@@ -5,30 +5,34 @@ import (
 	"path/filepath"
 )
 
-var supportedAgents = []string{
-	"claude-code",
-	"codex",
-	"pi",
-	"cursor",
-	"aider",
-	"github-copilot-cli",
-	"continue",
-	"cline",
-	"goose",
-	"_generic",
+// supportedAgents is derived from the catalog so the two stay in sync.
+// Exposed as a slice for error messages.
+func supportedAgents() []string {
+	cat := categoryByID("agent")
+	out := make([]string, 0, len(cat.Values))
+	for _, v := range cat.Values {
+		out = append(out, v.ID)
+	}
+	return out
 }
 
 func isSupportedAgent(name string) bool {
-	for _, a := range supportedAgents {
-		if a == name {
-			return true
-		}
+	cat := categoryByID("agent")
+	return cat.isValidValue(name)
+}
+
+// agentTargetDir returns the directory name under targets/ for an agent.
+// "generic" maps to "_generic" so the catalog stays kebab-case while the
+// directory keeps its conventional underscore prefix.
+func agentTargetDir(agent string) string {
+	if agent == "generic" {
+		return "_generic"
 	}
-	return false
+	return agent
 }
 
 // detectAgent inspects dir for agent-specific marker files and returns the
-// matching agent name, or "" if none match. Order mirrors install.sh.
+// matching agent name, or "" if none match.
 func detectAgent(dir string) string {
 	exists := func(rel string) bool {
 		_, err := os.Stat(filepath.Join(dir, rel))

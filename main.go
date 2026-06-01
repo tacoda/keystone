@@ -6,7 +6,7 @@ import (
 	"os"
 )
 
-//go:embed all:harness all:targets
+//go:embed all:harness all:targets all:optional
 var assets embed.FS
 
 var version = "dev"
@@ -23,6 +23,8 @@ func main() {
 			fmt.Fprintf(os.Stderr, "keystone: %v\n", err)
 			os.Exit(1)
 		}
+	case "options":
+		printOptionLabels(os.Stdout)
 	case "version", "--version", "-v":
 		fmt.Println(version)
 	case "help", "--help", "-h":
@@ -38,21 +40,50 @@ func printUsage(w *os.File) {
 	fmt.Fprint(w, `keystone — install the project harness into a directory
 
 Usage:
-  keystone init [<dir>] [--agent <name>] [--force]
+  keystone init [<dir>] [flags]
+  keystone options
   keystone version
   keystone help
 
 Commands:
   init      Scaffold harness/ and the agent menu file(s) into <dir> (default: .)
+  options   Print the allowed labels for every option flag
   version   Print the binary version
   help      Print this message
 
+Behavior:
+  When run in a TTY with options unset, keystone prompts interactively
+  (via huh) for each missing option. When stdin is not a TTY, the agent
+  must be supplied via --agent (or detected); other options stay unset.
+
 Flags for init:
-  --agent <name>   Agent target to install. One of:
-                   claude-code, codex, pi, cursor, aider,
-                   github-copilot-cli, continue, cline, goose, _generic
-                   If omitted, keystone attempts detection from existing files
-                   in <dir>; if detection fails, init exits with an error.
   --force          Overwrite an existing harness/ in <dir> without prompting.
+
+  --agent <label>             Agent target to install. Detected from marker
+                              files if unset.
+  --app-type <label>          Application type.
+  --language <a,b,...>        Language stack(s) — comma-separated.
+  --architecture <a,b,...>    Architecture preference(s) — comma-separated.
+  --testing <a,b,...>         Testing approach(es) — comma-separated.
+  --deployment-target <a,...> Deployment target(s) — comma-separated.
+  --database <a,...>          Database / persistence — comma-separated.
+  --ci-platform <label>       CI/CD platform.
+  --compliance <a,...>        Compliance scope — comma-separated.
+  --project-maturity <label>  greenfield | mvp | mature | legacy
+  --team-size <label>         solo | small-team | mid-team | large-org
 `)
+}
+
+// printOptionLabels writes the full catalog of allowed labels per category.
+func printOptionLabels(w *os.File) {
+	for _, c := range categories {
+		fmt.Fprintf(w, "--%s\n", c.ID)
+		if c.MultiSelect {
+			fmt.Fprintf(w, "  (multi-select; comma-separated)\n")
+		}
+		for _, v := range c.Values {
+			fmt.Fprintf(w, "  %-20s  %s\n", v.ID, v.Description)
+		}
+		fmt.Fprintln(w)
+	}
 }

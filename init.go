@@ -2,34 +2,18 @@ package main
 
 import (
 	"embed"
-	"flag"
 	"fmt"
 	"os"
 	"path/filepath"
 )
 
 func runInit(args []string, assets embed.FS) error {
-	flagArgs, positional, err := splitArgs(args)
+	flags, err := parseInitArgs(args)
 	if err != nil {
 		return err
 	}
 
-	flags := flag.NewFlagSet("init", flag.ContinueOnError)
-	agent := flags.String("agent", "", "agent target to install")
-	force := flags.Bool("force", false, "overwrite existing harness/ without prompting")
-	if err := flags.Parse(flagArgs); err != nil {
-		return err
-	}
-
-	dir := "."
-	if len(positional) > 0 {
-		dir = positional[0]
-	}
-	if len(positional) > 1 {
-		return fmt.Errorf("init takes at most one positional argument (got %d)", len(positional))
-	}
-
-	absDir, err := filepath.Abs(dir)
+	absDir, err := filepath.Abs(flags.dir)
 	if err != nil {
 		return fmt.Errorf("resolve dir: %w", err)
 	}
@@ -39,23 +23,41 @@ func runInit(args []string, assets embed.FS) error {
 		return fmt.Errorf("dir %s is not a directory", absDir)
 	}
 
-	resolved := *agent
-	if resolved == "" {
-		resolved = detectAgent(absDir)
-		if resolved == "" {
-			return fmt.Errorf("no --agent provided and detection found no marker files in %s; pass --agent <name>", absDir)
-		}
-		fmt.Fprintf(os.Stdout, "▸ detected agent: %s\n", resolved)
+	if err := resolveAgent(flags, absDir); err != nil {
+		return err
 	}
-	if !isSupportedAgent(resolved) {
-		return fmt.Errorf("unknown agent %q (supported: %v)", resolved, supportedAgents)
+
+	// Categories already satisfied by CLI flags or by agent detection are
+	// skipped during prompting. Everything else is asked for if we're in a TTY.
+	skip := map[string]bool{}
+	for id, v := range flags.selections {
+		if len(v) > 0 {
+			skip[id] = true
+		}
+	}
+
+	if tty := isTerminal(os.Stdin); tty {
+		if err := promptMissing(flags.selections, skip); err != nil {
+			return err
+		}
+	} else {
+		// Non-TTY: agent is mandatory; everything else can stay unset.
+		if _, ok := flags.selections["agent"]; !ok {
+			return fmt.Errorf("no --agent provided, detection found nothing, and stdin is not a TTY for interactive prompts")
+		}
+		fmt.Fprintf(os.Stderr, "! non-interactive mode: optional categories left unset\n")
+	}
+
+	agent := flags.selections["agent"][0]
+	if !isSupportedAgent(agent) {
+		return fmt.Errorf("unknown agent %q (supported: %v)", agent, supportedAgents())
 	}
 
 	preflight(absDir)
 
 	harnessDest := filepath.Join(absDir, "harness")
 	if _, err := os.Stat(harnessDest); err == nil {
-		if !*force {
+		if !flags.force {
 			return fmt.Errorf("%s already exists; pass --force to overwrite", harnessDest)
 		}
 		fmt.Fprintf(os.Stdout, "▸ overwriting existing harness/\n")
@@ -68,45 +70,42 @@ func runInit(args []string, assets embed.FS) error {
 		return fmt.Errorf("copy harness: %w", err)
 	}
 
-	targetRoot := filepath.Join("targets", resolved)
+	targetRoot := filepath.Join("targets", agentTargetDir(agent))
 	if _, err := assets.Open(targetRoot); err != nil {
-		fmt.Fprintf(os.Stderr, "! no target bundle for %s; corpus installed, configure activation manually\n", resolved)
+		fmt.Fprintf(os.Stderr, "! no target bundle for %s; corpus installed, configure activation manually\n", agent)
 	} else {
-		fmt.Fprintf(os.Stdout, "▸ installing %s target\n", resolved)
+		fmt.Fprintf(os.Stdout, "▸ installing %s target\n", agent)
 		if err := copyTree(assets, targetRoot, absDir, skipIfExists); err != nil {
 			return fmt.Errorf("copy target: %w", err)
 		}
 	}
 
-	printNextSteps(resolved)
+	if err := installConditional(assets, absDir, flags.selections); err != nil {
+		return fmt.Errorf("install optional content: %w", err)
+	}
+
+	if err := writeInstallProfile(absDir, flags.selections); err != nil {
+		return fmt.Errorf("write install profile: %w", err)
+	}
+
+	printNextSteps(agent)
 	return nil
 }
 
-// splitArgs separates flag tokens from positional tokens so that flags may
-// appear before or after the positional dir argument.
-func splitArgs(args []string) (flagArgs, positional []string, err error) {
-	booleanFlags := map[string]bool{"--force": true, "-force": true}
-	valueFlags := map[string]bool{"--agent": true, "-agent": true}
-
-	for i := 0; i < len(args); i++ {
-		a := args[i]
-		switch {
-		case booleanFlags[a]:
-			flagArgs = append(flagArgs, a)
-		case valueFlags[a]:
-			if i+1 >= len(args) {
-				return nil, nil, fmt.Errorf("flag %s requires a value", a)
-			}
-			flagArgs = append(flagArgs, a, args[i+1])
-			i++
-		case len(a) > 0 && a[0] == '-':
-			// Support --flag=value form for both kinds.
-			flagArgs = append(flagArgs, a)
-		default:
-			positional = append(positional, a)
-		}
+// resolveAgent fills flags.selections["agent"] when it is not already set,
+// using existing marker-file detection. It does NOT prompt — that is left
+// to promptMissing, which runs after this step.
+func resolveAgent(flags *initFlags, dir string) error {
+	if _, set := flags.selections["agent"]; set {
+		return nil
 	}
-	return flagArgs, positional, nil
+	detected := detectAgent(dir)
+	if detected == "" {
+		return nil
+	}
+	fmt.Fprintf(os.Stdout, "▸ detected agent: %s\n", detected)
+	flags.selections["agent"] = []string{detected}
+	return nil
 }
 
 func preflight(dir string) {
@@ -135,12 +134,16 @@ func printNextSteps(agent string) {
 	fmt.Fprintf(os.Stdout, `
 ✓ keystone installed for %s.
 
-Next steps:
+  ▶ Next: run the bootstrap action in %s.
 
-  1. Read harness/README.md
-  2. Run the bootstrap action in your agent to populate
-     harness/state/CODEBASE_STATE.md and harness/idioms/<your-stack>/
-     from your project.
-  3. Commit harness/ and any agent-specific files this installer created.
-`, agent)
+     Bootstrap reads your codebase and fills in harness/state/CODEBASE_STATE.md
+     and harness/idioms/<your-stack>/ so the corpus reflects your project.
+     See harness/adapters/%s/lifecycle.md for how to invoke it.
+
+Also:
+
+  • Read harness/README.md for an overview of the five layers.
+  • Review harness/state/INSTALL_PROFILE.md and adjust if needed.
+  • Commit harness/ and any agent-specific files this installer created.
+`, agent, agent, agentTargetDir(agent))
 }
