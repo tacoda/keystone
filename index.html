@@ -863,6 +863,31 @@
   </div>
 </section>
 
+<!-- Tool Assumptions -->
+<section>
+  <div class="section-label">Tool Assumptions</div>
+  <p style="font-size: 0.85rem; color: var(--muted); line-height: 1.7; margin-bottom: 20px;">
+    The harness is most useful when the surrounding tooling looks like this. None of these are hard requirements — <strong style="color: var(--text);">install runs regardless</strong>. Missing one degrades the corresponding phase to "ask the user / surface the gap"; it does not break the harness.
+  </p>
+  <div class="action-grid three">
+    <div class="action">
+      <span class="action-tag">spec phase</span>
+      <h3 style="color: var(--accent);">Issue tracker</h3>
+      <p>Anywhere on the spectrum from a full tracker (Jira, Linear, GitHub Issues, Asana) to a <code style="color: var(--accent);">TODO.md</code> to a conversation. The spec phase opens on a unit of work — a tracker card ID lets the agent fetch the description automatically; without one, the spec is authored inline.</p>
+    </div>
+    <div class="action">
+      <span class="action-tag">review + release</span>
+      <h3 style="color: var(--accent2);">PR workflow</h3>
+      <p>A change-request flow like GitHub PRs or GitLab MRs. The review phase spawns review agents on the diff and re-runs sensors against comment-driven changes; the release phase opens the PR with the tracker link in the body.</p>
+    </div>
+    <div class="action">
+      <span class="action-tag">verify phase</span>
+      <h3 style="color: var(--accent3);">Adequate sensors</h3>
+      <p>Lint, type-check, test runner, build, optionally coverage — automated checks that do a good job of constraining behavior. Not strictly required, but as sensor quality improves, so does the harness as a whole. Commands live in <code style="color: var(--accent3);">harness/state/CODEBASE_STATE.md</code>.</p>
+    </div>
+  </div>
+</section>
+
 <!-- Install -->
 <section>
   <div class="section-label">Install</div>
