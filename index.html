@@ -1053,7 +1053,7 @@
     <div class="action">
       <span class="action-tag">--force</span>
       <h3>Overwrite harness/</h3>
-      <p>Re-run with <code style="color:var(--accent2);">--force</code> to overwrite an existing <code style="color:var(--accent2);">harness/</code>. Menu files (<code style="color:var(--accent2);">CLAUDE.md</code>, <code style="color:var(--accent2);">CONVENTIONS.md</code>, etc.) <strong style="color:var(--text);">merge additively</strong> — see Updating below.</p>
+      <p>Re-run with <code style="color:var(--accent2);">--force</code> to overwrite an existing <code style="color:var(--accent2);">harness/</code>. Menu files (<code style="color:var(--accent2);">CLAUDE.md</code>, <code style="color:var(--accent2);">CONVENTIONS.md</code>, etc.) <strong style="color:var(--text);">merge additively</strong>.</p>
     </div>
   </div>
 </section>
@@ -1396,18 +1396,6 @@
     <div class="tree-line"><span class="tree-structure">    </span><span class="tree-annotation ann-default">+ opt-in content for selected --architecture and --compliance labels lands directly under principles/.</span></div>
 
   </div>
-</section>
-
-<!-- Updating -->
-<section>
-  <div class="section-label">Updating</div>
-  <div class="definition">
-    <p>The corpus is yours after install — keystone is not a runtime dependency. To refresh from a newer keystone release:</p>
-  </div>
-<pre class="code"><span class="prompt">$</span> brew upgrade tacoda/tap/keystone        <span class="comment"># or re-run the curl bootstrap</span></pre>
-  <p style="font-size: 0.85rem; color: var(--muted); line-height: 1.7; margin-top: 12px;">
-    Or cherry-pick specific layers from the keystone repo: <code style="font-family: var(--mono); font-size: 0.78rem; color: var(--accent); background: var(--surface2); padding: 1px 6px; border-radius: 2px;">cp -R keystone/harness/principles/. your-project/harness/principles/</code>. Principles rarely change; process and adapters change more often.
-  </p>
 </section>
 
 <div class="footer">
