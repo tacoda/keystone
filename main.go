@@ -62,15 +62,12 @@ Flags for init:
   --agent <label>             Agent target to install. Detected from marker
                               files if unset.
   --app-type <label>          Application type.
-  --language <a,b,...>        Language stack(s) — comma-separated.
   --architecture <a,b,...>    Architecture preference(s) — comma-separated.
   --testing <a,b,...>         Testing approach(es) — comma-separated.
-  --deployment-target <a,...> Deployment target(s) — comma-separated.
-  --database <a,...>          Database / persistence — comma-separated.
-  --ci-platform <label>       CI/CD platform.
   --compliance <a,...>        Compliance scope — comma-separated.
-  --project-maturity <label>  greenfield | mvp | mature | legacy
-  --team-size <label>         solo | small-team | mid-team | large-org
+
+Categories the bootstrap action infers from the codebase (not asked here):
+language, database, ci-platform, deployment target.
 `)
 }
 
