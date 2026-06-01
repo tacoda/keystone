@@ -1,0 +1,1242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Keystone — Project Harness Installer</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;600&family=IBM+Plex+Sans:wght@300;400;600&display=swap');
+
+  :root {
+    --bg: #0d0f14;
+    --surface: #13161d;
+    --surface2: #1a1e28;
+    --border: #252a38;
+    --accent: #4ade9a;
+    --accent2: #60a5fa;
+    --accent3: #f59e0b;
+    --accent4: #e879a0;
+    --accent5: #a78bfa;
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --mono: 'IBM Plex Mono', monospace;
+    --sans: 'IBM Plex Sans', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-weight: 300;
+    line-height: 1.6;
+    padding: 48px 24px;
+    max-width: 960px;
+    margin: 0 auto;
+  }
+
+  a { color: var(--accent2); text-decoration: none; border-bottom: 1px dotted var(--accent2); }
+  a:hover { color: var(--accent); border-bottom-color: var(--accent); }
+
+  /* Header */
+  .header {
+    border-left: 3px solid var(--accent);
+    padding-left: 20px;
+    margin-bottom: 64px;
+  }
+
+  .header h1 {
+    font-family: var(--mono);
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--accent);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .header p {
+    color: var(--muted);
+    font-size: 0.85rem;
+    font-family: var(--mono);
+  }
+
+  .header .links {
+    margin-top: 16px;
+    display: flex;
+    gap: 16px;
+    font-family: var(--mono);
+    font-size: 0.75rem;
+  }
+
+  .header .links a {
+    border-bottom: none;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .header .links a:hover { color: var(--accent); }
+
+  /* Section headers */
+  .section-label {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  section { margin-bottom: 64px; }
+
+  /* Definition block */
+  .definition {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent2);
+    padding: 24px 28px;
+    margin-bottom: 24px;
+    border-radius: 2px;
+  }
+
+  .definition p {
+    font-size: 0.95rem;
+    line-height: 1.8;
+    color: var(--text);
+    margin-bottom: 12px;
+  }
+
+  .definition p:last-child { margin-bottom: 0; }
+
+  .definition strong {
+    color: var(--accent2);
+    font-weight: 600;
+  }
+
+  .definition code {
+    font-family: var(--mono);
+    font-size: 0.85rem;
+    color: var(--accent);
+    background: var(--surface2);
+    padding: 1px 6px;
+    border-radius: 2px;
+  }
+
+  /* Architecture diagram */
+  .diagram {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    padding: 32px;
+    margin-bottom: 48px;
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    overflow-x: auto;
+  }
+
+  .diagram-row {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    margin-bottom: 2px;
+  }
+
+  .box {
+    border: 1px solid var(--border);
+    padding: 16px 20px;
+    position: relative;
+  }
+
+  .box-label {
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    display: block;
+  }
+
+  .corpus-box {
+    flex: 1;
+    border-color: var(--accent);
+    background: rgba(74,222,154,0.03);
+  }
+
+  .corpus-box .box-label { color: var(--accent); }
+
+  .corpus-layers {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 6px;
+    margin-top: 8px;
+  }
+
+  .corpus-layer-chip {
+    padding: 6px 10px;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    font-size: 0.68rem;
+    text-align: center;
+    background: var(--surface2);
+  }
+
+  .chip-1 { border-color: rgba(74,222,154,0.3); color: var(--accent); }
+  .chip-2 { border-color: rgba(96,165,250,0.3); color: var(--accent2); }
+  .chip-3 { border-color: rgba(245,158,11,0.3); color: var(--accent3); }
+  .chip-4 { border-color: rgba(232,121,160,0.3); color: var(--accent4); }
+  .chip-5 { border-color: rgba(167,139,250,0.3); color: var(--accent5); }
+
+  .arrow-row {
+    display: flex;
+    justify-content: space-around;
+    padding: 8px 0;
+    color: var(--muted);
+    font-size: 0.75rem;
+  }
+
+  .arrow-down {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    font-size: 0.65rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+  }
+
+  .arrow-sym { font-size: 1rem; line-height: 1; }
+
+  .installer-box {
+    flex: 1;
+    border-color: var(--accent3);
+    background: rgba(245,158,11,0.03);
+  }
+
+  .installer-box .box-label { color: var(--accent3); }
+
+  .installer-items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 8px;
+  }
+
+  .installer-item {
+    font-size: 0.68rem;
+    padding: 4px 10px;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    color: var(--muted);
+    background: var(--surface2);
+  }
+
+  .consumer-box {
+    flex: 1;
+    border-color: var(--accent2);
+    background: rgba(96,165,250,0.03);
+  }
+
+  .consumer-box .box-label { color: var(--accent2); }
+
+  .consumer-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    margin-top: 8px;
+  }
+
+  .consumer-cell {
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    background: var(--surface2);
+  }
+
+  .consumer-cell .cell-name {
+    display: block;
+    font-size: 0.72rem;
+    color: var(--text);
+    margin-bottom: 4px;
+    font-weight: 600;
+  }
+
+  .consumer-cell .cell-desc {
+    font-size: 0.66rem;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  .repo-note {
+    font-size: 0.68rem;
+    color: var(--muted);
+    border: 1px dashed var(--border);
+    padding: 8px 14px;
+    border-radius: 2px;
+    margin-top: 16px;
+    text-align: center;
+  }
+
+  /* Layer table */
+  .layer-header {
+    display: grid;
+    grid-template-columns: 120px 1fr 160px 160px;
+    gap: 0;
+    margin-bottom: 2px;
+  }
+
+  .layer-header span {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 8px 16px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+  }
+
+  .layers {
+    display: grid;
+    gap: 2px;
+    margin-bottom: 24px;
+  }
+
+  .layer {
+    display: grid;
+    grid-template-columns: 120px 1fr 160px 160px;
+    gap: 0;
+    background: var(--surface);
+    border: 1px solid var(--border);
+  }
+
+  .layer-cell {
+    padding: 14px 16px;
+    font-size: 0.83rem;
+    border-right: 1px solid var(--border);
+  }
+
+  .layer-cell:last-child { border-right: none; }
+
+  .layer-name {
+    font-family: var(--mono);
+    font-weight: 600;
+    font-size: 0.8rem;
+  }
+
+  .layer-desc { color: var(--muted); font-size: 0.8rem; line-height: 1.5; }
+  .layer-author { color: var(--muted); font-size: 0.78rem; }
+  .layer-act { font-family: var(--mono); font-size: 0.72rem; color: var(--muted); }
+
+  .l1 .layer-name { color: var(--accent); }
+  .l2 .layer-name { color: var(--accent2); }
+  .l3 .layer-name { color: var(--accent3); }
+  .l4 .layer-name { color: var(--accent4); }
+  .l5 .layer-name { color: var(--accent5); }
+
+  /* Code blocks */
+  pre.code {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent3);
+    border-radius: 2px;
+    padding: 18px 22px;
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    color: var(--text);
+    line-height: 1.6;
+    overflow-x: auto;
+    margin-bottom: 16px;
+  }
+
+  pre.code .prompt { color: var(--muted); user-select: none; }
+  pre.code .comment { color: var(--muted); }
+
+  .install-method {
+    margin-bottom: 32px;
+  }
+
+  .install-method h3 {
+    font-family: var(--mono);
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .install-method h3::before {
+    content: '▸';
+    color: var(--accent);
+  }
+
+  .install-method p {
+    font-size: 0.85rem;
+    color: var(--muted);
+    margin-bottom: 12px;
+    line-height: 1.7;
+  }
+
+  .install-method p code {
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    color: var(--accent);
+    background: var(--surface2);
+    padding: 1px 6px;
+    border-radius: 2px;
+  }
+
+  /* Action grid (lifecycle / heavyweight / modes) */
+  .action-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  .action-grid.three { grid-template-columns: 1fr 1fr 1fr; }
+  .action-grid.four { grid-template-columns: 1fr 1fr 1fr 1fr; }
+
+  .action {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 18px 20px;
+    border-radius: 2px;
+  }
+
+  .action-tag {
+    font-family: var(--mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 2px;
+    display: inline-block;
+    margin-bottom: 10px;
+    background: var(--surface2);
+    color: var(--muted);
+  }
+
+  .action h3 {
+    font-family: var(--mono);
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: var(--text);
+  }
+
+  .action h3 .when {
+    font-size: 0.65rem;
+    color: var(--muted);
+    font-weight: 400;
+    margin-left: 8px;
+    letter-spacing: 0.05em;
+  }
+
+  .action p {
+    font-size: 0.78rem;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  .lc-orient h3 { color: var(--accent); }
+  .lc-drift h3 { color: var(--accent2); }
+  .lc-verify h3 { color: var(--accent3); }
+  .lc-learn h3 { color: var(--accent4); }
+  .hw-bootstrap h3 { color: var(--accent); }
+  .hw-audit h3 { color: var(--accent2); }
+  .hw-synthesize h3 { color: var(--accent3); }
+  .hw-mode h3 { color: var(--accent5); }
+  .mode-paired h3 { color: var(--accent); }
+  .mode-solo h3 { color: var(--accent2); }
+  .mode-autopilot h3 { color: var(--accent4); }
+
+  /* Phase pipeline */
+  .pipeline {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 4px;
+    margin-bottom: 16px;
+  }
+
+  .phase {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    padding: 12px 10px;
+    text-align: center;
+  }
+
+  .phase .phase-num {
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    color: var(--muted);
+    letter-spacing: 0.15em;
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  .phase .phase-name {
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    color: var(--text);
+    font-weight: 600;
+  }
+
+  .phase.p1 { border-top: 2px solid var(--accent); }
+  .phase.p2 { border-top: 2px solid var(--accent2); }
+  .phase.p3 { border-top: 2px solid var(--accent3); }
+  .phase.p4 { border-top: 2px solid var(--accent4); }
+  .phase.p5 { border-top: 2px solid var(--accent5); }
+  .phase.p6 { border-top: 2px solid var(--accent); }
+
+  .phase-desc {
+    font-size: 0.78rem;
+    color: var(--muted);
+    line-height: 1.7;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent2);
+    padding: 16px 20px;
+    border-radius: 2px;
+  }
+
+  /* Flywheels */
+  .flywheels {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .flywheel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    padding: 24px;
+  }
+
+  .flywheel h3 {
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .fw-learn-h { color: var(--accent); }
+  .fw-prune-h { color: var(--accent4); }
+
+  .loop { display: flex; flex-direction: column; gap: 0; }
+
+  .loop-step {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .loop-step:last-child { border-bottom: none; }
+
+  .loop-num {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    color: var(--muted);
+    min-width: 24px;
+    padding-top: 2px;
+  }
+
+  .loop-text {
+    font-size: 0.78rem;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  .loop-text strong { color: var(--text); font-weight: 600; }
+
+  /* Agents table */
+  .agents-table {
+    display: grid;
+    gap: 2px;
+  }
+
+  .agent-row {
+    display: grid;
+    grid-template-columns: 200px 120px 1fr;
+    background: var(--surface);
+    border: 1px solid var(--border);
+  }
+
+  .agent-row.head span {
+    background: var(--surface2);
+    color: var(--muted);
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+
+  .agent-row span {
+    padding: 10px 14px;
+    border-right: 1px solid var(--border);
+    font-size: 0.8rem;
+  }
+
+  .agent-row span:last-child { border-right: none; }
+
+  .agent-name { font-family: var(--mono); color: var(--text); font-weight: 600; }
+  .agent-status {
+    font-family: var(--mono);
+    font-size: 0.7rem !important;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .agent-status.real { color: var(--accent); }
+  .agent-status.stub { color: var(--accent3); }
+  .agent-status.fallback { color: var(--muted); }
+  .agent-menu { font-family: var(--mono); color: var(--muted); font-size: 0.76rem !important; }
+
+  /* Directory tree */
+  .tree {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    padding: 28px 32px;
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    line-height: 2;
+    overflow-x: auto;
+  }
+
+  .tree-line {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    white-space: nowrap;
+  }
+
+  .tree-structure { color: var(--muted); user-select: none; }
+  .tree-dir { color: var(--text); font-weight: 600; }
+  .tree-file { color: var(--muted); }
+
+  .tree-annotation {
+    color: var(--border);
+    font-size: 0.68rem;
+    margin-left: 8px;
+  }
+
+  .ann-1 { color: rgba(74,222,154,0.5); }
+  .ann-2 { color: rgba(96,165,250,0.5); }
+  .ann-3 { color: rgba(245,158,11,0.5); }
+  .ann-4 { color: rgba(232,121,160,0.5); }
+  .ann-5 { color: rgba(167,139,250,0.5); }
+  .ann-default { color: var(--muted); opacity: 0.6; }
+
+  /* Footer */
+  .footer {
+    margin-top: 80px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    color: var(--muted);
+    text-align: center;
+  }
+
+  .footer a {
+    color: var(--muted);
+    border-bottom-color: var(--border);
+  }
+
+  /* Responsive */
+  @media (max-width: 720px) {
+    body { padding: 32px 16px; }
+    .layer, .layer-header { grid-template-columns: 100px 1fr; }
+    .layer-cell:nth-child(3), .layer-cell:nth-child(4),
+    .layer-header span:nth-child(3), .layer-header span:nth-child(4) { display: none; }
+    .action-grid, .action-grid.three, .action-grid.four,
+    .flywheels { grid-template-columns: 1fr; }
+    .pipeline { grid-template-columns: repeat(3, 1fr); }
+    .corpus-layers { grid-template-columns: repeat(2, 1fr); }
+    .consumer-row { grid-template-columns: 1fr; }
+    .agent-row { grid-template-columns: 1fr; }
+    .agent-row span { border-right: none; border-bottom: 1px solid var(--border); }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Keystone — Level 2 Project Harness</h1>
+  <p>A self-updating corpus of engineering knowledge that scaffolds a Level 2 project harness — installed in one command, owned by your repo, agent-agnostic.</p>
+  <div class="links">
+    <a href="https://github.com/tacoda/keystone">GitHub</a>
+    <a href="https://github.com/tacoda/keystone/releases">Releases</a>
+    <a href="https://github.com/tacoda/keystone/blob/main/LICENSE">MIT License</a>
+  </div>
+</div>
+
+<!-- What it is -->
+<section>
+  <div class="section-label">What it is</div>
+  <div class="definition">
+    <p><strong>Keystone</strong> generates a <strong>Level 2 project harness</strong> — codebase-level scaffolding an AI coding agent reads on every task. No language runtime, no daemon. The <code>keystone</code> CLI is a single Go binary with the entire harness embedded; <code>keystone init</code> writes a corpus and an agent menu file into your repo, then gets out of the way.</p>
+    <p>After install, the binary is <strong>no longer required</strong>. The corpus and menu are plain markdown files you own and version alongside your code. Your agent drives a six-phase workflow (spec → planning → implementation → verification → review → release) and two flywheels — <strong>Learning</strong> adds rules, <strong>Pruning</strong> removes stale ones.</p>
+  </div>
+</section>
+
+<!-- Harness Stack placement -->
+<section>
+  <div class="section-label">Where it sits in the harness stack</div>
+  <p style="font-size: 0.85rem; color: var(--muted); line-height: 1.7; margin-bottom: 20px;">
+    The <a href="https://dev.to/tacoda/the-harness-stack-4a7d">harness stack</a> has five levels. Keystone generates a <strong style="color: var(--text);">Level 2 (Project) harness</strong> — codebase-scoped scaffolding the agent reads on every task. <strong style="color: var(--text);">It blurs into Level 3</strong> (Organization) because the upper corpus layers — principles, process, adapters — are not codebase-specific and naturally travel across an organization's projects, even though the install target is a single repository.
+  </p>
+
+  <div class="layers">
+    <div class="layer">
+      <div class="layer-cell" style="grid-column: span 4; padding: 12px 16px; display: grid; grid-template-columns: 100px 130px 1fr; gap: 16px; align-items: center;">
+        <span style="font-family: var(--mono); font-size: 0.7rem; color: var(--muted); letter-spacing: 0.15em;">LEVEL 0</span>
+        <span style="font-family: var(--mono); font-size: 0.85rem; color: var(--text); font-weight: 600;">Model Harness</span>
+        <span style="font-size: 0.8rem; color: var(--muted); line-height: 1.5;">The AI tool itself — Claude Code, Cursor, Copilot. You select it; you don't configure it.</span>
+      </div>
+    </div>
+    <div class="layer">
+      <div class="layer-cell" style="grid-column: span 4; padding: 12px 16px; display: grid; grid-template-columns: 100px 130px 1fr; gap: 16px; align-items: center;">
+        <span style="font-family: var(--mono); font-size: 0.7rem; color: var(--muted); letter-spacing: 0.15em;">LEVEL 1</span>
+        <span style="font-family: var(--mono); font-size: 0.85rem; color: var(--text); font-weight: 600;">Agent Harness</span>
+        <span style="font-size: 0.8rem; color: var(--muted); line-height: 1.5;">Global config that travels with you across projects. Memory, user-level settings, global <code style="font-family: var(--mono); font-size: 0.75rem; color: var(--accent2);">~/.claude/CLAUDE.md</code>.</span>
+      </div>
+    </div>
+    <div class="layer" style="border-color: var(--accent); background: rgba(74,222,154,0.06); position: relative;">
+      <div class="layer-cell" style="grid-column: span 4; padding: 16px 16px 16px 20px; display: grid; grid-template-columns: 100px 130px 1fr 100px; gap: 16px; align-items: center; border-left: 3px solid var(--accent);">
+        <span style="font-family: var(--mono); font-size: 0.7rem; color: var(--accent); letter-spacing: 0.15em; font-weight: 600;">LEVEL 2</span>
+        <span style="font-family: var(--mono); font-size: 0.9rem; color: var(--accent); font-weight: 600;">Project Harness</span>
+        <span style="font-size: 0.82rem; color: var(--text); line-height: 1.5;">Codebase-level scaffolding. Slash commands, hooks, subdirectory <code style="font-family: var(--mono); font-size: 0.75rem; color: var(--accent);">CLAUDE.md</code> files, static analysis config — the terrain a single codebase presents to its agents.</span>
+        <span style="font-family: var(--mono); font-size: 0.65rem; color: var(--accent); letter-spacing: 0.15em; text-transform: uppercase; text-align: right; font-weight: 600;">← keystone</span>
+      </div>
+    </div>
+    <div class="layer" style="border-color: rgba(74,222,154,0.25); border-style: dashed;">
+      <div class="layer-cell" style="grid-column: span 4; padding: 12px 16px; display: grid; grid-template-columns: 100px 130px 1fr 100px; gap: 16px; align-items: center;">
+        <span style="font-family: var(--mono); font-size: 0.7rem; color: var(--muted); letter-spacing: 0.15em;">LEVEL 3</span>
+        <span style="font-family: var(--mono); font-size: 0.85rem; color: var(--text); font-weight: 600;">Organization Harness</span>
+        <span style="font-size: 0.8rem; color: var(--muted); line-height: 1.5;">Cross-project consistency — shared conventions, tool configs, policies that apply everywhere. The currently most underbuilt level.</span>
+        <span style="font-family: var(--mono); font-size: 0.62rem; color: var(--accent); letter-spacing: 0.1em; text-transform: uppercase; text-align: right;">← blurs here</span>
+      </div>
+    </div>
+    <div class="layer">
+      <div class="layer-cell" style="grid-column: span 4; padding: 12px 16px; display: grid; grid-template-columns: 100px 130px 1fr; gap: 16px; align-items: center;">
+        <span style="font-family: var(--mono); font-size: 0.7rem; color: var(--muted); letter-spacing: 0.15em;">LEVEL 4</span>
+        <span style="font-family: var(--mono); font-size: 0.85rem; color: var(--text); font-weight: 600;">Orchestrator Harness</span>
+        <span style="font-size: 0.8rem; color: var(--muted); line-height: 1.5;">Fleet-level coordination — LangGraph, Devin, CrewAI. Task decomposition, distribution, reassembly across multiple agents.</span>
+      </div>
+    </div>
+  </div>
+
+  <p style="font-size: 0.78rem; color: var(--muted); font-family: var(--mono); margin-top: 16px; line-height: 1.7;">
+    Why the blur? Keystone's <code style="color: var(--accent);">principles/</code> and <code style="color: var(--accent);">process/</code> layers are universal; <code style="color: var(--accent);">adapters/</code> are per-agent, not per-project. Cherry-pick those into every repo in your org and you have de facto Level 3 coverage — without a separate Level 3 mechanism. Only <code style="color: var(--accent);">idioms/</code>, <code style="color: var(--accent);">domain/</code>, and <code style="color: var(--accent);">state/</code> are genuinely project-scoped.
+  </p>
+</section>
+
+<!-- Architecture -->
+<section>
+  <div class="section-label">Architecture</div>
+  <div class="diagram">
+
+    <div class="diagram-row">
+      <div class="box corpus-box">
+        <span class="box-label">Embedded Corpus — //go:embed</span>
+        <div class="corpus-layers">
+          <div class="corpus-layer-chip chip-1">principles/</div>
+          <div class="corpus-layer-chip chip-2">idioms/</div>
+          <div class="corpus-layer-chip chip-3">domain/</div>
+          <div class="corpus-layer-chip chip-4">state/</div>
+          <div class="corpus-layer-chip chip-5">process/</div>
+        </div>
+        <div class="repo-note">Five-layer corpus + per-agent adapters, baked into the binary at build time.</div>
+      </div>
+    </div>
+
+    <div class="arrow-row">
+      <div class="arrow-down">
+        <span class="arrow-sym">↓</span>
+        <span>keystone init</span>
+      </div>
+    </div>
+
+    <div class="diagram-row">
+      <div class="box installer-box">
+        <span class="box-label">Installer — keystone binary</span>
+        <div class="installer-items">
+          <div class="installer-item">detect agent from markers</div>
+          <div class="installer-item">preflight (git, CI)</div>
+          <div class="installer-item">copy harness/ from embed.FS</div>
+          <div class="installer-item">copy menu files (skip-if-exists)</div>
+          <div class="installer-item">print next steps</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="arrow-row">
+      <div class="arrow-down">
+        <span class="arrow-sym">↓</span>
+        <span>writes to disk</span>
+      </div>
+    </div>
+
+    <div class="diagram-row">
+      <div class="box consumer-box">
+        <span class="box-label">Consumer Repository</span>
+        <div class="consumer-row">
+          <div class="consumer-cell">
+            <span class="cell-name">harness/</span>
+            <span class="cell-desc">The corpus — five layers of engineering knowledge plus per-agent adapters. Project-owned, agent-agnostic, versioned with the code.</span>
+          </div>
+          <div class="consumer-cell">
+            <span class="cell-name">CLAUDE.md · AGENTS.md · .cursor/rules/ · …</span>
+            <span class="cell-desc">The activation file ("menu") that tells the agent to read the corpus. Format depends on the agent.</span>
+          </div>
+        </div>
+        <div class="repo-note">After install, keystone is gone. The corpus lives in the repo and evolves with the code.</div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- Corpus Layers -->
+<section>
+  <div class="section-label">Corpus Layers</div>
+
+  <div class="layer-header">
+    <span>Layer</span>
+    <span>What it answers</span>
+    <span>Author</span>
+    <span>Activation</span>
+  </div>
+
+  <div class="layers">
+    <div class="layer l1">
+      <div class="layer-cell"><span class="layer-name">principles</span></div>
+      <div class="layer-cell"><span class="layer-desc">What does good engineering look like, regardless of stack? SOLID, coupling/cohesion, information hiding, separation of concerns. Cites literature.</span></div>
+      <div class="layer-cell"><span class="layer-author">Literature + discipline</span></div>
+      <div class="layer-cell"><span class="layer-act">Ambient · always</span></div>
+    </div>
+    <div class="layer l2">
+      <div class="layer-cell"><span class="layer-name">idioms</span></div>
+      <div class="layer-cell"><span class="layer-desc">How does this stack express those principles? Stack-specific patterns. Each idiom traces back to the principle it instantiates.</span></div>
+      <div class="layer-cell"><span class="layer-author">Lead engineer + agent</span></div>
+      <div class="layer-cell"><span class="layer-act">Ambient · lazy by region</span></div>
+    </div>
+    <div class="layer l3">
+      <div class="layer-cell"><span class="layer-name">domain</span></div>
+      <div class="layer-cell"><span class="layer-desc">What business rules constrain this codebase? Bounded contexts, invariants, workflow constraints, anti-patterns the agent cannot derive from code.</span></div>
+      <div class="layer-cell"><span class="layer-author">Domain expert + engineer</span></div>
+      <div class="layer-cell"><span class="layer-act">Ambient · always</span></div>
+    </div>
+    <div class="layer l4">
+      <div class="layer-cell"><span class="layer-name">state</span></div>
+      <div class="layer-cell"><span class="layer-desc">What is true about the codebase right now? Activation map per region, risk fingerprints, sensor commands, in-progress migrations.</span></div>
+      <div class="layer-cell"><span class="layer-author">Agent + human review</span></div>
+      <div class="layer-cell"><span class="layer-act">Ambient · always</span></div>
+    </div>
+    <div class="layer l5">
+      <div class="layer-cell"><span class="layer-name">process</span></div>
+      <div class="layer-cell"><span class="layer-desc">What happens at each phase of the workflow? Six phases: spec, planning, implementation, verification, review, release. Sensors and modes alongside.</span></div>
+      <div class="layer-cell"><span class="layer-author">Lead engineer + agent</span></div>
+      <div class="layer-cell"><span class="layer-act">Loaded per phase</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- Install -->
+<section>
+  <div class="section-label">Install</div>
+
+  <div class="install-method">
+    <h3>Homebrew (macOS / Linux)</h3>
+<pre class="code"><span class="prompt">$</span> brew install tacoda/tap/keystone</pre>
+  </div>
+
+  <div class="install-method">
+    <h3>Curl bootstrap (macOS / Linux)</h3>
+    <p>Downloads the binary into <code>~/.local/bin/keystone</code>, then prompts for the agent and runs <code>keystone init</code>:</p>
+<pre class="code"><span class="prompt">$</span> curl -fsSL https://raw.githubusercontent.com/tacoda/keystone/main/install.sh | sh</pre>
+    <p>Inspect before running (recommended):</p>
+<pre class="code"><span class="prompt">$</span> curl -fsSL https://raw.githubusercontent.com/tacoda/keystone/main/install.sh &gt; install.sh
+<span class="prompt">$</span> less install.sh
+<span class="prompt">$</span> sh install.sh</pre>
+    <p>Set <code>KEYSTONE_NO_INIT=1</code> to install the binary only.</p>
+  </div>
+
+  <div class="install-method">
+    <h3>PowerShell (Windows)</h3>
+<pre class="code"><span class="prompt">PS&gt;</span> iwr -useb https://raw.githubusercontent.com/tacoda/keystone/main/install.ps1 | iex</pre>
+  </div>
+
+  <div class="install-method">
+    <h3>Manual</h3>
+    <p>Download a prebuilt archive from the <a href="https://github.com/tacoda/keystone/releases">releases page</a>, extract <code>keystone</code> (or <code>keystone.exe</code>), and place it on your <code>PATH</code>.</p>
+  </div>
+</section>
+
+<!-- CLI Usage -->
+<section>
+  <div class="section-label">CLI Usage</div>
+<pre class="code"><span class="comment"># Scaffold harness/ and the agent's menu file(s) into &lt;dir&gt;</span>
+<span class="prompt">$</span> keystone init [&lt;dir&gt;] [--agent &lt;name&gt;] [--force]
+
+<span class="comment"># Print the binary version</span>
+<span class="prompt">$</span> keystone version
+
+<span class="comment"># Print usage</span>
+<span class="prompt">$</span> keystone help</pre>
+
+  <p style="font-size: 0.85rem; color: var(--muted); line-height: 1.7; margin-top: 16px;">
+    <code style="font-family: var(--mono); font-size: 0.78rem; color: var(--accent); background: var(--surface2); padding: 1px 6px; border-radius: 2px;">init</code> is non-interactive — it copies <code style="font-family: var(--mono); font-size: 0.78rem; color: var(--accent); background: var(--surface2); padding: 1px 6px; border-radius: 2px;">harness/</code> and the agent's menu file(s) into <code style="font-family: var(--mono); font-size: 0.78rem; color: var(--accent); background: var(--surface2); padding: 1px 6px; border-radius: 2px;">&lt;dir&gt;</code> (default <code style="font-family: var(--mono); font-size: 0.78rem; color: var(--accent); background: var(--surface2); padding: 1px 6px; border-radius: 2px;">.</code>) and exits.
+  </p>
+
+  <div class="action-grid" style="margin-top: 24px;">
+    <div class="action">
+      <span class="action-tag">--agent &lt;name&gt;</span>
+      <h3>Agent target</h3>
+      <p>One of: <code style="color:var(--accent2);">claude-code</code>, <code style="color:var(--accent2);">codex</code>, <code style="color:var(--accent2);">pi</code>, <code style="color:var(--accent2);">cursor</code>, <code style="color:var(--accent2);">aider</code>, <code style="color:var(--accent2);">github-copilot-cli</code>, <code style="color:var(--accent2);">continue</code>, <code style="color:var(--accent2);">cline</code>, <code style="color:var(--accent2);">goose</code>, <code style="color:var(--accent2);">_generic</code>. If omitted, keystone detects from existing marker files; if detection fails, init exits with an error.</p>
+    </div>
+    <div class="action">
+      <span class="action-tag">--force</span>
+      <h3>Overwrite harness/</h3>
+      <p>Re-run with <code style="color:var(--accent2);">--force</code> to overwrite an existing <code style="color:var(--accent2);">harness/</code>. Existing target files (e.g. <code style="color:var(--accent2);">CLAUDE.md</code>) are <strong style="color:var(--text);">always skipped</strong> — review and merge by hand.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Bootstrap -->
+<section>
+  <div class="section-label">First-run: the Bootstrap step</div>
+  <div class="definition">
+    <p>Immediately after <code>keystone init</code>, run the <strong>bootstrap</strong> heavyweight action in your agent. Bootstrap is an initial audit of a fresh install — it makes the corpus specific to your codebase.</p>
+    <p>It detects your stack, scaffolds <code>idioms/&lt;stack&gt;/</code> with real patterns derived from your code, and initializes <code>state/CODEBASE_STATE.md</code> with your sensor commands, activation map per region, and risk fingerprints. Until bootstrap runs, the corpus is generic.</p>
+  </div>
+
+  <div style="font-size: 0.85rem; color: var(--muted); line-height: 1.8;">
+    <p style="margin-bottom: 12px;">Three steps after install:</p>
+    <ol style="list-style: none; counter-reset: step; padding-left: 0;">
+      <li style="counter-increment: step; padding: 8px 0 8px 36px; position: relative; border-bottom: 1px solid var(--border);">
+        <span style="position: absolute; left: 0; top: 8px; font-family: var(--mono); font-size: 0.7rem; color: var(--accent); letter-spacing: 0.1em;">01 →</span>
+        Read <code style="font-family: var(--mono); font-size: 0.78rem; color: var(--accent2); background: var(--surface2); padding: 1px 6px; border-radius: 2px;">harness/README.md</code> — five-minute orientation to the corpus.
+      </li>
+      <li style="counter-increment: step; padding: 8px 0 8px 36px; position: relative; border-bottom: 1px solid var(--border);">
+        <span style="position: absolute; left: 0; top: 8px; font-family: var(--mono); font-size: 0.7rem; color: var(--accent); letter-spacing: 0.1em;">02 →</span>
+        Ask your agent to run the <strong style="color: var(--text);">bootstrap</strong> action. It populates <code style="font-family: var(--mono); font-size: 0.78rem; color: var(--accent2); background: var(--surface2); padding: 1px 6px; border-radius: 2px;">harness/state/CODEBASE_STATE.md</code> and <code style="font-family: var(--mono); font-size: 0.78rem; color: var(--accent2); background: var(--surface2); padding: 1px 6px; border-radius: 2px;">harness/idioms/&lt;your-stack&gt;/</code> from your project.
+      </li>
+      <li style="counter-increment: step; padding: 8px 0 8px 36px; position: relative;">
+        <span style="position: absolute; left: 0; top: 8px; font-family: var(--mono); font-size: 0.7rem; color: var(--accent); letter-spacing: 0.1em;">03 →</span>
+        Commit <code style="font-family: var(--mono); font-size: 0.78rem; color: var(--accent2); background: var(--surface2); padding: 1px 6px; border-radius: 2px;">harness/</code> and any agent-specific files the installer created.
+      </li>
+    </ol>
+  </div>
+</section>
+
+<!-- Six Phases -->
+<section>
+  <div class="section-label">The Six-Phase Workflow</div>
+  <div class="pipeline">
+    <div class="phase p1"><span class="phase-num">01</span><span class="phase-name">spec</span></div>
+    <div class="phase p2"><span class="phase-num">02</span><span class="phase-name">plan</span></div>
+    <div class="phase p3"><span class="phase-num">03</span><span class="phase-name">implement</span></div>
+    <div class="phase p4"><span class="phase-num">04</span><span class="phase-name">verify</span></div>
+    <div class="phase p5"><span class="phase-num">05</span><span class="phase-name">review</span></div>
+    <div class="phase p6"><span class="phase-num">06</span><span class="phase-name">release</span></div>
+  </div>
+  <div class="phase-desc">
+    Every task flows through these six phases. <strong style="color: var(--text);">spec</strong> anchors a unit of work (tracker card, TODO line, conversation). <strong style="color: var(--text);">planning</strong> orients to the region and writes a plan. <strong style="color: var(--text);">implementation</strong> works inside ambient idioms. <strong style="color: var(--text);">verification</strong> gates the commit on sensors (lint, type, tests, build). <strong style="color: var(--text);">review</strong> spawns review agents on the diff. <strong style="color: var(--text);">release</strong> opens the PR; CI gates the merge.
+  </div>
+</section>
+
+<!-- Lifecycle Actions -->
+<section>
+  <div class="section-label">Lifecycle Actions — invoked by the agent inside phases</div>
+  <div class="action-grid">
+    <div class="action lc-orient">
+      <span class="action-tag">Pre-task</span>
+      <h3>orient<span class="when">planning entry</span></h3>
+      <p>Read the region: load relevant idioms, recent state changes, related domain rules. Surface the activation map before writing the plan.</p>
+    </div>
+    <div class="action lc-drift">
+      <span class="action-tag">Post-edit</span>
+      <h3>check-drift<span class="when">implementation exit</span></h3>
+      <p>Did the edit violate a known idiom or invariant? Catch drift before verification — cheaper to fix while the change is fresh.</p>
+    </div>
+    <div class="action lc-verify">
+      <span class="action-tag">Pre-commit</span>
+      <h3>verify<span class="when">verification gate</span></h3>
+      <p>Run the sensors recorded in state/CODEBASE_STATE.md: lint, type-check, tests, build, coverage. Non-negotiable gate on every commit.</p>
+    </div>
+    <div class="action lc-learn">
+      <span class="action-tag">Post-commit</span>
+      <h3>learn<span class="when">release / capture</span></h3>
+      <p>Stage candidates from the cycle into learning/inbox/. Reasoning beyond the corpus gets captured; nothing is promoted yet.</p>
+    </div>
+  </div>
+  <p style="font-size: 0.78rem; color: var(--muted); font-family: var(--mono); margin-top: 8px;">How each action is actually invoked in your agent (slash command, rules-file trigger, CLI) lives in <code style="color: var(--accent);">harness/adapters/&lt;your-agent&gt;/lifecycle.md</code>.</p>
+</section>
+
+<!-- Heavyweight Actions -->
+<section>
+  <div class="section-label">Heavyweight Actions — invoked by the user</div>
+  <div class="action-grid four">
+    <div class="action hw-bootstrap">
+      <span class="action-tag">Day 1</span>
+      <h3>bootstrap</h3>
+      <p>Initial audit of a fresh install. Detects stack, scaffolds <code style="color: var(--accent);">idioms/&lt;stack&gt;/</code>, initializes <code style="color: var(--accent);">state/</code>.</p>
+    </div>
+    <div class="action hw-audit">
+      <span class="action-tag">Periodic</span>
+      <h3>audit</h3>
+      <p>Full dual audit — runs both Learning and Pruning flywheels. Detects corpus gaps and corpus/codebase discrepancies.</p>
+    </div>
+    <div class="action hw-synthesize">
+      <span class="action-tag">After learn</span>
+      <h3>synthesize</h3>
+      <p>Promote items from <code style="color: var(--accent);">learning/inbox/</code> into the right corpus layer. Human gates by confidence.</p>
+    </div>
+    <div class="action hw-mode">
+      <span class="action-tag">Config</span>
+      <h3>mode</h3>
+      <p>Set the pacing mode (paired / solo / autopilot). Controls how often the agent stops to ask.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Two Flywheels -->
+<section>
+  <div class="section-label">The Two Flywheels</div>
+  <div class="flywheels">
+    <div class="flywheel">
+      <h3 class="fw-learn-h">⟳ Learning Flywheel — additive</h3>
+      <div class="loop">
+        <div class="loop-step">
+          <span class="loop-num">01</span>
+          <span class="loop-text">Agent encounters a situation <strong>not covered by the corpus</strong> — makes a judgment call.</span>
+        </div>
+        <div class="loop-step">
+          <span class="loop-num">02</span>
+          <span class="loop-text"><strong>learn</strong> writes the reasoning as a candidate into <strong>harness/learning/inbox/</strong>.</span>
+        </div>
+        <div class="loop-step">
+          <span class="loop-num">03</span>
+          <span class="loop-text">Human gate applied by confidence — high-confidence items auto-promote, low-confidence require authorship.</span>
+        </div>
+        <div class="loop-step">
+          <span class="loop-num">04</span>
+          <span class="loop-text"><strong>synthesize</strong> promotes accepted items into the correct corpus layer.</span>
+        </div>
+        <div class="loop-step">
+          <span class="loop-num">05</span>
+          <span class="loop-text">Corpus grows — <strong>fewer gaps</strong> → cleaner signal on remaining gaps → loop tightens.</span>
+        </div>
+      </div>
+    </div>
+    <div class="flywheel">
+      <h3 class="fw-prune-h">⟲ Pruning Flywheel — subtractive</h3>
+      <div class="loop">
+        <div class="loop-step">
+          <span class="loop-num">01</span>
+          <span class="loop-text"><strong>audit</strong> compares corpus claims against codebase reality — discrepancy detected.</span>
+        </div>
+        <div class="loop-step">
+          <span class="loop-num">02</span>
+          <span class="loop-text">Staleness classified: factually wrong / aspirationally stale / domain-stale / process-stale.</span>
+        </div>
+        <div class="loop-step">
+          <span class="loop-num">03</span>
+          <span class="loop-text">Human gate for domain-stale content — agent handles structural staleness autonomously.</span>
+        </div>
+        <div class="loop-step">
+          <span class="loop-num">04</span>
+          <span class="loop-text">Content moves to <strong>archive/</strong> with reasoning recorded — never deleted, history preserved.</span>
+        </div>
+        <div class="loop-step">
+          <span class="loop-num">05</span>
+          <span class="loop-text">Corpus accuracy improves — <strong>higher signal-to-noise</strong> → next audit surfaces real problems faster.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Pacing Modes -->
+<section>
+  <div class="section-label">Pacing Modes</div>
+  <div class="action-grid three">
+    <div class="action mode-paired">
+      <span class="action-tag">Default</span>
+      <h3>paired</h3>
+      <p>Ask at every phase boundary; the user drives. Best for unfamiliar code or high-risk changes.</p>
+    </div>
+    <div class="action mode-solo">
+      <span class="action-tag">Independent</span>
+      <h3>solo</h3>
+      <p>Work independently through phases; stop only on hard problems. Best for well-scoped work in familiar code.</p>
+    </div>
+    <div class="action mode-autopilot">
+      <span class="action-tag">Hands-off</span>
+      <h3>autopilot</h3>
+      <p>Maximally autonomous; produces an assumption log at the end for review. Best for batch refactors and routine cleanup.</p>
+    </div>
+  </div>
+  <p style="font-size: 0.78rem; color: var(--muted); font-family: var(--mono); margin-top: 8px;">Set with the <code style="color: var(--accent5);">mode</code> action: <code style="color: var(--accent5);">mode &lt;paired|solo|autopilot&gt;</code>. Agents without a notion of autonomy levels collapse to a single mode; the phases still run.</p>
+</section>
+
+<!-- Supported Agents -->
+<section>
+  <div class="section-label">Supported Agents</div>
+  <div class="agents-table">
+    <div class="agent-row head">
+      <span>Agent</span>
+      <span>Adapter</span>
+      <span>Menu file installed</span>
+    </div>
+    <div class="agent-row">
+      <span class="agent-name">Claude Code</span>
+      <span class="agent-status real">real</span>
+      <span class="agent-menu">CLAUDE.md</span>
+    </div>
+    <div class="agent-row">
+      <span class="agent-name">Codex CLI</span>
+      <span class="agent-status real">real</span>
+      <span class="agent-menu">AGENTS.md</span>
+    </div>
+    <div class="agent-row">
+      <span class="agent-name">pi.dev</span>
+      <span class="agent-status real">real</span>
+      <span class="agent-menu">AGENTS.md + .pi/prompts/</span>
+    </div>
+    <div class="agent-row">
+      <span class="agent-name">Cursor</span>
+      <span class="agent-status stub">stub</span>
+      <span class="agent-menu">.cursor/rules/000-harness.mdc</span>
+    </div>
+    <div class="agent-row">
+      <span class="agent-name">Aider</span>
+      <span class="agent-status stub">stub</span>
+      <span class="agent-menu">CONVENTIONS.md</span>
+    </div>
+    <div class="agent-row">
+      <span class="agent-name">GitHub Copilot CLI</span>
+      <span class="agent-status stub">stub</span>
+      <span class="agent-menu">.github/copilot-instructions.md</span>
+    </div>
+    <div class="agent-row">
+      <span class="agent-name">Continue</span>
+      <span class="agent-status stub">stub</span>
+      <span class="agent-menu">.continuerules</span>
+    </div>
+    <div class="agent-row">
+      <span class="agent-name">Cline / Roo Code</span>
+      <span class="agent-status stub">stub</span>
+      <span class="agent-menu">cline-instructions.md</span>
+    </div>
+    <div class="agent-row">
+      <span class="agent-name">Goose</span>
+      <span class="agent-status stub">stub</span>
+      <span class="agent-menu">.goosehints</span>
+    </div>
+    <div class="agent-row">
+      <span class="agent-name">(any other)</span>
+      <span class="agent-status fallback">fallback</span>
+      <span class="agent-menu">AGENTS.md</span>
+    </div>
+  </div>
+  <p style="font-size: 0.78rem; color: var(--muted); font-family: var(--mono); margin-top: 16px; line-height: 1.7;">Stub adapters get a minimal lifecycle file and a working menu — enough to start; fill in the rest as you go. Real adapters cover the full set of lifecycle and heavyweight actions.</p>
+</section>
+
+<!-- Directory Tree -->
+<section>
+  <div class="section-label">What gets installed</div>
+  <div class="tree">
+
+    <div class="tree-line"><span class="tree-structure"></span><span class="tree-dir">your-project/</span></div>
+    <div class="tree-line"><span class="tree-structure">├──</span><span class="tree-dir">CLAUDE.md</span><span class="tree-annotation ann-default">← (or AGENTS.md / .cursor/rules/, agent-dependent)</span></div>
+    <div class="tree-line"><span class="tree-structure">│</span></div>
+    <div class="tree-line"><span class="tree-structure">└──</span><span class="tree-dir">harness/</span><span class="tree-annotation ann-default">← corpus root (project-owned)</span></div>
+    <div class="tree-line"><span class="tree-structure">    ├──</span><span class="tree-file">README.md</span><span class="tree-annotation ann-default">← five-minute orientation</span></div>
+    <div class="tree-line"><span class="tree-structure">    │</span></div>
+    <div class="tree-line"><span class="tree-structure">    ├──</span><span class="tree-dir">principles/</span><span class="tree-annotation ann-1">← Layer 1 · ambient · universal</span></div>
+    <div class="tree-line"><span class="tree-structure">    │   ├──</span><span class="tree-file">SOLID.md</span></div>
+    <div class="tree-line"><span class="tree-structure">    │   ├──</span><span class="tree-file">coupling-cohesion.md</span></div>
+    <div class="tree-line"><span class="tree-structure">    │   ├──</span><span class="tree-file">separation-of-concerns.md</span></div>
+    <div class="tree-line"><span class="tree-structure">    │   └──</span><span class="tree-file">information-hiding.md</span></div>
+    <div class="tree-line"><span class="tree-structure">    │</span></div>
+    <div class="tree-line"><span class="tree-structure">    ├──</span><span class="tree-dir">idioms/</span><span class="tree-annotation ann-2">← Layer 2 · ambient · stack-specific (bootstrap fills in)</span></div>
+    <div class="tree-line"><span class="tree-structure">    │</span></div>
+    <div class="tree-line"><span class="tree-structure">    ├──</span><span class="tree-dir">domain/</span><span class="tree-annotation ann-3">← Layer 3 · ambient · business rules</span></div>
+    <div class="tree-line"><span class="tree-structure">    │   ├──</span><span class="tree-file">bounded-contexts.md</span></div>
+    <div class="tree-line"><span class="tree-structure">    │   ├──</span><span class="tree-file">invariants.md</span></div>
+    <div class="tree-line"><span class="tree-structure">    │   ├──</span><span class="tree-file">workflows.md</span></div>
+    <div class="tree-line"><span class="tree-structure">    │   └──</span><span class="tree-file">anti-patterns.md</span></div>
+    <div class="tree-line"><span class="tree-structure">    │</span></div>
+    <div class="tree-line"><span class="tree-structure">    ├──</span><span class="tree-dir">state/</span><span class="tree-annotation ann-4">← Layer 4 · agent-maintained · temporal</span></div>
+    <div class="tree-line"><span class="tree-structure">    │   ├──</span><span class="tree-file">CODEBASE_STATE.md</span><span class="tree-annotation ann-4">← sensors + activation map (bootstrap fills in)</span></div>
+    <div class="tree-line"><span class="tree-structure">    │   ├──</span><span class="tree-file">risk-fingerprints.md</span></div>
+    <div class="tree-line"><span class="tree-structure">    │   └──</span><span class="tree-dir">migrations/</span></div>
+    <div class="tree-line"><span class="tree-structure">    │</span></div>
+    <div class="tree-line"><span class="tree-structure">    ├──</span><span class="tree-dir">process/</span><span class="tree-annotation ann-5">← Layer 5 · phase definitions</span></div>
+    <div class="tree-line"><span class="tree-structure">    │   ├──</span><span class="tree-file">spec.md</span></div>
+    <div class="tree-line"><span class="tree-structure">    │   ├──</span><span class="tree-file">planning.md</span></div>
+    <div class="tree-line"><span class="tree-structure">    │   ├──</span><span class="tree-file">implementation.md</span></div>
+    <div class="tree-line"><span class="tree-structure">    │   ├──</span><span class="tree-file">verification.md</span></div>
+    <div class="tree-line"><span class="tree-structure">    │   ├──</span><span class="tree-file">review.md</span></div>
+    <div class="tree-line"><span class="tree-structure">    │   ├──</span><span class="tree-file">release.md</span></div>
+    <div class="tree-line"><span class="tree-structure">    │   ├──</span><span class="tree-file">sensors.md</span></div>
+    <div class="tree-line"><span class="tree-structure">    │   └──</span><span class="tree-file">modes.md</span></div>
+    <div class="tree-line"><span class="tree-structure">    │</span></div>
+    <div class="tree-line"><span class="tree-structure">    ├──</span><span class="tree-dir">adapters/</span><span class="tree-annotation ann-default">← per-agent bindings (lifecycle + sensors + activation)</span></div>
+    <div class="tree-line"><span class="tree-structure">    │   ├──</span><span class="tree-dir">claude-code/</span></div>
+    <div class="tree-line"><span class="tree-structure">    │   ├──</span><span class="tree-dir">codex/</span></div>
+    <div class="tree-line"><span class="tree-structure">    │   ├──</span><span class="tree-dir">pi/</span></div>
+    <div class="tree-line"><span class="tree-structure">    │   └──</span><span class="tree-dir">…</span></div>
+    <div class="tree-line"><span class="tree-structure">    │</span></div>
+    <div class="tree-line"><span class="tree-structure">    ├──</span><span class="tree-dir">learning/</span><span class="tree-annotation ann-default">← Learning flywheel staging</span></div>
+    <div class="tree-line"><span class="tree-structure">    │   ├──</span><span class="tree-dir">inbox/</span></div>
+    <div class="tree-line"><span class="tree-structure">    │   ├──</span><span class="tree-dir">promoted/</span></div>
+    <div class="tree-line"><span class="tree-structure">    │   └──</span><span class="tree-dir">rejected/</span></div>
+    <div class="tree-line"><span class="tree-structure">    │</span></div>
+    <div class="tree-line"><span class="tree-structure">    └──</span><span class="tree-dir">archive/</span><span class="tree-annotation ann-default">← Pruning flywheel destination</span></div>
+
+  </div>
+</section>
+
+<!-- Updating -->
+<section>
+  <div class="section-label">Updating</div>
+  <div class="definition">
+    <p>The corpus is yours after install — keystone is not a runtime dependency. To refresh the corpus from a newer keystone release:</p>
+  </div>
+<pre class="code"><span class="prompt">$</span> brew upgrade keystone        <span class="comment"># or re-run the curl bootstrap</span>
+<span class="prompt">$</span> keystone init --force        <span class="comment"># overwrites harness/, skips your edits to CLAUDE.md etc.</span></pre>
+  <p style="font-size: 0.85rem; color: var(--muted); line-height: 1.7; margin-top: 12px;">
+    Or cherry-pick specific layers from the keystone repo: <code style="font-family: var(--mono); font-size: 0.78rem; color: var(--accent); background: var(--surface2); padding: 1px 6px; border-radius: 2px;">cp -R keystone/harness/principles/. your-project/harness/principles/</code>. Principles rarely change; process and adapters change more often.
+  </p>
+</section>
+
+<div class="footer">
+  <p>keystone · MIT · <a href="https://github.com/tacoda/keystone">github.com/tacoda/keystone</a></p>
+</div>
+
+</body>
+</html>
