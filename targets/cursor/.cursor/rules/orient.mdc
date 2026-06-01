@@ -1,0 +1,29 @@
+---
+description: Orient phase — load codebase state and matching idioms
+---
+
+# Orient
+
+You are entering the **planning** phase. Read `harness/process/planning.md` and follow its activities.
+
+## Activities
+
+1. **Read `harness/state/CODEBASE_STATE.md`** to learn:
+   - Tool commands (lint, type-check, test, build)
+   - Stacks present in the codebase
+   - Regions and their applicable idioms
+2. **Identify the touched region(s)** for this task. Map them to `Stacks` in CODEBASE_STATE.md.
+3. **Load matching idioms** by reading `harness/idioms/<stack>/*.md` for each stack the task touches. These define the stack-specific patterns the rest of the work must follow.
+4. **Load any active migrations** for the touched regions (`harness/state/migrations/active/*.md`).
+5. **Sketch a plan** — step list with a verification check per step.
+
+## Gate
+
+Do not begin implementation until the user has accepted the plan.
+
+## What to *not* load
+
+- Idioms for stacks the task does not touch.
+- Process docs for phases this task is not currently in.
+
+The orient phase exists to keep context small and relevant. Reading the entire corpus on every task is what orient prevents.

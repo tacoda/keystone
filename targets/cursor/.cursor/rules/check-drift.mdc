@@ -1,0 +1,25 @@
+---
+description: Check-drift — compare the diff against loaded corpus rules
+---
+
+# Check drift
+
+After making edits, run a drift check **before** invoking the verify gate. Read `harness/process/implementation.md` for the full activities.
+
+## Activities
+
+1. **Get the current diff** — `git diff` (unstaged + staged) plus untracked files relevant to the change.
+2. **List the corpus rules in scope**: every principle file referenced in `harness/principles/README.md` plus every idiom file under `harness/idioms/<stack>/` for the stacks the diff touches.
+3. **For each changed file, walk the diff against the in-scope rules.** Look for:
+   - Principle violations (e.g. circular dependencies, shared mutable state without sync — see `harness/principles/`).
+   - Idiom violations (stack-specific anti-patterns from `harness/idioms/<stack>/`).
+   - State drift — tool commands or stack assumptions the change invalidates.
+4. **Report findings** — each finding has a file:line citation, the rule it violates, and a suggested fix.
+
+## Output
+
+A structured list of findings. Empty list is a legitimate result.
+
+## When to use
+
+Between implementation and verification — when you have written code and want to confirm it respects the corpus before paying the cost of running sensors.

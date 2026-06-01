@@ -1,0 +1,40 @@
+---
+description: Review — semantic correctness check; spec adherence + sequential review concerns
+---
+
+# Review
+
+Semantic correctness check. Read `harness/process/review.md`. Runs *after* the `@verify` gate has passed.
+
+## Activities
+
+Cursor has no sub-agent parallelism, so this rule runs review concerns **sequentially** in the same chat. Three passes over the diff:
+
+### 1. Spec adherence
+
+- Load the spec for this task (from `docs/specs/` if recorded, or the inline spec from the chat).
+- Walk each acceptance criterion. For each, point to the change in the diff that satisfies it (or note the gap).
+- Surface AC that are *not* covered by the diff.
+
+### 2. Functional review
+
+- Re-read the diff with adversarial eyes. Look for:
+  - Edge cases the implementation does not handle.
+  - Error paths that swallow or misroute failure (see `harness/principles/error-handling.md`).
+  - Concurrency / race conditions (see `harness/principles/concurrency.md`).
+  - Off-by-one, boundary, and null-handling bugs.
+- Cite each finding with `file:line` and the suggested fix.
+
+### 3. Security review
+
+- Scan the diff for OWASP-Top-10 patterns (see `harness/principles/security-threats.md`).
+- Check secrets handling (see `harness/principles/secrets-management.md`).
+- Note any input-from-the-network paths that lack validation.
+
+## Output
+
+A structured report — three sections (spec / functional / security), each with findings or "no blockers."
+
+## Gate
+
+No blockers and all AC met → proceed to `@learn` and then commit. Any blocker → back to implementation.

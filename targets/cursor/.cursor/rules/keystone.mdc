@@ -1,0 +1,37 @@
+---
+description: Project harness — always-applied pointer
+alwaysApply: true
+---
+
+# Keystone harness
+
+This project uses a project harness. The corpus at `harness/` defines:
+
+- `principles/` — universal engineering rules
+- `idioms/` — stack-specific patterns
+- `domain/` — business rules for this project
+- `state/` — empirical map of the codebase right now
+- `process/` — six workflow phases (spec → planning → implementation → verification → review → release)
+
+Cursor-specific bindings live in `harness/adapters/cursor/`. Before starting work, read `harness/README.md`.
+
+## Iron laws
+
+- **No proceeding without explicit acceptance criteria** in the spec.
+- **No completion claims without fresh verification evidence** — sensors must have run this turn.
+- **No commits with failing sensors.** Never `--no-verify`.
+- **No AI attribution** in commits, PRs, or tracker comments.
+- **No silent overwrites** of state files — propose a diff, confirm before applying.
+
+## Lifecycle
+
+Each phase has a `.mdc` rule. Invoke by mentioning the action (e.g. `@orient`, `@verify`) or by asking the assistant to "run the X action."
+
+| Action | Rule | When |
+|---|---|---|
+| spec | `@spec` | Task entry, acceptance criteria |
+| orient | `@orient` | Plan + load idioms for touched region |
+| check-drift | `@check-drift` | After edits, before verify |
+| verify | `@verify` | Sensors gate, pre-commit |
+| review | `@review` | Semantic check, post-verify |
+| learn | `@learn` | Post-merge, capture insights |

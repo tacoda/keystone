@@ -31,7 +31,7 @@ var categories = []Category{
 			{"codex", "OpenAI Codex / Codex CLI"},
 			{"cursor", "Cursor editor"},
 			{"aider", "Aider"},
-			{"github-copilot-cli", "GitHub Copilot CLI"},
+			{"github-copilot", "GitHub Copilot (VS Code + CLI)"},
 			{"continue", "Continue.dev"},
 			{"cline", "Cline (VS Code)"},
 			{"goose", "Block Goose"},
