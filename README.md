@@ -6,22 +6,34 @@ A project harness for coding agents. Drops a self-updating corpus of engineering
 
 ## What it is
 
-Keystone is a markdown-only **project harness** — no language runtime, no daemon. The installer copies two things into your repo:
+Keystone is a markdown-only **project harness** — no language runtime, no daemon. The `keystone` CLI is a single Go binary with the entire harness embedded; `keystone init` writes two things into your repo:
 
 1. **A corpus** (`harness/`) — five layers of engineering knowledge: principles, idioms, domain, state, process. Plus per-agent bindings under `harness/adapters/<agent>/`.
 2. **An activation file** (the "menu") — `CLAUDE.md`, `AGENTS.md`, `.cursor/rules/*.mdc`, `CONVENTIONS.md`, etc. — depending on your agent. The menu tells the agent to read the cookbook.
+
+After `init`, the binary is no longer required — the corpus and menu are plain markdown files you own.
 
 After install, your agent drives a six-phase workflow (spec → planning → implementation → verification → review → release) and two flywheels (Learning adds rules, Pruning removes stale ones).
 
 ## Install
 
-### macOS / Linux
+Keystone ships as a single binary. Three ways to get it:
+
+### Homebrew (macOS / Linux)
+
+```bash
+brew install tacoda/tap/keystone
+```
+
+### Curl bootstrap (macOS / Linux)
+
+Downloads the binary into `~/.local/bin/keystone`, then prompts for the agent and runs `keystone init`:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/tacoda/keystone/main/install.sh | sh
 ```
 
-To inspect before running (recommended):
+Inspect before running (recommended):
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/tacoda/keystone/main/install.sh > install.sh
@@ -29,28 +41,27 @@ less install.sh
 sh install.sh
 ```
 
-To specify the agent explicitly:
+Set `KEYSTONE_NO_INIT=1` to install the binary only.
 
-```bash
-sh install.sh claude-code
-sh install.sh codex
-sh install.sh pi
-# etc.
-```
-
-### Windows
+### PowerShell (Windows)
 
 ```powershell
 iwr -useb https://raw.githubusercontent.com/tacoda/keystone/main/install.ps1 | iex
 ```
 
-Or download and inspect:
+### Manual
 
-```powershell
-iwr https://raw.githubusercontent.com/tacoda/keystone/main/install.ps1 -OutFile install.ps1
-Get-Content install.ps1 | more
-.\install.ps1 -Agent claude-code
+Download a prebuilt archive from the [releases page](https://github.com/tacoda/keystone/releases), extract `keystone` (or `keystone.exe`), and place it on your `PATH`.
+
+## Usage
+
 ```
+keystone init [<dir>] [--agent <name>] [--force]
+keystone version
+keystone help
+```
+
+`init` is non-interactive — it copies `harness/` and the agent's menu file(s) into `<dir>` (default `.`) and exits. If `--agent` is omitted it detects from existing marker files in `<dir>`; if detection fails it errors out. Re-run with `--force` to overwrite an existing `harness/`. Existing target files (e.g. `CLAUDE.md`) are always skipped — review and merge by hand.
 
 ## Supported agents
 
@@ -90,20 +101,31 @@ From then on, every task flows through the six phases, and the Learning flywheel
 
 ## Updating
 
-Keystone has no update CLI. Either:
-
-- **Re-run the installer** — fetches the latest, asks before overwriting any file you've edited.
-- **Pull from this repo** — clone keystone alongside your project and `cp -R keystone/harness/principles/. your-project/harness/principles/` for the layers you want updated. Principles rarely change; process and adapters change more often.
-
 The corpus is yours after install — keystone is not a runtime dependency.
+
+To refresh the corpus from a newer keystone release:
+
+```bash
+brew upgrade keystone        # or re-run the curl bootstrap
+keystone init --force        # overwrites harness/, skips your edits to CLAUDE.md etc.
+```
+
+Or cherry-pick specific layers from this repo: `cp -R keystone/harness/principles/. your-project/harness/principles/`. Principles rarely change; process and adapters change more often.
 
 ## Layout
 
 ```
 keystone/
 ├── README.md                # this file
-├── install.sh               # bash installer (macOS / Linux)
-├── install.ps1              # PowerShell installer (Windows)
+├── main.go                  # CLI entrypoint + //go:embed all:harness all:targets
+├── init.go                  # `keystone init` command
+├── scaffold.go              # walk embedded FS, write files to disk
+├── detect.go                # agent detection from marker files
+├── go.mod
+├── install.sh               # curl bootstrap (downloads binary, prompts, calls init)
+├── install.ps1              # PowerShell bootstrap
+├── .goreleaser.yml          # cross-compile + Homebrew tap publish
+├── .github/workflows/release.yml
 ├── harness/                 # the corpus skeleton dropped into consumer projects
 │   ├── README.md
 │   ├── principles/          # universal engineering rules
@@ -133,4 +155,4 @@ If you write a real adapter for an agent currently listed as a stub, contribute 
 
 ## License
 
-> _TODO: pick a license. MIT or Apache-2.0 are sensible defaults for a corpus + installer._
+MIT — see [LICENSE](LICENSE).
