@@ -1,34 +1,18 @@
-# AGENTS.md
+## Keystone harness
 
-> **Note:** If pi.dev reads a different file (e.g. `.pirules`, `pi.config`, etc.), rename this file accordingly. `AGENTS.md` is the cross-agent default.
+This project uses a **keystone harness**. The corpus at [`harness/`](harness/) defines the engineering knowledge and the six-phase workflow you operate within.
 
-This project uses a **project harness**. Read [`harness/README.md`](harness/README.md) before starting work.
+**Read first:**
+- [`harness/README.md`](harness/README.md) — five layers (principles, idioms, domain, state, process), the lifecycle, and the iron laws.
+- [`harness/adapters/pi/`](harness/adapters/pi/) — pi.dev bindings; also see prompts under `.pi/prompts/`.
+- [`harness/domain/`](harness/domain/) — business rules for this project.
 
-## Five layers of the corpus
+**Lifecycle actions:** `spec` · `orient` · `check-drift` · `verify` · `review` · `learn` (plus `bootstrap`, `audit`, `synthesize`, `mode`). Invoke by asking in natural language or via the matching `.pi/prompts/<action>.md` — see [`harness/adapters/pi/lifecycle.md`](harness/adapters/pi/lifecycle.md).
 
-- `harness/principles/` — universal engineering rules
-- `harness/idioms/` — stack-specific patterns
-- `harness/domain/` — business rules for this project
-- `harness/state/` — empirical map of the codebase right now
-- `harness/process/` — six workflow phases
-
-## Lifecycle actions
-
-When asked to run an action, read the corresponding phase file from `harness/process/` and follow its activities.
-
-- spec → `harness/process/spec.md`
-- orient → `harness/process/planning.md`
-- check-drift → `harness/process/implementation.md`
-- verify → `harness/process/verification.md`
-- review → `harness/process/review.md`
-- learn → `harness/process/release.md`
-
-pi.dev-specific bindings live in `harness/adapters/pi/`.
-
-## Iron laws
+**Iron laws** — non-negotiable across every phase:
 
 - No proceeding without explicit acceptance criteria in the spec.
-- No completion claims without fresh verification evidence.
-- No commits with failing sensors.
+- No completion claims without fresh verification evidence — sensors must have run this turn.
+- No commits with failing sensors. Never `--no-verify`.
 - No AI attribution in commits, PRs, or tracker comments.
 - No silent overwrites of state files.

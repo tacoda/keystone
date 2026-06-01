@@ -75,7 +75,11 @@ func runInit(args []string, assets embed.FS) error {
 		fmt.Fprintf(os.Stderr, "! no target bundle for %s; corpus installed, configure activation manually\n", agent)
 	} else {
 		fmt.Fprintf(os.Stdout, "▸ installing %s target\n", agent)
-		if err := copyTree(assets, targetRoot, absDir, skipIfExists); err != nil {
+		menuPath, err := installMenuFile(assets, agent, absDir)
+		if err != nil {
+			return fmt.Errorf("install menu file: %w", err)
+		}
+		if err := copyTree(assets, targetRoot, absDir, skipIfExists, menuPath); err != nil {
 			return fmt.Errorf("copy target: %w", err)
 		}
 	}

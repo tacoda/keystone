@@ -1,41 +1,18 @@
-# AGENTS.md
+## Keystone harness
 
-This project uses a **project harness**. Read [`harness/README.md`](harness/README.md) before starting work.
+This project uses a **keystone harness**. The corpus at [`harness/`](harness/) defines the engineering knowledge and the six-phase workflow you operate within.
 
-## Five layers of the corpus
+**Read first:**
+- [`harness/README.md`](harness/README.md) — five layers (principles, idioms, domain, state, process), the lifecycle, and the iron laws.
+- [`harness/adapters/codex/`](harness/adapters/codex/) — Codex bindings (shell execution, sandbox model).
+- [`harness/domain/`](harness/domain/) — business rules for this project.
 
-- `harness/principles/` — universal engineering rules
-- `harness/idioms/` — stack-specific patterns (lazy-loaded by region)
-- `harness/domain/` — business rules for this project
-- `harness/state/` — empirical map of the codebase right now
-- `harness/process/` — six workflow phases (spec → planning → implementation → verification → review → release)
+**Lifecycle actions:** `spec` · `orient` · `check-drift` · `verify` · `review` · `learn` (plus `bootstrap`, `audit`, `synthesize`, `mode`). Invoke by asking in natural language — see [`harness/adapters/codex/lifecycle.md`](harness/adapters/codex/lifecycle.md).
 
-## Lifecycle actions
+**Iron laws** — non-negotiable across every phase:
 
-When asked to run a lifecycle action, read the corresponding phase file from `harness/process/` and follow its activities. Sensors are executed via shell.
-
-| Action | Phase file |
-|---|---|
-| spec | `harness/process/spec.md` |
-| orient | `harness/process/planning.md` |
-| check-drift | `harness/process/implementation.md` |
-| verify | `harness/process/verification.md` |
-| review | `harness/process/review.md` |
-| learn | `harness/process/release.md` |
-
-Codex-specific bindings live in `harness/adapters/codex/`.
-
-## Iron laws
-
-- **No proceeding without explicit acceptance criteria** in the spec.
-- **No completion claims without fresh verification evidence.**
-- **No commits with failing sensors.**
-- **No AI attribution** in commits, PRs, or tracker comments.
-- **No silent overwrites** of state files.
-
-## Prerequisites the harness assumes
-
-- A way to track work — a tracker card (Jira / Linear / GitHub Issues / Asana), a `TODO.md`, or a conversation.
-- Lint / type-check / test / build commands in `harness/state/CODEBASE_STATE.md`.
-- A pull-request workflow.
-- A CI pipeline (CD is even better).
+- No proceeding without explicit acceptance criteria in the spec.
+- No completion claims without fresh verification evidence — sensors must have run this turn.
+- No commits with failing sensors. Never `--no-verify`.
+- No AI attribution in commits, PRs, or tracker comments.
+- No silent overwrites of state files.

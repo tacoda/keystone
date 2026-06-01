@@ -18,8 +18,16 @@ const (
 
 // copyTree copies every regular file under srcRoot in the embedded FS to
 // destDir on disk. Paths under srcRoot are joined onto destDir as-is
-// (the srcRoot prefix itself is not included).
-func copyTree(srcFS fs.FS, srcRoot, destDir string, mode copyMode) error {
+// (the srcRoot prefix itself is not included). Variadic exclude paths,
+// expressed relative to srcRoot, are skipped — used to hand-off files
+// like menu files that need merge semantics instead of plain copy.
+func copyTree(srcFS fs.FS, srcRoot, destDir string, mode copyMode, exclude ...string) error {
+	excludeSet := make(map[string]bool, len(exclude))
+	for _, e := range exclude {
+		if e != "" {
+			excludeSet[e] = true
+		}
+	}
 	return fs.WalkDir(srcFS, srcRoot, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
@@ -31,6 +39,9 @@ func copyTree(srcFS fs.FS, srcRoot, destDir string, mode copyMode) error {
 		rel, err := filepath.Rel(srcRoot, path)
 		if err != nil {
 			return err
+		}
+		if excludeSet[rel] {
+			return nil
 		}
 		dest := filepath.Join(destDir, rel)
 

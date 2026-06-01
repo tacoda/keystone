@@ -55,14 +55,16 @@ No event hooks. Process discipline drives the lifecycle.
 
 ## Lifecycle actions
 
-Invoked by the agent inside process phases:
+Invoked by the agent inside process phases. One sentence per action — the corresponding `process/<phase>.md` has the full activities.
 
-| Moment | Action | Phase |
+| Action | Moment / Phase | What it does |
 |---|---|---|
-| Pre-task | **orient** | planning entry |
-| Post-edit | **check-drift** | implementation exit |
-| Pre-commit | **verify** | verification gate |
-| Post-commit | **learn** | release / capture |
+| **spec** | task entry → spec phase | Captures intent and **acceptance criteria** from a tracker card or inline. Gate: spec approved. |
+| **orient** | spec approved → planning | Reads `state/CODEBASE_STATE.md`, lazy-loads matching idioms for the touched region, sketches a plan. Gate: plan approved. |
+| **check-drift** | implementation exit | Compares the current diff against loaded corpus rules; reports findings. |
+| **verify** | pre-commit / verification gate | Runs every sensor (lint, type-check, test, build, drift, commit-message) **in the current turn**. Gate: every sensor green. |
+| **review** | verification gate passed → review | Walks spec acceptance criteria + runs functional and security review concerns over the diff. Gate: no blockers, AC met. |
+| **learn** | post-commit / release | Writes a candidate to `learning/inbox/<timestamp>-<slug>.md` for the next **synthesize** cycle. |
 
 ## Heavyweight actions
 
@@ -74,6 +76,16 @@ Invoked by the user:
 - **mode** — set pacing mode.
 
 How each action is actually invoked in your agent (slash command, rules-file trigger, CLI, etc.) lives in `adapters/<your-agent>/lifecycle.md`. If your agent is not listed, see `adapters/_generic/`.
+
+## Iron laws
+
+Non-negotiable across every phase. Stated in full in the corresponding `process/<phase>.md`; consolidated here for quick reference.
+
+- **No proceeding without explicit acceptance criteria** in the spec.
+- **No completion claims without fresh verification evidence** — sensors must have run *this turn*, not in a prior one.
+- **No commits with failing sensors.** Never `--no-verify`.
+- **No AI attribution** in commits, PRs, or tracker comments (no `Co-Authored-By: <agent>`, no auto-generated footers).
+- **No silent overwrites** of state files — propose a diff, confirm before applying.
 
 ## Pacing modes
 
