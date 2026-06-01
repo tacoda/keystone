@@ -99,19 +99,6 @@ Missing one degrades the corresponding phase but does not break the harness.
 
 From then on, every task flows through the six phases, and the Learning flywheel grows the corpus as your project teaches you new patterns.
 
-## Updating
-
-The corpus is yours after install — keystone is not a runtime dependency.
-
-To refresh the corpus from a newer keystone release:
-
-```bash
-brew upgrade keystone        # or re-run the curl bootstrap
-keystone init --force        # overwrites harness/, skips your edits to CLAUDE.md etc.
-```
-
-Or cherry-pick specific layers from this repo: `cp -R keystone/harness/principles/. your-project/harness/principles/`. Principles rarely change; process and adapters change more often.
-
 ## Layout
 
 ```
