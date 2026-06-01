@@ -782,11 +782,12 @@
       <div class="box installer-box">
         <span class="box-label">Installer — keystone binary</span>
         <div class="installer-items">
-          <div class="installer-item">detect agent from markers</div>
+          <div class="installer-item">detect agent · prompt missing options (huh TTY)</div>
           <div class="installer-item">preflight (git, CI)</div>
           <div class="installer-item">copy harness/ from embed.FS</div>
-          <div class="installer-item">copy menu files (skip-if-exists)</div>
-          <div class="installer-item">print next steps</div>
+          <div class="installer-item">merge menu files (additive · idempotent)</div>
+          <div class="installer-item">install opt-in content from optional/</div>
+          <div class="installer-item">write INSTALL_PROFILE.md · next steps</div>
         </div>
       </div>
     </div>
@@ -808,7 +809,7 @@
           </div>
           <div class="consumer-cell">
             <span class="cell-name">CLAUDE.md · AGENTS.md · .cursor/rules/ · …</span>
-            <span class="cell-desc">The activation file ("menu") that tells the agent to read the corpus. Format depends on the agent.</span>
+            <span class="cell-desc">The agent's menu file — merges additively under your existing H1, bracketed by markers so re-installs refresh in place. Format depends on the agent.</span>
           </div>
         </div>
         <div class="repo-note">After install, keystone is gone. The corpus lives in the repo and evolves with the code.</div>
@@ -869,7 +870,7 @@
   <p style="font-size: 0.85rem; color: var(--muted); line-height: 1.7; margin-bottom: 20px;">
     The harness is most useful when the surrounding tooling looks like this. None of these are hard requirements — <strong style="color: var(--text);">install runs regardless</strong>. Missing one degrades the corresponding phase to "ask the user / surface the gap"; it does not break the harness.
   </p>
-  <div class="action-grid three">
+  <div class="action-grid">
     <div class="action">
       <span class="action-tag">spec phase</span>
       <h3 style="color: var(--accent);">Issue tracker</h3>
@@ -884,6 +885,11 @@
       <span class="action-tag">verify phase</span>
       <h3 style="color: var(--accent3);">Adequate sensors</h3>
       <p>Lint, type-check, test runner, build, optionally coverage — automated checks that do a good job of constraining behavior. Not strictly required, but as sensor quality improves, so does the harness as a whole. Commands live in <code style="color: var(--accent3);">harness/state/CODEBASE_STATE.md</code>.</p>
+    </div>
+    <div class="action">
+      <span class="action-tag">release phase</span>
+      <h3 style="color: var(--accent5);">CI pipeline (CD recommended)</h3>
+      <p>GitHub Actions, GitLab CI, CircleCI, Jenkins — anything that runs sensors on every push. The release phase assumes CI gates the merge. <strong style="color: var(--text);">Continuous Delivery</strong> (every commit produces a releasable artifact; the deploy itself stays a business decision) is highly recommended and makes the harness work better — small batches, fast feedback, low-risk releases. Continuous Deployment is an extension of CD, not a prerequisite. See <code style="color: var(--accent5);">principles/continuous-delivery.md</code> — opt-in via <code style="color: var(--accent5);">--architecture continuous-delivery</code>.</p>
     </div>
   </div>
 </section>
@@ -922,8 +928,13 @@
 <!-- CLI Usage -->
 <section>
   <div class="section-label">CLI Usage</div>
-<pre class="code"><span class="comment"># Scaffold harness/ and the agent's menu file(s) into &lt;dir&gt;</span>
-<span class="prompt">$</span> keystone init [&lt;dir&gt;] [--agent &lt;name&gt;] [--force]
+<pre class="code"><span class="comment"># Scaffold harness/ and the agent's menu file into &lt;dir&gt;.
+# Prompts interactively (huh) for any unset options when stdin is a TTY;
+# fails fast with a useful error when stdin is not a TTY and --agent is unset.</span>
+<span class="prompt">$</span> keystone init [&lt;dir&gt;] [flags]
+
+<span class="comment"># Print the catalog of allowed labels for every option flag</span>
+<span class="prompt">$</span> keystone options
 
 <span class="comment"># Print the binary version</span>
 <span class="prompt">$</span> keystone version
@@ -932,21 +943,64 @@
 <span class="prompt">$</span> keystone help</pre>
 
   <p style="font-size: 0.85rem; color: var(--muted); line-height: 1.7; margin-top: 16px;">
-    <code style="font-family: var(--mono); font-size: 0.78rem; color: var(--accent); background: var(--surface2); padding: 1px 6px; border-radius: 2px;">init</code> is non-interactive — it copies <code style="font-family: var(--mono); font-size: 0.78rem; color: var(--accent); background: var(--surface2); padding: 1px 6px; border-radius: 2px;">harness/</code> and the agent's menu file(s) into <code style="font-family: var(--mono); font-size: 0.78rem; color: var(--accent); background: var(--surface2); padding: 1px 6px; border-radius: 2px;">&lt;dir&gt;</code> (default <code style="font-family: var(--mono); font-size: 0.78rem; color: var(--accent); background: var(--surface2); padding: 1px 6px; border-radius: 2px;">.</code>) and exits.
+    <code style="font-family: var(--mono); font-size: 0.78rem; color: var(--accent); background: var(--surface2); padding: 1px 6px; border-radius: 2px;">init</code> is <strong style="color: var(--text);">interactive in a terminal, scriptable in CI</strong>. In a TTY, every unset option becomes a prompt; outside a TTY, options must be supplied as flags. Multi-select flags accept comma-separated values (e.g. <code style="font-family: var(--mono); font-size: 0.78rem; color: var(--accent); background: var(--surface2); padding: 1px 6px; border-radius: 2px;">--architecture hexagonal,continuous-delivery</code>).
   </p>
 
   <div class="action-grid" style="margin-top: 24px;">
     <div class="action">
-      <span class="action-tag">--agent &lt;name&gt;</span>
+      <span class="action-tag">--agent &lt;label&gt;</span>
       <h3>Agent target</h3>
-      <p>One of: <code style="color:var(--accent2);">claude-code</code>, <code style="color:var(--accent2);">codex</code>, <code style="color:var(--accent2);">pi</code>, <code style="color:var(--accent2);">cursor</code>, <code style="color:var(--accent2);">aider</code>, <code style="color:var(--accent2);">github-copilot-cli</code>, <code style="color:var(--accent2);">continue</code>, <code style="color:var(--accent2);">cline</code>, <code style="color:var(--accent2);">goose</code>, <code style="color:var(--accent2);">_generic</code>. If omitted, keystone detects from existing marker files; if detection fails, init exits with an error.</p>
+      <p>One of: <code style="color:var(--accent2);">claude-code</code>, <code style="color:var(--accent2);">codex</code>, <code style="color:var(--accent2);">cursor</code>, <code style="color:var(--accent2);">aider</code>, <code style="color:var(--accent2);">github-copilot</code>, <code style="color:var(--accent2);">continue</code>, <code style="color:var(--accent2);">cline</code>, <code style="color:var(--accent2);">goose</code>, <code style="color:var(--accent2);">pi</code>, <code style="color:var(--accent2);">generic</code>. If omitted, keystone detects from marker files; falls back to interactive prompt in a TTY.</p>
     </div>
     <div class="action">
       <span class="action-tag">--force</span>
       <h3>Overwrite harness/</h3>
-      <p>Re-run with <code style="color:var(--accent2);">--force</code> to overwrite an existing <code style="color:var(--accent2);">harness/</code>. Existing target files (e.g. <code style="color:var(--accent2);">CLAUDE.md</code>) are <strong style="color:var(--text);">always skipped</strong> — review and merge by hand.</p>
+      <p>Re-run with <code style="color:var(--accent2);">--force</code> to overwrite an existing <code style="color:var(--accent2);">harness/</code>. Menu files (<code style="color:var(--accent2);">CLAUDE.md</code>, <code style="color:var(--accent2);">CONVENTIONS.md</code>, etc.) <strong style="color:var(--text);">merge additively</strong> — see Updating below.</p>
     </div>
   </div>
+</section>
+
+<!-- Install-time Options -->
+<section>
+  <div class="section-label">Install-time Options — declared intent</div>
+  <p style="font-size: 0.85rem; color: var(--muted); line-height: 1.7; margin-bottom: 20px;">
+    These are the questions only a human can answer — <strong style="color: var(--text);">declared intent</strong>, not facts a script could infer from the codebase. In a TTY the installer prompts for each; in CI you pass them as flags. Selections land in <code style="font-family: var(--mono); font-size: 0.78rem; color: var(--accent); background: var(--surface2); padding: 1px 6px; border-radius: 2px;">harness/state/INSTALL_PROFILE.md</code>; the bootstrap action reads them as the starting hint when it audits the codebase.
+  </p>
+
+  <div class="action-grid">
+    <div class="action">
+      <span class="action-tag">--agent</span>
+      <h3 style="color: var(--accent);">Agent</h3>
+      <p>Which AI coding agent will read this harness. Determines the menu file and adapter bundle installed.</p>
+    </div>
+    <div class="action">
+      <span class="action-tag">--app-type</span>
+      <h3 style="color: var(--accent2);">App type</h3>
+      <p><code style="color:var(--accent2);">web-application</code> · <code style="color:var(--accent2);">web-api</code> · <code style="color:var(--accent2);">cli-tool</code> · <code style="color:var(--accent2);">library</code> · <code style="color:var(--accent2);">mobile-app</code> · <code style="color:var(--accent2);">desktop-app</code> · <code style="color:var(--accent2);">data-pipeline</code> · <code style="color:var(--accent2);">embedded</code></p>
+    </div>
+    <div class="action">
+      <span class="action-tag">--architecture</span>
+      <h3 style="color: var(--accent3);">Architecture (multi)</h3>
+      <p>Opinionated patterns the project follows: <code style="color:var(--accent3);">hexagonal</code>, <code style="color:var(--accent3);">clean-architecture</code>, <code style="color:var(--accent3);">onion-architecture</code>, <code style="color:var(--accent3);">layered</code>, <code style="color:var(--accent3);">mvc</code>, <code style="color:var(--accent3);">mvvm</code>, <code style="color:var(--accent3);">event-driven</code>, <code style="color:var(--accent3);">microservices</code>, <code style="color:var(--accent3);">monolith</code>, <code style="color:var(--accent3);">serverless</code>, <code style="color:var(--accent3);">spa</code>, <code style="color:var(--accent3);">continuous-delivery</code>. Each label installs the matching principle file.</p>
+    </div>
+    <div class="action">
+      <span class="action-tag">--testing</span>
+      <h3 style="color: var(--accent4);">Testing (multi)</h3>
+      <p>Disciplines the team practices: <code style="color:var(--accent4);">tdd</code>, <code style="color:var(--accent4);">bdd</code>, <code style="color:var(--accent4);">atdd</code>, <code style="color:var(--accent4);">property-based</code>, <code style="color:var(--accent4);">snapshot</code>, <code style="color:var(--accent4);">manual-qa</code>, <code style="color:var(--accent4);">none-yet</code>.</p>
+    </div>
+    <div class="action">
+      <span class="action-tag">--compliance</span>
+      <h3 style="color: var(--accent5);">Compliance scope (multi)</h3>
+      <p>Regimes the system must satisfy: <code style="color:var(--accent5);">gdpr</code>, <code style="color:var(--accent5);">hipaa</code>, <code style="color:var(--accent5);">pci-dss</code>, <code style="color:var(--accent5);">soc2</code>, <code style="color:var(--accent5);">fedramp</code>. Each label installs a regime-specific principle file under <code style="color:var(--accent5);">harness/principles/</code>.</p>
+    </div>
+    <div class="action">
+      <span class="action-tag">bootstrap-inferred</span>
+      <h3>Not asked here</h3>
+      <p>Language stack, database, CI platform, deployment target, project maturity, team size — bootstrap detects these from the codebase on first run, where it has accurate context. No <code style="color:var(--muted);">--language</code> flag exists in v0.2.0+.</p>
+    </div>
+  </div>
+
+  <p style="font-size: 0.78rem; color: var(--muted); font-family: var(--mono); margin-top: 16px; line-height: 1.7;">Run <code style="color: var(--accent);">keystone options</code> for the full catalog of allowed labels per flag.</p>
 </section>
 
 <!-- Bootstrap -->
@@ -954,7 +1008,7 @@
   <div class="section-label">First-run: the Bootstrap step</div>
   <div class="definition">
     <p>Immediately after <code>keystone init</code>, run the <strong>bootstrap</strong> heavyweight action in your agent. Bootstrap is an initial audit of a fresh install — it makes the corpus specific to your codebase.</p>
-    <p>It detects your stack, scaffolds <code>idioms/&lt;stack&gt;/</code> with real patterns derived from your code, and initializes <code>state/CODEBASE_STATE.md</code> with your sensor commands, activation map per region, and risk fingerprints. Until bootstrap runs, the corpus is generic.</p>
+    <p>Bootstrap reads <code>state/INSTALL_PROFILE.md</code> for your declared intent (agent, app-type, architecture, testing, compliance), then detects everything else from the codebase: language stack, database, CI platform, deployment target. It scaffolds <code>idioms/&lt;stack&gt;/</code> with real patterns derived from your code and initializes <code>state/CODEBASE_STATE.md</code> with your sensor commands, activation map per region, and risk fingerprints. Until bootstrap runs, the corpus is generic.</p>
   </div>
 
   <div style="font-size: 0.85rem; color: var(--muted); line-height: 1.8;">
@@ -995,11 +1049,16 @@
 <!-- Lifecycle Actions -->
 <section>
   <div class="section-label">Lifecycle Actions — invoked by the agent inside phases</div>
-  <div class="action-grid">
+  <div class="action-grid three">
+    <div class="action lc-orient">
+      <span class="action-tag">Task entry</span>
+      <h3 style="color: var(--accent);">spec<span class="when">spec phase</span></h3>
+      <p>Capture intent and <strong style="color: var(--text);">acceptance criteria</strong> from a tracker card or inline. Gate: spec approved before planning begins.</p>
+    </div>
     <div class="action lc-orient">
       <span class="action-tag">Pre-task</span>
       <h3>orient<span class="when">planning entry</span></h3>
-      <p>Read the region: load relevant idioms, recent state changes, related domain rules. Surface the activation map before writing the plan.</p>
+      <p>Read <code style="color: var(--accent);">state/CODEBASE_STATE.md</code>, lazy-load matching idioms for the touched region, sketch a plan. Gate: plan approved.</p>
     </div>
     <div class="action lc-drift">
       <span class="action-tag">Post-edit</span>
@@ -1009,15 +1068,20 @@
     <div class="action lc-verify">
       <span class="action-tag">Pre-commit</span>
       <h3>verify<span class="when">verification gate</span></h3>
-      <p>Run the sensors recorded in state/CODEBASE_STATE.md: lint, type-check, tests, build, coverage. Non-negotiable gate on every commit.</p>
+      <p>Run sensors from <code style="color: var(--accent3);">state/CODEBASE_STATE.md</code>: lint, type-check, tests, build, coverage. <strong style="color: var(--text);">No completion claims without fresh evidence — sensors must have run this turn.</strong></p>
+    </div>
+    <div class="action lc-drift">
+      <span class="action-tag">Post-verify</span>
+      <h3 style="color: var(--accent2);">review<span class="when">review phase</span></h3>
+      <p>Walk spec acceptance criteria + functional review + security review on the diff. Gate: no blockers, AC met.</p>
     </div>
     <div class="action lc-learn">
       <span class="action-tag">Post-commit</span>
       <h3>learn<span class="when">release / capture</span></h3>
-      <p>Stage candidates from the cycle into learning/inbox/. Reasoning beyond the corpus gets captured; nothing is promoted yet.</p>
+      <p>Stage candidates from the cycle into <code style="color: var(--accent4);">learning/inbox/</code>. Reasoning beyond the corpus gets captured; nothing is promoted yet.</p>
     </div>
   </div>
-  <p style="font-size: 0.78rem; color: var(--muted); font-family: var(--mono); margin-top: 8px;">How each action is actually invoked in your agent (slash command, rules-file trigger, CLI) lives in <code style="color: var(--accent);">harness/adapters/&lt;your-agent&gt;/lifecycle.md</code>.</p>
+  <p style="font-size: 0.78rem; color: var(--muted); font-family: var(--mono); margin-top: 8px;">How each action is actually invoked in your agent (slash command, rules-file trigger, natural language) lives in <code style="color: var(--accent);">harness/adapters/&lt;your-agent&gt;/lifecycle.md</code>.</p>
 </section>
 
 <!-- Heavyweight Actions -->
@@ -1153,17 +1217,17 @@
     </div>
     <div class="agent-row">
       <span class="agent-name">Cursor</span>
-      <span class="agent-status stub">stub</span>
-      <span class="agent-menu">.cursor/rules/000-harness.mdc</span>
+      <span class="agent-status real">real</span>
+      <span class="agent-menu">.cursor/rules/*.mdc (7 scaffolded)</span>
     </div>
     <div class="agent-row">
       <span class="agent-name">Aider</span>
-      <span class="agent-status stub">stub</span>
+      <span class="agent-status real">real</span>
       <span class="agent-menu">CONVENTIONS.md</span>
     </div>
     <div class="agent-row">
-      <span class="agent-name">GitHub Copilot CLI</span>
-      <span class="agent-status stub">stub</span>
+      <span class="agent-name">GitHub Copilot (VS Code + CLI)</span>
+      <span class="agent-status real">real</span>
       <span class="agent-menu">.github/copilot-instructions.md</span>
     </div>
     <div class="agent-row">
@@ -1196,52 +1260,42 @@
   <div class="tree">
 
     <div class="tree-line"><span class="tree-structure"></span><span class="tree-dir">your-project/</span></div>
-    <div class="tree-line"><span class="tree-structure">├──</span><span class="tree-dir">CLAUDE.md</span><span class="tree-annotation ann-default">← (or AGENTS.md / .cursor/rules/, agent-dependent)</span></div>
+    <div class="tree-line"><span class="tree-structure">├──</span><span class="tree-dir">CLAUDE.md</span><span class="tree-annotation ann-default">← agent menu file (merges additively under your H1)</span></div>
     <div class="tree-line"><span class="tree-structure">│</span></div>
     <div class="tree-line"><span class="tree-structure">└──</span><span class="tree-dir">harness/</span><span class="tree-annotation ann-default">← corpus root (project-owned)</span></div>
-    <div class="tree-line"><span class="tree-structure">    ├──</span><span class="tree-file">README.md</span><span class="tree-annotation ann-default">← five-minute orientation</span></div>
+    <div class="tree-line"><span class="tree-structure">    ├──</span><span class="tree-file">README.md</span><span class="tree-annotation ann-default">← five-minute orientation · lifecycle table · iron laws</span></div>
     <div class="tree-line"><span class="tree-structure">    │</span></div>
-    <div class="tree-line"><span class="tree-structure">    ├──</span><span class="tree-dir">principles/</span><span class="tree-annotation ann-1">← Layer 1 · ambient · universal</span></div>
-    <div class="tree-line"><span class="tree-structure">    │   ├──</span><span class="tree-file">SOLID.md</span></div>
-    <div class="tree-line"><span class="tree-structure">    │   ├──</span><span class="tree-file">coupling-cohesion.md</span></div>
-    <div class="tree-line"><span class="tree-structure">    │   ├──</span><span class="tree-file">separation-of-concerns.md</span></div>
-    <div class="tree-line"><span class="tree-structure">    │   └──</span><span class="tree-file">information-hiding.md</span></div>
+    <div class="tree-line"><span class="tree-structure">    ├──</span><span class="tree-dir">principles/</span><span class="tree-annotation ann-1">← Layer 1 · 29 cited files · ambient · universal</span></div>
+    <div class="tree-line"><span class="tree-structure">    │   ├──</span><span class="tree-file">SOLID · coupling-cohesion · information-hiding · separation-of-concerns</span></div>
+    <div class="tree-line"><span class="tree-structure">    │   ├──</span><span class="tree-file">object-oriented-design · law-of-demeter · design-by-contract</span></div>
+    <div class="tree-line"><span class="tree-structure">    │   ├──</span><span class="tree-file">simplicity · simple-design · refactoring · pragmatic-principles · naming</span></div>
+    <div class="tree-line"><span class="tree-structure">    │   ├──</span><span class="tree-file">modern-software-engineering · premature-optimization · fail-fast · error-handling</span></div>
+    <div class="tree-line"><span class="tree-structure">    │   ├──</span><span class="tree-file">least-astonishment · postels-law · hyrums-law</span></div>
+    <div class="tree-line"><span class="tree-structure">    │   ├──</span><span class="tree-file">concurrency · distributed-systems-fallacies · observability · idempotency</span></div>
+    <div class="tree-line"><span class="tree-structure">    │   ├──</span><span class="tree-file">tdd · bdd · testing-patterns</span></div>
+    <div class="tree-line"><span class="tree-structure">    │   └──</span><span class="tree-file">security · security-threats · secrets-management</span></div>
     <div class="tree-line"><span class="tree-structure">    │</span></div>
     <div class="tree-line"><span class="tree-structure">    ├──</span><span class="tree-dir">idioms/</span><span class="tree-annotation ann-2">← Layer 2 · ambient · stack-specific (bootstrap fills in)</span></div>
     <div class="tree-line"><span class="tree-structure">    │</span></div>
     <div class="tree-line"><span class="tree-structure">    ├──</span><span class="tree-dir">domain/</span><span class="tree-annotation ann-3">← Layer 3 · ambient · business rules</span></div>
-    <div class="tree-line"><span class="tree-structure">    │   ├──</span><span class="tree-file">bounded-contexts.md</span></div>
-    <div class="tree-line"><span class="tree-structure">    │   ├──</span><span class="tree-file">invariants.md</span></div>
-    <div class="tree-line"><span class="tree-structure">    │   ├──</span><span class="tree-file">workflows.md</span></div>
-    <div class="tree-line"><span class="tree-structure">    │   └──</span><span class="tree-file">anti-patterns.md</span></div>
     <div class="tree-line"><span class="tree-structure">    │</span></div>
     <div class="tree-line"><span class="tree-structure">    ├──</span><span class="tree-dir">state/</span><span class="tree-annotation ann-4">← Layer 4 · agent-maintained · temporal</span></div>
     <div class="tree-line"><span class="tree-structure">    │   ├──</span><span class="tree-file">CODEBASE_STATE.md</span><span class="tree-annotation ann-4">← sensors + activation map (bootstrap fills in)</span></div>
-    <div class="tree-line"><span class="tree-structure">    │   ├──</span><span class="tree-file">risk-fingerprints.md</span></div>
+    <div class="tree-line"><span class="tree-structure">    │   ├──</span><span class="tree-file">INSTALL_PROFILE.md</span><span class="tree-annotation ann-4">← user's declared intent at install time</span></div>
+    <div class="tree-line"><span class="tree-structure">    │   ├──</span><span class="tree-file">risk-fingerprints.md · traffic-topology.md</span></div>
     <div class="tree-line"><span class="tree-structure">    │   └──</span><span class="tree-dir">migrations/</span></div>
     <div class="tree-line"><span class="tree-structure">    │</span></div>
     <div class="tree-line"><span class="tree-structure">    ├──</span><span class="tree-dir">process/</span><span class="tree-annotation ann-5">← Layer 5 · phase definitions</span></div>
-    <div class="tree-line"><span class="tree-structure">    │   ├──</span><span class="tree-file">spec.md</span></div>
-    <div class="tree-line"><span class="tree-structure">    │   ├──</span><span class="tree-file">planning.md</span></div>
-    <div class="tree-line"><span class="tree-structure">    │   ├──</span><span class="tree-file">implementation.md</span></div>
-    <div class="tree-line"><span class="tree-structure">    │   ├──</span><span class="tree-file">verification.md</span></div>
-    <div class="tree-line"><span class="tree-structure">    │   ├──</span><span class="tree-file">review.md</span></div>
-    <div class="tree-line"><span class="tree-structure">    │   ├──</span><span class="tree-file">release.md</span></div>
-    <div class="tree-line"><span class="tree-structure">    │   ├──</span><span class="tree-file">sensors.md</span></div>
-    <div class="tree-line"><span class="tree-structure">    │   └──</span><span class="tree-file">modes.md</span></div>
+    <div class="tree-line"><span class="tree-structure">    │   └──</span><span class="tree-file">spec · planning · implementation · verification · review · release · sensors · modes</span></div>
     <div class="tree-line"><span class="tree-structure">    │</span></div>
-    <div class="tree-line"><span class="tree-structure">    ├──</span><span class="tree-dir">adapters/</span><span class="tree-annotation ann-default">← per-agent bindings (lifecycle + sensors + activation)</span></div>
-    <div class="tree-line"><span class="tree-structure">    │   ├──</span><span class="tree-dir">claude-code/</span></div>
-    <div class="tree-line"><span class="tree-structure">    │   ├──</span><span class="tree-dir">codex/</span></div>
-    <div class="tree-line"><span class="tree-structure">    │   ├──</span><span class="tree-dir">pi/</span></div>
-    <div class="tree-line"><span class="tree-structure">    │   └──</span><span class="tree-dir">…</span></div>
+    <div class="tree-line"><span class="tree-structure">    ├──</span><span class="tree-dir">adapters/</span><span class="tree-annotation ann-default">← per-agent bindings · lifecycle + activation (rules) + sensors</span></div>
+    <div class="tree-line"><span class="tree-structure">    │   └──</span><span class="tree-dir">claude-code · cursor · aider · github-copilot · codex · cline · continue · goose · pi · _generic</span></div>
     <div class="tree-line"><span class="tree-structure">    │</span></div>
-    <div class="tree-line"><span class="tree-structure">    ├──</span><span class="tree-dir">learning/</span><span class="tree-annotation ann-default">← Learning flywheel staging</span></div>
-    <div class="tree-line"><span class="tree-structure">    │   ├──</span><span class="tree-dir">inbox/</span></div>
-    <div class="tree-line"><span class="tree-structure">    │   ├──</span><span class="tree-dir">promoted/</span></div>
-    <div class="tree-line"><span class="tree-structure">    │   └──</span><span class="tree-dir">rejected/</span></div>
+    <div class="tree-line"><span class="tree-structure">    ├──</span><span class="tree-dir">learning/</span><span class="tree-annotation ann-default">← Learning flywheel staging · inbox / promoted / rejected</span></div>
     <div class="tree-line"><span class="tree-structure">    │</span></div>
     <div class="tree-line"><span class="tree-structure">    └──</span><span class="tree-dir">archive/</span><span class="tree-annotation ann-default">← Pruning flywheel destination</span></div>
+    <div class="tree-line"><span class="tree-structure"></span></div>
+    <div class="tree-line"><span class="tree-structure">    </span><span class="tree-annotation ann-default">+ opt-in content for selected --architecture and --compliance labels lands directly under principles/.</span></div>
 
   </div>
 </section>
@@ -1250,10 +1304,13 @@
 <section>
   <div class="section-label">Updating</div>
   <div class="definition">
-    <p>The corpus is yours after install — keystone is not a runtime dependency. To refresh the corpus from a newer keystone release:</p>
+    <p>The corpus is yours after install — keystone is not a runtime dependency. To refresh from a newer keystone release:</p>
   </div>
 <pre class="code"><span class="prompt">$</span> brew upgrade keystone        <span class="comment"># or re-run the curl bootstrap</span>
-<span class="prompt">$</span> keystone init --force        <span class="comment"># overwrites harness/, skips your edits to CLAUDE.md etc.</span></pre>
+<span class="prompt">$</span> keystone init --force        <span class="comment"># overwrites harness/, merges menu files additively</span></pre>
+  <p style="font-size: 0.85rem; color: var(--muted); line-height: 1.7; margin-top: 12px;">
+    <strong style="color: var(--text);">Menu files merge additively.</strong> If your project already has a <code style="font-family: var(--mono); font-size: 0.78rem; color: var(--accent); background: var(--surface2); padding: 1px 6px; border-radius: 2px;">CLAUDE.md</code>, <code style="font-family: var(--mono); font-size: 0.78rem; color: var(--accent); background: var(--surface2); padding: 1px 6px; border-radius: 2px;">CONVENTIONS.md</code>, <code style="font-family: var(--mono); font-size: 0.78rem; color: var(--accent); background: var(--surface2); padding: 1px 6px; border-radius: 2px;">.continuerules</code>, <code style="font-family: var(--mono); font-size: 0.78rem; color: var(--accent); background: var(--surface2); padding: 1px 6px; border-radius: 2px;">.github/copilot-instructions.md</code>, or other menu file, keystone inserts a concise <code style="font-family: var(--mono); font-size: 0.78rem; color: var(--accent); background: var(--surface2); padding: 1px 6px; border-radius: 2px;">## Keystone harness</code> section under your existing H1, bracketed by <code style="font-family: var(--mono); font-size: 0.78rem; color: var(--accent); background: var(--surface2); padding: 1px 6px; border-radius: 2px;">&lt;!-- keystone:start --&gt;</code> / <code style="font-family: var(--mono); font-size: 0.78rem; color: var(--accent); background: var(--surface2); padding: 1px 6px; border-radius: 2px;">&lt;!-- keystone:end --&gt;</code> markers. Re-running <code style="font-family: var(--mono); font-size: 0.78rem; color: var(--accent); background: var(--surface2); padding: 1px 6px; border-radius: 2px;">init</code> refreshes the section in place — idempotent. Your content outside the markers is never touched.
+  </p>
   <p style="font-size: 0.85rem; color: var(--muted); line-height: 1.7; margin-top: 12px;">
     Or cherry-pick specific layers from the keystone repo: <code style="font-family: var(--mono); font-size: 0.78rem; color: var(--accent); background: var(--surface2); padding: 1px 6px; border-radius: 2px;">cp -R keystone/harness/principles/. your-project/harness/principles/</code>. Principles rarely change; process and adapters change more often.
   </p>
