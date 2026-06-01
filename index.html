@@ -647,6 +647,65 @@
   .ann-5 { color: rgba(167,139,250,0.5); }
   .ann-default { color: var(--muted); opacity: 0.6; }
 
+  /* Terminal hero */
+  .hero-term { margin-bottom: 64px; }
+  .term {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+    box-shadow: 0 24px 48px -28px rgba(0,0,0,.6);
+  }
+  .term-bar {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 12px 16px;
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+  }
+  .term-bar .dot {
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    background: var(--border);
+    flex: none;
+  }
+  .term-bar .tlabel {
+    margin-left: 8px;
+    flex: 1;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    color: var(--muted);
+    letter-spacing: 0.04em;
+  }
+  .term-body {
+    padding: 22px 22px 26px;
+    font-family: var(--mono);
+    font-size: 0.82rem;
+    line-height: 1.95;
+    color: var(--text);
+    overflow-x: auto;
+  }
+  .term-body .pr  { color: var(--accent3); }
+  .term-body .ok  { color: var(--accent); }
+  .term-body .ar  { color: var(--accent2); }
+  .term-body .dim { color: var(--muted); }
+  .term-body .huh {
+    display: block;
+    white-space: pre;
+    line-height: 1.35;
+    margin: 8px 0 10px;
+    color: var(--muted);
+    font-size: 0.78rem;
+  }
+  .term-body .huh .hcur { color: var(--accent3); font-weight: 600; }
+  .term-body .huh .hsel { color: var(--text); }
+
   /* Footer */
   .footer {
     margin-top: 80px;
@@ -676,6 +735,8 @@
     .consumer-row { grid-template-columns: 1fr; }
     .agent-row { grid-template-columns: 1fr; }
     .agent-row span { border-right: none; border-bottom: 1px solid var(--border); }
+    .term-body { font-size: 0.72rem; padding: 16px 14px 18px; }
+    .term-body .huh { font-size: 0.68rem; }
   }
 </style>
 </head>
@@ -690,6 +751,43 @@
     <a href="https://github.com/tacoda/keystone/blob/main/LICENSE">MIT License</a>
   </div>
 </div>
+
+<section class="hero-term">
+  <div class="term">
+    <div class="term-bar">
+      <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+      <span class="tlabel">~/your-app</span>
+    </div>
+    <div class="term-body">
+      <span class="pr">$</span> brew tap tacoda/tap<br>
+      <span class="pr">$</span> brew install tacoda/tap/keystone<br>
+      <span class="ok">●</span> keystone installed<br>
+      <span class="pr">$</span> keystone init<div class="huh" id="huh-form">┌─ Select your agent ────────────────────────────┐
+│ <span class="hcur">›</span> <span class="hsel">claude-code</span>   Anthropic Claude Code          │
+│   codex         OpenAI Codex / Codex CLI       │
+│   cursor        Cursor editor                  │
+└────────────────────────────────────────────────┘</div><span class="ar">▸</span> installing corpus <span class="dim">→</span> harness/<br>
+      <span class="ar">▸</span> installing claude-code target <span class="dim">→</span> CLAUDE.md<br>
+      <span class="ok">✓</span> keystone installed for claude-code.<br>
+      <span class="ar">▶</span> <span class="dim">Next:</span> run the bootstrap action in claude-code.<br>
+      <span class="pr">$</span> claude<br>
+      <span class="dim">&gt;</span> /bootstrap<br>
+      <span class="ar" id="spark">✶</span> <span class="dim">Thinking… (<span id="elapsed">3</span>s · esc to interrupt)</span>
+    </div>
+  </div>
+  <p style="font-size: 0.8rem; color: var(--muted); line-height: 1.7; margin-top: 18px;">
+    Prefer to skip the prompts? Pass every option as a flag and <code style="font-family: var(--mono); font-size: 0.78rem; color: var(--accent); background: var(--surface2); padding: 1px 6px; border-radius: 2px;">init</code> runs non-interactively — handy for CI, dotfiles, and onboarding scripts:
+  </p>
+<pre class="code" style="margin-top: 10px;"><span class="prompt">$</span> keystone init \
+    --agent claude-code \
+    --app-type web-api \
+    --architecture hexagonal,continuous-delivery \
+    --testing tdd,property-based \
+    --compliance soc2</pre>
+  <p style="font-size: 0.78rem; color: var(--muted); font-family: var(--mono); margin-top: 8px; line-height: 1.7;">
+    Multi-select flags take comma-separated values. Run <code style="color: var(--accent);">keystone options</code> for the full catalog of labels per flag.
+  </p>
+</section>
 
 <!-- What it is -->
 <section>
@@ -1319,6 +1417,61 @@
 <div class="footer">
   <p>keystone · MIT · <a href="https://github.com/tacoda/keystone">github.com/tacoda/keystone</a></p>
 </div>
+
+<script>
+(function(){
+  var hf = document.getElementById('huh-form');
+  var sp = document.getElementById('spark');
+  var el = document.getElementById('elapsed');
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if (hf && !reduce) {
+    var forms = [
+      '┌─ Select your agent ────────────────────────────┐\n' +
+      '│ <span class="hcur">›</span> <span class="hsel">claude-code</span>   Anthropic Claude Code          │\n' +
+      '│   codex         OpenAI Codex / Codex CLI       │\n' +
+      '│   cursor        Cursor editor                  │\n' +
+      '└────────────────────────────────────────────────┘',
+
+      '┌─ App type ─────────────────────────────────────┐\n' +
+      '│ <span class="hcur">›</span> <span class="hsel">web-application</span>  Server-rendered / SPA web   │\n' +
+      '│   web-api          HTTP/JSON or gRPC service   │\n' +
+      '│   cli-tool         Command-line tool           │\n' +
+      '└────────────────────────────────────────────────┘',
+
+      '┌─ Architecture · multi-select ──────────────────┐\n' +
+      '│ <span class="hcur">›</span> [•] <span class="hsel">hexagonal</span>       Hexagonal / ports        │\n' +
+      '│   [•] event-driven    Event-driven             │\n' +
+      '│   [ ] microservices   Microservices            │\n' +
+      '└────────────────────────────────────────────────┘',
+
+      '┌─ Testing · multi-select ───────────────────────┐\n' +
+      '│ <span class="hcur">›</span> [•] <span class="hsel">tdd</span>             Test-driven development  │\n' +
+      '│   [•] property-based  Property-based testing   │\n' +
+      '│   [ ] manual-qa       Manual QA                │\n' +
+      '└────────────────────────────────────────────────┘',
+
+      '┌─ Compliance · multi-select ────────────────────┐\n' +
+      '│ <span class="hcur">›</span> [•] <span class="hsel">soc2</span>            SOC 2                    │\n' +
+      '│   [ ] gdpr            GDPR                     │\n' +
+      '│   [ ] hipaa           HIPAA                    │\n' +
+      '└────────────────────────────────────────────────┘'
+    ];
+    var fi = 0;
+    setInterval(function(){ fi = (fi + 1) % forms.length; hf.innerHTML = forms[fi]; }, 2000);
+  }
+
+  if (sp && !reduce) {
+    var sparks = ['✶','✳','✺','✸','✦'], si = 0;
+    setInterval(function(){ si = (si + 1) % sparks.length; sp.textContent = sparks[si]; }, 220);
+  }
+
+  if (el && !reduce) {
+    var t = 3;
+    setInterval(function(){ t = (t + 1) % 60; el.textContent = t; }, 1000);
+  }
+})();
+</script>
 
 </body>
 </html>
