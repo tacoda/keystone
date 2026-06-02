@@ -24,8 +24,9 @@ var categories = []Category{
 	{
 		ID:          "agent",
 		Label:       "Agent",
-		Description: "Which AI coding agent will read this harness.",
+		Description: "Which AI coding agent(s) will read this harness. Multiple allowed.",
 		Required:    true,
+		MultiSelect: true,
 		Values: []OptionValue{
 			{"claude-code", "Anthropic Claude Code (CLI / IDE extensions)"},
 			{"codex", "OpenAI Codex / Codex CLI"},
@@ -52,6 +53,7 @@ var categories = []Category{
 			{"desktop-app", "Native or Electron desktop app"},
 			{"data-pipeline", "Batch / streaming data processing"},
 			{"embedded", "Firmware / embedded device"},
+			{"monorepo", "Monorepo (assumes backend + frontend; bootstrap can refine)"},
 			{"other", "Something else (write it into the profile by hand)"},
 		},
 	},

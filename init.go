@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 func runInit(args []string, assets embed.FS) error {
@@ -48,9 +49,11 @@ func runInit(args []string, assets embed.FS) error {
 		fmt.Fprintf(os.Stderr, "! non-interactive mode: optional categories left unset\n")
 	}
 
-	agent := flags.selections["agent"][0]
-	if !isSupportedAgent(agent) {
-		return fmt.Errorf("unknown agent %q (supported: %v)", agent, supportedAgents())
+	agents := flags.selections["agent"]
+	for _, a := range agents {
+		if !isSupportedAgent(a) {
+			return fmt.Errorf("unknown agent %q (supported: %v)", a, supportedAgents())
+		}
 	}
 
 	preflight(absDir)
@@ -70,17 +73,9 @@ func runInit(args []string, assets embed.FS) error {
 		return fmt.Errorf("copy harness: %w", err)
 	}
 
-	targetRoot := filepath.Join("targets", agentTargetDir(agent))
-	if _, err := assets.Open(targetRoot); err != nil {
-		fmt.Fprintf(os.Stderr, "! no target bundle for %s; corpus installed, configure activation manually\n", agent)
-	} else {
-		fmt.Fprintf(os.Stdout, "▸ installing %s target\n", agent)
-		menuPath, err := installMenuFile(assets, agent, absDir)
-		if err != nil {
-			return fmt.Errorf("install menu file: %w", err)
-		}
-		if err := copyTree(assets, targetRoot, absDir, skipIfExists, menuPath); err != nil {
-			return fmt.Errorf("copy target: %w", err)
+	for _, agent := range agents {
+		if err := installAgentTarget(assets, agent, absDir); err != nil {
+			return err
 		}
 	}
 
@@ -92,8 +87,31 @@ func runInit(args []string, assets embed.FS) error {
 		return fmt.Errorf("write install profile: %w", err)
 	}
 
-	printAgentWarnings(agent)
-	printNextSteps(agent)
+	for _, agent := range agents {
+		printAgentWarnings(agent)
+	}
+	printNextSteps(agents)
+	return nil
+}
+
+// installAgentTarget copies one agent's target bundle into destDir, merging its
+// menu file. Existing target files are left alone (skipIfExists). If the agent
+// has no shipped target bundle, prints a notice and returns nil — callers treat
+// this as a soft success since the corpus alone is still useful.
+func installAgentTarget(assets embed.FS, agent, destDir string) error {
+	targetRoot := filepath.Join("targets", agentTargetDir(agent))
+	if _, err := assets.Open(targetRoot); err != nil {
+		fmt.Fprintf(os.Stderr, "! no target bundle for %s; configure activation manually\n", agent)
+		return nil
+	}
+	fmt.Fprintf(os.Stdout, "▸ installing %s target\n", agent)
+	menuPath, err := installMenuFile(assets, agent, destDir)
+	if err != nil {
+		return fmt.Errorf("install menu file for %s: %w", agent, err)
+	}
+	if err := copyTree(assets, targetRoot, destDir, skipIfExists, menuPath); err != nil {
+		return fmt.Errorf("copy target for %s: %w", agent, err)
+	}
 	return nil
 }
 
@@ -135,22 +153,39 @@ func preflight(dir string) {
 	fmt.Fprintf(os.Stderr, "! no CI config detected; the release phase assumes a CI pipeline\n")
 }
 
-func printNextSteps(agent string) {
-	fmt.Fprintf(os.Stdout, `
-✓ keystone installed for %s.
+func printNextSteps(agents []string) {
+	list := strings.Join(agents, ", ")
 
-  ▶ Next: run the bootstrap action in %s.
+	var bootstrapIn, lifecycle string
+	if len(agents) == 1 {
+		bootstrapIn = fmt.Sprintf("in %s", agents[0])
+		lifecycle = fmt.Sprintf("     See harness/adapters/%s/lifecycle.md for how to invoke it.\n",
+			agentTargetDir(agents[0]))
+	} else {
+		bootstrapIn = "in any one of the agents above (the harness edits are agent-agnostic)"
+		var b strings.Builder
+		b.WriteString("     See:\n")
+		for _, a := range agents {
+			fmt.Fprintf(&b, "       harness/adapters/%s/lifecycle.md\n", agentTargetDir(a))
+		}
+		b.WriteString("     for how to invoke it in each agent.\n")
+		lifecycle = b.String()
+	}
+
+	fmt.Fprintf(os.Stdout, `
+✓ harness installed for %s.
+
+  ▶ Next: run the bootstrap action %s.
 
      Bootstrap reads your codebase and seeds harness/corpus/state/CODEBASE_STATE.md,
      harness/corpus/idioms/<your-stack>/, and the paired harness/guides/idioms/<your-stack>/
      so the harness reflects your project. It also confirms the sensor commands.
-     See harness/adapters/%s/lifecycle.md for how to invoke it.
-
+%s
 Also:
 
   • Read harness/README.md for an overview of the four components
     (corpus, guides, sensors, flywheels).
   • Review harness/corpus/state/INSTALL_PROFILE.md and adjust if needed.
   • Commit harness/ and any agent-specific files this installer created.
-`, agent, agent, agentTargetDir(agent))
+`, list, bootstrapIn, lifecycle)
 }

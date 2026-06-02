@@ -23,6 +23,11 @@ func main() {
 			fmt.Fprintf(os.Stderr, "keystone: %v\n", err)
 			os.Exit(1)
 		}
+	case "add-target":
+		if err := runAddTarget(os.Args[2:], assets); err != nil {
+			fmt.Fprintf(os.Stderr, "keystone: %v\n", err)
+			os.Exit(1)
+		}
 	case "options":
 		printOptionLabels(os.Stdout)
 	case "version", "--version", "-v":
@@ -41,15 +46,17 @@ func printUsage(w *os.File) {
 
 Usage:
   keystone init [<dir>] [flags]
+  keystone add-target <agent>[,<agent>...] [<dir>]
   keystone options
   keystone version
   keystone help
 
 Commands:
-  init      Scaffold harness/ and the agent menu file(s) into <dir> (default: .)
-  options   Print the allowed labels for every option flag
-  version   Print the binary version
-  help      Print this message
+  init         Scaffold harness/ and the agent menu file(s) into <dir> (default: .)
+  add-target   Install another agent target bundle into an existing harness
+  options      Print the allowed labels for every option flag
+  version      Print the binary version
+  help         Print this message
 
 Behavior:
   When run in a TTY with options unset, keystone prompts interactively

@@ -2,6 +2,20 @@
 
 All notable changes to keystone are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); the project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and is pre-1.0 (minor versions may include breaking changes).
 
+## [0.3.1] — 2026-06-02
+
+A small install-flow polish. Adds support for projects that use more than one coding agent at a time, smooths over the success message, and introduces a way to add an agent to an existing install without re-running `init`.
+
+### Added
+
+- **`agent` is now multi-select.** Teams using multiple agents (e.g. Claude Code alongside Cursor) can install every target bundle in one pass — either via the interactive prompt or `--agent claude-code,cursor` on the CLI. Each agent's menu file and target bundle are installed; capability-gap warnings print per agent.
+- **`monorepo` option for `--app-type`.** Assumes backend + frontend; the **bootstrap** action can refine if the actual structure differs.
+- **`keystone add-target <agent>[,<agent>...] [<dir>]` subcommand.** Installs an additional agent's target bundle into an existing harness and merges the new agent(s) into `harness/corpus/state/INSTALL_PROFILE.md`. Errors out if any requested agent is already recorded — remove it first to re-add.
+
+### Fixed
+
+- **Post-install success message** now reads `✓ harness installed for ...` (was `keystone installed`). The binary-install line printed by `install.sh` is unchanged — that one is correctly about the binary itself.
+
 ## [0.3.0] — 2026-06-02
 
 A model overhaul. The harness now has **four components** instead of "the corpus plus three roles":
