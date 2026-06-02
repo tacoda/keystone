@@ -17,7 +17,7 @@ Plus [`adapters/<agent>/`](adapters/README.md) — per-agent bindings that lift 
 
 The core distinction in the harness:
 
-- **Guides are rules.** IRON LAWs (non-negotiable) and GOLDEN RULES (strongly preferred). **Always loaded** so the agent is always under their constraint. Adapters lift these into the agent's rules surface; the drift sensor checks for violations.
+- **Guides are rules.** Three tiers: regular **RULES** (the default), **GOLDEN RULES** (aspirational but explicit; stronger than regular), and **IRON LAWS** (non-negotiable; rare by design). **Always loaded** so the agent is always under their constraint. Adapters lift these into the agent's rules surface; the drift sensor checks for violations.
 - **Corpus is information.** The full reasoning, the literature, the anti-patterns, the references. **Loaded on demand** — only when the agent needs to look up *why* a rule exists, or when the rules don't cover the situation and the agent needs background to reason from.
 
 For each principle, idiom, or domain concern, the corpus file and the guide file are paired — the corpus explains, the guide commands. Process is mostly rules, so it lives entirely under `guides/process/`. State is mostly information, so it lives entirely under `corpus/state/`.
@@ -101,8 +101,10 @@ Agents without a notion of autonomy levels collapse to a single mode; the phases
 
 Carried across every layer:
 
-- **IRON LAW** — non-negotiable. `## IRON LAW` heading. Lives in a `guides/` file.
-- **GOLDEN RULES** — ideals; deviation requires reasoning. `## GOLDEN RULES` heading. Lives in a `guides/` file.
+- **RULES** — regular rules. The default tier; most directives land here. `## RULES` heading. Lives in a `guides/` file.
+- **GOLDEN RULES** — strong, explicit standards. Stronger than regular rules; deviation requires reasoning. May be concrete ("inject dependencies via the constructor; do not new them up inside other classes") or aspirational ("controllers should be thin; delegate to services"). `## GOLDEN RULES` heading. Lives in a `guides/` file.
+- **IRON LAW** — non-negotiable. Violation causes real damage (incidents, security, lost work). Rare by design. `## IRON LAW` heading. Lives in a `guides/` file.
+- The special tiers (IRON LAW, GOLDEN RULE) are opt-in during **synthesize** — confirmed by the user, not auto-applied. Default new rules to `## RULES`; keeping the special labels rare is what keeps them load-bearing.
 - Corpus files end with a forward-link to the paired guide file (when one exists).
 - Guide files end with a `Traces to:` footer pointing at the corpus file (and, for idioms, the principle they instantiate).
 - Files ship with real content. Placeholders are filled in by the **bootstrap** action when the harness is first installed.
@@ -113,9 +115,9 @@ Carried across every layer:
 1. Agent encounters a gap → writes a candidate to `learning/inbox/`.
 2. Human gates by confidence.
 3. **synthesize** classifies each candidate as **rule** or **information** and promotes it:
-   - **Rule** (an IRON LAW or GOLDEN RULE) → the right `guides/<layer>/<name>.md`. Optionally a paired corpus file is added or updated with the *why*.
+   - **Rule** → the right `guides/<layer>/<name>.md`. Default tier is regular **RULES**; synthesize may *suggest* promotion to GOLDEN RULE or IRON LAW, but the user confirms before the rule lands in a special tier. Optionally a paired corpus file is added or updated with the *why*.
    - **Information** (supplemental context, ideals, design rationale, history) → the right `corpus/<layer>/<name>.md`. No guide change.
-4. The classifier asks: *is this a constraint the agent must follow, or is this background that helps the agent reason?* Constraints land in guides; background lands in corpus.
+4. The classifier asks: *is this a directive the agent must follow, or is this background that helps the agent reason?* Directives land in guides; background lands in corpus.
 
 **Pruning — subtractive:** asymmetric. Guides are pruned often; corpus is pruned rarely.
 

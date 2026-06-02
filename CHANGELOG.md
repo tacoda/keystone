@@ -2,6 +2,27 @@
 
 All notable changes to keystone are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); the project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and is pre-1.0 (minor versions may include breaking changes).
 
+## [0.4.1] — 2026-06-02
+
+Introduces a third rule tier — regular **RULES** — as the default for any directive landing in `harness/guides/`. **IRON LAW** and **GOLDEN RULE** become opt-in promotions confirmed during **synthesize**, keeping the special labels rare and load-bearing.
+
+### Added
+
+- **`## RULES` section** in the guide file format. The default tier; most directives land here. `## IRON LAW(S)` and `## GOLDEN RULES` remain available but are now optional sections, omitted when nothing in a file qualifies.
+- **Rule-tier table in `harness/learning/README.md`** documenting the three tiers, when each is appropriate, and the synthesize prompt flow that requires user confirmation before a candidate lands under a special heading.
+
+### Changed
+
+- **Drift sensor severity** now distinguishes three tiers. IRON LAW violations fail the sensor; GOLDEN RULE violations surface as strong warnings; regular RULES violations surface as warnings.
+- **`harness/README.md` "Writing conventions"** describes all three tiers with examples — IRON LAW for non-negotiable damage-on-violation directives, GOLDEN RULE for strong explicit standards (concrete prescriptions or aspirational ideals), regular RULES for everything else.
+- **Synthesize classification** in `harness/learning/README.md` and `harness/README.md` defaults new rules to regular RULES; the user opts in to a special tier when the candidate warrants it.
+
+### Migration from 0.4.0
+
+- **Existing principle guides are unchanged.** The 29 shipped `harness/guides/principles/*.md` files keep their `## IRON LAW` / `## GOLDEN RULES` sections as authored — those designations were deliberate.
+- **Newly synthesized rules** going forward default to a `## RULES` section. Add the section to a guide file the first time a regular rule lands there; existing files with only the special tiers stay as-is until a regular rule joins them.
+- **Custom drift sensor integrations** that previously only inspected IRON LAW headings should be widened to read `## RULES` and treat its findings as warnings.
+
 ## [0.4.0] — 2026-06-02
 
 Namespaces every harness slash command under `keystone:` so they don't collide with project-defined or other-plugin commands. Bootstrap's inferred scope grows to cover frameworks and libraries — and shrinks to drop deployment target, since keystone's workflow ends at the PR.

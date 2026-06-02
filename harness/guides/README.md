@@ -1,6 +1,6 @@
 # Guides
 
-Rules — what the agent must *do* (and not do). IRON LAWs (non-negotiable) and GOLDEN RULES (strongly preferred). Loaded ambient; enforced by the [drift sensor](../sensors/drift.md). Per-agent adapters lift these into the agent's rules surface (`.cursor/rules/*.mdc`, the directive block of `CLAUDE.md`, etc.).
+Rules — what the agent must *do* (and not do). Three tiers: regular **RULES** (the default), **GOLDEN RULES** (aspirational but explicit; stronger than regular), and **IRON LAWS** (non-negotiable; rare by design). Loaded ambient; enforced by the [drift sensor](../sensors/drift.md). Per-agent adapters lift these into the agent's rules surface (`.cursor/rules/*.mdc`, the directive block of `CLAUDE.md`, etc.).
 
 For the full reasoning and references behind each rule, see the paired file in [`../corpus/`](../corpus/README.md).
 
@@ -15,7 +15,7 @@ For the full reasoning and references behind each rule, see the paired file in [
 
 ## File format
 
-Each guide file is short — it carries only the rules, not the reasoning:
+Each guide file is short — it carries only the rules, not the reasoning. Sections appear in order of strength; **only `## RULES` is mandatory**. Omit the special tiers when no rule warrants them — that's the common case.
 
 ```markdown
 # <Topic> — rules
@@ -25,16 +25,22 @@ Loaded ambient; enforced by the drift sensor.
 
 ## IRON LAW(S)
 
-Non-negotiable.
+Non-negotiable. Violation causes real damage. Rare by design — omit this section if nothing here qualifies.
 
 ## GOLDEN RULES
 
-Ideals. Deviation requires reasoning.
+Strong, explicit standards. Stronger than regular rules; deviation requires reasoning. May be concrete prescriptions or aspirational ideals. Omit if nothing here qualifies.
+
+## RULES
+
+Regular rules. The default tier — most directives live here.
 
 ---
 
 Traces to: [`corpus/<layer>/<name>.md`](../../corpus/<layer>/<name>.md).
 ```
+
+**Tier discipline.** The special tiers (IRON LAW, GOLDEN RULE) derive their force from being rare. Default new rules to `## RULES`; promote upward only when the user confirms during **synthesize**.
 
 Process files are exceptions — they are entirely prescriptive (phase-by-phase rules) and do not pair with a corpus file. They live directly under `process/`.
 
