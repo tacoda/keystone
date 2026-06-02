@@ -74,7 +74,7 @@ Flags for init:
   --compliance <a,...>        Compliance scope — comma-separated.
 
 Categories the bootstrap action infers from the codebase (not asked here):
-language, database, ci-platform, deployment target.
+language, frameworks, libraries, database, ci-platform.
 `)
 }
 

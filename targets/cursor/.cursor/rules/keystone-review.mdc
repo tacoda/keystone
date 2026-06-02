@@ -4,7 +4,7 @@ description: Review — semantic correctness check; spec adherence + sequential 
 
 # Review
 
-Semantic correctness check. Read `harness/guides/process/review.md`. Runs *after* the `@verify` gate has passed.
+Semantic correctness check. Read `harness/guides/process/review.md`. Runs *after* the `@keystone-verify` gate has passed.
 
 ## Activities
 
@@ -37,4 +37,4 @@ A structured report — three sections (spec / functional / security), each with
 
 ## Gate
 
-No blockers and all AC met → proceed to `@learn` and then commit. Any blocker → back to implementation.
+No blockers and all AC met → proceed to `@keystone-learn` and then commit. Any blocker → back to implementation.

@@ -33,4 +33,4 @@ A draft of the corpus rule this should become, if confirmed.
 
 If nothing in this work was novel — every decision was covered by existing corpus content — skip the write and report "no learnings to capture."
 
-The Learning flywheel doesn't reload until the next `/synthesize` cycle. `/learn` writes to the inbox only.
+The Learning flywheel doesn't reload until the next `/keystone-synthesize` cycle. `/keystone-learn` writes to the inbox only.

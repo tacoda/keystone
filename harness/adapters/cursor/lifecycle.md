@@ -4,18 +4,18 @@ How each abstract lifecycle action is invoked in Cursor.
 
 ## Action → invocation
 
-Cursor's native invocation surface is the chat — there are no slash commands. Lifecycle actions are invoked by **referencing a `.cursor/rules/<action>.mdc` rule** in the chat (typed as `@<action>` or by asking the agent in plain language) and letting the rule's body drive the work.
+Cursor's native invocation surface is the chat — there are no slash commands. Lifecycle actions are invoked by **referencing a `.cursor/rules/keystone-<action>.mdc` rule** in the chat (typed as `@keystone-<action>` or by asking the agent in plain language) and letting the rule's body drive the work. Hyphen, not colon, because cursor's `@<name>` references the rule's filename and colons aren't filesystem-safe everywhere.
 
 | Action | Invocation | Where it lives |
 |---|---|---|
-| **spec** | `@spec` or "start the spec phase for `<task>`" | `.cursor/rules/spec.mdc` |
-| **orient** | `@orient` at task start | `.cursor/rules/orient.mdc` |
-| **check-drift** | `@check-drift` after edits | `.cursor/rules/check-drift.mdc` |
-| **verify** | `@verify` before commit | `.cursor/rules/verify.mdc` |
-| **review** | `@review` after verification gate | `.cursor/rules/review.mdc` |
-| **learn** | `@learn` post-merge | `.cursor/rules/learn.mdc` |
-| **bootstrap** | "Bootstrap the harness" — one-time | reads `harness/guides/process/` directly |
-| **audit** | `@audit` or "audit the corpus" | inline / phase doc |
+| **spec** | `@keystone-spec` or "start the spec phase for `<task>`" | `.cursor/rules/keystone-spec.mdc` |
+| **orient** | `@keystone-orient` at task start | `.cursor/rules/keystone-orient.mdc` |
+| **check-drift** | `@keystone-check-drift` after edits | `.cursor/rules/keystone-check-drift.mdc` |
+| **verify** | `@keystone-verify` before commit | `.cursor/rules/keystone-verify.mdc` |
+| **review** | `@keystone-review` after verification gate | `.cursor/rules/keystone-review.mdc` |
+| **learn** | `@keystone-learn` post-merge | `.cursor/rules/keystone-learn.mdc` |
+| **bootstrap** | "Bootstrap the harness" — one-time; detects stack, frameworks, and libraries | reads `harness/guides/process/` directly |
+| **audit** | `@keystone-audit` or "audit the corpus" | inline / phase doc |
 | **synthesize** | "Synthesize the inbox" | reads `harness/learning/inbox/` |
 | **mode** | Edit `harness/guides/process/modes.md` directly | n/a |
 

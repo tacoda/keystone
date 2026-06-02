@@ -9,7 +9,7 @@ This project uses a **keystone harness**. The harness at [`harness/`](harness/) 
 - [`harness/adapters/claude-code/`](harness/adapters/claude-code/) — Claude Code bindings: slash commands, sub-agents, MCP tracker integration.
 - [`harness/corpus/domain/`](harness/corpus/domain/) and [`harness/guides/domain/`](harness/guides/domain/) — business knowledge and rules for this project.
 
-**Lifecycle actions:** `spec` · `orient` · `check-drift` · `verify` · `review` · `learn` (plus `bootstrap`, `audit`, `synthesize`, `mode`). Invoked via `/<prefix>:<action>` slash commands — see [`harness/adapters/claude-code/lifecycle.md`](harness/adapters/claude-code/lifecycle.md).
+**Lifecycle actions:** `spec` · `orient` · `check-drift` · `verify` · `review` · `learn` (plus `bootstrap`, `audit`, `synthesize`, `mode`). Invoked via `/keystone:<action>` slash commands — see [`harness/adapters/claude-code/lifecycle.md`](harness/adapters/claude-code/lifecycle.md).
 
 **Iron laws** — non-negotiable across every phase:
 

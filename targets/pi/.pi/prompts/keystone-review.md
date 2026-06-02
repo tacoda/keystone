@@ -14,6 +14,6 @@ Pi does not support parallel sub-agents natively. Run the review steps sequentia
 4. **Security review** — read the diff for OWASP-style risks: injection, secrets, auth bypass, unsafe deserialization, broken access control, sensitive data exposure. List findings with severity.
 5. **Combine** — merge the three lists into one severity-sorted table.
 
-If any blocker remains, return to implementation. After fixing, re-run `/verify` (fresh evidence) and then re-run `/review`.
+If any blocker remains, return to implementation. After fixing, re-run `/keystone-verify` (fresh evidence) and then re-run `/keystone-review`.
 
 GOLDEN RULE: do not approve a PR by inspection alone — the acceptance criteria must be verifiable.

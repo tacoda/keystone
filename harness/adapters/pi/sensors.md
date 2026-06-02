@@ -35,4 +35,4 @@ Same IRON LAW as Claude Code: claims need fresh evidence. Each sensor must re-ru
 
 1. The **verify** template surfaces structured output from the failing sensor.
 2. The agent returns to the **implementation** phase. Do not "fix forward" inside verification.
-3. After the fix, re-invoke `/verify`. Each retry is a fresh evidence cycle.
+3. After the fix, re-invoke `/keystone-verify`. Each retry is a fresh evidence cycle.

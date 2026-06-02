@@ -50,7 +50,7 @@ When a sensor fails:
 
 1. The **verify** action surfaces the structured output (linter findings, test failures) from the shell tool result.
 2. The agent returns to the **implementation** phase; do not "fix forward" inside verification.
-3. After the fix, re-invoke `@verify`. Each fix-and-retry is a fresh shell tool call → fresh evidence.
+3. After the fix, re-invoke `@keystone-verify`. Each fix-and-retry is a fresh shell tool call → fresh evidence.
 
 ## Differences from Claude Code
 

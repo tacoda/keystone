@@ -12,7 +12,7 @@ How each abstract lifecycle action is invoked in OpenAI's Codex CLI. Codex reads
 | **verify** | "Run the verify action." Codex executes lint / type-check / test / build / coverage via shell. |
 | **review** | "Run the review action." Sequential (no native sub-agent parallelism). |
 | **learn** | "Capture the learnings from this work." |
-| **bootstrap** | "Bootstrap the harness." One-time, seeds corpus (idioms/<stack>/, state/), paired guides (idioms/<stack>/), and confirms sensor commands. |
+| **bootstrap** | "Bootstrap the harness." One-time; detects stack, frameworks, and libraries; seeds corpus (idioms/<stack>/, state/), paired guides (idioms/<stack>/), and confirms sensor commands. |
 | **audit** | "Audit the corpus." |
 | **synthesize** | "Synthesize the inbox." |
 | **mode** | "Set pacing mode to `<paired\|solo\|autopilot>`." Edit `harness/guides/process/modes.md` directly. |

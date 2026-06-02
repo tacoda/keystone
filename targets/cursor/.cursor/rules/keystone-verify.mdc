@@ -16,7 +16,7 @@ Read the commands from `harness/corpus/state/CODEBASE_STATE.md`. For each define
 | type-check | → type_check | ✓ if configured |
 | test | → test | ✓ |
 | build | → build | ✓ if configured |
-| drift | inline (see `@check-drift`) | ✓ |
+| drift | inline (see `@keystone-check-drift`) | ✓ |
 | commit-message | inline (inspect proposed message) | at commit time |
 
 ## Reporting
@@ -33,8 +33,8 @@ Do not summarize without showing the underlying tool output. The IRON LAW depend
 
 1. Surface the structured output (linter findings, test failures).
 2. **Return to the implementation phase.** Do not "fix forward" inside verify.
-3. After the fix, re-invoke `@verify`. Each fix-and-retry is a fresh turn — fresh evidence.
+3. After the fix, re-invoke `@keystone-verify`. Each fix-and-retry is a fresh turn — fresh evidence.
 
 ## Gate
 
-Every sensor green this turn → proceed to `@review`. Any sensor red → back to implementation.
+Every sensor green this turn → proceed to `@keystone-review`. Any sensor red → back to implementation.

@@ -70,7 +70,7 @@ Invoked by the agent inside process phases. One sentence per action — the corr
 
 Invoked by the user:
 
-- **bootstrap** — initial audit of a fresh install. Detects stack, seeds `corpus/idioms/<stack>/` and `guides/idioms/<stack>/`, scaffolds `corpus/domain/product-shape.md`, initializes `corpus/state/`, and confirms sensor commands.
+- **bootstrap** — initial audit of a fresh install. Detects stack, frameworks, and libraries; seeds `corpus/idioms/<stack>/` and `guides/idioms/<stack>/`; scaffolds `corpus/domain/product-shape.md`; initializes `corpus/state/` (including the Frameworks & libraries table); and confirms sensor commands.
 - **audit** — full dual audit (Learning + Pruning flywheels).
 - **synthesize** — promote inbox items into the right corpus and/or guide.
 - **mode** — set pacing mode.

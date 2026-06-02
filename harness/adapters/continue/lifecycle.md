@@ -8,15 +8,15 @@ Continue reads `.continuerules` (legacy) and `config.yaml` / `config.json` (curr
 
 | Action | Invocation | What happens |
 |---|---|---|
-| **spec** | `/spec <task>` (custom slash) or "Start the spec phase for `<task>`." | Continue reads `harness/guides/process/spec.md` and follows its activities. Tracker fetch via MCP server (if configured) or `cmd` step (`gh issue view`). |
-| **orient** | `/orient` or "Orient for work in `<region>`." | Continue reads `harness/corpus/state/CODEBASE_STATE.md` and the matching idioms; sketches a plan. |
-| **check-drift** | `/check-drift` or "Check the diff for drift." | Continue compares `git diff` (via `cmd` step) against loaded guide rules. |
-| **verify** | `/verify` or "Run the verify action." | Continue invokes sensors via `cmd` steps; reports results. |
-| **review** | `/review` or "Run the review action." | Continue walks the diff against spec AC, then runs functional and security review concerns **sequentially** (no sub-agent parallelism). |
-| **learn** | `/learn` or "Capture learnings from this work." | Continue writes a candidate to `harness/learning/inbox/<timestamp>-<slug>.md`. |
-| **bootstrap** | `/bootstrap` or "Bootstrap the harness." | One-time; seeds corpus (idioms/<stack>/, state/), paired guides (idioms/<stack>/), and confirms sensor commands. |
-| **audit** | `/audit` or "Audit the harness." | Full Learning + Pruning flywheel pass. |
-| **synthesize** | `/synthesize` or "Synthesize the inbox." | Promotes inbox items into the right corpus and/or guide. |
+| **spec** | `/keystone:spec <task>` (custom slash) or "Start the spec phase for `<task>`." | Continue reads `harness/guides/process/spec.md` and follows its activities. Tracker fetch via MCP server (if configured) or `cmd` step (`gh issue view`). |
+| **orient** | `/keystone:orient` or "Orient for work in `<region>`." | Continue reads `harness/corpus/state/CODEBASE_STATE.md` and the matching idioms; sketches a plan. |
+| **check-drift** | `/keystone:check-drift` or "Check the diff for drift." | Continue compares `git diff` (via `cmd` step) against loaded guide rules. |
+| **verify** | `/keystone:verify` or "Run the verify action." | Continue invokes sensors via `cmd` steps; reports results. |
+| **review** | `/keystone:review` or "Run the review action." | Continue walks the diff against spec AC, then runs functional and security review concerns **sequentially** (no sub-agent parallelism). |
+| **learn** | `/keystone:learn` or "Capture learnings from this work." | Continue writes a candidate to `harness/learning/inbox/<timestamp>-<slug>.md`. |
+| **bootstrap** | `/keystone:bootstrap` or "Bootstrap the harness." | One-time; detects stack, frameworks, and libraries; seeds corpus (idioms/<stack>/, state/), paired guides (idioms/<stack>/), and confirms sensor commands. |
+| **audit** | `/keystone:audit` or "Audit the harness." | Full Learning + Pruning flywheel pass. |
+| **synthesize** | `/keystone:synthesize` or "Synthesize the inbox." | Promotes inbox items into the right corpus and/or guide. |
 | **mode** | Edit `harness/guides/process/modes.md` directly. | Continue has no autonomy levers; the file is informational. |
 
 ## Suggested `config.yaml` for slash commands
@@ -27,50 +27,50 @@ version: 0.3.0
 schema: v1
 
 prompts:
-  - name: spec
+  - name: "keystone:spec"
     description: "Spec phase — capture acceptance criteria"
     prompt: |
       Read harness/guides/process/spec.md and run the spec action
       for: {{{ input }}}
-  - name: orient
+  - name: "keystone:orient"
     description: "Planning phase — orient on touched region"
     prompt: |
       Read harness/guides/process/planning.md. Orient for: {{{ input }}}
-  - name: check-drift
+  - name: "keystone:check-drift"
     description: "Compare current diff against loaded guides"
     prompt: |
       Read harness/sensors/drift.md and run the check-drift action
       on the current diff.
-  - name: verify
+  - name: "keystone:verify"
     description: "Run every sensor against the current change"
     prompt: |
       Read harness/guides/process/verification.md and run the verify
       action. Sensor commands live in harness/corpus/state/CODEBASE_STATE.md.
-  - name: review
+  - name: "keystone:review"
     description: "Walk spec AC + run review concerns over the diff"
     prompt: |
       Read harness/guides/process/review.md and run the review action.
-  - name: learn
+  - name: "keystone:learn"
     description: "Capture a learning candidate"
     prompt: |
       Read harness/learning/README.md. Write a candidate to
       harness/learning/inbox/<timestamp>-<slug>.md classifying it
       as rule (→ guides) or information (→ corpus).
-  - name: bootstrap
+  - name: "keystone:bootstrap"
     description: "One-time bootstrap"
     prompt: |
       Read harness/guides/process/README.md and run the bootstrap action.
-  - name: audit
+  - name: "keystone:audit"
     description: "Audit the harness (Learning + Pruning flywheels)"
     prompt: |
       Read harness/archive/README.md and run the audit action.
-  - name: synthesize
+  - name: "keystone:synthesize"
     description: "Promote inbox items into guides and/or corpus"
     prompt: |
       Read harness/learning/README.md and run the synthesize action.
 ```
 
-Continue picks these up as `/spec`, `/orient`, etc., and they appear in the slash-command picker.
+Continue picks these up as `/keystone:spec`, `/keystone:orient`, etc., and they appear in the slash-command picker.
 
 ## Context providers
 

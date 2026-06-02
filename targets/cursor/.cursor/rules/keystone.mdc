@@ -25,13 +25,13 @@ Cursor-specific bindings live in `harness/adapters/cursor/`. Before starting wor
 
 ## Lifecycle
 
-Each phase has a `.mdc` rule. Invoke by mentioning the action (e.g. `@orient`, `@verify`) or by asking the assistant to "run the X action."
+Each phase has a `.mdc` rule. Invoke by mentioning the action (e.g. `@keystone-orient`, `@keystone-verify`) or by asking the assistant to "run the X action."
 
 | Action | Rule | When |
 |---|---|---|
-| spec | `@spec` | Task entry, acceptance criteria |
-| orient | `@orient` | Plan + load idioms for touched region |
-| check-drift | `@check-drift` | After edits, before verify |
-| verify | `@verify` | Sensors gate, pre-commit |
-| review | `@review` | Semantic check, post-verify |
-| learn | `@learn` | Post-merge, capture insights |
+| spec | `@keystone-spec` | Task entry, acceptance criteria |
+| orient | `@keystone-orient` | Plan + load idioms for touched region |
+| check-drift | `@keystone-check-drift` | After edits, before verify |
+| verify | `@keystone-verify` | Sensors gate, pre-commit |
+| review | `@keystone-review` | Semantic check, post-verify |
+| learn | `@keystone-learn` | Post-merge, capture insights |

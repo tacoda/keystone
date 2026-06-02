@@ -6,18 +6,18 @@ How each abstract lifecycle action is invoked in Claude Code.
 
 | Action | Invocation | Notes |
 |---|---|---|
-| **spec** | `/<prefix>:spec` slash command | Fetches tracker card via Atlassian / Linear / GitHub MCP server if a card ID is provided. |
-| **orient** | `/<prefix>:orient` slash command | Reads `harness/corpus/state/CODEBASE_STATE.md`, lazy-loads matching idioms for the touched region. |
-| **check-drift** | `/<prefix>:check-drift` slash command | Runs the drift sensor on the current diff. |
-| **verify** | `/<prefix>:verify` slash command | Runs lint, type-check, test, build, drift, commit-message sensors via shell. |
-| **review** | `/<prefix>:review` slash command | Spawns `review-functional` and `review-security` sub-agents in parallel on the diff. |
-| **learn** | `/<prefix>:learn` slash command | Writes a candidate to `harness/learning/inbox/<timestamp>-<slug>.md`. |
-| **bootstrap** | `/<prefix>:bootstrap` slash command | One-time initial scaffold. Detects stack, seeds corpus (idioms/<stack>/, state/), paired guides (idioms/<stack>/), and confirms sensor commands. |
-| **audit** | `/<prefix>:audit` slash command | Full dual-flywheel audit (Learning + Pruning). |
-| **synthesize** | `/<prefix>:synthesize` slash command | Promotes inbox items into the right corpus layer. |
-| **mode** | `/<prefix>:mode <paired\|solo\|autopilot>` | Updates `harness/guides/process/modes.md` in place. |
+| **spec** | `/keystone:spec` slash command | Fetches tracker card via Atlassian / Linear / GitHub MCP server if a card ID is provided. |
+| **orient** | `/keystone:orient` slash command | Reads `harness/corpus/state/CODEBASE_STATE.md`, lazy-loads matching idioms for the touched region. |
+| **check-drift** | `/keystone:check-drift` slash command | Runs the drift sensor on the current diff. |
+| **verify** | `/keystone:verify` slash command | Runs lint, type-check, test, build, drift, commit-message sensors via shell. |
+| **review** | `/keystone:review` slash command | Spawns `review-functional` and `review-security` sub-agents in parallel on the diff. |
+| **learn** | `/keystone:learn` slash command | Writes a candidate to `harness/learning/inbox/<timestamp>-<slug>.md`. |
+| **bootstrap** | `/keystone:bootstrap` slash command | One-time initial scaffold. Detects stack, frameworks, and libraries; seeds corpus (idioms/<stack>/, state/), paired guides (idioms/<stack>/), and confirms sensor commands. |
+| **audit** | `/keystone:audit` slash command | Full dual-flywheel audit (Learning + Pruning). |
+| **synthesize** | `/keystone:synthesize` slash command | Promotes inbox items into the right corpus layer. |
+| **mode** | `/keystone:mode <paired\|solo\|autopilot>` | Updates `harness/guides/process/modes.md` in place. |
 
-`<prefix>` is the project's chosen slash-command namespace. If the corpus was installed via a Claude Code plugin, the prefix is the plugin name; if installed directly into the project, the user picks a short prefix (typical: `harness`, `kit`, or the project's short name).
+`keystone:` is the slash-command namespace. The shipped commands live under that prefix so they don't collide with project-defined or other-plugin commands.
 
 ## Where commands live
 

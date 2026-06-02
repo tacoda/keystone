@@ -81,7 +81,7 @@ After a flywheel write that touched any `harness/guides/` file, start a new chat
 
 - **`corpus/domain/`** — relevant at task start; the orient action's first read after state.
 - **`corpus/state/CODEBASE_STATE.md`** — loaded by the **orient** action (via `@file harness/corpus/state/CODEBASE_STATE.md` or model's file-read).
-- **`guides/process/<phase>.md`** — loaded when the agent enters that phase. The harness's slash commands do this explicitly (`/spec` reads `spec.md`).
+- **`guides/process/<phase>.md`** — loaded when the agent enters that phase. The harness's slash commands do this explicitly (`/keystone:spec` reads `spec.md`).
 - **`guides/<layer>/<name>.md`** — auto-loaded via the `folder` context provider on `harness/guides/`.
 
 ## Capability gaps

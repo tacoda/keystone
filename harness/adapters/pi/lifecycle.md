@@ -4,20 +4,20 @@ How each abstract lifecycle action is invoked in pi.dev. pi has rich extensibili
 
 ## Action → invocation
 
-Pi's slash commands come from **prompt templates** (a `.md` file in `.pi/prompts/` becomes `/<filename>`) or **skills** (a `SKILL.md` in `.pi/skills/<name>/` becomes `/skill:<name>`). Keystone uses prompt templates for lifecycle actions because they're lighter-weight than skills.
+Pi's slash commands come from **prompt templates** (a `.md` file in `.pi/prompts/` becomes `/<filename>`) or **skills** (a `SKILL.md` in `.pi/skills/<name>/` becomes `/skill:<name>`). Keystone uses prompt templates for lifecycle actions because they're lighter-weight than skills. The filename drives the command name, so the harness ships `keystone-<action>.md` prompt files — pi exposes them as `/keystone-<action>` (hyphen, not colon, because colons aren't filesystem-safe everywhere).
 
 | Action | Invocation | File |
 |---|---|---|
-| **spec** | `/spec [<tracker-card-id>]` | `.pi/prompts/spec.md` |
-| **orient** | `/orient` | `.pi/prompts/orient.md` |
-| **check-drift** | `/check-drift` | `.pi/prompts/check-drift.md` |
-| **verify** | `/verify` | `.pi/prompts/verify.md` |
-| **review** | `/review` | `.pi/prompts/review.md` |
-| **learn** | `/learn` | `.pi/prompts/learn.md` |
-| **bootstrap** | `/bootstrap` | `.pi/prompts/bootstrap.md` (one-time) |
-| **audit** | `/audit` | `.pi/prompts/audit.md` |
-| **synthesize** | `/synthesize` | `.pi/prompts/synthesize.md` |
-| **mode** | `/mode <paired\|solo\|autopilot>` | `.pi/prompts/mode.md` |
+| **spec** | `/keystone-spec [<tracker-card-id>]` | `.pi/prompts/keystone-spec.md` |
+| **orient** | `/keystone-orient` | `.pi/prompts/keystone-orient.md` |
+| **check-drift** | `/keystone-check-drift` | `.pi/prompts/keystone-check-drift.md` |
+| **verify** | `/keystone-verify` | `.pi/prompts/keystone-verify.md` |
+| **review** | `/keystone-review` | `.pi/prompts/keystone-review.md` |
+| **learn** | `/keystone-learn` | `.pi/prompts/keystone-learn.md` |
+| **bootstrap** | `/keystone-bootstrap` | `.pi/prompts/keystone-bootstrap.md` (one-time) |
+| **audit** | `/keystone-audit` | `.pi/prompts/keystone-audit.md` |
+| **synthesize** | `/keystone-synthesize` | `.pi/prompts/keystone-synthesize.md` |
+| **mode** | `/keystone-mode <paired\|solo\|autopilot>` | `.pi/prompts/keystone-mode.md` |
 
 All prompt templates live in `targets/pi/.pi/prompts/` in this repo. The installer drops them into the consumer's `.pi/prompts/`.
 

@@ -2,6 +2,33 @@
 
 All notable changes to keystone are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); the project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and is pre-1.0 (minor versions may include breaking changes).
 
+## [0.4.0] — 2026-06-02
+
+Namespaces every harness slash command under `keystone:` so they don't collide with project-defined or other-plugin commands. Bootstrap's inferred scope grows to cover frameworks and libraries — and shrinks to drop deployment target, since keystone's workflow ends at the PR.
+
+### Added
+
+- **Slash-command namespace.** Claude Code and Continue invoke lifecycle actions as `/keystone:spec`, `/keystone:verify`, etc. Pi and Cursor use `/keystone-spec` and `@keystone-spec` (hyphen because those agents bind command name to filename, and colons aren't filesystem-safe everywhere). Goose already used `keystone-<action>` recipe names; Cline already used `Keystone: <action>` workflow names — both unchanged. Natural-language adapters (aider, codex, github-copilot) are unaffected.
+- **Frameworks & libraries inference.** `harness/corpus/state/CODEBASE_STATE.md` now ships a `Frameworks & libraries` table. The **bootstrap** action populates it from manifests (`package.json`, `composer.json`, `Gemfile`, `pyproject.toml`, `go.mod`, `Cargo.toml`, etc.), limited to dependencies that shape how code is written — routers, ORMs, validation, HTTP clients, UI kits, test frameworks.
+
+### Changed
+
+- **Rule and prompt filenames** in `targets/cursor/.cursor/rules/` and `targets/pi/.pi/prompts/` are prefixed with `keystone-` (e.g. `keystone-spec.mdc`, `keystone-verify.md`). Cross-references inside those files updated to match.
+- **Bootstrap action description** updated in `harness/README.md`, every `harness/adapters/<agent>/lifecycle.md`, and the keystone CLI help to name frameworks and libraries explicitly.
+
+### Removed
+
+- **`deployment target` dropped from bootstrap's inferred scope.** Keystone's workflow ends at "PR up for review" — humans merge and deploy. The CLI help and bootstrap-action docs no longer claim this category.
+
+### Migration from 0.3.x
+
+- **Slash commands have new names.** Update muscle memory:
+  - Claude Code / Continue: `/spec` → `/keystone:spec`, `/verify` → `/keystone:verify`, etc.
+  - Pi: `/spec` → `/keystone-spec`, `/verify` → `/keystone-verify`, etc.
+  - Cursor: `@spec` → `@keystone-spec`, `@verify` → `@keystone-verify`, etc.
+- **Existing pi and cursor installs:** rename rule/prompt files in your repo to the new `keystone-` prefix (`git mv` keeps history) and update any cross-references.
+- **Existing `harness/corpus/state/CODEBASE_STATE.md`:** add a `Frameworks & libraries` section (or let the next `bootstrap` run do it).
+
 ## [0.3.1] — 2026-06-02
 
 A small install-flow polish. Adds support for projects that use more than one coding agent at a time, smooths over the success message, and introduces a way to add an agent to an existing install without re-running `init`.
