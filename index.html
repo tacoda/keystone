@@ -963,7 +963,7 @@
   <div class="layers">
     <div class="layer l1">
       <div class="layer-cell"><span class="layer-name">guides</span></div>
-      <div class="layer-cell"><span class="layer-desc"><strong style="color: var(--text);">Rules.</strong> IRON LAWs (non-negotiable) and GOLDEN RULES (strong defaults). Sublayers: <code style="color: var(--accent);">guides/principles/</code>, <code style="color: var(--accent);">guides/idioms/&lt;stack&gt;/</code>, <code style="color: var(--accent);">guides/domain/</code>, <code style="color: var(--accent);">guides/process/</code>. The drift sensor enforces them.</span></div>
+      <div class="layer-cell"><span class="layer-desc"><strong style="color: var(--text);">Rules.</strong> Three tiers: regular <strong style="color: var(--text);">RULES</strong> (the default), <strong style="color: var(--text);">GOLDEN RULES</strong> (stronger; deviation requires reasoning), <strong style="color: var(--text);">IRON LAWS</strong> (non-negotiable; rare by design). Sublayers: <code style="color: var(--accent);">guides/principles/</code>, <code style="color: var(--accent);">guides/idioms/&lt;stack&gt;/</code>, <code style="color: var(--accent);">guides/domain/</code>, <code style="color: var(--accent);">guides/process/</code>. The drift sensor enforces them.</span></div>
       <div class="layer-cell"><span class="layer-author">Extracted from corpus + Learning flywheel</span></div>
       <div class="layer-cell"><span class="layer-act">Ambient · always loaded</span></div>
     </div>
@@ -1003,12 +1003,12 @@
     <li style="counter-increment: lo; padding: 14px 18px 14px 64px; position: relative; border: 1px solid var(--border); border-radius: 2px; background: var(--surface);">
       <span style="position: absolute; left: 16px; top: 14px; font-family: var(--mono); font-size: 0.7rem; color: var(--accent); letter-spacing: 0.15em; font-weight: 600;">01 →</span>
       <strong style="color: var(--accent); font-size: 0.85rem;">Session start — menu file auto-loads.</strong>
-      <p style="font-size: 0.78rem; color: var(--muted); line-height: 1.6; margin-top: 4px;">The agent reads its menu (<code style="color: var(--accent);">CLAUDE.md</code>, <code style="color: var(--accent);">AGENTS.md</code>, <code style="color: var(--accent);">.continuerules</code>, etc.) — a short pointer at <code style="color: var(--accent);">harness/</code> with the four components and the iron laws inline.</p>
+      <p style="font-size: 0.78rem; color: var(--muted); line-height: 1.6; margin-top: 4px;">The agent reads its menu (<code style="color: var(--accent);">CLAUDE.md</code>, <code style="color: var(--accent);">AGENTS.md</code>, <code style="color: var(--accent);">.continuerules</code>, etc.) — a short pointer at <code style="color: var(--accent);">harness/</code> with the four components, the three rule tiers (regular RULES, GOLDEN RULES, IRON LAWS), and the five process iron laws inline.</p>
     </li>
     <li style="counter-increment: lo; padding: 14px 18px 14px 64px; position: relative; border: 1px solid var(--border); border-radius: 2px; background: var(--surface);">
       <span style="position: absolute; left: 16px; top: 14px; font-family: var(--mono); font-size: 0.7rem; color: var(--accent); letter-spacing: 0.15em; font-weight: 600;">02 →</span>
       <strong style="color: var(--accent); font-size: 0.85rem;">Guides become ambient.</strong>
-      <p style="font-size: 0.78rem; color: var(--muted); line-height: 1.6; margin-top: 4px;">Per-agent activation projects <code style="color: var(--accent);">harness/guides/</code> into the agent's rules surface — Cursor's <code style="color: var(--accent);">.cursor/rules/*.mdc</code>, Claude Code's directive block, Cline's custom-instructions field. The agent is now under every IRON LAW and GOLDEN RULE.</p>
+      <p style="font-size: 0.78rem; color: var(--muted); line-height: 1.6; margin-top: 4px;">Per-agent activation projects <code style="color: var(--accent);">harness/guides/</code> into the agent's rules surface — Cursor's <code style="color: var(--accent);">.cursor/rules/*.mdc</code>, Claude Code's directive block, Cline's custom-instructions field. The agent is now under every regular RULE, GOLDEN RULE, and IRON LAW.</p>
     </li>
     <li style="counter-increment: lo; padding: 14px 18px 14px 64px; position: relative; border: 1px solid var(--border); border-radius: 2px; background: var(--surface);">
       <span style="position: absolute; left: 16px; top: 14px; font-family: var(--mono); font-size: 0.7rem; color: var(--accent2); letter-spacing: 0.15em; font-weight: 600;">03 →</span>
@@ -1048,7 +1048,7 @@
     <div class="action">
       <span class="action-tag">always-on</span>
       <h3 style="color: var(--accent);">Guides — small, dense, high signal</h3>
-      <p>Each guide is short — an IRON LAW plus a few GOLDEN RULES. Tens of files, not hundreds of lines each. Loading them all ambient stays well within a working budget while keeping the agent under every constraint at once.</p>
+      <p>Each guide is short — regular RULES plus the occasional GOLDEN RULE or IRON LAW. Tens of files, not hundreds of lines each. Loading them all ambient stays well within a working budget while keeping the agent under every constraint at once.</p>
     </div>
     <div class="action">
       <span class="action-tag">on-demand</span>
@@ -1072,23 +1072,28 @@
   </p>
 </section>
 
-<!-- Iron Laws + Golden Rules -->
+<!-- Rule Tiers -->
 <section>
-  <div class="section-label">Iron Laws &amp; Golden Rules</div>
+  <div class="section-label">Rules</div>
   <p style="font-size: 0.85rem; color: var(--muted); line-height: 1.7; margin-bottom: 20px;">
-    Every guide is built from two kinds of rule. The drift sensor enforces both — IRON LAW violations fail; GOLDEN RULE violations surface as warnings.
+    Every guide is built from rules in three tiers. <strong style="color: var(--text);">Regular RULES are the default</strong> — most directives live there. <strong style="color: var(--text);">GOLDEN RULES</strong> and <strong style="color: var(--text);">IRON LAWS</strong> are opt-in promotions, confirmed by the user during <code style="font-family: var(--mono); font-size: 0.78rem; color: var(--accent); background: var(--surface2); padding: 1px 6px; border-radius: 2px;">synthesize</code>. The special labels derive their force from being rare; promoting every rule would dilute them. The drift sensor enforces all three — IRON LAW violations fail; GOLDEN RULE and RULES violations surface as warnings.
   </p>
 
-  <div class="action-grid">
+  <div class="action-grid three">
+    <div class="action">
+      <span class="action-tag">default</span>
+      <h3>RULES</h3>
+      <p>Regular directives the agent follows. The default tier — when synthesize promotes a candidate, it lands here unless the user opts into a stronger tier. The bulk of guide content.</p>
+    </div>
+    <div class="action" style="border-color: rgba(74,222,154,0.3);">
+      <span class="action-tag" style="background: rgba(74,222,154,0.12); color: var(--accent); border-color: rgba(74,222,154,0.3);">stronger</span>
+      <h3 style="color: var(--accent);">GOLDEN RULES</h3>
+      <p>Strong, explicit standards — deviation requires reasoning, recorded in the work. May be concrete prescriptions ("inject dependencies via the constructor") or aspirational ideals ("controllers should be thin; delegate to services"). Rare relative to regular rules.</p>
+    </div>
     <div class="action" style="border-color: rgba(245,158,11,0.3);">
       <span class="action-tag" style="background: rgba(245,158,11,0.12); color: var(--accent3); border-color: rgba(245,158,11,0.3);">non-negotiable</span>
       <h3 style="color: var(--accent3);">IRON LAW</h3>
-      <p>A constraint the agent <strong style="color: var(--text);">must never violate</strong>. No reasoning escape hatch. Iron laws are rare, deliberate, and survive across stacks and projects.</p>
-    </div>
-    <div class="action" style="border-color: rgba(74,222,154,0.3);">
-      <span class="action-tag" style="background: rgba(74,222,154,0.12); color: var(--accent); border-color: rgba(74,222,154,0.3);">strong default</span>
-      <h3 style="color: var(--accent);">GOLDEN RULES</h3>
-      <p>Strongly preferred behavior — deviation requires explicit reasoning, recorded in the work. Most rules in the harness are golden; iron is reserved for the truly inviolable.</p>
+      <p>A constraint the agent <strong style="color: var(--text);">must never violate</strong>. Violation causes real damage — incidents, security exposure, lost work. No reasoning escape hatch. Iron laws are rare, deliberate, and survive across stacks and projects.</p>
     </div>
   </div>
 
@@ -1265,7 +1270,7 @@
     <ol style="list-style: none; counter-reset: step; padding-left: 0;">
       <li style="counter-increment: step; padding: 8px 0 8px 36px; position: relative; border-bottom: 1px solid var(--border);">
         <span style="position: absolute; left: 0; top: 8px; font-family: var(--mono); font-size: 0.7rem; color: var(--accent); letter-spacing: 0.1em;">01 →</span>
-        Read <code style="font-family: var(--mono); font-size: 0.78rem; color: var(--accent2); background: var(--surface2); padding: 1px 6px; border-radius: 2px;">harness/README.md</code> — orientation to the four components and the iron laws.
+        Read <code style="font-family: var(--mono); font-size: 0.78rem; color: var(--accent2); background: var(--surface2); padding: 1px 6px; border-radius: 2px;">harness/README.md</code> — orientation to the four components, the three rule tiers, and the iron laws.
       </li>
       <li style="counter-increment: step; padding: 8px 0 8px 36px; position: relative; border-bottom: 1px solid var(--border);">
         <span style="position: absolute; left: 0; top: 8px; font-family: var(--mono); font-size: 0.7rem; color: var(--accent); letter-spacing: 0.1em;">02 →</span>
@@ -1312,7 +1317,7 @@
     <div class="action lc-drift">
       <span class="action-tag">Post-edit</span>
       <h3>check-drift<span class="when">implementation exit</span></h3>
-      <p>Did the edit violate a loaded guide? The drift sensor compares the diff against IRON LAWs (fail) and GOLDEN RULES (warn). Cheaper to fix while the change is fresh.</p>
+      <p>Did the edit violate a loaded guide? The drift sensor compares the diff against IRON LAWs (fail), GOLDEN RULES (strong warn), and regular RULES (warn). Cheaper to fix while the change is fresh.</p>
     </div>
     <div class="action lc-verify">
       <span class="action-tag">Pre-commit</span>
@@ -1557,7 +1562,7 @@
     <div class="tree-line"><span class="tree-structure">├──</span><span class="tree-dir">CLAUDE.md</span><span class="tree-annotation ann-default">← agent menu file (merges additively under your H1)</span></div>
     <div class="tree-line"><span class="tree-structure">│</span></div>
     <div class="tree-line"><span class="tree-structure">└──</span><span class="tree-dir">harness/</span><span class="tree-annotation ann-default">← four-component harness (project-owned)</span></div>
-    <div class="tree-line"><span class="tree-structure">    ├──</span><span class="tree-file">README.md</span><span class="tree-annotation ann-default">← orientation to the four components · iron laws</span></div>
+    <div class="tree-line"><span class="tree-structure">    ├──</span><span class="tree-file">README.md</span><span class="tree-annotation ann-default">← orientation to the four components · rule tiers · iron laws</span></div>
     <div class="tree-line"><span class="tree-structure">    │</span></div>
     <div class="tree-line"><span class="tree-structure">    ├──</span><span class="tree-dir">guides/</span><span class="tree-annotation ann-1">← rules · always loaded · enforced by the drift sensor</span></div>
     <div class="tree-line"><span class="tree-structure">    │   ├──</span><span class="tree-dir">principles/</span><span class="tree-annotation ann-1">29 rule files extracted from corpus/principles/</span></div>
