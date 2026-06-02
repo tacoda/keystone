@@ -2,6 +2,31 @@
 
 All notable changes to keystone are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); the project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and is pre-1.0 (minor versions may include breaking changes).
 
+## [0.5.0] — 2026-06-02
+
+Adds a `kind` taxonomy orthogonal to the existing structure of guides and sensors. Every guide and sensor declares itself as **inferential** (agent reasoning over markdown rules, agent-driven code review) or **computational** (deterministic execution — language servers, formatters, lint, type-check, tests). Bootstrap is extended to inventory both kinds so that post-bootstrap, every applicable guide and sensor is recorded in `corpus/state/CODEBASE_STATE.md`. Anything that needs install-time setup remains an opt-in flag on `keystone init` — bootstrap inventories, install opts in.
+
+### Added
+
+- **`kind:` YAML frontmatter** on every guide and sensor file. Values: `inferential` or `computational`.
+- **`harness/guides/computational/`** — new subdirectory and README explaining what lives there (language servers, formatters, editor enforcement). Ships empty; bootstrap populates it based on what the project's stack supports.
+- **`harness/sensors/review-functional.md` and `review-security.md`** — the agent-review concerns that were previously only mentioned inline in adapters are now proper sensor files, marked `kind: inferential`.
+- **Sensors and Guides inventory sections** in `harness/corpus/state/CODEBASE_STATE.md` — bootstrap populates per-sensor wiring status and a table of detected computational guides.
+- **Testing — new IRON LAW.** "Flaky tests are not allowed." Fix the non-determinism (control the clock, RNGs, ordering, fixtures) or delete the test. Marking a test flaky and retrying it is forbidden — the retry hides the failure the suite exists to surface.
+- **Testing — new GOLDEN RULE.** "Test quality is the ideal — not coverage, not type passage." Good tests name a real use case or behavior and fail meaningfully when that behavior breaks. Coverage and a green type-checker are byproducts.
+
+### Changed
+
+- **`harness/sensors/README.md`** — new Kind section, Kind column in the sensor index, `Kind` field added to the contract shape.
+- **`harness/guides/README.md`** — new Kind section, Kind column in the sub-directory table, and a clarifying note that kind classifies the *guide* (its mechanism), not the thing the guide is about.
+- **Bootstrap action description** updated in `harness/README.md` and every `harness/adapters/<agent>/lifecycle.md` to cover inventorying computational guides and classifying sensors by kind.
+
+### Migration from 0.4.x
+
+- **Existing harness installations:** re-run the **bootstrap** action to populate the new `Sensors` and `Guides` inventory tables in `corpus/state/CODEBASE_STATE.md` and (if applicable) the `guides/computational/` directory. No existing content is invalidated.
+- **Custom sensor or guide files** authored downstream: add `kind: inferential` or `kind: computational` frontmatter the next time you touch them. Files without the field continue to work; the field is informational at present (drift and review tooling will start to read it in a future release).
+- **Adapter authors:** the bootstrap row in `harness/adapters/<your-agent>/lifecycle.md` now lists kind inventory and sensor classification as responsibilities.
+
 ## [0.4.1] — 2026-06-02
 
 Introduces a third rule tier — regular **RULES** — as the default for any directive landing in `harness/guides/`. **IRON LAW** and **GOLDEN RULE** become opt-in promotions confirmed during **synthesize**, keeping the special labels rare and load-bearing.
