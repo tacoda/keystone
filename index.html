@@ -784,10 +784,10 @@
 │   cursor        Cursor editor                  │
 └────────────────────────────────────────────────┘</div><span class="ar">▸</span> installing harness <span class="dim">→</span> harness/{corpus,guides,sensors,…}/<br>
       <span class="ar">▸</span> installing claude-code target <span class="dim">→</span> CLAUDE.md<br>
-      <span class="ok">✓</span> keystone installed for claude-code.<br>
+      <span class="ok">✓</span> harness installed for claude-code.<br>
       <span class="ar">▶</span> <span class="dim">Next:</span> run the bootstrap action in claude-code.<br>
       <span class="pr">$</span> claude<br>
-      <span class="dim">&gt;</span> /bootstrap<br>
+      <span class="dim">&gt;</span> /keystone:bootstrap<br>
       <span class="ar" id="spark">✶</span> <span class="dim">Thinking… (<span id="elapsed">3</span>s · esc to interrupt)</span>
     </div>
   </div>
@@ -1174,6 +1174,11 @@
 # fails fast with a useful error when stdin is not a TTY and --agent is unset.</span>
 <span class="prompt">$</span> keystone init [&lt;dir&gt;] [flags]
 
+<span class="comment"># Install another agent's target bundle into an existing harness/.
+# Merges the new agent(s) into harness/corpus/state/INSTALL_PROFILE.md.
+# Errors out if any requested agent is already recorded — remove it first to re-add.</span>
+<span class="prompt">$</span> keystone add-target &lt;agent&gt;[,&lt;agent&gt;...] [&lt;dir&gt;]
+
 <span class="comment"># Print the catalog of allowed labels for every option flag</span>
 <span class="prompt">$</span> keystone options
 
@@ -1189,9 +1194,9 @@
 
   <div class="action-grid" style="margin-top: 24px;">
     <div class="action">
-      <span class="action-tag">--agent &lt;label&gt;</span>
-      <h3>Agent target</h3>
-      <p>One of: <code style="color:var(--accent2);">claude-code</code>, <code style="color:var(--accent2);">codex</code>, <code style="color:var(--accent2);">cursor</code>, <code style="color:var(--accent2);">aider</code>, <code style="color:var(--accent2);">github-copilot</code>, <code style="color:var(--accent2);">continue</code>, <code style="color:var(--accent2);">cline</code>, <code style="color:var(--accent2);">goose</code>, <code style="color:var(--accent2);">pi</code>, <code style="color:var(--accent2);">generic</code>. If omitted, keystone detects from marker files; falls back to interactive prompt in a TTY.</p>
+      <span class="action-tag">--agent &lt;label&gt;[,&lt;label&gt;...]</span>
+      <h3>Agent target(s)</h3>
+      <p>One or more of: <code style="color:var(--accent2);">claude-code</code>, <code style="color:var(--accent2);">codex</code>, <code style="color:var(--accent2);">cursor</code>, <code style="color:var(--accent2);">aider</code>, <code style="color:var(--accent2);">github-copilot</code>, <code style="color:var(--accent2);">continue</code>, <code style="color:var(--accent2);">cline</code>, <code style="color:var(--accent2);">goose</code>, <code style="color:var(--accent2);">pi</code>, <code style="color:var(--accent2);">generic</code>. <strong style="color:var(--text);">Multi-select</strong> — pass a comma-separated list (e.g. <code style="color:var(--accent2);">claude-code,cursor</code>) and every target bundle installs in one pass. If omitted, keystone detects from marker files; falls back to interactive prompt in a TTY.</p>
     </div>
     <div class="action">
       <span class="action-tag">--force</span>
@@ -1213,14 +1218,14 @@
 
   <div class="action-grid">
     <div class="action">
-      <span class="action-tag">--agent</span>
+      <span class="action-tag">--agent (multi)</span>
       <h3 style="color: var(--accent);">Agent</h3>
-      <p>Which AI coding agent will read this harness. Determines the menu file and adapter bundle installed.</p>
+      <p>Which AI coding agent(s) will read this harness. Multi-select — teams running multiple agents (e.g. Claude Code alongside Cursor) can install every target bundle in one pass via comma-separated values. Determines the menu file(s) and adapter bundle(s) installed.</p>
     </div>
     <div class="action">
       <span class="action-tag">--app-type</span>
       <h3 style="color: var(--accent2);">App type</h3>
-      <p><code style="color:var(--accent2);">web-application</code> · <code style="color:var(--accent2);">web-api</code> · <code style="color:var(--accent2);">cli-tool</code> · <code style="color:var(--accent2);">library</code> · <code style="color:var(--accent2);">mobile-app</code> · <code style="color:var(--accent2);">desktop-app</code> · <code style="color:var(--accent2);">data-pipeline</code> · <code style="color:var(--accent2);">embedded</code></p>
+      <p><code style="color:var(--accent2);">web-application</code> · <code style="color:var(--accent2);">web-api</code> · <code style="color:var(--accent2);">cli-tool</code> · <code style="color:var(--accent2);">library</code> · <code style="color:var(--accent2);">mobile-app</code> · <code style="color:var(--accent2);">desktop-app</code> · <code style="color:var(--accent2);">data-pipeline</code> · <code style="color:var(--accent2);">embedded</code> · <code style="color:var(--accent2);">monorepo</code> (assumes backend + frontend; bootstrap can refine)</p>
     </div>
     <div class="action">
       <span class="action-tag">--architecture</span>
@@ -1240,7 +1245,7 @@
     <div class="action">
       <span class="action-tag">bootstrap-inferred</span>
       <h3>Not asked here</h3>
-      <p>Language stack, database, CI platform, deployment target, project maturity, team size — bootstrap detects these from the codebase on first run, where it has accurate context. No <code style="color:var(--muted);">--language</code> flag exists in v0.2.0+.</p>
+      <p>Language stack, <strong style="color:var(--text);">frameworks &amp; libraries</strong>, database, CI platform, project maturity, team size — bootstrap detects these from the codebase on first run, where it has accurate context. <em>Not</em> deployment target: keystone's workflow ends at "PR up for review" — humans merge and deploy.</p>
     </div>
   </div>
 
@@ -1252,7 +1257,7 @@
   <div class="section-label">First-run: the Bootstrap step</div>
   <div class="definition">
     <p>Immediately after <code>keystone init</code>, run the <strong>bootstrap</strong> heavyweight action in your agent. Bootstrap is an initial audit of a fresh install — it makes the harness specific to your codebase.</p>
-    <p>Bootstrap reads <code>corpus/state/INSTALL_PROFILE.md</code> for your declared intent, then detects everything else from the codebase: language stack, database, CI platform, deployment target. It seeds three things — paired <code>corpus/idioms/&lt;stack&gt;/</code> + <code>guides/idioms/&lt;stack&gt;/</code> from real patterns in your code, initializes <code>corpus/state/CODEBASE_STATE.md</code> with sensor commands and activation map, and confirms the sensor command set. Until bootstrap runs, the harness is generic.</p>
+    <p>Bootstrap reads <code>corpus/state/INSTALL_PROFILE.md</code> for your declared intent, then detects everything else from the codebase: language stack, frameworks &amp; libraries, database, CI platform. It seeds three things — paired <code>corpus/idioms/&lt;stack&gt;/</code> + <code>guides/idioms/&lt;stack&gt;/</code> from real patterns in your code, initializes <code>corpus/state/CODEBASE_STATE.md</code> (with sensor commands, activation map, and a <strong>Frameworks &amp; libraries</strong> table pulled from your manifests), and confirms the sensor command set. Until bootstrap runs, the harness is generic.</p>
   </div>
 
   <div style="font-size: 0.85rem; color: var(--muted); line-height: 1.8;">
@@ -1335,7 +1340,7 @@
     <div class="action hw-bootstrap">
       <span class="action-tag">Day 1</span>
       <h3>bootstrap</h3>
-      <p>Initial audit of a fresh install. Detects stack, seeds paired <code style="color: var(--accent);">corpus/idioms/&lt;stack&gt;/</code> + <code style="color: var(--accent);">guides/idioms/&lt;stack&gt;/</code>, initializes <code style="color: var(--accent);">corpus/state/</code>, confirms sensor commands.</p>
+      <p>Initial audit of a fresh install. Detects stack, frameworks, and libraries; seeds paired <code style="color: var(--accent);">corpus/idioms/&lt;stack&gt;/</code> + <code style="color: var(--accent);">guides/idioms/&lt;stack&gt;/</code>, initializes <code style="color: var(--accent);">corpus/state/</code> (including the Frameworks &amp; libraries table), confirms sensor commands.</p>
     </div>
     <div class="action hw-audit">
       <span class="action-tag">Periodic</span>
@@ -1465,7 +1470,7 @@
     <div class="agent-row">
       <span class="agent-name">Cursor</span>
       <span class="agent-status real">full</span>
-      <span class="agent-menu">.cursor/rules/*.mdc (7 scaffolded)</span>
+      <span class="agent-menu">.cursor/rules/keystone-*.mdc (7 scaffolded)</span>
     </div>
     <div class="agent-row">
       <span class="agent-name">Aider</span>
