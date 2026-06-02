@@ -1,11 +1,13 @@
 ## Keystone harness
 
-This project uses a **keystone harness**. The corpus at [`harness/`](harness/) defines the engineering knowledge and the six-phase workflow you operate within.
+This project uses a **keystone harness**. The harness at [`harness/`](harness/) defines the engineering knowledge, rules, sensors, and self-update flywheels you operate within.
 
 **Read first:**
-- [`harness/README.md`](harness/README.md) — five layers (principles, idioms, domain, state, process), the lifecycle, and the iron laws.
+- [`harness/README.md`](harness/README.md) — four components (corpus, guides, sensors, flywheels), the lifecycle, and the iron laws.
+- [`harness/guides/`](harness/guides/) — rules (always loaded).
+- [`harness/corpus/`](harness/corpus/) — informational reference (on-demand).
 - [`harness/adapters/continue/`](harness/adapters/continue/) — Continue bindings.
-- [`harness/domain/`](harness/domain/) — business rules for this project.
+- [`harness/corpus/domain/`](harness/corpus/domain/) and [`harness/guides/domain/`](harness/guides/domain/) — business knowledge and rules for this project.
 
 **Lifecycle actions:** `spec` · `orient` · `check-drift` · `verify` · `review` · `learn` (plus `bootstrap`, `audit`, `synthesize`, `mode`). Invoke by asking in natural language — see [`harness/adapters/continue/lifecycle.md`](harness/adapters/continue/lifecycle.md).
 

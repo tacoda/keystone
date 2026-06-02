@@ -4,7 +4,7 @@ How sensors actually fire inside Claude Code.
 
 ## Execution model
 
-Claude Code can run shell commands directly via the Bash tool during a turn. **All sensors run autonomously** — no human paste-and-report loop required. The agent reads the tool commands from `harness/state/CODEBASE_STATE.md`, invokes them via Bash, and consumes the output.
+Claude Code can run shell commands directly via the Bash tool during a turn. **All sensors run autonomously** — no human paste-and-report loop required. The agent reads the tool commands from `harness/corpus/state/CODEBASE_STATE.md`, invokes them via Bash, and consumes the output.
 
 ## Per-sensor binding
 

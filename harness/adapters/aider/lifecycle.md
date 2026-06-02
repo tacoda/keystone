@@ -8,20 +8,20 @@ Aider has no slash-command primitive (its `/<command>` set is for shell, git, an
 
 | Action | Invocation | What happens |
 |---|---|---|
-| **spec** | "Start the spec phase for `<task>`." | Aider reads `harness/process/spec.md` and follows its activities. |
-| **orient** | "Orient for work in `<region>`." | Aider reads `harness/state/CODEBASE_STATE.md` and the matching idioms; sketches a plan. |
+| **spec** | "Start the spec phase for `<task>`." | Aider reads `harness/guides/process/spec.md` and follows its activities. |
+| **orient** | "Orient for work in `<region>`." | Aider reads `harness/corpus/state/CODEBASE_STATE.md` and the matching idioms; sketches a plan. |
 | **check-drift** | "Check the diff for drift." | Aider compares `git diff` against loaded corpus rules. |
 | **verify** | "Run the verify action." | Aider invokes sensors via `/run <cmd>` and `/test`; reports results. |
 | **review** | "Run the review action." | Aider walks the diff against spec AC, then runs functional and security review concerns **sequentially**. |
 | **learn** | "Capture the learnings from this work." | Aider writes a candidate to `harness/learning/inbox/<timestamp>-<slug>.md`. |
-| **bootstrap** | "Bootstrap the harness." | One-time; populates `harness/idioms/<stack>/` and `harness/state/`. |
+| **bootstrap** | "Bootstrap the harness." | One-time; seeds corpus (idioms/<stack>/, state/), paired guides (idioms/<stack>/), and confirms sensor commands. |
 | **audit** | "Audit the corpus." | Full Learning + Pruning flywheel pass. |
 | **synthesize** | "Synthesize the inbox." | Promotes inbox items into the right corpus layer. |
-| **mode** | Edit `harness/process/modes.md` directly. | Aider has no autonomy levers; the file is informational. |
+| **mode** | Edit `harness/guides/process/modes.md` directly. | Aider has no autonomy levers; the file is informational. |
 
 ## Phase docs as the playbook
 
-Aider's value is that it works straightforwardly with markdown — reading a phase doc and following its activities is its native shape. The phase docs themselves (`harness/process/*.md`) are the playbook; the lifecycle action just names which one to read.
+Aider's value is that it works straightforwardly with markdown — reading a phase doc and following its activities is its native shape. The phase docs themselves (`harness/guides/process/*.md`) are the playbook; the lifecycle action just names which one to read.
 
 The corollary: keep the phase docs clear and executable. Aider does not have a slash command layer to paper over a vague phase doc.
 

@@ -4,7 +4,7 @@ description: Run the review phase — spec adherence + functional + security rev
 
 Run the **review** action of the project harness.
 
-Read `harness/process/review.md`.
+Read `harness/guides/process/review.md`.
 
 Pi does not support parallel sub-agents natively. Run the review steps sequentially:
 

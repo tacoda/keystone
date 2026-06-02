@@ -1,11 +1,13 @@
 ## Keystone harness
 
-This project uses a **keystone harness**. The corpus at [`harness/`](harness/) defines the engineering knowledge and the six-phase workflow you operate within.
+This project uses a **keystone harness**. The harness at [`harness/`](harness/) defines the engineering knowledge, rules, sensors, and self-update flywheels you operate within.
 
 **Read first:**
-- [`harness/README.md`](harness/README.md) — five layers (principles, idioms, domain, state, process) and the lifecycle.
+- [`harness/README.md`](harness/README.md) — four components (corpus, guides, sensors, flywheels) and the lifecycle.
+- [`harness/guides/`](harness/guides/) — rules. **Always loaded.** What you must do and not do.
+- [`harness/corpus/`](harness/corpus/) — informational reference. **On-demand.** Reasoning behind the rules; reach via forward-link from a guide.
 - [`harness/adapters/claude-code/`](harness/adapters/claude-code/) — Claude Code bindings: slash commands, sub-agents, MCP tracker integration.
-- [`harness/domain/`](harness/domain/) — business rules for this project.
+- [`harness/corpus/domain/`](harness/corpus/domain/) and [`harness/guides/domain/`](harness/guides/domain/) — business knowledge and rules for this project.
 
 **Lifecycle actions:** `spec` · `orient` · `check-drift` · `verify` · `review` · `learn` (plus `bootstrap`, `audit`, `synthesize`, `mode`). Invoked via `/<prefix>:<action>` slash commands — see [`harness/adapters/claude-code/lifecycle.md`](harness/adapters/claude-code/lifecycle.md).
 

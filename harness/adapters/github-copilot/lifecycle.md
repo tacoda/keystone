@@ -10,16 +10,16 @@ Copilot has no slash-command primitive for project actions. Lifecycle actions ar
 
 | Action | Invocation | What happens |
 |---|---|---|
-| **spec** | "Start the spec phase for `<task>`." | Reads `harness/process/spec.md` and follows its activities. |
-| **orient** | "Orient for work in `<region>`." | Reads `harness/state/CODEBASE_STATE.md` and matching idioms; sketches a plan. |
+| **spec** | "Start the spec phase for `<task>`." | Reads `harness/guides/process/spec.md` and follows its activities. |
+| **orient** | "Orient for work in `<region>`." | Reads `harness/corpus/state/CODEBASE_STATE.md` and matching idioms; sketches a plan. |
 | **check-drift** | "Check the diff for drift." | Compares `git diff` against loaded corpus rules. |
 | **verify** | "Run the verify action." | Invokes sensors via the shell; reports results inline. |
 | **review** | "Run the review action." | Walks the diff sequentially against spec AC, functional concerns, security concerns. |
 | **learn** | "Capture the learnings from this work." | Writes a candidate to `harness/learning/inbox/<timestamp>-<slug>.md`. |
-| **bootstrap** | "Bootstrap the harness." | One-time; populates `harness/idioms/<stack>/` and `harness/state/`. |
+| **bootstrap** | "Bootstrap the harness." | One-time; seeds corpus (idioms/<stack>/, state/), paired guides (idioms/<stack>/), and confirms sensor commands. |
 | **audit** | "Audit the corpus." | Full Learning + Pruning flywheel pass. |
 | **synthesize** | "Synthesize the inbox." | Promotes inbox items into the right corpus layer. |
-| **mode** | Edit `harness/process/modes.md` directly. | Copilot has limited autonomy levers; the file is informational. |
+| **mode** | Edit `harness/guides/process/modes.md` directly. | Copilot has limited autonomy levers; the file is informational. |
 
 ## GitHub-native integrations
 

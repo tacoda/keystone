@@ -1,67 +1,67 @@
 # Project Harness
 
-This is the project's harness — a body of engineering knowledge organized into five layers, plus per-agent bindings. Each layer answers a different kind of question about how to write code in this project. The harness is project-owned: every file under `harness/` is versioned with the code and may be edited freely by the team.
+This is the project's harness — a body of engineering knowledge, rules, sensors, and self-update flywheels, plus per-agent bindings. The harness is project-owned: every file under `harness/` is versioned with the code and may be edited freely by the team.
 
-## Three surfaces
+## Four components
 
-- **Corpus** — `harness/principles/`, `harness/idioms/`, `harness/domain/`, `harness/state/`, `harness/process/`, plus `harness/learning/` and `harness/archive/`. Project-owned, agent-agnostic. Versioned with the code.
-- **Adapters** — `harness/adapters/<agent>/`. Per-agent bindings: how each abstract lifecycle action maps to that agent's invocation surface (slash command, rules file, CLI, etc.). Ships with the corpus.
-- **Agent runtime** — agent-specific (`.claude/`, `.cursor/`, `.aider.conf.yml`, etc.). Tool-owned.
+| Component | What it is | Activation |
+|---|---|---|
+| [`guides/`](guides/README.md) | **Rules** — what the agent must *do* (and not do). Process phases, plus rule extracts from corpus. | **Ambient — always loaded.** Enforced by the [drift sensor](sensors/drift.md) |
+| [`corpus/`](corpus/README.md) | **Informational reference** — what the agent should *know* when the rules are not enough. Principles, idioms, domain, state. | **On-demand only.** Loaded when the agent needs reasoning, history, or anti-patterns beyond what the rules say |
+| [`sensors/`](sensors/README.md) | **Automated checks** — lint, type-check, test, build, drift, coverage, etc. Fire inside lifecycle actions at phase boundaries. | Invoked |
+| Flywheels — [`learning/`](learning/README.md) + [`archive/`](archive/README.md) | **Self-update** — additive (Learning) and subtractive (Pruning) loops that keep corpus and guides current. | Invoked via **synthesize** and **audit** |
 
-## The five layers
+Plus [`adapters/<agent>/`](adapters/README.md) — per-agent bindings that lift rules into the agent's rules surface (`.cursor/rules/*.mdc`, `CLAUDE.md` directives, etc.) and wire each lifecycle action to that agent's invocation mechanism.
 
-| Layer | What it answers | Activation | Authorship |
-|---|---|---|---|
-| [`principles/`](principles/README.md) | What does good engineering look like, regardless of stack? | Ambient (always) | Literature + discipline |
-| [`idioms/`](idioms/README.md) | How does *this* stack express those principles? | Ambient (lazy by region) | Lead engineer + agent |
-| [`domain/`](domain/README.md) | What business rules constrain this codebase? | Ambient (always) | Domain expert + engineer |
-| [`state/`](state/README.md) | What is true about the codebase right now? | Ambient (always) | Agent + human |
-| [`process/`](process/README.md) | What happens at each phase of the workflow? | Loaded when entering a phase | Lead engineer + agent |
+## Corpus vs. guides — the split
 
-Plus three supporting directories:
+The core distinction in the harness:
 
-- [`learning/`](learning/README.md) — staging area for the Learning flywheel.
-- [`archive/`](archive/README.md) — pruned content, preserved with reasoning.
-- [`adapters/`](adapters/README.md) — per-agent bindings for lifecycle actions and sensor execution.
+- **Guides are rules.** IRON LAWs (non-negotiable) and GOLDEN RULES (strongly preferred). **Always loaded** so the agent is always under their constraint. Adapters lift these into the agent's rules surface; the drift sensor checks for violations.
+- **Corpus is information.** The full reasoning, the literature, the anti-patterns, the references. **Loaded on demand** — only when the agent needs to look up *why* a rule exists, or when the rules don't cover the situation and the agent needs background to reason from.
+
+For each principle, idiom, or domain concern, the corpus file and the guide file are paired — the corpus explains, the guide commands. Process is mostly rules, so it lives entirely under `guides/process/`. State is mostly information, so it lives entirely under `corpus/state/`.
+
+**Why the asymmetry.** Rules are short and high-value-per-token; corpus is long-form. Loading corpus ambient would crowd the agent's context for cases that don't need it. Loading guides ambient keeps the agent honest at all times without paying for context the situation doesn't warrant.
+
+## The five knowledge layers (now distributed across corpus and guides)
+
+| Layer | Corpus (info) | Guides (rules) |
+|---|---|---|
+| Principles | [`corpus/principles/`](corpus/principles/README.md) | [`guides/principles/`](guides/README.md) |
+| Idioms | [`corpus/idioms/`](corpus/idioms/README.md) | [`guides/idioms/`](guides/idioms/README.md) |
+| Domain | [`corpus/domain/`](corpus/domain/README.md) | [`guides/domain/`](guides/domain/README.md) |
+| State | [`corpus/state/`](corpus/state/README.md) | (no rules — state is empirical) |
+| Process | (no explanatory corpus — process is prescriptive) | [`guides/process/`](guides/process/README.md) |
 
 ## Assumptions
 
-The corpus is written for projects that already have these in place. Missing one is not a hard failure — the corresponding phase degrades to "ask the user / surface the gap" — but the harness is most useful when all four exist:
+The harness is written for projects that already have these in place. Missing one is not a hard failure — the corresponding phase degrades to "ask the user / surface the gap" — but the harness is most useful when all four exist:
 
 | Assumption | Used by |
 |---|---|
 | **A way to track work** — anywhere on the spectrum from a full issue tracker (Jira / Linear / GitHub Issues / Asana) to a `TODO.md` to a sticky note | The **spec** phase opens on a unit of work. A tracker card ID lets the agent fetch the description automatically; without one, the agent authors the spec inline from a conversation. Either works. |
-| **Adequate sensors** — lint, type-check, test runner, build command, optionally coverage | The **verify** phase gates every commit on these. Their commands are recorded in `state/CODEBASE_STATE.md`. |
+| **Adequate sensors** — lint, type-check, test runner, build command, optionally coverage | The **verify** phase gates every commit on these. Their commands are recorded in `corpus/state/CODEBASE_STATE.md`. |
 | **Pull request process** (GitHub PRs, GitLab MRs, etc.) | The **review** phase spawns review agents on a diff; comment-driven verification re-runs sensors. The **release** phase opens the PR with the tracker link in the body. |
 | **CI pipeline, ideally with CD** | The **release** phase assumes CI runs on the PR (sensors as a backstop) and that merge triggers a deploy. If CD isn't wired up yet, the harness still works — CI gates the merge; deploy stays manual. |
 
-## Roles
-
-The corpus is exercised through four roles:
-
-- **Guides** — ambient prose loaded into context.
-- **Sensors** — automated checks and instruments that read code / state.
-- **Flywheels** — Learning (additive) and Pruning (subtractive).
-- **Discipline** — the act of auditing code, corpus, and flywheel loops.
-
-Workflows are folded in — actions and review agents are how each phase executes, not a separate role.
-
 ## Activation
 
-- **Ambient** — loaded by context. No invocation needed.
-- **Invoked** — a lifecycle action. Either agent-invoked inside a process phase, or user-invoked for heavyweight operations.
+- **Ambient** — loaded by context. No invocation needed. **Guides** are ambient.
+- **On-demand** — loaded by the agent when needed. **Corpus** is on-demand: each corpus file is reached via the forward-link in its paired guide, or via explicit reference in process.
+- **Invoked** — a lifecycle action. Either agent-invoked inside a process phase, or user-invoked for heavyweight operations. (Sensors fire from inside actions.)
 
 No event hooks. Process discipline drives the lifecycle.
 
 ## Lifecycle actions
 
-Invoked by the agent inside process phases. One sentence per action — the corresponding `process/<phase>.md` has the full activities.
+Invoked by the agent inside process phases. One sentence per action — the corresponding `guides/process/<phase>.md` has the full activities.
 
 | Action | Moment / Phase | What it does |
 |---|---|---|
 | **spec** | task entry → spec phase | Captures intent and **acceptance criteria** from a tracker card or inline. Gate: spec approved. |
-| **orient** | spec approved → planning | Reads `state/CODEBASE_STATE.md`, lazy-loads matching idioms for the touched region, sketches a plan. Gate: plan approved. |
-| **check-drift** | implementation exit | Compares the current diff against loaded corpus rules; reports findings. |
+| **orient** | spec approved → planning | Reads `corpus/state/CODEBASE_STATE.md`, lazy-loads matching idioms for the touched region, sketches a plan. Gate: plan approved. |
+| **check-drift** | implementation exit | Compares the current diff against loaded guides; reports findings. |
 | **verify** | pre-commit / verification gate | Runs every sensor (lint, type-check, test, build, drift, commit-message) **in the current turn**. Gate: every sensor green. |
 | **review** | verification gate passed → review | Walks spec acceptance criteria + runs functional and security review concerns over the diff. Gate: no blockers, AC met. |
 | **learn** | post-commit / release | Writes a candidate to `learning/inbox/<timestamp>-<slug>.md` for the next **synthesize** cycle. |
@@ -70,16 +70,16 @@ Invoked by the agent inside process phases. One sentence per action — the corr
 
 Invoked by the user:
 
-- **bootstrap** — initial audit of a fresh install. Detects stack, scaffolds `idioms/<stack>/`, initializes `state/`.
+- **bootstrap** — initial audit of a fresh install. Detects stack, seeds `corpus/idioms/<stack>/` and `guides/idioms/<stack>/`, scaffolds `corpus/domain/product-shape.md`, initializes `corpus/state/`, and confirms sensor commands.
 - **audit** — full dual audit (Learning + Pruning flywheels).
-- **synthesize** — promote inbox items into the right corpus layer.
+- **synthesize** — promote inbox items into the right corpus and/or guide.
 - **mode** — set pacing mode.
 
 How each action is actually invoked in your agent (slash command, rules-file trigger, CLI, etc.) lives in `adapters/<your-agent>/lifecycle.md`. If your agent is not listed, see `adapters/_generic/`.
 
 ## Iron laws
 
-Non-negotiable across every phase. Stated in full in the corresponding `process/<phase>.md`; consolidated here for quick reference.
+Non-negotiable across every phase. Stated in full in the corresponding `guides/process/<phase>.md`; consolidated here for quick reference.
 
 - **No proceeding without explicit acceptance criteria** in the spec.
 - **No completion claims without fresh verification evidence** — sensors must have run *this turn*, not in a prior one.
@@ -101,35 +101,44 @@ Agents without a notion of autonomy levels collapse to a single mode; the phases
 
 Carried across every layer:
 
-- **IRON LAW** — non-negotiable. `## IRON LAW` heading.
-- **GOLDEN RULES** — ideals; deviation requires reasoning. `## GOLDEN RULES` heading.
-- Idiom files end with a **Traces to:** footer pointing at the principle they instantiate.
-- Files ship with real content. Placeholders are filled in by the **bootstrap** action when the corpus is first installed.
+- **IRON LAW** — non-negotiable. `## IRON LAW` heading. Lives in a `guides/` file.
+- **GOLDEN RULES** — ideals; deviation requires reasoning. `## GOLDEN RULES` heading. Lives in a `guides/` file.
+- Corpus files end with a forward-link to the paired guide file (when one exists).
+- Guide files end with a `Traces to:` footer pointing at the corpus file (and, for idioms, the principle they instantiate).
+- Files ship with real content. Placeholders are filled in by the **bootstrap** action when the harness is first installed.
 
 ## Two flywheels
 
 **Learning — additive:**
 1. Agent encounters a gap → writes a candidate to `learning/inbox/`.
 2. Human gates by confidence.
-3. **synthesize** promotes into the right corpus layer.
+3. **synthesize** classifies each candidate as **rule** or **information** and promotes it:
+   - **Rule** (an IRON LAW or GOLDEN RULE) → the right `guides/<layer>/<name>.md`. Optionally a paired corpus file is added or updated with the *why*.
+   - **Information** (supplemental context, ideals, design rationale, history) → the right `corpus/<layer>/<name>.md`. No guide change.
+4. The classifier asks: *is this a constraint the agent must follow, or is this background that helps the agent reason?* Constraints land in guides; background lands in corpus.
 
-**Pruning — subtractive:**
-1. **audit** detects discrepancies between corpus claims and codebase reality.
+**Pruning — subtractive:** asymmetric. Guides are pruned often; corpus is pruned rarely.
+
+1. **audit** runs in two passes:
+   - **Guide audit (regular).** Every guide is checked against the codebase. Rules that the code no longer follows — and the team has decided not to enforce — are stale. Rules that contradict newer rules are stale. Rules that name removed APIs are stale. Guides churn as the codebase does, and are pruned aggressively.
+   - **Corpus audit (rare).** Corpus is pruned only when the *design, strategy, direction, or stated ideals* have moved on. A principle file does not become stale because the codebase changed shape; it becomes stale when the principle itself no longer reflects how the team thinks. Treat corpus pruning as a deliberate act, not a maintenance task.
 2. Staleness classified: factually wrong / aspirationally stale / domain-stale / process-stale.
 3. Content moves to `archive/` with reasoning recorded.
 
-## Reload after corpus writes
+## Reload after guide writes
 
-Ambient corpus content is loaded **once per session** in most agents. When **synthesize** promotes an inbox item into a layer, or **audit** archives a stale file, the active session still has the old content — the new rules are not in context yet.
+Guides are loaded ambient — **once per session** in most agents. When **synthesize** promotes a rule, or **audit** archives a stale guide, the active session still has the old rules in context.
 
-Every flywheel-writing action ends with a **reload prompt**:
+Every flywheel-writing action that touches `guides/` ends with a **reload prompt**:
 
-1. Save anything in the current session that the corpus change should not blow away.
+1. Save anything in the current session that the change should not blow away.
 2. Reset the agent's context (the agent's context-clear primitive — see `adapters/<your-agent>/activation.md`).
-3. Re-prompt. The next turn's ambient load reads the updated corpus.
+3. Re-prompt. The next turn's ambient load reads the updated guides.
 
-**learn** does **not** require a reload — it writes to `learning/inbox/`, which is not ambient.
+**Corpus writes do not require a reload.** Corpus is loaded on demand — the agent reads the file the next time it follows the forward-link from a guide. No context reset is needed.
+
+**learn** does not require a reload either — it writes to `learning/inbox/`, which is neither ambient nor on-demand-reachable until **synthesize** runs.
 
 ---
 
-> Installed via [keystone](https://github.com/tacoda/keystone). The corpus is yours after install — keystone is not a runtime dependency.
+> Installed via [keystone](https://github.com/tacoda/keystone). The harness is yours after install — keystone is not a runtime dependency.

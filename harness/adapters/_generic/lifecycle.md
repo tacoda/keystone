@@ -4,7 +4,7 @@ Fallback for any coding agent that reads markdown but lacks a specific adapter.
 
 ## Action → invocation
 
-For agents without slash commands, custom-command syntax, or rules-file triggers, every lifecycle action collapses to "the user asks the agent to do `<action>`, the agent reads `harness/process/<phase>.md` and follows it."
+For agents without slash commands, custom-command syntax, or rules-file triggers, every lifecycle action collapses to "the user asks the agent to do `<action>`, the agent reads `harness/guides/process/<phase>.md` and follows it."
 
 | Action | Invocation |
 |---|---|
@@ -14,12 +14,12 @@ For agents without slash commands, custom-command syntax, or rules-file triggers
 | **verify** | "Run the verify action — execute every sensor and report." |
 | **review** | "Run the review action — check spec adherence and review findings." |
 | **learn** | "Capture the learnings from this work to `harness/learning/inbox/`." |
-| **bootstrap** | "Bootstrap the harness — populate idioms and state from the project." |
+| **bootstrap** | "Bootstrap the harness — seed corpus (idioms/<stack>/, state/), paired guides (idioms/<stack>/), and sensor commands." |
 | **audit** | "Audit the corpus against the codebase." |
 | **synthesize** | "Synthesize inbox items into the corpus." |
 | **mode** | "Set pacing mode to `<paired\|solo\|autopilot>`." |
 
-The agent is expected to read `harness/README.md`, then `harness/process/<phase>.md` for the active phase, then execute the activities described there using whatever tools it has.
+The agent is expected to read `harness/README.md`, then `harness/guides/process/<phase>.md` for the active phase, then execute the activities described there using whatever tools it has.
 
 ## Capability matrix
 

@@ -46,7 +46,7 @@ The corpus references "the agent's context-clear primitive." For pi, `/compact` 
 
 ## Lazy-by-region — manual
 
-Pi has no glob-based rules system (unlike Cursor's `.cursor/rules/*.mdc`). The **orient** prompt template implements lazy-by-region manually: it reads the touched paths, walks `harness/state/CODEBASE_STATE.md` for matching idioms, and reads them with pi's file-read tool.
+Pi has no glob-based rules system (unlike Cursor's `.cursor/rules/*.mdc`). The **orient** prompt template implements lazy-by-region manually: it reads the touched paths, walks `harness/corpus/state/CODEBASE_STATE.md` for matching idioms, and reads them with pi's file-read tool.
 
 ## Skills as an alternative
 

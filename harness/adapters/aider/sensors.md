@@ -10,7 +10,7 @@ The `/run` and `/test` commands feed their output back into Aider's conversation
 
 ## Per-sensor binding
 
-Sensor commands come from `harness/state/CODEBASE_STATE.md`, populated by the **bootstrap** action.
+Sensor commands come from `harness/corpus/state/CODEBASE_STATE.md`, populated by the **bootstrap** action.
 
 | Sensor | Fires inside | Implementation |
 |---|---|---|

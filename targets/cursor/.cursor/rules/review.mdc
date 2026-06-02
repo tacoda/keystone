@@ -4,7 +4,7 @@ description: Review — semantic correctness check; spec adherence + sequential 
 
 # Review
 
-Semantic correctness check. Read `harness/process/review.md`. Runs *after* the `@verify` gate has passed.
+Semantic correctness check. Read `harness/guides/process/review.md`. Runs *after* the `@verify` gate has passed.
 
 ## Activities
 
@@ -20,15 +20,15 @@ Cursor has no sub-agent parallelism, so this rule runs review concerns **sequent
 
 - Re-read the diff with adversarial eyes. Look for:
   - Edge cases the implementation does not handle.
-  - Error paths that swallow or misroute failure (see `harness/principles/error-handling.md`).
-  - Concurrency / race conditions (see `harness/principles/concurrency.md`).
+  - Error paths that swallow or misroute failure (see `harness/corpus/principles/error-handling.md`).
+  - Concurrency / race conditions (see `harness/corpus/principles/concurrency.md`).
   - Off-by-one, boundary, and null-handling bugs.
 - Cite each finding with `file:line` and the suggested fix.
 
 ### 3. Security review
 
-- Scan the diff for OWASP-Top-10 patterns (see `harness/principles/security-threats.md`).
-- Check secrets handling (see `harness/principles/secrets-management.md`).
+- Scan the diff for OWASP-Top-10 patterns (see `harness/corpus/principles/security-threats.md`).
+- Check secrets handling (see `harness/corpus/principles/secrets-management.md`).
 - Note any input-from-the-network paths that lack validation.
 
 ## Output

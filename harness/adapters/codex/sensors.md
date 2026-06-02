@@ -4,7 +4,7 @@ How sensors fire inside Codex CLI.
 
 ## Execution model
 
-Codex runs shell commands directly. **All sensors run autonomously** — the agent reads tool commands from `harness/state/CODEBASE_STATE.md`, invokes them via shell, and consumes the output. No human paste-and-report loop.
+Codex runs shell commands directly. **All sensors run autonomously** — the agent reads tool commands from `harness/corpus/state/CODEBASE_STATE.md`, invokes them via shell, and consumes the output. No human paste-and-report loop.
 
 How aggressively shell runs without approval depends on the Codex flag chosen at session start:
 
@@ -35,7 +35,7 @@ Pick the mode that matches the harness's pacing mode (see `lifecycle.md` for the
 
 In `paired` mode (default Codex flag), every sensor invocation prompts the user. This is slow but safe. For active development sessions, switch to `solo` or `autopilot` (Codex `--auto-edit` or `--full-auto`).
 
-The **mode** action updates `harness/process/modes.md`; the user is expected to choose the corresponding Codex flag at the *next* session start. Codex does not switch modes mid-session.
+The **mode** action updates `harness/guides/process/modes.md`; the user is expected to choose the corresponding Codex flag at the *next* session start. Codex does not switch modes mid-session.
 
 ## Stale evidence guard
 

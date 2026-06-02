@@ -20,7 +20,7 @@ This is the floor — markdown read on demand. Anything beyond that is an adapte
 
 ## Lazy-by-region — manual
 
-The generic adapter does not have a mechanism to automatically load `harness/idioms/<stack>/` when editing a particular path. The agent must read the **orient** phase explicitly at task start and load the relevant idioms by hand.
+The generic adapter does not have a mechanism to automatically load `harness/corpus/idioms/<stack>/` when editing a particular path. The agent must read the **orient** phase explicitly at task start and load the relevant idioms by hand.
 
 ## Context-reset primitive
 

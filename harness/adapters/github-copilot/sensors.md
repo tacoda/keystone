@@ -10,7 +10,7 @@ In VS Code's chat-only (non-agent) mode, the agent surfaces commands as text and
 
 ## Per-sensor binding
 
-Sensor commands come from `harness/state/CODEBASE_STATE.md`, populated by the **bootstrap** action.
+Sensor commands come from `harness/corpus/state/CODEBASE_STATE.md`, populated by the **bootstrap** action.
 
 | Sensor | Fires inside | Implementation |
 |---|---|---|

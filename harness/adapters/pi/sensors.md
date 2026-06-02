@@ -4,7 +4,7 @@ How sensors fire inside pi.
 
 ## Execution model
 
-Pi runs shell commands directly. **All sensors run autonomously** — the agent reads tool commands from `harness/state/CODEBASE_STATE.md`, invokes them via pi's shell tool, and consumes the output. No human paste-and-report loop required.
+Pi runs shell commands directly. **All sensors run autonomously** — the agent reads tool commands from `harness/corpus/state/CODEBASE_STATE.md`, invokes them via pi's shell tool, and consumes the output. No human paste-and-report loop required.
 
 ## Per-sensor binding
 

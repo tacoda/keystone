@@ -13,7 +13,9 @@ optional/
 
 `<category-id>` is one of the categories defined in `options.go` (e.g. `architecture`, `language`, `testing`). `<label-id>` is one of that category's allowed values (e.g. `hexagonal`, `go`, `tdd`).
 
-Files under `optional/<cat>/<label>/` are copied **as if rooted at the install destination**, so `optional/architecture/hexagonal/harness/principles/hexagonal-architecture.md` lands at `<destDir>/harness/principles/hexagonal-architecture.md`.
+Files under `optional/<cat>/<label>/` are copied **as if rooted at the install destination**, so `optional/architecture/hexagonal/harness/corpus/principles/hexagonal-architecture.md` lands at `<destDir>/harness/corpus/principles/hexagonal-architecture.md`. A paired guide at `optional/architecture/hexagonal/harness/guides/principles/hexagonal-architecture.md` lands at `<destDir>/harness/guides/principles/hexagonal-architecture.md`.
+
+Each opt-in label typically ships two files for every concept — the informational corpus file and the rule-bearing guide. For some labels (e.g., `architecture/mvc`), the bundle also seeds concern-specific files under `corpus/idioms/<label>/` and `guides/idioms/<label>/` (e.g., `models.md`, `controllers.md`, `views.md`).
 
 The `agent` category is **excluded** — agent bundles already live in `targets/<agent>/`.
 

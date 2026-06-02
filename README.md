@@ -1,6 +1,6 @@
 # keystone
 
-A project harness for coding agents. Drops a self-updating corpus of engineering knowledge into your repo, wired to whichever agent you use.
+A project harness for coding agents. Drops a self-updating set of engineering knowledge, rules, and sensors into your repo, wired to whichever agent you use.
 
 > **Status:** working temp name; the product itself is the harness, not the installer.
 
@@ -8,12 +8,17 @@ A project harness for coding agents. Drops a self-updating corpus of engineering
 
 Keystone is a markdown-only **project harness** — no language runtime, no daemon. The `keystone` CLI is a single Go binary with the entire harness embedded; `keystone init` writes two things into your repo:
 
-1. **A corpus** (`harness/`) — five layers of engineering knowledge: principles, idioms, domain, state, process. Plus per-agent bindings under `harness/adapters/<agent>/`.
-2. **An activation file** (the "menu") — `CLAUDE.md`, `AGENTS.md`, `.cursor/rules/*.mdc`, `CONVENTIONS.md`, etc. — depending on your agent. The menu tells the agent to read the cookbook.
+1. **A harness** (`harness/`) — four components:
+   - `guides/` — **rules**. Always loaded. What the agent must do and not do.
+   - `corpus/` — **informational reference**. On-demand. The reasoning behind the rules.
+   - `sensors/` — **automated checks**. Lint, type-check, test, build, drift, coverage.
+   - `learning/` + `archive/` — **flywheels** that keep the harness current.
+   Plus per-agent bindings under `harness/adapters/<agent>/`.
+2. **An activation file** (the "menu") — `CLAUDE.md`, `AGENTS.md`, `.cursor/rules/*.mdc`, `CONVENTIONS.md`, etc. — depending on your agent. The menu tells the agent to read the harness.
 
-After `init`, the binary is no longer required — the corpus and menu are plain markdown files you own.
+After `init`, the binary is no longer required — the harness and menu are plain markdown files you own.
 
-After install, your agent drives a six-phase workflow (spec → planning → implementation → verification → review → release) and two flywheels (Learning adds rules, Pruning removes stale ones).
+After install, your agent drives a six-phase workflow (spec → planning → implementation → verification → review → release) and two flywheels (Learning adds rules and reasoning; Pruning removes stale guides regularly and stale corpus rarely).
 
 ## Install
 
@@ -85,7 +90,7 @@ Stub adapters get a minimal lifecycle file and a working menu — enough to star
 The harness assumes (soft — install runs regardless):
 
 - **A way to track work** — a tracker card (Jira / Linear / GitHub Issues / Asana), a `TODO.md`, or a conversation. The spec phase needs a unit of work to anchor; it doesn't care what tool you use.
-- **Sensors** — lint, type-check, test, build, optionally coverage. Their commands live in `harness/state/CODEBASE_STATE.md`.
+- **Sensor commands** — lint, type-check, test, build, optionally coverage. Recorded in `harness/corpus/state/CODEBASE_STATE.md`.
 - **PR workflow** — the review phase spawns review agents on a diff; the release phase opens the PR.
 - **CI pipeline** (ideally CD) — release assumes CI runs on PRs and CD triggers on merge.
 
@@ -93,18 +98,18 @@ Missing one degrades the corresponding phase but does not break the harness.
 
 ## After install
 
-1. Read `harness/README.md` — five-minute orientation to the corpus.
-2. Ask your agent to run the **bootstrap** action — it populates `harness/state/CODEBASE_STATE.md` and `harness/idioms/<your-stack>/` from your project.
+1. Read `harness/README.md` — four-component orientation (corpus, guides, sensors, flywheels).
+2. Ask your agent to run the **bootstrap** action — it seeds `harness/corpus/state/CODEBASE_STATE.md`, `harness/corpus/idioms/<your-stack>/`, the paired `harness/guides/idioms/<your-stack>/`, and confirms the sensor commands.
 3. Commit `harness/` and any agent files the installer created.
 
-From then on, every task flows through the six phases, and the Learning flywheel grows the corpus as your project teaches you new patterns.
+From then on, every task flows through the six phases, and the Learning flywheel grows the harness as your project teaches you new patterns (rules into `guides/`, supplemental reasoning into `corpus/`).
 
 ## Layout
 
 ```
 keystone/
 ├── README.md                # this file
-├── main.go                  # CLI entrypoint + //go:embed all:harness all:targets
+├── main.go                  # CLI entrypoint + //go:embed all:harness all:targets all:optional
 ├── init.go                  # `keystone init` command
 ├── scaffold.go              # walk embedded FS, write files to disk
 ├── detect.go                # agent detection from marker files
@@ -113,16 +118,25 @@ keystone/
 ├── install.ps1              # PowerShell bootstrap
 ├── .goreleaser.yml          # cross-compile + Homebrew tap publish
 ├── .github/workflows/release.yml
-├── harness/                 # the corpus skeleton dropped into consumer projects
+├── harness/                 # the harness dropped into consumer projects
 │   ├── README.md
-│   ├── principles/          # universal engineering rules
-│   ├── idioms/              # stack-specific patterns (per-project)
-│   ├── domain/              # project-specific business rules (template)
-│   ├── state/               # empirical map of the codebase (template)
-│   ├── process/             # six workflow phases + sensors + modes
+│   ├── corpus/              # informational reference (on-demand)
+│   │   ├── principles/      # universal engineering knowledge
+│   │   ├── idioms/          # stack-specific patterns (per-project)
+│   │   ├── domain/          # project-specific business knowledge (template)
+│   │   └── state/           # empirical map of the codebase (template)
+│   ├── guides/              # rules (always loaded)
+│   │   ├── principles/      # rule extracts from corpus/principles/
+│   │   ├── idioms/          # rule extracts from corpus/idioms/
+│   │   ├── domain/          # business-rule constraints
+│   │   └── process/         # six workflow phases + modes
+│   ├── sensors/             # automated checks (lint, type-check, test, etc.)
 │   ├── adapters/            # per-agent bindings
 │   ├── learning/            # Learning flywheel staging
 │   └── archive/             # Pruning flywheel destination
+├── optional/                # opt-in content seeded by --architecture / --compliance / etc.
+│   ├── architecture/<label>/harness/{corpus,guides}/...
+│   └── compliance/<label>/harness/{corpus,guides}/...
 └── targets/                 # per-agent menu files installed into consumer projects
     ├── _generic/            # universal AGENTS.md fallback
     ├── claude-code/         # CLAUDE.md
@@ -130,7 +144,7 @@ keystone/
     ├── pi/                  # AGENTS.md + .pi/prompts/*.md slash templates
     ├── cursor/              # .cursor/rules/000-harness.mdc
     ├── aider/               # CONVENTIONS.md
-    ├── github-copilot-cli/  # .github/copilot-instructions.md
+    ├── github-copilot/      # .github/copilot-instructions.md
     ├── continue/            # .continuerules
     ├── cline/               # paste-into-settings text
     └── goose/               # .goosehints

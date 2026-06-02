@@ -1,13 +1,13 @@
 ## Keystone harness
 
-This project uses a **keystone harness**. The corpus at [`harness/`](harness/) defines the engineering knowledge and the six-phase workflow you operate within.
+This project uses a **keystone harness**. The harness at [`harness/`](harness/) defines the engineering knowledge, rules, sensors, and self-update flywheels you operate within.
 
 **Read first:**
-- [`harness/README.md`](harness/README.md) — five layers (principles, idioms, domain, state, process) and the lifecycle.
+- [`harness/README.md`](harness/README.md) — four components (corpus, guides, sensors, flywheels), the lifecycle, and the iron laws.
 - [`harness/adapters/_generic/`](harness/adapters/_generic/) — fallback bindings used when no agent-specific adapter exists.
-- [`harness/domain/`](harness/domain/) — business rules for this project.
+- [`harness/corpus/domain/`](harness/corpus/domain/) — business rules for this project.
 
-**Lifecycle actions:** `spec` · `orient` · `check-drift` · `verify` · `review` · `learn` (plus `bootstrap`, `audit`, `synthesize`, `mode`). Invoke by asking in natural language; read the matching `harness/process/<phase>.md` for each action — see [`harness/adapters/_generic/lifecycle.md`](harness/adapters/_generic/lifecycle.md).
+**Lifecycle actions:** `spec` · `orient` · `check-drift` · `verify` · `review` · `learn` (plus `bootstrap`, `audit`, `synthesize`, `mode`). Invoke by asking in natural language; read the matching `harness/guides/process/<phase>.md` for each action — see [`harness/adapters/_generic/lifecycle.md`](harness/adapters/_generic/lifecycle.md).
 
 **Iron laws** — non-negotiable across every phase:
 

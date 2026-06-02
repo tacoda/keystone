@@ -25,11 +25,11 @@ Copilot loads:
 - **Currently-open editor buffers** (VS Code only) — visible context for inline suggestions.
 - **Files referenced in the chat** — read on demand when the agent or user names them.
 
-The harness places the short menu in `.github/copilot-instructions.md` and lets the lifecycle actions pull in `harness/principles/<file>.md`, `harness/idioms/<stack>/*.md`, and `harness/process/<phase>.md` as needed. Loading the entire corpus into the always-loaded menu would dilute every chat.
+The harness places the short menu in `.github/copilot-instructions.md` and lets the lifecycle actions pull in `harness/corpus/principles/<file>.md`, `harness/corpus/idioms/<stack>/*.md`, and `harness/guides/process/<phase>.md` as needed. Loading the entire corpus into the always-loaded menu would dilute every chat.
 
 ## Lazy-by-region — not native
 
-Copilot has no glob-based file auto-attachment (unlike Cursor's `.mdc` rules). The **orient** action implements lazy-by-region inside the chat: the agent reads `harness/state/CODEBASE_STATE.md` to find the stack for the touched paths, then reads `harness/idioms/<stack>/*.md`.
+Copilot has no glob-based file auto-attachment (unlike Cursor's `.mdc` rules). The **orient** action implements lazy-by-region inside the chat: the agent reads `harness/corpus/state/CODEBASE_STATE.md` to find the stack for the touched paths, then reads `harness/corpus/idioms/<stack>/*.md`.
 
 For VS Code specifically, the open-file context partially compensates — if the user has the relevant idiom files open in the editor, Copilot uses them as context. But this is incidental, not architectural.
 
@@ -42,11 +42,11 @@ After any **synthesize** or **audit** writes changed the corpus, reset the conte
 
 ## Domain / state / process loading
 
-- `domain/` — read at the start of any task via "read harness/domain/" or similar in the chat.
+- `domain/` — read at the start of any task via "read harness/corpus/domain/" or similar in the chat.
 - `state/CODEBASE_STATE.md` — read by the **orient** action.
 - `process/<phase>.md` — read by the matching lifecycle action.
 
-The user can pre-warm a session by asking Copilot to "read harness/README.md, harness/domain/, and harness/state/CODEBASE_STATE.md" at the start. This brings the always-relevant context into the chat without ceremony.
+The user can pre-warm a session by asking Copilot to "read harness/README.md, harness/corpus/domain/, and harness/corpus/state/CODEBASE_STATE.md" at the start. This brings the always-relevant context into the chat without ceremony.
 
 ## VS Code extension considerations
 

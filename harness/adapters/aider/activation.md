@@ -37,8 +37,8 @@ The `read:` list auto-attaches files at session start *without* including them i
 Aider's load surface is intentionally narrow:
 
 - **Auto-loaded at session start:** files in `.aider.conf.yml`'s `read:` list. The harness puts the menu pointer here.
-- **Manually attached:** `/add <path>` adds a file to the editable set; `/read-only <path>` adds it as reference. Use these to bring in `harness/principles/<file>.md`, `harness/idioms/<stack>/*.md`, `harness/process/<phase>.md` as the work needs.
-- **Read on demand:** Aider can read files mentioned in the chat (it has file-read access). Inline reference to `harness/state/CODEBASE_STATE.md` will cause it to read that file.
+- **Manually attached:** `/add <path>` adds a file to the editable set; `/read-only <path>` adds it as reference. Use these to bring in `harness/corpus/principles/<file>.md`, `harness/corpus/idioms/<stack>/*.md`, `harness/guides/process/<phase>.md` as the work needs.
+- **Read on demand:** Aider can read files mentioned in the chat (it has file-read access). Inline reference to `harness/corpus/state/CODEBASE_STATE.md` will cause it to read that file.
 
 The pattern this harness recommends: keep the read-set small (menu + harness/README.md) and use the lifecycle actions to instruct Aider to read each phase doc and the matching idioms when they are needed.
 
@@ -47,8 +47,8 @@ The pattern this harness recommends: keep the read-set small (menu + harness/REA
 Aider has no glob-based auto-attachment. Region-scoped idiom loading is done by the **orient** action, which:
 
 1. Looks at the files the user is editing.
-2. Cross-references `harness/state/CODEBASE_STATE.md` to find the stack and the idiom folder.
-3. Reads `harness/idioms/<stack>/*.md` and brings those rules into the conversation.
+2. Cross-references `harness/corpus/state/CODEBASE_STATE.md` to find the stack and the idiom folder.
+3. Reads `harness/corpus/idioms/<stack>/*.md` and brings those rules into the conversation.
 
 The user can streamline this by adding the stack-relevant idiom files to `.aider.conf.yml`'s `read:` list for sessions that touch one stack heavily.
 
@@ -64,7 +64,7 @@ After a flywheel write that changed any file in Aider's read-set, run `/clear` a
 
 - `domain/` — relevant at task start; the orient action's first read is the domain layer.
 - `state/CODEBASE_STATE.md` — loaded by the **orient** action.
-- `process/<phase>.md` — loaded by the lifecycle action when the agent enters that phase. The user can pre-attach with `/read-only harness/process/<phase>.md`.
+- `process/<phase>.md` — loaded by the lifecycle action when the agent enters that phase. The user can pre-attach with `/read-only harness/guides/process/<phase>.md`.
 
 ## Capability gaps
 

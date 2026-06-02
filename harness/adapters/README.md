@@ -1,6 +1,8 @@
 # Adapters
 
-Per-agent bindings. The corpus (principles, idioms, domain, state, process) is agent-agnostic — it speaks in **lifecycle actions** (`orient`, `verify`, `learn`, etc.). An adapter binds those abstract actions to a specific coding agent's invocation surface: slash commands, rules files, CLI subcommands, instructions fields, etc.
+Per-agent bindings. The harness (corpus, guides, sensors, flywheels) is agent-agnostic — it speaks in **lifecycle actions** (`orient`, `verify`, `learn`, etc.). An adapter binds those abstract actions to a specific coding agent's invocation surface: slash commands, rules files, CLI subcommands, instructions fields, etc.
+
+It also describes how the adapter projects **guides** into the agent's rules surface (so they load ambient) and how the agent reaches **corpus** files on demand.
 
 ## What an adapter ships
 
@@ -10,7 +12,7 @@ Each `adapters/<agent>/` directory contains three files:
 |---|---|
 | `lifecycle.md` | How each abstract action (`orient`, `check-drift`, `verify`, `review`, `learn`, `bootstrap`, `audit`, `synthesize`, `migrate`, `mode`) is invoked. |
 | `sensors.md` | How sensors actually fire — autonomous shell execution, surfaced commands for the human to run, or no-op with checklist. |
-| `activation.md` | Where ambient corpus content is loaded from (root file convention), how lazy-by-region works, and the agent's context-reset primitive. |
+| `activation.md` | Where ambient **guide** content is projected (root file convention or rules-surface mechanism), how lazy-by-region works for `guides/idioms/`, how the agent reaches **corpus** files on demand, and the agent's context-reset primitive. |
 
 ## Supported agents
 
@@ -40,12 +42,12 @@ Each adapter calls out which of these apply.
 ## Adding a new adapter
 
 1. Create `adapters/<agent>/` with the three files above.
-2. Fill in the **lifecycle table** — every action in `harness/process/` must have a row, even if the row says "not supported on this agent."
-3. Fill in the **sensors table** — every sensor in `harness/process/sensors.md` gets a binding (autonomous / surfaced / no-op).
-4. Fill in **activation** — where ambient content loads from, glob/region matching mechanism, context-reset primitive.
+2. Fill in the **lifecycle table** — every action in `harness/guides/process/` must have a row, even if the row says "not supported on this agent."
+3. Fill in the **sensors table** — every sensor in `harness/sensors/` gets a binding (autonomous / surfaced / no-op).
+4. Fill in **activation** — where ambient **guide** content projects to, how the agent reaches **corpus** files on demand, glob/region matching for `guides/idioms/`, context-reset primitive.
 5. Add a row to the table above.
-6. Add the matching installable artifacts to `targets/<agent>/` at repo root (separate from the corpus — this is what gets dropped into a consumer project).
+6. Add the matching installable artifacts to `targets/<agent>/` at repo root (separate from the harness — this is what gets dropped into a consumer project).
 
-## The plugin/corpus separation invariant still applies
+## The plugin/harness separation invariant still applies
 
-`harness/adapters/<agent>/` is documentation about how the agent binds to the corpus. The actual artifacts that get installed into a consumer's project live in `targets/<agent>/` at repo root. Do not duplicate content between the two; the adapter doc *describes*, the target *ships*.
+`harness/adapters/<agent>/` is documentation about how the agent binds to the harness. The actual artifacts that get installed into a consumer's project live in `targets/<agent>/` at repo root. Do not duplicate content between the two; the adapter doc *describes*, the target *ships*.

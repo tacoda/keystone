@@ -17,7 +17,7 @@ Continue reads `.continuerules` (and `config.json` / `config.yaml` for richer cu
 | **bootstrap** | Freeform ask. |
 | **audit** | Freeform ask. |
 | **synthesize** | Freeform ask. |
-| **mode** | Edit `harness/process/modes.md` directly. |
+| **mode** | Edit `harness/guides/process/modes.md` directly. |
 
 ## Capability matrix
 

@@ -4,7 +4,7 @@ description: Learn — capture insights from this work into the inbox
 
 # Learn
 
-Post-merge capture. Read `harness/process/release.md` for the full activities. The Learning flywheel is **additive** — this rule writes candidates to `harness/learning/inbox/` for later promotion via the **synthesize** action.
+Post-merge capture. Read `harness/guides/process/release.md` for the full activities. The Learning flywheel is **additive** — this rule writes candidates to `harness/learning/inbox/` for later promotion via the **synthesize** action.
 
 ## When to capture
 
@@ -12,7 +12,7 @@ A learning candidate is worth recording when:
 
 - The work surfaced a **gap in the corpus** — a principle, idiom, or process step that would have prevented a mistake or sped up the work.
 - A **review finding** (functional or security) pointed at a pattern the corpus does not yet name.
-- A **state drift** revealed that `harness/state/CODEBASE_STATE.md` is wrong or incomplete.
+- A **state drift** revealed that `harness/corpus/state/CODEBASE_STATE.md` is wrong or incomplete.
 - A **decision** was made that future-you should know about — an ADR-worthy moment.
 
 Routine work does not require a learning capture. Empty turns are legitimate.

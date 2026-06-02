@@ -140,14 +140,16 @@ func printNextSteps(agent string) {
 
   ▶ Next: run the bootstrap action in %s.
 
-     Bootstrap reads your codebase and fills in harness/state/CODEBASE_STATE.md
-     and harness/idioms/<your-stack>/ so the corpus reflects your project.
+     Bootstrap reads your codebase and seeds harness/corpus/state/CODEBASE_STATE.md,
+     harness/corpus/idioms/<your-stack>/, and the paired harness/guides/idioms/<your-stack>/
+     so the harness reflects your project. It also confirms the sensor commands.
      See harness/adapters/%s/lifecycle.md for how to invoke it.
 
 Also:
 
-  • Read harness/README.md for an overview of the five layers.
-  • Review harness/state/INSTALL_PROFILE.md and adjust if needed.
+  • Read harness/README.md for an overview of the four components
+    (corpus, guides, sensors, flywheels).
+  • Review harness/corpus/state/INSTALL_PROFILE.md and adjust if needed.
   • Commit harness/ and any agent-specific files this installer created.
 `, agent, agent, agentTargetDir(agent))
 }

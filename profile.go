@@ -8,11 +8,11 @@ import (
 	"time"
 )
 
-// writeInstallProfile renders sel as harness/state/INSTALL_PROFILE.md under
-// destDir. Overwrites any existing file (the file is install-scoped — re-running
-// init should reset it).
+// writeInstallProfile renders sel as harness/corpus/state/INSTALL_PROFILE.md
+// under destDir. Overwrites any existing file (the file is install-scoped —
+// re-running init should reset it).
 func writeInstallProfile(destDir string, sel Selections) error {
-	path := filepath.Join(destDir, "harness", "state", "INSTALL_PROFILE.md")
+	path := filepath.Join(destDir, "harness", "corpus", "state", "INSTALL_PROFILE.md")
 	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
 		return err
 	}

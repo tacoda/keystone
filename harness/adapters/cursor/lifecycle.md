@@ -14,10 +14,10 @@ Cursor's native invocation surface is the chat — there are no slash commands. 
 | **verify** | `@verify` before commit | `.cursor/rules/verify.mdc` |
 | **review** | `@review` after verification gate | `.cursor/rules/review.mdc` |
 | **learn** | `@learn` post-merge | `.cursor/rules/learn.mdc` |
-| **bootstrap** | "Bootstrap the harness" — one-time | reads `harness/process/` directly |
+| **bootstrap** | "Bootstrap the harness" — one-time | reads `harness/guides/process/` directly |
 | **audit** | `@audit` or "audit the corpus" | inline / phase doc |
 | **synthesize** | "Synthesize the inbox" | reads `harness/learning/inbox/` |
-| **mode** | Edit `harness/process/modes.md` directly | n/a |
+| **mode** | Edit `harness/guides/process/modes.md` directly | n/a |
 
 ## Why rules, not commands
 

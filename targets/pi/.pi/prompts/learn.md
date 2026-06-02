@@ -4,7 +4,7 @@ description: Capture novel judgment calls to the Learning flywheel inbox
 
 Run the **learn** action of the project harness.
 
-Read `harness/process/release.md` (the "Capture learnings" section).
+Read `harness/guides/process/release.md` (the "Capture learnings" section).
 
 If during this work you encountered a situation not covered by the corpus and made a judgment call, write a candidate to `harness/learning/inbox/<timestamp>-<slug>.md` with this shape:
 

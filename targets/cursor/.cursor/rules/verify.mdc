@@ -4,11 +4,11 @@ description: Verify gate — run sensors, no completion claims without fresh evi
 
 # Verify
 
-Mechanical correctness gate. Read `harness/process/verification.md`. Iron law: **no completion claims without fresh verification evidence — sensors must have run this turn.**
+Mechanical correctness gate. Read `harness/guides/process/verification.md`. Iron law: **no completion claims without fresh verification evidence — sensors must have run this turn.**
 
 ## Sensors to run
 
-Read the commands from `harness/state/CODEBASE_STATE.md`. For each defined sensor, **run it in the current turn** via the shell tool. Do not rely on prior runs.
+Read the commands from `harness/corpus/state/CODEBASE_STATE.md`. For each defined sensor, **run it in the current turn** via the shell tool. Do not rely on prior runs.
 
 | Sensor | Command source | Required |
 |---|---|---|

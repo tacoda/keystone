@@ -31,8 +31,8 @@ Codex has no in-session `/clear`. To reset context after a flywheel write (**syn
 
 ## Lazy-by-region — manual
 
-Codex has no glob-based rules system. The **orient** action implements lazy-by-region manually: the agent reads the touched paths, walks `harness/state/CODEBASE_STATE.md` for matching idioms, and reads them on demand.
+Codex has no glob-based rules system. The **orient** action implements lazy-by-region manually: the agent reads the touched paths, walks `harness/corpus/state/CODEBASE_STATE.md` for matching idioms, and reads them on demand.
 
 ## Approval modes ↔ pacing modes
 
-Codex's approval flags (`--ask-for-approval`, `--auto-edit`, `--full-auto`) are the closest analog to the harness's pacing modes. The flag is chosen at session start, not switched mid-session — so to change pacing mid-task, the user updates `harness/process/modes.md` and starts a new Codex session with the matching flag.
+Codex's approval flags (`--ask-for-approval`, `--auto-edit`, `--full-auto`) are the closest analog to the harness's pacing modes. The flag is chosen at session start, not switched mid-session — so to change pacing mid-task, the user updates `harness/guides/process/modes.md` and starts a new Codex session with the matching flag.

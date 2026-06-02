@@ -13,7 +13,7 @@ The per-command approval in agent mode is Cursor's only autonomy lever. Even in 
 
 ## Per-sensor binding
 
-The sensor commands are read from `harness/state/CODEBASE_STATE.md` (populated by the **bootstrap** action). Cursor invokes them via the shell tool when in agent mode.
+The sensor commands are read from `harness/corpus/state/CODEBASE_STATE.md` (populated by the **bootstrap** action). Cursor invokes them via the shell tool when in agent mode.
 
 | Sensor | Fires inside | Implementation |
 |---|---|---|

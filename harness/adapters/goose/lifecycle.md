@@ -17,7 +17,7 @@ Block's Goose reads `.goosehints` at the repo root (and global config). Lifecycl
 | **bootstrap** | "Bootstrap the harness." |
 | **audit** | "Audit the corpus." |
 | **synthesize** | "Synthesize the inbox." |
-| **mode** | Edit `harness/process/modes.md` directly. |
+| **mode** | Edit `harness/guides/process/modes.md` directly. |
 
 ## Capability matrix
 

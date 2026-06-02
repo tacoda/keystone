@@ -11,8 +11,10 @@ import (
 // tree into destDir based on the user's selections.
 //
 // Layout convention: optional/<category-id>/<label-id>/<...mirrors destDir...>
-// e.g. optional/architecture/hexagonal/harness/principles/hexagonal.md →
-//      <destDir>/harness/principles/hexagonal.md
+// e.g. optional/architecture/hexagonal/harness/corpus/principles/hexagonal.md →
+//      <destDir>/harness/corpus/principles/hexagonal.md
+// (Paired guide files at optional/.../harness/guides/principles/hexagonal.md
+// land at <destDir>/harness/guides/principles/hexagonal.md.)
 //
 // `agent` is excluded because the agent-specific bundle is already handled by
 // the `targets/` copy in init.go.

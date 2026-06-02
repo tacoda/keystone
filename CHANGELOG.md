@@ -2,6 +2,60 @@
 
 All notable changes to keystone are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); the project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and is pre-1.0 (minor versions may include breaking changes).
 
+## [0.3.0] — 2026-06-02
+
+A model overhaul. The harness now has **four components** instead of "the corpus plus three roles":
+
+- **Corpus** — informational reference. **Loaded on-demand.**
+- **Guides** — rules. **Always loaded.** Surfaced into each agent's rules surface (`.cursor/rules`, `CLAUDE.md` directives, etc.).
+- **Sensors** — automated checks. Promoted to a top-level directory.
+- **Flywheels** — Learning and Pruning, asymmetric: Pruning churns guides regularly, corpus rarely.
+
+The split is the point: rules are short and high-value-per-token; corpus is long-form. Always-loading guides keeps the agent honest without crowding context with reasoning the situation may not need.
+
+### Added
+
+- **`harness/corpus/`** — informational layer. Houses `principles/`, `idioms/`, `domain/`, `state/`. Read on-demand via forward-links from paired guides, or when process explicitly references a file.
+- **`harness/guides/`** — rule layer. Houses `principles/`, `idioms/`, `domain/`, `process/`. Always loaded. Enforced by the drift sensor.
+- **`harness/sensors/`** — promoted from `harness/process/sensors.md` (one file) into one file per sensor: `lint`, `type-check`, `test`, `build`, `drift`, `coverage`, `risk-fingerprint`, `traffic-topology`, `state-region`, `commit-message`, `tracker-card-fetcher`, `spec-adherence`, plus a README index.
+- **Paired guide files for every principle** that previously carried `## IRON LAW` / `## GOLDEN RULES` sections. The rule sections moved into `harness/guides/principles/<name>.md`; the original corpus file keeps the reasoning, anti-patterns, and references, plus a forward-link.
+- **Concern-specific MVC idioms** seeded when `--architecture mvc` is selected: `corpus/idioms/mvc/{models,controllers,views}.md` with paired `guides/idioms/mvc/{models,controllers,views}.md` covering "the model is not a row," "controllers translate, they do not decide," and "views render, they do not compute."
+- **Learning flywheel classification.** The **synthesize** action now explicitly routes each inbox candidate as **rule** (lands in `guides/`) or **information** (lands in `corpus/`). The inbox frontmatter carries a `candidate_kind` hint; synthesize confirms or overrides.
+- **Pruning flywheel asymmetry.** **audit** runs in two passes — a regular pass over guides (rules churn with the codebase) and a rare pass over corpus (only when design / strategy / ideals have moved on).
+- **`harness/guides/idioms/`** and **`harness/guides/domain/`** READMEs documenting the rule-extraction format and the bootstrap/learning population path.
+
+### Changed
+
+- **Bootstrap action** now seeds three things: corpus (`idioms/<stack>/`, `state/`), paired guides (`idioms/<stack>/`), and sensor commands. Adapter lifecycle docs updated across every supported agent.
+- **`optional/<cat>/<label>/` bundles** now ship corpus and guides separately. Selecting an architecture or compliance label installs both the explanatory corpus file and the rule-bearing guide file.
+- **Activation model.** Corpus is **on-demand only** — the agent reads a corpus file when it follows a forward-link from a guide, when process explicitly names one, or when researching a topic. Guides remain ambient.
+- **Adapter framing.** Every adapter's `activation.md` now distinguishes "project this guide into the agent's rules surface" (ambient) from "reach this corpus file when needed" (on-demand).
+- **Menu files** (CLAUDE.md, AGENTS.md, .continuerules, .goosehints, CONVENTIONS.md, copilot-instructions.md, etc.) reframed to point at the four components and call out the always-loaded vs. on-demand split.
+- **`harness/state/INSTALL_PROFILE.md`** now lives at `harness/corpus/state/INSTALL_PROFILE.md`. `profile.go` updated.
+
+### Removed
+
+- **The "Discipline" role.** It was always an audit action, never a peer of guides/sensors/flywheels. Folded into the audit/synthesize lifecycle.
+- **The "corpus = the whole thing" framing.** `corpus` now names a specific component (informational reference). What used to be called "the corpus" is now called "the harness."
+
+### Migration from 0.2.0
+
+Path moves for hand-references inside any project that has installed an earlier version:
+
+| Old path | New path |
+|---|---|
+| `harness/principles/` | `harness/corpus/principles/` |
+| `harness/idioms/` | `harness/corpus/idioms/` |
+| `harness/domain/` | `harness/corpus/domain/` |
+| `harness/state/` | `harness/corpus/state/` |
+| `harness/process/<phase>.md` | `harness/guides/process/<phase>.md` |
+| `harness/process/sensors.md` | `harness/sensors/<sensor-name>.md` (one file per sensor) + `harness/sensors/README.md` |
+| `harness/state/INSTALL_PROFILE.md` | `harness/corpus/state/INSTALL_PROFILE.md` |
+
+Each principle file previously containing `## IRON LAW` / `## GOLDEN RULES` sections has had those sections moved into a paired `harness/guides/principles/<name>.md`. The corpus file now ends with a forward-link to the guide. If a project has extended a principle file in-place with custom rule sections, hand-port those sections to the matching guide file.
+
+The internal classification convention is: **rules go in `guides/`, reasoning goes in `corpus/`.** When in doubt during Learning flywheel reviews, default to corpus — adding a guide narrows the agent's behavior across the whole project, so the bar should be higher than adding context.
+
 ## [0.2.0] — 2026-06-01
 
 A second pass focused on three things: deepening the corpus, broadening the install-time intent surface, and making installs safe to re-run on existing projects.

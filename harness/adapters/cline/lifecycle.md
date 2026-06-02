@@ -19,7 +19,7 @@ Lifecycle actions are invoked by asking the agent.
 | **bootstrap** | "Bootstrap the harness." |
 | **audit** | "Audit the corpus." |
 | **synthesize** | "Synthesize the inbox." |
-| **mode** | Edit `harness/process/modes.md` directly. |
+| **mode** | Edit `harness/guides/process/modes.md` directly. |
 
 ## Capability matrix
 
