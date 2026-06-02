@@ -975,7 +975,7 @@
     </div>
     <div class="layer l3">
       <div class="layer-cell"><span class="layer-name">sensors</span></div>
-      <div class="layer-cell"><span class="layer-desc"><strong style="color: var(--text);">Automated checks.</strong> 12 sensors in <code style="color: var(--accent3);">sensors/</code>: lint, type-check, test, build, drift, coverage, risk-fingerprint, traffic-topology, state-region, commit-message, tracker-card-fetcher, spec-adherence. Each declares trigger, inputs, exit condition, output, state writes.</span></div>
+      <div class="layer-cell"><span class="layer-desc"><strong style="color: var(--text);">Automated checks.</strong> 14 sensors in <code style="color: var(--accent3);">sensors/</code>: lint, type-check, test, build, drift, coverage, risk-fingerprint, traffic-topology, state-region, commit-message, tracker-card-fetcher, spec-adherence, review-functional, review-security. Each declares <strong style="color: var(--text);">kind</strong> (inferential / computational), trigger, inputs, exit condition, output, state writes.</span></div>
       <div class="layer-cell"><span class="layer-author">Lead engineer + adapter</span></div>
       <div class="layer-cell"><span class="layer-act">Invoked · fires inside lifecycle actions at phase boundaries</span></div>
     </div>
@@ -989,6 +989,41 @@
 
   <p style="font-size: 0.78rem; color: var(--muted); font-family: var(--mono); margin-top: 16px; line-height: 1.7;">
     The corpus/guides split is the central move in 0.3.0. Rules are short and high-value-per-token, so they live always-loaded in <code style="color: var(--accent);">guides/</code>. Long-form reasoning sits in <code style="color: var(--accent2);">corpus/</code> and is reached only when an agent needs the <em>why</em> behind a rule — see <strong style="color: var(--text);">Context Budgeting</strong> below.
+  </p>
+</section>
+
+<!-- Guide & Sensor Kinds -->
+<section>
+  <div class="section-label">Guide &amp; Sensor Kinds — new in 0.5.0</div>
+  <p style="font-size: 0.85rem; color: var(--muted); line-height: 1.7; margin-bottom: 20px;">
+    Every guide and every sensor declares a <strong style="color: var(--text);">kind</strong> in its frontmatter. The kind says <em>how</em> the guidance or check is produced — by agent reasoning, or by deterministic execution. Kind is orthogonal to the four components: a guide is still a guide and a sensor is still a sensor; the kind tells you what kind of work it does. <strong style="color: var(--text);">Bootstrap inventories both kinds</strong>, so post-bootstrap, every applicable guide and sensor is recorded in <code style="color: var(--accent2);">corpus/state/CODEBASE_STATE.md</code>.
+  </p>
+
+  <div class="action-grid">
+    <div class="action">
+      <span class="action-tag">Inferential</span>
+      <h3 style="color: var(--accent);">Inferential guide</h3>
+      <p>Natural-language rules an agent reasons about. Markdown under <code style="color: var(--accent);">guides/principles/</code>, <code style="color: var(--accent);">guides/idioms/&lt;stack&gt;/</code>, <code style="color: var(--accent);">guides/domain/</code>, <code style="color: var(--accent);">guides/process/</code>. This is what guides have been historically; it remains the default kind.</p>
+    </div>
+    <div class="action">
+      <span class="action-tag">Computational</span>
+      <h3 style="color: var(--accent);">Computational guide</h3>
+      <p>Deterministic ambient enforcement that does not depend on agent reasoning — a language server giving live type/error feedback, an editor formatter, a pre-save linter rule. Lives under <code style="color: var(--accent);">guides/computational/</code>; populated by bootstrap based on what the stack supports.</p>
+    </div>
+    <div class="action">
+      <span class="action-tag">Inferential</span>
+      <h3 style="color: var(--accent3);">Inferential sensor</h3>
+      <p>A check produced by an agent reasoning over the code or spec. Includes <code style="color: var(--accent3);">review-functional</code> and <code style="color: var(--accent3);">review-security</code> (an agent reviews the diff) and <code style="color: var(--accent3);">spec-adherence</code> (walks AC against the diff). Bootstrap records which inferential sensors the active adapter can run.</p>
+    </div>
+    <div class="action">
+      <span class="action-tag">Computational</span>
+      <h3 style="color: var(--accent3);">Computational sensor</h3>
+      <p>A check produced by deterministic execution — a binary, script, or library returns a result that does not depend on agent reasoning. Includes <code style="color: var(--accent3);">lint</code>, <code style="color: var(--accent3);">type-check</code>, <code style="color: var(--accent3);">test</code>, <code style="color: var(--accent3);">build</code>, <code style="color: var(--accent3);">drift</code>, <code style="color: var(--accent3);">coverage</code>, and the rest of the deterministic family.</p>
+    </div>
+  </div>
+
+  <p style="font-size: 0.78rem; color: var(--muted); font-family: var(--mono); margin-top: 16px; line-height: 1.7;">
+    The kind classifies the guide or sensor, not the thing it is about. An inferential rule about <em>how to write good TypeScript types</em> lives under <code style="color: var(--accent);">guides/idioms/typescript/</code>, not <code style="color: var(--accent);">guides/computational/</code> — even though the underlying enforcement (a TS language server) is computational. The folder reflects the guide's mechanism; the LSP entry lives separately. Anything a computational guide needs at install time (a config file, a binary, an agent setting) is exposed as an option on <code style="color: var(--accent);">keystone init</code> rather than scaffolded silently — <strong style="color: var(--text);">bootstrap inventories, install opts in</strong>.
   </p>
 </section>
 
@@ -1345,7 +1380,7 @@
     <div class="action hw-bootstrap">
       <span class="action-tag">Day 1</span>
       <h3>bootstrap</h3>
-      <p>Initial audit of a fresh install. Detects stack, frameworks, and libraries; seeds paired <code style="color: var(--accent);">corpus/idioms/&lt;stack&gt;/</code> + <code style="color: var(--accent);">guides/idioms/&lt;stack&gt;/</code>, initializes <code style="color: var(--accent);">corpus/state/</code> (including the Frameworks &amp; libraries table), confirms sensor commands.</p>
+      <p>Initial audit of a fresh install. Detects stack, frameworks, and libraries; seeds paired <code style="color: var(--accent);">corpus/idioms/&lt;stack&gt;/</code> + <code style="color: var(--accent);">guides/idioms/&lt;stack&gt;/</code>, initializes <code style="color: var(--accent);">corpus/state/</code> (including the Frameworks &amp; libraries table), confirms sensor commands, and <strong style="color: var(--text);">inventories guides and sensors of both kinds</strong> — populates <code style="color: var(--accent);">guides/computational/</code> with the language servers and formatters the stack supports, and records which inferential sensors the active adapter can run.</p>
     </div>
     <div class="action hw-audit">
       <span class="action-tag">Periodic</span>
