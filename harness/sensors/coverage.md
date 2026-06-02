@@ -1,3 +1,7 @@
+---
+kind: computational
+---
+
 # Sensor: coverage
 
 Reads test coverage and updates the State layer.

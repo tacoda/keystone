@@ -19,7 +19,7 @@ Lifecycle actions are invoked by **asking in chat**. Cline / Roo Code have no sl
 | **verify** | "Run the verify action." | Cline executes sensor commands directly via its shell tool. |
 | **review** | "Run the review action." | Cline walks the diff against spec AC, then runs functional and security review concerns **sequentially**. |
 | **learn** | "Capture learnings from this work." | Cline writes a candidate to `harness/learning/inbox/<timestamp>-<slug>.md`. |
-| **bootstrap** | "Bootstrap the harness." | One-time; detects stack, frameworks, and libraries; seeds corpus (idioms/<stack>/, state/), paired guides (idioms/<stack>/), and confirms sensor commands. |
+| **bootstrap** | "Bootstrap the harness." | One-time; detects stack, frameworks, and libraries; seeds corpus (idioms/<stack>/, state/), paired guides (idioms/<stack>/); confirms sensor commands; inventories computational guides (LSPs, formatters, editor enforcement) into `guides/computational/`; classifies sensors by kind. Post-bootstrap, every applicable guide and sensor is recorded in `corpus/state/CODEBASE_STATE.md`. |
 | **audit** | "Audit the harness." | Full Learning + Pruning flywheel pass. |
 | **synthesize** | "Synthesize the inbox." | Promotes inbox items into the right corpus and/or guide. |
 | **mode** | Edit `harness/guides/process/modes.md` directly. | Cline's autonomy is configured via auto-approve toggles, not the harness mode file; see below. |

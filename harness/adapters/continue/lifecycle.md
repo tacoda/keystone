@@ -14,7 +14,7 @@ Continue reads `.continuerules` (legacy) and `config.yaml` / `config.json` (curr
 | **verify** | `/keystone:verify` or "Run the verify action." | Continue invokes sensors via `cmd` steps; reports results. |
 | **review** | `/keystone:review` or "Run the review action." | Continue walks the diff against spec AC, then runs functional and security review concerns **sequentially** (no sub-agent parallelism). |
 | **learn** | `/keystone:learn` or "Capture learnings from this work." | Continue writes a candidate to `harness/learning/inbox/<timestamp>-<slug>.md`. |
-| **bootstrap** | `/keystone:bootstrap` or "Bootstrap the harness." | One-time; detects stack, frameworks, and libraries; seeds corpus (idioms/<stack>/, state/), paired guides (idioms/<stack>/), and confirms sensor commands. |
+| **bootstrap** | `/keystone:bootstrap` or "Bootstrap the harness." | One-time; detects stack, frameworks, and libraries; seeds corpus (idioms/<stack>/, state/), paired guides (idioms/<stack>/); confirms sensor commands; inventories computational guides (LSPs, formatters, editor enforcement) into `guides/computational/`; classifies sensors by kind. Post-bootstrap, every applicable guide and sensor is recorded in `corpus/state/CODEBASE_STATE.md`. |
 | **audit** | `/keystone:audit` or "Audit the harness." | Full Learning + Pruning flywheel pass. |
 | **synthesize** | `/keystone:synthesize` or "Synthesize the inbox." | Promotes inbox items into the right corpus and/or guide. |
 | **mode** | Edit `harness/guides/process/modes.md` directly. | Continue has no autonomy levers; the file is informational. |

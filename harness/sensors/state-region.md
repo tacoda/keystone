@@ -1,3 +1,7 @@
+---
+kind: computational
+---
+
 # Sensor: state-region
 
 Read-only. Surfaces what is already in State for a touched region.

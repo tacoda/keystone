@@ -14,7 +14,7 @@ Aider has no slash-command primitive (its `/<command>` set is for shell, git, an
 | **verify** | "Run the verify action." | Aider invokes sensors via `/run <cmd>` and `/test`; reports results. |
 | **review** | "Run the review action." | Aider walks the diff against spec AC, then runs functional and security review concerns **sequentially**. |
 | **learn** | "Capture the learnings from this work." | Aider writes a candidate to `harness/learning/inbox/<timestamp>-<slug>.md`. |
-| **bootstrap** | "Bootstrap the harness." | One-time; detects stack, frameworks, and libraries; seeds corpus (idioms/<stack>/, state/), paired guides (idioms/<stack>/), and confirms sensor commands. |
+| **bootstrap** | "Bootstrap the harness." | One-time; detects stack, frameworks, and libraries; seeds corpus (idioms/<stack>/, state/), paired guides (idioms/<stack>/); confirms sensor commands; inventories computational guides (LSPs, formatters, editor enforcement) into `guides/computational/`; classifies sensors by kind. Post-bootstrap, every applicable guide and sensor is recorded in `corpus/state/CODEBASE_STATE.md`. |
 | **audit** | "Audit the corpus." | Full Learning + Pruning flywheel pass. |
 | **synthesize** | "Synthesize the inbox." | Promotes inbox items into the right corpus layer. |
 | **mode** | Edit `harness/guides/process/modes.md` directly. | Aider has no autonomy levers; the file is informational. |

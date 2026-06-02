@@ -14,7 +14,7 @@ Cursor's native invocation surface is the chat — there are no slash commands. 
 | **verify** | `@keystone-verify` before commit | `.cursor/rules/keystone-verify.mdc` |
 | **review** | `@keystone-review` after verification gate | `.cursor/rules/keystone-review.mdc` |
 | **learn** | `@keystone-learn` post-merge | `.cursor/rules/keystone-learn.mdc` |
-| **bootstrap** | "Bootstrap the harness" — one-time; detects stack, frameworks, and libraries | reads `harness/guides/process/` directly |
+| **bootstrap** | "Bootstrap the harness" — one-time; detects stack, frameworks, and libraries; inventories computational guides (LSPs, formatters, editor enforcement) into `guides/computational/`; classifies sensors by kind. Post-bootstrap, every applicable guide and sensor is recorded in `corpus/state/CODEBASE_STATE.md`. | reads `harness/guides/process/` directly |
 | **audit** | `@keystone-audit` or "audit the corpus" | inline / phase doc |
 | **synthesize** | "Synthesize the inbox" | reads `harness/learning/inbox/` |
 | **mode** | Edit `harness/guides/process/modes.md` directly | n/a |

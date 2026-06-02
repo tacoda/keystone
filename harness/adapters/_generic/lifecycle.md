@@ -14,7 +14,7 @@ For agents without slash commands, custom-command syntax, or rules-file triggers
 | **verify** | "Run the verify action — execute every sensor and report." |
 | **review** | "Run the review action — check spec adherence and review findings." |
 | **learn** | "Capture the learnings from this work to `harness/learning/inbox/`." |
-| **bootstrap** | "Bootstrap the harness — detect stack, frameworks, and libraries; seed corpus (idioms/<stack>/, state/), paired guides (idioms/<stack>/), and sensor commands." |
+| **bootstrap** | "Bootstrap the harness — detect stack, frameworks, and libraries; seed corpus (idioms/<stack>/, state/), paired guides (idioms/<stack>/), and sensor commands; inventory computational guides (LSPs, formatters, editor enforcement) into `guides/computational/`; classify sensors by kind. Post-bootstrap, every applicable guide and sensor is recorded in `corpus/state/CODEBASE_STATE.md`." |
 | **audit** | "Audit the corpus against the codebase." |
 | **synthesize** | "Synthesize inbox items into the corpus." |
 | **mode** | "Set pacing mode to `<paired\|solo\|autopilot>`." |

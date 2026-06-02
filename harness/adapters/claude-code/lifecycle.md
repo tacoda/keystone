@@ -12,7 +12,7 @@ How each abstract lifecycle action is invoked in Claude Code.
 | **verify** | `/keystone:verify` slash command | Runs lint, type-check, test, build, drift, commit-message sensors via shell. |
 | **review** | `/keystone:review` slash command | Spawns `review-functional` and `review-security` sub-agents in parallel on the diff. |
 | **learn** | `/keystone:learn` slash command | Writes a candidate to `harness/learning/inbox/<timestamp>-<slug>.md`. |
-| **bootstrap** | `/keystone:bootstrap` slash command | One-time initial scaffold. Detects stack, frameworks, and libraries; seeds corpus (idioms/<stack>/, state/), paired guides (idioms/<stack>/), and confirms sensor commands. |
+| **bootstrap** | `/keystone:bootstrap` slash command | One-time initial scaffold. Detects stack, frameworks, and libraries; seeds corpus (idioms/<stack>/, state/), paired guides (idioms/<stack>/); confirms sensor commands; **inventories computational guides** (LSPs, formatters, editor enforcement) into `guides/computational/`; **classifies sensors** (records which inferential sensors — review-functional, review-security, spec-adherence — this adapter can run, and which computational sensors have a working command). Post-bootstrap, `corpus/state/CODEBASE_STATE.md` lists every guide and sensor wired up. |
 | **audit** | `/keystone:audit` slash command | Full dual-flywheel audit (Learning + Pruning). |
 | **synthesize** | `/keystone:synthesize` slash command | Promotes inbox items into the right corpus layer. |
 | **mode** | `/keystone:mode <paired\|solo\|autopilot>` | Updates `harness/guides/process/modes.md` in place. |

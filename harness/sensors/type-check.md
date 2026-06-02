@@ -1,3 +1,7 @@
+---
+kind: computational
+---
+
 # Sensor: type-check
 
 Signature and contract consistency.

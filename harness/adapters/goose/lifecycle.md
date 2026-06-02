@@ -16,7 +16,7 @@ Goose supports **recipes** — saved, parameterized sessions defined in `recipe.
 | **verify** | `goose run --recipe keystone-verify` or "Run the verify action." | Goose invokes sensors via the developer extension's shell tool; reports results. |
 | **review** | `goose run --recipe keystone-review` or "Run the review action." | Goose walks the diff against spec AC, then runs functional and security review concerns **sequentially**. |
 | **learn** | `goose run --recipe keystone-learn` or "Capture learnings from this work." | Goose writes a candidate to `harness/learning/inbox/<timestamp>-<slug>.md`. |
-| **bootstrap** | `goose run --recipe keystone-bootstrap` or "Bootstrap the harness." | One-time; detects stack, frameworks, and libraries; seeds corpus (idioms/<stack>/, state/), paired guides (idioms/<stack>/), and confirms sensor commands. |
+| **bootstrap** | `goose run --recipe keystone-bootstrap` or "Bootstrap the harness." | One-time; detects stack, frameworks, and libraries; seeds corpus (idioms/<stack>/, state/), paired guides (idioms/<stack>/); confirms sensor commands; inventories computational guides (LSPs, formatters, editor enforcement) into `guides/computational/`; classifies sensors by kind. Post-bootstrap, every applicable guide and sensor is recorded in `corpus/state/CODEBASE_STATE.md`. |
 | **audit** | `goose run --recipe keystone-audit` or "Audit the harness." | Full Learning + Pruning flywheel pass. |
 | **synthesize** | `goose run --recipe keystone-synthesize` or "Synthesize the inbox." | Promotes inbox items into the right corpus and/or guide. |
 | **mode** | Edit `harness/guides/process/modes.md` directly. | Goose has no autonomy levels in the harness sense; the file is informational. |

@@ -14,7 +14,7 @@ Pi's slash commands come from **prompt templates** (a `.md` file in `.pi/prompts
 | **verify** | `/keystone-verify` | `.pi/prompts/keystone-verify.md` |
 | **review** | `/keystone-review` | `.pi/prompts/keystone-review.md` |
 | **learn** | `/keystone-learn` | `.pi/prompts/keystone-learn.md` |
-| **bootstrap** | `/keystone-bootstrap` | `.pi/prompts/keystone-bootstrap.md` (one-time) |
+| **bootstrap** | `/keystone-bootstrap` | `.pi/prompts/keystone-bootstrap.md` (one-time; also inventories computational guides into `guides/computational/` and classifies sensors by kind) |
 | **audit** | `/keystone-audit` | `.pi/prompts/keystone-audit.md` |
 | **synthesize** | `/keystone-synthesize` | `.pi/prompts/keystone-synthesize.md` |
 | **mode** | `/keystone-mode <paired\|solo\|autopilot>` | `.pi/prompts/keystone-mode.md` |

@@ -2,9 +2,19 @@
 
 Automated checks and instruments that read code or state. One of the four harness components (Corpus / Guides / **Sensors** / Flywheels).
 
-## Two kinds
+## Kind
 
-Sensors split by what they do with their output:
+Every sensor declares a `kind:` in its frontmatter. The kind says *how* the check is produced:
+
+**Computational** — deterministic execution. A binary, script, or library returns a result that does not depend on agent reasoning. Examples: a unit test runner, a type checker, a lint pass, a build command, a git-history diff.
+
+**Inferential** — produced by an agent reasoning over the code or spec. Examples: an agent doing a functional review, a security review, or walking spec acceptance criteria against the diff.
+
+The bootstrap action inventories both kinds for the project and records them under `corpus/state/CODEBASE_STATE.md`.
+
+## Role
+
+Sensors also split by what they do with their output (orthogonal to kind):
 
 **Verification sensors** — gate the commit. Pass/fail. Run during the verification phase via the **verify** action. Failure blocks the commit.
 
@@ -22,15 +32,24 @@ Sensors do not run on event hooks. They run inside lifecycle actions invoked at 
 | **orient** | planning | [state-region](state-region.md) |
 | **check-drift** | implementation | [drift](drift.md) |
 | **verify** | verification | [lint](lint.md), [type-check](type-check.md), [test](test.md), [build](build.md), [drift](drift.md), [commit-message](commit-message.md); proposes state updates from [coverage](coverage.md) |
-| **review** | review | review-functional, review-security (agents); [spec-adherence](spec-adherence.md) check |
+| **review** | review | [review-functional](review-functional.md), [review-security](review-security.md), [spec-adherence](spec-adherence.md) |
 | **audit** | discipline | [drift](drift.md), [coverage](coverage.md), [risk-fingerprint](risk-fingerprint.md), [traffic-topology](traffic-topology.md) |
 
 How an action is actually invoked, and whether sensors run autonomously or require human prompting, is agent-specific — see `harness/adapters/<your-agent>/sensors.md`. The most common degradation: an agent that cannot run shell commands during a turn surfaces the sensor commands for the human to execute instead.
 
 ## Contract shape
 
+Each sensor file begins with YAML frontmatter declaring its kind:
+
+```markdown
+---
+kind: computational  # or: inferential
+---
+```
+
 Each sensor declares:
 
+- **Kind** — `computational` (deterministic execution) or `inferential` (agent reasoning).
 - **Trigger** — when it runs.
 - **Inputs** — what it reads.
 - **Exit condition** — what counts as pass.
@@ -41,20 +60,24 @@ Tool commands (lint, test, build, type-check, coverage) live in `corpus/state/CO
 
 ## Sensor index
 
-| Sensor | Purpose |
-|---|---|
-| [lint](lint.md) | Surface-level style and pattern checks |
-| [type-check](type-check.md) | Signature and contract consistency |
-| [test](test.md) | The project's test suite |
-| [build](build.md) | Build / compile / package step |
-| [drift](drift.md) | Diff vs. loaded corpus and guide rules |
-| [coverage](coverage.md) | Test coverage; proposes state updates |
-| [risk-fingerprint](risk-fingerprint.md) | Complexity + coupling + coverage per region |
-| [traffic-topology](traffic-topology.md) | Git churn + recency + criticality map |
-| [state-region](state-region.md) | Read-only: what State says about a touched region |
-| [commit-message](commit-message.md) | Conventional-commit format + no AI attribution |
-| [tracker-card-fetcher](tracker-card-fetcher.md) | Fetches tracker card from Jira / Linear / etc. |
-| [spec-adherence](spec-adherence.md) | Walks spec ACs against the diff |
+| Sensor | Kind | Purpose |
+|---|---|---|
+| [lint](lint.md) | computational | Surface-level style and pattern checks |
+| [type-check](type-check.md) | computational | Signature and contract consistency |
+| [test](test.md) | computational | The project's test suite |
+| [build](build.md) | computational | Build / compile / package step |
+| [drift](drift.md) | computational | Diff vs. loaded corpus and guide rules |
+| [coverage](coverage.md) | computational | Test coverage; proposes state updates |
+| [risk-fingerprint](risk-fingerprint.md) | computational | Complexity + coupling + coverage per region |
+| [traffic-topology](traffic-topology.md) | computational | Git churn + recency + criticality map |
+| [state-region](state-region.md) | computational | Read-only: what State says about a touched region |
+| [commit-message](commit-message.md) | computational | Conventional-commit format + no AI attribution |
+| [tracker-card-fetcher](tracker-card-fetcher.md) | computational | Fetches tracker card from Jira / Linear / etc. |
+| [spec-adherence](spec-adherence.md) | inferential | Walks spec ACs against the diff |
+| [review-functional](review-functional.md) | inferential | Agent reviews the diff for logic / behavior bugs |
+| [review-security](review-security.md) | inferential | Agent reviews the diff for security concerns |
+
+The bootstrap action confirms which sensors are wired up for this project (e.g., projects without a tracker skip `tracker-card-fetcher`; adapters without sub-agent support skip the review sensors) and records the result in `corpus/state/CODEBASE_STATE.md`.
 
 ## How contracts are wired
 

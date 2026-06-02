@@ -1,3 +1,7 @@
+---
+kind: computational
+---
+
 # Sensor: risk-fingerprint
 
 Computes complexity + coupling + coverage patterns per region.

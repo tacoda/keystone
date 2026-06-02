@@ -1,3 +1,7 @@
+---
+kind: computational
+---
+
 # Sensor: test
 
 The project's test suite.

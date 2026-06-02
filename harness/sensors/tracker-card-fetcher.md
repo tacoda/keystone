@@ -1,3 +1,7 @@
+---
+kind: computational
+---
+
 # Sensor: tracker-card-fetcher
 
 Fetches a tracker card from Jira / Linear / GitHub Issues / Asana via whatever tracker integration the agent has (MCP server, CLI, plugin), if one is referenced.

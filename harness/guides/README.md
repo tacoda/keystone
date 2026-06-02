@@ -4,14 +4,25 @@ Rules — what the agent must *do* (and not do). Three tiers: regular **RULES** 
 
 For the full reasoning and references behind each rule, see the paired file in [`../corpus/`](../corpus/README.md).
 
+## Kind
+
+Every guide declares a `kind:` in its frontmatter. The kind says *how* the guidance is delivered:
+
+**Inferential** — natural-language rules an agent reasons about. Markdown files under `principles/`, `idioms/`, `domain/`, and `process/`. This is what guides have been historically; it remains the default kind.
+
+**Computational** — deterministic ambient enforcement that does not depend on agent reasoning. Examples: a language server giving live type/error feedback, an editor formatter, a pre-save linter rule. These live under [`computational/`](computational/README.md) and are inventoried by the bootstrap action based on what the project's stack supports.
+
+Kind classifies the guide, not the thing the guide is about. An inferential rule about *how to write good TypeScript types* lives under `idioms/typescript/`, not `computational/` — even though the underlying enforcement (a TS LSP) is computational. The folder reflects the guide's mechanism; the LSP entry lives separately under `computational/`.
+
 ## Sub-directories
 
-| Directory | What lives here | Activation |
-|---|---|---|
-| `principles/` | Universal engineering rules (rules extracted from `corpus/principles/`). | Ambient (always) |
-| [`idioms/`](idioms/README.md) | Stack-specific rules (rules extracted from `corpus/idioms/<stack>/`). | Ambient (lazy by region) |
-| [`domain/`](domain/README.md) | Business-rule constraints (rules extracted from `corpus/domain/`). | Ambient (always) |
-| [`process/`](process/README.md) | What happens at each phase of the workflow. | Loaded when entering a phase |
+| Directory | Kind | What lives here | Activation |
+|---|---|---|---|
+| `principles/` | inferential | Universal engineering rules (rules extracted from `corpus/principles/`). | Ambient (always) |
+| [`idioms/`](idioms/README.md) | inferential | Stack-specific rules (rules extracted from `corpus/idioms/<stack>/`). | Ambient (lazy by region) |
+| [`domain/`](domain/README.md) | inferential | Business-rule constraints (rules extracted from `corpus/domain/`). | Ambient (always) |
+| [`process/`](process/README.md) | inferential | What happens at each phase of the workflow. | Loaded when entering a phase |
+| [`computational/`](computational/README.md) | computational | Deterministic ambient enforcement — language servers, formatters, editor checks the stack supports. | Ambient (in-editor / on-save) |
 
 ## File format
 
@@ -58,7 +69,9 @@ The drift sensor reads guides directly from `guides/` regardless of how the agen
 
 - `guides/principles/` ships populated with 29 files extracted from the corpus principles.
 - `guides/process/` ships populated with the workflow phase files.
-- `guides/idioms/` and `guides/domain/` ship empty; the **bootstrap** action and Learning flywheel populate them.
+- `guides/idioms/`, `guides/domain/`, and `guides/computational/` ship empty; the **bootstrap** action and Learning flywheel populate them.
+
+Anything a computational guide needs at install time (a particular editor config file, an LSP binary, an agent setting) is exposed as an option on `keystone init` rather than shipped by default.
 
 ## Activation
 

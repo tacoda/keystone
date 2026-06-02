@@ -1,3 +1,7 @@
+---
+kind: computational
+---
+
 # Sensor: build
 
 The project's build / compile / package step.

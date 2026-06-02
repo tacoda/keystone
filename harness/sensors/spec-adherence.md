@@ -1,3 +1,7 @@
+---
+kind: inferential
+---
+
 # Sensor: spec-adherence
 
 Walks the spec's acceptance criteria against the current diff.

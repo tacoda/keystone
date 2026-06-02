@@ -1,3 +1,7 @@
+---
+kind: computational
+---
+
 # Sensor: lint
 
 Surface-level style and pattern checks.

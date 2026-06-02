@@ -20,6 +20,35 @@ The commands each sensor invokes. Filled in by **bootstrap** from your manifest 
 | build | `<your build command, e.g. npm run build>` |
 | coverage | `<your coverage command, e.g. pytest --cov>` |
 
+## Sensors
+
+Inventory of sensors wired up for this project. Filled in by **bootstrap**. A sensor's row is omitted when it does not apply (no tracker, no spec workflow, adapter cannot run sub-agents, etc.).
+
+| Sensor | Kind | Status |
+|---|---|---|
+| lint | computational | `<wired \| (none)>` |
+| type-check | computational | `<wired \| (none)>` |
+| test | computational | `<wired \| (none)>` |
+| build | computational | `<wired \| (none)>` |
+| coverage | computational | `<wired \| (none)>` |
+| drift | computational | wired |
+| commit-message | computational | wired |
+| state-region | computational | wired |
+| risk-fingerprint | computational | `<wired \| (none)>` |
+| traffic-topology | computational | `<wired \| (none)>` |
+| tracker-card-fetcher | computational | `<wired \| (none)>` |
+| spec-adherence | inferential | wired |
+| review-functional | inferential | `<wired \| (none)>` |
+| review-security | inferential | `<wired \| (none)>` |
+
+## Guides
+
+Inferential guides (markdown rules) are activated by directory — see `harness/guides/`. The table below tracks **computational guides** the bootstrap action detected. Filled in by **bootstrap**.
+
+| Tool | Kind | What it covers | Activation |
+|---|---|---|---|
+| `<e.g. typescript-language-server>` | computational | `<e.g. types, completion, unused imports>` | `<e.g. LSP in editor>` |
+
 ## Stacks
 
 | Stack | Idiom folder | Region(s) |

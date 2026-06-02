@@ -1,3 +1,7 @@
+---
+kind: computational
+---
+
 # Sensor: drift
 
 Compares the diff (or full codebase, during audit) against loaded guide rules. Finds violations across all three rule tiers — regular **RULES**, **GOLDEN RULES**, and **IRON LAWS**.
