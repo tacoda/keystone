@@ -75,15 +75,15 @@ keystone help
 | Claude Code | real adapter | `CLAUDE.md` |
 | Codex CLI | real adapter | `AGENTS.md` |
 | [pi.dev](https://pi.dev) | real adapter | `AGENTS.md` + `.pi/prompts/` |
-| Cursor | stub adapter | `.cursor/rules/000-harness.mdc` |
-| Aider | stub adapter | `CONVENTIONS.md` |
-| GitHub Copilot CLI | stub adapter | `.github/copilot-instructions.md` |
-| Continue | stub adapter | `.continuerules` |
-| Cline / Roo Code | stub adapter | `cline-instructions.md` (paste into Cline settings) |
-| Goose | stub adapter | `.goosehints` |
+| Cursor | real adapter | `.cursor/rules/000-harness.mdc` (+ one per lifecycle action) |
+| Aider | real adapter | `CONVENTIONS.md` |
+| GitHub Copilot | real adapter | `.github/copilot-instructions.md` |
+| Continue | real adapter | `.continuerules` |
+| Cline / Roo Code | real adapter | `cline-instructions.md` (paste into Cline settings) |
+| Goose | real adapter | `.goosehints` |
 | (any other) | generic fallback | `AGENTS.md` |
 
-Stub adapters get a minimal lifecycle file and a working menu — enough to start; fill in the rest as you go.
+Every adapter ships `lifecycle.md`, `activation.md`, and `sensors.md`. When an agent does not natively cover a harness feature, `keystone init` prints a per-agent warning section pointing at the remedy — either a configuration step in the agent, or a small `harness/adapters/<agent>/<topic>.md` you fill in to document how your team handles the gap.
 
 ## Prerequisites
 

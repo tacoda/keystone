@@ -92,6 +92,7 @@ func runInit(args []string, assets embed.FS) error {
 		return fmt.Errorf("write install profile: %w", err)
 	}
 
+	printAgentWarnings(agent)
 	printNextSteps(agent)
 	return nil
 }

@@ -15,6 +15,8 @@ The split is the point: rules are short and high-value-per-token; corpus is long
 
 ### Added
 
+- **Full adapter implementations for Continue, Cline / Roo Code, and Goose.** Previously stubs. Each now ships `lifecycle.md`, `activation.md`, and `sensors.md` matching the depth of the Claude Code / Codex / pi adapters. Continue gets a documented `config.yaml` with prompts and context providers; Cline gets workflow guidance and auto-approve recommendations; Goose gets recipe templates and developer-extension wiring.
+- **Per-agent install-time warnings.** `keystone init` now prints a `⚠ <agent> adapter — capability gaps to address` section before the success message for adapters that do not natively cover every harness feature. Each gap names a configuration remedy and/or a harness file to add (e.g., `harness/adapters/aider/review-strategy.md`). Fully-supported adapters (claude-code, codex, pi, cursor) print no warning.
 - **`harness/corpus/`** — informational layer. Houses `principles/`, `idioms/`, `domain/`, `state/`. Read on-demand via forward-links from paired guides, or when process explicitly references a file.
 - **`harness/guides/`** — rule layer. Houses `principles/`, `idioms/`, `domain/`, `process/`. Always loaded. Enforced by the drift sensor.
 - **`harness/sensors/`** — promoted from `harness/process/sensors.md` (one file) into one file per sensor: `lint`, `type-check`, `test`, `build`, `drift`, `coverage`, `risk-fingerprint`, `traffic-topology`, `state-region`, `commit-message`, `tracker-card-fetcher`, `spec-adherence`, plus a README index.
