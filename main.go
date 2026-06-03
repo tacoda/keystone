@@ -6,7 +6,7 @@ import (
 	"os"
 )
 
-//go:embed all:harness all:targets all:optional
+//go:embed all:harness all:targets all:optional all:migrations
 var assets embed.FS
 
 var version = "dev"
@@ -25,6 +25,11 @@ func main() {
 		}
 	case "add-target":
 		if err := runAddTarget(os.Args[2:], assets); err != nil {
+			fmt.Fprintf(os.Stderr, "keystone: %v\n", err)
+			os.Exit(1)
+		}
+	case "migrate":
+		if err := runMigrate(os.Args[2:], assets); err != nil {
 			fmt.Fprintf(os.Stderr, "keystone: %v\n", err)
 			os.Exit(1)
 		}
@@ -47,6 +52,7 @@ func printUsage(w *os.File) {
 Usage:
   keystone init [<dir>] [flags]
   keystone add-target <agent>[,<agent>...] [<dir>]
+  keystone migrate [<dir>] [--apply|-y] [--dry-run] [--from <version>]
   keystone options
   keystone version
   keystone help
@@ -54,6 +60,7 @@ Usage:
 Commands:
   init         Scaffold harness/ and the agent menu file(s) into <dir> (default: .)
   add-target   Install another agent target bundle into an existing harness
+  migrate      Apply pending harness migrations to an existing install
   options      Print the allowed labels for every option flag
   version      Print the binary version
   help         Print this message

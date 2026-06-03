@@ -79,6 +79,46 @@ func readInstalledAgents(destDir string) ([]string, error) {
 	return []string{}, nil
 }
 
+// readKeystoneVersion returns the `keystone_version:` value recorded in the
+// INSTALL_PROFILE.md frontmatter, or an empty string if the field is missing.
+// Returns an error if the file itself can't be read.
+func readKeystoneVersion(destDir string) (string, error) {
+	path := filepath.Join(destDir, "harness", "corpus", "state", "INSTALL_PROFILE.md")
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return "", err
+	}
+	for _, line := range strings.Split(string(data), "\n") {
+		if strings.HasPrefix(line, "keystone_version:") {
+			return strings.TrimSpace(strings.TrimPrefix(line, "keystone_version:")), nil
+		}
+	}
+	return "", nil
+}
+
+// updateKeystoneVersion rewrites the `keystone_version:` frontmatter field in
+// INSTALL_PROFILE.md to newVersion, preserving the rest of the file.
+func updateKeystoneVersion(destDir, newVersion string) error {
+	path := filepath.Join(destDir, "harness", "corpus", "state", "INSTALL_PROFILE.md")
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return err
+	}
+	lines := strings.Split(string(data), "\n")
+	found := false
+	for i, line := range lines {
+		if strings.HasPrefix(line, "keystone_version:") {
+			lines[i] = "keystone_version: " + newVersion
+			found = true
+			break
+		}
+	}
+	if !found {
+		return fmt.Errorf("no keystone_version field in %s", path)
+	}
+	return os.WriteFile(path, []byte(strings.Join(lines, "\n")), 0o644)
+}
+
 // appendAgentsToProfile rewrites INSTALL_PROFILE.md's agent row to include the
 // new agents alongside the existing ones, preserving every other row.
 func appendAgentsToProfile(destDir string, newAgents []string) error {
