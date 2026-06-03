@@ -1,12 +1,12 @@
-# keystone
+# Keystone
 
-A project harness for coding agents. Drops a self-updating set of engineering knowledge, rules, and sensors into your repo, wired to whichever agent you use.
+A **project harness installer** for coding agents. Drops a self-updating set of engineering knowledge, rules, sensors, and lifecycle workflow into your repo, wired to whichever agent you use.
 
-> **Status:** working temp name; the product itself is the harness, not the installer.
+Keystone produces a **Level 2 project harness** — markdown content scoped to one project, owned by the team that installs it, versioned with the code — that **blurs into Level 3** through its embedded corpus and adapter set: every install ships the same engineering principles, lifecycle phases, and rule tiers, so organizations distributing Keystone across many projects get a shared baseline by default. No central service to run; no per-project rewrite of the foundation.
 
 ## What it is
 
-Keystone is a markdown-only **project harness** — no language runtime, no daemon. The `keystone` CLI is a single Go binary with the entire harness embedded; `keystone init` writes two things into your repo:
+Keystone is a **project harness installer** — a single Go binary with the entire markdown-only harness embedded. `keystone init` writes two things into your repo:
 
 1. **A harness** (`harness/`) — four components:
    - `guides/` — **rules**. Always loaded. What the agent must do and not do.
@@ -32,7 +32,7 @@ brew install tacoda/tap/keystone
 
 ### Curl bootstrap (macOS / Linux)
 
-Downloads the binary into `~/.local/bin/keystone`, then prompts for the agent and runs `keystone init`:
+Downloads the binary into `~/.local/bin/keystone` and adds the install directory to your shell rc so `keystone` is on your `PATH`:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/tacoda/keystone/main/install.sh | sh
@@ -46,13 +46,15 @@ less install.sh
 sh install.sh
 ```
 
-Set `KEYSTONE_NO_INIT=1` to install the binary only.
+Override the install dir with `KEYSTONE_PREFIX=/some/path` or pin the release with `KEYSTONE_VERSION=v0.7.0`. The installer does not run `keystone init` — open a new shell (or `source` your rc file) and run it yourself in any project to scaffold the harness.
 
 ### PowerShell (Windows)
 
 ```powershell
 iwr -useb https://raw.githubusercontent.com/tacoda/keystone/main/install.ps1 | iex
 ```
+
+Installs `keystone.exe` under `%LOCALAPPDATA%\Programs\keystone` and adds it to your user `PATH`. Open a new terminal and run `keystone init` in any project to scaffold the harness.
 
 ### Manual
 
