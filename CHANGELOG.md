@@ -2,6 +2,25 @@
 
 All notable changes to keystone are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); the project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and is pre-1.0 (minor versions may include breaking changes).
 
+## [Unreleased]
+
+Adds `keystone migrate` — a forward-only migration runner that brings an existing harness install up to the binary's version. Migrations live under an embedded `migrations/<version>/` tree as YAML files declaring idempotent operations (`add_file`, `frontmatter_set`, `ensure_section`, `replace_block`). The runner reads the project's `keystone_version` from `harness/corpus/state/INSTALL_PROFILE.md`, applies every newer migration with a per-file `y/N/q` prompt, and bumps the version after each release directory completes. Each op detects current state before writing, so conflicts (target diverged from the migration's assumption) are surfaced rather than auto-resolved.
+
+### Added
+
+- **`keystone migrate [<dir>] [--apply|-y] [--dry-run] [--from <version>]`** — new CLI command. Interactive by default (preview + prompt per file); `--apply` applies every non-conflict change without prompting; `--dry-run` previews everything and writes nothing; `--from` overrides the recorded version.
+- **`migrations/`** — embedded directory of release-versioned migration files. Each file declares a `description` and a list of typed `operations`. Files inside a version directory run in lexical order.
+- **Four operation types**, all idempotent:
+  - `add_file` — create only if missing.
+  - `frontmatter_set` — set a YAML frontmatter key only if absent (existing values are never overwritten).
+  - `ensure_section` — append a heading + body anchored after another heading; no-op if the heading already exists.
+  - `replace_block` — exact-string swap; conflict if the expected text isn't found.
+- **`migrations/README.md`** — documents the file format, layout, and per-op idempotency semantics for downstream migration authors.
+
+### Changed
+
+- **`profile.go`** — `readKeystoneVersion` and `updateKeystoneVersion` helpers added so `keystone migrate` can read and bump the project-local version pointer in `INSTALL_PROFILE.md`.
+
 ## [0.5.0] — 2026-06-02
 
 Adds a `kind` taxonomy orthogonal to the existing structure of guides and sensors. Every guide and sensor declares itself as **inferential** (agent reasoning over markdown rules, agent-driven code review) or **computational** (deterministic execution — language servers, formatters, lint, type-check, tests). Bootstrap is extended to inventory both kinds so that post-bootstrap, every applicable guide and sensor is recorded in `corpus/state/CODEBASE_STATE.md`. Anything that needs install-time setup remains an opt-in flag on `keystone init` — bootstrap inventories, install opts in.
