@@ -2,9 +2,11 @@
 
 All notable changes to keystone are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); the project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and is pre-1.0 (minor versions may include breaking changes).
 
-## [Unreleased]
+## [0.6.0] — 2026-06-03
 
 Adds `keystone migrate` — a forward-only migration runner that brings an existing harness install up to the binary's version. Migrations live under an embedded `migrations/<version>/` tree as YAML files declaring idempotent operations (`add_file`, `frontmatter_set`, `ensure_section`, `replace_block`). The runner reads the project's `keystone_version` from `harness/corpus/state/INSTALL_PROFILE.md`, applies every newer migration with a per-file `y/N/q` prompt, and bumps the version after each release directory completes. Each op detects current state before writing, so conflicts (target diverged from the migration's assumption) are surfaced rather than auto-resolved.
+
+0.6.0 is the **starting point for migrations**: this release ships the runner but no migration content. Future releases will add YAML files under `migrations/<next-version>/` describing what to change between releases, and `keystone migrate` will apply them.
 
 ### Added
 
@@ -20,6 +22,11 @@ Adds `keystone migrate` — a forward-only migration runner that brings an exist
 ### Changed
 
 - **`profile.go`** — `readKeystoneVersion` and `updateKeystoneVersion` helpers added so `keystone migrate` can read and bump the project-local version pointer in `INSTALL_PROFILE.md`.
+
+### Migration from 0.5.x
+
+- **Existing harness installations:** no harness content changed in 0.6.0; this release only adds the runner. After upgrading the binary, run `keystone migrate` in your project — it will report "harness is up to date" against your recorded version. From this release forward, every release that requires harness edits will ship a corresponding `migrations/<version>/` set.
+- **`keystone_version` field in `INSTALL_PROFILE.md`** now serves a dual role: the snapshot of the binary that installed the harness (as before) **and** the pointer that `keystone migrate` uses to know what's already been applied. Pre-existing installs at 0.5.0 (or earlier) need no manual edit — the runner reads whatever is there.
 
 ## [0.5.0] — 2026-06-02
 
