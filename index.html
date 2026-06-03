@@ -975,7 +975,7 @@
     </div>
     <div class="layer l3">
       <div class="layer-cell"><span class="layer-name">sensors</span></div>
-      <div class="layer-cell"><span class="layer-desc"><strong style="color: var(--text);">Automated checks.</strong> 14 sensors in <code style="color: var(--accent3);">sensors/</code>: lint, type-check, test, build, drift, coverage, risk-fingerprint, traffic-topology, state-region, commit-message, tracker-card-fetcher, spec-adherence, review-functional, review-security. Each declares <strong style="color: var(--text);">kind</strong> (inferential / computational), trigger, inputs, exit condition, output, state writes.</span></div>
+      <div class="layer-cell"><span class="layer-desc"><strong style="color: var(--text);">Automated checks.</strong> 16 sensors in <code style="color: var(--accent3);">sensors/</code>: lint, type-check, test, build, drift, coverage, risk-fingerprint, traffic-topology, state-region, commit-message, tracker-card-fetcher, spec-adherence, review-functional, review-security, review-risk, review-deployment. Each declares <strong style="color: var(--text);">kind</strong> (inferential / computational), trigger, inputs, exit condition, output, state writes.</span></div>
       <div class="layer-cell"><span class="layer-author">Lead engineer + adapter</span></div>
       <div class="layer-cell"><span class="layer-act">Invoked · fires inside lifecycle actions at phase boundaries</span></div>
     </div>
@@ -1013,7 +1013,7 @@
     <div class="action">
       <span class="action-tag">Inferential</span>
       <h3 style="color: var(--accent3);">Inferential sensor</h3>
-      <p>A check produced by an agent reasoning over the code or spec. Includes <code style="color: var(--accent3);">review-functional</code> and <code style="color: var(--accent3);">review-security</code> (an agent reviews the diff) and <code style="color: var(--accent3);">spec-adherence</code> (walks AC against the diff). Bootstrap records which inferential sensors the active adapter can run.</p>
+      <p>A check produced by an agent reasoning over the code or spec. Includes <code style="color: var(--accent3);">review-functional</code>, <code style="color: var(--accent3);">review-security</code>, <code style="color: var(--accent3);">review-risk</code>, and <code style="color: var(--accent3);">review-deployment</code> (an agent reviews the diff) and <code style="color: var(--accent3);">spec-adherence</code> (walks AC against the diff). Bootstrap records which inferential sensors the active adapter can run.</p>
     </div>
     <div class="action">
       <span class="action-tag">Computational</span>
@@ -1288,7 +1288,7 @@
 <pre class="code"><span class="prompt">$</span> curl -fsSL https://raw.githubusercontent.com/tacoda/keystone/main/install.sh &gt; install.sh
 <span class="prompt">$</span> less install.sh
 <span class="prompt">$</span> sh install.sh</pre>
-    <p>Override the install dir with <code>KEYSTONE_PREFIX=/some/path</code> or pin the release with <code>KEYSTONE_VERSION=v0.7.1</code>. The installer does not run <code>keystone init</code> — open a new shell and run it yourself in a project to scaffold the harness.</p>
+    <p>Override the install dir with <code>KEYSTONE_PREFIX=/some/path</code> or pin the release with <code>KEYSTONE_VERSION=v0.8.0</code>. The installer does not run <code>keystone init</code> — open a new shell and run it yourself in a project to scaffold the harness.</p>
   </div>
 
   <div class="install-method">
@@ -1507,7 +1507,7 @@
     <div class="action lc-drift">
       <span class="action-tag">Post-verify</span>
       <h3 style="color: var(--accent2);">review<span class="when">review phase</span></h3>
-      <p>Walk spec acceptance criteria + functional review + security review on the diff. Gate: no blockers, AC met.</p>
+      <p>Walk spec acceptance criteria + functional, security, risk, and deployment review on the diff. Gate: no blockers, AC met.</p>
     </div>
     <div class="action lc-learn">
       <span class="action-tag">Post-commit</span>
@@ -1713,6 +1713,11 @@
       <h3 style="color: var(--accent2);">Add a harness file</h3>
       <p>Where the agent can't be configured for the feature — or you'd rather work around it explicitly: add a file like <code style="color: var(--accent2);">harness/adapters/&lt;agent&gt;/review-strategy.md</code> describing how your team handles the gap. The agent reads that file as part of the adapter's activation contract.</p>
     </div>
+  </div>
+
+  <div style="margin-top: 20px; padding: 16px 18px; border-left: 3px solid var(--accent3); background: var(--surface2); border-radius: 2px; font-size: 0.85rem; line-height: 1.7;">
+    <p style="margin: 0 0 10px 0;"><strong style="color: var(--accent3); font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.1em;">BIGGEST GAP</strong> &nbsp; <strong style="color: var(--text);">Sub-agent parallelism for review.</strong> Most gaps are merely annoying — a workflow needs a workaround, a sensor falls back to shell. This one is different. When an adapter lacks native sub-agent support, the four review concerns (<code style="color: var(--accent3);">review-functional</code>, <code style="color: var(--accent3);">review-security</code>, <code style="color: var(--accent3);">review-risk</code>, <code style="color: var(--accent3);">review-deployment</code>) all collapse into a single conversation. The same context window is asked to wear four hats sequentially, sharing the same primed framing — and findings degrade accordingly. Security blind spots survive a functional pass; deployment risk gets folded into a generic "looks fine."</p>
+    <p style="margin: 0;"><strong style="color: var(--text);">Strong recommendation:</strong> if your agent does not support sub-agents, do <em>not</em> run the four reviewers in one chat. Spawn them as <strong style="color: var(--text);">separate sessions</strong> — separate tmux panes, separate terminals, separate browser tabs — one reviewer per session, each starting from the diff alone. Combine the findings outside the agent. The independent context windows are the point; a single-session review with four sequential prompts is not a substitute.</p>
   </div>
 
   <pre class="code" style="margin-top: 20px;"><span class="comment"># Example: keystone init --agent aider</span>
