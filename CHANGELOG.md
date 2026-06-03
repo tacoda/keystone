@@ -2,6 +2,26 @@
 
 All notable changes to keystone are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); the project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and is pre-1.0 (minor versions may include breaking changes).
 
+## [0.7.1] — 2026-06-03
+
+Repositions Keystone as a **project harness installer** and simplifies the install scripts. The curl and PowerShell bootstraps now install the binary, ensure the install directory is on the user's `PATH`, and exit — `keystone init` is a deliberate step the user runs in a project, not a side effect of installation. Documentation (README and site) is brought in line with the new behavior and the new framing.
+
+No harness content changed in 0.7.1; existing installs see "harness is up to date" when they run `keystone migrate`.
+
+### Changed
+
+- **`README.md`** — `# keystone` → `# Keystone` (canonical capitalization). Drops the working-title status line. Tagline leads with "project harness installer." Adds a Level 2 / Level 3 framing paragraph: Keystone produces a **Level 2** harness (project-scoped, team-owned, versioned with the code) that **blurs into Level 3** (org-wide shared baseline) through the embedded corpus and adapter set every install ships. The "What it is" section repositions Keystone as the installer; the harness is what gets installed.
+- **`install.sh`** — no longer runs `keystone init`. Removed `KEYSTONE_NO_INIT`, the agent prompt, the harness-existence check, and the agent argument. Added `ensure_on_path()` — detects the user's login shell from `$SHELL` (zsh / bash / fish) and appends an `export PATH=...` line (or `fish_add_path`) to the appropriate rc file. Idempotent: skips if the prefix is already referenced.
+- **`install.ps1`** — no longer runs `keystone init`. Removed `-NoInit`, the agent prompt, the harness check, and the init invocation. The PATH block now actively calls `[Environment]::SetEnvironmentVariable("Path", ..., "User")` to persist the install directory across terminals.
+- **README curl / PowerShell sections** — describe the new behavior, document `KEYSTONE_PREFIX` and `KEYSTONE_VERSION` overrides, point the user at running `keystone init` themselves.
+- **gh-pages site** — Install and Upgrading sections updated to match. The `KEYSTONE_NO_INIT=1` reference removed.
+
+### Migration from 0.7.0
+
+- **Existing harness installs:** no harness content changed; `keystone migrate` reports up-to-date.
+- **Curl / PowerShell bootstrap users:** the installer no longer runs `keystone init` for you. After the binary lands, open a new shell (so the updated PATH is picked up) and run `keystone init` in any project.
+- **`KEYSTONE_NO_INIT=1` is no longer recognized.** It was the override for the previous default — and the default has flipped. Drop the variable from any scripts that set it.
+
 ## [0.7.0] — 2026-06-03
 
 Fills out the harness with two layers of agent-reliability content: **cross-cutting discipline** (sensitive-file handling, dangerous-action confirmation, PR scoping, CI-failure remediation, escalation) and **agent-specific failure modes** (grounding against hallucinated APIs, pushback against sycophancy, self-validation refusal, subagent-trust discipline, context-budget hygiene, surgical-edit boundaries). Adds five new principle pairs (dependencies, migrations, logging, determinism, rollback) and one principle pair for prompt injection. Four new IRON LAWs — sensitive files, dangerous actions, secret-safe logging, prompt-injection refusal — bring the consolidated total from five to nine. Adds `harness/learning/wishlist.md` as a team-curated channel for known gaps that complements the agent-driven Learning flywheel.
