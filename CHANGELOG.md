@@ -2,6 +2,33 @@
 
 All notable changes to keystone are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); the project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and is pre-1.0 (minor versions may include breaking changes).
 
+## [0.8.0] — 2026-06-03
+
+Adds two new inferential review sensors to the **review** phase: **`review-risk`** (blast radius, reversibility, hot-spot regions, coupling, side effects) and **`review-deployment`** (schema migrations, feature-flag gating, environment / config drift, rolling-deploy compatibility, rollback path). The default review-* set goes from two to four; adapters that support sub-agent parallelism (Claude Code) spawn all four concurrently, adapters that don't (Codex, Pi) run them sequentially.
+
+### Added
+
+- **`harness/sensors/review-risk.md`** — agent reviews the diff for risk concerns: blast radius, reversibility, hot-spot regions (cross-refs `state/risk-fingerprints.md`), fan-out / shared-state coupling, irreversible side effects.
+- **`harness/sensors/review-deployment.md`** — agent reviews the diff for deployment considerations: expand-contract schema migrations, feature-flag gating, env / config drift, backwards compatibility during rolling deploy, rollback path. Cross-refs `principles/migrations.md` and `principles/rollback.md`.
+
+### Changed
+
+- **`harness/sensors/README.md`** — review row in "How sensors fire" lists the four review-* sensors; sensor index gains two rows.
+- **`harness/corpus/state/CODEBASE_STATE.md`** — sensor inventory gains `review-risk` and `review-deployment` rows.
+- **`harness/README.md`** — bootstrap action description names all four inferential review sensors when listing what the action classifies.
+- **`harness/adapters/claude-code/lifecycle.md`** — review action spawns four sub-agents in parallel; bootstrap row names all four when describing sensor classification.
+- **`harness/adapters/codex/lifecycle.md`** and **`harness/adapters/pi/lifecycle.md`** — sub-agent degradation notes name all four reviewers.
+- **`harness/guides/process/review.md`** — the "default review set" line names `review-functional`, `review-security`, `review-risk`, `review-deployment` (and drops the now-stale "v2" framing).
+
+### Migration from 0.7.x
+
+`keystone migrate` ships **two migration files** under `migrations/0.8.0/`:
+
+1. **`001-add-review-risk-and-deployment-sensors.yaml`** — 2 `add_file` ops for the two new sensor files.
+2. **`002-update-readmes-for-review-agents.yaml`** — 9 `replace_block` ops surfacing the new sensors across sensors README, CODEBASE_STATE, harness README, the three adapter lifecycle docs, and the review process guide.
+
+After upgrading the binary, run `keystone migrate` in your project. Customized files that no longer match the migration's expected text will surface a conflict — merge by hand and re-run. The `add_file` operations are unconditionally idempotent; existing custom files are never overwritten.
+
 ## [0.7.1] — 2026-06-03
 
 Repositions Keystone as a **project harness installer** and simplifies the install scripts. The curl and PowerShell bootstraps now install the binary, ensure the install directory is on the user's `PATH`, and exit — `keystone init` is a deliberate step the user runs in a project, not a side effect of installation. Documentation (README and site) is brought in line with the new behavior and the new framing.
