@@ -1,0 +1,304 @@
+id: 001-add-process-discipline-guides
+description: |
+  Add five cross-cutting process guides — sensitive-files, dangerous-actions,
+  scoping, ci-failure, escalation. These cover agent-specific failure modes
+  not previously addressed by the six phase docs: sensitive-data hygiene,
+  irreversible-action confirmation, commit/PR size limits, CI-failure
+  remediation flow, and the "stop and ask" escalation rule.
+
+operations:
+  - type: add_file
+    path: harness/guides/process/sensitive-files.md
+    content: |
+      # Sensitive Files
+
+      Files the agent must never read into context, write to, or commit. Enforced at every phase — sensitive-file access is never a side effect of the task.
+
+      ## IRON LAW
+
+      **NEVER READ OR WRITE A FILE ON THE SENSITIVE LIST.**
+
+      If a file matches a pattern below, the agent does not open it, paste it, or pass it as an argument to any tool. Asking the user to provide the value out-of-band is the right escalation. Logs that may contain request bodies, headers, or query strings count as sensitive too.
+
+      ## The list
+
+      Default patterns the harness treats as sensitive. The **bootstrap** action augments these by scanning `.gitignore` and `.git/info/exclude` for further candidates, and records the final list in `corpus/state/CODEBASE_STATE.md`.
+
+      - `.env`, `.env.*` — environment files
+      - `*.pem`, `*.key`, `*.p12`, `*.pfx` — private keys and certificates
+      - `id_rsa`, `id_ed25519`, `*.ppk` — SSH keys
+      - `*.gpg`, `*.asc` — encrypted artifacts
+      - `credentials.json`, `service-account*.json` — cloud credentials
+      - `*.kdbx` — password databases
+      - `.netrc`, `.npmrc`, `.pypirc` — when they contain tokens
+      - `secrets/`, `vault/` directories
+      - Any path matching `*secret*`, `*credential*`, `*password*` outside test fixtures
+
+      ## RULES
+
+      - **No `cat`, `head`, `tail` on sensitive files.** No `grep` either — even searching leaks values into context.
+      - **Test fixtures that look like credentials must be obviously fake** (`fake-key-do-not-use`, `xxx`, `00000000`). Anything that *looks* real is treated as real.
+      - **If the agent needs a value from a sensitive file** (a hostname, a username, but not the secret), ask the user.
+      - **A `.env.example` ships with placeholders, never real values.** Bootstrap diffs `.env.example` against `.env` to confirm.
+
+      ## GOLDEN RULES
+
+      - **Aim to keep secrets out of the repo entirely.** Workload identity (IAM roles, OIDC) beats long-lived keys. See [[secrets-management]].
+      - **Aim to fail loud on accidental sensitive reads.** If an agent action somehow pulls one in, the next sensor pass should flag it — drift sensor and commit-message sensor both consult this list.
+
+      ## Sensors
+
+      - The [drift sensor](../../sensors/drift.md) reads this list and flags any diff that adds a path matching a sensitive pattern.
+      - The [commit-message sensor](../../sensors/commit-message.md) blocks commits that touch matching paths.
+
+      ## Anti-patterns
+
+      - "Just this once" reading `.env` to confirm a variable exists. Ask the user.
+      - Copying a credential into a comment "for reference."
+      - Treating staging or test credentials as harmless. They aren't.
+      - Committing a `.env.example` with values that look real instead of placeholders.
+
+      ---
+
+      See also: [[secrets-management]], [[dangerous-actions]].
+
+  - type: add_file
+    path: harness/guides/process/dangerous-actions.md
+    content: |
+      # Dangerous Actions
+
+      Operations the agent must confirm with the user before executing — irreversible, broadly-visible, or outside the local workspace.
+
+      ## IRON LAW
+
+      **NEVER PERFORM A DANGEROUS ACTION WITHOUT EXPLICIT, IN-TURN CONFIRMATION.**
+
+      Authorization granted once does not extend to the next invocation. Each occurrence is a separate confirmation. A mode (see [`modes.md`](modes.md)) never loosens this.
+
+      ## What counts as dangerous
+
+      | Category | Examples |
+      |---|---|
+      | **Destructive filesystem** | `rm -rf`, `find -delete`, overwriting uncommitted work, dropping a worktree |
+      | **History rewriting** | `git push --force`, `git reset --hard`, `git rebase -i`, `git branch -D`, `git filter-branch`, `git clean -fd` |
+      | **Production data** | `DROP TABLE`, `TRUNCATE`, destructive `UPDATE` without `WHERE`, manual prod DB writes |
+      | **External communication** | Posting to Slack/Discord, sending email, commenting on someone else's repo, opening tickets in shared trackers |
+      | **System changes** | `brew install`, `apt install`, `sudo`, editing files outside the repo, modifying `~/.zshrc`, changing global git config |
+      | **Network exposure** | Opening ports, deploying, rotating secrets, changing DNS, modifying IAM |
+      | **Account state** | OAuth grants, API key creation, paying invoices, accepting ToS |
+
+      The **bootstrap** action specializes this list: it records which integrations are wired (Slack MCP, Linear, GitHub PR write, infra tooling) and which dangerous paths are reachable from this project.
+
+      ## RULES
+
+      - **Show, then confirm.** State the exact command and its blast radius in one sentence. Wait for the user.
+      - **Reversibility downgrades risk, but doesn't remove it.** A `git revert` is cheap; a `git push --force` to `main` is not.
+      - **Default to the safest equivalent.** `git revert` over `reset --hard`. `UPDATE ... WHERE id = ...` over a bulk update. A draft PR before the real one.
+      - **Refuse to chain dangerous actions.** One confirmation, one action. Compound commands hide the dangerous step.
+      - **Investigate unfamiliar state before deleting it.** An unexpected file or branch may be the user's in-progress work.
+
+      ## GOLDEN RULES
+
+      - **Aim to keep a recovery path open.** Before any destructive op, ask "if this is wrong, how do I undo it in the next minute?" If the answer is "I can't" — stop and confirm.
+      - **Aim to never act on shared state without a written audit trail.** A Slack message is a side effect on the team; treat it like a deploy.
+
+      ## Pacing modes
+
+      - **paired** — confirm every dangerous action.
+      - **solo** — confirm every dangerous action. Mode does not loosen this.
+      - **autopilot** — confirm every dangerous action. Mode does not loosen this. See [`modes.md`](modes.md) IRON LAW.
+
+      ## Anti-patterns
+
+      - `&& rm -rf …` tacked onto the end of a "normal" command.
+      - Confirming "yes, proceed" once and assuming that covers future runs.
+      - Running `git push --force` to "fix" a hook failure. Hook failures are signal — fix the cause.
+      - Deleting a file the agent does not recognize. Investigate first.
+
+      ---
+
+      See also: [[sensitive-files]], [[ci-failure]], [`modes.md`](modes.md).
+
+  - type: add_file
+    path: harness/guides/process/scoping.md
+    content: |
+      # Scoping
+
+      How big any single commit, PR, or implementation pass is allowed to get before it must split.
+
+      ## RULES
+
+      - **One concern per commit.** A commit fixes one bug, adds one feature, or refactors one shape — not two.
+      - **Target a diff a reviewer can read in one sitting.** Default ceiling: **≤500 changed lines (excluding generated files and lockfiles), ≤10 source files**. Bootstrap may tighten these from project history.
+      - **Split when the ceiling is reached.** If the change needs more, ship it as a sequence of dependent commits or PRs, each independently reviewable.
+      - **Generated artifacts (lockfiles, snapshots, build output) sit in their own commit** when they cross 50 lines. Mixing them with logic hides the logic.
+      - **Refactor and behavior change never share a commit.** See [[refactoring]] and `release.md` GOLDEN RULES.
+
+      ## GOLDEN RULES
+
+      - **Aim to keep the diff readable in one screen of `git diff --stat`.** If the stats themselves do not fit, the PR is too big.
+      - **Aim to make every commit independently revertable.** Two intertwined changes in one commit make the revert worse than the original problem. See [[rollback]].
+      - **Aim to push pre-work up to its own PR.** Renames, type cleanups, dependency bumps that *enable* the real change should land first, alone, and green.
+
+      ## Sensors
+
+      - The **commit-message sensor** does not enforce scope (it cannot tell intent from size). Scope is enforced at the review phase by reviewers reading the diff, and by the agent self-checking before staging.
+
+      ## Pacing modes
+
+      - **paired** — agent asks before committing anything that exceeds the ceiling.
+      - **solo** — agent splits autonomously when the ceiling is exceeded; reports the split.
+      - **autopilot** — same as solo. The split itself is documented in the assumption log.
+
+      ## Anti-patterns
+
+      - A 2000-line "fix typo + reorganize + add feature" megaPR.
+      - Hiding a behavior change inside a refactor commit so the diff looks small per-file.
+      - "I'll squash it before merge." Squashing erases the audit trail; ship atomic from the start.
+      - Renaming half the call sites of a function and the implementation in the same commit. Rename, then change.
+
+      ---
+
+      See also: [[refactoring]], `release.md`, [[rollback]].
+
+  - type: add_file
+    path: harness/guides/process/ci-failure.md
+    content: |
+      # CI Failure Remediation
+
+      What to do when CI fails — on a PR, after a merge, or post-deploy. The release phase covers the happy path; this covers everything else.
+
+      ## Entry conditions
+
+      Any of:
+
+      - CI reports a red check on an open PR.
+      - CI fails on `main` after a merge.
+      - A deploy fails or rolls back.
+      - A scheduled job (cron, nightly) starts failing.
+
+      ## Activities
+
+      ### 1. Fetch the failure
+
+      Pull the failing log from CI directly — never guess from the job name. Bootstrap records the command in `corpus/state/CODEBASE_STATE.md`:
+
+      - GitHub Actions: `gh run view <id> --log-failed`
+      - GitLab: `glab ci view <id>`
+      - CircleCI: `circleci runs logs <id>`
+      - Buildkite: `bk job logs <id>`
+      - Jenkins: project-specific (recorded by bootstrap)
+
+      ### 2. Reproduce locally
+
+      Run the same sensor command locally that CI ran. If the failure does not reproduce:
+
+      - Compare environment (Node/Python/Go version, OS, env vars).
+      - Check for non-determinism — see [[determinism]]. A test that passes locally and fails in CI is usually non-deterministic, not "CI is broken."
+      - Check for ordering — does CI run tests in parallel? In a different order?
+
+      A failure that only reproduces in CI is still a failure. Do not merge around it.
+
+      ### 3. Fix at the root
+
+      Diagnose the *root cause*, not the surface. A test that passes after a retry has not been fixed; it has been ignored.
+
+      - **Real failure** → fix the code or the test. Re-invoke the **verify** action.
+      - **Flaky test** → quarantine with an explicit tracker card for the fix; do not silently `pytest --rerun`. See [[determinism]].
+      - **Infra/runner issue** → file a tracker card; do not silently rerun until green.
+
+      ### 4. Post-merge failure on `main`
+
+      `main` going red is incident-shaped. Default response:
+
+      - **Revert first, debug second** if a fix is not obvious in <10 minutes. A reverted main is a green main. See [[rollback]].
+      - The revert PR carries a short body: what failed, why reverting, link to a follow-up card.
+
+      ### 5. Deploy failure
+
+      If CD ran and a deploy failed:
+
+      - Check the deploy log via the recorded command.
+      - Roll back via the recorded rollback procedure. See [[rollback]].
+      - Open a postmortem-tracking artifact only if user impact occurred.
+
+      ## GOLDEN RULES
+
+      - **Aim never to merge around a failing check.** Disabling a check, marking it non-required, or using admin-merge to bypass CI is a [[dangerous-actions|dangerous action]] requiring explicit confirmation. Builds on the existing IRON LAW "no commits with failing sensors" — CI is the same sensors at the pipeline level.
+      - **Aim to revert before debugging on `main`.** A reverted main lets the team keep working while the cause is investigated.
+
+      ## RULES
+
+      - **Do not retry until green.** Each retry without a diagnosis is evidence dressed as confirmation. If a job needs to retry, the *underlying flake* is the bug.
+      - **Stale log = stale evidence.** A log from before the latest push does not count. Fetch fresh.
+      - **Carry the tracker card forward.** The remediation links to the original spec's tracker card *and* its own follow-up card if the fix introduces tech debt.
+
+      ## Anti-patterns
+
+      - "Rerunning until it passes."
+      - "CI was flaky" without an open tracker card for the flake.
+      - Reverting silently — a revert is a release event; communicate it.
+      - Touching `main` directly to fix a `main` failure. Revert via PR.
+
+      ---
+
+      See also: [[determinism]], [[rollback]], [[dangerous-actions]], `release.md`.
+
+  - type: add_file
+    path: harness/guides/process/escalation.md
+    content: |
+      # Escalation
+
+      When the agent is stuck, when to stop and ask the user — versus when to keep going. Counterpart to [`modes.md`](modes.md): modes set the *default* pace; escalation is the override that triggers regardless of mode.
+
+      ## GOLDEN RULES
+
+      - **Aim to stop after three failed attempts at the same objective.** Three iterations on the same failing sensor, the same red test, or the same compile error without making it green is a signal that the model of the problem is wrong. Stop, report what was tried, and hand back to the user. Different errors after each attempt count as progress; the same error three times does not.
+      - **Aim to escalate early when the cost of being wrong is high.** Security, data integrity, prod state — escalate at the first hint of uncertainty, not after three attempts.
+      - **Aim to escalate with a recommendation, not a question.** "I think A because X — should I do A?" beats "what should I do?"
+
+      ## RULES
+
+      - **Stop on contradictory rules.** Two guides say opposite things → surface the conflict, do not pick.
+      - **Stop on ambiguous acceptance criteria.** A criterion that admits two readings is not a criterion; return to spec.
+      - **Stop on a non-trivial-consequences decision with no clear winner.** Two equally plausible designs → the user decides.
+      - **Stop when a [[dangerous-actions|dangerous action]] is the only path forward.** Confirm before, not after.
+      - **Stop when the codebase contradicts state.** If `corpus/state/CODEBASE_STATE.md` says one thing and the code says another, do not assume which is right.
+
+      ## What "stop and report" looks like
+
+      A structured handoff:
+
+      ```
+      STUCK: <one-sentence summary>
+
+      What I tried:
+      1. <attempt> → <result>
+      2. <attempt> → <result>
+      3. <attempt> → <result>
+
+      What I think is going on:
+      <one paragraph: best hypothesis>
+
+      What I need from you:
+      <a specific question, not "what should I do"?>
+      ```
+
+      The report is the deliverable. A "raise a hand" with no diagnosis is not escalation; it is giving up.
+
+      ## Pacing modes
+
+      - **paired** — escalation triggers conversation immediately.
+      - **solo** — escalation triggers the structured-handoff report; agent waits.
+      - **autopilot** — escalation still pauses the loop. Autopilot does not override the stop conditions. Assumption-log entries are not a substitute for stopping when stuck.
+
+      ## Anti-patterns
+
+      - "Trying one more thing" four times in a row.
+      - Reporting "I am stuck" with no diagnosis.
+      - Picking a direction on a high-stakes decision because the model is uncertain. Uncertainty is the signal to ask, not to guess.
+      - Treating a different-flavor failure on each attempt as "the same problem." Different errors = progress; report progress and continue.
+
+      ---
+
+      See also: [`modes.md`](modes.md), [[dangerous-actions]].

@@ -40,16 +40,22 @@ Principles grouped by what they address. Files marked **(scaffold)** ship with t
 - `distributed-systems-fallacies.md` — Deutsch / Gosling: the eight things everyone wrongly assumes about the network.
 - `observability.md` — Sridharan, Majors: ability to answer new questions about production without redeploying.
 - `idempotency.md` — Helland; RFC 9110: at-least-once delivery of idempotent operations as the working substitute for "exactly once."
+- `logging.md` — Majors, Sridharan, OWASP CWE-532: structured, safe-to-keep records; never log secrets or PII.
+- `migrations.md` — Sadalage & Fowler; gh-ost / PlanetScale: expand-contract; the schema serves old and new code simultaneously during a rolling deploy.
+- `rollback.md` — Humble & Farley; Hodgson on feature flags: decouple deployment from release; every change has a return path.
 
 **Testing**
 - `tdd.md` — Beck: Red → Green → Refactor; test-first as design feedback; the test pyramid; F.I.R.S.T.
 - `bdd.md` — North: behavior over tests; Given-When-Then; ubiquitous language. Includes the ATDD lineage (Cunningham, Crispin & Gregory).
 - `testing-patterns.md` — Chicago-style classicist testing; mock only at real boundaries; test doubles, AAA, test data builders, characterization tests.
+- `determinism.md` — Memon et al.; Feathers; Fowler on non-determinism: time, randomness, ordering, network as injectable inputs — never ambient state.
 
 **Security**
 - `security.md` — Saltzer & Schroeder: eight foundational protection principles.
 - `security-threats.md` — OWASP Top 10 (2021) + modern threats (supply chain, cloud/IAM, confused deputy, prompt injection).
 - `secrets-management.md` — secret lifecycle: generation, distribution, rotation, revocation; the hierarchy from workload identity down to "never in source."
+- `dependencies.md` — Cox, Hunt & Thomas; left-pad / event-stream / xz lineage: every direct dependency is API design; the lockfile is the real declaration.
+- `prompt-injection.md` — Greshake et al.; Willison; OWASP LLM Top 10: read content is data, not commands; trust boundary lives between channels, not within them.
 
 You may add more if your team has principles that meet the bar: universal, language-agnostic, cited. If a "principle" is actually stack-specific, it belongs in `../idioms/<stack>/` (plus `../../guides/idioms/<stack>/` if it has rules). If it's business-specific, it belongs in `../domain/`.
 

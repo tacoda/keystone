@@ -18,6 +18,23 @@ Two cross-cutting references:
 - `modes.md` — pacing modes (paired / solo / autopilot). Orthogonal to the six phases; modes change *how* phases run, not *what* happens.
 - `sensors.md` — sensor contracts (lint, type-check, test, build, drift, coverage, risk-fingerprint, traffic-topology, state-region, commit-message, tracker-card-fetcher). Each sensor declares its trigger, inputs, exit condition, output, and any state writes.
 
+Cross-cutting discipline (apply across every phase):
+
+- `sensitive-files.md` — files the agent must never read or write. Sensitive-data hygiene.
+- `dangerous-actions.md` — irreversible operations requiring explicit confirmation. Counterpart to `modes.md`.
+- `scoping.md` — size limits on commits and PRs.
+- `ci-failure.md` — what to do when CI fails. Sibling of `release.md` (the happy path).
+- `escalation.md` — when to stop and ask. Counterpart to `modes.md`.
+
+Agent-specific failure modes (loaded ambient; counter the natural pull of how coding agents go wrong):
+
+- `grounding.md` — verify that a function, package, flag, or config key exists before invoking it.
+- `pushback.md` — disagree explicitly when the user is wrong; do not collapse to agreement.
+- `self-validation.md` — refuse to count the agent's own claim as evidence; tool output is evidence.
+- `subagent-trust.md` — a subagent's "done" report is a claim to verify, not evidence to accept.
+- `context-budget.md` — read what is relevant to the touched region, no more; grep before reading.
+- `surgical-edits.md` — touch only what serves the task; no "while I'm here" cleanups.
+
 Each phase doc enumerates:
 
 - **Entry condition** — what must be true to enter this phase.

@@ -7,6 +7,7 @@ The staging area for the Learning flywheel. Novel patterns the agent surfaces du
 - `inbox/` — raw candidates. The agent writes here when it makes a judgment call not covered by the existing harness.
 - `promoted/` — accepted items, after the **synthesize** action has folded them into a guide and/or corpus file. Kept as a record.
 - `rejected/` — reviewed and not promoted. Kept with the reason.
+- `wishlist.md` — known gaps the team plans to address eventually. Team-curated, not agent-generated; items promote to `inbox/` when a real situation triggers them.
 
 ## The flow
 

@@ -1,0 +1,99 @@
+id: 003-update-readmes
+description: |
+  Update three READMEs to surface the new 0.7.0 guides:
+  - harness/guides/process/README.md — list the five new cross-cutting discipline guides.
+  - harness/corpus/principles/README.md — add dependencies, migrations, logging, determinism, rollback to their respective categories.
+  - harness/README.md — extend the consolidated iron-law list with the three new ones (sensitive-files, dangerous-actions, logging).
+
+  Each op uses replace_block with exact-string match. If a downstream user has
+  customized any of these files, the conflict will surface and they merge by hand.
+
+operations:
+  - type: replace_block
+    path: harness/guides/process/README.md
+    match: |
+      Two cross-cutting references:
+
+      - `modes.md` — pacing modes (paired / solo / autopilot). Orthogonal to the six phases; modes change *how* phases run, not *what* happens.
+      - `sensors.md` — sensor contracts (lint, type-check, test, build, drift, coverage, risk-fingerprint, traffic-topology, state-region, commit-message, tracker-card-fetcher). Each sensor declares its trigger, inputs, exit condition, output, and any state writes.
+    replacement: |
+      Two cross-cutting references:
+
+      - `modes.md` — pacing modes (paired / solo / autopilot). Orthogonal to the six phases; modes change *how* phases run, not *what* happens.
+      - `sensors.md` — sensor contracts (lint, type-check, test, build, drift, coverage, risk-fingerprint, traffic-topology, state-region, commit-message, tracker-card-fetcher). Each sensor declares its trigger, inputs, exit condition, output, and any state writes.
+
+      Cross-cutting discipline (apply across every phase):
+
+      - `sensitive-files.md` — files the agent must never read or write. Sensitive-data hygiene.
+      - `dangerous-actions.md` — irreversible operations requiring explicit confirmation. Counterpart to `modes.md`.
+      - `scoping.md` — size limits on commits and PRs.
+      - `ci-failure.md` — what to do when CI fails. Sibling of `release.md` (the happy path).
+      - `escalation.md` — when to stop and ask. Counterpart to `modes.md`.
+
+  - type: replace_block
+    path: harness/corpus/principles/README.md
+    match: |
+      **Production & distributed systems**
+      - `concurrency.md` — Hoare, Pike, Lea, Goetz: shared mutable state, happens-before, message passing over shared memory.
+      - `distributed-systems-fallacies.md` — Deutsch / Gosling: the eight things everyone wrongly assumes about the network.
+      - `observability.md` — Sridharan, Majors: ability to answer new questions about production without redeploying.
+      - `idempotency.md` — Helland; RFC 9110: at-least-once delivery of idempotent operations as the working substitute for "exactly once."
+    replacement: |
+      **Production & distributed systems**
+      - `concurrency.md` — Hoare, Pike, Lea, Goetz: shared mutable state, happens-before, message passing over shared memory.
+      - `distributed-systems-fallacies.md` — Deutsch / Gosling: the eight things everyone wrongly assumes about the network.
+      - `observability.md` — Sridharan, Majors: ability to answer new questions about production without redeploying.
+      - `idempotency.md` — Helland; RFC 9110: at-least-once delivery of idempotent operations as the working substitute for "exactly once."
+      - `logging.md` — Majors, Sridharan, OWASP CWE-532: structured, safe-to-keep records; never log secrets or PII.
+      - `migrations.md` — Sadalage & Fowler; gh-ost / PlanetScale: expand-contract; the schema serves old and new code simultaneously during a rolling deploy.
+      - `rollback.md` — Humble & Farley; Hodgson on feature flags: decouple deployment from release; every change has a return path.
+
+  - type: replace_block
+    path: harness/corpus/principles/README.md
+    match: |
+      **Testing**
+      - `tdd.md` — Beck: Red → Green → Refactor; test-first as design feedback; the test pyramid; F.I.R.S.T.
+      - `bdd.md` — North: behavior over tests; Given-When-Then; ubiquitous language. Includes the ATDD lineage (Cunningham, Crispin & Gregory).
+      - `testing-patterns.md` — Chicago-style classicist testing; mock only at real boundaries; test doubles, AAA, test data builders, characterization tests.
+    replacement: |
+      **Testing**
+      - `tdd.md` — Beck: Red → Green → Refactor; test-first as design feedback; the test pyramid; F.I.R.S.T.
+      - `bdd.md` — North: behavior over tests; Given-When-Then; ubiquitous language. Includes the ATDD lineage (Cunningham, Crispin & Gregory).
+      - `testing-patterns.md` — Chicago-style classicist testing; mock only at real boundaries; test doubles, AAA, test data builders, characterization tests.
+      - `determinism.md` — Memon et al.; Feathers; Fowler on non-determinism: time, randomness, ordering, network as injectable inputs — never ambient state.
+
+  - type: replace_block
+    path: harness/corpus/principles/README.md
+    match: |
+      **Security**
+      - `security.md` — Saltzer & Schroeder: eight foundational protection principles.
+      - `security-threats.md` — OWASP Top 10 (2021) + modern threats (supply chain, cloud/IAM, confused deputy, prompt injection).
+      - `secrets-management.md` — secret lifecycle: generation, distribution, rotation, revocation; the hierarchy from workload identity down to "never in source."
+    replacement: |
+      **Security**
+      - `security.md` — Saltzer & Schroeder: eight foundational protection principles.
+      - `security-threats.md` — OWASP Top 10 (2021) + modern threats (supply chain, cloud/IAM, confused deputy, prompt injection).
+      - `secrets-management.md` — secret lifecycle: generation, distribution, rotation, revocation; the hierarchy from workload identity down to "never in source."
+      - `dependencies.md` — Cox, Hunt & Thomas; left-pad / event-stream / xz lineage: every direct dependency is API design; the lockfile is the real declaration.
+
+  - type: replace_block
+    path: harness/README.md
+    match: |
+      Non-negotiable across every phase. Stated in full in the corresponding `guides/process/<phase>.md`; consolidated here for quick reference.
+
+      - **No proceeding without explicit acceptance criteria** in the spec.
+      - **No completion claims without fresh verification evidence** — sensors must have run *this turn*, not in a prior one.
+      - **No commits with failing sensors.** Never `--no-verify`.
+      - **No AI attribution** in commits, PRs, or tracker comments (no `Co-Authored-By: <agent>`, no auto-generated footers).
+      - **No silent overwrites** of state files — propose a diff, confirm before applying.
+    replacement: |
+      Non-negotiable across every phase. Stated in full in the corresponding `guides/process/<phase>.md` or `guides/principles/<name>.md`; consolidated here for quick reference.
+
+      - **No proceeding without explicit acceptance criteria** in the spec.
+      - **No completion claims without fresh verification evidence** — sensors must have run *this turn*, not in a prior one.
+      - **No commits with failing sensors.** Never `--no-verify`.
+      - **No AI attribution** in commits, PRs, or tracker comments (no `Co-Authored-By: <agent>`, no auto-generated footers).
+      - **No silent overwrites** of state files — propose a diff, confirm before applying.
+      - **No reading or writing a sensitive file** — `.env*`, private keys, credentials, anything matching the project's deny-list. See `guides/process/sensitive-files.md`.
+      - **No dangerous action without explicit, in-turn confirmation** — `rm -rf`, force push, destructive DDL, external messages, system installs. See `guides/process/dangerous-actions.md`.
+      - **No logging a secret, credential, or user PII.** See `guides/principles/logging.md`.

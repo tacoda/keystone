@@ -1,0 +1,406 @@
+id: 002-add-principle-guide-pairs
+description: |
+  Add five new principle pairs (guide + corpus) — dependencies, migrations,
+  logging, determinism, rollback. Each covers a class of agent-induced damage
+  not previously named at the principle layer: supply-chain risk, schema-change
+  safety, structured/PII-safe logging, non-deterministic tests, and rollback
+  discipline.
+
+operations:
+  - type: add_file
+    path: harness/guides/principles/dependencies.md
+    content: |
+      # Dependencies — rules
+
+      The non-negotiable and strongly-preferred rules from [`corpus/principles/dependencies.md`](../../corpus/principles/dependencies.md). Loaded ambient; enforced at planning, implementation, and review.
+
+      ## GOLDEN RULES
+
+      - **Aim to never add a dependency the team has not approved.** Adding a package is a planning-phase decision — surface it in the plan, get explicit approval, then add. No package gets installed as a side effect of solving an unrelated problem.
+      - **Aim to never bypass the lockfile.** `package-lock.json`, `pnpm-lock.yaml`, `yarn.lock`, `poetry.lock`, `Gemfile.lock`, `Cargo.lock`, `go.sum` — these are committed, regenerated only by the package manager, and never hand-edited.
+      - **Aim to prefer the standard library** over a new dependency when the function fits in 50 lines and is well-understood.
+      - **Aim to justify every new direct dependency** in the commit or PR body: what it does, what alternatives exist, why this one.
+      - **Aim to upgrade in dedicated commits.** A dependency bump and a feature change in the same commit hide each other. See [[scoping]].
+      - **Aim to read the changelog on major-version bumps.** Major bumps are breaking by definition. Patch and minor bumps may proceed with the test suite as the gate.
+
+      ## RULES
+
+      - **Lockfile changes are review-visible.** A diff that touches a lockfile but not its manifest is suspicious — investigate.
+      - **No transitive dependency added directly.** If the agent finds it needs a package only because another package needs it, pin the *direct* dependency, not the transitive.
+      - **No `--force`, `--legacy-peer-deps`, or version-resolution bypass flags** to make an install succeed. The error is the signal.
+      - **Removed code → removed dependency.** When the last call site disappears, the dependency goes too. The drift sensor watches for orphans.
+      - **Security advisories block the release phase.** If `npm audit`, `pip-audit`, `bundle audit`, `cargo audit`, or `govulncheck` reports a high-severity vulnerability on a touched dependency, fix it before merge.
+
+      ## Sensors
+
+      - **Bootstrap** records the package manager and inserts the install / upgrade / audit commands into `corpus/state/CODEBASE_STATE.md`.
+      - The **drift sensor** flags new direct dependencies introduced by the diff so the review phase can confirm they were approved at planning.
+
+      ---
+
+      Traces to: [`corpus/principles/dependencies.md`](../../corpus/principles/dependencies.md). See also: [[secrets-management]], [[scoping]].
+
+  - type: add_file
+    path: harness/corpus/principles/dependencies.md
+    content: |
+      # Dependencies
+
+      Every dependency added to a project is a permanent decision with permanent cost. Code you do not own runs in your build, in your CI, in your binary, and — at runtime — in your users' processes. Treating dependency selection as the same kind of decision as writing a function, rather than as the kind of decision as picking an API to expose, is the root of supply-chain risk.
+
+      > **Rules extracted:** [`guides/principles/dependencies.md`](../../guides/principles/dependencies.md).
+
+      ## What it asks of you
+
+      - Treat every direct dependency as a stable, named contract with the rest of the codebase. Adding one is API design.
+      - Treat the lockfile as the *actual* dependency declaration. The manifest is a *constraint*; the lockfile is the *resolution*. Reviews read the lockfile.
+      - Treat upgrades as their own work, not as cleanup. Upgrades are behavior changes — the wire is the same, the runtime is not.
+      - Treat transitive dependencies as a *surface area* metric, not a *correctness* metric. They run too.
+
+      ## Why it holds
+
+      The npm `left-pad` incident (2016) made the cost of unmanaged dependencies legible: an 11-line module's removal broke a meaningful slice of the JavaScript ecosystem in real time. The `event-stream` (2018) and `ua-parser-js` (2021) compromises showed that transitive dependencies are an attack surface even when the direct list looks clean. The xz backdoor (2024) extended this to system-level supply chains.
+
+      The economic argument is older. Adding a dependency moves work *out* of the project's control. Some moves are correct (you should not rewrite OpenSSL); many are not (you do not need 14 packages to format a date). Hunt & Thomas's *ETC — Easier To Change* — generally favors fewer, deeper dependencies over many shallow ones.
+
+      Lockfiles exist because semver is a *promise*, and promises are *broken*. A package manager resolving `^1.2.3` today may give you `1.2.5`; tomorrow `1.2.6`; the day after a patched-but-incompatible `1.2.7`. The lockfile pins the resolution so the build is reproducible across machines, CI runs, and weeks.
+
+      ## Anti-patterns
+
+      - A dependency added to solve a one-line problem ("I need to debounce — let me install `lodash.debounce`").
+      - Mass-installing a meta-package to get one function ("`npm install lodash` for `lodash.get`").
+      - Hand-editing the lockfile to "fix" a version conflict.
+      - Running `--force` / `--legacy-peer-deps` to make an install pass without understanding what the resolver was protecting you from.
+      - Pinning all transitives ("overriding" the resolver). Sometimes correct; often a sign of misunderstanding semver ranges.
+      - Auto-merging dependabot PRs without a test suite that exercises the relevant code paths.
+      - Treating dev dependencies as harmless. A compromised dev dep ships malicious code in your CI.
+
+      ## References
+
+      - Hunt, A. & Thomas, D. *The Pragmatic Programmer* — ETC, orthogonality.
+      - Williams, C. (2016). [left-pad incident retrospective](https://www.theregister.com/2016/03/23/npm_left_pad_chaos/).
+      - Cox, R. (2019). [*Surviving Software Dependencies*](https://research.swtch.com/deps).
+      - Ohm, M. et al. (2020). *Backstabber's Knife Collection: A Review of Open Source Software Supply Chain Attacks*.
+      - npm, GitHub, OSV.dev advisories — the lived corpus.
+
+      ---
+
+      Forward link: [`guides/principles/dependencies.md`](../../guides/principles/dependencies.md).
+
+  - type: add_file
+    path: harness/guides/principles/migrations.md
+    content: |
+      # Migrations — rules
+
+      The non-negotiable and strongly-preferred rules from [`corpus/principles/migrations.md`](../../corpus/principles/migrations.md). Loaded ambient; enforced at planning and review.
+
+      ## GOLDEN RULES
+
+      - **Aim to never ship a destructive schema change in the same release as code that depends on the old shape.** Expand first; contract only after every reader and writer is on the new shape.
+      - **Aim to never run a migration whose rollback path has not been written down.** "Drop the table" is not a rollback; restoring from backup is. If the rollback is restore-from-backup, that is the rollback — write it down and confirm the backup exists. See [[rollback]].
+      - **Aim for expand-contract.** Three phases: (1) **expand** — add the new shape, dual-write; (2) **migrate** — backfill, switch readers; (3) **contract** — remove the old shape. Each phase is its own PR.
+      - **Aim for online schema changes** when the table is large enough that a lock would matter. Tools: `pt-online-schema-change`, `gh-ost`, `pg_repack`, Vitess/PlanetScale online DDL. Bootstrap records which is wired.
+      - **Aim for backwards-compatible migrations end-to-end.** The new code reads the old shape; the old code tolerates the new shape. Roll forward and roll back must both work.
+      - **Aim to migrate in idempotent batches.** A backfill that fails halfway must be safe to re-run from the start.
+
+      ## RULES
+
+      - **Migrations land in their own PR.** Schema and code mix only when the change is purely additive and the code does not yet read the new column.
+      - **No `DROP COLUMN`, `DROP TABLE`, `ALTER TYPE`** in the same PR as application code that no longer uses the column/table/type. Wait one release cycle minimum.
+      - **No data migrations inside a schema migration.** Schema migrations are DDL; data migrations are jobs. They have different failure modes and different rollback paths.
+      - **Long-running migrations run out-of-band.** Anything that holds a lock long enough to be noticeable by callers runs as a job, not as part of the deploy.
+      - **Every migration has a tracked end-state.** Active migrations live in `corpus/state/migrations/active/<NAME>.md` until contract is done; then move to `completed/`.
+
+      ## Sensors
+
+      - The **drift sensor** flags migration files in a PR that also contains application code referencing the changed columns.
+      - **Bootstrap** detects the migration tool (Alembic, Knex, Rails, Goose, Diesel, Flyway, sqitch, atlas, dbmate, etc.) and writes its commands into `corpus/state/CODEBASE_STATE.md`.
+
+      ---
+
+      Traces to: [`corpus/principles/migrations.md`](../../corpus/principles/migrations.md). See also: [[rollback]], [[scoping]].
+
+  - type: add_file
+    path: harness/corpus/principles/migrations.md
+    content: |
+      # Migrations
+
+      A schema migration changes the *shape* of state that survives the deploy. The deploy itself is finite; the state is permanent. Migrations that treat schema as code — atomically, with rollback by `git revert` — are migrations that lose data. The discipline of migrations is the discipline of separating the *change in the schema* from the *change in the code that uses it*.
+
+      > **Rules extracted:** [`guides/principles/migrations.md`](../../guides/principles/migrations.md).
+
+      ## What it asks of you
+
+      - Separate schema change from behavior change. They have different rollback semantics, different blast radii, and different time-to-recover. Mixing them couples them.
+      - Make every step independently revertable. Each migration commit is also a migration-revert commit; if the revert is "restore from backup," the migration is not designed.
+      - Plan for the rolling deploy. There is no instant when "the deploy" happens — there is a window where old and new code run together. The schema must serve both.
+      - Treat large tables as production. A `DROP COLUMN` on 100 rows is free; on a hundred million rows it is an incident.
+
+      ## Why it holds
+
+      Expand-contract (Sadalage & Fowler, *Refactoring Databases*, 2006) is the canonical pattern. Add the new column without removing the old; backfill; switch readers; switch writers; only then remove the old column. Each step is a small, reviewable, individually-revertable change. The pattern predates the cloud — it works because it never assumes the deploy is instantaneous.
+
+      PlanetScale, GitHub (gh-ost), Percona (pt-online-schema-change), and Vitess all exist to extend the pattern to tables where the *change itself* cannot be atomic at the database level. Online schema changes use shadow tables, change-data-capture, and atomic swaps to avoid the long-lock failure mode.
+
+      The "blue-green deploy + migration" pattern fails when a migration is not backwards-compatible: the green pool starts up, runs the migration, and the blue pool — still serving traffic — sees a schema it does not understand. Backwards-compatible migrations make blue-green safe.
+
+      ## Anti-patterns
+
+      - A single PR that adds a column, populates it, switches all callers, and drops the old column.
+      - A `DROP TABLE` rollback that assumes the data is recoverable. Once dropped, it is gone.
+      - A backfill in a migration file. Backfills time out, retry awkwardly, and run inside the deploy's transaction boundary. Make them jobs.
+      - "We have a maintenance window" as the safety net. The window is not the safety; backwards compatibility is.
+      - Forgetting to test the *intermediate* state — old code, new schema. That state runs in production for the duration of the rolling deploy.
+
+      ## References
+
+      - Sadalage, P. & Fowler, M. *Refactoring Databases* (2006).
+      - Humble, J. & Farley, D. *Continuous Delivery* (2010) — zero-downtime database changes.
+      - GitHub Engineering. [*gh-ost: Online Schema Migration for MySQL*](https://github.com/github/gh-ost).
+      - PlanetScale docs. [*Branching and deploy requests*](https://planetscale.com/docs/concepts/deploy-requests).
+      - Fowler, M. [*ParallelChange*](https://martinfowler.com/bliki/ParallelChange.html) — the expand-contract pattern at the API level.
+
+      ---
+
+      Forward link: [`guides/principles/migrations.md`](../../guides/principles/migrations.md).
+
+  - type: add_file
+    path: harness/guides/principles/logging.md
+    content: |
+      # Logging — rules
+
+      The non-negotiable and strongly-preferred rules from [`corpus/principles/logging.md`](../../corpus/principles/logging.md). Loaded ambient. Sibling of [[observability]] — observability is the why; logging is one of the hows.
+
+      ## IRON LAW
+
+      **NEVER LOG A SECRET, A CREDENTIAL, OR USER PII.**
+
+      Tokens, passwords, session cookies, API keys, full credit-card numbers, government IDs, full email addresses (when avoidable), full request bodies (when they may contain credentials) — none of these go to a log. Once a value lands in a log file, it lands in log aggregation, in backups, in S3, in whatever the team's retention policy is. Treat logs as public.
+
+      ## GOLDEN RULES
+
+      - **Aim for structured logs.** JSON or key-value pairs, not free-form strings. Searchable beats prosaic.
+      - **Aim for one log line per request boundary**, not one per function call. Logging on the inside of a hot loop is how disks fill.
+      - **Aim to log decisions, not data.** "Routed request to handler X" is a decision. "Request body: {...}" is data — and is the riskiest kind of log line.
+      - **Aim to include enough context to act on the line without opening another tool.** Request ID, user ID (hashed if needed), the operation, the outcome.
+
+      ## RULES
+
+      - **Redact at the boundary.** A logger that "knows" to redact secrets is fragile; data that has been redacted before reaching the logger is safe. See [[secrets-management]].
+      - **Log at level.** `error` for things a human must act on; `warn` for things worth knowing; `info` for the request-shaped story; `debug` for development. No `error` for things that are merely surprising.
+      - **No `print()` / `console.log()` in committed code.** Use the project logger. Print statements escape redaction.
+      - **Sample high-volume logs.** A log line that fires a million times an hour is noise. Sample, or remove.
+      - **Errors carry the cause chain.** A re-raised exception that drops the original is a debugger's enemy. Use `raise ... from`, `Error.cause`, `errors.Wrap`, depending on the language.
+
+      ## Sensors
+
+      - The **drift sensor** flags `print(`, `console.log(`, `fmt.Println(`, `dbg!(` and the project-specific equivalents recorded by bootstrap.
+      - **Bootstrap** records the logger (e.g., `structlog`, `pino`, `slog`, `tracing`, Monolog) and any PII-redaction middleware in `corpus/state/CODEBASE_STATE.md`.
+
+      ---
+
+      Traces to: [`corpus/principles/logging.md`](../../corpus/principles/logging.md). See also: [[observability]], [[secrets-management]], [[sensitive-files]].
+
+  - type: add_file
+    path: harness/corpus/principles/logging.md
+    content: |
+      # Logging
+
+      A log is a record of what the system did, written for a future reader who is trying to understand a past failure. Logs that cannot be searched, cannot be trusted, or cannot be safely retained are worse than no logs — they cost storage, mislead investigations, and create liability. The discipline of logging is the discipline of producing records that are *useful*, *honest*, and *safe to keep*.
+
+      > **Rules extracted:** [`guides/principles/logging.md`](../../guides/principles/logging.md).
+
+      ## What it asks of you
+
+      - Write logs for the next reader, not for the current author. The reader is on-call at 03:00 — give them the answer, not the breadcrumbs.
+      - Treat logs as a permanent surface. Anything that lands there is durable, replicated, and visible to anyone with log access. That includes attackers who get log access.
+      - Distinguish *the story of the request* (info) from *the situations that need human attention* (warn, error). A log stream where everything is `info` and everything is `error` carries no signal.
+      - Redact upstream. The logger is too late to be the last line of defense.
+
+      ## Why it holds
+
+      The CWE catalogue lists "Insertion of Sensitive Information into Log File" (CWE-532) as a recurring class of breach — and the lived record of incidents (T-Mobile 2018, Twitter 2018 password-log, Facebook 2019 password-log) shows it is not a theoretical concern. Once a secret lands in a log, it propagates: hot storage, cold storage, log aggregators, vendor systems, backups. The only safe assumption is that *any value in a log is permanently disclosed*.
+
+      The structured-log argument (Majors, Sridharan) is empirical: free-form logs are unsearchable at scale. A platform on which "find every 502 in the last hour, grouped by route" takes thirty minutes of grep is a platform without observability. Structured logs make those queries cheap; cheap queries make incident response fast.
+
+      The level discipline (most language-specific style guides) is about producing signal. An `ERROR` log that fires on every input-validation rejection is not an error log — it is a wolf-cry channel, and the team will learn to ignore it.
+
+      ## Anti-patterns
+
+      - `log.info("request body: %s", body)` on a route that takes credentials.
+      - `log.error()` on every 4xx response. 4xx is the client; errors are about the server.
+      - "Temporary" `print()` left in shipped code.
+      - A redaction step that runs *inside* the logger, which can be disabled at runtime by raising the level.
+      - A log line that says "something went wrong" with no request ID, no user, no operation. Untraceable.
+      - Logging exceptions and continuing without re-raising or handling. The log is not a substitute for handling the error.
+
+      ## References
+
+      - Majors, C., Fong-Jones, L. & Miranda, G. *Observability Engineering* (2022).
+      - Sridharan, C. *Distributed Systems Observability* (2018).
+      - OWASP. [*Logging Cheat Sheet*](https://cheatsheetseries.owasp.org/cheatsheets/Logging_Cheat_Sheet.html).
+      - CWE-532: *Insertion of Sensitive Information into Log File*.
+      - Gregg, B. *Systems Performance* — the operational case for structured, low-cardinality logs.
+
+      ---
+
+      Forward link: [`guides/principles/logging.md`](../../guides/principles/logging.md). See also: [`observability.md`](observability.md), [`secrets-management.md`](secrets-management.md).
+
+  - type: add_file
+    path: harness/guides/principles/determinism.md
+    content: |
+      # Determinism — rules
+
+      The non-negotiable and strongly-preferred rules from [`corpus/principles/determinism.md`](../../corpus/principles/determinism.md). Loaded ambient; enforced at implementation and verification.
+
+      ## GOLDEN RULES
+
+      - **Aim to treat a non-deterministic test as not-a-test.** A test whose outcome depends on time, randomness, ordering, the network, the filesystem, or any other ambient state must control that state explicitly. If it cannot, it does not belong in the test suite — it belongs in a separate, gated, flake-tolerant tier. (Builds on the existing testing IRON LAW *"flaky tests are not allowed."*)
+      - **Aim to inject the clock.** `now()` is a dependency; let the test pass in a fixed value. Equivalents: `freeze_time`, `MockClock`, `time.tzset`, `sinon.useFakeTimers`.
+      - **Aim to seed every randomness source.** `random.seed(0)`, `np.random.default_rng(0)`, `Math.random` replaced with a seeded PRNG in tests. Bootstrap records the project's pattern.
+      - **Aim to control IDs and tokens.** UUIDs, ULIDs, request IDs, JWTs — generated through an injectable source so tests can pin them.
+      - **Aim to remove the network from unit tests.** If a test makes an outbound call to a server you do not control, it is an integration test (or a flake).
+
+      ## RULES
+
+      - **No `sleep()` in tests.** Use explicit synchronization (event, condition variable, polling with a bounded timeout and a *reason*).
+      - **No real wall-clock arithmetic in tests.** `expected = now + duration` is fragile; freeze the clock.
+      - **No reliance on dict / map / set iteration order** unless the language guarantees it (Python 3.7+, JavaScript objects since ES2015 for string keys). Even then, prefer explicit sorting in tests.
+      - **No reliance on filesystem ordering.** `os.listdir` order is platform-specific.
+      - **No reliance on locale.** Date formatting, sort order, number formatting — pin or avoid in test assertions.
+      - **No environment leakage.** A test that sets `os.environ['X']` cleans up. A test that reads it from the surrounding shell is environment-dependent.
+      - **No reused test data between cases.** Each test seeds its own state.
+
+      ## Sensors
+
+      - The **test sensor** flags tests that have been retried within the same run as flaky candidates (when the runner supports retry annotations).
+      - **Bootstrap** records the time-mocking library, the seeded-random pattern, and the test-isolation library (`pytest-freezer`, `vitest.useFakeTimers`, `quicktime`, etc.) in `corpus/state/CODEBASE_STATE.md`.
+
+      ---
+
+      Traces to: [`corpus/principles/determinism.md`](../../corpus/principles/determinism.md). See also: [[testing-patterns]], [[tdd]], [[ci-failure]].
+
+  - type: add_file
+    path: harness/corpus/principles/determinism.md
+    content: |
+      # Determinism
+
+      A deterministic test gives the same answer every time given the same input. A non-deterministic test gives different answers under different ambient conditions — and is therefore not a test of the code, but a test of *the code plus the conditions*. Flaky tests are the most common operational cost of a non-deterministic suite, but the deeper cost is loss of trust: once one test is known to flake, every red is suspect.
+
+      > **Rules extracted:** [`guides/principles/determinism.md`](../../guides/principles/determinism.md).
+
+      ## What it asks of you
+
+      - Treat time, randomness, ordering, the network, the filesystem, and the environment as *inputs*, not as ambient state. Inputs are passed; ambient state is read. Tests pass inputs.
+      - Make every source of variation injectable. The production code uses a real clock; the test uses a frozen one. Same code, different input.
+      - Quarantine the rest. Tests that genuinely need the real world live in a separate, longer-running, flake-tolerant tier — typically called integration or end-to-end. They are not the main suite, and the main suite does not depend on them.
+
+      ## Why it holds
+
+      Google's 2016 flaky-test study (Memon, Gao, Nguyen, et al.) measured the cost: roughly 1 in 7 test failures across their internal codebase were flakes, costing engineering hours, masking real regressions, and gradually training engineers to retry-and-merge. The fix was systematic — detect flakes, quarantine them, repair the determinism issue, not the symptom.
+
+      The clock argument is older. *Working Effectively with Legacy Code* (Feathers, 2004) treats time as the canonical example of an "unmanaged dependency" — code that uses `now()` directly is harder to test than code that takes a clock parameter. The same applies to randomness, IDs, and the network.
+
+      The "test pyramid" (Cohn, 2009) is a determinism argument as much as a speed argument: unit tests sit at the base because they are *isolated*, which is what makes them fast *and* reliable. Integration tests are slower partly because they cross more boundaries, but mostly because they admit more sources of variation.
+
+      ## Anti-patterns
+
+      - `await new Promise(r => setTimeout(r, 100))` in a test, hoping that's long enough.
+      - `assert response.created_at == datetime.now()` — racing the assertion against the system clock.
+      - `Math.random() > 0.5` inside the code under test, with no seed control.
+      - A test that passes locally and fails in CI, "fixed" by adding `pytest.mark.flaky`.
+      - Retries in the runner as a substitute for fixing the cause. Retries hide the bug, they do not solve it.
+      - A test that depends on another test having run first.
+
+      ## References
+
+      - Memon, A. et al. (2017). *Taming Google-Scale Continuous Testing* — ICSE.
+      - Feathers, M. *Working Effectively with Legacy Code* (2004).
+      - Cohn, M. *Succeeding with Agile* (2009) — the test pyramid.
+      - Fowler, M. [*Eradicating Non-Determinism in Tests*](https://martinfowler.com/articles/nonDeterminism.html).
+      - Beck, K. *Test-Driven Development: By Example* (2002) — F.I.R.S.T., specifically the *Repeatable* property.
+
+      ---
+
+      Forward link: [`guides/principles/determinism.md`](../../guides/principles/determinism.md). See also: [`testing-patterns.md`](testing-patterns.md), [`tdd.md`](tdd.md).
+
+  - type: add_file
+    path: harness/guides/principles/rollback.md
+    content: |
+      # Rollback — rules
+
+      The non-negotiable and strongly-preferred rules from [`corpus/principles/rollback.md`](../../corpus/principles/rollback.md). Loaded ambient; enforced at planning and release.
+
+      ## GOLDEN RULES
+
+      - **Aim for every change to have a written rollback path before it merges.** "Revert the PR" is a valid rollback for pure-code changes — write it down anyway. For changes involving migrations, infrastructure, external services, or data, "revert the PR" is **not** sufficient. The rollback path must name the exact steps and the expected blast radius.
+      - **Aim to ship behind a flag** for risky changes. A change behind an off-by-default flag is a change that is not yet live. See [[modern-software-engineering]] on decoupling deployment from release.
+      - **Aim for the rollback path to be the same as the roll-forward path, but in reverse.** Symmetric procedures are practiced procedures.
+      - **Aim to test the rollback in staging.** A rollback path that has never been exercised is a hope.
+      - **Aim for changes small enough that revert is an option.** A 3000-line PR is one that the team cannot revert under pressure. See [[scoping]].
+
+      ## RULES
+
+      - **Migrations follow the [[migrations]] expand-contract pattern.** The rollback for an expand step is `git revert` of the expand commit; for a contract step it is restore-from-backup. Plan accordingly.
+      - **Feature flags are documented in the spec.** Flag name, default state, who can toggle it, what it gates, when it will be removed.
+      - **Long-lived flags are tech debt.** A flag that has been on for 100% of traffic for 30 days gets removed in a dedicated PR. The harness's audit action may flag candidates.
+      - **Kill switches are not feature flags.** A kill switch turns *off* an existing capability for incident response; a feature flag *exposes* a new capability for rollout. The risk profile is different; document each clearly.
+
+      ## PR body must include (when applicable)
+
+      A `## Rollback` section naming:
+
+      1. The condition that would trigger a rollback (what does "this went wrong" look like).
+      2. The exact rollback command(s) — `git revert <sha>`, `kubectl rollout undo`, `flipper disable <flag>`, etc. Bootstrap records the project's tooling.
+      3. The expected user impact during rollback.
+
+      ## Sensors
+
+      - The **commit-message sensor** does not enforce a rollback section directly. The review phase confirms it for changes that touch listed risky paths.
+      - **Bootstrap** detects the feature-flag system (LaunchDarkly, GrowthBook, Unleash, Flipper, Statsig, custom config) and records the toggle command in `corpus/state/CODEBASE_STATE.md`. If none is wired, the rollback rule notes "no flag system available — risky changes ship in their own deploy with a documented revert."
+
+      ---
+
+      Traces to: [`corpus/principles/rollback.md`](../../corpus/principles/rollback.md). See also: [[migrations]], [[modern-software-engineering]], [[scoping]], [[ci-failure]].
+
+  - type: add_file
+    path: harness/corpus/principles/rollback.md
+    content: |
+      # Rollback
+
+      A deploy is one half of a change; the other half is the path back. Changes that ship without a rehearsed way home assume nothing will go wrong — an assumption the historical record does not support. The discipline of rollback is the discipline of building the return path *with* the change, not *after* the change has failed.
+
+      > **Rules extracted:** [`guides/principles/rollback.md`](../../guides/principles/rollback.md).
+
+      ## What it asks of you
+
+      - Decouple *deployment* from *release*. Deploying code is a technical act; releasing capability is a product act. A feature flag separates them. A change can be deployed without being released, and released without being re-deployed.
+      - Design the rollback as part of the design. The PR that adds a capability includes the path to remove it. If the path is harder to think about than the addition, that is signal: the change is too coupled to existing state.
+      - Treat the rollback path as *real code*. Rehearse it. Stale rollback procedures are an incident waiting for an excuse.
+
+      ## Why it holds
+
+      Humble & Farley's *Continuous Delivery* (2010) places rollback at the center of release engineering: a system where every change can be undone in minutes is a system where *teams take more risks*, not fewer, because the cost of being wrong is bounded. The opposite — where rollback is "restore from backup over the weekend" — is a system where teams ship rarely, conservatively, and in large batches, which is the exact pattern that *increases* the rate of incidents (Forsgren, Humble & Kim, *Accelerate*, 2018).
+
+      Feature flags (Hodgson, Fowler 2017) generalize the rollback path to *runtime*: the change is in production, off; turning it on is the release; turning it off is the rollback. This works as long as the flagged code does not entangle itself with un-flagged code — the "long-lived flag" pattern is a documented anti-pattern precisely because entanglement grows.
+
+      The blue-green pattern (Fowler 2010) is the same idea at the infrastructure level: deploy the new version next to the old, switch traffic, keep the old running until confidence is established. Rollback is a traffic switch, not a redeploy.
+
+      ## Anti-patterns
+
+      - A migration with no rollback strategy beyond "restore from a backup that we hope works."
+      - A feature flag that has been on for 100% of traffic for six months. Either remove the flag (the code is now part of the system) or remove the feature (the flag is hiding dead code).
+      - A rollback procedure that has never been exercised in staging.
+      - "Forward-only" as a policy. Forward-only is a description of what happened when rollback failed; it is not a strategy.
+      - Coupling a deploy to a one-way data migration. The data change makes the rollback irreversible; the code change should not depend on the data change being permanent yet.
+
+      ## References
+
+      - Humble, J. & Farley, D. *Continuous Delivery* (2010).
+      - Forsgren, N., Humble, J. & Kim, G. *Accelerate* (2018).
+      - Hodgson, P. [*Feature Toggles (aka Feature Flags)*](https://martinfowler.com/articles/feature-toggles.html) (2017).
+      - Fowler, M. [*BlueGreenDeployment*](https://martinfowler.com/bliki/BlueGreenDeployment.html) (2010).
+      - Allspaw, J. & the Resilience Engineering literature — the discipline of return paths.
+
+      ---
+
+      Forward link: [`guides/principles/rollback.md`](../../guides/principles/rollback.md). See also: [`migrations.md`](migrations.md), [`modern-software-engineering.md`](modern-software-engineering.md).
