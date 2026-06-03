@@ -1282,18 +1282,19 @@
 
   <div class="install-method">
     <h3>Curl bootstrap (macOS / Linux)</h3>
-    <p>Downloads the binary into <code>~/.local/bin/keystone</code>, then prompts for the agent and runs <code>keystone init</code>:</p>
+    <p>Downloads the binary into <code>~/.local/bin/keystone</code> and adds the install directory to your shell rc so <code>keystone</code> is on your <code>PATH</code>:</p>
 <pre class="code"><span class="prompt">$</span> curl -fsSL https://raw.githubusercontent.com/tacoda/keystone/main/install.sh | sh</pre>
     <p>Inspect before running (recommended):</p>
 <pre class="code"><span class="prompt">$</span> curl -fsSL https://raw.githubusercontent.com/tacoda/keystone/main/install.sh &gt; install.sh
 <span class="prompt">$</span> less install.sh
 <span class="prompt">$</span> sh install.sh</pre>
-    <p>Set <code>KEYSTONE_NO_INIT=1</code> to install the binary only.</p>
+    <p>Override the install dir with <code>KEYSTONE_PREFIX=/some/path</code> or pin the release with <code>KEYSTONE_VERSION=v0.7.1</code>. The installer does not run <code>keystone init</code> — open a new shell and run it yourself in a project to scaffold the harness.</p>
   </div>
 
   <div class="install-method">
     <h3>PowerShell (Windows)</h3>
 <pre class="code"><span class="prompt">PS&gt;</span> iwr -useb https://raw.githubusercontent.com/tacoda/keystone/main/install.ps1 | iex</pre>
+    <p>Installs <code>keystone.exe</code> under <code>%LOCALAPPDATA%\Programs\keystone</code> and adds it to your user <code>PATH</code>. Open a new terminal and run <code>keystone init</code> in a project to scaffold the harness.</p>
   </div>
 
   <div class="install-method">
@@ -1313,8 +1314,8 @@
     <h3>Upgrade the binary</h3>
     <p>Homebrew (macOS / Linux):</p>
 <pre class="code"><span class="prompt">$</span> brew upgrade tacoda/tap/keystone</pre>
-    <p>Curl bootstrap (re-run; <code>KEYSTONE_NO_INIT=1</code> skips the init prompt):</p>
-<pre class="code"><span class="prompt">$</span> KEYSTONE_NO_INIT=1 curl -fsSL https://raw.githubusercontent.com/tacoda/keystone/main/install.sh | sh</pre>
+    <p>Curl bootstrap (re-run — binary-only by default):</p>
+<pre class="code"><span class="prompt">$</span> curl -fsSL https://raw.githubusercontent.com/tacoda/keystone/main/install.sh | sh</pre>
     <p>PowerShell (Windows): re-run the bootstrap.</p>
 <pre class="code"><span class="prompt">PS&gt;</span> iwr -useb https://raw.githubusercontent.com/tacoda/keystone/main/install.ps1 | iex</pre>
   </div>
