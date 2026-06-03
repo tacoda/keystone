@@ -1,32 +1,28 @@
-# keystone bootstrap (Windows) - installs the `keystone` binary into
-# $env:LOCALAPPDATA\Programs\keystone and (optionally) runs `keystone init` in
-# the current directory.
+# Keystone installer (Windows) — downloads the `keystone.exe` binary into
+# $env:LOCALAPPDATA\Programs\keystone (or -Prefix) and adds the install
+# directory to the user PATH if it is not already there.
 #
 # Usage:
 #   iwr -useb https://raw.githubusercontent.com/tacoda/keystone/main/install.ps1 | iex
-#   iwr https://raw.githubusercontent.com/tacoda/keystone/main/install.ps1 -OutFile install.ps1; .\install.ps1 -Agent claude-code
+#   iwr https://raw.githubusercontent.com/tacoda/keystone/main/install.ps1 -OutFile install.ps1; .\install.ps1 -Version v0.7.0
 #
 # Parameters:
-#   -Agent <name>   skip the agent prompt
 #   -Version <tag>  pin a release tag (default: latest)
 #   -Prefix <path>  override install dir
-#   -NoInit         install the binary but skip `keystone init`
+#
+# This installer does NOT run `keystone init`. Once installed, open a new
+# terminal so the updated PATH is picked up, then run `keystone init` in
+# any project to scaffold the harness.
 
 [CmdletBinding()]
 param(
-    [string]$Agent = "",
     [string]$Version = $(if ($env:KEYSTONE_VERSION) { $env:KEYSTONE_VERSION } else { "latest" }),
-    [string]$Prefix = $(if ($env:KEYSTONE_PREFIX) { $env:KEYSTONE_PREFIX } else { Join-Path $env:LOCALAPPDATA "Programs\keystone" }),
-    [switch]$NoInit
+    [string]$Prefix = $(if ($env:KEYSTONE_PREFIX) { $env:KEYSTONE_PREFIX } else { Join-Path $env:LOCALAPPDATA "Programs\keystone" })
 )
 
 $ErrorActionPreference = "Stop"
 
 $Repo = "tacoda/keystone"
-$SupportedAgents = @(
-    "claude-code", "codex", "pi", "cursor", "aider",
-    "github-copilot-cli", "continue", "cline", "goose", "_generic"
-)
 
 function Write-Info { param([string]$m) Write-Host "> $m" -ForegroundColor Blue }
 function Write-Warn { param([string]$m) Write-Host "! $m" -ForegroundColor Yellow }
@@ -67,63 +63,28 @@ try {
     Copy-Item -Path $Binary.FullName -Destination $InstallPath -Force
     Write-OK "installed $InstallPath ($Version)"
 
+    # ----- Ensure PATH ------------------------------------------------------
+
     $userPath = [Environment]::GetEnvironmentVariable("Path", "User")
-    if ($userPath -notlike "*$Prefix*") {
-        Write-Warn "$Prefix is not on your PATH. add it with:"
-        Write-Host "    [Environment]::SetEnvironmentVariable('Path', `"`$env:Path;$Prefix`", 'User')"
+    if ($userPath -like "*$Prefix*") {
+        Write-Info "$Prefix already on user PATH"
+    } else {
+        $newPath = if ([string]::IsNullOrEmpty($userPath)) { $Prefix } else { "$userPath;$Prefix" }
+        [Environment]::SetEnvironmentVariable("Path", $newPath, "User")
+        Write-OK "added $Prefix to user PATH"
+        Write-Warn "open a new terminal to pick up the change"
     }
 }
 finally {
     if (Test-Path $Tmp.FullName) { Remove-Item -Path $Tmp.FullName -Recurse -Force -ErrorAction SilentlyContinue }
 }
 
-if ($NoInit) {
-    Write-Info "-NoInit set, skipping init"
-    return
-}
+# ----- Next steps -----------------------------------------------------------
 
-# ----- Agent prompt + init --------------------------------------------------
-
-function Detect-Agent {
-    if (Test-Path "CLAUDE.md")          { return "claude-code" }
-    if (Test-Path ".claude")            { return "claude-code" }
-    if ((Test-Path "AGENTS.md") -and (Test-Path ".pi")) { return "pi" }
-    if (Test-Path ".github/copilot-instructions.md")    { return "github-copilot-cli" }
-    if (Test-Path ".cursor")            { return "cursor" }
-    if (Test-Path ".aider.conf.yml")    { return "aider" }
-    if (Test-Path "CONVENTIONS.md")     { return "aider" }
-    if (Test-Path "AGENTS.md")          { return "codex" }
-    if (Test-Path ".continuerules")     { return "continue" }
-    if (Test-Path ".goosehints")        { return "goose" }
-    return ""
-}
-
-if (-not $Agent) {
-    $detected = Detect-Agent
-    if ($detected) {
-        Write-Info "detected agent: $detected"
-        $Agent = $detected
-    } else {
-        $Agent = Read-Host "which coding agent are you using? [$($SupportedAgents -join '|')]"
-    }
-}
-
-if ($SupportedAgents -notcontains $Agent) {
-    Write-Err "unknown agent '$Agent'. supported: $($SupportedAgents -join ', ')"
-    exit 1
-}
-
-$ForceArgs = @()
-if (Test-Path "harness") {
-    Write-Warn "harness/ already exists in this directory."
-    $answer = Read-Host "overwrite? [y/N]"
-    if ($answer -match '^(y|Y|yes|YES)$') {
-        $ForceArgs = @("--force")
-    } else {
-        Write-Err "aborted."
-        exit 1
-    }
-}
-
-Write-Info "running: keystone init --agent $Agent $($ForceArgs -join ' ')"
-& $InstallPath init --agent $Agent @ForceArgs
+Write-Host ""
+Write-Host "Run keystone init in any project to scaffold the harness:"
+Write-Host ""
+Write-Host "  > cd C:\path\to\your\project"
+Write-Host "  > keystone init"
+Write-Host ""
+Write-Host "See 'keystone help' for options."

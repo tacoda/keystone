@@ -1,26 +1,24 @@
 #!/usr/bin/env bash
 #
-# keystone bootstrap — installs the `keystone` binary into ~/.local/bin
-# and (optionally) runs `keystone init` in the current directory.
+# Keystone installer — downloads the `keystone` binary into ~/.local/bin
+# (or $KEYSTONE_PREFIX) and ensures that directory is on your PATH.
 #
 # Usage:
 #   curl -fsSL https://raw.githubusercontent.com/tacoda/keystone/main/install.sh | sh
-#   curl -fsSL https://raw.githubusercontent.com/tacoda/keystone/main/install.sh | sh -s -- <agent>
 #
 # Environment overrides:
 #   KEYSTONE_VERSION    pin a release tag (default: latest)
 #   KEYSTONE_PREFIX     install dir (default: $HOME/.local/bin)
-#   KEYSTONE_NO_INIT=1  skip the post-install `keystone init` step
 #
-# After install, `keystone init` is invoked unless KEYSTONE_NO_INIT=1.
+# This installer does NOT run `keystone init`. Once installed, open a new
+# shell (or `source` your shell rc) and run `keystone init` in any project
+# to scaffold the harness.
 
 set -euo pipefail
 
 REPO="tacoda/keystone"
 PREFIX="${KEYSTONE_PREFIX:-$HOME/.local/bin}"
 VERSION="${KEYSTONE_VERSION:-latest}"
-
-SUPPORTED_AGENTS="claude-code codex pi cursor aider github-copilot-cli continue cline goose _generic"
 
 info()  { printf '\033[1;34m▸\033[0m %s\n' "$*"; }
 warn()  { printf '\033[1;33m!\033[0m %s\n' "$*" >&2; }
@@ -88,65 +86,73 @@ mv "$TMP/keystone" "$PREFIX/keystone"
 chmod +x "$PREFIX/keystone"
 ok "installed $PREFIX/keystone ($VERSION)"
 
-case ":$PATH:" in
-  *":$PREFIX:"*) ;;
-  *) warn "$PREFIX is not on your PATH; add it to your shell rc:"
-     printf '    export PATH="%s:$PATH"\n' "$PREFIX" >&2
-     ;;
-esac
+# ----- Ensure PATH ----------------------------------------------------------
 
-# ----- Optional: run init in current directory ------------------------------
+ensure_on_path() {
+  ep_prefix="$1"
 
-if [ "${KEYSTONE_NO_INIT:-}" = "1" ]; then
-  info "KEYSTONE_NO_INIT=1 set — skipping init"
-  exit 0
-fi
+  # Already on the current PATH? Nothing to do.
+  case ":$PATH:" in
+    *":$ep_prefix:"*) info "$ep_prefix already on PATH"; return 0 ;;
+  esac
 
-AGENT="${1:-}"
+  # Detect the user's login shell and choose its rc file.
+  ep_shell=$(basename "${SHELL:-/bin/sh}")
+  ep_rc=""
+  ep_line=""
 
-# Best-effort detection (mirrors `keystone init`'s built-in detection but lets
-# us prompt before invoking the binary).
-detect_agent() {
-  if   [ -f CLAUDE.md ]              || [ -d .claude ];   then echo "claude-code"
-  elif [ -f AGENTS.md ]              && [ -d .pi ];       then echo "pi"
-  elif [ -f .github/copilot-instructions.md ];            then echo "github-copilot-cli"
-  elif [ -d .cursor ];                                    then echo "cursor"
-  elif [ -f .aider.conf.yml ]        || [ -f CONVENTIONS.md ]; then echo "aider"
-  elif [ -f AGENTS.md ];                                  then echo "codex"
-  elif [ -f .continuerules ];                             then echo "continue"
-  elif [ -f .goosehints ];                                then echo "goose"
-  else                                                         echo ""
+  case "$ep_shell" in
+    zsh)
+      ep_rc="${ZDOTDIR:-$HOME}/.zshrc"
+      ep_line="export PATH=\"$ep_prefix:\$PATH\""
+      ;;
+    bash)
+      if [ -f "$HOME/.bashrc" ]; then
+        ep_rc="$HOME/.bashrc"
+      elif [ "$os" = "darwin" ]; then
+        ep_rc="$HOME/.bash_profile"
+      else
+        ep_rc="$HOME/.profile"
+      fi
+      ep_line="export PATH=\"$ep_prefix:\$PATH\""
+      ;;
+    fish)
+      ep_rc="$HOME/.config/fish/config.fish"
+      ep_line="fish_add_path \"$ep_prefix\""
+      ;;
+    *)
+      warn "unrecognized shell ($ep_shell); add this to your shell rc by hand:"
+      printf '    export PATH="%s:$PATH"\n' "$ep_prefix" >&2
+      return 0
+      ;;
+  esac
+
+  # Idempotent: skip if the prefix is already referenced anywhere in the rc.
+  if [ -f "$ep_rc" ] && grep -Fq "$ep_prefix" "$ep_rc" 2>/dev/null; then
+    warn "$ep_prefix already referenced in $ep_rc but not on the current PATH"
+    warn "open a new shell, or run: source $ep_rc"
+    return 0
   fi
+
+  mkdir -p "$(dirname "$ep_rc")"
+  {
+    printf '\n# Added by keystone installer\n'
+    printf '%s\n' "$ep_line"
+  } >> "$ep_rc"
+  ok "added $ep_prefix to PATH via $ep_rc"
+  warn "open a new shell, or run: source $ep_rc"
 }
 
-if [ -z "$AGENT" ]; then
-  detected=$(detect_agent)
-  if [ -n "$detected" ]; then
-    info "detected agent: $detected"
-    AGENT="$detected"
-  else
-    printf 'which coding agent are you using? ['
-    printf '%s' "$SUPPORTED_AGENTS" | tr ' ' '|'
-    printf '] '
-    read -r AGENT </dev/tty
-  fi
-fi
+ensure_on_path "$PREFIX"
 
-case " $SUPPORTED_AGENTS " in
-  *" $AGENT "*) ;;
-  *) err "unknown agent '$AGENT'. supported: $SUPPORTED_AGENTS"; exit 1 ;;
-esac
+# ----- Next steps -----------------------------------------------------------
 
-FORCE_FLAG=""
-if [ -d harness ]; then
-  warn "harness/ already exists in this directory."
-  printf "overwrite? [y/N] "
-  read -r answer </dev/tty
-  case "$answer" in
-    y|Y|yes|YES) FORCE_FLAG="--force" ;;
-    *) err "aborted."; exit 1 ;;
-  esac
-fi
+cat <<EOF
 
-info "running: keystone init --agent $AGENT $FORCE_FLAG"
-"$PREFIX/keystone" init --agent "$AGENT" $FORCE_FLAG
+Run keystone init in any project to scaffold the harness:
+
+  \$ cd /path/to/your/project
+  \$ keystone init
+
+See 'keystone help' for options.
+EOF
