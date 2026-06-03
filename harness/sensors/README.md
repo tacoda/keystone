@@ -32,7 +32,7 @@ Sensors do not run on event hooks. They run inside lifecycle actions invoked at 
 | **orient** | planning | [state-region](state-region.md) |
 | **check-drift** | implementation | [drift](drift.md) |
 | **verify** | verification | [lint](lint.md), [type-check](type-check.md), [test](test.md), [build](build.md), [drift](drift.md), [commit-message](commit-message.md); proposes state updates from [coverage](coverage.md) |
-| **review** | review | [review-functional](review-functional.md), [review-security](review-security.md), [spec-adherence](spec-adherence.md) |
+| **review** | review | [review-functional](review-functional.md), [review-security](review-security.md), [review-risk](review-risk.md), [review-deployment](review-deployment.md), [spec-adherence](spec-adherence.md) |
 | **audit** | discipline | [drift](drift.md), [coverage](coverage.md), [risk-fingerprint](risk-fingerprint.md), [traffic-topology](traffic-topology.md) |
 
 How an action is actually invoked, and whether sensors run autonomously or require human prompting, is agent-specific — see `harness/adapters/<your-agent>/sensors.md`. The most common degradation: an agent that cannot run shell commands during a turn surfaces the sensor commands for the human to execute instead.
@@ -76,6 +76,8 @@ Tool commands (lint, test, build, type-check, coverage) live in `corpus/state/CO
 | [spec-adherence](spec-adherence.md) | inferential | Walks spec ACs against the diff |
 | [review-functional](review-functional.md) | inferential | Agent reviews the diff for logic / behavior bugs |
 | [review-security](review-security.md) | inferential | Agent reviews the diff for security concerns |
+| [review-risk](review-risk.md) | inferential | Agent reviews the diff for blast radius, reversibility, and coupling risk |
+| [review-deployment](review-deployment.md) | inferential | Agent reviews the diff for deployment safety — migrations, flags, rollback |
 
 The bootstrap action confirms which sensors are wired up for this project (e.g., projects without a tracker skip `tracker-card-fetcher`; adapters without sub-agent support skip the review sensors) and records the result in `corpus/state/CODEBASE_STATE.md`.
 

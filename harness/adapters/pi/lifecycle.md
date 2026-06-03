@@ -34,9 +34,9 @@ All prompt templates live in `targets/pi/.pi/prompts/` in this repo. The install
 
 ## Sub-agent degradation
 
-The **review** action would ideally spawn `review-functional` and `review-security` in parallel. Pi doesn't support this natively. Two workable approaches:
+The **review** action would ideally spawn `review-functional`, `review-security`, `review-risk`, and `review-deployment` in parallel. Pi doesn't support this natively. Two workable approaches:
 
-1. **Sequential** (default) — pi runs the review prompt template twice, once per agent role, and combines findings.
+1. **Sequential** (default) — pi runs the review prompt template once per agent role, and combines findings.
 2. **tmux fan-out** — power users can launch parallel pi instances in tmux panes, each running one reviewer prompt, then merge results.
 
 The shipped `.pi/prompts/review.md` template defaults to sequential.

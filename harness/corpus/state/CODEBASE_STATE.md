@@ -40,6 +40,8 @@ Inventory of sensors wired up for this project. Filled in by **bootstrap**. A se
 | spec-adherence | inferential | wired |
 | review-functional | inferential | `<wired \| (none)>` |
 | review-security | inferential | `<wired \| (none)>` |
+| review-risk | inferential | `<wired \| (none)>` |
+| review-deployment | inferential | `<wired \| (none)>` |
 
 ## Guides
 

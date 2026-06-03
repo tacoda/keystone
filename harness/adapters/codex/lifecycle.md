@@ -44,7 +44,7 @@ Codex's CLI flags map naturally to the harness's pacing modes:
 
 ## Sub-agent degradation
 
-The **review** action would ideally spawn `review-functional` and `review-security` in parallel. Codex doesn't support this natively. When invoked, the review action runs them sequentially in one conversation, then combines findings.
+The **review** action would ideally spawn `review-functional`, `review-security`, `review-risk`, and `review-deployment` in parallel. Codex doesn't support this natively. When invoked, the review action runs them sequentially in one conversation, then combines findings.
 
 ## Tracker integration
 
