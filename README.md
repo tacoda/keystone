@@ -18,7 +18,7 @@ Keystone is a **project harness installer** — a single Go binary with the enti
 
 After `init`, the binary is no longer required — the harness and menu are plain markdown files you own.
 
-After install, your agent drives a six-phase workflow (spec → planning → implementation → verification → review → release) and two flywheels (Learning adds rules and reasoning; Pruning removes stale guides regularly and stale corpus rarely).
+After `keystone init`, your agent drives a six-phase workflow (spec → planning → implementation → verification → review → release) and two flywheels (Learning adds rules and reasoning; Pruning removes stale guides regularly and stale corpus rarely).
 
 ## Install
 
@@ -68,7 +68,7 @@ keystone version
 keystone help
 ```
 
-`init` is non-interactive — it copies `harness/` and the agent's menu file(s) into `<dir>` (default `.`) and exits. If `--agent` is omitted it detects from existing marker files in `<dir>`; if detection fails it errors out. Re-run with `--force` to overwrite an existing `harness/`. Existing target files (e.g. `CLAUDE.md`) are always skipped — review and merge by hand.
+`init` is interactive in a TTY — every unset option becomes a prompt (via huh). Outside a TTY it is non-interactive and `--agent` must be supplied or detected (other options stay unset). It then copies `harness/` and the agent's menu file(s) into `<dir>` (default `.`) and exits. If `--agent` is omitted it detects from existing marker files in `<dir>`; if detection fails outside a TTY it errors out. Re-run with `--force` to overwrite an existing `harness/`. Existing target files (e.g. `CLAUDE.md`) are always skipped — review and merge by hand.
 
 ## Supported agents
 
@@ -98,11 +98,11 @@ The harness assumes (soft — install runs regardless):
 
 Missing one degrades the corresponding phase but does not break the harness.
 
-## After install
+## After `keystone init`
 
 1. Read `harness/README.md` — four-component orientation (corpus, guides, sensors, flywheels).
 2. Ask your agent to run the **bootstrap** action — it seeds `harness/corpus/state/CODEBASE_STATE.md`, `harness/corpus/idioms/<your-stack>/`, the paired `harness/guides/idioms/<your-stack>/`, and confirms the sensor commands.
-3. Commit `harness/` and any agent files the installer created.
+3. Commit `harness/` and any agent files `init` created.
 
 From then on, every task flows through the six phases, and the Learning flywheel grows the harness as your project teaches you new patterns (rules into `guides/`, supplemental reasoning into `corpus/`).
 
