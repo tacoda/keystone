@@ -810,7 +810,7 @@
   <div class="section-label">What it is</div>
   <div class="definition">
     <p><strong>Keystone</strong> generates a <strong>Level 2 project harness</strong> — codebase-level scaffolding an AI coding agent reads on every task. No language runtime, no daemon. The <code>keystone</code> CLI is a single Go binary with the entire harness embedded; <code>keystone init</code> writes the harness and an agent menu file into your repo, then gets out of the way.</p>
-    <p>After <code>keystone init</code>, the binary is <strong>no longer required</strong>. The harness is plain markdown you own and version alongside your code. It has four components: <strong style="color: var(--accent);">guides</strong> (rules — always loaded), <strong style="color: var(--accent2);">corpus</strong> (informational reference — loaded on demand), <strong style="color: var(--accent3);">sensors</strong> (automated checks that fire at phase boundaries), and two <strong style="color: var(--accent4);">flywheels</strong> — Learning adds rules and reasoning, Pruning removes stale ones (guides regularly, corpus rarely).</p>
+    <p>After <code>keystone init</code>, the agent drives everything from the harness directly — <strong>keystone is not a runtime dependency</strong>. The binary stays installed for follow-up commands like <code>keystone migrate</code> and <code>keystone add-target</code>, but the harness itself is plain markdown you own and version alongside your code. It has four components: <strong style="color: var(--accent);">guides</strong> (rules — always loaded), <strong style="color: var(--accent2);">corpus</strong> (informational reference — loaded on demand), <strong style="color: var(--accent3);">sensors</strong> (automated checks that fire at phase boundaries), and two <strong style="color: var(--accent4);">flywheels</strong> — Learning adds rules and reasoning, Pruning removes stale ones (guides regularly, corpus rarely).</p>
     <p>Your agent drives a six-phase workflow (spec → planning → implementation → verification → review → release) under the always-loaded guide rules, reaching for corpus reasoning only when the rules aren't enough.</p>
   </div>
 </section>
@@ -939,7 +939,7 @@
             <span class="cell-desc">The agent's menu file — merges additively under your existing H1, bracketed by markers so re-installs refresh in place. Format depends on the agent.</span>
           </div>
         </div>
-        <div class="repo-note">After <code>keystone init</code>, the binary is gone. The harness lives in the repo and evolves with the code.</div>
+        <div class="repo-note">After <code>keystone init</code>, the agent operates directly on the harness — no keystone dependency at runtime. The binary stays for follow-up commands (<code>migrate</code>, <code>add-target</code>); the harness lives in the repo and evolves with the code.</div>
       </div>
     </div>
 
