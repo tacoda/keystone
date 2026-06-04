@@ -1969,6 +1969,11 @@ policies:
         <h3 style="color: var(--accent5);">CI pipeline (CD recommended)</h3>
         <p>GitHub Actions, GitLab CI, CircleCI, Jenkins — anything that runs sensors on every push. <strong>Continuous Delivery</strong> (every commit produces a releasable artifact; the deploy itself stays a business decision) is highly recommended.</p>
       </div>
+      <div class="action">
+        <span class="action-tag">across phases</span>
+        <h3 style="color: var(--accent4);">Git repository</h3>
+        <p>The project root is a git repository. <code>risk-fingerprint</code> and <code>traffic-topology</code> sensors call <code>git log</code> for churn and history; <code>drift</code> and <code>commit-message</code> sensors operate on the working diff; the release phase opens a PR or MR. <code>keystone init</code> warns when there is no <code>.git</code> directory but still installs — the corpus alone is useful without git, but every flywheel that depends on history degrades.</p>
+      </div>
     </div>
   </section>
 
