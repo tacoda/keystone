@@ -1,15 +1,11 @@
----
-name: keystone:mode
-description: Switch the harness pacing mode (paired / solo / autopilot)
-argument-hint: "paired | solo | autopilot"
----
+# mode
 
-You are running the **mode** action. Read `harness/guides/process/modes.md`.
+**Switch the harness pacing mode** (paired / solo / autopilot). Read [`harness/guides/process/modes.md`](../guides/process/modes.md).
 
 ## Activities
 
-1. If `$1` is `paired`, `solo`, or `autopilot`, set that as the active mode.
-2. If `$1` is empty or `--show`, print the current active mode and a one-line description of each.
+1. If the user named `paired`, `solo`, or `autopilot`, set that as the active mode.
+2. If no mode was named, print the current mode and a one-line description of each.
 3. Update `harness/guides/process/modes.md` in place — replace the "Current mode" line. Do not rewrite the rest of the file.
 
 ## Mode summary
@@ -20,4 +16,4 @@ You are running the **mode** action. Read `harness/guides/process/modes.md`.
 
 ## Iron law
 
-**No silent overwrites of state files.** Show the modes.md diff before saving.
+**No silent overwrites of state files.** Show the `modes.md` diff before saving.

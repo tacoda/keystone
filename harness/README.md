@@ -86,7 +86,7 @@ Invoked by the user:
 - **synthesize** — promote inbox items into the right corpus and/or guide.
 - **mode** — set pacing mode.
 
-How each action is actually invoked in your agent (slash command, rules-file trigger, CLI, etc.) lives in `adapters/<your-agent>/lifecycle.md`. If your agent is not listed, see `adapters/_generic/`.
+**Every action is invoked via natural language.** The agent reads its menu file at session start, finds the action in the bulleted list, follows the link to `actions/<action>.md`, and executes the playbook. The canonical kickoff phrase for end-to-end work is **"run task on `<ticket-id>`"** — see [`actions/task.md`](actions/task.md). Per-agent specifics (sensor execution model, sub-agent parallelism, MCP integration) live in `adapters/<your-agent>/lifecycle.md`; if your agent is not listed, see `adapters/_generic/`.
 
 ## Iron laws
 

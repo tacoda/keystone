@@ -27,15 +27,10 @@ Legacy `.cursorrules` (single-file format) is **not** used — the modern `.curs
 ```
 .cursor/
 └── rules/
-    ├── keystone.mdc          # always-applied menu pointer
-    ├── orient.mdc            # manual — invoked at task start
-    ├── check-drift.mdc       # manual — invoked after edits
-    ├── verify.mdc            # manual — invoked before commit
-    ├── review.mdc            # manual — invoked after verification
-    └── learn.mdc             # manual — invoked post-merge
+    └── keystone.mdc          # always-applied menu pointer (the only file the installer ships)
 ```
 
-The installer ships these as **starter scaffolds**. Teams refine them as they discover what each phase should emphasize for their stack.
+Lifecycle actions live in `harness/actions/<action>.md` and are invoked via natural language — no per-action `.mdc` files. The single always-applied rule lists every action with a pointer to its playbook, and the agent follows that pointer when the user asks to run an action.
 
 ## Ambient loading
 
@@ -43,15 +38,14 @@ Rules with `alwaysApply: true` enter every chat. Rules with a `globs:` pattern e
 
 Convention this harness follows:
 
-- **Menu pointer** → `alwaysApply: true`, no glob.
-- **Lifecycle action rules** → manual (no `alwaysApply`, no `globs`). The user invokes via `@<action>` when entering that phase.
-- **Region-scoped idioms** → `globs: "<path-pattern>"`. *Bootstrap* writes these; they auto-attach when the user opens matching files.
+- **Menu pointer** → `alwaysApply: true`, no glob. (One file: `keystone.mdc`.)
+- **Region-scoped idioms** → `globs: "<path-pattern>"`. The **bootstrap** action writes these into `.cursor/rules/idiom-<stack>.mdc` as the project's stacks are detected; they auto-attach when the user opens matching files.
 
 ## Lazy-by-region — native
 
 Cursor's biggest structural advantage over the other adapters in this harness: it can express "load this rule when editing this region" natively, via `globs:` frontmatter on each `.mdc`. The **bootstrap** action exploits this — for each detected stack, it writes a `.cursor/rules/idiom-<stack>.mdc` with the matching glob, so the right idioms enter context only when the right files are being edited.
 
-No equivalent mechanism exists in Aider, GitHub Copilot, or Claude Code (which implements lazy-by-region inside the **orient** action instead). Cursor's framework does the work for free.
+No equivalent mechanism exists in Aider, GitHub Copilot, or Claude Code (which implements lazy-by-region inside the **orient** action playbook instead). Cursor's framework does the work for free.
 
 ## Context-reset primitive
 
@@ -63,8 +57,9 @@ After a flywheel write (synthesize/audit), the user must start a new chat so the
 ## Domain / state / process loading
 
 - `domain/` — always relevant at task start; loaded via chat read at the start of each session.
-- `state/CODEBASE_STATE.md` — loaded by the **orient** rule.
-- `process/<phase>.md` — loaded by the matching action rule when the agent enters that phase.
+- `state/CODEBASE_STATE.md` — loaded by the **orient** action playbook.
+- `actions/<action>.md` — loaded when the user invokes that action by name.
+- `guides/process/<phase>.md` — loaded when the agent enters that phase from inside an action playbook.
 
 ## Capability gaps
 

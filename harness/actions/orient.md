@@ -1,9 +1,6 @@
----
-name: keystone:orient
-description: Enter the planning phase — load codebase state and idioms for the touched region
----
+# orient
 
-You are entering the **planning** phase. Read `harness/guides/process/planning.md` and follow its activities.
+**Enter the planning phase.** Load codebase state and matching idioms for the touched region, then sketch a plan. Read [`harness/guides/process/planning.md`](../guides/process/planning.md) for the full discipline.
 
 ## Activities
 

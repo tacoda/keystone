@@ -4,22 +4,11 @@ How each abstract lifecycle action is invoked in GitHub Copilot.
 
 This adapter covers both **Copilot in VS Code** (chat + edit + agent modes) and the **Copilot CLI** (`gh copilot suggest`, `gh copilot explain`, and the standalone `copilot` CLI). Both read the same project menu file (`.github/copilot-instructions.md`) and share the same conventions.
 
-## Action → invocation
+## Invocation
 
-Copilot has no slash-command primitive for project actions. Lifecycle actions are invoked by **asking the agent in natural language**, optionally referencing the matching phase doc.
+Every action is invoked via natural language: "run task on TICKET-123," "run verify," "do a review pass." The agent reads `.github/copilot-instructions.md` at session start, finds the action in the bulleted list, follows the link to `harness/actions/<action>.md`, and executes the playbook. Copilot has no slash-command primitive for project actions — natural-language invocation is the only path, which is why the playbooks live agent-agnostic in `harness/actions/`.
 
-| Action | Invocation | What happens |
-|---|---|---|
-| **spec** | "Start the spec phase for `<task>`." | Reads `harness/guides/process/spec.md` and follows its activities. |
-| **orient** | "Orient for work in `<region>`." | Reads `harness/corpus/state/CODEBASE_STATE.md` and matching idioms; sketches a plan. |
-| **check-drift** | "Check the diff for drift." | Compares `git diff` against loaded corpus rules. |
-| **verify** | "Run the verify action." | Invokes sensors via the shell; reports results inline. |
-| **review** | "Run the review action." | Walks the diff sequentially against spec AC, functional concerns, security concerns. |
-| **learn** | "Capture the learnings from this work." | Writes a candidate to `harness/learning/inbox/<timestamp>-<slug>.md`. |
-| **bootstrap** | "Bootstrap the harness." | One-time; detects stack, frameworks, and libraries; seeds corpus (idioms/<stack>/, state/), paired guides (idioms/<stack>/); confirms sensor commands; inventories computational guides (LSPs, formatters, editor enforcement) into `guides/computational/`; classifies sensors by kind. Post-bootstrap, every applicable guide and sensor is recorded in `corpus/state/CODEBASE_STATE.md`. |
-| **audit** | "Audit the corpus." | Full Learning + Pruning flywheel pass. |
-| **synthesize** | "Synthesize the inbox." | Promotes inbox items into the right corpus layer. |
-| **mode** | Edit `harness/guides/process/modes.md` directly. | Copilot has limited autonomy levers; the file is informational. |
+The canonical kickoff phrase is **"run task on `<ticket-id>`"** (or "run the task workflow") — `harness/actions/task.md` orchestrates `spec → orient → implementation → check-drift → verify → review`.
 
 ## GitHub-native integrations
 

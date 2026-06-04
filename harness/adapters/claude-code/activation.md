@@ -27,23 +27,23 @@ If the project already had a `CLAUDE.md`, the installer asks before overwriting.
 
 ## Where runtime config lives
 
-- `.claude/settings.json` — permissions, MCP servers, hooks (optional).
-- `.claude/commands/*.md` — project-local slash commands (if not installed as a plugin).
-- `.claude/agents/*.md` — project-local sub-agents (review-functional, review-security, etc.).
+- `.claude/settings.json` — permissions, MCP servers, hooks (optional, user-owned).
+- `.claude/agents/*.md` — project-local sub-agents (review-functional, review-security, etc.). Optional; only needed if the user wants to customize review sub-agents beyond what `harness/actions/review.md` describes.
 
-The installer creates these directories empty if they don't exist. The **bootstrap** action populates them on first use.
+The installer does **not** create or populate `.claude/`. Lifecycle actions live in `harness/actions/<action>.md` and are invoked via natural language — no slash commands, no skills, no plugin install required.
 
 ## Ambient loading
 
-Claude Code automatically loads `CLAUDE.md` from the repo root *and* from every parent directory up to `~/.claude/CLAUDE.md`. The harness places one short pointer at root; the corpus itself is read via the Read tool inside slash commands, not autoloaded.
+Claude Code automatically loads `CLAUDE.md` from the repo root *and* from every parent directory up to `~/.claude/CLAUDE.md`. The harness places one short pointer at root; the corpus and action playbooks are read via the Read tool on demand, not autoloaded.
 
 This is intentional — loading the entire corpus at every session start would burn context. Instead:
 
-- `principles/` is referenced from `CLAUDE.md` so it's always available by path.
+- `policies/universal/` is referenced from `CLAUDE.md` so it's always available by path.
 - `idioms/<stack>/` loads lazily when the **orient** action detects the touched region.
 - `domain/` loads at the start of any task (always relevant).
 - `state/` loads on demand from the **orient** action.
-- `process/<phase>.md` loads when the agent enters that phase.
+- `actions/<action>.md` loads when the user invokes that action by name.
+- `guides/process/<phase>.md` loads when the agent enters that phase from inside an action playbook.
 
 ## Context-reset primitive
 
@@ -56,13 +56,4 @@ The corpus references these as "the agent's context-clear primitive." For Claude
 
 ## Lazy-by-region
 
-Claude Code does not have a built-in "load this file when editing this path" mechanism (unlike Cursor's `.cursor/rules/*.mdc` globs). The harness implements lazy-by-region inside the **orient** slash command: the command reads the touched paths, walks `harness/corpus/state/CODEBASE_STATE.md` to find matching idioms, and loads them via Read.
-
-## Plugin vs. project install
-
-Two install paths are supported:
-
-- **As a Claude Code plugin** — published to a plugin marketplace; the user installs once and gets the slash commands and review agents across every project that uses the harness.
-- **As a project install** — `install.sh` drops files directly into the project. No plugin marketplace dependency.
-
-The plugin path is recommended for organizations; the project install is recommended for solo developers and open-source repos.
+Claude Code does not have a built-in "load this file when editing this path" mechanism (unlike Cursor's `.cursor/rules/*.mdc` globs). The harness implements lazy-by-region inside the **orient** action playbook: the playbook tells the agent to read the touched paths, walk `harness/corpus/state/CODEBASE_STATE.md` to find matching idioms, and load them via Read.

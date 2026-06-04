@@ -2,24 +2,11 @@
 
 Fallback for any coding agent that reads markdown but lacks a specific adapter.
 
-## Action → invocation
+## Invocation
 
-For agents without slash commands, custom-command syntax, or rules-file triggers, every lifecycle action collapses to "the user asks the agent to do `<action>`, the agent reads `harness/guides/process/<phase>.md` and follows it."
+Every action is invoked via natural language: "run task on TICKET-123," "run verify," "do a review pass." The agent reads `AGENTS.md` at session start, finds the action in the bulleted list, follows the link to `harness/actions/<action>.md`, and executes the playbook. No slash commands, no rule files, no prompt templates required — markdown reading is the floor.
 
-| Action | Invocation |
-|---|---|
-| **spec** | "Start the spec phase for `<task or tracker card>`." |
-| **orient** | "Orient yourself for work in `<region>` — read state and load idioms." |
-| **check-drift** | "Check the current diff for drift against the corpus." |
-| **verify** | "Run the verify action — execute every sensor and report." |
-| **review** | "Run the review action — check spec adherence and review findings." |
-| **learn** | "Capture the learnings from this work to `harness/learning/inbox/`." |
-| **bootstrap** | "Bootstrap the harness — detect stack, frameworks, and libraries; seed corpus (idioms/<stack>/, state/), paired guides (idioms/<stack>/), and sensor commands; inventory computational guides (LSPs, formatters, editor enforcement) into `guides/computational/`; classify sensors by kind. Post-bootstrap, every applicable guide and sensor is recorded in `corpus/state/CODEBASE_STATE.md`." |
-| **audit** | "Audit the corpus against the codebase." |
-| **synthesize** | "Synthesize inbox items into the corpus." |
-| **mode** | "Set pacing mode to `<paired\|solo\|autopilot>`." |
-
-The agent is expected to read `harness/README.md`, then `harness/guides/process/<phase>.md` for the active phase, then execute the activities described there using whatever tools it has.
+The canonical kickoff phrase is **"run task on `<ticket-id>`"** (or "run the task workflow") — `harness/actions/task.md` orchestrates `spec → orient → implementation → check-drift → verify → review`.
 
 ## Capability matrix
 

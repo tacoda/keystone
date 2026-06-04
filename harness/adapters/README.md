@@ -16,17 +16,19 @@ Each `adapters/<agent>/` directory contains three files:
 
 ## Supported agents
 
-| Agent | Adapter | Rules surface |
+Every adapter uses the same invocation model: the agent reads its menu file at session start, finds an action in the bulleted list, follows the link to `harness/actions/<action>.md`, and executes the playbook. The "menu file" differs per agent — that's what this table records.
+
+| Agent | Adapter | Menu file |
 |---|---|---|
-| Claude Code | [`claude-code/`](claude-code/) | slash commands + `CLAUDE.md` + `.claude/` |
+| Claude Code | [`claude-code/`](claude-code/) | `CLAUDE.md` at repo root |
 | Codex CLI | [`codex/`](codex/) | `AGENTS.md` at repo root |
-| [pi.dev](https://pi.dev) | [`pi/`](pi/) | `AGENTS.md` + `.pi/prompts/` + `.pi/settings.json` |
-| Cursor | [`cursor/`](cursor/) (stub) | `.cursor/rules/*.mdc` with glob frontmatter |
-| Aider | [`aider/`](aider/) (stub) | `CONVENTIONS.md` + `.aider.conf.yml` |
-| GitHub Copilot CLI | [`github-copilot-cli/`](github-copilot-cli/) (stub) | `.github/copilot-instructions.md` |
-| Continue | [`continue/`](continue/) (stub) | `.continuerules` + yaml config |
-| Cline / Roo Code | [`cline/`](cline/) (stub) | custom instructions field |
-| Goose | [`goose/`](goose/) (stub) | `.goosehints` + config |
+| [pi.dev](https://pi.dev) | [`pi/`](pi/) | `AGENTS.md` at repo root |
+| Cursor | [`cursor/`](cursor/) | `.cursor/rules/keystone.mdc` (`alwaysApply: true`) |
+| Aider | [`aider/`](aider/) | `CONVENTIONS.md` (loaded via `.aider.conf.yml` `read:`) |
+| GitHub Copilot | [`github-copilot/`](github-copilot/) | `.github/copilot-instructions.md` |
+| Continue | [`continue/`](continue/) | `.continuerules` + optional `config.yaml` |
+| Cline / Roo Code | [`cline/`](cline/) | Custom instructions field + `.clinerules` / `.roorules` |
+| Goose | [`goose/`](goose/) | `.goosehints` |
 | (any other) | [`_generic/`](_generic/) | the floor: agent reads markdown on demand |
 
 ## How adapters degrade

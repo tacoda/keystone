@@ -1,25 +1,29 @@
 # pi.dev — Lifecycle binding
 
-How each abstract lifecycle action is invoked in pi.dev. pi has rich extensibility — prompt templates for slash commands, skills as on-demand capabilities, project-scoped JSON settings, and shell execution.
+How pi.dev runs the harness's lifecycle actions.
 
-## Action → invocation
+## Invocation
 
-Pi's slash commands come from **prompt templates** (a `.md` file in `.pi/prompts/` becomes `/<filename>`) or **skills** (a `SKILL.md` in `.pi/skills/<name>/` becomes `/skill:<name>`). Keystone uses prompt templates for lifecycle actions because they're lighter-weight than skills. The filename drives the command name, so the harness ships `keystone-<action>.md` prompt files — pi exposes them as `/keystone-<action>` (hyphen, not colon, because colons aren't filesystem-safe everywhere).
+Every action is invoked via natural language: "run task on TICKET-123," "run verify," "do a review pass." The agent reads `AGENTS.md` at session start, finds the action in the bulleted list, follows the link to `harness/actions/<action>.md`, and executes the playbook. No prompt templates, no `/keystone-<action>` shortcuts — the playbooks are agent-agnostic.
 
-| Action | Invocation | File |
-|---|---|---|
-| **spec** | `/keystone-spec [<tracker-card-id>]` | `.pi/prompts/keystone-spec.md` |
-| **orient** | `/keystone-orient` | `.pi/prompts/keystone-orient.md` |
-| **check-drift** | `/keystone-check-drift` | `.pi/prompts/keystone-check-drift.md` |
-| **verify** | `/keystone-verify` | `.pi/prompts/keystone-verify.md` |
-| **review** | `/keystone-review` | `.pi/prompts/keystone-review.md` |
-| **learn** | `/keystone-learn` | `.pi/prompts/keystone-learn.md` |
-| **bootstrap** | `/keystone-bootstrap` | `.pi/prompts/keystone-bootstrap.md` (one-time; also inventories computational guides into `guides/computational/` and classifies sensors by kind) |
-| **audit** | `/keystone-audit` | `.pi/prompts/keystone-audit.md` |
-| **synthesize** | `/keystone-synthesize` | `.pi/prompts/keystone-synthesize.md` |
-| **mode** | `/keystone-mode <paired\|solo\|autopilot>` | `.pi/prompts/keystone-mode.md` |
+The canonical kickoff phrase is **"run task on `<ticket-id>`"** (or "run the task workflow") — `harness/actions/task.md` orchestrates `spec → orient → implementation → check-drift → verify → review`.
 
-All prompt templates live in `targets/pi/.pi/prompts/` in this repo. The installer drops them into the consumer's `.pi/prompts/`.
+## Sensor execution
+
+Pi runs shell commands directly. Sensors execute autonomously — see `harness/adapters/pi/sensors.md` for the per-sensor binding.
+
+## Sub-agent degradation
+
+The **review** action would ideally spawn `review-functional`, `review-security`, `review-risk`, and `review-deployment` in parallel. Pi doesn't support sub-agent parallelism natively. Two workable approaches:
+
+1. **Sequential** (default) — pi runs each reviewer pass in turn against the same diff and combines findings.
+2. **tmux fan-out** — power users can launch parallel pi instances in tmux panes, each running one reviewer pass, then merge results.
+
+`harness/actions/review.md` defaults to sequential.
+
+## Session and branching
+
+Pi's tree-structured session history with branching fits the `spec → orient → implementation → verification → review` flow well: each phase can be a branch point, and the user can return to a prior branch if a downstream phase reveals the plan was wrong.
 
 ## Capability matrix
 
@@ -31,16 +35,3 @@ All prompt templates live in `targets/pi/.pi/prompts/` in this repo. The install
 | Lazy-by-region | ✗ (no glob-based loading; **orient** reads `state/CODEBASE_STATE.md` and loads matching idioms by hand) |
 | Context-reset primitive | `/compact` and session branching |
 | Project-scoped settings | ✓ (`.pi/settings.json`) |
-
-## Sub-agent degradation
-
-The **review** action would ideally spawn `review-functional`, `review-security`, `review-risk`, and `review-deployment` in parallel. Pi doesn't support this natively. Two workable approaches:
-
-1. **Sequential** (default) — pi runs the review prompt template once per agent role, and combines findings.
-2. **tmux fan-out** — power users can launch parallel pi instances in tmux panes, each running one reviewer prompt, then merge results.
-
-The shipped `.pi/prompts/review.md` template defaults to sequential.
-
-## Session and branching
-
-Pi's tree-structured session history with branching is a unique fit for the spec → planning → implementation → verification flow: each phase can be a branch point, and the user can return to a prior branch if a downstream phase reveals the plan was wrong.

@@ -2,27 +2,16 @@
 
 How each abstract lifecycle action is invoked in Cline (and its Roo Code fork).
 
-## Action → invocation
+## Invocation
 
 Cline and Roo Code are VS Code extensions that present a chat-driven agent with autonomous tool use. They read **two** harness pointers:
 
 - The **custom instructions** field configured in the extension settings (`cline.customInstructions` / `rooCode.customInstructions`). This is the always-loaded menu.
 - **`.clinerules`** (Cline) or **`.roorules`** (Roo Code) at the repo root — auto-loaded from the workspace. Newer Cline versions read `.clinerules` natively; older ones rely entirely on the settings field. The harness ships both.
 
-Lifecycle actions are invoked by **asking in chat**. Cline / Roo Code have no slash-command primitive in the sense Claude Code does, but Cline supports **custom workflows** (saved prompts triggered from the side panel) that the harness uses to formalize lifecycle invocation.
+Every action is invoked via natural language: "run task on TICKET-123," "run verify," "do a review pass." The agent finds the action in the menu's bulleted list, follows the link to `harness/actions/<action>.md`, and executes the playbook. Users who want a one-click trigger can save the canonical phrase as a Cline workflow (saved prompts triggered from the side panel).
 
-| Action | Invocation | What happens |
-|---|---|---|
-| **spec** | "Start the spec phase for `<task>`." (or saved workflow `Keystone: spec`) | Cline reads `harness/guides/process/spec.md` and follows its activities. Tracker fetch via MCP server (Cline has built-in MCP support) or shell. |
-| **orient** | "Orient for work in `<region>`." | Cline reads `harness/corpus/state/CODEBASE_STATE.md` and the matching idioms; sketches a plan. |
-| **check-drift** | "Check the diff for drift." | Cline runs `git diff` and compares against loaded guide rules. |
-| **verify** | "Run the verify action." | Cline executes sensor commands directly via its shell tool. |
-| **review** | "Run the review action." | Cline walks the diff against spec AC, then runs functional and security review concerns **sequentially**. |
-| **learn** | "Capture learnings from this work." | Cline writes a candidate to `harness/learning/inbox/<timestamp>-<slug>.md`. |
-| **bootstrap** | "Bootstrap the harness." | One-time; detects stack, frameworks, and libraries; seeds corpus (idioms/<stack>/, state/), paired guides (idioms/<stack>/); confirms sensor commands; inventories computational guides (LSPs, formatters, editor enforcement) into `guides/computational/`; classifies sensors by kind. Post-bootstrap, every applicable guide and sensor is recorded in `corpus/state/CODEBASE_STATE.md`. |
-| **audit** | "Audit the harness." | Full Learning + Pruning flywheel pass. |
-| **synthesize** | "Synthesize the inbox." | Promotes inbox items into the right corpus and/or guide. |
-| **mode** | Edit `harness/guides/process/modes.md` directly. | Cline's autonomy is configured via auto-approve toggles, not the harness mode file; see below. |
+The canonical kickoff phrase is **"run task on `<ticket-id>`"** (or "run the task workflow") — `harness/actions/task.md` orchestrates `spec → orient → implementation → check-drift → verify → review`.
 
 ## Cline's Plan / Act modes vs. harness modes
 
@@ -36,23 +25,18 @@ Cline ships a **Plan mode** (chat-only, no tool use) and an **Act mode** (full t
 
 The user toggles auto-approve in the extension UI per category (read files, edit files, execute commands, use browser, use MCP). The harness recommends auto-approving file reads and `.git`-scoped commands at minimum so sensors and drift checks don't stall on approval prompts.
 
-## Saved workflows
+## Optional: saved workflows for one-click invocation
 
-Cline supports **workflows** — saved prompts you trigger from the side panel. The harness defines one workflow per lifecycle action so users can fire actions consistently:
+Cline supports **workflows** — saved prompts you trigger from the side panel. Power users who want per-action shortcuts can define one workflow per action, each invoking the canonical playbook:
 
 ```
-Keystone: spec        → "Read harness/guides/process/spec.md and run the spec action."
-Keystone: orient      → "Read harness/guides/process/planning.md and orient."
-Keystone: check-drift → "Read harness/sensors/drift.md and run the check-drift action."
-Keystone: verify      → "Read harness/guides/process/verification.md and run verify."
-Keystone: review      → "Read harness/guides/process/review.md and run review."
-Keystone: learn       → "Read harness/learning/README.md and capture a learning candidate."
-Keystone: bootstrap   → "Bootstrap the keystone harness."
-Keystone: audit       → "Run the audit action."
-Keystone: synthesize  → "Run the synthesize action."
+Keystone: task        → "Run task on $INPUT"
+Keystone: bootstrap   → "Run bootstrap"
+Keystone: verify      → "Run verify"
+Keystone: review      → "Run review"
 ```
 
-The installer suggests these in `cline-instructions.md` (which is paste-into-settings text); users add them via the workflows menu.
+Workflows aren't required — every action is reachable via natural language against the menu file alone. They're a UX convenience for repeated invocation.
 
 ## Sub-agent support
 

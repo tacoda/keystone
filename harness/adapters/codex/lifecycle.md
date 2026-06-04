@@ -2,22 +2,11 @@
 
 How each abstract lifecycle action is invoked in OpenAI's Codex CLI. Codex reads `AGENTS.md` at the repo root on every session and runs shell commands autonomously. It has no slash commands and no built-in sub-agents — every lifecycle action is invoked by asking the agent in natural language.
 
-## Action → invocation
+## Invocation
 
-| Action | Invocation |
-|---|---|
-| **spec** | "Start the spec phase for `<task or tracker card>`." Codex reads `harness/guides/process/spec.md` and follows it. |
-| **orient** | "Orient for work in `<region>`." |
-| **check-drift** | "Check the current diff for drift against the corpus." |
-| **verify** | "Run the verify action." Codex executes lint / type-check / test / build / coverage via shell. |
-| **review** | "Run the review action." Sequential (no native sub-agent parallelism). |
-| **learn** | "Capture the learnings from this work." |
-| **bootstrap** | "Bootstrap the harness." One-time; detects stack, frameworks, and libraries; seeds corpus (idioms/<stack>/, state/), paired guides (idioms/<stack>/); confirms sensor commands; inventories computational guides (LSPs, formatters, editor enforcement) into `guides/computational/`; classifies sensors by kind. Post-bootstrap, every applicable guide and sensor is recorded in `corpus/state/CODEBASE_STATE.md`. |
-| **audit** | "Audit the corpus." |
-| **synthesize** | "Synthesize the inbox." |
-| **mode** | "Set pacing mode to `<paired\|solo\|autopilot>`." Edit `harness/guides/process/modes.md` directly. |
+Every action is invoked via natural language: "run task on TICKET-123," "run verify," "do a review pass." The agent reads `AGENTS.md` at session start, finds the action in the bulleted list, follows the link to `harness/actions/<action>.md`, and executes the playbook. Codex has no slash-command primitive — natural language is the only invocation surface, which is why action playbooks are agent-agnostic and live in `harness/actions/`.
 
-Because Codex has no slash-command convention, lifecycle actions are invoked by the human typing the action name into the chat. The shipped `AGENTS.md` tells Codex which corpus file to read for each action.
+The canonical kickoff phrase is **"run task on `<ticket-id>`"** (or "run the task workflow") — `harness/actions/task.md` orchestrates `spec → orient → implementation → check-drift → verify → review`.
 
 ## Capability matrix
 

@@ -2,28 +2,15 @@
 
 How each abstract lifecycle action is invoked in Aider.
 
-## Action → invocation
+## Invocation
 
-Aider has no slash-command primitive (its `/<command>` set is for shell, git, and chat control — not for project actions). Lifecycle actions are invoked by **typing the action name as natural language in the chat**, optionally preceded by reading the matching phase doc.
+Every action is invoked via natural language in the chat: "run task on TICKET-123," "run verify," "do a review pass." The agent reads `CONVENTIONS.md` (loaded via the `.aider.conf.yml` `read:` list) at session start, finds the action in the bulleted list, follows the link to `harness/actions/<action>.md`, and executes the playbook. Aider has no slash-command primitive for project actions (its `/<command>` set is for shell, git, and chat control), so natural-language invocation is the only path — and that's exactly what `harness/actions/` is designed for.
 
-| Action | Invocation | What happens |
-|---|---|---|
-| **spec** | "Start the spec phase for `<task>`." | Aider reads `harness/guides/process/spec.md` and follows its activities. |
-| **orient** | "Orient for work in `<region>`." | Aider reads `harness/corpus/state/CODEBASE_STATE.md` and the matching idioms; sketches a plan. |
-| **check-drift** | "Check the diff for drift." | Aider compares `git diff` against loaded corpus rules. |
-| **verify** | "Run the verify action." | Aider invokes sensors via `/run <cmd>` and `/test`; reports results. |
-| **review** | "Run the review action." | Aider walks the diff against spec AC, then runs functional and security review concerns **sequentially**. |
-| **learn** | "Capture the learnings from this work." | Aider writes a candidate to `harness/learning/inbox/<timestamp>-<slug>.md`. |
-| **bootstrap** | "Bootstrap the harness." | One-time; detects stack, frameworks, and libraries; seeds corpus (idioms/<stack>/, state/), paired guides (idioms/<stack>/); confirms sensor commands; inventories computational guides (LSPs, formatters, editor enforcement) into `guides/computational/`; classifies sensors by kind. Post-bootstrap, every applicable guide and sensor is recorded in `corpus/state/CODEBASE_STATE.md`. |
-| **audit** | "Audit the corpus." | Full Learning + Pruning flywheel pass. |
-| **synthesize** | "Synthesize the inbox." | Promotes inbox items into the right corpus layer. |
-| **mode** | Edit `harness/guides/process/modes.md` directly. | Aider has no autonomy levers; the file is informational. |
+The canonical kickoff phrase is **"run task on `<ticket-id>`"** (or "run the task workflow") — `harness/actions/task.md` orchestrates `spec → orient → implementation → check-drift → verify → review`.
 
-## Phase docs as the playbook
+## Markdown is the native shape
 
-Aider's value is that it works straightforwardly with markdown — reading a phase doc and following its activities is its native shape. The phase docs themselves (`harness/guides/process/*.md`) are the playbook; the lifecycle action just names which one to read.
-
-The corollary: keep the phase docs clear and executable. Aider does not have a slash command layer to paper over a vague phase doc.
+Aider's value is that it works straightforwardly with markdown — reading a playbook and following its activities is its native pattern. The action playbooks in `harness/actions/` are exactly that. The corollary: keep them clear and executable. Aider has no slash-command layer to paper over a vague playbook.
 
 ## Sub-agent support
 

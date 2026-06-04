@@ -1,41 +1,28 @@
 # Cursor — Lifecycle binding
 
-How each abstract lifecycle action is invoked in Cursor.
+How Cursor runs the harness's lifecycle actions.
 
-## Action → invocation
+## Invocation
 
-Cursor's native invocation surface is the chat — there are no slash commands. Lifecycle actions are invoked by **referencing a `.cursor/rules/keystone-<action>.mdc` rule** in the chat (typed as `@keystone-<action>` or by asking the agent in plain language) and letting the rule's body drive the work. Hyphen, not colon, because cursor's `@<name>` references the rule's filename and colons aren't filesystem-safe everywhere.
+Every action is invoked via natural language in the chat: "run task on TICKET-123," "run verify," "do a review pass." Cursor's always-applied rule (`.cursor/rules/keystone.mdc`) lists every action with a pointer to its playbook in `harness/actions/<action>.md`. The agent reads the playbook and executes it. No per-action `.mdc` rule files, no `@`-references — the playbooks are agent-agnostic.
 
-| Action | Invocation | Where it lives |
-|---|---|---|
-| **spec** | `@keystone-spec` or "start the spec phase for `<task>`" | `.cursor/rules/keystone-spec.mdc` |
-| **orient** | `@keystone-orient` at task start | `.cursor/rules/keystone-orient.mdc` |
-| **check-drift** | `@keystone-check-drift` after edits | `.cursor/rules/keystone-check-drift.mdc` |
-| **verify** | `@keystone-verify` before commit | `.cursor/rules/keystone-verify.mdc` |
-| **review** | `@keystone-review` after verification gate | `.cursor/rules/keystone-review.mdc` |
-| **learn** | `@keystone-learn` post-merge | `.cursor/rules/keystone-learn.mdc` |
-| **bootstrap** | "Bootstrap the harness" — one-time; detects stack, frameworks, and libraries; inventories computational guides (LSPs, formatters, editor enforcement) into `guides/computational/`; classifies sensors by kind. Post-bootstrap, every applicable guide and sensor is recorded in `corpus/state/CODEBASE_STATE.md`. | reads `harness/guides/process/` directly |
-| **audit** | `@keystone-audit` or "audit the corpus" | inline / phase doc |
-| **synthesize** | "Synthesize the inbox" | reads `harness/learning/inbox/` |
-| **mode** | Edit `harness/guides/process/modes.md` directly | n/a |
+The canonical kickoff phrase is **"run task on `<ticket-id>`"** (or "run the task workflow") — `harness/actions/task.md` orchestrates `spec → orient → implementation → check-drift → verify → review`.
 
-## Why rules, not commands
+## Why one rule, not many
 
-Cursor has no equivalent of Claude Code's slash-command system. Instead, it has **rules** — `.mdc` files in `.cursor/rules/` that can be:
+Cursor's rule system supports three kinds of `.mdc` files: always-applied, auto-attached (by glob), and manual (`@<name>`). The harness uses **one always-applied rule** (`keystone.mdc`) as the menu file; idiom guides loaded by region still use auto-attach via `globs:` frontmatter inside `harness/guides/idioms/<stack>/`. Manual `@`-references are no longer used — every action lives in `harness/actions/` and the menu rule lists them.
 
-- **Always-applied** (`alwaysApply: true`) — loaded into every chat turn. The harness uses this for the menu pointer (`keystone.mdc`), nothing else.
-- **Auto-attached** (matching `globs`) — loaded when the user edits a matching file. Useful for region-scoped idioms.
-- **Manual** (referenced via `@<name>`) — loaded only when explicitly named. **Most lifecycle action rules are this kind.**
+## Sensor execution
 
-The lifecycle action's `.mdc` body contains the same instructions a slash command would: which phase docs to read, which sensors to run, which artifacts to produce.
+Cursor's agent mode can invoke shell commands with per-call approval. Sensors run there. In chat-only mode the user pastes sensor output back into the chat. See `harness/adapters/cursor/sensors.md` for the per-sensor binding.
 
 ## Sub-agent parallelism
 
-Cursor does not have first-class parallel sub-agents. The **review** action therefore runs review prompts **sequentially** within the same chat — each review concern is its own pass over the diff.
+Cursor does not have first-class parallel sub-agents. The **review** action runs review concerns **sequentially** within the same chat — each is its own pass over the diff.
 
 ## Modes
 
-Cursor effectively has one autonomy level — the user accepts each tool call in agent mode. The harness's `paired`/`solo`/`autopilot` distinction collapses to **paired** in practice. Treat the `mode` action as informational; the user still confirms each shell command Cursor proposes.
+Cursor effectively has one autonomy level — the user accepts each tool call in agent mode. The harness's `paired`/`solo`/`autopilot` distinction collapses to **paired** in practice.
 
 ## Capability matrix
 

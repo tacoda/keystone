@@ -5,15 +5,14 @@ alwaysApply: true
 
 # Keystone harness
 
-This project uses a project harness. The corpus at `harness/` defines:
+This project uses a **keystone harness**. The harness at `harness/` defines the engineering knowledge, rules, sensors, and self-update flywheels you operate within.
 
-- `principles/` — universal engineering rules
-- `idioms/` — stack-specific patterns
-- `domain/` — business rules for this project
-- `state/` — empirical map of the codebase right now
-- `process/` — six workflow phases (spec → planning → implementation → verification → review → release)
-
-Cursor-specific bindings live in `harness/adapters/cursor/`. Before starting work, read `harness/README.md`.
+**Read first:**
+- `harness/README.md` — five components (corpus, guides, sensors, policies, flywheels), the lifecycle, and the iron laws.
+- `harness/guides/` — rules. **Always loaded.** What you must do and not do.
+- `harness/corpus/` — informational reference. **On-demand.** Reasoning behind the rules; reach via forward-link from a guide.
+- `harness/adapters/cursor/` — Cursor bindings (capability matrix, sensor execution model).
+- `harness/corpus/domain/` — business rules for this project.
 
 ## Iron laws
 
@@ -23,19 +22,18 @@ Cursor-specific bindings live in `harness/adapters/cursor/`. Before starting wor
 - **No AI attribution** in commits, PRs, or tracker comments.
 - **No silent overwrites** of state files — propose a diff, confirm before applying.
 
-## Lifecycle
+## Lifecycle actions
 
-Each phase has a `.mdc` rule. Invoke by mentioning the action (e.g. `@keystone-orient`, `@keystone-verify`) or by asking the assistant to "run the X action."
+To kick off a unit of work, say "**run task on `<ticket-id>`**". To invoke any single action, ask in natural language ("run verify," "do a review pass"). Each action's playbook lives in `harness/actions/`:
 
-| Action | Rule | When |
-|---|---|---|
-| bootstrap | `@keystone-bootstrap` | First install — detect stack, seed state, classify sensors |
-| spec | `@keystone-spec` | Task entry, acceptance criteria |
-| orient | `@keystone-orient` | Plan + load idioms for touched region |
-| check-drift | `@keystone-check-drift` | After edits, before verify |
-| verify | `@keystone-verify` | Sensors gate, pre-commit |
-| review | `@keystone-review` | Semantic check, post-verify |
-| learn | `@keystone-learn` | Post-merge, capture insights |
-| audit | `@keystone-audit` | Periodic dual-flywheel (Learning + Pruning) |
-| synthesize | `@keystone-synthesize` | Promote inbox candidates into corpus / guides |
-| mode | `@keystone-mode` | Switch pacing (paired / solo / autopilot) |
+- **task** (`harness/actions/task.md`) — end-to-end workflow: spec → orient → implementation → check-drift → verify → review.
+- **bootstrap** (`harness/actions/bootstrap.md`) — one-time scaffold; detect stack, seed state, classify sensors. Run once per project.
+- **spec** (`harness/actions/spec.md`) — capture intent + acceptance criteria. First action on any task.
+- **orient** (`harness/actions/orient.md`) — load `CODEBASE_STATE.md` and idioms for the touched region; sketch a plan.
+- **check-drift** (`harness/actions/check-drift.md`) — compare the diff against loaded guides; fast pre-verify check.
+- **verify** (`harness/actions/verify.md`) — run lint / type-check / test / build / drift / commit-message sensors.
+- **review** (`harness/actions/review.md`) — semantic review (functional / security / risk / deployment + spec-adherence).
+- **learn** (`harness/actions/learn.md`) — capture an inbox candidate from a surprise or incident.
+- **audit** (`harness/actions/audit.md`) — periodic dual-flywheel: Learning + Pruning.
+- **synthesize** (`harness/actions/synthesize.md`) — promote inbox candidates into the right corpus / guide layer.
+- **mode** (`harness/actions/mode.md`) — switch pacing (paired / solo / autopilot).

@@ -81,7 +81,8 @@ After a flywheel write that touched any `harness/guides/` file, start a new chat
 
 - **`corpus/domain/`** — relevant at task start; the orient action's first read after state.
 - **`corpus/state/CODEBASE_STATE.md`** — loaded by the **orient** action (via `@file harness/corpus/state/CODEBASE_STATE.md` or model's file-read).
-- **`guides/process/<phase>.md`** — loaded when the agent enters that phase. The harness's slash commands do this explicitly (`/keystone:spec` reads `spec.md`).
+- **`actions/<action>.md`** — loaded when the user invokes that action by name.
+- **`guides/process/<phase>.md`** — loaded when the agent enters that phase from inside an action playbook.
 - **`guides/<layer>/<name>.md`** — auto-loaded via the `folder` context provider on `harness/guides/`.
 
 ## Capability gaps
@@ -89,4 +90,4 @@ After a flywheel write that touched any `harness/guides/` file, start a new chat
 - **No autonomous tracker integration without MCP.** If the user doesn't configure an Atlassian / Linear MCP server, tracker fetch falls back to `cmd` steps (`gh issue view`, `curl`).
 - **No sub-agent parallelism.** The **review** action runs each concern sequentially.
 - **Single autonomy mode.** Agent mode applies edits as it suggests them; the user reviews each edit before it lands. Treat all sessions as `paired`.
-- **`.continuerules` only.** Continue versions that predate `config.yaml` cannot host slash commands or MCP — they fall back to typing the action name in chat.
+- **`.continuerules` only.** Continue versions that predate `config.yaml` cannot host MCP servers — they fall back to typing the action name in chat against the agent-agnostic playbooks in `harness/actions/`.
