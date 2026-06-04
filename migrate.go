@@ -173,7 +173,14 @@ func processMigration(m Migration, destDir string, flags *migrateFlags, reader *
 			if err := writeOpResult(res); err != nil {
 				return err
 			}
-			fmt.Fprintf(os.Stdout, "    ✓ wrote %s\n", res.targetPath)
+			switch res.op.Type {
+			case "move_dir":
+				fmt.Fprintf(os.Stdout, "    ✓ moved %s → %s\n", res.op.Path, res.op.To)
+			case "delete_dir":
+				fmt.Fprintf(os.Stdout, "    ✓ removed %s\n", res.op.Path)
+			default:
+				fmt.Fprintf(os.Stdout, "    ✓ wrote %s\n", res.targetPath)
+			}
 		}
 	}
 	fmt.Fprintln(os.Stdout)
@@ -198,6 +205,21 @@ func printOpPreview(res opResult) {
 		fmt.Fprintf(os.Stdout, "    replace_block in %s:\n", res.op.Path)
 		printPrefixed(res.op.Match, "    - ")
 		printPrefixed(res.op.Replacement, "    + ")
+	case "move_dir":
+		fmt.Fprintf(os.Stdout, "    move_dir: %s → %s\n", res.op.Path, res.op.To)
+		for _, p := range res.movePlans {
+			switch p.status {
+			case opCreate:
+				fmt.Fprintf(os.Stdout, "    + %s\n", p.relPath)
+			case opConflict:
+				fmt.Fprintf(os.Stdout, "    ! %s (%s)\n", p.relPath, p.note)
+			case opNoop:
+				fmt.Fprintf(os.Stdout, "      %s (already at destination)\n", p.relPath)
+			}
+		}
+	case "delete_dir":
+		fmt.Fprintf(os.Stdout, "    delete_dir: %s\n", res.op.Path)
+		fmt.Fprintf(os.Stdout, "    - %s/\n", res.op.Path)
 	}
 }
 
@@ -208,10 +230,17 @@ func printPrefixed(s, prefix string) {
 }
 
 func writeOpResult(res opResult) error {
-	if err := os.MkdirAll(filepath.Dir(res.targetPath), 0o755); err != nil {
-		return err
+	switch res.op.Type {
+	case "move_dir":
+		return applyMoveDir(res)
+	case "delete_dir":
+		return applyDeleteDir(res)
+	default:
+		if err := os.MkdirAll(filepath.Dir(res.targetPath), 0o755); err != nil {
+			return err
+		}
+		return os.WriteFile(res.targetPath, res.proposed, 0o644)
 	}
-	return os.WriteFile(res.targetPath, res.proposed, 0o644)
 }
 
 func promptYesNoQuit(reader *bufio.Reader) (string, error) {

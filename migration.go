@@ -44,6 +44,15 @@ type Operation struct {
 	// replace_block (reuses Heading)
 	Match       string `yaml:"match,omitempty"`
 	Replacement string `yaml:"replacement,omitempty"`
+
+	// move_dir: relocate every file under Path (source) into To (destination),
+	// preserving subpath structure. Idempotent — already-moved files no-op;
+	// destination files with diverged content surface as conflicts. After all
+	// files are moved, the source directory is removed if empty.
+	//
+	// delete_dir: remove Path if it is empty (after a prior move_dir, for
+	// instance). Conflicts if Path still contains files.
+	To string `yaml:"to,omitempty"`
 }
 
 // loadMigrations walks the embedded migrations/ tree and returns every

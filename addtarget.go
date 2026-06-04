@@ -72,7 +72,7 @@ func runAddTarget(args []string, assets embed.FS) error {
 
 	existing, err := readInstalledAgents(absDir)
 	if err != nil {
-		return fmt.Errorf("read install profile: %w", err)
+		return fmt.Errorf("read installed agents: %w", err)
 	}
 	already := map[string]bool{}
 	for _, a := range existing {
@@ -80,7 +80,7 @@ func runAddTarget(args []string, assets embed.FS) error {
 	}
 	for _, a := range requested {
 		if already[a] {
-			return fmt.Errorf("%s is already installed (recorded in INSTALL_PROFILE.md); remove it first to re-add", a)
+			return fmt.Errorf("%s is already installed (recorded in the lockfile); remove it first to re-add", a)
 		}
 	}
 
@@ -90,8 +90,8 @@ func runAddTarget(args []string, assets embed.FS) error {
 		}
 	}
 
-	if err := appendAgentsToProfile(absDir, requested); err != nil {
-		return fmt.Errorf("update install profile: %w", err)
+	if err := appendInstalledAgents(absDir, requested); err != nil {
+		return fmt.Errorf("update lockfile: %w", err)
 	}
 
 	for _, agent := range requested {

@@ -15,6 +15,11 @@ type initFlags struct {
 	// selections: category ID → list of chosen labels.
 	// Single-select categories store at most one entry.
 	selections Selections
+
+	// policies: --policy arguments collected verbatim, in CLI order.
+	// Free-form refs (URLs), not validated against any catalog. Empty if no
+	// policies were requested.
+	policies []string
 }
 
 // parseInitArgs parses `init`'s args. Behavior:
@@ -42,6 +47,17 @@ func parseInitArgs(args []string) (*initFlags, error) {
 		switch {
 		case a == "--force" || a == "-force":
 			flags.force = true
+
+		case a == "--policy":
+			// --policy <ref> — repeatable, free-form (not a category).
+			if i+1 >= len(args) {
+				return nil, fmt.Errorf("flag %s requires a value", a)
+			}
+			flags.policies = append(flags.policies, args[i+1])
+			i++
+
+		case strings.HasPrefix(a, "--policy="):
+			flags.policies = append(flags.policies, strings.TrimPrefix(a, "--policy="))
 
 		case strings.HasPrefix(a, "--") && strings.Contains(a, "="):
 			// --flag=value form

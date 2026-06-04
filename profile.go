@@ -4,14 +4,21 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 	"time"
 )
 
-// writeInstallProfile renders sel as harness/corpus/state/INSTALL_PROFILE.md
+// writeInstallProfile renders sel + packs as harness/corpus/state/INSTALL_PROFILE.md
 // under destDir. Overwrites any existing file (the file is install-scoped —
-// re-running init should reset it).
-func writeInstallProfile(destDir string, sel Selections) error {
+// re-running init should reset it). Packs is nil/empty when no org packs were
+// installed.
+//
+// The profile is the human-readable record. Machine state (keystone version,
+// agents, packs) lives in harness/.keystone.lock — written separately. The
+// profile no longer emits `keystone_version:` frontmatter; that field was
+// promoted to the lockfile.
+func writeInstallProfile(destDir string, sel Selections, policies map[string]PolicyLock) error {
 	path := filepath.Join(destDir, "harness", "corpus", "state", "INSTALL_PROFILE.md")
 	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
 		return err
@@ -20,10 +27,9 @@ func writeInstallProfile(destDir string, sel Selections) error {
 	var b strings.Builder
 	fmt.Fprintf(&b, "---\n")
 	fmt.Fprintf(&b, "created: %s\n", time.Now().UTC().Format("2006-01-02"))
-	fmt.Fprintf(&b, "keystone_version: %s\n", version)
 	fmt.Fprintf(&b, "---\n\n")
 	fmt.Fprintf(&b, "# Install Profile\n\n")
-	fmt.Fprintf(&b, "Selections captured by `keystone init`. Read by the **bootstrap** action; safe to edit by hand.\n\n")
+	fmt.Fprintf(&b, "Selections captured by `keystone init`. Read by the **bootstrap** action; safe to edit by hand. Machine state (keystone version, agents, packs) lives in [`../../.keystone.lock`](../../.keystone.lock).\n\n")
 	fmt.Fprintf(&b, "## Selections\n\n")
 	fmt.Fprintf(&b, "| Category | Value(s) |\n")
 	fmt.Fprintf(&b, "|---|---|\n")
@@ -38,6 +44,22 @@ func writeInstallProfile(destDir string, sel Selections) error {
 		fmt.Fprintf(&b, "| %s | %s |\n", c.ID, strings.Join(values, ", "))
 	}
 
+	if len(policies) > 0 {
+		fmt.Fprintf(&b, "\n## Policies\n\n")
+		fmt.Fprintf(&b, "Org policies installed under `harness/policies/`. Detailed pin state (resolved SHA, file hashes) lives in the lockfile.\n\n")
+		fmt.Fprintf(&b, "| Policy | Version | Source |\n")
+		fmt.Fprintf(&b, "|---|---|---|\n")
+		names := make([]string, 0, len(policies))
+		for name := range policies {
+			names = append(names, name)
+		}
+		sort.Strings(names)
+		for _, name := range names {
+			p := policies[name]
+			fmt.Fprintf(&b, "| %s | %s | %s |\n", name, p.PolicyVersion, p.SourceRef)
+		}
+	}
+
 	if err := os.WriteFile(path, []byte(b.String()), 0o644); err != nil {
 		return err
 	}
@@ -45,20 +67,114 @@ func writeInstallProfile(destDir string, sel Selections) error {
 	return nil
 }
 
-// readInstalledAgents parses the agent row of INSTALL_PROFILE.md. Returns the
-// list of agent IDs already recorded, or an empty slice if the row is unset.
-// Returns an error if the profile file is missing or unreadable.
+// readInstalledAgents returns the list of agent IDs recorded in the lockfile.
+// Falls back to parsing INSTALL_PROFILE.md for installs that predate the
+// lockfile.
 func readInstalledAgents(destDir string) ([]string, error) {
+	lf, err := readLockfile(destDir)
+	if err != nil {
+		return nil, err
+	}
+	if len(lf.Keystone.Agents) > 0 {
+		return append([]string{}, lf.Keystone.Agents...), nil
+	}
+	return readInstalledAgentsFromProfile(destDir)
+}
+
+// readKeystoneVersion returns the binary version that last touched the install,
+// from the lockfile. Falls back to INSTALL_PROFILE.md frontmatter for installs
+// that predate the lockfile. Returns "" if neither source has a value.
+func readKeystoneVersion(destDir string) (string, error) {
+	lf, err := readLockfile(destDir)
+	if err != nil {
+		return "", err
+	}
+	if lf.Keystone.Version != "" {
+		return lf.Keystone.Version, nil
+	}
+	return readKeystoneVersionFromProfile(destDir)
+}
+
+// updateKeystoneVersion sets the binary version in the lockfile, creating
+// the file if needed. Backfills install state from INSTALL_PROFILE.md when
+// the lockfile is empty.
+func updateKeystoneVersion(destDir, newVersion string) error {
+	lf, err := ensureLockfile(destDir)
+	if err != nil {
+		return err
+	}
+	lf.Keystone.Version = newVersion
+	return writeLockfile(destDir, lf)
+}
+
+// appendInstalledAgents adds newAgents to the lockfile's agent list, preserving
+// existing entries and order. Backfills from INSTALL_PROFILE.md when the
+// lockfile is empty so old installs get a lockfile on first agent-add.
+func appendInstalledAgents(destDir string, newAgents []string) error {
+	lf, err := ensureLockfile(destDir)
+	if err != nil {
+		return err
+	}
+	if lf.Keystone.Version == "" {
+		lf.Keystone.Version = version
+	}
+	if lf.Keystone.Installed == "" {
+		lf.Keystone.Installed = time.Now().UTC().Format("2006-01-02")
+	}
+
+	seen := map[string]bool{}
+	for _, a := range lf.Keystone.Agents {
+		seen[a] = true
+	}
+	for _, a := range newAgents {
+		if !seen[a] {
+			lf.Keystone.Agents = append(lf.Keystone.Agents, a)
+			seen[a] = true
+		}
+	}
+	if err := writeLockfile(destDir, lf); err != nil {
+		return err
+	}
+	fmt.Fprintf(os.Stdout, "  updated: %s\n", filepath.Join(destDir, KeystoneLockfile))
+	return nil
+}
+
+// readKeystoneVersionFromProfile parses the `keystone_version:` frontmatter
+// from INSTALL_PROFILE.md. Used as a backward-compat fallback for installs
+// created before the lockfile existed. Returns "" if the field is missing.
+func readKeystoneVersionFromProfile(destDir string) (string, error) {
 	path := filepath.Join(destDir, "harness", "corpus", "state", "INSTALL_PROFILE.md")
 	data, err := os.ReadFile(path)
 	if err != nil {
+		if os.IsNotExist(err) {
+			return "", nil
+		}
+		return "", err
+	}
+	for _, line := range strings.Split(string(data), "\n") {
+		if strings.HasPrefix(line, "keystone_version:") {
+			return strings.TrimSpace(strings.TrimPrefix(line, "keystone_version:")), nil
+		}
+	}
+	return "", nil
+}
+
+// readInstalledAgentsFromProfile parses the agent row of INSTALL_PROFILE.md.
+// Used as a backward-compat fallback for installs created before the lockfile
+// existed.
+func readInstalledAgentsFromProfile(destDir string) ([]string, error) {
+	path := filepath.Join(destDir, "harness", "corpus", "state", "INSTALL_PROFILE.md")
+	data, err := os.ReadFile(path)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return nil, nil
+		}
 		return nil, err
 	}
 	for _, line := range strings.Split(string(data), "\n") {
 		if !strings.HasPrefix(line, "| agent ") && !strings.HasPrefix(line, "| agent|") {
 			continue
 		}
-		// Row shape: "| agent | claude-code, cursor |"
 		cells := strings.Split(line, "|")
 		if len(cells) < 3 {
 			continue
@@ -77,84 +193,4 @@ func readInstalledAgents(destDir string) ([]string, error) {
 		return out, nil
 	}
 	return []string{}, nil
-}
-
-// readKeystoneVersion returns the `keystone_version:` value recorded in the
-// INSTALL_PROFILE.md frontmatter, or an empty string if the field is missing.
-// Returns an error if the file itself can't be read.
-func readKeystoneVersion(destDir string) (string, error) {
-	path := filepath.Join(destDir, "harness", "corpus", "state", "INSTALL_PROFILE.md")
-	data, err := os.ReadFile(path)
-	if err != nil {
-		return "", err
-	}
-	for _, line := range strings.Split(string(data), "\n") {
-		if strings.HasPrefix(line, "keystone_version:") {
-			return strings.TrimSpace(strings.TrimPrefix(line, "keystone_version:")), nil
-		}
-	}
-	return "", nil
-}
-
-// updateKeystoneVersion rewrites the `keystone_version:` frontmatter field in
-// INSTALL_PROFILE.md to newVersion, preserving the rest of the file.
-func updateKeystoneVersion(destDir, newVersion string) error {
-	path := filepath.Join(destDir, "harness", "corpus", "state", "INSTALL_PROFILE.md")
-	data, err := os.ReadFile(path)
-	if err != nil {
-		return err
-	}
-	lines := strings.Split(string(data), "\n")
-	found := false
-	for i, line := range lines {
-		if strings.HasPrefix(line, "keystone_version:") {
-			lines[i] = "keystone_version: " + newVersion
-			found = true
-			break
-		}
-	}
-	if !found {
-		return fmt.Errorf("no keystone_version field in %s", path)
-	}
-	return os.WriteFile(path, []byte(strings.Join(lines, "\n")), 0o644)
-}
-
-// appendAgentsToProfile rewrites INSTALL_PROFILE.md's agent row to include the
-// new agents alongside the existing ones, preserving every other row.
-func appendAgentsToProfile(destDir string, newAgents []string) error {
-	path := filepath.Join(destDir, "harness", "corpus", "state", "INSTALL_PROFILE.md")
-	data, err := os.ReadFile(path)
-	if err != nil {
-		return err
-	}
-
-	existing, err := readInstalledAgents(destDir)
-	if err != nil {
-		return err
-	}
-	merged := append([]string{}, existing...)
-	seen := map[string]bool{}
-	for _, a := range merged {
-		seen[a] = true
-	}
-	for _, a := range newAgents {
-		if !seen[a] {
-			merged = append(merged, a)
-			seen[a] = true
-		}
-	}
-
-	lines := strings.Split(string(data), "\n")
-	for i, line := range lines {
-		if strings.HasPrefix(line, "| agent ") || strings.HasPrefix(line, "| agent|") {
-			lines[i] = fmt.Sprintf("| agent | %s |", strings.Join(merged, ", "))
-			break
-		}
-	}
-
-	if err := os.WriteFile(path, []byte(strings.Join(lines, "\n")), 0o644); err != nil {
-		return err
-	}
-	fmt.Fprintf(os.Stdout, "  updated: %s\n", path)
-	return nil
 }

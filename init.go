@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 )
 
 func runInit(args []string, assets embed.FS) error {
@@ -83,7 +84,16 @@ func runInit(args []string, assets embed.FS) error {
 		return fmt.Errorf("install optional content: %w", err)
 	}
 
-	if err := writeInstallProfile(absDir, flags.selections); err != nil {
+	installedPolicies, err := installPolicies(absDir, flags.policies)
+	if err != nil {
+		return fmt.Errorf("install policies: %w", err)
+	}
+
+	if err := initializeLockfile(absDir, agents); err != nil {
+		return fmt.Errorf("initialize lockfile: %w", err)
+	}
+
+	if err := writeInstallProfile(absDir, flags.selections, installedPolicies); err != nil {
 		return fmt.Errorf("write install profile: %w", err)
 	}
 
@@ -91,6 +101,36 @@ func runInit(args []string, assets embed.FS) error {
 		printAgentWarnings(agent)
 	}
 	printNextSteps(agents)
+	return nil
+}
+
+// initializeLockfile creates harness/.keystone.lock if it doesn't exist yet,
+// or fills in the keystone section if a prior call (e.g. installPacks) wrote
+// only the packs section. Records the binary version, install date, and the
+// agent IDs whose menu files were just installed.
+func initializeLockfile(destDir string, agents []string) error {
+	lf, err := ensureLockfile(destDir)
+	if err != nil {
+		return err
+	}
+	lf.Keystone.Version = version
+	if lf.Keystone.Installed == "" {
+		lf.Keystone.Installed = time.Now().UTC().Format("2006-01-02")
+	}
+	seen := map[string]bool{}
+	for _, a := range lf.Keystone.Agents {
+		seen[a] = true
+	}
+	for _, a := range agents {
+		if !seen[a] {
+			lf.Keystone.Agents = append(lf.Keystone.Agents, a)
+			seen[a] = true
+		}
+	}
+	if err := writeLockfile(destDir, lf); err != nil {
+		return err
+	}
+	fmt.Fprintf(os.Stdout, "  wrote: %s\n", filepath.Join(destDir, KeystoneLockfile))
 	return nil
 }
 
@@ -183,8 +223,8 @@ func printNextSteps(agents []string) {
 %s
 Also:
 
-  • Read harness/README.md for an overview of the four components
-    (corpus, guides, sensors, flywheels).
+  • Read harness/README.md for an overview of the five components
+    (corpus, guides, sensors, policies, flywheels).
   • Review harness/corpus/state/INSTALL_PROFILE.md and adjust if needed.
   • Commit harness/ and any agent-specific files this installer created.
 `, list, bootstrapIn, lifecycle)

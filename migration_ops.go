@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"strings"
@@ -22,11 +23,25 @@ const (
 // note used for user-facing messages.
 type opResult struct {
 	op         Operation
-	targetPath string // absolute path on disk
+	targetPath string // absolute path on disk (single-file ops); empty for multi-file
 	status     opStatus
 	current    []byte
 	proposed   []byte
 	note       string
+
+	// movePlans is populated only by move_dir; one entry per file the op will
+	// touch. Aggregate status above reflects the worst sub-status across these
+	// (any conflict → conflict; all noop → noop; otherwise change).
+	movePlans []movePlan
+}
+
+// movePlan is one file-level action inside a move_dir operation.
+type movePlan struct {
+	sourceAbs string
+	destAbs   string
+	relPath   string // for display
+	status    opStatus
+	note      string
 }
 
 // planOperation computes what op would do to the harness rooted at destDir,
@@ -36,6 +51,15 @@ func planOperation(op Operation, destDir string) (opResult, error) {
 	if op.Path == "" {
 		return opResult{}, fmt.Errorf("operation %q is missing path", op.Type)
 	}
+
+	// Directory-scoped ops handle their own existence + content checks.
+	switch op.Type {
+	case "move_dir":
+		return planMoveDir(op, destDir)
+	case "delete_dir":
+		return planDeleteDir(op, destDir)
+	}
+
 	target := filepath.Join(destDir, filepath.FromSlash(op.Path))
 	res := opResult{op: op, targetPath: target}
 
@@ -246,6 +270,228 @@ func headingLevel(line string) int {
 		return 0
 	}
 	return n
+}
+
+// planMoveDir walks every file under op.Path and computes, for each, the
+// transition into op.To. Idempotent: files already at the destination with
+// matching content are no-ops; files at the destination with diverged content
+// surface as conflicts. The aggregate status is the worst sub-status (any
+// conflict bubbles up).
+func planMoveDir(op Operation, destDir string) (opResult, error) {
+	if op.Path == "" || op.To == "" {
+		return opResult{op: op}, fmt.Errorf("move_dir requires both path and to")
+	}
+	res := opResult{op: op}
+	src := filepath.Join(destDir, filepath.FromSlash(op.Path))
+	dst := filepath.Join(destDir, filepath.FromSlash(op.To))
+	res.targetPath = src // applyMoveDir uses this to attempt cleanup of the empty source dir
+
+	srcInfo, srcErr := os.Stat(src)
+	dstInfo, dstErr := os.Stat(dst)
+
+	srcExists := srcErr == nil
+	dstExists := dstErr == nil
+
+	if srcErr != nil && !os.IsNotExist(srcErr) {
+		return res, srcErr
+	}
+	if dstErr != nil && !os.IsNotExist(dstErr) {
+		return res, dstErr
+	}
+
+	if !srcExists {
+		// Source already gone. Either previously moved or never installed.
+		if dstExists && dstInfo.IsDir() {
+			res.status = opNoop
+			res.note = fmt.Sprintf("source %s already relocated", op.Path)
+		} else {
+			res.status = opNoop
+			res.note = fmt.Sprintf("source %s not present — nothing to move", op.Path)
+		}
+		return res, nil
+	}
+	if !srcInfo.IsDir() {
+		return res, fmt.Errorf("move_dir source %s is not a directory", op.Path)
+	}
+
+	worst := opNoop
+	err := filepath.Walk(src, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if info.IsDir() {
+			return nil
+		}
+		rel, relErr := filepath.Rel(src, path)
+		if relErr != nil {
+			return relErr
+		}
+		destPath := filepath.Join(dst, rel)
+		plan := movePlan{
+			sourceAbs: path,
+			destAbs:   destPath,
+			relPath:   filepath.ToSlash(rel),
+		}
+
+		srcBytes, readErr := os.ReadFile(path)
+		if readErr != nil {
+			return readErr
+		}
+
+		destBytes, destReadErr := os.ReadFile(destPath)
+		switch {
+		case os.IsNotExist(destReadErr):
+			plan.status = opCreate
+			if worst < opCreate {
+				worst = opCreate
+			}
+		case destReadErr != nil:
+			return destReadErr
+		case string(destBytes) == string(srcBytes):
+			plan.status = opNoop
+			plan.note = "destination matches source — will just remove source"
+			if worst < opChange {
+				worst = opChange // we still have work to do (remove source)
+			}
+		default:
+			plan.status = opConflict
+			plan.note = "destination exists with different content"
+			worst = opConflict
+		}
+
+		res.movePlans = append(res.movePlans, plan)
+		return nil
+	})
+	if err != nil {
+		return res, err
+	}
+
+	if len(res.movePlans) == 0 {
+		// Source dir is empty — just need cleanup.
+		res.status = opChange
+		res.note = "source directory is empty — will remove"
+		return res, nil
+	}
+	res.status = worst
+	return res, nil
+}
+
+// planDeleteDir reports the planned removal of an empty directory. Conflicts
+// if the directory still contains files (so the user notices residue).
+func planDeleteDir(op Operation, destDir string) (opResult, error) {
+	res := opResult{op: op}
+	target := filepath.Join(destDir, filepath.FromSlash(op.Path))
+	res.targetPath = target
+
+	info, err := os.Stat(target)
+	if err != nil {
+		if os.IsNotExist(err) {
+			res.status = opNoop
+			res.note = "directory already absent"
+			return res, nil
+		}
+		return res, err
+	}
+	if !info.IsDir() {
+		return res, fmt.Errorf("delete_dir target %s is not a directory", op.Path)
+	}
+
+	entries, err := os.ReadDir(target)
+	if err != nil {
+		return res, err
+	}
+	if len(entries) > 0 {
+		res.status = opConflict
+		names := make([]string, 0, len(entries))
+		for _, e := range entries {
+			names = append(names, e.Name())
+		}
+		res.note = "directory not empty: " + strings.Join(names, ", ")
+		return res, nil
+	}
+	res.status = opChange
+	return res, nil
+}
+
+// applyMoveDir performs the planned moves on disk: copies each source file to
+// its destination, then unlinks the source. Removes the source directory if
+// emptied. Conflicts in movePlans are skipped (leaving the source file in
+// place for the user to handle).
+func applyMoveDir(res opResult) error {
+	src := filepath.Join(filepath.Dir(res.targetPath), "") // unused; we use plans
+	_ = src
+	for _, p := range res.movePlans {
+		if p.status == opConflict {
+			continue
+		}
+		if p.status == opNoop {
+			// Destination already matches — just remove the source.
+			if err := os.Remove(p.sourceAbs); err != nil && !os.IsNotExist(err) {
+				return fmt.Errorf("remove %s: %w", p.sourceAbs, err)
+			}
+			continue
+		}
+		// opCreate: copy then remove source.
+		if err := os.MkdirAll(filepath.Dir(p.destAbs), 0o755); err != nil {
+			return err
+		}
+		if err := copyFile(p.sourceAbs, p.destAbs); err != nil {
+			return err
+		}
+		if err := os.Remove(p.sourceAbs); err != nil {
+			return fmt.Errorf("remove %s: %w", p.sourceAbs, err)
+		}
+	}
+	// Attempt to remove the (now-empty) source directory and any empty parents
+	// up to but not including the harness root. Silent if anything is still
+	// occupied — `delete_dir` exists for explicit cleanup.
+	_ = removeIfEmpty(res.targetPath)
+	return nil
+}
+
+// applyDeleteDir removes a directory that planDeleteDir already verified is
+// empty.
+func applyDeleteDir(res opResult) error {
+	if err := os.Remove(res.targetPath); err != nil && !os.IsNotExist(err) {
+		return err
+	}
+	return nil
+}
+
+// removeIfEmpty unlinks dir if it has no entries left. Silent if dir is gone
+// or non-empty.
+func removeIfEmpty(dir string) error {
+	if dir == "" {
+		return nil
+	}
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		return nil
+	}
+	if len(entries) > 0 {
+		return nil
+	}
+	return os.Remove(dir)
+}
+
+// copyFile streams src to dst. Truncates dst if it exists (planMoveDir should
+// have flagged a content mismatch already, so reaching here means destination
+// is absent or content already matches).
+func copyFile(src, dst string) error {
+	in, err := os.Open(src)
+	if err != nil {
+		return err
+	}
+	defer in.Close()
+	out, err := os.Create(dst)
+	if err != nil {
+		return err
+	}
+	if _, err := io.Copy(out, in); err != nil {
+		out.Close()
+		return err
+	}
+	return out.Close()
 }
 
 // findNextHeadingAtOrAbove returns the byte index in body of the next heading

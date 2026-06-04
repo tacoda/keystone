@@ -8,10 +8,11 @@ Informational reference — what the agent should *know* when the rules aren't e
 
 | Layer | What it answers | When loaded |
 |---|---|---|
-| [`principles/`](principles/README.md) | What does good engineering look like, regardless of stack? | When following a forward-link from `guides/principles/<file>.md`, or when researching a topic |
-| [`idioms/`](idioms/README.md) | How does *this* stack express those principles? | When following a forward-link from `guides/idioms/<stack>/<file>.md`, or when picking up a new region |
+| [`idioms/`](idioms/README.md) | How does *this* stack express engineering principles? | When following a forward-link from `guides/idioms/<stack>/<file>.md`, or when picking up a new region |
 | [`domain/`](domain/README.md) | What does the product do, what does it ship, what survives a release? | When following a forward-link from `guides/domain/<file>.md`, or when reasoning about scope and invariants |
 | [`state/`](state/README.md) | What is true about the codebase right now? | At the start of planning (**orient**), and whenever a sensor reads or writes state |
+
+**Engineering principles** (the universal reasoning that used to live under `corpus/principles/`) now ship inside the default policy at [`../policies/universal/corpus/principles/`](../policies/universal/) — they're a Level-3 plugin, not project-authored content.
 
 Process is not represented here — the workflow phases are entirely prescriptive, so they live under [`../guides/process/`](../guides/process/README.md).
 
@@ -28,10 +29,10 @@ Corpus files include a forward-link to the paired guide when one exists:
 
 ## Authorship
 
-- `principles/` — foundational literature; team-curated additions that meet the bar (universal, language-agnostic, cited).
 - `idioms/` — lead engineer + agent (via Learning flywheel).
 - `domain/` — domain expert + lead engineer.
 - `state/` — agent + human (state sensors propose diffs; humans accept).
+- Engineering principles — shipped via the `universal` default policy; see [`../policies/`](../policies/README.md).
 
 ## Activation
 
@@ -54,7 +55,6 @@ Each layer documents its file format in its own README. Common convention:
 
 ## Changes when
 
-- `principles/` — almost never. Editing one often suggests you've mis-classified an idiom.
 - `idioms/` — when the stack does (new framework, version upgrade, pattern adopted).
 - `domain/` — when the product does (new invariant, vocabulary shift).
 - `state/` — continuously. State is empirical; sensors keep it current.

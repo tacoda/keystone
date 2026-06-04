@@ -8,7 +8,7 @@ For the full reasoning and references behind each rule, see the paired file in [
 
 Every guide declares a `kind:` in its frontmatter. The kind says *how* the guidance is delivered:
 
-**Inferential** — natural-language rules an agent reasons about. Markdown files under `principles/`, `idioms/`, `domain/`, and `process/`. This is what guides have been historically; it remains the default kind.
+**Inferential** — natural-language rules an agent reasons about. Markdown files under `idioms/`, `domain/`, and `process/`. This is what guides have been historically; it remains the default kind.
 
 **Computational** — deterministic ambient enforcement that does not depend on agent reasoning. Examples: a language server giving live type/error feedback, an editor formatter, a pre-save linter rule. These live under [`computational/`](computational/README.md) and are inventoried by the bootstrap action based on what the project's stack supports.
 
@@ -18,11 +18,12 @@ Kind classifies the guide, not the thing the guide is about. An inferential rule
 
 | Directory | Kind | What lives here | Activation |
 |---|---|---|---|
-| `principles/` | inferential | Universal engineering rules (rules extracted from `corpus/principles/`). | Ambient (always) |
 | [`idioms/`](idioms/README.md) | inferential | Stack-specific rules (rules extracted from `corpus/idioms/<stack>/`). | Ambient (lazy by region) |
 | [`domain/`](domain/README.md) | inferential | Business-rule constraints (rules extracted from `corpus/domain/`). | Ambient (always) |
 | [`process/`](process/README.md) | inferential | What happens at each phase of the workflow. | Loaded when entering a phase |
 | [`computational/`](computational/README.md) | computational | Deterministic ambient enforcement — language servers, formatters, editor checks the stack supports. | Ambient (in-editor / on-save) |
+
+**Universal engineering rules** (the principles rule extracts that used to live in `guides/principles/`) now ship inside the default policy at [`../policies/universal/guides/principles/`](../policies/universal/). They are still ambient and still part of the always-loaded rule set — they just live under the policies layer rather than under project-owned guides.
 
 ## File format
 
@@ -67,14 +68,14 @@ The drift sensor reads guides directly from `guides/` regardless of how the agen
 
 ## Empty vs. populated
 
-- `guides/principles/` ships populated with 29 files extracted from the corpus principles.
 - `guides/process/` ships populated with the workflow phase files.
 - `guides/idioms/`, `guides/domain/`, and `guides/computational/` ship empty; the **bootstrap** action and Learning flywheel populate them.
+- Universal engineering rules ship under [`../policies/universal/`](../policies/) (the default policy), not under project-owned `guides/`.
 
 Anything a computational guide needs at install time (a particular editor config file, an LSP binary, an agent setting) is exposed as an option on `keystone init` rather than shipped by default.
 
 ## Activation
 
-Ambient (always loaded for principles, domain, process; lazy-by-region for idioms). The agent operates under guide rules at all times. Enforced by the [drift sensor](../sensors/drift.md) inside the **check-drift**, **verify**, and **audit** actions.
+Ambient (always loaded for domain, process; lazy-by-region for idioms; universal-policy rules also ambient). The agent operates under guide rules at all times. Enforced by the [drift sensor](../sensors/drift.md) inside the **check-drift**, **verify**, and **audit** actions.
 
 When the agent needs the reasoning *behind* a rule, it follows the forward-link from the guide to the paired corpus file. Corpus is on-demand; guides are not.

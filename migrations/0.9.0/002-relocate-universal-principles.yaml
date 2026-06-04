@@ -1,0 +1,28 @@
+id: 002-relocate-universal-principles
+description: |
+  Relocate the universal engineering principles from harness/corpus/principles/
+  and harness/guides/principles/ into the universal default policy at
+  harness/policies/universal/. The reasoning lives under .../corpus/principles/
+  and the rule extracts live under .../guides/principles/. After the move,
+  the now-empty source directories are removed.
+
+  Locally edited principle files are moved verbatim — user content is
+  preserved. If a destination file already exists with different content
+  (e.g., from a partial earlier migration or re-init that landed the 0.9.0
+  universal content alongside an old install), the conflict is surfaced for
+  manual review.
+
+operations:
+  - type: move_dir
+    path: harness/corpus/principles
+    to: harness/policies/universal/corpus/principles
+
+  - type: move_dir
+    path: harness/guides/principles
+    to: harness/policies/universal/guides/principles
+
+  - type: delete_dir
+    path: harness/corpus/principles
+
+  - type: delete_dir
+    path: harness/guides/principles

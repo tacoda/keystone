@@ -28,6 +28,11 @@ func main() {
 			fmt.Fprintf(os.Stderr, "keystone: %v\n", err)
 			os.Exit(1)
 		}
+	case "policy":
+		if err := runPolicy(os.Args[2:]); err != nil {
+			fmt.Fprintf(os.Stderr, "keystone: %v\n", err)
+			os.Exit(1)
+		}
 	case "migrate":
 		if err := runMigrate(os.Args[2:], assets); err != nil {
 			fmt.Fprintf(os.Stderr, "keystone: %v\n", err)
@@ -52,6 +57,7 @@ func printUsage(w *os.File) {
 Usage:
   keystone init [<dir>] [flags]
   keystone add-target <agent>[,<agent>...] [<dir>]
+  keystone policy update <name> [<new-ref>] [--dir <path>] [--force]
   keystone migrate [<dir>] [--apply|-y] [--dry-run] [--from <version>]
   keystone options
   keystone version
@@ -60,6 +66,7 @@ Usage:
 Commands:
   init         Scaffold harness/ and the agent menu file(s) into <dir> (default: .)
   add-target   Install another agent target bundle into an existing harness
+  policy       Manage org policies installed under harness/policies/ (see 'policy help')
   migrate      Apply pending harness migrations to an existing install
   options      Print the allowed labels for every option flag
   version      Print the binary version
@@ -79,6 +86,9 @@ Flags for init:
   --architecture <a,b,...>    Architecture preference(s) — comma-separated.
   --testing <a,b,...>         Testing approach(es) — comma-separated.
   --compliance <a,...>        Compliance scope — comma-separated.
+  --policy <ref>              Install an org policy into harness/policies/. Repeatable.
+                              v1 supports git+<url>[#<rev>]:
+                                --policy git+https://github.com/acme/policy.git#v1.2.0
 
 Categories the bootstrap action infers from the codebase (not asked here):
 language, frameworks, libraries, database, ci-platform.
