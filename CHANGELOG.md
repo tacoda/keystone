@@ -2,6 +2,28 @@
 
 All notable changes to keystone are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); the project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and is pre-1.0 (minor versions may include breaking changes).
 
+## [0.9.1] — 2026-06-04
+
+CLI consistency pass. Splits installation of post-`init` artifacts into noun-first subcommands so adding an agent and adding a policy share one mental model. **`keystone add-target` is renamed to `keystone target add`** and **`keystone policy add`** lands alongside the existing `keystone policy update`. The install directory is now a `--dir <path>` flag across every post-`init` command (was positional on `add-target`).
+
+### Added
+
+- **`keystone policy add <ref> [--dir <path>]`** — installs an org policy into an existing harness. Fetches and resolves the ref the same way `keystone init --policy` does, validates pack content, then records the resolved SHA and per-file hashes in `harness/.keystone.lock`. Errors out if a policy with the resolved manifest name is already installed — use `policy update` to re-resolve or change the ref instead.
+- **`keystone target add <agent>[,<agent>...] [--dir <path>]`** — installs another agent target bundle into an existing harness. Same behavior as the prior `add-target` command (multi-agent, refuses if the agent is already recorded) with `--dir` instead of a trailing positional for the install directory.
+
+### Changed
+
+- **`keystone policy` subcommand listing** now includes `add` alongside `update`. The `policy help` and top-level `keystone help` output reflect the new shape.
+
+### Removed
+
+- **`keystone add-target`** has been removed in favor of `keystone target add`. There is no backwards-compatible alias — invocations using the old form will print an `unknown command` error.
+
+### Migration from 0.9.0
+
+- **Update any scripts or muscle memory:** `keystone add-target <agent> <dir>` → `keystone target add <agent> --dir <dir>`. The trailing positional directory argument is gone.
+- **No harness content changes.** No `migrations/0.9.1/` directory ships. Running `keystone migrate` against an existing 0.9.0 install reports "harness is up to date."
+
 ## [0.9.0] — 2026-06-04
 
 Introduces **policies** — a fifth, plugin-style harness layer. Keystone is now framed explicitly as **a Level 2 project harness with Level 3 plugins**: project files (`corpus/`, `guides/`, `sensors/`, flywheels) are team-owned; policies are distributable governance bundles owned by whoever published them. The universal engineering principles that previously lived under `corpus/principles/` and `guides/principles/` now ship as the **default policy** at `policies/universal/`. Adds a `keystone policy update` subcommand and a `--policy <ref>` flag on `init` for fetching org policies from git, with a combined `harness/.keystone.lock` lockfile pinning each installed policy.
