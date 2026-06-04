@@ -2,6 +2,43 @@
 
 All notable changes to keystone are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); the project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and is pre-1.0 (minor versions may include breaking changes).
 
+## [0.9.0] — 2026-06-04
+
+Introduces **policies** — a fifth, plugin-style harness layer. Keystone is now framed explicitly as **a Level 2 project harness with Level 3 plugins**: project files (`corpus/`, `guides/`, `sensors/`, flywheels) are team-owned; policies are distributable governance bundles owned by whoever published them. The universal engineering principles that previously lived under `corpus/principles/` and `guides/principles/` now ship as the **default policy** at `policies/universal/`. Adds a `keystone policy update` subcommand and a `--policy <ref>` flag on `init` for fetching org policies from git, with a combined `harness/.keystone.lock` lockfile pinning each installed policy.
+
+### Added
+
+- **`harness/policies/`** — the new layer. Holds `policies/universal/` (default) and `policies/<name>/` (org-installed) subdirectories. Each policy carries `<name>/corpus/` (on-demand reasoning) and `<name>/guides/` (ambient rules); sensors are deliberately project-only.
+- **`keystone init --policy <ref>`** — repeatable flag. Fetches an org policy from a git ref (`git+<url>[#<rev>]`) and installs it at `harness/policies/<name>/`. Validates that pack content lives only under the namespace.
+- **`keystone policy update <name> [<new-ref>] [<dir>] [--force]`** — re-resolves the recorded ref (or a new one) and replaces the namespace tree. Refuses to overwrite files edited locally since install unless `--force`.
+- **`harness/.keystone.lock`** — combined lockfile holding the keystone install section (version, install date, agents) and a `policies:` map with per-policy `source_ref`, `resolved_sha`, `policy_version`, `keystone_version`, and per-file SHA-256 hashes. Authoritative for machine state; `INSTALL_PROFILE.md` stays human-readable.
+- **`harness/policies/README.md`** — describes the layer, the universal default, authoring shape (`keystone-policy.yaml` + `policy/harness/policies/<name>/`), and the activation convention (`<name>/guides/` ambient, `<name>/corpus/` on-demand).
+- **Migration vocabulary: `move_dir` and `delete_dir`** — new operation types in `harness/migrations/` for relocating directory trees with conflict detection on diverged destinations.
+
+### Changed
+
+- **Universal engineering content relocated.** `harness/corpus/principles/*` → `harness/policies/universal/corpus/principles/*` and `harness/guides/principles/*` → `harness/policies/universal/guides/principles/*`. Forward-links between the paired files are unchanged because both moved by the same delta.
+- **`optional/<category>/<label>/` overlays** — `--architecture hexagonal` (and 16 other architecture/compliance options) now write to `harness/policies/<label>/{corpus,guides}/<label>.md` instead of the old `corpus/principles/` and `guides/principles/` paths. Each opt-in becomes its own policy namespace.
+- **`harness/README.md`, `harness/corpus/README.md`, `harness/guides/README.md`** — components table is now five rows (corpus, guides, sensors, policies, flywheels); knowledge-layers table points "Principles" at `policies/universal/`. Mentions of "principles" inside corpus/guides are redirected.
+- **Top-level `README.md`** — replaces the "L2 that blurs into L3" framing with explicit "L2 harness with L3 plugins"; adds an org-policies section covering `--policy` and `policy update`.
+- **Menu files in `targets/`** (9 files) and adapter activation docs (`cline`, `goose`, `continue`) — "four components" updated to "five components (corpus, guides, sensors, policies, flywheels)".
+- **`targets/pi/.pi/prompts/keystone-check-drift.md`** — drift-detection rule sources updated to include `policies/*/guides/**/*.md` and the policy corpus.
+
+### Removed
+
+- **`harness/corpus/principles/`** and **`harness/guides/principles/`** as project-layer directories. They now live inside the universal policy. Project-layer guides/corpus retain `idioms/`, `domain/`, `process/`, `computational/`, and `state/` as before.
+
+### Migration from 0.8.x
+
+`keystone migrate` ships **two migration files** under `migrations/0.9.0/`:
+
+1. **`001-add-policies-layer.yaml`** — one `add_file` op for `harness/policies/README.md` describing the new layer.
+2. **`002-relocate-universal-principles.yaml`** — two `move_dir` ops (`corpus/principles/` → `policies/universal/corpus/principles/` and `guides/principles/` → `policies/universal/guides/principles/`) followed by two `delete_dir` ops cleaning up the emptied source directories.
+
+After upgrading the binary, run `keystone migrate --apply` in your project. Locally edited principle files are moved verbatim — user content is preserved. If a destination file already exists with diverged content (rare, e.g. from a partial earlier migration), the conflict is surfaced for manual review.
+
+**Caveat for users with optional/ overlays installed:** files added by `keystone init --architecture <X>` or `--compliance <Y>` in 0.8.x lived under `corpus/principles/` and `guides/principles/`. The migration moves them along with the universal principles into `policies/universal/`. To get the cleaner per-overlay namespacing (`policies/hexagonal/`, `policies/soc2/`, etc.), re-run `keystone init --architecture <X> --force` after migrate. The pre-migration paths still work; only the on-disk layout differs.
+
 ## [0.8.0] — 2026-06-03
 
 Adds two new inferential review sensors to the **review** phase: **`review-risk`** (blast radius, reversibility, hot-spot regions, coupling, side effects) and **`review-deployment`** (schema migrations, feature-flag gating, environment / config drift, rolling-deploy compatibility, rollback path). The default review-* set goes from two to four; adapters that support sub-agent parallelism (Claude Code) spawn all four concurrently, adapters that don't (Codex, Pi) run them sequentially.
