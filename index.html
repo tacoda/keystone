@@ -1423,7 +1423,7 @@ flowchart LR
 <span class="prompt">$</span> keystone init --policy git+https://github.com/tacoda/tacoda-policy.git#v0.1.0
 
 <span class="comment"># Add a policy to an existing install</span>
-<span class="prompt">$</span> keystone init --policy git+https://github.com/acme/keystone-policy.git#v1.2.0 --force
+<span class="prompt">$</span> keystone policy add git+https://github.com/acme/keystone-policy.git#v1.2.0
 
 <span class="comment"># Re-resolve the recorded ref (pull latest of the same ref)</span>
 <span class="prompt">$</span> keystone policy update tacoda
@@ -1803,7 +1803,7 @@ policies:
     <div class="page-head">
       <div class="crumb">Reference · Command-line</div>
       <h1>CLI usage.</h1>
-      <p class="tagline"><code>init</code> is interactive in a terminal, scriptable in CI. The other commands (<code>migrate</code>, <code>policy update</code>, <code>add-target</code>) operate on an existing install.</p>
+      <p class="tagline"><code>init</code> is interactive in a terminal, scriptable in CI. The other commands (<code>migrate</code>, <code>target add</code>, <code>policy add</code>, <code>policy update</code>) operate on an existing install.</p>
     </div>
 
 <pre class="code"><span class="comment"># Scaffold harness/ and the agent's menu file into &lt;dir&gt;.
@@ -1814,13 +1814,18 @@ policies:
 <span class="comment"># Forward-only harness migrations. Idempotent. Conflicts surfaced rather than auto-resolved.</span>
 <span class="prompt">$</span> keystone migrate [&lt;dir&gt;] [--apply|-y] [--dry-run] [--from &lt;version&gt;]
 
+<span class="comment"># Install an org policy into an existing harness/.
+# Errors out if a policy with the same name is already recorded in the lockfile —
+# use `policy update` to re-resolve or change the ref instead.</span>
+<span class="prompt">$</span> keystone policy add &lt;ref&gt; [--dir &lt;path&gt;]
+
 <span class="comment"># Re-resolve a named policy (or bump it to a new ref).</span>
-<span class="prompt">$</span> keystone policy update &lt;name&gt; [&lt;new-ref&gt;] [&lt;dir&gt;] [--force]
+<span class="prompt">$</span> keystone policy update &lt;name&gt; [&lt;new-ref&gt;] [--dir &lt;path&gt;] [--force]
 
 <span class="comment"># Install another agent's target bundle into an existing harness/.
-# Merges the new agent(s) into harness/corpus/state/INSTALL_PROFILE.md.
+# Merges the new agent(s) into the lockfile's agents list.
 # Errors out if any requested agent is already recorded — remove it first to re-add.</span>
-<span class="prompt">$</span> keystone add-target &lt;agent&gt;[,&lt;agent&gt;...] [&lt;dir&gt;]
+<span class="prompt">$</span> keystone target add &lt;agent&gt;[,&lt;agent&gt;...] [--dir &lt;path&gt;]
 
 <span class="comment"># Print the catalog of allowed labels for every option flag</span>
 <span class="prompt">$</span> keystone options
