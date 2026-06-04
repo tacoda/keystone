@@ -956,6 +956,7 @@
         <a class="nav-link" href="#agents">Supported agents</a>
         <a class="nav-link" href="#options">Install-time options</a>
         <a class="nav-link" href="#assumptions">Tool assumptions</a>
+        <a class="nav-link" href="#budget">Context budgeting</a>
         <a class="nav-link" href="https://github.com/tacoda/keystone/blob/main/CHANGELOG.md" target="_blank" rel="noopener">Changelog <span class="ext">↗</span></a>
       </div>
 
@@ -1985,6 +1986,102 @@ policies:
         <h3 style="color: var(--accent4);">Git repository</h3>
         <p>The project root is a git repository. <code>risk-fingerprint</code> and <code>traffic-topology</code> sensors call <code>git log</code> for churn and history; <code>drift</code> and <code>commit-message</code> sensors operate on the working diff; the release phase opens a PR or MR. <code>keystone init</code> warns when there is no <code>.git</code> directory but still installs — the corpus alone is useful without git, but every flywheel that depends on history degrades.</p>
       </div>
+    </div>
+  </section>
+
+  <!-- ===================== CONTEXT BUDGET ===================== -->
+  <section id="budget" class="page" data-title="Context budgeting">
+    <div class="page-head">
+      <div class="crumb">Reference · Tokens loaded per turn</div>
+      <h1>Context budgeting.</h1>
+      <p class="tagline">The harness is markdown — every byte costs tokens. This section covers how Keystone budgets that cost through tiered loading, then shows measured numbers for the workflows you'll actually run.</p>
+    </div>
+
+    <div class="section-label">The loading cascade — what enters context, when</div>
+    <p style="font-size: 0.85rem; color: var(--muted); line-height: 1.7; margin-bottom: 20px;">
+      Keystone does not push the whole harness into every turn. Loading is tiered: the agent activation file is the only thing auto-loaded; everything else is pulled in by reference, on demand, or not at all. The cascade is designed so that ambient cost stays roughly fixed while the harness on disk grows.
+    </p>
+
+    <div class="action-grid">
+      <div class="action">
+        <span class="action-tag">tier 0 · auto</span>
+        <h3 style="color: var(--accent);">Activation file</h3>
+        <p><strong style="font-family: var(--mono); color: var(--accent);">~0.7K tokens</strong> · the menu file the installer writes (<code>CLAUDE.md</code>, <code>AGENTS.md</code>, etc.). The only file the agent loads without being asked. A pointer into the harness, not the harness itself.</p>
+      </div>
+      <div class="action">
+        <span class="action-tag">tier 1 · ambient</span>
+        <h3 style="color: var(--accent2);">Always-loaded guides</h3>
+        <p><strong style="font-family: var(--mono); color: var(--accent2);">~35K tokens</strong> · <code>harness/README.md</code> + every file under <code>guides/</code> + every file under <code>policies/*/guides/</code>. Marked <em>"Always loaded"</em> in the menu — the agent reads them on the first turn and the provider's prompt cache holds them after.</p>
+      </div>
+      <div class="action">
+        <span class="action-tag">tier 2 · on-demand</span>
+        <h3 style="color: var(--accent3);">Corpus reach</h3>
+        <p><strong style="font-family: var(--mono); color: var(--accent3);">~1–3K per file</strong> · <code>corpus/</code> and <code>policies/*/corpus/</code>. Loaded only when the agent follows a forward-link from an ambient guide. Most turns: <strong>0 files</strong>. Deep-reasoning turn: 2–3 files.</p>
+      </div>
+      <div class="action">
+        <span class="action-tag">tier 2 · on-demand</span>
+        <h3 style="color: var(--accent4);">Action playbook</h3>
+        <p><strong style="font-family: var(--mono); color: var(--accent4);">~0.3–0.5K per action</strong> · one file from <code>actions/</code> when you invoke spec / orient / verify / review / audit / etc. Only the playbook for the action you ran enters context — never the whole directory.</p>
+      </div>
+      <div class="action">
+        <span class="action-tag">tier 3 · transient</span>
+        <h3 style="color: var(--accent5);">Sensor output</h3>
+        <p><strong style="font-family: var(--mono); color: var(--accent5);">~1–5K per verify</strong> · lint, type-check, test, build output for the turn. Sensor <em>contracts</em> in <code>sensors/</code> are never loaded as source — only the output the sensor emits crosses into context, and it leaves with the next turn.</p>
+      </div>
+      <div class="action">
+        <span class="action-tag">tier — · never</span>
+        <h3>What the cascade keeps out</h3>
+        <p>Sensor contracts, the rest of <code>actions/</code>, every adapter except the one bound to your agent, <code>archive/</code>, <code>learning/inbox/</code> (until <code>audit</code>), and every file the agent never opens. The harness on disk can grow to hundreds of KB without changing the ambient cost.</p>
+      </div>
+    </div>
+
+    <div class="definition" style="margin-top: 28px;">
+      <p><strong>Why it works.</strong> Most coding turns need rules ("don't <code>--no-verify</code>", "every changed line traces to the request") and a small amount of project state — both ambient. The deep reasoning behind those rules lives in corpus, and the agent only reaches for it when the rule alone isn't enough. Action playbooks are a separate layer for the same reason: a 10-step lifecycle workflow does not cost 10 × playbook tokens; only the playbook for the phase you ran enters context.</p>
+      <p><strong>Why it matters.</strong> A harness that doubles the prompt cuts the working window in half. Keystone aims to <em>buy</em> reliability with a roughly fixed ambient cost (~36K) and let the variable load track the work — small for simple edits, larger for audit. If ambient drifts upward over time, the Pruning flywheel exists to recover it.</p>
+    </div>
+
+    <div class="section-label" style="margin-top: 32px;">Measured scenarios — what loads on a real turn</div>
+    <p style="font-size: 0.85rem; color: var(--muted); line-height: 1.7; margin-bottom: 20px;">
+      Measured against a fresh <code>keystone init</code> at 0.10.x with the <code>universal</code> policy and the <code>claude-code</code> adapter. Token estimates are chars / 4, rounded to two significant figures. <strong style="color: var(--text);">Ambient baseline ≈ 36K tokens</strong>; every scenario below includes it unless noted. Ranges reflect agent-to-agent variance in how aggressively the model fetches optional reads.
+    </p>
+
+    <div class="action-grid">
+      <div class="action">
+        <span class="action-tag">scenario 1</span>
+        <h3 style="color: var(--accent);">Idle / read-only question</h3>
+        <p><strong style="font-family: var(--mono); color: var(--accent);">~36K tokens</strong> · activation file + ambient guides. The whole "what does Keystone do?" or "where is the spec for X?" class of question. No corpus reach, no action playbook, no sensors. The fixed cost of having the harness installed.</p>
+      </div>
+      <div class="action">
+        <span class="action-tag">scenario 2</span>
+        <h3 style="color: var(--accent2);">Simple edit (no action invoked)</h3>
+        <p><strong style="font-family: var(--mono); color: var(--accent2);">~38–42K tokens</strong> · baseline + 1–3 source files the agent reads to make the change (~2–6K). No playbook, because no lifecycle action was invoked. Most ad-hoc "fix this typo / rename this variable" work lands here.</p>
+      </div>
+      <div class="action">
+        <span class="action-tag">scenario 3</span>
+        <h3 style="color: var(--accent3);"><code>verify</code> action</h3>
+        <p><strong style="font-family: var(--mono); color: var(--accent3);">~40–45K tokens</strong> · baseline + <code>actions/verify.md</code> (~0.4K) + sensor output for lint / type-check / test / build / drift / commit-message (~2–5K). The single most common harness-aware turn.</p>
+      </div>
+      <div class="action">
+        <span class="action-tag">scenario 4</span>
+        <h3 style="color: var(--accent4);"><code>review</code> action</h3>
+        <p><strong style="font-family: var(--mono); color: var(--accent4);">~45–55K tokens</strong> · baseline + <code>actions/review.md</code> + 2–3 corpus reaches the review playbook follows (~4–6K) + the diff. Sub-agents spawn with their own copies of the ambient guides; the parent context stays bounded.</p>
+      </div>
+      <div class="action">
+        <span class="action-tag">scenario 5</span>
+        <h3 style="color: var(--accent5);"><code>task</code> action (full lifecycle)</h3>
+        <p><strong style="font-family: var(--mono); color: var(--accent5);">~50–70K tokens</strong> · baseline + <code>actions/task.md</code> + each phase playbook loaded as it runs (spec, orient, implementation, check-drift, verify, review) + <code>CODEBASE_STATE.md</code> + sensor output. The heaviest non-audit turn — but amortized across the entire ticket.</p>
+      </div>
+      <div class="action" style="border-color: rgba(245,158,11,0.3); grid-column: span 2;">
+        <span class="action-tag" style="background: rgba(245,158,11,0.12); color: var(--accent3); border-color: rgba(245,158,11,0.3);">scenario 6 · heaviest</span>
+        <h3 style="color: var(--accent3);"><code>audit</code> action — worst case</h3>
+        <p><strong style="font-family: var(--mono); color: var(--accent3);">~75–90K tokens</strong> · baseline + <code>actions/audit.md</code> + <code>actions/synthesize.md</code> + <code>learning/inbox/</code> sweep + multi-file corpus reach across both <code>corpus/</code> and <code>policies/*/corpus/</code> (the universal policy corpus alone is ~45K if fully reached). This is the most expensive single operation in the harness. Runs on cadence (monthly, or after a major feature) — not per task. If you are running it per ticket, you are paying audit prices for review work.</p>
+      </div>
+    </div>
+
+    <div class="definition" style="margin-top: 28px;">
+      <p><strong>Frame of reference.</strong> On a 200K-context model, the ambient baseline is ~18% of the window; on a 1M-context model, ~3.6%. A full <code>review</code> turn lands around 22% and 5%, respectively. The harness is designed to <em>buy</em> reliability with that fraction — never to dominate the window. The bulk of the window stays available for the file the agent is editing, the diff, and the conversation.</p>
+      <p><strong>Drift upward is the failure mode.</strong> A harness that only grows is a harness that crowds context out of every task. The Pruning flywheel runs during <code>audit</code> and moves stale guides into <code>archive/</code> (never loaded), so ambient stays roughly constant as the project evolves. If your harness has grown past ~50K ambient and you have not audited in a quarter, that is the signal — see the <a href="#flywheels">flywheels section</a> for the recovery flow.</p>
+      <p><strong>This is harness load, not the agent's own discipline.</strong> The parallel concern — the agent over-reading source files during a task — is covered by the <a href="#failure-modes"><code>context-budget</code> guide</a>. The harness budgets its own ambient load; the guide budgets what the agent loads on top of it.</p>
     </div>
   </section>
 
