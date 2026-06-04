@@ -2,6 +2,43 @@
 
 All notable changes to keystone are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); the project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and is pre-1.0 (minor versions may include breaking changes).
 
+## [0.10.0] — 2026-06-04
+
+Reverses the per-agent skill/rule/prompt approach shipped two hours ago in 0.9.2. **Lifecycle actions are now agent-agnostic playbooks in `harness/actions/<action>.md`** and invoked via natural language. No `.claude/skills/`, no `.cursor/rules/keystone-<action>.mdc`, no `.pi/prompts/keystone-<action>.md` — every agent reads its menu file, finds an action in the bulleted list, follows the link to `harness/actions/<action>.md`, and executes the playbook. The canonical kickoff phrase for end-to-end work is **"run task on `<ticket-id>`"** — a new `task` action orchestrates `spec → orient → implementation → check-drift → verify → review`.
+
+Why the reversal: per-agent authoring meant three near-duplicate copies of every action (one per file-based-discovery agent), high maintenance for marginal UX win, and an install-write bug (the consumer's `.claude/` may not exist) that surfaced immediately after 0.9.2 shipped. Moving the playbooks into `harness/` eliminates the duplication and the install path entirely.
+
+### Added
+
+- **`harness/actions/<action>.md`** — eleven canonical action playbooks (`task`, `bootstrap`, `spec`, `orient`, `check-drift`, `verify`, `review`, `learn`, `audit`, `synthesize`, `mode`) plus `harness/actions/README.md`. Each playbook is short (~20–40 lines), forward-links to deeper guides (`harness/guides/process/*.md`, `harness/sensors/*.md`, `harness/learning/README.md`), and is read by every agent the same way.
+- **`harness/actions/task.md`** — the kickoff playbook. Walks `spec → orient → implementation → check-drift → verify → review` and an optional `learn` pass, with gates between phases. Canonical kickoff phrase: **"run task on `<ticket-id>`"**.
+
+### Changed
+
+- **All ten menu files** (`targets/{claude-code/CLAUDE.md,codex/AGENTS.md,aider/CONVENTIONS.md,_generic/AGENTS.md,continue/.continuerules,cline/cline-instructions.md,goose/.goosehints,github-copilot/.github/copilot-instructions.md,pi/AGENTS.md,cursor/.cursor/rules/keystone.mdc}`) — bulleted action list now links each entry to `harness/actions/<action>.md`. Adds `task` as the first bullet. Drops the "see `harness/adapters/<agent>/lifecycle.md` for the full table" pointer since the playbook is now the canonical reference.
+- **`harness/adapters/<agent>/lifecycle.md`** (all ten) — per-action invocation tables removed. Each adapter doc now opens with a short "Invocation" section that points at `harness/actions/<action>.md` and names the canonical kickoff phrase. The rest of the file focuses on agent-specific concerns: sensor execution model, sub-agent parallelism, autonomy / pacing modes, tracker integration, capability matrix.
+- **`harness/adapters/<agent>/activation.md`** (claude-code, cursor, pi, continue) — removed references to per-action `.claude/commands/*.md` / `.cursor/rules/keystone-<action>.mdc` / `.pi/prompts/keystone-<action>.md` / `config.yaml` slash-command blocks. The "where runtime config lives" sections now show only the user-owned files (`settings.json`, `SYSTEM.md`, etc.) plus the menu file.
+- **`harness/README.md`** — invocation section now states "every action is invoked via natural language," names the kickoff phrase, and points at `harness/actions/`.
+- **`harness/adapters/README.md`** — adapter table column renamed `Rules surface` → `Menu file`, with a short note above explaining the uniform invocation model.
+
+### Removed
+
+- **`targets/claude-code/.claude/skills/keystone/<action>/SKILL.md`** — all ten skill files added in 0.9.2.
+- **`targets/cursor/.cursor/rules/keystone-<action>.mdc`** — all ten action rule files. The always-applied `keystone.mdc` (menu pointer) is kept.
+- **`targets/pi/.pi/prompts/keystone-<action>.md`** — all ten prompt template files.
+
+### Migration from 0.9.2
+
+- **No harness content removed from existing installs.** No `migrations/0.10.0/` directory ships. Running `keystone migrate` against an existing 0.9.2 install reports "harness is up to date."
+- **Orphaned files in consumer projects.** Existing 0.9.2 installs of `claude-code` / `cursor` / `pi` have skill/rule/prompt files at the consumer's repo root (`.claude/skills/keystone/`, `.cursor/rules/keystone-<action>.mdc`, `.pi/prompts/keystone-<action>.md`) that are no longer used. They're inert — the agent now reads `harness/actions/<action>.md` regardless of whether those files exist. To clean them up, delete them by hand:
+  ```bash
+  rm -rf .claude/skills/keystone
+  rm -f .cursor/rules/keystone-{bootstrap,spec,orient,check-drift,verify,review,learn,audit,synthesize,mode}.mdc
+  rm -rf .pi/prompts
+  ```
+- **Re-run `keystone init --force`** if you want the updated menu files (the per-action bullets now link to `harness/actions/`). The corpus content under `harness/` is also refreshed; review `harness/.keystone.lock` after.
+- **Invocation phrase change.** Replace any `/keystone:<action>` slash-command usage (claude-code), `@keystone-<action>` rule references (cursor), or `/keystone-<action>` prompts (pi) with natural language: "run `<action>`" or, for the end-to-end workflow, **"run task on `<ticket-id>`"**.
+
 ## [0.9.2] — 2026-06-04
 
 Bug-fix release covering two install-flow defects. **The interactive prompt for `agent` is now a single-select** — previously it was rendered as a multi-select, so pressing Enter without first pressing Space submitted zero selections and the install completed with no agent target written. **The `claude-code` target now ships actual skill files** under `.claude/skills/keystone/<action>/SKILL.md` so `keystone:bootstrap` (and the other nine lifecycle actions) are discoverable after `keystone init`. Other agents that lacked per-action files (`cursor`, `pi`) gain the four missing actions (`bootstrap`, `audit`, `synthesize`, `mode`); the remaining agents (`codex`, `aider`, `_generic`, `continue`, `cline`, `goose`, `github-copilot`) get an explicit per-action bulleted list in their menu file. The `--agent claude-code,codex` flag and `keystone target add a,b` paths still accept comma-separated values.
