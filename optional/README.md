@@ -13,9 +13,9 @@ optional/
 
 `<category-id>` is one of the categories defined in `options.go` (e.g. `architecture`, `language`, `testing`). `<label-id>` is one of that category's allowed values (e.g. `hexagonal`, `go`, `tdd`).
 
-Files under `optional/<cat>/<label>/` are copied **as if rooted at the install destination**, so `optional/architecture/hexagonal/harness/corpus/principles/hexagonal-architecture.md` lands at `<destDir>/harness/corpus/principles/hexagonal-architecture.md`. A paired guide at `optional/architecture/hexagonal/harness/guides/principles/hexagonal-architecture.md` lands at `<destDir>/harness/guides/principles/hexagonal-architecture.md`.
+Files under `optional/<cat>/<label>/` are copied **as if rooted at the install destination**. For architecture and compliance overlays, the content lands inside a policy namespace named after the label: `optional/architecture/hexagonal/harness/policies/hexagonal/corpus/hexagonal.md` lands at `<destDir>/harness/policies/hexagonal/corpus/hexagonal.md`, with its paired guide at `<destDir>/harness/policies/hexagonal/guides/hexagonal.md`.
 
-Each opt-in label typically ships two files for every concept — the informational corpus file and the rule-bearing guide. For some labels (e.g., `architecture/mvc`), the bundle also seeds concern-specific files under `corpus/idioms/<label>/` and `guides/idioms/<label>/` (e.g., `models.md`, `controllers.md`, `views.md`).
+Each opt-in label typically ships two files for every concept — the informational corpus file and the rule-bearing guide — both inside the policy namespace. For labels with stack-shaped content (e.g., `architecture/mvc`), the bundle may also seed concern-specific files under `corpus/idioms/<label>/` and `guides/idioms/<label>/` at the project layer (`models.md`, `controllers.md`, `views.md`) since those are project-stack idioms, not policy.
 
 The `agent` category is **excluded** — agent bundles already live in `targets/<agent>/`.
 
@@ -27,8 +27,8 @@ Optional content copies with `skipIfExists`: it never clobbers a file that alrea
 
 A file belongs in `optional/` rather than `harness/` when it is:
 
-- **Too opinionated** for the always-on principles (e.g. a particular architecture style).
+- **Too opinionated** for the always-on universal policy (e.g. a particular architecture style).
 - **Stack-specific** in a way that ships ready-to-go starter content (e.g. a Go test idiom file).
 - **Compliance-scoped** content that only matters under a particular regulatory regime.
 
-If it belongs to *every* project, it goes in `harness/` directly.
+If it belongs to *every* project, it goes in `harness/policies/universal/` directly.
