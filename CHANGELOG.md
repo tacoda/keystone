@@ -2,6 +2,32 @@
 
 All notable changes to keystone are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); the project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and is pre-1.0 (minor versions may include breaking changes).
 
+## [0.9.2] — 2026-06-04
+
+Bug-fix release covering two install-flow defects. **The interactive prompt for `agent` is now a single-select** — previously it was rendered as a multi-select, so pressing Enter without first pressing Space submitted zero selections and the install completed with no agent target written. **The `claude-code` target now ships actual skill files** under `.claude/skills/keystone/<action>/SKILL.md` so `keystone:bootstrap` (and the other nine lifecycle actions) are discoverable after `keystone init`. Other agents that lacked per-action files (`cursor`, `pi`) gain the four missing actions (`bootstrap`, `audit`, `synthesize`, `mode`); the remaining agents (`codex`, `aider`, `_generic`, `continue`, `cline`, `goose`, `github-copilot`) get an explicit per-action bulleted list in their menu file. The `--agent claude-code,codex` flag and `keystone target add a,b` paths still accept comma-separated values.
+
+### Added
+
+- **`targets/claude-code/.claude/skills/keystone/<action>/SKILL.md`** — ten new skill files (`bootstrap`, `spec`, `orient`, `check-drift`, `verify`, `review`, `learn`, `audit`, `synthesize`, `mode`). Project-scoped (`.claude/skills/` in the consumer repo, never global). Each delegates to the matching `harness/guides/process/*.md` or `harness/sensors/*.md` for the full procedure.
+- **`targets/cursor/.cursor/rules/keystone-{bootstrap,audit,synthesize,mode}.mdc`** — four new cursor rule files filling the gaps in the existing per-action set.
+- **`targets/pi/.pi/prompts/keystone-{bootstrap,audit,synthesize,mode}.md`** — four new pi prompt files filling the same gaps.
+
+### Changed
+
+- **`interactive.go`** — the `agent` category is rendered as a single-select in `promptMissing` even though the catalog keeps `MultiSelect: true`. The catalog flag still governs the CLI parser (so `--agent a,b` and `keystone target add a,b` continue to accept multiple agents); only the interactive prompt was overconfigured.
+- **Menu files for eight agents** (`targets/{claude-code/CLAUDE.md,codex/AGENTS.md,aider/CONVENTIONS.md,_generic/AGENTS.md,continue/.continuerules,cline/cline-instructions.md,goose/.goosehints,github-copilot/.github/copilot-instructions.md,pi/AGENTS.md}`) — the single-line `**Lifecycle actions:** spec · orient · …` was bolstered into an explicit per-action bulleted list with one-line descriptions, so an agent reading the menu file knows `bootstrap` exists and what it does without having to follow the link to `harness/adapters/<agent>/lifecycle.md`.
+- **`targets/cursor/.cursor/rules/keystone.mdc`** — action table now lists all ten actions instead of six.
+- **`harness/adapters/claude-code/lifecycle.md`** — invocation column now documents `keystone:<action>` skills (matching what `keystone init` actually installs) instead of `/keystone:<action>` slash commands (which were documented but never delivered). "Where commands live" section becomes "Where the skills live" and points at `.claude/skills/keystone/<action>/SKILL.md`.
+
+### Fixed
+
+- **Silent no-agent install via the interactive prompt.** Previously, running `keystone init` interactively and pressing Enter on the agent step without pressing Space first selected nothing — the install proceeded, the corpus was written, but no `<agent>` target was installed and the lockfile recorded an empty `agents:` list. Now the agent prompt is single-select; Enter on the highlighted row picks that agent.
+
+### Migration from 0.9.1
+
+- **No harness content changes that require migration.** No `migrations/0.9.2/` directory ships. Running `keystone migrate` against an existing 0.9.1 install reports "harness is up to date."
+- **Existing claude-code installs** do not retroactively gain the new `.claude/skills/keystone/` directory. To pick it up, either re-run `keystone init --force` (which overwrites the harness) or manually copy `targets/claude-code/.claude/skills/keystone/` from this version into your repo. `keystone target add claude-code` refuses to re-add an already-installed agent — remove `claude-code` from `harness/.keystone.lock`'s `agents:` list first if you want to use that path.
+
 ## [0.9.1] — 2026-06-04
 
 CLI consistency pass. Splits installation of post-`init` artifacts into noun-first subcommands so adding an agent and adding a policy share one mental model. **`keystone add-target` is renamed to `keystone target add`** and **`keystone policy add`** lands alongside the existing `keystone policy update`. The install directory is now a `--dir <path>` flag across every post-`init` command (was positional on `add-target`).
