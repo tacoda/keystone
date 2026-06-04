@@ -1003,7 +1003,7 @@
           <span class="ok">✓</span> harness installed for claude-code.<br>
           <span class="ar">▶</span> <span class="dim">Next:</span> run the bootstrap action in claude-code.<br>
           <span class="pr">$</span> claude<br>
-          <span class="dim">&gt;</span> /keystone:bootstrap<br>
+          <span class="dim">&gt;</span> run bootstrap<br>
           <span class="ar" id="spark">✶</span> <span class="dim">Thinking… (<span id="elapsed">3</span>s · esc to interrupt)</span><span class="cursor"></span>
         </div>
       </div>
@@ -1550,8 +1550,14 @@ policies:
   <section id="lifecycle" class="page" data-title="Lifecycle workflow">
     <div class="page-head">
       <div class="crumb">Capabilities · Workflow</div>
-      <h1>Six phases. Six lifecycle actions. Four heavyweights.</h1>
-      <p class="tagline">Every task flows through the same six phases. The agent invokes lifecycle actions at the gates; the user invokes heavyweight actions for setup and maintenance.</p>
+      <h1>One kickoff phrase. Eleven action playbooks. Six phases.</h1>
+      <p class="tagline">Every task flows through the same six phases. Every action is invoked the same way in every agent — natural language against an agent-agnostic playbook at <code>harness/actions/&lt;action&gt;.md</code>. <span class="badge" style="font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.12em; color: var(--accent3); background: rgba(245,158,11,0.10); border: 1px solid rgba(245,158,11,0.25); padding: 1px 6px; border-radius: 2px;">NEW 0.10</span></p>
+    </div>
+
+    <div class="cta-card alt" style="margin-bottom: 32px;">
+      <p class="cta-headline" style="color: var(--accent);">Kickoff: <code style="background: transparent; color: var(--accent); font-size: 1em;">run task on &lt;ticket-id&gt;</code></p>
+      <p class="cta-body">A single phrase walks the entire workflow. The <code>task</code> playbook orchestrates <strong style="color: var(--text);">spec → orient → implementation → check-drift → verify → review</strong> with explicit gates between phases — the agent pauses for your acceptance before moving on. Use it for any unit of work that needs the full lifecycle; for one-off invocation say <code>run verify</code> or <code>do a review pass</code>.</p>
+      <p class="cta-body" style="margin-top: 12px; font-family: var(--mono); font-size: 0.78rem; color: var(--text-dim);">Works in every supported agent: Claude Code, Codex, Cursor, Aider, GitHub Copilot, Continue, Cline, Goose, pi.dev. No per-agent slash commands, rule files, or prompt templates — the agent reads its menu file, finds the action in the bulleted list, follows the link to <code>harness/actions/&lt;action&gt;.md</code>, and executes the playbook.</p>
     </div>
 
     <div class="section-label">Phase pipeline</div>
@@ -1567,8 +1573,13 @@ policies:
       <strong style="color: var(--text);">spec</strong> anchors a unit of work (tracker card, TODO line, conversation). <strong style="color: var(--text);">planning</strong> orients to the region and writes a plan. <strong style="color: var(--text);">implementation</strong> works inside ambient idioms. <strong style="color: var(--text);">verification</strong> gates the commit on sensors (lint, type, tests, build, drift, commit-message). <strong style="color: var(--text);">review</strong> spawns four review agents on the diff. <strong style="color: var(--text);">release</strong> opens the PR with the tracker link; CI gates the merge.
     </div>
 
-    <div class="section-label">Lifecycle actions — invoked by the agent</div>
+    <div class="section-label">Lifecycle actions — invoked by you, executed by the agent</div>
     <div class="action-grid three">
+      <div class="action" style="border-color: var(--accent); background: rgba(74,222,154,0.04);">
+        <span class="action-tag" style="background: rgba(74,222,154,0.10); color: var(--accent);">Kickoff</span>
+        <h3 style="color: var(--accent);">task<span class="when">whole workflow</span></h3>
+        <p>Walks <strong style="color: var(--text);">spec → orient → implementation → check-drift → verify → review</strong> end-to-end, pausing for acceptance between phases. Optional <code>learn</code> pass at the end if something surprising came up. <strong style="color: var(--text);">Say:</strong> <code>run task on &lt;ticket-id&gt;</code>.</p>
+      </div>
       <div class="action">
         <span class="action-tag">Task entry</span>
         <h3 style="color: var(--accent);">spec<span class="when">spec phase</span></h3>
@@ -1625,7 +1636,7 @@ policies:
       </div>
     </div>
 
-    <p style="font-size: 0.78rem; color: var(--muted); font-family: var(--mono); margin-top: 8px;">How each action is actually invoked in your agent (slash command, rules-file trigger, natural language) lives in <code>harness/adapters/&lt;your-agent&gt;/lifecycle.md</code>.</p>
+    <p style="font-size: 0.78rem; color: var(--muted); font-family: var(--mono); margin-top: 8px;">Every action is invoked the same way in every agent: ask in natural language. The agent reads its menu file, finds the action in the bulleted list, follows the link to <code>harness/actions/&lt;action&gt;.md</code>, and executes the playbook. Agent-specific sensor execution, sub-agent parallelism, and tracker integration are documented in <code>harness/adapters/&lt;your-agent&gt;/lifecycle.md</code>.</p>
   </section>
 
   <!-- ===================== RULES & IRON LAWS ===================== -->
@@ -1886,7 +1897,7 @@ policies:
       <div class="agent-row"><span class="agent-name">(any other)</span><span class="agent-status fallback">fallback</span><span class="agent-menu">AGENTS.md</span></div>
     </div>
 
-    <p style="font-size: 0.78rem; color: var(--muted); font-family: var(--mono); margin-top: 16px; line-height: 1.7;"><strong style="color: var(--text);">full</strong> — adapter covers every harness feature natively. <strong style="color: var(--text);">real · gaps</strong> — adapter covers the lifecycle but the agent lacks one or more native features (slash commands, sub-agent parallelism, autonomous tracker integration, etc.). <code>keystone init</code> prints the specific gaps at the end of its run with actionable remedies.</p>
+    <p style="font-size: 0.78rem; color: var(--muted); font-family: var(--mono); margin-top: 16px; line-height: 1.7;"><strong style="color: var(--text);">full</strong> — adapter covers every harness feature natively. <strong style="color: var(--text);">real · gaps</strong> — adapter covers the lifecycle but the agent lacks one or more native features (sub-agent parallelism, autonomous shell execution, autonomous tracker integration, etc.). <code>keystone init</code> prints the specific gaps at the end of its run with actionable remedies. Lifecycle invocation itself is uniform — natural language against the playbooks in <code>harness/actions/</code> works the same way in every agent.</p>
 
     <div class="definition" style="margin-top: 24px; border-left-color: var(--accent3);">
       <p><strong style="color: var(--accent3);">Biggest gap: sub-agent parallelism for review.</strong> When an adapter lacks native sub-agent support, the four review concerns (<code>review-functional</code>, <code>review-security</code>, <code>review-risk</code>, <code>review-deployment</code>) collapse into a single conversation. The same context window wears four hats sequentially, sharing the same primed framing — and findings degrade accordingly. Security blind spots survive a functional pass; deployment risk gets folded into "looks fine."</p>
