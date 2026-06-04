@@ -18,7 +18,7 @@ Plus [`adapters/<agent>/`](adapters/README.md) — per-agent bindings that lift 
 A fifth layer that holds **policies** — distributable governance bundles. Two kinds:
 
 - **`policies/universal/`** — the default policy. Ships embedded in the keystone binary; contains the universal engineering principles (reasoning + rules) every install gets.
-- **`policies/<name>/`** — org-authored policies installed via `keystone init --policy <ref>` or `keystone policy update`. Vendor lists, license rules, release gates, compliance regimes.
+- **`policies/<name>/`** — org-authored policies installed via `keystone init --policy <ref>`, `keystone policy add <ref>`, or `keystone policy update`. Vendor lists, license rules, release gates, compliance regimes.
 
 Each policy is its own namespace. Inside a policy: `<name>/corpus/` (on-demand) + `<name>/guides/` (ambient). Sensors are **not** part of a policy — they describe project tooling. See [`policies/README.md`](policies/README.md) for the full convention.
 

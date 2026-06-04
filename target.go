@@ -8,20 +8,57 @@ import (
 	"strings"
 )
 
-// runAddTarget installs one or more additional agent target bundles into an
-// existing harness directory. Errors out if any requested agent is already
-// recorded in INSTALL_PROFILE.md — the user must explicitly remove it first
-// rather than risk silent overwrites.
-func runAddTarget(args []string, assets embed.FS) error {
-	var dir string = "."
-	var rawAgents string
-	positional := []string{}
+// runTarget dispatches `keystone target <subcommand> ...`.
+func runTarget(args []string, assets embed.FS) error {
+	if len(args) == 0 {
+		printTargetUsage(os.Stderr)
+		return fmt.Errorf("target requires a subcommand")
+	}
+	switch args[0] {
+	case "add":
+		return runTargetAdd(args[1:], assets)
+	case "help", "--help", "-h":
+		printTargetUsage(os.Stdout)
+		return nil
+	default:
+		return fmt.Errorf("unknown target subcommand %q (try: add)", args[0])
+	}
+}
 
-	for _, a := range args {
+func printTargetUsage(w *os.File) {
+	fmt.Fprint(w, `keystone target — manage installed agent targets
+
+Usage:
+  keystone target add <agent>[,<agent>...] [--dir <path>]
+  keystone target help
+
+Commands:
+  add    Install another agent target bundle into an existing harness.
+`)
+}
+
+// runTargetAdd installs one or more additional agent target bundles into an
+// existing harness directory. Errors out if any requested agent is already
+// recorded in the lockfile — the user must explicitly remove it first
+// rather than risk silent overwrites.
+func runTargetAdd(args []string, assets embed.FS) error {
+	dir := "."
+	var positional []string
+
+	for i := 0; i < len(args); i++ {
+		a := args[i]
 		switch {
 		case a == "--help" || a == "-h":
-			printAddTargetUsage(os.Stdout)
+			printTargetAddUsage(os.Stdout)
 			return nil
+		case a == "--dir":
+			if i+1 >= len(args) {
+				return fmt.Errorf("flag %s requires a value", a)
+			}
+			dir = args[i+1]
+			i++
+		case strings.HasPrefix(a, "--dir="):
+			dir = strings.TrimPrefix(a, "--dir=")
 		case strings.HasPrefix(a, "-"):
 			return fmt.Errorf("unknown flag %s", a)
 		default:
@@ -29,17 +66,10 @@ func runAddTarget(args []string, assets embed.FS) error {
 		}
 	}
 
-	switch len(positional) {
-	case 0:
-		return fmt.Errorf("add-target requires an agent name (e.g. `keystone add-target claude-code`)")
-	case 1:
-		rawAgents = positional[0]
-	case 2:
-		rawAgents = positional[0]
-		dir = positional[1]
-	default:
-		return fmt.Errorf("add-target takes at most two positional arguments (<agent>[,<agent>...] [<dir>])")
+	if len(positional) != 1 {
+		return fmt.Errorf("target add requires exactly one agent argument (e.g. `keystone target add claude-code`); use --dir for the install directory")
 	}
+	rawAgents := positional[0]
 
 	absDir, err := filepath.Abs(dir)
 	if err != nil {
@@ -52,7 +82,6 @@ func runAddTarget(args []string, assets embed.FS) error {
 		return err
 	}
 
-	// Parse and validate the requested agents.
 	requested := []string{}
 	seen := map[string]bool{}
 	for _, p := range strings.Split(rawAgents, ",") {
@@ -97,22 +126,25 @@ func runAddTarget(args []string, assets embed.FS) error {
 	for _, agent := range requested {
 		printAgentWarnings(agent)
 	}
-	printAddTargetNextSteps(requested)
+	printTargetAddNextSteps(requested)
 	return nil
 }
 
-func printAddTargetUsage(w *os.File) {
-	fmt.Fprint(w, `keystone add-target — install another agent's target bundle into an existing harness
+func printTargetAddUsage(w *os.File) {
+	fmt.Fprint(w, `keystone target add — install another agent's target bundle into an existing harness
 
 Usage:
-  keystone add-target <agent>[,<agent>...] [<dir>]
+  keystone target add <agent>[,<agent>...] [--dir <path>]
 
 Requires harness/ to exist in <dir> (default: .). Errors out if any of the
-requested agents is already recorded in INSTALL_PROFILE.md.
+requested agents is already recorded in the lockfile.
+
+Flags:
+  --dir <path>   Directory containing harness/ (defaults to cwd).
 `)
 }
 
-func printAddTargetNextSteps(agents []string) {
+func printTargetAddNextSteps(agents []string) {
 	fmt.Fprintf(os.Stdout, "\n✓ added %s to the harness.\n\n", strings.Join(agents, ", "))
 	if len(agents) == 1 {
 		fmt.Fprintf(os.Stdout, "  See harness/adapters/%s/lifecycle.md for how to invoke actions in it.\n",

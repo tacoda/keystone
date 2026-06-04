@@ -120,7 +120,13 @@ Orgs distributing shared governance across many projects (vendor lists, license 
 keystone init --policy git+https://github.com/acme/keystone-policy.git#v1.2.0
 ```
 
-Policy content lands under `harness/policies/<name>/`, with `guides/` ambient and `corpus/` on-demand inside the namespace. Pin state (resolved SHA, per-file hashes) is recorded in `harness/.keystone.lock`. Update with:
+Policy content lands under `harness/policies/<name>/`, with `guides/` ambient and `corpus/` on-demand inside the namespace. Pin state (resolved SHA, per-file hashes) is recorded in `harness/.keystone.lock`. Add a policy after `init` with:
+
+```bash
+keystone policy add git+https://github.com/acme/keystone-policy.git#v1.2.0
+```
+
+Update an installed policy with:
 
 ```bash
 keystone policy update <name>                # re-resolve the recorded ref

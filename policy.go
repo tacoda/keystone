@@ -6,21 +6,23 @@ import (
 	"path/filepath"
 )
 
-// runPolicy dispatches `keystone policy <subcommand> ...`. Only `update` is
-// implemented in v1; `add`, `list`, and `remove` are slated for slice 2.
+// runPolicy dispatches `keystone policy <subcommand> ...`. `list` and `remove`
+// are slated for a later slice.
 func runPolicy(args []string) error {
 	if len(args) == 0 {
 		printPolicyUsage(os.Stderr)
 		return fmt.Errorf("policy requires a subcommand")
 	}
 	switch args[0] {
+	case "add":
+		return runPolicyAdd(args[1:])
 	case "update":
 		return runPolicyUpdate(args[1:])
 	case "help", "--help", "-h":
 		printPolicyUsage(os.Stdout)
 		return nil
 	default:
-		return fmt.Errorf("unknown policy subcommand %q (try: update)", args[0])
+		return fmt.Errorf("unknown policy subcommand %q (try: add, update)", args[0])
 	}
 }
 
@@ -28,10 +30,13 @@ func printPolicyUsage(w *os.File) {
 	fmt.Fprint(w, `keystone policy — manage installed org policies
 
 Usage:
+  keystone policy add <ref> [--dir <path>]
   keystone policy update <name> [<new-ref>] [--dir <path>] [--force]
   keystone policy help
 
 Commands:
+  add       Install a new org policy into an existing harness. Errors if a
+            policy with the same name is already recorded in the lockfile.
   update    Re-resolve a policy and replace its content. Refuses to overwrite
             local edits unless --force.
 `)

@@ -5,7 +5,7 @@
 There are two kinds:
 
 - **`universal/`** — the default policy. Ships embedded in the keystone binary. Contains the universal engineering principles (reasoning + rule extracts) that apply to every Keystone install regardless of stack, domain, or org.
-- **`<name>/`** — org-authored policies installed via `keystone init --policy <ref>` or `keystone policy update`. Vendor lists, license rules, release gates, compliance regimes, internal coding standards — anything an org wants to push down across many projects.
+- **`<name>/`** — org-authored policies installed via `keystone init --policy <ref>`, `keystone policy add <ref>`, or `keystone policy update`. Vendor lists, license rules, release gates, compliance regimes, internal coding standards — anything an org wants to push down across many projects.
 
 ## Layout inside a policy
 
@@ -35,7 +35,7 @@ Policy guides participate in the drift sensor the same way project guides do. Th
 
 ## Authorship
 
-Policies are **not** project-authored. The `universal/` policy is owned by keystone; named policies are owned by the org or vendor that published the source repo. Consumers consume — they `init --policy` and `policy update`, but they don't edit policy files in place. Local edits block `policy update` unless `--force` is passed, on the assumption that ad-hoc changes inside a policy namespace are usually mistakes.
+Policies are **not** project-authored. The `universal/` policy is owned by keystone; named policies are owned by the org or vendor that published the source repo. Consumers consume — they `init --policy`, `policy add`, and `policy update`, but they don't edit policy files in place. Local edits block `policy update` unless `--force` is passed, on the assumption that ad-hoc changes inside a policy namespace are usually mistakes.
 
 If a project needs to soften or extend a policy, the right move is at the project layer — add a project guide that explicitly traces to the policy file with reasoning. The policy stays unmodified; the project's deviation is recorded where future readers will look.
 

@@ -23,8 +23,8 @@ func main() {
 			fmt.Fprintf(os.Stderr, "keystone: %v\n", err)
 			os.Exit(1)
 		}
-	case "add-target":
-		if err := runAddTarget(os.Args[2:], assets); err != nil {
+	case "target":
+		if err := runTarget(os.Args[2:], assets); err != nil {
 			fmt.Fprintf(os.Stderr, "keystone: %v\n", err)
 			os.Exit(1)
 		}
@@ -56,7 +56,8 @@ func printUsage(w *os.File) {
 
 Usage:
   keystone init [<dir>] [flags]
-  keystone add-target <agent>[,<agent>...] [<dir>]
+  keystone target add <agent>[,<agent>...] [--dir <path>]
+  keystone policy add <ref> [--dir <path>]
   keystone policy update <name> [<new-ref>] [--dir <path>] [--force]
   keystone migrate [<dir>] [--apply|-y] [--dry-run] [--from <version>]
   keystone options
@@ -64,13 +65,13 @@ Usage:
   keystone help
 
 Commands:
-  init         Scaffold harness/ and the agent menu file(s) into <dir> (default: .)
-  add-target   Install another agent target bundle into an existing harness
-  policy       Manage org policies installed under harness/policies/ (see 'policy help')
-  migrate      Apply pending harness migrations to an existing install
-  options      Print the allowed labels for every option flag
-  version      Print the binary version
-  help         Print this message
+  init       Scaffold harness/ and the agent menu file(s) into <dir> (default: .)
+  target     Manage agent targets installed under harness/adapters/ (see 'target help')
+  policy     Manage org policies installed under harness/policies/ (see 'policy help')
+  migrate    Apply pending harness migrations to an existing install
+  options    Print the allowed labels for every option flag
+  version    Print the binary version
+  help       Print this message
 
 Behavior:
   When run in a TTY with options unset, keystone prompts interactively
