@@ -3,7 +3,7 @@
 This project uses a **keystone harness**. The harness at [`harness/`](harness/) defines the engineering knowledge, rules, sensors, and self-update flywheels you operate within.
 
 **Read first:**
-- [`harness/README.md`](harness/README.md) — four components (corpus, guides, sensors, flywheels) and the lifecycle.
+- [`harness/README.md`](harness/README.md) — five components (corpus, guides, sensors, policies, flywheels) and the lifecycle.
 - [`harness/guides/`](harness/guides/) — rules. **Always loaded.** What you must do and not do.
 - [`harness/corpus/`](harness/corpus/) — informational reference. **On-demand.** Reasoning behind the rules; reach via forward-link from a guide.
 - [`harness/adapters/claude-code/`](harness/adapters/claude-code/) — Claude Code bindings: slash commands, sub-agents, MCP tracker integration.

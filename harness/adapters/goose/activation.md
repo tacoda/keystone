@@ -4,7 +4,7 @@ How the harness's ambient content (guides and process docs) loads into Goose, an
 
 ## The menu
 
-Goose reads `.goosehints` at the repo root on every session — the file is treated as project-specific hints prepended to the system prompt. The installer drops a short `.goosehints` that points at `harness/`, lists the four components, and states the iron laws.
+Goose reads `.goosehints` at the repo root on every session — the file is treated as project-specific hints prepended to the system prompt. The installer drops a short `.goosehints` that points at `harness/`, lists the five components, and states the iron laws.
 
 Goose also reads a **global** hints file at `~/.config/goose/hints.md`. The harness uses only the workspace `.goosehints`; the global file is the user's territory.
 

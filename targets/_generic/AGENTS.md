@@ -3,7 +3,7 @@
 This project uses a **keystone harness**. The harness at [`harness/`](harness/) defines the engineering knowledge, rules, sensors, and self-update flywheels you operate within.
 
 **Read first:**
-- [`harness/README.md`](harness/README.md) — four components (corpus, guides, sensors, flywheels), the lifecycle, and the iron laws.
+- [`harness/README.md`](harness/README.md) — five components (corpus, guides, sensors, policies, flywheels), the lifecycle, and the iron laws.
 - [`harness/adapters/_generic/`](harness/adapters/_generic/) — fallback bindings used when no agent-specific adapter exists.
 - [`harness/corpus/domain/`](harness/corpus/domain/) — business rules for this project.
 

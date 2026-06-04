@@ -2,16 +2,22 @@
 
 A **project harness installer** for coding agents. Drops a self-updating set of engineering knowledge, rules, sensors, and lifecycle workflow into your repo, wired to whichever agent you use.
 
-Keystone produces a **Level 2 project harness** — markdown content scoped to one project, owned by the team that installs it, versioned with the code — that **blurs into Level 3** through its embedded corpus and adapter set: every install ships the same engineering principles, lifecycle phases, and rule tiers, so organizations distributing Keystone across many projects get a shared baseline by default. No central service to run; no per-project rewrite of the foundation.
+Keystone is **a Level 2 project harness with Level 3 plugins** — markdown only, no central service.
+
+- **Level 2 (project)** — `harness/corpus/`, `harness/guides/`, `harness/sensors/`, plus the Learning and Pruning flywheels. Owned by the team that installs it, versioned with the code, edited freely.
+- **Level 3 (plugins)** — `harness/policies/`. Distributable governance bundles owned by whoever published them. Two kinds: `policies/universal/` (the default, shipped with the binary, carrying the engineering principles every install gets) and `policies/<name>/` (org-authored, installed via `keystone init --policy <ref>`).
+
+Universal engineering content is just the default plugin; org policies are the same shape, sourced from outside. The split keeps the project layer ergonomic for the team while letting orgs distribute shared standards without forking the harness.
 
 ## What it is
 
 Keystone is a **project harness installer** — a single Go binary with the entire markdown-only harness embedded. `keystone init` writes two things into your repo:
 
-1. **A harness** (`harness/`) — four components:
-   - `guides/` — **rules**. Always loaded. What the agent must do and not do.
-   - `corpus/` — **informational reference**. On-demand. The reasoning behind the rules.
+1. **A harness** (`harness/`) — five components:
+   - `guides/` — **rules**. Always loaded. What the agent must do and not do (project-authored).
+   - `corpus/` — **informational reference**. On-demand. The reasoning behind the rules (project-authored).
    - `sensors/` — **automated checks**. Lint, type-check, test, build, drift, coverage.
+   - `policies/` — **Level 3 plugins**. Distributable governance bundles (`universal/` by default; org policies via `--policy`).
    - `learning/` + `archive/` — **flywheels** that keep the harness current.
    Plus per-agent bindings under `harness/adapters/<agent>/`.
 2. **An activation file** (the "menu") — `CLAUDE.md`, `AGENTS.md`, `.cursor/rules/*.mdc`, `CONVENTIONS.md`, etc. — depending on your agent. The menu tells the agent to read the harness.
@@ -100,11 +106,40 @@ Missing one degrades the corresponding phase but does not break the harness.
 
 ## After `keystone init`
 
-1. Read `harness/README.md` — four-component orientation (corpus, guides, sensors, flywheels).
+1. Read `harness/README.md` — orientation across project layers (corpus, guides, sensors, flywheels) and policies.
 2. Ask your agent to run the **bootstrap** action — it seeds `harness/corpus/state/CODEBASE_STATE.md`, `harness/corpus/idioms/<your-stack>/`, the paired `harness/guides/idioms/<your-stack>/`, and confirms the sensor commands.
 3. Commit `harness/` and any agent files `init` created.
 
 From then on, every task flows through the six phases, and the Learning flywheel grows the harness as your project teaches you new patterns (rules into `guides/`, supplemental reasoning into `corpus/`).
+
+## Org policies (Level 3 plugins)
+
+Orgs distributing shared governance across many projects (vendor lists, license rules, release gates, compliance regimes) ship that content as a **policy** — a git repo with a small manifest. Consumers install it during `init`:
+
+```bash
+keystone init --policy git+https://github.com/acme/keystone-policy.git#v1.2.0
+```
+
+Policy content lands under `harness/policies/<name>/`, with `guides/` ambient and `corpus/` on-demand inside the namespace. Pin state (resolved SHA, per-file hashes) is recorded in `harness/.keystone.lock`. Update with:
+
+```bash
+keystone policy update <name>                # re-resolve the recorded ref
+keystone policy update <name> <new-ref>      # bump to a new ref
+```
+
+`policy update` refuses to overwrite locally edited policy files unless `--force`. See [`harness/policies/README.md`](harness/policies/README.md) for the layer's full shape, including the universal default and the corpus/guides convention inside each policy namespace.
+
+A policy repo is just a small directory tree:
+
+```
+keystone-policy.yaml       # name, version, optional description
+policy/
+  harness/policies/<name>/
+    corpus/<topic>/<file>.md
+    guides/<topic>/<file>.md
+```
+
+The policy author owns the namespace; the installer enforces that policy writes cannot escape it. Sensors are not part of a policy — they describe project tooling.
 
 ## Layout
 
@@ -122,17 +157,19 @@ keystone/
 ├── .github/workflows/release.yml
 ├── harness/                 # the harness dropped into consumer projects
 │   ├── README.md
-│   ├── corpus/              # informational reference (on-demand)
-│   │   ├── principles/      # universal engineering knowledge
-│   │   ├── idioms/          # stack-specific patterns (per-project)
-│   │   ├── domain/          # project-specific business knowledge (template)
-│   │   └── state/           # empirical map of the codebase (template)
-│   ├── guides/              # rules (always loaded)
-│   │   ├── principles/      # rule extracts from corpus/principles/
+│   ├── corpus/              # informational reference (on-demand) — project-scoped
+│   │   ├── idioms/          # stack-specific patterns
+│   │   ├── domain/          # project-specific business knowledge
+│   │   └── state/           # empirical map of the codebase
+│   ├── guides/              # rules (always loaded) — project-scoped
 │   │   ├── idioms/          # rule extracts from corpus/idioms/
 │   │   ├── domain/          # business-rule constraints
-│   │   └── process/         # six workflow phases + modes
+│   │   ├── process/         # six workflow phases + modes
+│   │   └── computational/   # language servers, formatters, editor enforcement
 │   ├── sensors/             # automated checks (lint, type-check, test, etc.)
+│   ├── policies/            # Level 3 plugins — universal default + named org policies
+│   │   ├── universal/       # default policy: engineering principles (corpus + guides)
+│   │   └── <name>/          # org-installed policies (corpus + guides)
 │   ├── adapters/            # per-agent bindings
 │   ├── learning/            # Learning flywheel staging
 │   └── archive/             # Pruning flywheel destination

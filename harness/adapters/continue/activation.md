@@ -4,7 +4,7 @@ How the harness's ambient content (guides and process docs) loads into Continue,
 
 ## The menu
 
-Continue auto-loads `.continuerules` at the repo root on every session. The installer drops a short `.continuerules` that points at `harness/`, lists the four components, and states the iron laws.
+Continue auto-loads `.continuerules` at the repo root on every session. The installer drops a short `.continuerules` that points at `harness/`, lists the five components, and states the iron laws.
 
 `.continuerules` is the legacy mechanism. Newer Continue versions also read `config.yaml` (or `config.json`) at `<repo>/.continue/config.yaml` for slash commands, context providers, and tool/MCP configuration. The harness ships `.continuerules` because every Continue version reads it; richer config is opt-in via `config.yaml`.
 

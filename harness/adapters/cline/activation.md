@@ -66,7 +66,7 @@ After a flywheel write that touched any `harness/guides/` file, start a new task
 - **`corpus/domain/`** — relevant at task start; the orient action reads it after state.
 - **`corpus/state/CODEBASE_STATE.md`** — read by the **orient** action via `read_file`.
 - **`guides/process/<phase>.md`** — read when entering each phase. The Keystone workflows make this explicit ("read harness/guides/process/<phase>.md").
-- **`guides/<layer>/<name>.md`** — should be reachable via the custom-instructions menu pointer. The menu file lists the four components and the iron laws; specific rule files are read on demand.
+- **`guides/<layer>/<name>.md`** — should be reachable via the custom-instructions menu pointer. The menu file lists the five components and the iron laws; specific rule files are read on demand.
 
 ## Auto-approve and the verify cycle
 
