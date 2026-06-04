@@ -29,9 +29,13 @@ Each phase has a `.mdc` rule. Invoke by mentioning the action (e.g. `@keystone-o
 
 | Action | Rule | When |
 |---|---|---|
+| bootstrap | `@keystone-bootstrap` | First install — detect stack, seed state, classify sensors |
 | spec | `@keystone-spec` | Task entry, acceptance criteria |
 | orient | `@keystone-orient` | Plan + load idioms for touched region |
 | check-drift | `@keystone-check-drift` | After edits, before verify |
 | verify | `@keystone-verify` | Sensors gate, pre-commit |
 | review | `@keystone-review` | Semantic check, post-verify |
 | learn | `@keystone-learn` | Post-merge, capture insights |
+| audit | `@keystone-audit` | Periodic dual-flywheel (Learning + Pruning) |
+| synthesize | `@keystone-synthesize` | Promote inbox candidates into corpus / guides |
+| mode | `@keystone-mode` | Switch pacing (paired / solo / autopilot) |

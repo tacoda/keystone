@@ -4,29 +4,28 @@ How each abstract lifecycle action is invoked in Claude Code.
 
 ## Action → invocation
 
-| Action | Invocation | Notes |
+Each action ships as a project-scoped **skill** under `.claude/skills/keystone/<action>/SKILL.md`. Invoke by name (e.g. `keystone:bootstrap`) or by asking the agent to "run the bootstrap action" — Claude Code auto-discovers skills under `.claude/skills/` and surfaces them.
+
+| Action | Skill | Notes |
 |---|---|---|
-| **spec** | `/keystone:spec` slash command | Fetches tracker card via Atlassian / Linear / GitHub MCP server if a card ID is provided. |
-| **orient** | `/keystone:orient` slash command | Reads `harness/corpus/state/CODEBASE_STATE.md`, lazy-loads matching idioms for the touched region. |
-| **check-drift** | `/keystone:check-drift` slash command | Runs the drift sensor on the current diff. |
-| **verify** | `/keystone:verify` slash command | Runs lint, type-check, test, build, drift, commit-message sensors via shell. |
-| **review** | `/keystone:review` slash command | Spawns `review-functional`, `review-security`, `review-risk`, and `review-deployment` sub-agents in parallel on the diff. |
-| **learn** | `/keystone:learn` slash command | Writes a candidate to `harness/learning/inbox/<timestamp>-<slug>.md`. |
-| **bootstrap** | `/keystone:bootstrap` slash command | One-time initial scaffold. Detects stack, frameworks, and libraries; seeds corpus (idioms/<stack>/, state/), paired guides (idioms/<stack>/); confirms sensor commands; **inventories computational guides** (LSPs, formatters, editor enforcement) into `guides/computational/`; **classifies sensors** (records which inferential sensors — review-functional, review-security, review-risk, review-deployment, spec-adherence — this adapter can run, and which computational sensors have a working command). Post-bootstrap, `corpus/state/CODEBASE_STATE.md` lists every guide and sensor wired up. |
-| **audit** | `/keystone:audit` slash command | Full dual-flywheel audit (Learning + Pruning). |
-| **synthesize** | `/keystone:synthesize` slash command | Promotes inbox items into the right corpus layer. |
-| **mode** | `/keystone:mode <paired\|solo\|autopilot>` | Updates `harness/guides/process/modes.md` in place. |
+| **bootstrap** | `keystone:bootstrap` | One-time initial scaffold. Detects stack, frameworks, and libraries; seeds corpus (idioms/<stack>/, state/), paired guides (idioms/<stack>/); confirms sensor commands; **inventories computational guides** (LSPs, formatters, editor enforcement) into `guides/computational/`; **classifies sensors** (records which inferential sensors — review-functional, review-security, review-risk, review-deployment, spec-adherence — this adapter can run, and which computational sensors have a working command). Post-bootstrap, `corpus/state/CODEBASE_STATE.md` lists every guide and sensor wired up. |
+| **spec** | `keystone:spec` | Fetches tracker card via Atlassian / Linear / GitHub MCP server if a card ID is provided. |
+| **orient** | `keystone:orient` | Reads `harness/corpus/state/CODEBASE_STATE.md`, lazy-loads matching idioms for the touched region. |
+| **check-drift** | `keystone:check-drift` | Runs the drift sensor on the current diff. |
+| **verify** | `keystone:verify` | Runs lint, type-check, test, build, drift, commit-message sensors via shell. |
+| **review** | `keystone:review` | Spawns `review-functional`, `review-security`, `review-risk`, and `review-deployment` sub-agents in parallel on the diff. |
+| **learn** | `keystone:learn` | Writes a candidate to `harness/learning/inbox/<timestamp>-<slug>.md`. |
+| **audit** | `keystone:audit` | Full dual-flywheel audit (Learning + Pruning). |
+| **synthesize** | `keystone:synthesize` | Promotes inbox items into the right corpus layer. |
+| **mode** | `keystone:mode` | Updates `harness/guides/process/modes.md` in place. Arg: `paired`, `solo`, or `autopilot`. |
 
-`keystone:` is the slash-command namespace. The shipped commands live under that prefix so they don't collide with project-defined or other-plugin commands.
+`keystone:` is the namespace prefix. The shipped skills live under that prefix so they don't collide with project-defined or other-plugin skills.
 
-## Where commands live
+## Where the skills live
 
-The slash command files live in one of two places:
+The skill files live at `.claude/skills/keystone/<action>/SKILL.md` in the consumer repo. `keystone init` (or `keystone target add claude-code`) lays them down; they're versioned alongside `harness/`.
 
-- **As a plugin** — installed via the Claude Code plugin marketplace. The commands are owned by the plugin author; users get them by installing the plugin.
-- **In the project** — `.claude/commands/*.md` at the consumer's repo root. The commands are owned by the project; they're versioned alongside `harness/`.
-
-Either path works. The plugin path is recommended for organizations that want to ship the same commands across many projects.
+Organizations that prefer a single source of truth across many repos can lift the same files into a Claude Code plugin and distribute via the plugin marketplace instead — the on-disk shape is identical.
 
 ## Sub-agent support
 

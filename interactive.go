@@ -50,7 +50,11 @@ func promptMissing(sel Selections, skip map[string]bool) error {
 			options = append(options, huh.NewOption(label, v.ID))
 		}
 
-		if c.MultiSelect {
+		// Agent stays MultiSelect=true at the catalog level so --agent a,b and
+		// `target add a,b` still accept comma-separated values; but the prompt
+		// renders as single-select. Users picking one agent interactively just
+		// press Enter on the highlighted row — no space-to-toggle required.
+		if c.MultiSelect && c.ID != "agent" {
 			val := []string{}
 			multiVals[c.ID] = &val
 			fields = append(fields,

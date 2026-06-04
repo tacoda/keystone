@@ -1,0 +1,19 @@
+---
+description: Bootstrap phase — one-time initial harness scaffold (detect stack, seed state, classify sensors)
+---
+
+# Bootstrap
+
+You are running the **bootstrap** action of the project's keystone harness. Read `harness/adapters/cursor/lifecycle.md` for the action table and `harness/README.md` for the five components.
+
+## Activities
+
+1. **Detect the stack.** Inspect the repo (package.json, go.mod, pyproject.toml, Gemfile, Cargo.toml, build.gradle, etc.) and list every primary language, framework, and notable library.
+2. **Seed `harness/corpus/state/CODEBASE_STATE.md`** with detected stacks, real tool commands (lint / type-check / test / build / coverage), region map, and CI platform.
+3. **Seed stack idioms.** For each detected stack, scaffold `harness/corpus/idioms/<stack>/` and the paired `harness/guides/idioms/<stack>/`.
+4. **Inventory computational guides** (LSP, formatter, editor enforcement) under `harness/guides/computational/`.
+5. **Classify sensors.** Record in `CODEBASE_STATE.md` which inferential and computational sensors this adapter can run.
+
+## Iron law
+
+**No silent overwrites.** Propose every state-file diff before applying.

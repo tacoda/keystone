@@ -9,7 +9,18 @@ This project uses a **keystone harness**. The harness at [`harness/`](harness/) 
 - [`harness/adapters/pi/`](harness/adapters/pi/) — pi.dev bindings; also see prompts under `.pi/prompts/`.
 - [`harness/corpus/domain/`](harness/corpus/domain/) — business rules for this project.
 
-**Lifecycle actions:** `spec` · `orient` · `check-drift` · `verify` · `review` · `learn` (plus `bootstrap`, `audit`, `synthesize`, `mode`). Invoke by asking in natural language or via the matching `.pi/prompts/<action>.md` — see [`harness/adapters/pi/lifecycle.md`](harness/adapters/pi/lifecycle.md).
+**Lifecycle actions** — invoke by asking in natural language or via the matching `.pi/prompts/keystone-<action>.md` (see [`harness/adapters/pi/lifecycle.md`](harness/adapters/pi/lifecycle.md) for the full table):
+
+- **bootstrap** — one-time scaffold; detect stack, seed state, classify sensors. Run once per project.
+- **spec** — capture intent + acceptance criteria. First action on any task.
+- **orient** — load `CODEBASE_STATE.md` and idioms for the touched region; sketch a plan.
+- **check-drift** — compare the diff against loaded guides; fast pre-verify check.
+- **verify** — run lint / type-check / test / build / drift / commit-message sensors.
+- **review** — semantic review (functional / security / risk / deployment + spec-adherence).
+- **learn** — capture an inbox candidate from a surprise or incident.
+- **audit** — periodic dual-flywheel: Learning + Pruning.
+- **synthesize** — promote inbox candidates into the right corpus / guide layer.
+- **mode** — switch pacing (paired / solo / autopilot).
 
 **Iron laws** — non-negotiable across every phase:
 
