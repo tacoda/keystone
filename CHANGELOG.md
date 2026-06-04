@@ -2,6 +2,18 @@
 
 All notable changes to keystone are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); the project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and is pre-1.0 (minor versions may include breaking changes).
 
+## [0.10.1] — 2026-06-04
+
+Patch release tightening the **bootstrap** action playbook. The 0.10.0 playbook described what to record but not what to write — agents could complete bootstrap by narrating findings without ever invoking the edit primitive, leaving `CODEBASE_STATE.md` as the shipped template and stack idiom folders unscaffolded. This release converts the playbook from descriptive to imperative and replaces the self-reported "when this is done" criterion with an empirical completion check the agent can verify with `grep` + `ls`.
+
+### Changed
+
+- **`harness/actions/bootstrap.md`** — preamble added stating every activity produces a concrete file write. Steps 2 and 5 reworded from "Record" → "Propose an edit to...". Iron law extended with "**Narration is not a write** — bootstrap is incomplete until each file change has actually landed on disk." Descriptive "When this is done" section replaced with an empirical "Completion check": no `<...>` placeholders in `CODEBASE_STATE.md`, `last_reconciled` front-matter set to today's date, and `harness/corpus/idioms/<stack>/` + paired `harness/guides/idioms/<stack>/` exist for each detected stack.
+
+### Migration from 0.10.0
+
+- No `migrations/0.10.1/` directory ships — the change is doc-only inside `harness/actions/`. Existing 0.10.0 installs can pick up the updated playbook by running `keystone init --force` to refresh the harness content (review `harness/.keystone.lock` after), or by hand-copying the new `harness/actions/bootstrap.md`.
+
 ## [0.10.0] — 2026-06-04
 
 Reverses the per-agent skill/rule/prompt approach shipped two hours ago in 0.9.2. **Lifecycle actions are now agent-agnostic playbooks in `harness/actions/<action>.md`** and invoked via natural language. No `.claude/skills/`, no `.cursor/rules/keystone-<action>.mdc`, no `.pi/prompts/keystone-<action>.md` — every agent reads its menu file, finds an action in the bulleted list, follows the link to `harness/actions/<action>.md`, and executes the playbook. The canonical kickoff phrase for end-to-end work is **"run task on `<ticket-id>`"** — a new `task` action orchestrates `spec → orient → implementation → check-drift → verify → review`.
