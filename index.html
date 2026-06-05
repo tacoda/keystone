@@ -933,6 +933,7 @@
         <span class="nav-label">Overview</span>
         <a class="nav-link" href="#introduction">Introduction</a>
         <a class="nav-link" href="#how-it-works">How it works</a>
+        <a class="nav-link" href="#override">Override by markdown</a>
         <a class="nav-link" href="#install">Install</a>
       </div>
 
@@ -940,10 +941,13 @@
         <span class="nav-label">Capabilities</span>
         <a class="nav-link" href="#guides">Guides <span class="ext">— rules</span></a>
         <a class="nav-link" href="#corpus">Corpus <span class="ext">— reference</span></a>
+        <a class="nav-link" href="#state">State ledgers</a>
         <a class="nav-link" href="#sensors">Sensors</a>
         <a class="nav-link" href="#policies">Policies <span class="badge">NEW 0.9</span></a>
         <a class="nav-link" href="#flywheels">Flywheels</a>
+        <a class="nav-link" href="#learning">Learning pipeline</a>
         <a class="nav-link" href="#lifecycle">Lifecycle workflow</a>
+        <a class="nav-link" href="#actions">Actions</a>
         <a class="nav-link" href="#rules">Rules &amp; iron laws</a>
         <a class="nav-link" href="#failure-modes">Agent failure modes</a>
         <a class="nav-link" href="#migrations">Migrations</a>
@@ -955,6 +959,7 @@
         <span class="nav-label">Reference</span>
         <a class="nav-link" href="#cli">CLI usage</a>
         <a class="nav-link" href="#agents">Supported agents</a>
+        <a class="nav-link" href="#adapters">Adapters</a>
         <a class="nav-link" href="#options">Install-time options</a>
         <a class="nav-link" href="#assumptions">Tool assumptions</a>
         <a class="nav-link" href="https://github.com/tacoda/keystone/blob/main/CHANGELOG.md" target="_blank" rel="noopener">Changelog <span class="ext">↗</span></a>
@@ -1057,8 +1062,6 @@
       </div>
     </div>
 
-    <p style="font-size: 0.82rem; color: var(--muted); margin-top: 8px; line-height: 1.7;"><code>keystone migrate</code> (see <a href="#migrations">Migrations</a>) keeps the <em>generic</em> harness aligned with each release without touching your edits — it applies idempotent operations, flags conflicts where you've diverged, and never silently overwrites. So bending the harness to your team and pulling in upstream improvements aren't mutually exclusive.</p>
-
     <div class="action-grid">
       <div class="action">
         <span class="action-tag" style="background: rgba(245,158,11,0.12); color: var(--accent3); border: 1px solid rgba(245,158,11,0.3);">NEW</span>
@@ -1091,8 +1094,6 @@
         <p>Periodic triage of the code-debt ledger. Walks <code>discovery</code> items, re-scores existing entries, prunes <code>stale</code> items. <strong>Audit</strong>'s Pruning flywheel now persists harness-debt findings instead of producing an ephemeral report.</p>
       </div>
     </div>
-
-    <p style="font-size: 0.82rem; color: var(--muted); margin-top: 8px; line-height: 1.7;">Existing 0.9.x and 0.10.x installs migrate to 0.11.0 cleanly via <code>keystone migrate</code>. This release also <strong style="color: var(--text);">backfills</strong> the missing 0.10.0 and 0.10.1 migration directories (those releases shipped without migrations) so <code>migrate</code> from 0.9.x produces a complete install. See <a href="#migrations">Migrations</a>.</p>
 
     <!-- CTAs (visible on landing) -->
     <div class="section-label">Get involved · get support</div>
@@ -1231,6 +1232,58 @@ flowchart LR
   class gap,learn,inbox,synth,g2,c2 green
   class code,audit,stG,stC,arc pink
       </div>
+    </div>
+  </section>
+
+  <!-- ===================== OVERRIDE BY MARKDOWN ===================== -->
+  <section id="override" class="page" data-title="Override by markdown">
+    <div class="page-head">
+      <div class="crumb">Overview · The whole bargain</div>
+      <h1>Every layer is markdown. Override by editing a file.</h1>
+      <p class="tagline">No DSL, no compiled config, no runtime service. Rules, reasoning, sensor contracts, action playbooks, ledgers, policies, adapter docs — all markdown the agent reads and you edit. The harness bends to your project, not the other way around.</p>
+    </div>
+
+    <div class="definition">
+      <p><strong>Defaults are seeds, not the shape.</strong> Keystone ships with a default set of guides, sensors, actions, and a six-phase workflow because most teams want <em>something</em> to start from. They're also the worked examples for how to author your own — copy any file, edit, rename, ship.</p>
+      <p><strong>The agent stops applying a rule the moment its file is gone</strong> — and starts applying a new one the moment its file lands. No reindex, no rebuild, no service restart. Add a file under <code>harness/guides/</code> and the next turn picks it up.</p>
+    </div>
+
+    <div class="section-label">What you can change, and how</div>
+    <div class="action-grid three">
+      <div class="action">
+        <span class="action-tag">Workflow</span>
+        <h3 style="color: var(--accent);">Don't like six phases?</h3>
+        <p>The pipeline is just <code>harness/actions/task.md</code> orchestrating <code>spec.md</code>, <code>orient.md</code>, <code>verify.md</code>, etc. Edit <code>task.md</code> to change the order; replace any phase by editing its playbook; add a phase by dropping in <code>harness/actions/&lt;new-phase&gt;.md</code> and adding a bullet to your menu file. Remove one by deleting the file.</p>
+      </div>
+      <div class="action">
+        <span class="action-tag">Rules</span>
+        <h3 style="color: var(--accent2);">Guide doesn't fit?</h3>
+        <p>Open the markdown under <code>harness/guides/</code>, edit it, soften it, strengthen it, or delete the file. The drift sensor enforces what's there — nothing else. Authoring a new rule is one new file in the right subdirectory.</p>
+      </div>
+      <div class="action">
+        <span class="action-tag">Sensors</span>
+        <h3 style="color: var(--accent3);">Need a new check?</h3>
+        <p>Sensors are markdown contracts — kind, trigger, inputs, exit condition, output. Add <code>harness/sensors/&lt;name&gt;.md</code> with that shape; the action that should invoke it picks it up next pass. The shipped sensors (lint, type-check, the four reviewers, the security trio) are the worked examples.</p>
+      </div>
+      <div class="action">
+        <span class="action-tag">Reasoning</span>
+        <h3 style="color: var(--accent5);">Stack idiom is wrong?</h3>
+        <p><code>harness/corpus/idioms/&lt;stack&gt;/*.md</code> is the empirical map of how your stack is used here. Edit when patterns shift; add files when new patterns emerge. State ledgers (<code>code-debt.md</code>, <code>harness-debt.md</code>, <code>quality-radar.md</code>) are markdown too — read during planning, written by sensors, edited by humans.</p>
+      </div>
+      <div class="action">
+        <span class="action-tag">Policies</span>
+        <h3 style="color: var(--accent4);">Org policy too strict?</h3>
+        <p>Policy plugins are also markdown, distributable as a small git repo with a manifest. They land under <code>harness/policies/&lt;name&gt;/</code>. If your team disagrees with a rule, document the deviation in a project guide that traces to the policy file — the policy stays canonical, your project's exception is recorded where readers look.</p>
+      </div>
+      <div class="action">
+        <span class="action-tag">Adapters &amp; modes</span>
+        <h3 style="color: var(--accent);">Agent-specific friction?</h3>
+        <p><code>harness/adapters/&lt;agent&gt;/lifecycle.md</code> and <code>activation.md</code> document how that agent runs the harness — edit to capture how your team actually uses it. Pacing modes live in <code>harness/guides/process/modes.md</code>; redefine the modes themselves, not just pick one.</p>
+      </div>
+    </div>
+
+    <div class="definition" style="margin-top: 24px; border-left-color: var(--accent3);">
+      <p><strong style="color: var(--accent3);">Upstream improvements are not lost when you edit.</strong> <code>keystone migrate</code> (see <a href="#migrations">Migrations</a>) keeps the generic harness aligned with each release without touching your edits — it applies idempotent operations, flags conflicts where you've diverged, and never silently overwrites. So bending the harness to your team and pulling in upstream improvements aren't mutually exclusive.</p>
     </div>
   </section>
 
@@ -1390,6 +1443,57 @@ flowchart LR
     </div>
 
     <p style="font-size: 0.82rem; color: var(--muted); line-height: 1.7;">Universal principles' explanatory text (SOLID rationale, Cox/Hunt/Thomas citations, OWASP references) is in <code>policies/universal/corpus/principles/</code>; <code>corpus/principles/</code> no longer exists at the project layer in 0.9.0.</p>
+  </section>
+
+  <!-- ===================== STATE LEDGERS ===================== -->
+  <section id="state" class="page" data-title="State ledgers">
+    <div class="page-head">
+      <div class="crumb">Capabilities · Project memory</div>
+      <h1>State ledgers — what the harness remembers about your project.</h1>
+      <p class="tagline">Markdown files under <code>harness/corpus/state/</code>. Read during planning so the agent knows what your project actually looks like; written by sensors and bootstrap; edited by humans when defaults are wrong. Project memory the agent never has to rediscover.</p>
+    </div>
+
+    <div class="action-grid">
+      <div class="action">
+        <span class="action-tag">install-time</span>
+        <h3 style="color: var(--accent);"><code>INSTALL_PROFILE.md</code></h3>
+        <p>Frozen at <code>keystone init</code>. Records the agent target(s), app type, architecture, testing posture, compliance regimes, the installed policies, and the <code>keystone_version</code> that the migrator reads. The starting hint bootstrap reads on its first pass.</p>
+      </div>
+      <div class="action">
+        <span class="action-tag">bootstrap-time</span>
+        <h3 style="color: var(--accent2);"><code>CODEBASE_STATE.md</code></h3>
+        <p>The big one. Written by <strong>bootstrap</strong>; updated when the stack changes. Detected stacks, frameworks, libraries, region map, tool commands (lint, type, test, build, coverage, security trio), severity thresholds, the per-sensor classification of which ones the adapter can run.</p>
+      </div>
+      <div class="action">
+        <span class="action-tag">orient · planning</span>
+        <h3 style="color: var(--accent3);"><code>code-debt.md</code></h3>
+        <p>Debt in your codebase — TODOs, FIXMEs, complexity hotspots, smells. Walked by the <strong>debt-review</strong> action: <code>discovery</code> items get scored, existing entries re-scored, <code>stale</code> items pruned. Read during planning so debt is visible before you touch a region.</p>
+      </div>
+      <div class="action">
+        <span class="action-tag">audit · pruning</span>
+        <h3 style="color: var(--accent4);"><code>harness-debt.md</code></h3>
+        <p>Debt in the <em>harness itself</em> — stale rules, unresolved placeholders, failing sensors, drifted state files. Persisted by <strong>audit</strong>'s Pruning flywheel instead of producing an ephemeral report. Tells you when to prune before ambient context drifts up. <span class="ver">0.11.0</span></p>
+      </div>
+      <div class="action">
+        <span class="action-tag">review · signal</span>
+        <h3 style="color: var(--accent5);"><code>quality-radar.md</code></h3>
+        <p>Five-dimension scorecard (type safety, test quality, readability, security, performance) aggregating verify + review sensors. Not a gate — a signal the review action discusses. Append-only history so trends are visible across releases. <span class="ver">0.11.0</span></p>
+      </div>
+      <div class="action">
+        <span class="action-tag">orient · risk</span>
+        <h3 style="color: var(--accent);"><code>risk-fingerprints.md</code></h3>
+        <p>Per-region risk classification — what changes here have a history of breaking. Computed by the <code>risk-fingerprint</code> sensor against <code>git log</code>: churn, post-merge-fix rate, blast radius. Orient reads it to decide where the plan needs extra care.</p>
+      </div>
+      <div class="action">
+        <span class="action-tag">orient · routing</span>
+        <h3 style="color: var(--accent2);"><code>traffic-topology.md</code></h3>
+        <p>How requests flow through the codebase — entry points, edges, terminal handlers. Computed by the <code>traffic-topology</code> sensor. Anchors the agent's mental model of "what does this region actually do at runtime?" before planning a change.</p>
+      </div>
+    </div>
+
+    <div class="definition" style="margin-top: 24px; border-left-color: var(--accent3);">
+      <p><strong style="color: var(--accent3);">State is markdown, like everything else.</strong> If a ledger is wrong, edit it. If you don't want a ledger, delete the file — the action that writes it will recreate it next pass, or you can soften the playbook that writes it. The <strong>stack-drift</strong> sensor exists specifically because <code>CODEBASE_STATE.md</code> can fall behind reality; <strong>audit</strong> reconciles incrementally rather than rebootstrapping.</p>
+    </div>
   </section>
 
   <!-- ===================== SENSORS ===================== -->
@@ -1605,6 +1709,45 @@ policies:
     </div>
   </section>
 
+  <!-- ===================== LEARNING PIPELINE ===================== -->
+  <section id="learning" class="page" data-title="Learning pipeline">
+    <div class="page-head">
+      <div class="crumb">Capabilities · How the harness gets better</div>
+      <h1>Learning pipeline — from surprise to rule, in four steps.</h1>
+      <p class="tagline">The Learning flywheel made concrete. Nothing in this pipeline auto-promotes — every step is gated. A surprising moment in <code>learn</code> can become a guide rule, a corpus reference, both, or nothing.</p>
+    </div>
+
+    <div class="section-label">The four steps</div>
+    <div class="action-grid">
+      <div class="action">
+        <span class="action-tag">step 1 · capture</span>
+        <h3 style="color: var(--accent);"><code>learn</code> action</h3>
+        <p>Any time something surprising happens — a sensor catches a class of bug the guides missed, the reviewer flags a pattern that should be canonical, a rule felt wrong in context — invoke <strong>learn</strong>. The agent writes a candidate file into <code>harness/learning/inbox/</code> classified as <strong>rule</strong> (→ guides) or <strong>information</strong> (→ corpus).</p>
+      </div>
+      <div class="action">
+        <span class="action-tag">step 2 · queue</span>
+        <h3 style="color: var(--accent2);"><code>learning/inbox/</code></h3>
+        <p>Candidates accumulate as cheap markdown drafts. Each carries provenance (which task, which sensor finding, what the agent thinks the lesson is) and a proposed classification. The inbox is browseable — nothing has entered guides or corpus yet, so review is free.</p>
+      </div>
+      <div class="action">
+        <span class="action-tag">step 3 · promote</span>
+        <h3 style="color: var(--accent3);"><code>synthesize</code> action</h3>
+        <p>Promotes items from <code>learning/inbox/</code>. Rules land under <code>guides/</code> at the right subdirectory; information lands under <code>corpus/</code>; some items are both (a rule plus the reasoning behind it). Human gates by confidence — the agent proposes, you decide.</p>
+      </div>
+      <div class="action">
+        <span class="action-tag">step 4 · prune</span>
+        <h3 style="color: var(--accent4);"><code>audit</code> Pruning flywheel</h3>
+        <p>The asymmetric audit catches the other direction: guides that no longer earn their context cost get moved to <code>archive/</code> (never loaded). Findings persist in <code>corpus/state/harness-debt.md</code> instead of vanishing into an ephemeral report.</p>
+      </div>
+    </div>
+
+    <div class="definition" style="margin-top: 24px;">
+      <p><strong>Nothing auto-promotes.</strong> Even with the agent running <code>learn</code> after every surprise, no rule enters guides or corpus until <code>synthesize</code> is invoked and you accept the diff. The inbox is intentionally a cheap parking lot — drafts are free; rules in guides cost ambient context.</p>
+      <p><strong>Default classification: regular rule.</strong> When <code>synthesize</code> promotes a candidate, it lands under <code>guides/</code> as a regular <strong>RULE</strong>. Promotion to <strong>GOLDEN RULE</strong> or <strong>IRON LAW</strong> is a deliberate opt-in — those tiers derive their force from being rare. See <a href="#rules">Rules &amp; iron laws</a>.</p>
+      <p><strong>Reload after promotion.</strong> Guides are ambient — your active session has the old set in context. After <code>synthesize</code> writes new files under <code>guides/</code>, save in-flight work, reset the agent, and re-prompt so the new rules load. Corpus writes don't need a reload (loaded on demand).</p>
+    </div>
+  </section>
+
   <!-- ===================== LIFECYCLE ===================== -->
   <section id="lifecycle" class="page" data-title="Lifecycle workflow">
     <div class="page-head">
@@ -1706,6 +1849,96 @@ policies:
     </div>
 
     <p style="font-size: 0.78rem; color: var(--muted); font-family: var(--mono); margin-top: 8px;">Every action is invoked the same way in every agent: ask in natural language. The agent reads its menu file, finds the action in the bulleted list, follows the link to <code>harness/actions/&lt;action&gt;.md</code>, and executes the playbook. Agent-specific sensor execution, sub-agent parallelism, and tracker integration are documented in <code>harness/adapters/&lt;your-agent&gt;/lifecycle.md</code>.</p>
+  </section>
+
+  <!-- ===================== ACTIONS ===================== -->
+  <section id="actions" class="page" data-title="Actions">
+    <div class="page-head">
+      <div class="crumb">Capabilities · Reference catalog</div>
+      <h1>Actions — thirteen agent-agnostic playbooks.</h1>
+      <p class="tagline">Every action is one markdown file in <code>harness/actions/</code>. The agent reads its menu file on session start, finds the action in the bulleted list, follows the link, and executes the playbook. No agent-specific slash commands, no rule files, no prompt templates — one source of truth per action. Where Lifecycle workflow frames the workflow, this is the reference catalog.</p>
+    </div>
+
+    <div class="section-label">Invocation</div>
+    <div class="definition">
+      <p><strong>Natural language against the playbook.</strong> Say "run task on <code>&lt;ticket-id&gt;</code>" or "do a verify pass" or "run policy-audit before I cut the release." Every agent — Claude Code, Codex, Cursor, Aider, GitHub Copilot, Continue, Cline, Goose, pi — reads the same playbooks. Adapter-specific concerns (sub-agent parallelism, autonomous shell execution, tracker integration) live in <code>harness/adapters/&lt;agent&gt;/lifecycle.md</code>; the playbooks themselves don't know which agent is running them.</p>
+      <p><strong>Single-action vs. full lifecycle.</strong> <code>run task</code> chains spec → orient → implementation → check-drift → verify → review with gates between phases. Individual actions are also invokable directly — "run verify" or "do a review pass" or "audit the harness."</p>
+    </div>
+
+    <div class="section-label">Lifecycle actions — chained by <code>task</code></div>
+    <div class="action-grid three">
+      <div class="action" style="border-color: var(--accent); background: rgba(74,222,154,0.04);">
+        <span class="action-tag" style="background: rgba(74,222,154,0.10); color: var(--accent);">kickoff</span>
+        <h3 style="color: var(--accent);">task</h3>
+        <p>Chains <strong style="color: var(--text);">spec → orient → implementation → check-drift → verify → review</strong>, pausing for acceptance between phases. Optional <code>learn</code> pass at the end. <strong style="color: var(--text);">Say:</strong> <code>run task on &lt;ticket-id&gt;</code>. Playbook: <code>actions/task.md</code>.</p>
+      </div>
+      <div class="action">
+        <span class="action-tag">spec phase</span>
+        <h3 style="color: var(--accent);">spec</h3>
+        <p>Capture intent + acceptance criteria from a tracker card or inline. <strong style="color: var(--text);">Gate:</strong> spec approved before planning begins. Playbook: <code>actions/spec.md</code>.</p>
+      </div>
+      <div class="action">
+        <span class="action-tag">planning entry</span>
+        <h3 style="color: var(--accent2);">orient</h3>
+        <p>Read <code>corpus/state/CODEBASE_STATE.md</code>, lazy-load matching guides for the touched region, consult <code>risk-fingerprints.md</code> and <code>traffic-topology.md</code>, sketch a plan. <strong style="color: var(--text);">Gate:</strong> plan approved. Playbook: <code>actions/orient.md</code>.</p>
+      </div>
+      <div class="action">
+        <span class="action-tag">implementation exit</span>
+        <h3 style="color: var(--accent3);">check-drift</h3>
+        <p>Compare the diff against IRON LAWs (fail), GOLDEN RULES (strong warn), and regular RULES (warn). Cheaper to fix while the change is fresh than during verify. Playbook: <code>actions/check-drift.md</code>.</p>
+      </div>
+      <div class="action">
+        <span class="action-tag">verification gate</span>
+        <h3 style="color: var(--accent3);">verify</h3>
+        <p>Run sensors from <code>CODEBASE_STATE.md</code>: lint, type-check, tests, build, drift, commit-message, security trio. <strong style="color: var(--text);">No completion claims without fresh evidence — sensors must have run this turn.</strong> Playbook: <code>actions/verify.md</code>.</p>
+      </div>
+      <div class="action">
+        <span class="action-tag">review phase</span>
+        <h3 style="color: var(--accent2);">review</h3>
+        <p>Walk spec acceptance criteria, then four review concerns: <code>review-functional</code>, <code>review-security</code>, <code>review-risk</code>, <code>review-deployment</code> — sub-agents in parallel on capable adapters. <strong style="color: var(--text);">Gate:</strong> no blockers, AC met. Playbook: <code>actions/review.md</code>.</p>
+      </div>
+      <div class="action">
+        <span class="action-tag">release / capture</span>
+        <h3 style="color: var(--accent4);">learn</h3>
+        <p>Stage candidates into <code>learning/inbox/</code> classified as <strong>rule</strong> (→ guides) or <strong>information</strong> (→ corpus). Nothing is promoted yet — see <a href="#learning">Learning pipeline</a>. Playbook: <code>actions/learn.md</code>.</p>
+      </div>
+    </div>
+
+    <div class="section-label">Heavyweight actions — invoked by you</div>
+    <div class="action-grid three">
+      <div class="action">
+        <span class="action-tag">day 1</span>
+        <h3 style="color: var(--accent);">bootstrap</h3>
+        <p>Initial audit. Detects stack, frameworks, libraries; seeds paired <code>corpus/idioms/</code> + <code>guides/idioms/</code>; initializes <code>CODEBASE_STATE.md</code>; populates <code>guides/computational/</code>; classifies which inferential sensors the adapter can run. Playbook: <code>actions/bootstrap.md</code>.</p>
+      </div>
+      <div class="action">
+        <span class="action-tag">periodic</span>
+        <h3 style="color: var(--accent2);">audit</h3>
+        <p>Asymmetric dual audit. <strong>Guides</strong> reviewed regularly; <strong>corpus</strong> rarely. Pruning flywheel reads the harness-debt sensor and persists findings to <code>corpus/state/harness-debt.md</code>. Playbook: <code>actions/audit.md</code>. <span class="ver">0.11.0</span></p>
+      </div>
+      <div class="action">
+        <span class="action-tag">after learn</span>
+        <h3 style="color: var(--accent3);">synthesize</h3>
+        <p>Promote items from <code>learning/inbox/</code>. Classifies each as <strong>rule</strong> (→ guides) or <strong>information</strong> (→ corpus); some both. Human gates by confidence. Playbook: <code>actions/synthesize.md</code>.</p>
+      </div>
+      <div class="action">
+        <span class="action-tag">periodic <span class="ver">0.11.0</span></span>
+        <h3 style="color: var(--accent3);">debt-review</h3>
+        <p>Triage <code>corpus/state/code-debt.md</code>. Walks <code>discovery</code> items, re-scores existing entries, prunes <code>stale</code> items. Harness debt is handled by <strong>audit</strong>'s Pruning flywheel; this action is code-debt only. Playbook: <code>actions/debt-review.md</code>.</p>
+      </div>
+      <div class="action">
+        <span class="action-tag">pre-release <span class="ver">0.11.0</span></span>
+        <h3 style="color: var(--accent4);">policy-audit</h3>
+        <p>Walks every installed policy's guides under <code>harness/policies/&lt;name&gt;/guides/</code> and reports <code>compliant</code> / <code>violation</code> / <code>inapplicable</code> / <code>uncheckable</code> per rule. Compliance only — lockfile integrity is out of scope. Playbook: <code>actions/policy-audit.md</code>.</p>
+      </div>
+      <div class="action">
+        <span class="action-tag">config</span>
+        <h3 style="color: var(--accent5);">mode</h3>
+        <p>Set pacing mode: <code>paired</code> / <code>solo</code> / <code>autopilot</code>. Controls how often the agent stops to ask. See <a href="#modes">Pacing modes</a>. Playbook: <code>actions/mode.md</code>.</p>
+      </div>
+    </div>
+
+    <p style="font-size: 0.78rem; color: var(--muted); font-family: var(--mono); margin-top: 24px; line-height: 1.7;">Authoring a new action is one markdown file under <code>harness/actions/</code> plus a bullet in the menu file. Playbooks are short (~20–40 lines): list the activities, link to the underlying guides / sensors / state. Deeper context lives in <code>harness/guides/process/</code>; playbooks forward-link there when they apply.</p>
   </section>
 
   <!-- ===================== RULES & IRON LAWS ===================== -->
@@ -1983,6 +2216,60 @@ policies:
       <p><strong style="color: var(--accent3);">Biggest gap: sub-agent parallelism for review.</strong> When an adapter lacks native sub-agent support, the four review concerns (<code>review-functional</code>, <code>review-security</code>, <code>review-risk</code>, <code>review-deployment</code>) collapse into a single conversation. The same context window wears four hats sequentially, sharing the same primed framing — and findings degrade accordingly. Security blind spots survive a functional pass; deployment risk gets folded into "looks fine."</p>
       <p>Recommendation: if your agent does not support sub-agents, do <em>not</em> run the four reviewers in one chat. Spawn them as <strong>separate sessions</strong> — separate tmux panes, terminals, or tabs — one reviewer per session, each starting from the diff alone. Combine findings outside the agent.</p>
     </div>
+  </section>
+
+  <!-- ===================== ADAPTERS ===================== -->
+  <section id="adapters" class="page" data-title="Adapters">
+    <div class="page-head">
+      <div class="crumb">Reference · How each agent runs the harness</div>
+      <h1>Adapters — three markdown files per supported agent.</h1>
+      <p class="tagline">Every supported agent ships an adapter under <code>harness/adapters/&lt;agent&gt;/</code>. Three files: <code>lifecycle.md</code>, <code>activation.md</code>, <code>sensors.md</code>. They capture how that specific agent runs the harness — sub-agent spawning, shell execution, tracker integration, sensor invocation. The action playbooks stay agent-neutral; adapters document the bridge.</p>
+    </div>
+
+    <div class="section-label">The three files</div>
+    <div class="action-grid three">
+      <div class="action">
+        <span class="action-tag">how the agent works phases</span>
+        <h3 style="color: var(--accent);"><code>lifecycle.md</code></h3>
+        <p>How this agent invokes each phase. Whether spec phase pulls from a tracker via MCP or asks inline; whether review spawns four sub-agents in parallel or runs them sequentially; how the agent handles the gates between phases. Edit when your team uses the agent in a way the default doesn't capture.</p>
+      </div>
+      <div class="action">
+        <span class="action-tag">how rules enter context</span>
+        <h3 style="color: var(--accent2);"><code>activation.md</code></h3>
+        <p>How this agent loads the ambient guides on session start. <code>CLAUDE.md</code> for Claude Code, <code>AGENTS.md</code> for Codex, <code>.cursor/rules/keystone-*.mdc</code> for Cursor, <code>.continuerules</code> for Continue, etc. Documents the menu file's role and the always-loaded section.</p>
+      </div>
+      <div class="action">
+        <span class="action-tag">how sensors run</span>
+        <h3 style="color: var(--accent3);"><code>sensors.md</code></h3>
+        <p>Which sensors the agent can run autonomously (shell-execution-capable agents can run lint / type / tests directly; others surface the command and ask you to paste output). Inferential sensors that need sub-agents are gated here too — the four reviewers can run in parallel only where the adapter supports it.</p>
+      </div>
+    </div>
+
+    <div class="section-label">Adapters shipped today</div>
+    <div class="agents-table">
+      <div class="agent-row head">
+        <span>Agent</span>
+        <span>Adapter folder</span>
+        <span>Coverage</span>
+      </div>
+      <div class="agent-row"><span class="agent-name">Claude Code</span><span class="agent-menu"><code>adapters/claude-code/</code></span><span class="agent-status real">full</span></div>
+      <div class="agent-row"><span class="agent-name">Codex CLI</span><span class="agent-menu"><code>adapters/codex/</code></span><span class="agent-status real">full</span></div>
+      <div class="agent-row"><span class="agent-name">pi.dev</span><span class="agent-menu"><code>adapters/pi/</code></span><span class="agent-status real">full</span></div>
+      <div class="agent-row"><span class="agent-name">Cursor</span><span class="agent-menu"><code>adapters/cursor/</code></span><span class="agent-status real">full</span></div>
+      <div class="agent-row"><span class="agent-name">Aider</span><span class="agent-menu"><code>adapters/aider/</code></span><span class="agent-status gaps">real · gaps</span></div>
+      <div class="agent-row"><span class="agent-name">GitHub Copilot</span><span class="agent-menu"><code>adapters/github-copilot/</code></span><span class="agent-status gaps">real · gaps</span></div>
+      <div class="agent-row"><span class="agent-name">Continue</span><span class="agent-menu"><code>adapters/continue/</code></span><span class="agent-status gaps">real · gaps</span></div>
+      <div class="agent-row"><span class="agent-name">Cline / Roo Code</span><span class="agent-menu"><code>adapters/cline/</code></span><span class="agent-status gaps">real · gaps</span></div>
+      <div class="agent-row"><span class="agent-name">Goose</span><span class="agent-menu"><code>adapters/goose/</code></span><span class="agent-status gaps">real · gaps</span></div>
+      <div class="agent-row"><span class="agent-name">Generic fallback</span><span class="agent-menu"><code>adapters/_generic/</code></span><span class="agent-status fallback">fallback</span></div>
+    </div>
+
+    <div class="definition" style="margin-top: 24px;">
+      <p><strong>Authoring a new adapter.</strong> Three markdown files, modeled on an existing adapter. The most useful reference shapes are <code>adapters/claude-code/</code> (full coverage, sub-agent parallelism, autonomous shell) and <code>adapters/_generic/</code> (fallback — no execution, no sub-agents, everything surfaces to the human). Adapters marked <em>real · gaps</em> can be promoted to <em>full</em> as the upstream agent gains the missing capability; the gap list lives in the adapter's own README.</p>
+      <p><strong>Adding a new target bundle to an existing install.</strong> <code>keystone target add &lt;agent&gt;</code> installs the adapter bundle and the menu file for that agent into an existing <code>harness/</code>. Teams running multiple agents pass a comma-separated list to <code>keystone init --agent</code> or add agents incrementally with <code>target add</code>.</p>
+    </div>
+
+    <p style="font-size: 0.78rem; color: var(--muted); font-family: var(--mono); margin-top: 16px; line-height: 1.7;">For the per-agent coverage matrix (which capabilities are native, which gap), see <a href="#agents">Supported agents</a>.</p>
   </section>
 
   <!-- ===================== OPTIONS ===================== -->
