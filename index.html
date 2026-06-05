@@ -925,7 +925,7 @@
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <h1>Keystone</h1>
-      <p>v0.9.0 · project harness + org policy plugins</p>
+      <p>v0.11.0 · project harness + org policy plugins</p>
     </div>
 
     <nav>
@@ -948,6 +948,7 @@
         <a class="nav-link" href="#failure-modes">Agent failure modes</a>
         <a class="nav-link" href="#migrations">Migrations</a>
         <a class="nav-link" href="#modes">Pacing modes</a>
+        <a class="nav-link" href="#budget">Context budgeting</a>
       </div>
 
       <div class="nav-group">
@@ -956,7 +957,6 @@
         <a class="nav-link" href="#agents">Supported agents</a>
         <a class="nav-link" href="#options">Install-time options</a>
         <a class="nav-link" href="#assumptions">Tool assumptions</a>
-        <a class="nav-link" href="#budget">Context budgeting</a>
         <a class="nav-link" href="https://github.com/tacoda/keystone/blob/main/CHANGELOG.md" target="_blank" rel="noopener">Changelog <span class="ext">↗</span></a>
       </div>
 
@@ -980,7 +980,7 @@
   <!-- ===================== INTRODUCTION (landing) ===================== -->
   <section id="introduction" class="page" data-title="Introduction">
     <div class="page-head">
-      <div class="crumb">Overview · Keystone v0.9.0</div>
+      <div class="crumb">Overview · Keystone v0.11.0</div>
       <h1>A project harness installer with org policy plugins.</h1>
       <p class="tagline">A single Go binary that drops a self-updating, markdown-only harness — guides, corpus, sensors, policies, and flywheels — into your repo and wires it to your AI coding agent. One command, agent-agnostic, owned by your team.</p>
     </div>
@@ -1017,31 +1017,82 @@
       <p>After <code>keystone init</code>, your agent drives a six-phase workflow (spec → planning → implementation → verification → review → release) under always-loaded guides, reaching for corpus reasoning only when the rules aren't enough.</p>
     </div>
 
-    <div class="section-label">What ships in 0.9.0</div>
-    <div class="action-grid">
+    <div class="section-label">It's all just markdown — override by editing a file</div>
+    <div class="definition">
+      <p><strong>Every layer of the harness is markdown the agent reads and you edit.</strong> Rules, reasoning, sensor contracts, action playbooks, ledgers, policies, adapter docs — all of it. No DSL, no compiled config, no runtime service. If something doesn't match your team, change the markdown. The agent stops applying a rule the moment its file is gone; starts applying a new one the moment its file lands.</p>
+      <p><strong>Defaults are <em>seeds</em>, not the shape.</strong> The harness ships with a default set of guides, sensors, actions, and a six-phase workflow because most teams want <em>something</em> to start from. They're also the worked examples for how to author your own — copy any file, edit, rename, ship. The whole point of the markdown-only design is that the harness bends to your project, not the other way around.</p>
+    </div>
+
+    <div class="section-label">What you can change, and how</div>
+    <div class="action-grid three">
       <div class="action">
-        <span class="action-tag" style="background: rgba(245,158,11,0.12); color: var(--accent3); border: 1px solid rgba(245,158,11,0.3);">NEW</span>
-        <h3 style="color: var(--accent3);">Org policy plugins</h3>
-        <p>Policies live under <code>harness/policies/</code> — a fifth harness layer. Universal default + org-installed namespaces. Each policy is a markdown plugin with its own <code>corpus/</code> + <code>guides/</code>.</p>
+        <span class="action-tag">Workflow</span>
+        <h3 style="color: var(--accent);">Don't like six phases?</h3>
+        <p>The pipeline is just <code>harness/actions/task.md</code> orchestrating <code>spec.md</code>, <code>orient.md</code>, <code>verify.md</code>, etc. Edit <code>task.md</code> to change the order; replace any phase by editing its playbook; add a phase by dropping in <code>harness/actions/&lt;new-phase&gt;.md</code> and adding a bullet to your menu file. Remove one by deleting the file.</p>
       </div>
       <div class="action">
-        <span class="action-tag">NEW</span>
-        <h3 style="color: var(--accent);"><code>keystone init --policy</code></h3>
-        <p>Repeatable flag. Fetches an org policy from a git ref (<code>git+&lt;url&gt;[#&lt;rev&gt;]</code>) and installs it at <code>harness/policies/&lt;name&gt;/</code>. Validates that pack content stays inside the namespace.</p>
+        <span class="action-tag">Rules</span>
+        <h3 style="color: var(--accent2);">Guide doesn't fit?</h3>
+        <p>Open the markdown under <code>harness/guides/</code>, edit it, soften it, strengthen it, or delete the file. The drift sensor enforces what's there — nothing else. Authoring a new rule is one new file in the right subdirectory.</p>
       </div>
       <div class="action">
-        <span class="action-tag">NEW</span>
-        <h3 style="color: var(--accent2);"><code>keystone policy update</code></h3>
-        <p>Re-resolves the recorded ref (or a new one) and replaces the namespace tree. Refuses to overwrite files edited locally since install unless <code>--force</code>.</p>
+        <span class="action-tag">Sensors</span>
+        <h3 style="color: var(--accent3);">Need a new check?</h3>
+        <p>Sensors are markdown contracts — kind, trigger, inputs, exit condition, output. Add <code>harness/sensors/&lt;name&gt;.md</code> with that shape; the action that should invoke it picks it up next pass. The shipped sensors (lint, type-check, the four reviewers, the security trio) are the worked examples.</p>
       </div>
       <div class="action">
-        <span class="action-tag">NEW</span>
-        <h3 style="color: var(--accent5);"><code>harness/.keystone.lock</code></h3>
-        <p>Combined lockfile: install section (version, install date, agents) + <code>policies:</code> map with per-policy <code>source_ref</code>, <code>resolved_sha</code>, <code>policy_version</code>, and per-file SHA-256 hashes.</p>
+        <span class="action-tag">Reasoning</span>
+        <h3 style="color: var(--accent5);">Stack idiom is wrong?</h3>
+        <p><code>harness/corpus/idioms/&lt;stack&gt;/*.md</code> is the empirical map of how your stack is used here. Edit when patterns shift; add files when new patterns emerge. State ledgers (<code>code-debt.md</code>, <code>harness-debt.md</code>, <code>quality-radar.md</code>) are markdown too — read during planning, written by sensors, edited by humans.</p>
+      </div>
+      <div class="action">
+        <span class="action-tag">Policies</span>
+        <h3 style="color: var(--accent4);">Org policy too strict?</h3>
+        <p>Policy plugins are also markdown, distributable as a small git repo with a manifest. They land under <code>harness/policies/&lt;name&gt;/</code>. If your team disagrees with a rule, document the deviation in a project guide that traces to the policy file — the policy stays canonical, your project's exception is recorded where readers look.</p>
+      </div>
+      <div class="action">
+        <span class="action-tag">Adapters &amp; modes</span>
+        <h3 style="color: var(--accent);">Agent-specific friction?</h3>
+        <p><code>harness/adapters/&lt;agent&gt;/lifecycle.md</code> and <code>activation.md</code> document how that agent runs the harness — edit to capture how your team actually uses it. Pacing modes live in <code>harness/guides/process/modes.md</code>; redefine the modes themselves, not just pick one.</p>
       </div>
     </div>
 
-    <p style="font-size: 0.82rem; color: var(--muted); margin-top: 8px; line-height: 1.7;">Existing 0.8.x installs migrate to 0.9.0 cleanly via <code>keystone migrate</code> — universal principles relocate into <code>policies/universal/</code> with two <code>move_dir</code> migration ops; local edits to principle files are preserved.</p>
+    <p style="font-size: 0.82rem; color: var(--muted); margin-top: 8px; line-height: 1.7;"><code>keystone migrate</code> (see <a href="#migrations">Migrations</a>) keeps the <em>generic</em> harness aligned with each release without touching your edits — it applies idempotent operations, flags conflicts where you've diverged, and never silently overwrites. So bending the harness to your team and pulling in upstream improvements aren't mutually exclusive.</p>
+
+    <div class="action-grid">
+      <div class="action">
+        <span class="action-tag" style="background: rgba(245,158,11,0.12); color: var(--accent3); border: 1px solid rgba(245,158,11,0.3);">NEW</span>
+        <h3 style="color: var(--accent3);">Security sensors</h3>
+        <p>Three new computational sensors — <code>secret-scan</code>, <code>vuln-scan</code>, <code>sast</code> — wrap whatever tool the project picks (gitleaks/trivy/semgrep/etc.). Gate the commit in <strong>verify</strong>; advisory-only in <strong>audit</strong>.</p>
+      </div>
+      <div class="action">
+        <span class="action-tag">NEW</span>
+        <h3 style="color: var(--accent);">Code debt + harness debt</h3>
+        <p>Two paired ledgers. <code>corpus/state/code-debt.md</code> tracks debt in your codebase (TODO/FIXME/complexity hotspots). <code>corpus/state/harness-debt.md</code> tracks debt in the <em>harness itself</em> — stale rules, placeholders, failing sensors, drifted state. Read during planning so debt is visible before you touch the region.</p>
+      </div>
+      <div class="action">
+        <span class="action-tag">NEW</span>
+        <h3 style="color: var(--accent2);">Quality Radar</h3>
+        <p>Five-dimension scorecard (type safety, test quality, readability, security, performance) aggregating the verify + review sensors. Not a gate — a signal the review action discusses. Persisted with append-only history in <code>corpus/state/quality-radar.md</code>.</p>
+      </div>
+      <div class="action">
+        <span class="action-tag">NEW</span>
+        <h3 style="color: var(--accent5);">Stack-drift sensor</h3>
+        <p>Detects when <code>CODEBASE_STATE.md</code> has diverged from the actual repo — declared stacks vanished, undeclared manifests appeared, region map stale, tool commands missing. No rebootstrap; the <strong>audit</strong> action reconciles incrementally.</p>
+      </div>
+      <div class="action">
+        <span class="action-tag">NEW</span>
+        <h3 style="color: var(--accent4);"><code>policy-audit</code> action</h3>
+        <p>Agent walks every installed policy's guides and reports <code>compliant</code> / <code>violation</code> / <code>inapplicable</code> / <code>uncheckable</code> per rule against the codebase. Run before release or per audit cycle.</p>
+      </div>
+      <div class="action">
+        <span class="action-tag">NEW</span>
+        <h3 style="color: var(--accent3);"><code>debt-review</code> action</h3>
+        <p>Periodic triage of the code-debt ledger. Walks <code>discovery</code> items, re-scores existing entries, prunes <code>stale</code> items. <strong>Audit</strong>'s Pruning flywheel now persists harness-debt findings instead of producing an ephemeral report.</p>
+      </div>
+    </div>
+
+    <p style="font-size: 0.82rem; color: var(--muted); margin-top: 8px; line-height: 1.7;">Existing 0.9.x and 0.10.x installs migrate to 0.11.0 cleanly via <code>keystone migrate</code>. This release also <strong style="color: var(--text);">backfills</strong> the missing 0.10.0 and 0.10.1 migration directories (those releases shipped without migrations) so <code>migrate</code> from 0.9.x produces a complete install. See <a href="#migrations">Migrations</a>.</p>
 
     <!-- CTAs (visible on landing) -->
     <div class="section-label">Get involved · get support</div>
@@ -1204,7 +1255,7 @@ flowchart LR
 <pre class="code"><span class="prompt">$</span> curl -fsSL https://raw.githubusercontent.com/tacoda/keystone/main/install.sh &gt; install.sh
 <span class="prompt">$</span> less install.sh
 <span class="prompt">$</span> sh install.sh</pre>
-      <p>Override the install dir with <code>KEYSTONE_PREFIX=/some/path</code> or pin the release with <code>KEYSTONE_VERSION=v0.9.0</code>. The installer does not run <code>keystone init</code> — open a new shell and run it yourself in a project to scaffold the harness.</p>
+      <p>Override the install dir with <code>KEYSTONE_PREFIX=/some/path</code> or pin the release with <code>KEYSTONE_VERSION=v0.11.0</code>. The installer does not run <code>keystone init</code> — open a new shell and run it yourself in a project to scaffold the harness.</p>
     </div>
 
     <div class="install-method">
@@ -1346,7 +1397,7 @@ flowchart LR
     <div class="page-head">
       <div class="crumb">Capabilities · Project layer</div>
       <h1>Sensors — automated checks at phase boundaries.</h1>
-      <p class="tagline">Sixteen sensors fire from inside lifecycle actions. Each declares <strong>kind</strong> (inferential or computational), trigger, inputs, exit condition, and output. Verify gates the commit; review spawns four reviewers in parallel on the diff.</p>
+      <p class="tagline">Twenty-three sensors fire from inside lifecycle actions. Each declares <strong>kind</strong> (inferential or computational), trigger, inputs, exit condition, and output. Verify gates the commit; review spawns four reviewers in parallel on the diff; audit sweeps the whole codebase. <span class="badge" style="font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.12em; color: var(--accent3); background: rgba(245,158,11,0.10); border: 1px solid rgba(245,158,11,0.25); padding: 1px 6px; border-radius: 2px;">+7 in 0.11.0</span></p>
     </div>
 
     <div class="section-label">Kind taxonomy</div>
@@ -1354,7 +1405,7 @@ flowchart LR
       <div class="action">
         <span class="action-tag">Computational</span>
         <h3 style="color: var(--accent3);">Deterministic execution</h3>
-        <p>A binary, script, or library returns a result that does not depend on agent reasoning. <code>lint</code>, <code>type-check</code>, <code>test</code>, <code>build</code>, <code>drift</code>, <code>coverage</code>, <code>commit-message</code>, <code>risk-fingerprint</code>, <code>traffic-topology</code>, <code>state-region</code>, <code>tracker-card-fetcher</code>.</p>
+        <p>A binary, script, or library returns a result that does not depend on agent reasoning. <code>lint</code>, <code>type-check</code>, <code>test</code>, <code>build</code>, <code>drift</code>, <code>coverage</code>, <code>commit-message</code>, <code>risk-fingerprint</code>, <code>traffic-topology</code>, <code>state-region</code>, <code>tracker-card-fetcher</code>, <code>quality-radar</code>, <code>code-debt</code>, <code>harness-debt</code>, <code>stack-drift</code>, <code>secret-scan</code>, <code>vuln-scan</code>, <code>sast</code>.</p>
       </div>
       <div class="action">
         <span class="action-tag">Inferential</span>
@@ -1387,6 +1438,13 @@ flowchart LR
       <div class="layer l3"><div class="layer-cell"><span class="layer-name">review-security</span></div><div class="layer-cell"><span class="layer-desc">Injection, authn/authz, secrets, OWASP top-N concerns.</span></div><div class="layer-cell"><span class="layer-act">inferential</span></div><div class="layer-cell"><span class="layer-act">review</span></div></div>
       <div class="layer l3"><div class="layer-cell"><span class="layer-name">review-risk</span></div><div class="layer-cell"><span class="layer-desc">Blast radius, reversibility, hot-spot regions, coupling, side effects. (0.8.0)</span></div><div class="layer-cell"><span class="layer-act">inferential</span></div><div class="layer-cell"><span class="layer-act">review</span></div></div>
       <div class="layer l3"><div class="layer-cell"><span class="layer-name">review-deployment</span></div><div class="layer-cell"><span class="layer-desc">Schema migrations, feature-flag gating, env drift, rolling-deploy compatibility, rollback path. (0.8.0)</span></div><div class="layer-cell"><span class="layer-act">inferential</span></div><div class="layer-cell"><span class="layer-act">review</span></div></div>
+      <div class="layer l3"><div class="layer-cell"><span class="layer-name">quality-radar</span></div><div class="layer-cell"><span class="layer-desc">Five-dimension scorecard (type safety · test quality · readability · security · performance). Aggregates verify + review outputs. (0.11.0)</span></div><div class="layer-cell"><span class="layer-act">computational</span></div><div class="layer-cell"><span class="layer-act">review · audit</span></div></div>
+      <div class="layer l3"><div class="layer-cell"><span class="layer-name">code-debt</span></div><div class="layer-cell"><span class="layer-desc">Debt markers (TODO/FIXME/HACK/XXX) + complexity hotspots. Categorizes by deliberate / drift / shortcut / discovery. (0.11.0)</span></div><div class="layer-cell"><span class="layer-act">computational</span></div><div class="layer-cell"><span class="layer-act">review · audit</span></div></div>
+      <div class="layer l3"><div class="layer-cell"><span class="layer-name">harness-debt</span></div><div class="layer-cell"><span class="layer-desc">Debt in the harness itself — stale rules, placeholders, failing sensors, empty shells, uncited policies, drifted state. (0.11.0)</span></div><div class="layer-cell"><span class="layer-act">computational</span></div><div class="layer-cell"><span class="layer-act">audit</span></div></div>
+      <div class="layer l3"><div class="layer-cell"><span class="layer-name">stack-drift</span></div><div class="layer-cell"><span class="layer-desc">Flags when <code>CODEBASE_STATE.md</code> diverges from the actual repo. Feeds harness-debt; audit reconciles. (0.11.0)</span></div><div class="layer-cell"><span class="layer-act">computational</span></div><div class="layer-cell"><span class="layer-act">audit</span></div></div>
+      <div class="layer l3"><div class="layer-cell"><span class="layer-name">secret-scan</span></div><div class="layer-cell"><span class="layer-desc">Committed-secret detection (gitleaks / trufflehog / detect-secrets). Project picks the tool. (0.11.0)</span></div><div class="layer-cell"><span class="layer-act">computational</span></div><div class="layer-cell"><span class="layer-act">verify · audit</span></div></div>
+      <div class="layer l3"><div class="layer-cell"><span class="layer-name">vuln-scan</span></div><div class="layer-cell"><span class="layer-desc">Known-vulnerability scan over declared dependencies (trivy / npm audit / pip-audit / cargo audit / govulncheck). (0.11.0)</span></div><div class="layer-cell"><span class="layer-act">computational</span></div><div class="layer-cell"><span class="layer-act">verify · audit</span></div></div>
+      <div class="layer l3"><div class="layer-cell"><span class="layer-name">sast</span></div><div class="layer-cell"><span class="layer-desc">Static analysis for insecure code patterns (semgrep / bandit / brakeman / gosec). Computational sibling to review-security. (0.11.0)</span></div><div class="layer-cell"><span class="layer-act">computational</span></div><div class="layer-cell"><span class="layer-act">verify · audit</span></div></div>
     </div>
 
     <p style="font-size: 0.82rem; color: var(--muted); line-height: 1.7;">Adapters with sub-agent parallelism (Claude Code) spawn the four review-* sensors concurrently; adapters without (Codex, Pi) run them sequentially. <strong style="color: var(--text);">Strong recommendation</strong> for adapters that can't parallelize: run the four reviewers in separate sessions and combine findings outside the agent — the independent context windows are the point.</p>
@@ -1455,8 +1513,8 @@ flowchart LR
     <div class="section-label">Pinning &amp; the lockfile</div>
     <p style="font-size: 0.85rem; color: var(--muted); line-height: 1.7; margin-bottom: 14px;">Each installed policy is pinned in <code>harness/.keystone.lock</code> — the same lockfile that holds the install section. Per-file SHA-256 hashes let <code>policy update</code> detect locally edited files before clobbering them.</p>
 <pre class="code">install:
-  version: 0.9.0
-  install_date: 2026-06-04
+  version: 0.11.0
+  install_date: 2026-06-05
   agents: [claude-code]
 
 policies:
@@ -1464,7 +1522,7 @@ policies:
     source_ref: "git+https://github.com/tacoda/tacoda-policy.git#v0.1.0"
     resolved_sha: "abc1234..."
     policy_version: "0.1.0"
-    keystone_version: "0.9.0"
+    keystone_version: "0.11.0"
     files:
       "harness/policies/tacoda/guides/documentation.md": "sha256:..."
       "harness/policies/tacoda/corpus/documentation.md": "sha256:..."
@@ -1551,7 +1609,7 @@ policies:
   <section id="lifecycle" class="page" data-title="Lifecycle workflow">
     <div class="page-head">
       <div class="crumb">Capabilities · Workflow</div>
-      <h1>One kickoff phrase. Eleven action playbooks. Six phases.</h1>
+      <h1>One kickoff phrase. Thirteen action playbooks. Six phases.</h1>
       <p class="tagline">Every task flows through the same six phases. Every action is invoked the same way in every agent — natural language against an agent-agnostic playbook at <code>harness/actions/&lt;action&gt;.md</code>. <span class="badge" style="font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.12em; color: var(--accent3); background: rgba(245,158,11,0.10); border: 1px solid rgba(245,158,11,0.25); padding: 1px 6px; border-radius: 2px;">NEW 0.10</span></p>
     </div>
 
@@ -1623,7 +1681,7 @@ policies:
       <div class="action">
         <span class="action-tag">Periodic</span>
         <h3 style="color: var(--accent2);">audit</h3>
-        <p>Asymmetric dual audit. <strong>Guides</strong> regularly, <strong>corpus</strong> rarely — only when design/strategy has shifted.</p>
+        <p>Asymmetric dual audit. <strong>Guides</strong> regularly, <strong>corpus</strong> rarely. Pruning now reads the harness-debt sensor and persists findings to <code>corpus/state/harness-debt.md</code> instead of producing an ephemeral report. <span class="ver">0.11.0</span></p>
       </div>
       <div class="action">
         <span class="action-tag">After learn</span>
@@ -1634,6 +1692,16 @@ policies:
         <span class="action-tag">Config</span>
         <h3 style="color: var(--accent5);">mode</h3>
         <p>Set pacing mode (paired / solo / autopilot). Controls how often the agent stops to ask. See <a href="#modes">Pacing modes</a>.</p>
+      </div>
+      <div class="action">
+        <span class="action-tag">Periodic <span class="ver">0.11.0</span></span>
+        <h3 style="color: var(--accent3);">debt-review</h3>
+        <p>Triage <code>corpus/state/code-debt.md</code>. Walks <code>discovery</code> items, re-scores existing entries, prunes <code>stale</code> items. Harness debt is handled by <strong>audit</strong>'s Pruning flywheel; this action is code-debt only.</p>
+      </div>
+      <div class="action">
+        <span class="action-tag">Pre-release <span class="ver">0.11.0</span></span>
+        <h3 style="color: var(--accent4);">policy-audit</h3>
+        <p>Walks every installed policy's guides under <code>harness/policies/&lt;name&gt;/guides/</code> and reports <code>compliant</code> / <code>violation</code> / <code>inapplicable</code> / <code>uncheckable</code> per rule. Compliance only — lockfile integrity is out of scope.</p>
       </div>
     </div>
 
@@ -1734,7 +1802,19 @@ policies:
     <div class="page-head">
       <div class="crumb">Capabilities · Upgrade flow</div>
       <h1>Migrate the harness forward with <code>keystone migrate</code>.</h1>
-      <p class="tagline">Migrations live under an embedded <code>migrations/&lt;version&gt;/</code> tree as YAML files declaring idempotent operations. The runner reads <code>keystone_version</code> from <code>INSTALL_PROFILE.md</code>, applies every newer migration with a per-file <code>y/N/q</code> prompt, and bumps the version after each release directory completes.</p>
+      <p class="tagline"><code>keystone migrate</code> brings the <em>generic</em> harness — the parts every install gets from the binary — up to the version you have. It does not touch the files your team has edited.</p>
+    </div>
+
+    <div class="definition">
+      <p><strong>What <code>migrate</code> updates.</strong> Every release ships a <code>migrations/&lt;version&gt;/</code> directory of YAML files declaring idempotent operations against the generic harness — adding new sensors, action playbooks, README index entries, frontmatter keys; relocating layers; updating the templates that ship inside the binary. The runner reads <code>keystone_version</code> from <code>INSTALL_PROFILE.md</code> and applies every migration newer than that, version directory by version directory.</p>
+      <p><strong>What <code>migrate</code> never touches.</strong> Anything your team has edited. Every operation is idempotent and reads the target's current state before writing:</p>
+      <ul class="iron-list">
+        <li>If the file is missing, <code>add_file</code> creates it; if it's already there with matching content, no-op; if it's there with <em>different</em> content, the runner reports a <strong style="color: var(--text);">conflict</strong> and leaves the file alone. Same shape for <code>replace_block</code> — exact text match required, or it's flagged for you to merge by hand.</li>
+        <li><code>frontmatter_set</code> only adds keys; existing values are never overwritten.</li>
+        <li><code>ensure_section</code> appends a heading + body only if the heading isn't already present.</li>
+        <li>Customized rules, hand-tuned sensor commands, project-specific corpus, state ledgers, policy guides — all of it stays as you left it. Migrations carry the <em>defaults</em> forward; your edits are sacrosanct.</li>
+      </ul>
+      <p>Bring the binary up first, then run <code>migrate</code> in your project. If a migration encounters a divergence, it surfaces — never silently overwrites.</p>
     </div>
 
     <div class="install-method">
@@ -1772,15 +1852,14 @@ policies:
       <li><strong style="color: var(--accent4);">DELETE_DIR</strong> <span class="ver">0.9.0</span> Remove an emptied source directory after a move.</li>
     </ul>
 
-    <div class="section-label">Migrating to 0.9.0</div>
+    <div class="section-label">Migrating to 0.11.0</div>
     <div class="definition">
-      <p><code>keystone migrate</code> ships two migration files under <code>migrations/0.9.0/</code>:</p>
-      <p><strong style="color: var(--accent);">001-add-policies-layer.yaml</strong> — one <code>add_file</code> op for <code>harness/policies/README.md</code> describing the new layer.</p>
-      <p><strong style="color: var(--accent);">002-relocate-universal-principles.yaml</strong> — two <code>move_dir</code> ops (<code>corpus/principles/</code> → <code>policies/universal/corpus/principles/</code> and <code>guides/principles/</code> → <code>policies/universal/guides/principles/</code>) followed by two <code>delete_dir</code> ops cleaning up the emptied source directories.</p>
-      <p>Locally edited principle files are <strong>moved verbatim</strong> — user content is preserved. If a destination file already exists with diverged content (rare, e.g. from a partial earlier migration), the conflict is surfaced for manual review.</p>
+      <p><code>migrations/0.11.0/</code> ships five files: <strong style="color: var(--accent);">001-add-sensors.yaml</strong> (seven new sensor playbooks), <strong style="color: var(--accent);">002-add-state-files.yaml</strong> (three state ledger templates), <strong style="color: var(--accent);">003-add-actions.yaml</strong> (debt-review and policy-audit), <strong style="color: var(--accent);">004-update-audit.yaml</strong> (Pruning flywheel rewrite), and <strong style="color: var(--accent);">005-update-readmes.yaml</strong> (sensor/action/state index updates).</p>
+      <p><strong style="color: var(--accent3);">Backfill:</strong> 0.10.0 and 0.10.1 shipped without migration directories — running <code>migrate</code> from a 0.9.x install used to silently produce an incomplete install (the entire <code>harness/actions/</code> tree from 0.10.0 was missed). This release backfills both: <code>migrations/0.10.0/</code> adds the twelve action playbooks plus README updates, and <code>migrations/0.10.1/</code> tightens the bootstrap playbook. Users already at 0.10.1 no-op the backfill on idempotent re-apply.</p>
+      <p><strong style="color: var(--text);">Not touched by migration:</strong> your <code>CODEBASE_STATE.md</code>. The template grew new slots (security tool commands, severity thresholds, the seven new Sensor rows) but the file in an existing install has been populated with your project's actual values — replacing it would clobber your edits. To wire up the new sensors, add the rows by hand or run the <strong>bootstrap</strong> action through your agent and review the proposed diff.</p>
     </div>
 
-    <p style="font-size: 0.82rem; color: var(--muted); line-height: 1.7;"><strong style="color: var(--text);">Caveat for <code>optional/</code> overlay users:</strong> files added by <code>keystone init --architecture &lt;X&gt;</code> or <code>--compliance &lt;Y&gt;</code> in 0.8.x lived under <code>corpus/principles/</code> and <code>guides/principles/</code>. The migration moves them along with the universal principles into <code>policies/universal/</code>. To get the cleaner per-overlay namespacing (<code>policies/hexagonal/</code>, <code>policies/soc2/</code>, etc.), re-run <code>keystone init --architecture &lt;X&gt; --force</code> after migrate. The pre-migration paths still work; only the on-disk layout differs.</p>
+    <p style="font-size: 0.82rem; color: var(--muted); line-height: 1.7;"><strong style="color: var(--text);">For users still on 0.9.x:</strong> <code>migrate</code> walks <code>0.10.0 → 0.10.1 → 0.11.0</code> in sequence; each migration's changes are on disk before the next runs, so the <code>replace_block</code> operations in 0.10.1 and 0.11.0 find the files added by 0.10.0. One pass, three version directories, one final bump of <code>keystone_version</code> to <code>0.11.0</code>.</p>
   </section>
 
   <!-- ===================== PACING MODES ===================== -->
