@@ -2,6 +2,29 @@
 
 All notable changes to keystone are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); the project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and is pre-1.0 (minor versions may include breaking changes).
 
+## [0.13.0] — 2026-06-05
+
+Adds **sensors** as a fourth policy kind, restricted to a two-tier cascade (**team → project**). Sensors describe project tooling (lint, type-check, test, `rubocop`) — too stack-specific to live at the org level, but a team often shares them. An org policy can still mandate *what* must be checked via an `action` (e.g., `static_analysis`); a team policy ships the concrete sensor (e.g., `rubocop`); the project can override either unless the team marks it `strict`.
+
+### Added
+
+- **`sensors:` key in `strict` and `required` manifest specs** — `keystone-policy.yaml` now accepts `strict.sensors:` and `required.sensors:` on team-tier policies. Same semantics as the other kinds (strict blocks override from below; required surfaces gaps).
+- **`harness/policies/<name>/sensors/<name>.md`** — team-tier policies can now ship concrete sensor definitions inside their namespace. The override cascade is **project beats team** for sensors; there is no org layer.
+
+### Changed
+
+- **`harness/policies/README.md`** — adds `sensors/` to the policy layout, adds a row to the activation table, calls out the two-tier sensors exception in the override-model section, updates the `strict` example to include sensors, and notes the team-tier restriction in both the `strict` and `required` rules.
+- **`policy_manifest.go` validation** — rejects two cases at install/update time: (a) an org-tier manifest that lists sensors in `strict` or `required`; (b) an org-tier policy that ships any file under its `sensors/` subdirectory.
+- **`policy_verify.go`** — `keystone policy verify` now walks sensors as a fourth kind. Team-strict sensors shadowed by a project sensor are reported as hard violations; team-required sensors that no tier defines are reported as advisory gaps.
+
+### Migration from 0.12.0
+
+Run `keystone migrate`. The runner applies `migrations/0.13.0/001-update-policies-readme-sensors.yaml` and bumps `keystone_version` to `0.13.0`:
+
+- Updates the policy layout, activation table, override-model section, `strict` example, `strict`/`required` rule lists, and authoring template in `harness/policies/README.md` to document the new sensors kind.
+
+No code or lockfile schema migrations are needed — the on-disk lockfile format is unchanged (the new `sensors:` list is optional and absent from existing entries).
+
 ## [0.12.0] — 2026-06-05
 
 Introduces **playbooks** as a first-class concept alongside actions, formalizes a three-tier **Org → Team → Project** policy cascade with `strict` and `required` declarations, and adds `keystone policy verify` to enforce it. The pre-existing implicit "lifecycle workflow" (`task.md`) becomes the canonical `task` playbook at `harness/playbooks/task.md`. Solo projects continue to work without any installed policies — the cascade is opt-in.
