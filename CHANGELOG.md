@@ -2,6 +2,49 @@
 
 All notable changes to keystone are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); the project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and is pre-1.0 (minor versions may include breaking changes).
 
+## [0.12.0] — 2026-06-05
+
+Introduces **playbooks** as a first-class concept alongside actions, formalizes a three-tier **Org → Team → Project** policy cascade with `strict` and `required` declarations, and adds `keystone policy verify` to enforce it. The pre-existing implicit "lifecycle workflow" (`task.md`) becomes the canonical `task` playbook at `harness/playbooks/task.md`. Solo projects continue to work without any installed policies — the cascade is opt-in.
+
+### Added
+
+- **`harness/playbooks/`** — new top-level directory. A *playbook* is a markdown file that runs an ordered set of [actions](harness/actions/). Project-level playbooks live here; orgs and teams can ship their own under `harness/policies/<name>/playbooks/`.
+- **`harness/playbooks/task.md`** — the end-to-end task workflow (spec → orient → implementation → check-drift → verify → review, with optional learn). Moved from `harness/actions/task.md` (task chains other actions, so it is a playbook).
+- **`harness/playbooks/README.md`** — explains the action vs. playbook distinction and the override cascade.
+- **`harness/policies/<name>/playbooks/` and `harness/policies/<name>/actions/`** — optional new subdirectories inside a policy namespace. Org and team policies can ship distributable playbooks and actions (e.g., `rubocop_for_ruby` as a shared org action).
+- **`keystone policy verify`** — new CLI subcommand. Walks every installed policy in `harness/.keystone.lock` and reports (a) strict-cascade violations — items declared `strict` by a higher tier that are overridden by a lower tier; (b) required-item gaps — items declared `required` by a policy that no tier has defined. Strict violations are hard errors; required gaps are advisory. Also called automatically after `keystone policy add` / `policy update` / `init --policy`.
+- **`tier:` manifest field** — `keystone-policy.yaml` now accepts `tier: org` (default) or `tier: team`. Org-tier policies sit above team-tier policies in the cascade; team-tier policies sit above the project. Defaults to `org` for backward compatibility with existing policies.
+- **`strict:` manifest field** — structured map of kinds to item basenames that the policy locks against override from any lower tier. Keys: `guides`, `playbooks`, `actions` (corpus is never strict — it is loaded on-demand by link). Org-strict blocks both team and project overrides; team-strict blocks project only.
+- **`required:` manifest field** — same structure as `strict`. Names items the policy declares should exist somewhere in the cascade but does not itself ship. Verify surfaces unmet ones as advisory gaps so the project knows what to define.
+- **`Tier`, `Strict`, `Required` fields on `PolicyLock`** in `harness/.keystone.lock` — recorded at install time so `policy verify` runs without re-resolving source policies.
+- **Migration ops `move_file` and `delete_file`** in `migration_ops.go` / `migrate.go` — single-file equivalents of `move_dir` / `delete_dir`. Same idempotency semantics.
+
+### Changed
+
+- **`harness/actions/README.md`** — title changes from "Lifecycle actions" to "Actions", the `task` row is removed from the action table (now a playbook), and an "Override cascade" section documents project-beats-team-beats-org with `strict` enforcement.
+- **`harness/policies/README.md`** — major rewrite. Documents the three-tier cascade (Org → Team → Project), the optional `playbooks/` and `actions/` policy subdirs, and the `strict` / `required` manifest fields with worked examples. Also notes that org/team policies are optional and the harness works for a single project alone.
+- **`harness/actions/policy-audit.md`** — extended to run `keystone policy verify` as its first activity. Reports two categories: strict violations (hard) and required gaps (advisory). Lists every installed policy with its tier; walks `playbooks/` and `actions/` in addition to `guides/`.
+- **`harness/actions/audit.md`** — Pruning flywheel grows two new categories: **strict-cascade violations** (#9) and **required-item gaps** (#10).
+- **Every menu file under `targets/`** (`CLAUDE.md`, `AGENTS.md`, `CONVENTIONS.md`, `.continuerules`, `.goosehints`, `cline-instructions.md`, `.github/copilot-instructions.md`, `.cursor/rules/keystone.mdc`) — adds a "Playbooks" section above the existing "Actions" list. The `task` link now points at `harness/playbooks/task.md`. Each menu file explains the cascade and the `strict` rule in one sentence.
+- **`README.md`** — describes playbooks as a sibling component to actions; the policy section adds the tier model, the cascade rule, and the `required` mechanism.
+
+### Removed
+
+- **`harness/actions/task.md`** — moved to `harness/playbooks/task.md`. The migration handles existing installs via `add_file` (new location) + `delete_file` (old location).
+
+### Migration from 0.11.0
+
+Run `keystone migrate`. The runner applies `migrations/0.12.0/` (six files) and bumps `keystone_version` to `0.12.0`:
+
+- `001-add-playbooks-readme.yaml` — creates `harness/playbooks/README.md`.
+- `002-move-task-to-playbooks.yaml` — `add_file` for `harness/playbooks/task.md` with the new (relative-link-corrected) content, then `delete_file` for `harness/actions/task.md`.
+- `003-update-actions-readme.yaml` — replaces the title, intro, and table header in `harness/actions/README.md`; adds the override-cascade note.
+- `004-update-policies-readme.yaml` — replaces the lead-in paragraph and layout block in `harness/policies/README.md`; ensures the new "Override model" section is present.
+- `005-update-menu-task-link.yaml` — `replace_block` on every shipped menu file's task link, rewriting `harness/actions/task.md` → `harness/playbooks/task.md`. Menu files not present in this install surface as conflicts (skipped).
+- `006-update-actions-policy-audit.yaml` — rewrites the relevant section of `harness/actions/policy-audit.md` and adds the new categories to `harness/actions/audit.md`.
+
+Existing installs that have hand-edited menu files or `harness/actions/README.md` will see conflicts on those operations — re-apply by hand or run `keystone init --force` to refresh.
+
 ## [0.11.0] — 2026-06-05
 
 Adds **quality, debt, security, drift, and policy-compliance sensors** plus the persistent state ledgers and action playbooks they feed. The harness now tracks *code debt* and *harness debt* as two separate ledgers, treats Connectory-style "Quality Radar" scoring as a markdown contract, and exposes `policy-audit` as the agent action that walks installed policy guides against the codebase. Also **backfills migrations for 0.10.0 and 0.10.1** — previous releases shipped without migration directories, so `keystone migrate` from 0.9.x silently produced incomplete installs. The backfill closes that gap; existing 0.10.1 installs no-op the backfill ops on idempotent re-apply.
