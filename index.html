@@ -1398,6 +1398,22 @@ flowchart LR
       <p>Each guide is a markdown file with frontmatter (<code>kind: inferential</code> or <code>computational</code>) and one or more rule sections. The three tiers — regular <code>## RULES</code>, <code>## GOLDEN RULES</code>, <code>## IRON LAW</code> — let the file express both routine directives and damage-on-violation constraints in the same place. Special tiers are <strong>opt-in</strong> during <code>synthesize</code>; defaulting to regular RULES keeps the strong labels rare and load-bearing.</p>
     </div>
 
+    <div class="section-label">Kind taxonomy</div>
+    <div class="action-grid">
+      <div class="action">
+        <span class="action-tag">Computational</span>
+        <h3 style="color: var(--accent3);">Deterministic ambient enforcement</h3>
+        <p>Language servers, formatters, and editor enforcement carry the rule — no agent reasoning needed to apply it. Bootstrap populates <code>guides/computational/</code> with the LSPs and formatters the stack supports (e.g., <code>gopls</code>, <code>ruff</code>, <code>prettier</code>, <code>eslint --fix</code>). The check is the rule.</p>
+      </div>
+      <div class="action">
+        <span class="action-tag">Inferential</span>
+        <h3 style="color: var(--accent2);">Prose rules the agent reasons under</h3>
+        <p>Short directives in plain markdown that the agent must interpret against the situation. <code>guides/process/</code>, <code>guides/idioms/&lt;stack&gt;/</code>, <code>guides/domain/</code>, and the universal-principles bundle. Loaded ambient; applied by judgment, not by binary execution.</p>
+      </div>
+    </div>
+
+    <p style="font-size: 0.82rem; color: var(--muted); line-height: 1.7;">Same <code>kind</code> taxonomy as sensors — but where sensors are reactive feedback fired at phase boundaries, guides are <strong style="color: var(--text);">proactive input</strong> loaded before the agent ever takes an action. Inferential guides shape reasoning up front; computational guides catch deviations in real time at the editor layer. The drift sensor closes the loop, comparing the diff back against the inferential guides at implementation exit.</p>
+
     <div class="section-label">Sublayers</div>
     <div class="layer-header">
       <span>Sublayer</span>
