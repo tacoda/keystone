@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Keystone — A Project Harness Installer with Org Policy Plugins</title>
-<meta name="description" content="Keystone is a project harness installer for coding agents. A project harness with org policy plugins — markdown only, agent-agnostic, owned by your team.">
+<title>Keystone — A Project Harness Installer with Org & Team Policy Plugins</title>
+<meta name="description" content="Keystone is a project harness installer for coding agents. A project harness with org and team policy plugins — markdown only, agent-agnostic, owned by your team. Three-tier cascade: Org → Team → Project.">
 <style>
   @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;600&family=IBM+Plex+Sans:wght@300;400;600&display=swap');
 
@@ -420,12 +420,41 @@
     color: var(--text);
     font-weight: 600;
   }
-  .phase.p1 { border-top: 2px solid var(--accent); }
-  .phase.p2 { border-top: 2px solid var(--accent2); }
-  .phase.p3 { border-top: 2px solid var(--accent3); }
-  .phase.p4 { border-top: 2px solid var(--accent4); }
-  .phase.p5 { border-top: 2px solid var(--accent5); }
-  .phase.p6 { border-top: 2px solid var(--accent); }
+  .phase.p1 { border-top: 2px solid var(--accent);  --phase-color: 74, 222, 154; }
+  .phase.p2 { border-top: 2px solid var(--accent2); --phase-color: 96, 165, 250; }
+  .phase.p3 { border-top: 2px solid var(--accent3); --phase-color: 245, 158, 11; }
+  .phase.p4 { border-top: 2px solid var(--accent4); --phase-color: 232, 121, 160; }
+  .phase.p5 { border-top: 2px solid var(--accent5); --phase-color: 167, 139, 250; }
+  .phase.p6 { border-top: 2px solid var(--accent);  --phase-color: 74, 222, 154; }
+
+  /* Pulse the pipeline in order, with a slight overlap so movement reads
+     as a wave traveling left-to-right. Six phases × 0.6s each = 3.6s loop. */
+  @keyframes pipeline-pulse {
+    0%, 100% {
+      box-shadow: 0 0 0 0 rgba(var(--phase-color), 0);
+      background: var(--surface);
+    }
+    35% {
+      box-shadow: 0 0 24px 2px rgba(var(--phase-color), 0.55);
+      background: rgba(var(--phase-color), 0.10);
+    }
+    70% {
+      box-shadow: 0 0 0 0 rgba(var(--phase-color), 0);
+      background: var(--surface);
+    }
+  }
+  .pipeline .phase {
+    animation: pipeline-pulse 3.6s ease-in-out infinite;
+  }
+  .pipeline .phase.p1 { animation-delay: 0.0s; }
+  .pipeline .phase.p2 { animation-delay: 0.6s; }
+  .pipeline .phase.p3 { animation-delay: 1.2s; }
+  .pipeline .phase.p4 { animation-delay: 1.8s; }
+  .pipeline .phase.p5 { animation-delay: 2.4s; }
+  .pipeline .phase.p6 { animation-delay: 3.0s; }
+  @media (prefers-reduced-motion: reduce) {
+    .pipeline .phase { animation: none; }
+  }
   .phase-desc {
     font-size: 0.82rem;
     color: var(--muted);
@@ -925,7 +954,7 @@
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <h1>Keystone</h1>
-      <p>v0.11.0 · project harness + org policy plugins</p>
+      <p>v0.12.0 · project harness + org/team policy plugins</p>
     </div>
 
     <nav>
@@ -943,10 +972,10 @@
         <a class="nav-link" href="#corpus">Corpus <span class="ext">— reference</span></a>
         <a class="nav-link" href="#state">State ledgers</a>
         <a class="nav-link" href="#sensors">Sensors</a>
-        <a class="nav-link" href="#policies">Policies <span class="badge">NEW 0.9</span></a>
+        <a class="nav-link" href="#policies">Policies <span class="badge">UPDATED 0.12</span></a>
         <a class="nav-link" href="#flywheels">Flywheels</a>
         <a class="nav-link" href="#learning">Learning pipeline</a>
-        <a class="nav-link" href="#lifecycle">Lifecycle workflow</a>
+        <a class="nav-link" href="#playbooks">Playbooks <span class="badge">NEW 0.12</span></a>
         <a class="nav-link" href="#actions">Actions</a>
         <a class="nav-link" href="#rules">Rules &amp; iron laws</a>
         <a class="nav-link" href="#failure-modes">Agent failure modes</a>
@@ -985,9 +1014,9 @@
   <!-- ===================== INTRODUCTION (landing) ===================== -->
   <section id="introduction" class="page" data-title="Introduction">
     <div class="page-head">
-      <div class="crumb">Overview · Keystone v0.11.0</div>
-      <h1>A project harness installer with org policy plugins.</h1>
-      <p class="tagline">A single Go binary that drops a self-updating, markdown-only harness — guides, corpus, sensors, policies, and flywheels — into your repo and wires it to your AI coding agent. One command, agent-agnostic, owned by your team.</p>
+      <div class="crumb">Overview · Keystone v0.12.0</div>
+      <h1>A project harness installer with org &amp; team policy plugins.</h1>
+      <p class="tagline">A single Go binary that drops a self-updating, markdown-only harness — guides, corpus, playbooks, actions, sensors, policies, and flywheels — into your repo and wires it to your AI coding agent. One command, agent-agnostic, owned by your team. Org and team policies cascade <strong>Org → Team → Project</strong>, with <code>strict</code> locking what shouldn't be overridden.</p>
     </div>
 
     <section class="hero-term">
@@ -1033,7 +1062,7 @@
       <div class="action">
         <span class="action-tag">Workflow</span>
         <h3 style="color: var(--accent);">Don't like six phases?</h3>
-        <p>The pipeline is just <code>harness/actions/task.md</code> orchestrating <code>spec.md</code>, <code>orient.md</code>, <code>verify.md</code>, etc. Edit <code>task.md</code> to change the order; replace any phase by editing its playbook; add a phase by dropping in <code>harness/actions/&lt;new-phase&gt;.md</code> and adding a bullet to your menu file. Remove one by deleting the file.</p>
+        <p>The pipeline is just <code>harness/playbooks/task.md</code> orchestrating <code>spec.md</code>, <code>orient.md</code>, <code>verify.md</code>, etc. Edit <code>task.md</code> to change the order; replace any phase by editing its action; add a phase by dropping in <code>harness/actions/&lt;new-phase&gt;.md</code> and referencing it from the playbook. Remove one by deleting the file.</p>
       </div>
       <div class="action">
         <span class="action-tag">Rules</span>
@@ -1052,8 +1081,8 @@
       </div>
       <div class="action">
         <span class="action-tag">Policies</span>
-        <h3 style="color: var(--accent4);">Org policy too strict?</h3>
-        <p>Policy plugins are also markdown, distributable as a small git repo with a manifest. They land under <code>harness/policies/&lt;name&gt;/</code>. If your team disagrees with a rule, document the deviation in a project guide that traces to the policy file — the policy stays canonical, your project's exception is recorded where readers look.</p>
+        <h3 style="color: var(--accent4);">Org or team policy doesn't fit?</h3>
+        <p>Drop a file with the same basename at the matching project path — <code>harness/&lt;kind&gt;/&lt;name&gt;.md</code> — and your version wins. The cascade is <strong>project → team → org</strong>. The only exception: items the higher tier declared <code>strict</code>, which <code>keystone policy verify</code> blocks from being shadowed. Non-strict items are freely overridable.</p>
       </div>
       <div class="action">
         <span class="action-tag">Adapters &amp; modes</span>
@@ -1152,39 +1181,43 @@ flowchart LR
       </div>
     </div>
 
-    <div class="section-label">Five-component harness</div>
+    <div class="section-label">Project harness + org/team policy plugins</div>
     <div class="mermaid-wrap">
-      <p class="mermaid-caption">Project harness + org policy plugins under <code>harness/</code></p>
+      <p class="mermaid-caption">Six components under <code>harness/</code>; policies cascade Org → Team → Project</p>
       <div class="mermaid">
 flowchart TB
-  subgraph projectHarness ["project harness (team-owned)"]
+  subgraph projectHarness ["project harness (project-owned)"]
     direction LR
     guides["guides/<br/><i>ambient · rules</i>"]
     corpus["corpus/<br/><i>on-demand ·<br/>reasoning</i>"]
+    playbooks["playbooks/<br/><i>ordered action<br/>chains</i>"]
+    actions["actions/<br/><i>single units</i>"]
     sensors["sensors/<br/><i>invoked · checks</i>"]
     fly["learning/ + archive/<br/><i>flywheels</i>"]
   end
-  subgraph orgPolicyPlugins ["org policy plugins (policy-owner-owned)"]
-    universal["policies/universal/<br/><i>shipped default</i>"]
-    named["policies/&lt;name&gt;/<br/><i>--policy &lt;ref&gt;</i>"]
+  subgraph orgPolicyPlugins ["policies (policy-owner-owned)"]
+    universal["policies/universal/<br/><i>shipped default · org</i>"]
+    org["policies/&lt;org&gt;/<br/><i>tier: org</i>"]
+    team["policies/&lt;team&gt;/<br/><i>tier: team</i>"]
   end
   guides <-->|paired forward-link| corpus
+  playbooks --> actions
   guides --> drift["drift sensor enforces"]
   universal --> guides
-  universal --> corpus
-  named --> guides
-  named --> corpus
+  org --> guides
+  team --> guides
+  org -. strict locks .-> projectHarness
+  team -. strict locks .-> projectHarness
   classDef green fill:#13161d,stroke:#4ade9a,color:#4ade9a
   classDef blue fill:#13161d,stroke:#60a5fa,color:#60a5fa
   classDef orange fill:#13161d,stroke:#f59e0b,color:#f59e0b
   classDef pink fill:#13161d,stroke:#e879a0,color:#e879a0
   classDef purple fill:#13161d,stroke:#a78bfa,color:#a78bfa
-  class guides green
-  class corpus blue
-  class sensors orange
-  class fly pink
-  class universal,named purple
-  class drift orange
+  class guides,actions green
+  class corpus,team blue
+  class sensors,drift orange
+  class fly,playbooks pink
+  class universal,org purple
       </div>
     </div>
 
@@ -1253,7 +1286,7 @@ flowchart LR
       <div class="action">
         <span class="action-tag">Workflow</span>
         <h3 style="color: var(--accent);">Don't like six phases?</h3>
-        <p>The pipeline is just <code>harness/actions/task.md</code> orchestrating <code>spec.md</code>, <code>orient.md</code>, <code>verify.md</code>, etc. Edit <code>task.md</code> to change the order; replace any phase by editing its playbook; add a phase by dropping in <code>harness/actions/&lt;new-phase&gt;.md</code> and adding a bullet to your menu file. Remove one by deleting the file.</p>
+        <p>The pipeline is just <code>harness/playbooks/task.md</code> orchestrating <code>spec.md</code>, <code>orient.md</code>, <code>verify.md</code>, etc. Edit <code>task.md</code> to change the order; replace any phase by editing its action; add a phase by dropping in <code>harness/actions/&lt;new-phase&gt;.md</code> and referencing it from the playbook. Remove one by deleting the file.</p>
       </div>
       <div class="action">
         <span class="action-tag">Rules</span>
@@ -1272,8 +1305,8 @@ flowchart LR
       </div>
       <div class="action">
         <span class="action-tag">Policies</span>
-        <h3 style="color: var(--accent4);">Org policy too strict?</h3>
-        <p>Policy plugins are also markdown, distributable as a small git repo with a manifest. They land under <code>harness/policies/&lt;name&gt;/</code>. If your team disagrees with a rule, document the deviation in a project guide that traces to the policy file — the policy stays canonical, your project's exception is recorded where readers look.</p>
+        <h3 style="color: var(--accent4);">Org or team policy doesn't fit?</h3>
+        <p>Drop a file with the same basename at the matching project path — <code>harness/&lt;kind&gt;/&lt;name&gt;.md</code> — and your version wins. The cascade is <strong>project → team → org</strong>. The only exception: items the higher tier declared <code>strict</code>, which <code>keystone policy verify</code> blocks from being shadowed. Non-strict items are freely overridable.</p>
       </div>
       <div class="action">
         <span class="action-tag">Adapters &amp; modes</span>
@@ -1332,7 +1365,8 @@ flowchart LR
     --architecture hexagonal,continuous-delivery \
     --testing tdd,property-based \
     --compliance soc2 \
-    --policy git+https://github.com/tacoda/tacoda-policy.git#v0.1.0</pre>
+    --policy git+https://github.com/tacoda/tacoda-org.git#v0.2.0 \
+    --policy git+https://github.com/tacoda/tacoda-team.git#v0.1.0</pre>
 
     <p style="font-size: 0.78rem; color: var(--muted); font-family: var(--mono); margin-top: 12px; line-height: 1.7;">Multi-select flags take comma-separated values. <code>--policy</code> is repeatable and may be supplied multiple times for multiple org policies. Run <code style="color:var(--accent);">keystone options</code> for the full catalog.</p>
 
@@ -1557,86 +1591,106 @@ flowchart LR
   <!-- ===================== POLICIES ===================== -->
   <section id="policies" class="page" data-title="Policies">
     <div class="page-head">
-      <div class="crumb">Capabilities · Org policy plugins <span style="color:var(--accent3);">· New in 0.9.0</span></div>
-      <h1>Policies — org policy plugins, distributable governance bundles.</h1>
-      <p class="tagline">A fifth harness layer composed of markdown plugins. <code>policies/universal/</code> is the default policy shipped with the binary; <code>policies/&lt;name&gt;/</code> holds org-authored policies installed from git. Each policy is its own namespace with its own <code>corpus/</code> + <code>guides/</code>.</p>
+      <div class="crumb">Capabilities · Policy plugins <span style="color:var(--accent3);">· Updated in 0.12.0</span></div>
+      <h1>Policies — distributable governance, with a tiered cascade.</h1>
+      <p class="tagline">Markdown plugins under <code>harness/policies/</code>. Each policy is its own namespace with its own <code>corpus/</code>, <code>guides/</code>, optional <code>playbooks/</code>, and optional <code>actions/</code>. Policies stack: <strong>Org → Team → Project</strong>. The project owns its harness; org and team policies are optional, opt-in, and overridable unless a higher tier marks an item <code>strict</code>.</p>
     </div>
 
     <div class="definition">
-      <p><strong>Project harness files are team-owned; policies are owned by whoever published them.</strong> Local edits to project files are routine; local edits to policy files block <code>policy update</code> unless <code>--force</code>, on the assumption that ad-hoc changes inside a policy namespace are usually mistakes.</p>
-      <p>If a project needs to soften or extend a policy, the right move is at the project layer — add a project guide that explicitly traces to the policy file with reasoning. The policy stays unmodified; the deviation is recorded where future readers will look.</p>
+      <p><strong>Everything belongs to the project.</strong> A project file at <code>harness/&lt;kind&gt;/&lt;name&gt;.md</code> overrides the same-basename file from any team or org policy — unless a higher tier declares that item <code>strict</code>, in which case the project must remove the shadow. A policy can also declare items <code>required</code>: things it expects to exist somewhere in the cascade but does not itself ship. <code>keystone policy verify</code> reports both: <em>strict violations</em> as hard errors, <em>required gaps</em> as advisory findings.</p>
     </div>
 
-    <div class="section-label">Two kinds of policy</div>
-    <div class="action-grid">
-      <div class="action">
-        <span class="action-tag">default · embedded</span>
-        <h3 style="color: var(--accent5);"><code>policies/universal/</code></h3>
-        <p>Ships embedded in the keystone binary. Contains the universal engineering principles (paired reasoning + rules) every Keystone install gets: SOLID, TDD, BDD, concurrency, dependencies, logging, migrations, rollback, determinism, prompt-injection, and the rest of the corpus that used to live under <code>guides/principles/</code>.</p>
-      </div>
-      <div class="action">
-        <span class="action-tag">named · pluggable</span>
-        <h3 style="color: var(--accent5);"><code>policies/&lt;name&gt;/</code></h3>
-        <p>Org-authored, installed via <code>keystone init --policy &lt;ref&gt;</code> from a git repo. Vendor lists, license rules, release gates, compliance regimes, internal coding standards — anything an org wants to push down across many projects without forking the harness.</p>
+    <div class="section-label">The cascade</div>
+    <div class="mermaid-wrap">
+      <p class="mermaid-caption">Project beats team beats org. Corpus is reference and does not cascade.</p>
+      <div class="mermaid">
+flowchart LR
+  org["Org policy<br/><i>harness/policies/&lt;org&gt;/<br/>tier: org</i>"] --> team["Team policy<br/><i>harness/policies/&lt;team&gt;/<br/>tier: team</i>"]
+  team --> project["Project<br/><i>harness/{guides,playbooks,actions}/</i>"]
+  org -. strict locks .-> project
+  team -. strict locks .-> project
+  classDef purple fill:#13161d,stroke:#a78bfa,color:#a78bfa
+  classDef blue fill:#13161d,stroke:#60a5fa,color:#60a5fa
+  classDef green fill:#13161d,stroke:#4ade9a,color:#4ade9a
+  class org purple
+  class team blue
+  class project green
       </div>
     </div>
 
-    <div class="section-label">Install &amp; update an org policy</div>
-<pre class="code"><span class="comment"># Install during init</span>
-<span class="prompt">$</span> keystone init --policy git+https://github.com/tacoda/tacoda-policy.git#v0.1.0
+    <div class="section-label">Manifest fields</div>
+<pre class="code"><span class="comment"># keystone-policy.yaml</span>
+name: acme
+version: 1.0.0
+tier: org              <span class="comment"># or `team`. Default: org.</span>
+keystone_min: 0.12.0
 
-<span class="comment"># Add a policy to an existing install</span>
-<span class="prompt">$</span> keystone policy add git+https://github.com/acme/keystone-policy.git#v1.2.0
+<span class="comment"># Items this policy ships and locks against override from below.</span>
+strict:
+  guides:
+    - documentation
+  playbooks:
+    - trunk_based_development
+  actions:
+    - rubocop_for_ruby
 
-<span class="comment"># Re-resolve the recorded ref (pull latest of the same ref)</span>
-<span class="prompt">$</span> keystone policy update tacoda
+<span class="comment"># Items the policy expects to exist in the cascade but does not ship.</span>
+<span class="comment"># Project (or a team policy) fills them in.</span>
+required:
+  actions:
+    - release-notes</pre>
 
-<span class="comment"># Bump to a new ref</span>
-<span class="prompt">$</span> keystone policy update tacoda git+https://github.com/tacoda/tacoda-policy.git#v0.2.0
+    <p style="font-size: 0.78rem; color: var(--muted); font-family: var(--mono); margin: 16px 0; line-height: 1.7;"><strong>Corpus is never strict-able</strong> — it's reference loaded on-demand by forward-link from a guide; every guide links to its own intended corpus, so corpus from different tiers coexists without collision.</p>
 
-<span class="comment"># Overwrite local edits (--force)</span>
-<span class="prompt">$</span> keystone policy update tacoda --force</pre>
-
-    <div class="section-label">Authoring a policy</div>
-    <p style="font-size: 0.85rem; color: var(--muted); line-height: 1.7; margin-bottom: 16px;">A policy is a git repo with two things at its root: a <code>keystone-policy.yaml</code> manifest and a <code>policy/</code> content directory. The installer enforces that every file under <code>policy/</code> lives within the policy's own namespace.</p>
-
+    <div class="section-label">Layout inside a policy</div>
     <div class="tree">
       <div class="tree-line"><span class="tree-structure"></span><span class="tree-dir">my-policy-repo/</span></div>
-      <div class="tree-line"><span class="tree-structure">├──</span><span class="tree-file">keystone-policy.yaml</span><span class="tree-annotation ann-default">name · version · description</span></div>
+      <div class="tree-line"><span class="tree-structure">├──</span><span class="tree-file">keystone-policy.yaml</span><span class="tree-annotation ann-default">name · version · tier · strict · required</span></div>
       <div class="tree-line"><span class="tree-structure">├──</span><span class="tree-file">README.md</span><span class="tree-annotation ann-default">for humans — ignored at install</span></div>
       <div class="tree-line"><span class="tree-structure">└──</span><span class="tree-dir">policy/</span></div>
       <div class="tree-line"><span class="tree-structure">    └──</span><span class="tree-dir">harness/policies/&lt;name&gt;/</span></div>
       <div class="tree-line"><span class="tree-structure">        ├──</span><span class="tree-dir">corpus/</span><span class="tree-annotation ann-2">on-demand reasoning</span></div>
-      <div class="tree-line"><span class="tree-structure">        │   └──</span><span class="tree-file">&lt;topic&gt;/&lt;file&gt;.md</span></div>
-      <div class="tree-line"><span class="tree-structure">        └──</span><span class="tree-dir">guides/</span><span class="tree-annotation ann-1">ambient rules</span></div>
-      <div class="tree-line"><span class="tree-structure">            └──</span><span class="tree-file">&lt;topic&gt;/&lt;file&gt;.md</span></div>
+      <div class="tree-line"><span class="tree-structure">        ├──</span><span class="tree-dir">guides/</span><span class="tree-annotation ann-1">ambient rules</span></div>
+      <div class="tree-line"><span class="tree-structure">        ├──</span><span class="tree-dir">playbooks/</span><span class="tree-annotation ann-3">ordered action chains · optional</span></div>
+      <div class="tree-line"><span class="tree-structure">        └──</span><span class="tree-dir">actions/</span><span class="tree-annotation ann-4">single units · optional</span></div>
     </div>
 
-    <p style="font-size: 0.78rem; color: var(--muted); font-family: var(--mono); margin: 16px 0; line-height: 1.7;">Sensors are <strong>not</strong> part of a policy. Sensors describe project tooling (lint, test commands) — they're an integration concern the project owns. A policy may declare <em>what</em> must be checked; the project decides <em>how</em>.</p>
+    <p style="font-size: 0.78rem; color: var(--muted); font-family: var(--mono); margin: 16px 0; line-height: 1.7;">Sensors are <strong>not</strong> part of a policy. Sensors describe project tooling (lint, test commands) — they're an integration concern the project owns.</p>
 
-    <div class="section-label">Pinning &amp; the lockfile</div>
-    <p style="font-size: 0.85rem; color: var(--muted); line-height: 1.7; margin-bottom: 14px;">Each installed policy is pinned in <code>harness/.keystone.lock</code> — the same lockfile that holds the install section. Per-file SHA-256 hashes let <code>policy update</code> detect locally edited files before clobbering them.</p>
-<pre class="code">install:
-  version: 0.11.0
-  install_date: 2026-06-05
-  agents: [claude-code]
+    <div class="section-label">Install, update, verify</div>
+<pre class="code"><span class="comment"># Install during init</span>
+<span class="prompt">$</span> keystone init \
+    --policy git+https://github.com/tacoda/tacoda-org.git#v0.2.0 \
+    --policy git+https://github.com/tacoda/tacoda-team.git#v0.1.0
 
-policies:
-  tacoda:
-    source_ref: "git+https://github.com/tacoda/tacoda-policy.git#v0.1.0"
-    resolved_sha: "abc1234..."
-    policy_version: "0.1.0"
-    keystone_version: "0.11.0"
-    files:
-      "harness/policies/tacoda/guides/documentation.md": "sha256:..."
-      "harness/policies/tacoda/corpus/documentation.md": "sha256:..."
-      "harness/policies/tacoda/guides/todos.md": "sha256:..."
-      "harness/policies/tacoda/corpus/todos.md": "sha256:..."</pre>
+<span class="comment"># Add a policy to an existing install</span>
+<span class="prompt">$</span> keystone policy add git+https://github.com/tacoda/tacoda-team.git#v0.1.0
 
-    <div class="section-label">Example: <code>tacoda-policy</code></div>
-    <p style="font-size: 0.85rem; color: var(--muted); line-height: 1.7;">
-      A reference policy at <a href="https://github.com/tacoda/tacoda-policy" target="_blank" rel="noopener">github.com/tacoda/tacoda-policy</a>. Layers on top of the universal baseline with personal/team preferences around documentation conciseness and TODO hygiene. Use it as a testbed for the <code>keystone policy update</code> flow or as a shape reference for authoring your own policy.
-    </p>
+<span class="comment"># Re-resolve the recorded ref (pull latest of the same ref)</span>
+<span class="prompt">$</span> keystone policy update tacoda-team
+
+<span class="comment"># Bump to a new ref</span>
+<span class="prompt">$</span> keystone policy update tacoda-team git+https://github.com/tacoda/tacoda-team.git#v0.2.0
+
+<span class="comment"># Audit the strict cascade and surface required-but-missing items</span>
+<span class="prompt">$</span> keystone policy verify
+✓ policy verify clean — no strict items overridden, no required items unmet (.)</pre>
+
+    <div class="section-label">Worked example: <code>tacoda-org</code> + <code>tacoda-team</code></div>
+    <div class="action-grid">
+      <div class="action">
+        <span class="action-tag">tier: org</span>
+        <h3 style="color: var(--accent5);"><a href="https://github.com/tacoda/tacoda-org" target="_blank" rel="noopener" style="color: inherit;"><code>tacoda-org</code></a></h3>
+        <p>All four components. <strong>Strict</strong> on <code>guides/documentation</code>, <code>guides/todos</code>, <code>actions/changelog-check</code> — no team or project may override. <strong>Required</strong>: <code>actions/release-notes</code> — declared but not shipped; the project must define it. Non-strict <code>playbooks/release</code>, <code>guides/release-process</code>, and <code>actions/announce-release</code> let teams refine the release flow.</p>
+      </div>
+      <div class="action">
+        <span class="action-tag">tier: team</span>
+        <h3 style="color: var(--accent2);"><a href="https://github.com/tacoda/tacoda-team" target="_blank" rel="noopener" style="color: inherit;"><code>tacoda-team</code></a></h3>
+        <p>Layers on top of <code>tacoda-org</code>. Legitimately overrides the org's non-strict <code>playbooks/release</code>, <code>guides/release-process</code>, and <code>actions/announce-release</code> with team-specific versions. Adds <code>actions/pre-release-smoke</code> as a team-strict gate that projects cannot skip. Cannot ship <code>actions/changelog-check</code> — the org locked that name.</p>
+      </div>
+    </div>
+
+    <p style="font-size: 0.85rem; color: var(--muted); line-height: 1.7; margin-top: 16px;">Solo project, no policies installed? Everything above is opt-in — the harness works for a single project alone.</p>
   </section>
 
   <!-- ===================== FLYWHEELS ===================== -->
@@ -1748,22 +1802,22 @@ policies:
     </div>
   </section>
 
-  <!-- ===================== LIFECYCLE ===================== -->
-  <section id="lifecycle" class="page" data-title="Lifecycle workflow">
+  <!-- ===================== PLAYBOOKS ===================== -->
+  <section id="playbooks" class="page" data-title="Playbooks">
     <div class="page-head">
-      <div class="crumb">Capabilities · Workflow</div>
-      <h1>One kickoff phrase. Thirteen action playbooks. Six phases.</h1>
-      <p class="tagline">Every task flows through the same six phases. Every action is invoked the same way in every agent — natural language against an agent-agnostic playbook at <code>harness/actions/&lt;action&gt;.md</code>. <span class="badge" style="font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.12em; color: var(--accent3); background: rgba(245,158,11,0.10); border: 1px solid rgba(245,158,11,0.25); padding: 1px 6px; border-radius: 2px;">NEW 0.10</span></p>
+      <div class="crumb">Capabilities · Workflow <span style="color:var(--accent3);">· New in 0.12.0</span></div>
+      <h1>Playbooks — ordered chains of actions.</h1>
+      <p class="tagline">A playbook is a markdown file that runs an ordered set of <a href="#actions">actions</a>. Invoke the same way as any action: say "run <code>&lt;playbook&gt;</code>" and the agent reads the file and walks the steps.</p>
     </div>
 
-    <div class="cta-card alt" style="margin-bottom: 32px;">
-      <p class="cta-headline" style="color: var(--accent);">Kickoff: <code style="background: transparent; color: var(--accent); font-size: 1em;">run task on &lt;ticket-id&gt;</code></p>
-      <p class="cta-body">A single phrase walks the entire workflow. The <code>task</code> playbook orchestrates <strong style="color: var(--text);">spec → orient → implementation → check-drift → verify → review</strong> with explicit gates between phases — the agent pauses for your acceptance before moving on. Use it for any unit of work that needs the full lifecycle; for one-off invocation say <code>run verify</code> or <code>do a review pass</code>.</p>
-      <p class="cta-body" style="margin-top: 12px; font-family: var(--mono); font-size: 0.78rem; color: var(--text-dim);">Works in every supported agent: Claude Code, Codex, Cursor, Aider, GitHub Copilot, Continue, Cline, Goose, pi.dev. No per-agent slash commands, rule files, or prompt templates — the agent reads its menu file, finds the action in the bulleted list, follows the link to <code>harness/actions/&lt;action&gt;.md</code>, and executes the playbook.</p>
+    <div class="definition">
+      <p><strong>Action vs. playbook.</strong> An action is one unit of lifecycle work — <code>spec</code>, <code>verify</code>, <code>review</code>. A playbook is an ordered chain — the default <code>task</code> playbook walks spec → orient → implementation → check-drift → verify → review. Project playbooks live in <code>harness/playbooks/</code>; org and team policies can ship their own under <code>harness/policies/&lt;name&gt;/playbooks/</code>, subject to the same cascade as guides and actions.</p>
     </div>
 
-    <div class="section-label">Phase pipeline</div>
-    <div class="pipeline">
+    <div class="section-label">The default: <code>task</code></div>
+    <p style="font-size: 0.85rem; color: var(--muted); line-height: 1.7;">Every install ships with <code>harness/playbooks/task.md</code>. Kickoff phrase: <code style="color: var(--accent);">run task on &lt;ticket-id&gt;</code>. The agent pauses for acceptance between phases; an optional <code>learn</code> pass closes out if something surprising came up.</p>
+
+    <div class="pipeline" style="margin-top: 20px;">
       <div class="phase p1"><span class="phase-num">01</span><span class="phase-name">spec</span></div>
       <div class="phase p2"><span class="phase-num">02</span><span class="phase-name">plan</span></div>
       <div class="phase p3"><span class="phase-num">03</span><span class="phase-name">implement</span></div>
@@ -1774,104 +1828,24 @@ policies:
     <div class="phase-desc">
       <strong style="color: var(--text);">spec</strong> anchors a unit of work (tracker card, TODO line, conversation). <strong style="color: var(--text);">planning</strong> orients to the region and writes a plan. <strong style="color: var(--text);">implementation</strong> works inside ambient idioms. <strong style="color: var(--text);">verification</strong> gates the commit on sensors (lint, type, tests, build, drift, commit-message). <strong style="color: var(--text);">review</strong> spawns four review agents on the diff. <strong style="color: var(--text);">release</strong> opens the PR with the tracker link; CI gates the merge.
     </div>
-
-    <div class="section-label">Lifecycle actions — invoked by you, executed by the agent</div>
-    <div class="action-grid three">
-      <div class="action" style="border-color: var(--accent); background: rgba(74,222,154,0.04);">
-        <span class="action-tag" style="background: rgba(74,222,154,0.10); color: var(--accent);">Kickoff</span>
-        <h3 style="color: var(--accent);">task<span class="when">whole workflow</span></h3>
-        <p>Walks <strong style="color: var(--text);">spec → orient → implementation → check-drift → verify → review</strong> end-to-end, pausing for acceptance between phases. Optional <code>learn</code> pass at the end if something surprising came up. <strong style="color: var(--text);">Say:</strong> <code>run task on &lt;ticket-id&gt;</code>.</p>
-      </div>
-      <div class="action">
-        <span class="action-tag">Task entry</span>
-        <h3 style="color: var(--accent);">spec<span class="when">spec phase</span></h3>
-        <p>Capture intent and acceptance criteria from a tracker card or inline. <strong style="color: var(--text);">Gate:</strong> spec approved before planning begins.</p>
-      </div>
-      <div class="action">
-        <span class="action-tag">Pre-task</span>
-        <h3 style="color: var(--accent2);">orient<span class="when">planning entry</span></h3>
-        <p>Read <code>corpus/state/CODEBASE_STATE.md</code>, lazy-load matching guides for the touched region, sketch a plan. <strong style="color: var(--text);">Gate:</strong> plan approved.</p>
-      </div>
-      <div class="action">
-        <span class="action-tag">Post-edit</span>
-        <h3 style="color: var(--accent3);">check-drift<span class="when">implementation exit</span></h3>
-        <p>Compare the diff against IRON LAWs (fail), GOLDEN RULES (strong warn), and regular RULES (warn). Cheaper to fix while the change is fresh.</p>
-      </div>
-      <div class="action">
-        <span class="action-tag">Pre-commit</span>
-        <h3 style="color: var(--accent3);">verify<span class="when">verification gate</span></h3>
-        <p>Run sensors from <code>corpus/state/CODEBASE_STATE.md</code>: lint, type-check, tests, build, drift, commit-message. <strong style="color: var(--text);">No completion claims without fresh evidence — sensors must have run this turn.</strong></p>
-      </div>
-      <div class="action">
-        <span class="action-tag">Post-verify</span>
-        <h3 style="color: var(--accent2);">review<span class="when">review phase</span></h3>
-        <p>Walk spec acceptance criteria + functional, security, risk, and deployment review on the diff. <strong style="color: var(--text);">Gate:</strong> no blockers, AC met.</p>
-      </div>
-      <div class="action">
-        <span class="action-tag">Post-commit</span>
-        <h3 style="color: var(--accent4);">learn<span class="when">release / capture</span></h3>
-        <p>Stage candidates into <code>learning/inbox/</code> classified as <strong>rule</strong> (→ guides) or <strong>information</strong> (→ corpus). Nothing is promoted yet.</p>
-      </div>
-    </div>
-
-    <div class="section-label">Heavyweight actions — invoked by the user</div>
-    <div class="action-grid four">
-      <div class="action">
-        <span class="action-tag">Day 1</span>
-        <h3 style="color: var(--accent);">bootstrap</h3>
-        <p>Initial audit. Detects stack, frameworks, libraries; seeds paired <code>corpus/idioms/</code> + <code>guides/idioms/</code>; initializes state; populates <code>guides/computational/</code>; records which inferential sensors the adapter can run.</p>
-      </div>
-      <div class="action">
-        <span class="action-tag">Periodic</span>
-        <h3 style="color: var(--accent2);">audit</h3>
-        <p>Asymmetric dual audit. <strong>Guides</strong> regularly, <strong>corpus</strong> rarely. Pruning now reads the harness-debt sensor and persists findings to <code>corpus/state/harness-debt.md</code> instead of producing an ephemeral report. <span class="ver">0.11.0</span></p>
-      </div>
-      <div class="action">
-        <span class="action-tag">After learn</span>
-        <h3 style="color: var(--accent3);">synthesize</h3>
-        <p>Promote items from <code>learning/inbox/</code>. Classifies each as <strong>rule</strong> (→ guides) or <strong>information</strong> (→ corpus); some both. Human gates by confidence.</p>
-      </div>
-      <div class="action">
-        <span class="action-tag">Config</span>
-        <h3 style="color: var(--accent5);">mode</h3>
-        <p>Set pacing mode (paired / solo / autopilot). Controls how often the agent stops to ask. See <a href="#modes">Pacing modes</a>.</p>
-      </div>
-      <div class="action">
-        <span class="action-tag">Periodic <span class="ver">0.11.0</span></span>
-        <h3 style="color: var(--accent3);">debt-review</h3>
-        <p>Triage <code>corpus/state/code-debt.md</code>. Walks <code>discovery</code> items, re-scores existing entries, prunes <code>stale</code> items. Harness debt is handled by <strong>audit</strong>'s Pruning flywheel; this action is code-debt only.</p>
-      </div>
-      <div class="action">
-        <span class="action-tag">Pre-release <span class="ver">0.11.0</span></span>
-        <h3 style="color: var(--accent4);">policy-audit</h3>
-        <p>Walks every installed policy's guides under <code>harness/policies/&lt;name&gt;/guides/</code> and reports <code>compliant</code> / <code>violation</code> / <code>inapplicable</code> / <code>uncheckable</code> per rule. Compliance only — lockfile integrity is out of scope.</p>
-      </div>
-    </div>
-
-    <p style="font-size: 0.78rem; color: var(--muted); font-family: var(--mono); margin-top: 8px;">Every action is invoked the same way in every agent: ask in natural language. The agent reads its menu file, finds the action in the bulleted list, follows the link to <code>harness/actions/&lt;action&gt;.md</code>, and executes the playbook. Agent-specific sensor execution, sub-agent parallelism, and tracker integration are documented in <code>harness/adapters/&lt;your-agent&gt;/lifecycle.md</code>.</p>
   </section>
 
   <!-- ===================== ACTIONS ===================== -->
   <section id="actions" class="page" data-title="Actions">
     <div class="page-head">
       <div class="crumb">Capabilities · Reference catalog</div>
-      <h1>Actions — thirteen agent-agnostic playbooks.</h1>
-      <p class="tagline">Every action is one markdown file in <code>harness/actions/</code>. The agent reads its menu file on session start, finds the action in the bulleted list, follows the link, and executes the playbook. No agent-specific slash commands, no rule files, no prompt templates — one source of truth per action. Where Lifecycle workflow frames the workflow, this is the reference catalog.</p>
+      <h1>Actions — agent-agnostic units of lifecycle work.</h1>
+      <p class="tagline">Every action is one markdown file in <code>harness/actions/</code>. The agent reads its menu file on session start, finds the action in the bulleted list, follows the link, and executes the playbook. No agent-specific slash commands, no rule files, no prompt templates — one source of truth per action. Chained into <a href="#playbooks">playbooks</a> like <code>task</code>; individually invokable too.</p>
     </div>
 
     <div class="section-label">Invocation</div>
     <div class="definition">
-      <p><strong>Natural language against the playbook.</strong> Say "run task on <code>&lt;ticket-id&gt;</code>" or "do a verify pass" or "run policy-audit before I cut the release." Every agent — Claude Code, Codex, Cursor, Aider, GitHub Copilot, Continue, Cline, Goose, pi — reads the same playbooks. Adapter-specific concerns (sub-agent parallelism, autonomous shell execution, tracker integration) live in <code>harness/adapters/&lt;agent&gt;/lifecycle.md</code>; the playbooks themselves don't know which agent is running them.</p>
-      <p><strong>Single-action vs. full lifecycle.</strong> <code>run task</code> chains spec → orient → implementation → check-drift → verify → review with gates between phases. Individual actions are also invokable directly — "run verify" or "do a review pass" or "audit the harness."</p>
+      <p><strong>Natural language against the action.</strong> Say "do a verify pass" or "run policy-audit before I cut the release." Every agent — Claude Code, Codex, Cursor, Aider, GitHub Copilot, Continue, Cline, Goose, pi — reads the same files. Adapter-specific concerns (sub-agent parallelism, autonomous shell execution, tracker integration) live in <code>harness/adapters/&lt;agent&gt;/lifecycle.md</code>; the actions themselves don't know which agent is running them.</p>
+      <p><strong>Single-action vs. full lifecycle.</strong> Run individual actions directly, or run a <a href="#playbooks">playbook</a> like <code>task</code> to chain them with gates between phases.</p>
     </div>
 
-    <div class="section-label">Lifecycle actions — chained by <code>task</code></div>
+    <div class="section-label">Lifecycle actions — chained by the <code>task</code> playbook</div>
     <div class="action-grid three">
-      <div class="action" style="border-color: var(--accent); background: rgba(74,222,154,0.04);">
-        <span class="action-tag" style="background: rgba(74,222,154,0.10); color: var(--accent);">kickoff</span>
-        <h3 style="color: var(--accent);">task</h3>
-        <p>Chains <strong style="color: var(--text);">spec → orient → implementation → check-drift → verify → review</strong>, pausing for acceptance between phases. Optional <code>learn</code> pass at the end. <strong style="color: var(--text);">Say:</strong> <code>run task on &lt;ticket-id&gt;</code>. Playbook: <code>actions/task.md</code>.</p>
-      </div>
       <div class="action">
         <span class="action-tag">spec phase</span>
         <h3 style="color: var(--accent);">spec</h3>
@@ -2138,13 +2112,17 @@ policies:
 <span class="comment"># Forward-only harness migrations. Idempotent. Conflicts surfaced rather than auto-resolved.</span>
 <span class="prompt">$</span> keystone migrate [&lt;dir&gt;] [--apply|-y] [--dry-run] [--from &lt;version&gt;]
 
-<span class="comment"># Install an org policy into an existing harness/.
+<span class="comment"># Install an org or team policy into an existing harness/.
 # Errors out if a policy with the same name is already recorded in the lockfile —
 # use `policy update` to re-resolve or change the ref instead.</span>
 <span class="prompt">$</span> keystone policy add &lt;ref&gt; [--dir &lt;path&gt;]
 
 <span class="comment"># Re-resolve a named policy (or bump it to a new ref).</span>
 <span class="prompt">$</span> keystone policy update &lt;name&gt; [&lt;new-ref&gt;] [--dir &lt;path&gt;] [--force]
+
+<span class="comment"># Audit the strict cascade and required-item gaps. Exits non-zero on
+# any strict violation; required gaps are advisory.</span>
+<span class="prompt">$</span> keystone policy verify [--dir &lt;path&gt;]
 
 <span class="comment"># Install another agent's target bundle into an existing harness/.
 # Merges the new agent(s) into the lockfile's agents list.
@@ -2467,7 +2445,7 @@ policies:
         <li><span class="il-tag">No harness yet</span><span>Tell us what's blocking adoption — friction, missing agent support, unclear docs, or workflows that don't fit your project.</span></li>
         <li><span class="il-tag">Hit a bug</span><span>File it, even with a rough repro. Sensors and guides get sharper every time someone shows us a corner we missed.</span></li>
         <li><span class="il-tag">Write an adapter</span><span>Adapters for agents currently marked "real · gaps" can be promoted to "full" — see <code>harness/adapters/README.md</code> for the shape.</span></li>
-        <li><span class="il-tag">Publish a policy</span><span>Vendor lists, license rules, release gates, compliance regimes — anything an org would push down. The <a href="https://github.com/tacoda/tacoda-policy" target="_blank" rel="noopener">tacoda-policy</a> repo is a reference shape.</span></li>
+        <li><span class="il-tag">Publish a policy</span><span>Vendor lists, license rules, release gates, compliance regimes — anything an org or team would push down. <a href="https://github.com/tacoda/tacoda-org" target="_blank" rel="noopener">tacoda-org</a> (org tier) and <a href="https://github.com/tacoda/tacoda-team" target="_blank" rel="noopener">tacoda-team</a> (team tier) are reference shapes covering all four components, <code>strict</code>, and <code>required</code>.</span></li>
       </ul>
       <div class="cta-buttons">
         <a class="cta-btn cta-primary" href="https://github.com/tacoda/keystone/discussions" target="_blank" rel="noopener">▸ Start a Discussion</a>
@@ -2635,10 +2613,10 @@ policies:
         '│   [ ] hipaa           HIPAA                    │\n' +
         '└────────────────────────────────────────────────┘',
 
-        '┌─ Org policy ───────────────────────────────────┐\n' +
-        '│ <span class="hcur">›</span> <span class="hsel">git+github.com/tacoda/tacoda-policy.git</span>      │\n' +
-        '│   #v0.1.0                                      │\n' +
-        '│   add another with --policy                    │\n' +
+        '┌─ Org / team policy ────────────────────────────┐\n' +
+        '│ <span class="hcur">›</span> <span class="hsel">git+github.com/tacoda/tacoda-org.git#v0.2.0</span>   │\n' +
+        '│   git+github.com/tacoda/tacoda-team.git#v0.1.0 │\n' +
+        '│   add more with --policy                       │\n' +
         '└────────────────────────────────────────────────┘'
       ];
       var fi = 0;
