@@ -2,6 +2,56 @@
 
 All notable changes to keystone are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); the project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and is pre-1.0 (minor versions may include breaking changes).
 
+## [0.11.0] — 2026-06-05
+
+Adds **quality, debt, security, drift, and policy-compliance sensors** plus the persistent state ledgers and action playbooks they feed. The harness now tracks *code debt* and *harness debt* as two separate ledgers, treats Connectory-style "Quality Radar" scoring as a markdown contract, and exposes `policy-audit` as the agent action that walks installed policy guides against the codebase. Also **backfills migrations for 0.10.0 and 0.10.1** — previous releases shipped without migration directories, so `keystone migrate` from 0.9.x silently produced incomplete installs. The backfill closes that gap; existing 0.10.1 installs no-op the backfill ops on idempotent re-apply.
+
+### Added
+
+- **`harness/sensors/quality-radar.md`** — five-dimension scorecard (type safety, test quality, readability, security, performance) aggregating outputs of `lint`, `type-check`, `test`, `coverage`, `review-security`, `review-functional`, and `risk-fingerprint`. Runs in **review** (diff-scoped) and **audit** (codebase-wide). Not a gate — a signal for the **review** action to discuss.
+- **`harness/sensors/code-debt.md`** — surfaces and categorizes debt in the codebase via debt markers (`TODO`, `FIXME`, `HACK`, `XXX`, `DEPRECATED`) plus complexity hotspots. Categories: `deliberate`, `drift`, `shortcut`, `discovery`. Severity: `load-bearing`, `noisy`, `stale`.
+- **`harness/sensors/harness-debt.md`** — surfaces debt in the *harness* itself. Categories: `stale-rule`, `dead-idiom`, `placeholder`, `failing-sensor`, `empty-shell`, `uncited-policy`, `unresolved-gap`, `drifted-state`. Feeds the existing **audit** Pruning flywheel.
+- **`harness/sensors/stack-drift.md`** — flags when `CODEBASE_STATE.md` diverges from the actual repo (declared stacks vanished, undeclared manifests appeared, region map stale, tool commands missing). Findings feed `harness-debt` as `drifted-state`; no rebootstrap action exists — **audit** reconciles incrementally.
+- **`harness/sensors/secret-scan.md`** — committed-secret detection wrapper around `gitleaks` / `trufflehog` / `detect-secrets`. Project picks the tool; the sensor describes the contract. Runs in **verify** (gate) and **audit** (history-scoped, advisory).
+- **`harness/sensors/vuln-scan.md`** — known-vulnerability scan over declared dependencies (`trivy`, `npm audit`, `pip-audit`, `bundler-audit`, `cargo audit`, `govulncheck`, etc.). Severity threshold lives in `CODEBASE_STATE.md`; defaults to `high`.
+- **`harness/sensors/sast.md`** — pattern-based static analysis (`semgrep`, `bandit`, `brakeman`, `gosec`, etc.). Diff-scoped in **verify**, codebase-scoped in **audit**. Documented as the computational sibling to the inferential `review-security`.
+- **`harness/corpus/state/quality-radar.md`** — scorecard ledger with append-only history. Read during planning when scores are red.
+- **`harness/corpus/state/code-debt.md`** — code-debt ledger. Surfaces during **orient** so the plan can account for load-bearing debt before touching the region.
+- **`harness/corpus/state/harness-debt.md`** — harness-debt ledger. Updated by **audit**'s Pruning flywheel; consulted before **synthesize** to avoid stacking new rules on top of stale ones.
+- **`harness/actions/debt-review.md`** — periodic triage of the code-debt ledger. Walks `discovery` items, re-scores existing entries, prunes `stale` items.
+- **`harness/actions/policy-audit.md`** — agent walks every installed policy's guides (under `harness/policies/<name>/guides/`) and reports `compliant` / `violation` / `inapplicable` / `uncheckable` per rule against the codebase. The compliance half of policy auditing; lockfile integrity (hashes, ref freshness) is intentionally out of scope.
+
+### Changed
+
+- **`harness/actions/audit.md`** — Pruning flywheel rewritten to read the new `harness-debt` sensor and persist findings to `corpus/state/harness-debt.md` instead of producing an ephemeral list. Eight categories surfaced (stale-rule, dead-idiom, placeholder, failing-sensor, empty-shell, uncited-policy, unresolved-gap, drifted-state). `risk-fingerprint` and `traffic-topology` updates remain at the end of the playbook.
+- **`harness/corpus/state/CODEBASE_STATE.md`** (template) — adds `secret_scan` / `vuln_scan` / `sast` rows to the Tool commands table, severity-threshold table for the security sensors, and rows for the seven new sensors in the Sensors inventory. New installs get these slots automatically via `bootstrap`; existing installs add by hand (see Migration notes).
+- **`harness/sensors/README.md`** — "How sensors fire" table now lists the new security sensors under **verify**, the diff-scoped scoring sensors under **review**, and the full debt/drift/security suite under **audit**. Sensor index extended with seven new computational rows.
+- **`harness/actions/README.md`** — actions table adds `debt-review` and `policy-audit`; the `audit` row now mentions that Pruning writes to `corpus/state/harness-debt.md`.
+- **`harness/corpus/state/README.md`** — "Files initialized" list extended with `quality-radar.md`, `code-debt.md`, `harness-debt.md`.
+
+### Migration from 0.10.1
+
+Run `keystone migrate`. The runner applies `migrations/0.11.0/` (five files) and bumps `keystone_version` to `0.11.0`. Idempotent — re-applying is a no-op.
+
+What the 0.11.0 migration **does not** touch:
+
+- `harness/corpus/state/CODEBASE_STATE.md`. The new sensor commands and severity thresholds are part of the *template* updated in this release; existing installs already populated this file with their own values, so a `replace_block` would conflict. To wire up the new sensors in an existing install, either edit `CODEBASE_STATE.md` by hand (add the `secret_scan` / `vuln_scan` / `sast` tool rows, the severity thresholds table, and the seven new Sensor rows) or re-run the **bootstrap** action through your agent and review the proposed diff. The new sensors are not invoked anywhere until classified.
+
+### Migration from 0.9.x (backfill)
+
+Previous 0.10.0 and 0.10.1 releases shipped without migration directories — the CHANGELOG documented this and pointed users at `keystone init --force` instead. This release **backfills both**:
+
+- **`migrations/0.10.0/`** — three files:
+  - `001-add-actions.yaml` — adds the twelve `harness/actions/*.md` playbooks (`README`, `task`, `bootstrap`, `spec`, `orient`, `check-drift`, `verify`, `review`, `learn`, `audit`, `synthesize`, `mode`) introduced in 0.10.0 with their 0.10.0 content.
+  - `002-update-harness-readme.yaml` — swaps the invocation paragraph in `harness/README.md` to the natural-language model.
+  - `003-update-adapters-readme.yaml` — updates the "Supported agents" table in `harness/adapters/README.md`: column rename, preamble explanation, per-row menu-file normalization, drop `(stub)` markers.
+- **`migrations/0.10.1/`** — one file:
+  - `001-tighten-bootstrap.yaml` — replaces `harness/actions/bootstrap.md` with the 0.10.1 version (preamble about writes, reworded steps 2 and 5, extended iron law, empirical "Completion check").
+
+**Intentionally not backfilled:** the per-adapter `harness/adapters/<agent>/lifecycle.md` rewrites and `harness/adapters/claude-code/activation.md` from 0.10.0. These are documentation describing the model; the agent doesn't read them at run-time. Backfilling eleven full-file rewrites would add ~1000 lines of YAML and high conflict risk for installs that customized adapter docs. If you want the new adapter wording, run `keystone init --force` — it overwrites `harness/adapters/` while leaving the lockfile alone.
+
+For users currently at 0.9.x: `keystone migrate` walks `0.10.0 → 0.10.1 → 0.11.0` in sequence; each migration applies its changes to disk before the next runs, so `replace_block` operations in 0.10.1 and 0.11.0 find the files they expect (added by 0.10.0). Idempotent — users already at 0.10.1 no-op the backfill.
+
 ## [0.10.1] — 2026-06-04
 
 Patch release tightening the **bootstrap** action playbook. The 0.10.0 playbook described what to record but not what to write — agents could complete bootstrap by narrating findings without ever invoking the edit primitive, leaving `CODEBASE_STATE.md` as the shipped template and stack idiom folders unscaffolded. This release converts the playbook from descriptive to imperative and replaces the self-reported "when this is done" criterion with an empirical completion check the agent can verify with `grep` + `ls`.
