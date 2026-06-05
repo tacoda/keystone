@@ -31,16 +31,18 @@ const (
 
 // StrictSpec lists items, by kind, for either a `strict` or `required`
 // declaration on a policy. Corpus is intentionally absent — it is background
-// reference loaded on-demand and not subject to the cascade.
+// reference loaded on-demand and not subject to the cascade. Sensors cascade
+// across two tiers only (team → project); org policies cannot declare them.
 type StrictSpec struct {
 	Guides    []string `yaml:"guides,omitempty"`
 	Playbooks []string `yaml:"playbooks,omitempty"`
 	Actions   []string `yaml:"actions,omitempty"`
+	Sensors   []string `yaml:"sensors,omitempty"`
 }
 
 // IsEmpty reports whether the spec names any items.
 func (s StrictSpec) IsEmpty() bool {
-	return len(s.Guides) == 0 && len(s.Playbooks) == 0 && len(s.Actions) == 0
+	return len(s.Guides) == 0 && len(s.Playbooks) == 0 && len(s.Actions) == 0 && len(s.Sensors) == 0
 }
 
 // Manifest describes one policy (a distributable bundle of governance
@@ -109,6 +111,14 @@ func (m *Manifest) validate() error {
 	default:
 		return fmt.Errorf("%s: tier %q must be %q or %q", PolicyManifestFile, m.Tier, TierOrg, TierTeam)
 	}
+	if m.ResolvedTier() == TierOrg {
+		if len(m.Strict.Sensors) > 0 {
+			return fmt.Errorf("%s: org-tier policies cannot declare strict sensors (sensors cascade is team → project only)", PolicyManifestFile)
+		}
+		if len(m.Required.Sensors) > 0 {
+			return fmt.Errorf("%s: org-tier policies cannot declare required sensors (sensors cascade is team → project only)", PolicyManifestFile)
+		}
+	}
 	return nil
 }
 
@@ -127,8 +137,11 @@ func validatePolicyContent(policyRoot string, m *Manifest) ([]string, error) {
 	}
 
 	allowedPrefix := filepath.Join(PolicyContentRoot, "harness", "policies", m.Namespace())
+	sensorsPrefix := filepath.Join(allowedPrefix, "sensors")
+	isOrg := m.ResolvedTier() == TierOrg
 	var files []string
 	var stray []string
+	var sensorFilesInOrg []string
 
 	err = filepath.WalkDir(contentRoot, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
@@ -145,6 +158,10 @@ func validatePolicyContent(policyRoot string, m *Manifest) ([]string, error) {
 			stray = append(stray, rel)
 			return nil
 		}
+		if isOrg && strings.HasPrefix(rel, sensorsPrefix+string(filepath.Separator)) {
+			sensorFilesInOrg = append(sensorFilesInOrg, rel)
+			return nil
+		}
 		files = append(files, rel)
 		return nil
 	})
@@ -155,6 +172,12 @@ func validatePolicyContent(policyRoot string, m *Manifest) ([]string, error) {
 		return nil, fmt.Errorf(
 			"policy %q writes files outside its allowed namespace %s/:\n  %s",
 			m.Name, allowedPrefix, strings.Join(stray, "\n  "),
+		)
+	}
+	if len(sensorFilesInOrg) > 0 {
+		return nil, fmt.Errorf(
+			"policy %q is tier %q but ships sensor files (sensors cascade is team → project only):\n  %s",
+			m.Name, TierOrg, strings.Join(sensorFilesInOrg, "\n  "),
 		)
 	}
 	if len(files) == 0 {

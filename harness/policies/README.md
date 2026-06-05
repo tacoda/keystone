@@ -26,13 +26,15 @@ harness/policies/<name>/
 │   └── <topic>/<file>.md
 ├── playbooks/           # optional — ordered sets of actions an org distributes
 │   └── <name>.md
-└── actions/             # optional — shared actions (e.g., rubocop_for_ruby)
+├── actions/             # optional — shared actions (e.g., rubocop_for_ruby)
+│   └── <name>.md
+└── sensors/             # team-tier only — concrete checks (e.g., rubocop)
     └── <name>.md
 ```
 
 A policy playbook references actions by name; the action itself can live in the same policy, in another policy, or in the project tree. Policies do not embed action definitions inside their playbooks.
 
-Sensors are **not** part of a policy. Sensors describe project tooling (lint, type-check, test commands) — they're an integration concern that the project owns. A policy may declare *what* must be checked; the project decides *how*.
+Sensors cascade across **two tiers only — team → project**. Org policies cannot ship or declare sensors. Sensors describe project tooling (lint, type-check, test commands) — too stack-specific to live at the org level, but a team often shares them. A policy may declare *what* must be checked at the org level (via `actions`); a team policy can ship the concrete sensor (e.g., `rubocop`); the project can override.
 
 ## Activation
 
@@ -43,6 +45,7 @@ Sub-paths inside a policy determine activation:
 | `<name>/guides/...` | **Ambient** — always loaded, same as project guides |
 | `<name>/playbooks/...` | **On invocation** — named in a "run `<playbook>`" request |
 | `<name>/actions/...` | **On invocation** — named in a "run `<action>`" request |
+| `<name>/sensors/...` | **On invocation** — fired by a lifecycle action at its phase boundary (team-tier only) |
 | `<name>/corpus/...` | **On-demand** — reached via the forward-link from a paired guide |
 | `<name>/*.md` (flat) | Ambient — short policies (e.g., a vendor list) without an explicit guides/ subtree |
 
@@ -60,6 +63,8 @@ For any `<kind>/<name>` (kind ∈ `guides`, `playbooks`, `actions`), the file th
 | Team policy | `harness/policies/<team-policy>/<kind>/<name>.md` (manifest `tier: team`) |
 | Org policy | `harness/policies/<org-policy>/<kind>/<name>.md` (manifest `tier: org`) |
 
+**Sensors are the exception — two tiers only.** For `sensors/<name>`, the cascade is **project beats team**. Org policies cannot ship sensors and cannot declare them strict or required; the installer rejects an org-tier policy that puts files under `sensors/`. Team-strict on a sensor blocks the project from overriding it, same as for other kinds.
+
 **Corpus does not cascade.** Corpus is loaded on-demand by forward-link from a guide — every guide links to its own intended corpus, so corpus from different tiers coexists without collision. `corpus` is never strict-able.
 
 ### `strict` — block override from below
@@ -70,7 +75,7 @@ Any policy tier can lock specific items against override from below. Declare it 
 # keystone-policy.yaml
 name: acme
 version: 1.0.0
-tier: org              # or `team`
+tier: team             # `sensors` requires tier: team
 strict:
   guides:
     - documentation
@@ -78,12 +83,15 @@ strict:
     - trunk_based_development
   actions:
     - rubocop_for_ruby
+  sensors:
+    - rubocop
 ```
 
 Rules:
 
-- Each key is a kind (`guides`, `playbooks`, `actions`); under it a list of item basenames.
+- Each key is a kind (`guides`, `playbooks`, `actions`, `sensors`); under it a list of item basenames.
 - `corpus` is **not** strict-able.
+- `sensors` is strict-able **only by team-tier policies**. An org-tier policy that lists sensors in `strict` (or `required`) is rejected at install time.
 - Default is `strict: {}` (empty). Nothing is strict unless declared.
 - **Org-strict** blocks both team and project overrides of that item.
 - **Team-strict** blocks project overrides only (org can still override the team's item from above — but at install time `policy verify` catches a team policy attempting to violate an org strict).
@@ -110,6 +118,7 @@ Rules:
 
 - Same structure as `strict` (kind → list of item basenames).
 - `corpus` is not required-able (same rationale as strict).
+- `sensors` is required-able **only by team-tier policies** (same restriction as strict).
 - An item satisfies `required` when any tier — project, team, or another org policy — has a file at the matching path.
 - `keystone policy verify` reports unmet required items as advisory **gaps**, not hard errors. They are listed under "needs to be defined" so the project can fill them in.
 
@@ -151,7 +160,8 @@ my-policy-repo/
         ├── corpus/<topic>/<file>.md
         ├── guides/<topic>/<file>.md
         ├── playbooks/<name>.md      # optional
-        └── actions/<name>.md        # optional
+        ├── actions/<name>.md        # optional
+        └── sensors/<name>.md        # optional, team-tier only
 ```
 
-The installer enforces that every file under `policy/` lives within the policy's own namespace (`policy/harness/policies/<name>/`). Files outside that prefix are an error — keeps policies from accidentally writing into project trees.
+The installer enforces that every file under `policy/` lives within the policy's own namespace (`policy/harness/policies/<name>/`). Files outside that prefix are an error — keeps policies from accidentally writing into project trees. Sensor files in an org-tier policy are also rejected.

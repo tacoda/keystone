@@ -1,0 +1,116 @@
+id: 001-update-policies-readme-sensors
+description: |
+  Update harness/policies/README.md to document the new two-tier sensors
+  cascade (team → project). Sensors join guides/playbooks/actions as a
+  fourth policy kind, restricted to team-tier policies; org policies
+  cannot ship or declare sensors.
+
+operations:
+  - type: replace_block
+    path: harness/policies/README.md
+    match: |
+      ├── playbooks/           # optional — ordered sets of actions an org distributes
+      │   └── <name>.md
+      └── actions/             # optional — shared actions (e.g., rubocop_for_ruby)
+          └── <name>.md
+    replacement: |
+      ├── playbooks/           # optional — ordered sets of actions an org distributes
+      │   └── <name>.md
+      ├── actions/             # optional — shared actions (e.g., rubocop_for_ruby)
+      │   └── <name>.md
+      └── sensors/             # team-tier only — concrete checks (e.g., rubocop)
+          └── <name>.md
+
+  - type: replace_block
+    path: harness/policies/README.md
+    match: |
+      Sensors are **not** part of a policy. Sensors describe project tooling (lint, type-check, test commands) — they're an integration concern that the project owns. A policy may declare *what* must be checked; the project decides *how*.
+    replacement: |
+      Sensors cascade across **two tiers only — team → project**. Org policies cannot ship or declare sensors. Sensors describe project tooling (lint, type-check, test commands) — too stack-specific to live at the org level, but a team often shares them. A policy may declare *what* must be checked at the org level (via `actions`); a team policy can ship the concrete sensor (e.g., `rubocop`); the project can override.
+
+  - type: replace_block
+    path: harness/policies/README.md
+    match: |
+      | `<name>/actions/...` | **On invocation** — named in a "run `<action>`" request |
+      | `<name>/corpus/...` | **On-demand** — reached via the forward-link from a paired guide |
+    replacement: |
+      | `<name>/actions/...` | **On invocation** — named in a "run `<action>`" request |
+      | `<name>/sensors/...` | **On invocation** — fired by a lifecycle action at its phase boundary (team-tier only) |
+      | `<name>/corpus/...` | **On-demand** — reached via the forward-link from a paired guide |
+
+  - type: replace_block
+    path: harness/policies/README.md
+    match: |
+      | Org policy | `harness/policies/<org-policy>/<kind>/<name>.md` (manifest `tier: org`) |
+
+      **Corpus does not cascade.** Corpus is loaded on-demand by forward-link from a guide — every guide links to its own intended corpus, so corpus from different tiers coexists without collision. `corpus` is never strict-able.
+    replacement: |
+      | Org policy | `harness/policies/<org-policy>/<kind>/<name>.md` (manifest `tier: org`) |
+
+      **Sensors are the exception — two tiers only.** For `sensors/<name>`, the cascade is **project beats team**. Org policies cannot ship sensors and cannot declare them strict or required; the installer rejects an org-tier policy that puts files under `sensors/`. Team-strict on a sensor blocks the project from overriding it, same as for other kinds.
+
+      **Corpus does not cascade.** Corpus is loaded on-demand by forward-link from a guide — every guide links to its own intended corpus, so corpus from different tiers coexists without collision. `corpus` is never strict-able.
+
+  - type: replace_block
+    path: harness/policies/README.md
+    match: |
+      tier: org              # or `team`
+      strict:
+        guides:
+          - documentation
+        playbooks:
+          - trunk_based_development
+        actions:
+          - rubocop_for_ruby
+    replacement: |
+      tier: team             # `sensors` requires tier: team
+      strict:
+        guides:
+          - documentation
+        playbooks:
+          - trunk_based_development
+        actions:
+          - rubocop_for_ruby
+        sensors:
+          - rubocop
+
+  - type: replace_block
+    path: harness/policies/README.md
+    match: |
+      - Each key is a kind (`guides`, `playbooks`, `actions`); under it a list of item basenames.
+      - `corpus` is **not** strict-able.
+      - Default is `strict: {}` (empty). Nothing is strict unless declared.
+    replacement: |
+      - Each key is a kind (`guides`, `playbooks`, `actions`, `sensors`); under it a list of item basenames.
+      - `corpus` is **not** strict-able.
+      - `sensors` is strict-able **only by team-tier policies**. An org-tier policy that lists sensors in `strict` (or `required`) is rejected at install time.
+      - Default is `strict: {}` (empty). Nothing is strict unless declared.
+
+  - type: replace_block
+    path: harness/policies/README.md
+    match: |
+      - Same structure as `strict` (kind → list of item basenames).
+      - `corpus` is not required-able (same rationale as strict).
+      - An item satisfies `required` when any tier — project, team, or another org policy — has a file at the matching path.
+    replacement: |
+      - Same structure as `strict` (kind → list of item basenames).
+      - `corpus` is not required-able (same rationale as strict).
+      - `sensors` is required-able **only by team-tier policies** (same restriction as strict).
+      - An item satisfies `required` when any tier — project, team, or another org policy — has a file at the matching path.
+
+  - type: replace_block
+    path: harness/policies/README.md
+    match: |2
+              ├── playbooks/<name>.md      # optional
+              └── actions/<name>.md        # optional
+    replacement: |2
+              ├── playbooks/<name>.md      # optional
+              ├── actions/<name>.md        # optional
+              └── sensors/<name>.md        # optional, team-tier only
+
+  - type: replace_block
+    path: harness/policies/README.md
+    match: |
+      The installer enforces that every file under `policy/` lives within the policy's own namespace (`policy/harness/policies/<name>/`). Files outside that prefix are an error — keeps policies from accidentally writing into project trees.
+    replacement: |
+      The installer enforces that every file under `policy/` lives within the policy's own namespace (`policy/harness/policies/<name>/`). Files outside that prefix are an error — keeps policies from accidentally writing into project trees. Sensor files in an org-tier policy are also rejected.

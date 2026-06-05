@@ -30,7 +30,7 @@ func (r VerifyResult) HasGaps() bool { return len(r.Gaps) > 0 }
 type ShadowViolation struct {
 	Policy      string   // name of the policy that declared the item strict
 	PolicyTier  string   // "org" or "team"
-	Kind        string   // "guides" / "playbooks" / "actions"
+	Kind        string   // "guides" / "playbooks" / "actions" / "sensors"
 	Item        string   // basename (no .md)
 	ShadowPaths []string // file paths that violate the strict rule
 }
@@ -47,7 +47,7 @@ func (v ShadowViolation) String() string {
 type MissingRequired struct {
 	Policy     string // name of the policy that declared the item required
 	PolicyTier string // "org" or "team"
-	Kind       string // "guides" / "playbooks" / "actions"
+	Kind       string // "guides" / "playbooks" / "actions" / "sensors"
 	Item       string // basename (no .md)
 }
 
@@ -71,7 +71,7 @@ func verifyPolicies(installDir string) (*VerifyResult, error) {
 	for _, policyName := range sortedPolicyNames(lf.Policies) {
 		lock := lf.Policies[policyName]
 		tier := lock.ResolvedTier()
-		for _, kind := range []string{"guides", "playbooks", "actions"} {
+		for _, kind := range []string{"guides", "playbooks", "actions", "sensors"} {
 			for _, item := range strictItemsFor(lock.Strict, kind) {
 				paths, walkErr := findShadowing(installDir, kind, item, tier, lf.Policies, policyName)
 				if walkErr != nil {
@@ -139,6 +139,8 @@ func strictItemsFor(s StrictSpec, kind string) []string {
 		return s.Playbooks
 	case "actions":
 		return s.Actions
+	case "sensors":
+		return s.Sensors
 	}
 	return nil
 }
