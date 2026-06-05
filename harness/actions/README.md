@@ -24,7 +24,9 @@ For the end-to-end lifecycle on a single task, say **"run task on `<ticket-id>`"
 | **verify** | [`verify.md`](verify.md) | Pre-commit — lint / type-check / test / build / drift / commit-message sensors. |
 | **review** | [`review.md`](review.md) | Post-verify — functional / security / risk / deployment review + spec-adherence. |
 | **learn** | [`learn.md`](learn.md) | Any time something surprising happens — capture to `learning/inbox/`. |
-| **audit** | [`audit.md`](audit.md) | Periodic — dual flywheel (Learning + Pruning). |
+| **audit** | [`audit.md`](audit.md) | Periodic — dual flywheel (Learning + Pruning); Pruning writes to `corpus/state/harness-debt.md`. |
+| **debt-review** | [`debt-review.md`](debt-review.md) | Periodic — triage `corpus/state/code-debt.md`. |
+| **policy-audit** | [`policy-audit.md`](policy-audit.md) | Before release or per audit cycle — check codebase against installed policy guides. |
 | **synthesize** | [`synthesize.md`](synthesize.md) | After inbox has accumulated — promote into corpus / guides. |
 | **mode** | [`mode.md`](mode.md) | When pacing needs to change — paired / solo / autopilot. |
 

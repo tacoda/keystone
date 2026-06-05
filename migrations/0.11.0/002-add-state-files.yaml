@@ -1,0 +1,127 @@
+id: 002-add-state-files
+description: |
+  Add three new state-file templates that the new sensors populate:
+
+  - quality-radar.md  — five-dimension scorecard, updated by audit/review.
+  - code-debt.md      — code-debt ledger, updated by debt-review/audit.
+  - harness-debt.md   — harness-debt ledger, updated by audit's Pruning.
+
+  Templates only — `last_reconciled` is intentionally `<YYYY-MM-DD>` until a
+  sensor populates the file for real.
+
+operations:
+  - type: add_file
+    path: harness/corpus/state/quality-radar.md
+    content: |
+      ---
+      last_reconciled: <YYYY-MM-DD>
+      ---
+
+      # Quality Radar
+
+      > **Template.** The **audit** or **review** action will populate this from the underlying sensors. Until then, leave as-is or fill in by hand.
+
+      Five-dimension scorecard for the codebase (or for the most recent reviewed diff). Captured periodically by the [quality-radar sensor](../../sensors/quality-radar.md).
+
+      ## Latest scorecard
+
+      | Dimension | Score | Trend vs. last | Citations |
+      |---|---|---|---|
+      | Type safety | `<green|yellow|red>` | `<→|↑|↓>` | `<sensor + finding refs>` |
+      | Test quality | `<green|yellow|red>` | `<→|↑|↓>` | `<sensor + finding refs>` |
+      | Readability | `<green|yellow|red>` | `<→|↑|↓>` | `<sensor + finding refs>` |
+      | Security | `<green|yellow|red>` | `<→|↑|↓>` | `<sensor + finding refs>` |
+      | Performance | `<green|yellow|red>` | `<→|↑|↓>` | `<sensor + finding refs>` |
+
+      ## How to use it
+
+      - **Two or more reds** → block further feature work until the worst is addressed.
+      - **One red** → flag in the next planning pass; do not start adjacent work without a containment plan.
+      - **All-yellow** → drift signal. Run **audit** to see whether the harness needs new rules.
+      - **All-green** → keep iterating.
+
+      ## History
+
+      Append a new dated section per audit pass. Do not overwrite — trend matters more than any single score.
+
+      ```
+      ## YYYY-MM-DD
+
+      | Dimension | Score | Citations |
+      |---|---|---|
+      | ... | ... | ... |
+      ```
+
+      ## Scoring conventions
+
+      Per-dimension thresholds live in [`harness/sensors/quality-radar.md`](../../sensors/quality-radar.md). If your project needs different thresholds (e.g., a research codebase where coverage drops are expected), edit the sensor and document the deviation here.
+
+  - type: add_file
+    path: harness/corpus/state/code-debt.md
+    content: |
+      ---
+      last_reconciled: <YYYY-MM-DD>
+      ---
+
+      # Code Debt Ledger
+
+      > **Template.** The **audit** action and **debt-review** action will populate this from the [code-debt sensor](../../sensors/code-debt.md). Until then, leave as-is or fill in by hand.
+
+      Paired ledger: [`harness-debt.md`](harness-debt.md) — debt in the harness itself. Tracked separately on purpose.
+
+      The known debt this codebase carries. One row per item. The point of the ledger is to make the cost of debt *visible during planning* — when **orient** runs against a region with load-bearing debt, the plan should account for it.
+
+      ## Ledger
+
+      | ID | Location | Category | Severity | Owner | Trigger to revisit | Notes |
+      |---|---|---|---|---|---|---|
+      | `<DEBT-001>` | `<path:line or region>` | `<deliberate|drift|shortcut|discovery>` | `<load-bearing|noisy|stale>` | `<name or team>` | `<event or date>` | `<one line>` |
+
+      ## Categories
+
+      See [`harness/sensors/code-debt.md`](../../sensors/code-debt.md) for category and severity definitions. Keep them consistent — the planning phase reads this table verbatim.
+
+      ## How to use it
+
+      - **Before planning a change in a region with load-bearing debt** → factor the debt into the plan. Either pay it down first, route around it, or document why you're adding to it.
+      - **Before adding new debt** → add the row first (with a trigger to revisit). A debt item without a revisit trigger rots into noise.
+      - **During audit** → sweep `stale` items for removal and `discovery` items for triage.
+
+      ## Pruning
+
+      `stale` items are deleted during **debt-review**, not archived. The whole point of the ledger is signal density; archiving every fix turns it into a museum.
+
+  - type: add_file
+    path: harness/corpus/state/harness-debt.md
+    content: |
+      ---
+      last_reconciled: <YYYY-MM-DD>
+      ---
+
+      # Harness Debt Ledger
+
+      > **Template.** The **audit** action's Pruning flywheel populates this from the [harness-debt sensor](../../sensors/harness-debt.md). Until then, leave as-is or fill in by hand.
+
+      Paired ledger: [`code-debt.md`](code-debt.md) — debt in the codebase. Tracked separately on purpose.
+
+      The debt the harness itself is carrying. When the harness gives stale or wrong guidance, that cost lands on every task the agent runs against this project. This ledger makes that cost visible so the team can pay it down deliberately.
+
+      ## Ledger
+
+      | ID | Location | Category | Severity | Notes |
+      |---|---|---|---|---|
+      | `<HDEBT-001>` | `<harness/path>` | `<stale-rule\|dead-idiom\|placeholder\|failing-sensor\|empty-shell\|uncited-policy\|unresolved-gap\|drifted-state>` | `<load-bearing\|noisy\|stale>` | `<one line>` |
+
+      ## Categories
+
+      See [`harness/sensors/harness-debt.md`](../../sensors/harness-debt.md) for category and severity definitions.
+
+      ## How to use it
+
+      - **Before any task** → if the touched region has a `load-bearing` harness-debt item, address it first (the agent will be operating on bad guidance otherwise).
+      - **During audit** → triage `placeholder` and `failing-sensor` items as `load-bearing` by default; they're the most likely to mislead.
+      - **During synthesize** → before promoting an inbox item into a guide, check that no `stale-rule` already covers the topic. Adding a new rule next to a stale one compounds the noise.
+
+      ## Pruning
+
+      `stale` items are deleted during **audit**, not archived. The harness lives in git — history is already preserved.

@@ -1,0 +1,89 @@
+id: 003-add-actions
+description: |
+  Add two new action playbooks:
+
+  - debt-review   — periodic triage of corpus/state/code-debt.md.
+  - policy-audit  — agent walks installed policy guides and reports
+                    compliance against the codebase.
+
+operations:
+  - type: add_file
+    path: harness/actions/debt-review.md
+    content: |
+      # debt-review
+
+      **Triage the code-debt ledger.** Read [`harness/sensors/code-debt.md`](../sensors/code-debt.md) and [`harness/corpus/state/code-debt.md`](../corpus/state/code-debt.md).
+
+      For **harness debt** (stale rules, placeholder bootstrap, empty idiom dirs, uncited policies), use the [`audit`](audit.md) action — its Pruning flywheel writes to `corpus/state/harness-debt.md`.
+
+      ## Activities
+
+      1. **Run the code-debt sensor.** Walk the codebase for markers and complexity hotspots; produce the candidate list.
+      2. **Triage `discovery` items.** For each, propose: a category (deliberate / drift / shortcut), a severity, an owner, and a revisit trigger. If you can't propose all four, leave the item as `discovery` with a note explaining why.
+      3. **Re-score existing items.** Compare ledger entries against the code. Items whose region is no longer present, or whose severity has dropped to nothing the diff or plan would notice, become `stale`.
+      4. **Prune `stale` items.** Delete them from the ledger. Do not archive.
+      5. **Propose the diff** to `corpus/state/code-debt.md` and let the user accept or edit. No silent writes.
+
+      ## When to invoke
+
+      - Periodically (suggested: monthly or per audit pass).
+      - Before any large refactor of a region with multiple ledger entries — to make sure the plan accounts for them.
+      - When the ledger has accumulated more than ~10 `discovery` items.
+
+      ## Output
+
+      One report:
+
+      - Items triaged (with proposed category/severity/owner/trigger).
+      - Items pruned as `stale`.
+      - Items re-scored.
+      - Open questions where triage stalled.
+
+  - type: add_file
+    path: harness/actions/policy-audit.md
+    content: |
+      # policy-audit
+
+      **Audit the codebase against every installed org policy.** Read [`harness/policies/README.md`](../policies/README.md) and walk the installed policies recorded in `harness/.keystone.lock`.
+
+      This is the **compliance** half of policy auditing — does the code actually do what the policies require? Lockfile integrity (hashes, local edits, ref freshness) is out of scope here.
+
+      ## Activities
+
+      1. **List installed policies.** Read `harness/.keystone.lock` and enumerate every entry under `policies:`. For each policy:
+         - Name and resolved ref.
+         - Path: `harness/policies/<name>/guides/` (rules to enforce) and `harness/policies/<name>/corpus/` (reasoning context, on-demand).
+      2. **Load each policy's guides.** For each `harness/policies/<name>/guides/**/*.md`, read the file. Treat every rule as a claim the codebase should be checkable against.
+      3. **Check the codebase against each rule.** For each rule, decide one of:
+         - **compliant** — the codebase satisfies the rule. Cite the evidence (file:line or pattern).
+         - **violation** — the codebase contradicts the rule. Cite the offending file:line.
+         - **inapplicable** — the rule's preconditions don't apply to this project (e.g., a Python rule in a Go-only repo). Say why.
+         - **uncheckable** — the rule is prose without a verifiable claim. Say what would be needed to make it checkable.
+      4. **Report findings** grouped by policy, then by rule. One bullet per finding with the cited evidence.
+
+      ## Output
+
+      One report:
+
+      ```
+      Policy: <name> @ <ref>
+        ✓ <rule-path>: compliant — <evidence>
+        ✗ <rule-path>: violation — <file:line>
+        · <rule-path>: inapplicable — <reason>
+        ? <rule-path>: uncheckable — <reason>
+
+      Policy: <name> @ <ref>
+        ...
+      ```
+
+      ## When to invoke
+
+      - Before any release that touches a policy-covered area.
+      - Periodically (suggested: monthly or per audit cycle).
+      - After `keystone policy add` or `keystone policy update` — the policy changed; the codebase may now violate rules that weren't there before.
+
+      ## What this action does not do
+
+      - Does not check lockfile integrity (file hashes, local edits, upstream ref freshness). Those checks are mechanical and belong in the binary if at all; today they live in [`audit.md`](audit.md) Pruning if anywhere.
+      - Does not modify code to fix violations. Findings are inputs to **spec** for the next round of work.
+      - Does not promote policy rules into project guides. If a policy rule is so consistently violated that you decide to weaken or remove it, that's a conversation with the policy owner — not a local edit.

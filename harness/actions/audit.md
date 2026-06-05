@@ -10,11 +10,22 @@
 
 ## Pruning flywheel
 
-1. **Stale rules** — list guides in `harness/guides/` that no diff has touched in N months (`git log -- harness/guides/`). Flag for review.
-2. **Dead idioms** — list idioms in `harness/corpus/idioms/<stack>/` whose stack is no longer present in `CODEBASE_STATE.md`.
-3. **Risk fingerprint** — read [`harness/sensors/risk-fingerprint.md`](../sensors/risk-fingerprint.md) and update `harness/corpus/state/risk-fingerprints.md`.
-4. **Traffic topology** — read [`harness/sensors/traffic-topology.md`](../sensors/traffic-topology.md) and update `harness/corpus/state/traffic-topology.md`.
+The Pruning flywheel reads the [harness-debt sensor](../sensors/harness-debt.md) and proposes the diff to `harness/corpus/state/harness-debt.md`. Categories the sensor surfaces:
+
+1. **Stale rules** — guides in `harness/guides/` that no diff has touched in N months.
+2. **Dead idioms** — idiom dirs whose stack is no longer in `CODEBASE_STATE.md`.
+3. **Placeholders** — bootstrap `<...>` markers left unfilled.
+4. **Failing sensors** — sensors recorded as available that error on invocation.
+5. **Empty shells** — scaffolded dirs with no real content.
+6. **Uncited policies** — installed policies whose guides were never referenced.
+7. **Unresolved gaps** — `harness/adapters/<agent>/<topic>.md` TODO placeholders.
+8. **Drifted state** — [stack-drift](../sensors/stack-drift.md) findings + `CODEBASE_STATE.md` stale-`last_reconciled`.
+
+Then update the empirical state files:
+
+9. **Risk fingerprint** — read [`harness/sensors/risk-fingerprint.md`](../sensors/risk-fingerprint.md) and update `harness/corpus/state/risk-fingerprints.md`.
+10. **Traffic topology** — read [`harness/sensors/traffic-topology.md`](../sensors/traffic-topology.md) and update `harness/corpus/state/traffic-topology.md`.
 
 ## Output
 
-One report with two sections (Learn / Prune), each listing concrete proposed harness edits. Propose every state-file diff before applying; do not silently overwrite.
+One report with two sections (Learn / Prune), each listing concrete proposed harness edits. Pruning's diffs land in `corpus/state/harness-debt.md`. Propose every state-file diff before applying; do not silently overwrite.

@@ -31,9 +31,10 @@ Sensors do not run on event hooks. They run inside lifecycle actions invoked at 
 | **spec** | spec | [tracker-card-fetcher](tracker-card-fetcher.md) (if a card ID was provided) |
 | **orient** | planning | [state-region](state-region.md) |
 | **check-drift** | implementation | [drift](drift.md) |
-| **verify** | verification | [lint](lint.md), [type-check](type-check.md), [test](test.md), [build](build.md), [drift](drift.md), [commit-message](commit-message.md); proposes state updates from [coverage](coverage.md) |
-| **review** | review | [review-functional](review-functional.md), [review-security](review-security.md), [review-risk](review-risk.md), [review-deployment](review-deployment.md), [spec-adherence](spec-adherence.md) |
-| **audit** | discipline | [drift](drift.md), [coverage](coverage.md), [risk-fingerprint](risk-fingerprint.md), [traffic-topology](traffic-topology.md) |
+| **verify** | verification | [lint](lint.md), [type-check](type-check.md), [test](test.md), [build](build.md), [drift](drift.md), [commit-message](commit-message.md), [secret-scan](secret-scan.md), [vuln-scan](vuln-scan.md), [sast](sast.md); proposes state updates from [coverage](coverage.md) |
+| **review** | review | [review-functional](review-functional.md), [review-security](review-security.md), [review-risk](review-risk.md), [review-deployment](review-deployment.md), [spec-adherence](spec-adherence.md), [quality-radar](quality-radar.md), [code-debt](code-debt.md) |
+| **audit** | discipline | [drift](drift.md), [coverage](coverage.md), [risk-fingerprint](risk-fingerprint.md), [traffic-topology](traffic-topology.md), [quality-radar](quality-radar.md), [code-debt](code-debt.md), [harness-debt](harness-debt.md), [stack-drift](stack-drift.md), [vuln-scan](vuln-scan.md), [sast](sast.md) |
+| **debt-review** | discipline | [code-debt](code-debt.md) |
 
 How an action is actually invoked, and whether sensors run autonomously or require human prompting, is agent-specific — see `harness/adapters/<your-agent>/sensors.md`. The most common degradation: an agent that cannot run shell commands during a turn surfaces the sensor commands for the human to execute instead.
 
@@ -73,6 +74,13 @@ Tool commands (lint, test, build, type-check, coverage) live in `corpus/state/CO
 | [state-region](state-region.md) | computational | Read-only: what State says about a touched region |
 | [commit-message](commit-message.md) | computational | Conventional-commit format + no AI attribution |
 | [tracker-card-fetcher](tracker-card-fetcher.md) | computational | Fetches tracker card from Jira / Linear / etc. |
+| [quality-radar](quality-radar.md) | computational | Five-dimension scorecard aggregating verify + review sensors |
+| [code-debt](code-debt.md) | computational | Surfaces and categorizes debt in the codebase |
+| [harness-debt](harness-debt.md) | computational | Surfaces debt in the harness itself (stale rules, placeholders, failing sensors, etc.) |
+| [stack-drift](stack-drift.md) | computational | Divergence between `CODEBASE_STATE.md` and actual repo |
+| [secret-scan](secret-scan.md) | computational | Committed-secret detection (gate) |
+| [vuln-scan](vuln-scan.md) | computational | Known-vulnerability scan over declared dependencies |
+| [sast](sast.md) | computational | Static analysis for insecure code patterns |
 | [spec-adherence](spec-adherence.md) | inferential | Walks spec ACs against the diff |
 | [review-functional](review-functional.md) | inferential | Agent reviews the diff for logic / behavior bugs |
 | [review-security](review-security.md) | inferential | Agent reviews the diff for security concerns |

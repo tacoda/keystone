@@ -19,6 +19,16 @@ The commands each sensor invokes. Filled in by **bootstrap** from your manifest 
 | test | `<your test command, e.g. pytest>` |
 | build | `<your build command, e.g. npm run build>` |
 | coverage | `<your coverage command, e.g. pytest --cov>` |
+| secret_scan | `<e.g. gitleaks detect>` |
+| vuln_scan | `<e.g. trivy fs . / npm audit / pip-audit>` |
+| sast | `<e.g. semgrep ci / bandit / gosec>` |
+
+Severity thresholds (used by vuln-scan and sast):
+
+| Tool | Fail at or above |
+|---|---|
+| vuln_scan | `<low \| medium \| high \| critical>` (default: high) |
+| sast | `<info \| warning \| error>` (default: error) |
 
 ## Sensors
 
@@ -37,6 +47,13 @@ Inventory of sensors wired up for this project. Filled in by **bootstrap**. A se
 | risk-fingerprint | computational | `<wired \| (none)>` |
 | traffic-topology | computational | `<wired \| (none)>` |
 | tracker-card-fetcher | computational | `<wired \| (none)>` |
+| quality-radar | computational | `<wired \| (none)>` |
+| code-debt | computational | `<wired \| (none)>` |
+| harness-debt | computational | wired |
+| stack-drift | computational | wired |
+| secret-scan | computational | `<wired \| (none)>` |
+| vuln-scan | computational | `<wired \| (none)>` |
+| sast | computational | `<wired \| (none)>` |
 | spec-adherence | inferential | wired |
 | review-functional | inferential | `<wired \| (none)>` |
 | review-security | inferential | `<wired \| (none)>` |

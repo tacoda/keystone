@@ -9,6 +9,9 @@ Files initialized by the **bootstrap** action:
 - `CODEBASE_STATE.md` — activation map per region: which idioms apply, coverage, last review.
 - `risk-fingerprints.md` — complexity + coupling + coverage patterns per region.
 - `traffic-topology.md` — git signals (churn, recency) + business criticality.
+- `quality-radar.md` — five-dimension scorecard, updated by **audit** and **review**.
+- `code-debt.md` — ledger of debt in the codebase, updated by **debt-review** and **audit**.
+- `harness-debt.md` — ledger of debt in the harness itself, updated by **audit**'s Pruning flywheel.
 
 Plus migration tracking:
 
