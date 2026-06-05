@@ -1629,6 +1629,8 @@ keystone_min: 0.13.0
 strict:
   guides:
     - documentation             <span class="comment"># locked — no team/project may override</span>
+  actions:
+    - static-analysis           <span class="comment"># mandate the check; team ships the concrete sensor</span>
 
 <span class="comment"># Also shipped, but non-strict — teams/projects may override:</span>
 <span class="comment">#   guides/release-process.md</span>
