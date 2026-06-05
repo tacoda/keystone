@@ -1619,8 +1619,8 @@ flowchart LR
     </div>
 
     <div class="section-label">Manifest fields</div>
-<pre class="code"><span class="comment"># keystone-policy.yaml — org-tier</span>
-name: acme
+<pre class="code"><span class="comment"># keystone-policy.yaml — org-tier (tacoda-org)</span>
+name: tacoda-org
 version: 1.0.0
 tier: org              <span class="comment"># default. Org-tier cannot ship or declare `sensors`.</span>
 keystone_min: 0.13.0
@@ -1628,29 +1628,25 @@ keystone_min: 0.13.0
 <span class="comment"># Items this policy ships and locks against override from below.</span>
 strict:
   guides:
-    - documentation
-  playbooks:
-    - trunk_based_development
-  actions:
-    - static-analysis             <span class="comment"># mandate the check; teams pick the tool</span>
+    - documentation             <span class="comment"># locked — no team/project may override</span>
 
-<span class="comment"># Items the policy expects to exist in the cascade but does not ship.</span>
-<span class="comment"># Project (or a team policy) fills them in.</span>
-required:
-  actions:
-    - release-notes</pre>
+<span class="comment"># Also shipped, but non-strict — teams/projects may override:</span>
+<span class="comment">#   guides/release-process.md</span>
+<span class="comment">#   actions/announce-release.md</span></pre>
 
-<pre class="code"><span class="comment"># keystone-policy.yaml — team-tier (can ship sensors)</span>
-name: acme-rb
+<pre class="code"><span class="comment"># keystone-policy.yaml — team-tier (tacoda-team, can ship sensors)</span>
+name: tacoda-team
 version: 1.0.0
 tier: team             <span class="comment"># sensors require tier: team</span>
 keystone_min: 0.13.0
 
 strict:
+  guides:
+    - release-process           <span class="comment"># team locks its override of the org's non-strict guide</span>
   actions:
-    - rubocop_for_ruby
-  sensors:                          <span class="comment"># team-tier only; org policies are rejected at install</span>
-    - rubocop                       <span class="comment"># concrete sensor satisfying the org's static-analysis action</span></pre>
+    - announce-release          <span class="comment"># team locks its release-announcement workflow</span>
+  sensors:                       <span class="comment"># team-tier only — org policies are rejected at install</span>
+    - rubocop                   <span class="comment"># concrete sensor; project may still override unless strict</span></pre>
 
     <p style="font-size: 0.78rem; color: var(--muted); font-family: var(--mono); margin: 16px 0; line-height: 1.7;"><strong>Corpus is never strict-able</strong> — it's reference loaded on-demand by forward-link from a guide; every guide links to its own intended corpus, so corpus from different tiers coexists without collision.</p>
 
