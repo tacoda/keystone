@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Keystone — Level 2 Project Harness with Level 3 Plugins</title>
-<meta name="description" content="Keystone is a project harness installer for coding agents. A Level 2 project harness with Level 3 plugins — markdown only, agent-agnostic, owned by your team.">
+<title>Keystone — Project Harness with Organization Harness</title>
+<meta name="description" content="Keystone is a project harness installer for coding agents. A project harness with an organization harness — markdown only, agent-agnostic, owned by your team.">
 <style>
   @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;600&family=IBM+Plex+Sans:wght@300;400;600&display=swap');
 
@@ -925,7 +925,7 @@
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <h1>Keystone</h1>
-      <p>v0.9.0 · L2 harness · L3 plugins</p>
+      <p>v0.9.0 · project + organization harness</p>
     </div>
 
     <nav>
@@ -981,7 +981,7 @@
   <section id="introduction" class="page" data-title="Introduction">
     <div class="page-head">
       <div class="crumb">Overview · Keystone v0.9.0</div>
-      <h1>A Level 2 project harness with Level 3 plugins.</h1>
+      <h1>A project harness with an organization harness.</h1>
       <p class="tagline">A single Go binary that drops a self-updating, markdown-only harness — guides, corpus, sensors, policies, and flywheels — into your repo and wires it to your AI coding agent. One command, agent-agnostic, owned by your team.</p>
     </div>
 
@@ -1011,9 +1011,9 @@
     </section>
 
     <div class="definition">
-      <p><strong>Keystone</strong> ships a Level 2 project harness with Level 3 plugins — markdown only, no central service, no runtime dependency after install. The split:</p>
-      <p><strong style="color:var(--accent);">Project layer (L2)</strong> — <code>guides/</code>, <code>corpus/</code>, <code>sensors/</code>, plus the Learning and Pruning flywheels. Owned by the team, versioned with the code, edited freely.</p>
-      <p><strong style="color:var(--accent3);">Plugin layer (L3)</strong> — <code>policies/</code>. Distributable governance bundles owned by whoever published them. The <code>universal/</code> default ships with the binary; named org policies install via <code>keystone init --policy &lt;ref&gt;</code> from git.</p>
+      <p><strong>Keystone</strong> ships a project harness with an organization harness — markdown only, no central service, no runtime dependency after install. The split:</p>
+      <p><strong style="color:var(--accent);">Project harness</strong> — <code>guides/</code>, <code>corpus/</code>, <code>sensors/</code>, plus the Learning and Pruning flywheels. Owned by the team, versioned with the code, edited freely.</p>
+      <p><strong style="color:var(--accent3);">Organization harness</strong> — a policy plugin system rooted at <code>policies/</code>. Policies are markdown plugins, owned by whoever published them. The <code>universal/</code> default ships with the binary; named org policies install via <code>keystone init --policy &lt;ref&gt;</code> from git.</p>
       <p>After <code>keystone init</code>, your agent drives a six-phase workflow (spec → planning → implementation → verification → review → release) under always-loaded guides, reaching for corpus reasoning only when the rules aren't enough.</p>
     </div>
 
@@ -1021,8 +1021,8 @@
     <div class="action-grid">
       <div class="action">
         <span class="action-tag" style="background: rgba(245,158,11,0.12); color: var(--accent3); border: 1px solid rgba(245,158,11,0.3);">NEW</span>
-        <h3 style="color: var(--accent3);">Policies layer</h3>
-        <p>A fifth, plugin-style harness layer under <code>harness/policies/</code>. Universal default + org-installed namespaces. Each policy carries its own <code>corpus/</code> + <code>guides/</code>.</p>
+        <h3 style="color: var(--accent3);">Organization harness</h3>
+        <p>Policies live under <code>harness/policies/</code> — a fifth harness layer. Universal default + org-installed namespaces. Each policy is a markdown plugin with its own <code>corpus/</code> + <code>guides/</code>.</p>
       </div>
       <div class="action">
         <span class="action-tag">NEW</span>
@@ -1102,17 +1102,17 @@ flowchart LR
 
     <div class="section-label">Five-component harness</div>
     <div class="mermaid-wrap">
-      <p class="mermaid-caption">Project layer (L2) + plugin layer (L3) under <code>harness/</code></p>
+      <p class="mermaid-caption">Project harness + organization harness under <code>harness/</code></p>
       <div class="mermaid">
 flowchart TB
-  subgraph L2 ["L2 · project (team-owned)"]
+  subgraph projectHarness ["project harness (team-owned)"]
     direction LR
     guides["guides/<br/><i>ambient · rules</i>"]
     corpus["corpus/<br/><i>on-demand ·<br/>reasoning</i>"]
     sensors["sensors/<br/><i>invoked · checks</i>"]
     fly["learning/ + archive/<br/><i>flywheels</i>"]
   end
-  subgraph L3 ["L3 · plugins (policy-owner-owned)"]
+  subgraph orgHarness ["organization harness (policy-owner-owned)"]
     universal["policies/universal/<br/><i>shipped default</i>"]
     named["policies/&lt;name&gt;/<br/><i>--policy &lt;ref&gt;</i>"]
   end
@@ -1395,13 +1395,13 @@ flowchart LR
   <!-- ===================== POLICIES ===================== -->
   <section id="policies" class="page" data-title="Policies">
     <div class="page-head">
-      <div class="crumb">Capabilities · Plugin layer <span style="color:var(--accent3);">· New in 0.9.0</span></div>
-      <h1>Policies — Level 3 plugins, distributable governance bundles.</h1>
-      <p class="tagline">A fifth, plugin-style harness layer. <code>policies/universal/</code> is the default policy shipped with the binary; <code>policies/&lt;name&gt;/</code> holds org-authored policies installed from git. Each policy is its own namespace with its own <code>corpus/</code> + <code>guides/</code>.</p>
+      <div class="crumb">Capabilities · Organization harness <span style="color:var(--accent3);">· New in 0.9.0</span></div>
+      <h1>Policies — the organization harness policy plugin system.</h1>
+      <p class="tagline">A fifth harness layer composed of markdown plugins. <code>policies/universal/</code> is the default policy shipped with the binary; <code>policies/&lt;name&gt;/</code> holds org-authored policies installed from git. Each policy is its own namespace with its own <code>corpus/</code> + <code>guides/</code>.</p>
     </div>
 
     <div class="definition">
-      <p><strong>Project files (L2) are team-owned; policies (L3) are owned by whoever published them.</strong> Local edits to project files are routine; local edits to policy files block <code>policy update</code> unless <code>--force</code>, on the assumption that ad-hoc changes inside a policy namespace are usually mistakes.</p>
+      <p><strong>Project harness files are team-owned; policies are owned by whoever published them.</strong> Local edits to project files are routine; local edits to policy files block <code>policy update</code> unless <code>--force</code>, on the assumption that ad-hoc changes inside a policy namespace are usually mistakes.</p>
       <p>If a project needs to soften or extend a policy, the right move is at the project layer — add a project guide that explicitly traces to the policy file with reasoning. The policy stays unmodified; the deviation is recorded where future readers will look.</p>
     </div>
 
@@ -2123,7 +2123,7 @@ policies:
       <p class="cta-body">Most teams can get a Keystone install running in an afternoon. The question that matters six months later is <em>does this harness actually catch what your team would have caught at review?</em> — and that takes deliberate work: writing org-specific policies, calibrating the rule tiers to the way your team actually ships, and closing the gaps the defaults can't cover.</p>
       <ul class="cta-list">
         <li><span class="il-tag">Rollout</span><span>Get Keystone installed and bootstrapped across a multi-repo codebase with the right architecture / compliance / testing posture from day one.</span></li>
-        <li><span class="il-tag">Org policies</span><span>Author the L3 plugin your org should ship — vendor allowlists, release gates, compliance regimes — and the update flow that keeps every repo current.</span></li>
+        <li><span class="il-tag">Org policies</span><span>Author the policies your org should ship — vendor allowlists, release gates, compliance regimes — and the update flow that keeps every repo current.</span></li>
         <li><span class="il-tag">Harness tuning</span><span>Calibrate iron laws, golden rules, and review sensors to the work your team actually does. Make the harness fit the shop, not the other way around.</span></li>
         <li><span class="il-tag">Review loops</span><span>Wire the four-reviewer parallel pattern into your CI / PR flow so coding agents produce reviewable, shippable changes — not the 600-line "while I'm here" diffs.</span></li>
       </ul>
