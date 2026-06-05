@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Keystone — Project Harness with Organization Harness</title>
-<meta name="description" content="Keystone is a project harness installer for coding agents. A project harness with an organization harness — markdown only, agent-agnostic, owned by your team.">
+<title>Keystone — A Project Harness Installer with Org Policy Plugins</title>
+<meta name="description" content="Keystone is a project harness installer for coding agents. A project harness with org policy plugins — markdown only, agent-agnostic, owned by your team.">
 <style>
   @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;600&family=IBM+Plex+Sans:wght@300;400;600&display=swap');
 
@@ -925,7 +925,7 @@
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <h1>Keystone</h1>
-      <p>v0.9.0 · project + organization harness</p>
+      <p>v0.9.0 · project harness + org policy plugins</p>
     </div>
 
     <nav>
@@ -981,7 +981,7 @@
   <section id="introduction" class="page" data-title="Introduction">
     <div class="page-head">
       <div class="crumb">Overview · Keystone v0.9.0</div>
-      <h1>A project harness with an organization harness.</h1>
+      <h1>A project harness installer with org policy plugins.</h1>
       <p class="tagline">A single Go binary that drops a self-updating, markdown-only harness — guides, corpus, sensors, policies, and flywheels — into your repo and wires it to your AI coding agent. One command, agent-agnostic, owned by your team.</p>
     </div>
 
@@ -1011,9 +1011,9 @@
     </section>
 
     <div class="definition">
-      <p><strong>Keystone</strong> ships a project harness with an organization harness — markdown only, no central service, no runtime dependency after install. The split:</p>
+      <p><strong>Keystone</strong> is a project harness installer that ships with org policy plugins — markdown only, no central service, no runtime dependency after install. The split:</p>
       <p><strong style="color:var(--accent);">Project harness</strong> — <code>guides/</code>, <code>corpus/</code>, <code>sensors/</code>, plus the Learning and Pruning flywheels. Owned by the team, versioned with the code, edited freely.</p>
-      <p><strong style="color:var(--accent3);">Organization harness</strong> — a policy plugin system rooted at <code>policies/</code>. Policies are markdown plugins, owned by whoever published them. The <code>universal/</code> default ships with the binary; named org policies install via <code>keystone init --policy &lt;ref&gt;</code> from git.</p>
+      <p><strong style="color:var(--accent3);">Org policy plugins</strong> — rooted at <code>policies/</code>. Markdown plugins, owned by whoever published them. The <code>universal/</code> default ships with the binary; named org policies install via <code>keystone init --policy &lt;ref&gt;</code> from git.</p>
       <p>After <code>keystone init</code>, your agent drives a six-phase workflow (spec → planning → implementation → verification → review → release) under always-loaded guides, reaching for corpus reasoning only when the rules aren't enough.</p>
     </div>
 
@@ -1021,7 +1021,7 @@
     <div class="action-grid">
       <div class="action">
         <span class="action-tag" style="background: rgba(245,158,11,0.12); color: var(--accent3); border: 1px solid rgba(245,158,11,0.3);">NEW</span>
-        <h3 style="color: var(--accent3);">Organization harness</h3>
+        <h3 style="color: var(--accent3);">Org policy plugins</h3>
         <p>Policies live under <code>harness/policies/</code> — a fifth harness layer. Universal default + org-installed namespaces. Each policy is a markdown plugin with its own <code>corpus/</code> + <code>guides/</code>.</p>
       </div>
       <div class="action">
@@ -1102,7 +1102,7 @@ flowchart LR
 
     <div class="section-label">Five-component harness</div>
     <div class="mermaid-wrap">
-      <p class="mermaid-caption">Project harness + organization harness under <code>harness/</code></p>
+      <p class="mermaid-caption">Project harness + org policy plugins under <code>harness/</code></p>
       <div class="mermaid">
 flowchart TB
   subgraph projectHarness ["project harness (team-owned)"]
@@ -1112,7 +1112,7 @@ flowchart TB
     sensors["sensors/<br/><i>invoked · checks</i>"]
     fly["learning/ + archive/<br/><i>flywheels</i>"]
   end
-  subgraph orgHarness ["organization harness (policy-owner-owned)"]
+  subgraph orgPolicyPlugins ["org policy plugins (policy-owner-owned)"]
     universal["policies/universal/<br/><i>shipped default</i>"]
     named["policies/&lt;name&gt;/<br/><i>--policy &lt;ref&gt;</i>"]
   end
@@ -1395,8 +1395,8 @@ flowchart LR
   <!-- ===================== POLICIES ===================== -->
   <section id="policies" class="page" data-title="Policies">
     <div class="page-head">
-      <div class="crumb">Capabilities · Organization harness <span style="color:var(--accent3);">· New in 0.9.0</span></div>
-      <h1>Policies — the organization harness policy plugin system.</h1>
+      <div class="crumb">Capabilities · Org policy plugins <span style="color:var(--accent3);">· New in 0.9.0</span></div>
+      <h1>Policies — org policy plugins, distributable governance bundles.</h1>
       <p class="tagline">A fifth harness layer composed of markdown plugins. <code>policies/universal/</code> is the default policy shipped with the binary; <code>policies/&lt;name&gt;/</code> holds org-authored policies installed from git. Each policy is its own namespace with its own <code>corpus/</code> + <code>guides/</code>.</p>
     </div>
 
