@@ -2,12 +2,12 @@
 
 A **project harness installer** for coding agents. Drops a self-updating set of engineering knowledge, rules, sensors, and lifecycle workflow into your repo, wired to whichever agent you use.
 
-Keystone is **a Level 2 project harness with Level 3 plugins** — markdown only, no central service.
+Keystone is **a project harness installer with org policy plugins** — markdown only, no central service.
 
-- **Level 2 (project)** — `harness/corpus/`, `harness/guides/`, `harness/sensors/`, plus the Learning and Pruning flywheels. Owned by the team that installs it, versioned with the code, edited freely.
-- **Level 3 (plugins)** — `harness/policies/`. Distributable governance bundles owned by whoever published them. Two kinds: `policies/universal/` (the default, shipped with the binary, carrying the engineering principles every install gets) and `policies/<name>/` (org-authored, installed via `keystone init --policy <ref>`).
+- **Project harness** — `harness/corpus/`, `harness/guides/`, `harness/sensors/`, plus the Learning and Pruning flywheels. Owned by the team that installs it, versioned with the code, edited freely.
+- **Org policy plugins** — `harness/policies/`. Markdown plugins owned by whoever published them. Two kinds: `policies/universal/` (the default, shipped with the binary, carrying the engineering principles every install gets) and `policies/<name>/` (org-authored, installed via `keystone init --policy <ref>`).
 
-Universal engineering content is just the default plugin; org policies are the same shape, sourced from outside. The split keeps the project layer ergonomic for the team while letting orgs distribute shared standards without forking the harness.
+Universal engineering content is just the default plugin; org policies are the same shape, sourced from outside. The split keeps the project harness ergonomic for the team while letting orgs distribute shared standards without forking it.
 
 ## What it is
 
@@ -17,7 +17,7 @@ Keystone is a **project harness installer** — a single Go binary with the enti
    - `guides/` — **rules**. Always loaded. What the agent must do and not do (project-authored).
    - `corpus/` — **informational reference**. On-demand. The reasoning behind the rules (project-authored).
    - `sensors/` — **automated checks**. Lint, type-check, test, build, drift, coverage.
-   - `policies/` — **Level 3 plugins**. Distributable governance bundles (`universal/` by default; org policies via `--policy`).
+   - `policies/` — **org policy plugins**. Markdown plugins (`universal/` by default; org policies via `--policy`).
    - `learning/` + `archive/` — **flywheels** that keep the harness current.
    Plus per-agent bindings under `harness/adapters/<agent>/`.
 2. **An activation file** (the "menu") — `CLAUDE.md`, `AGENTS.md`, `.cursor/rules/*.mdc`, `CONVENTIONS.md`, etc. — depending on your agent. The menu tells the agent to read the harness.
@@ -112,7 +112,7 @@ Missing one degrades the corresponding phase but does not break the harness.
 
 From then on, every task flows through the six phases, and the Learning flywheel grows the harness as your project teaches you new patterns (rules into `guides/`, supplemental reasoning into `corpus/`).
 
-## Org policies (Level 3 plugins)
+## Org policy plugins
 
 Orgs distributing shared governance across many projects (vendor lists, license rules, release gates, compliance regimes) ship that content as a **policy** — a git repo with a small manifest. Consumers install it during `init`:
 
@@ -173,7 +173,7 @@ keystone/
 │   │   ├── process/         # six workflow phases + modes
 │   │   └── computational/   # language servers, formatters, editor enforcement
 │   ├── sensors/             # automated checks (lint, type-check, test, etc.)
-│   ├── policies/            # Level 3 plugins — universal default + named org policies
+│   ├── policies/            # org policy plugins — universal default + named org policies
 │   │   ├── universal/       # default policy: engineering principles (corpus + guides)
 │   │   └── <name>/          # org-installed policies (corpus + guides)
 │   ├── adapters/            # per-agent bindings
