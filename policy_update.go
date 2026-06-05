@@ -136,6 +136,9 @@ func runPolicyUpdate(args []string) error {
 		ResolvedSHA:     resolved.ResolvedSHA,
 		PolicyVersion:   manifest.Version,
 		KeystoneVersion: version,
+		Tier:            manifest.ResolvedTier(),
+		Strict:          manifest.Strict,
+		Required:        manifest.Required,
 		Files:           newHashes,
 	}
 	if err := writeLockfile(absDir, lf); err != nil {
@@ -144,6 +147,14 @@ func runPolicyUpdate(args []string) error {
 
 	fmt.Fprintf(os.Stdout, "✓ updated %s → %s (%s)\n",
 		name, manifest.Version, resolved.ResolvedSHA[:displaySHALen(resolved.ResolvedSHA)])
+
+	res, verr := verifyPolicies(absDir)
+	if verr != nil {
+		return fmt.Errorf("policy verify: %w", verr)
+	}
+	if printVerifyReport(absDir, res) {
+		return fmt.Errorf("policy %q updated but strict cascade is violated — resolve the shadowing file(s) above", name)
+	}
 	return nil
 }
 

@@ -58,6 +58,10 @@ func planOperation(op Operation, destDir string) (opResult, error) {
 		return planMoveDir(op, destDir)
 	case "delete_dir":
 		return planDeleteDir(op, destDir)
+	case "move_file":
+		return planMoveFile(op, destDir)
+	case "delete_file":
+		return planDeleteFile(op, destDir)
 	}
 
 	target := filepath.Join(destDir, filepath.FromSlash(op.Path))
@@ -374,6 +378,125 @@ func planMoveDir(op Operation, destDir string) (opResult, error) {
 	}
 	res.status = worst
 	return res, nil
+}
+
+// planMoveFile reports the planned relocation of a single file from Path to
+// To. Idempotent: missing source no-ops, matching destination removes the
+// source, diverged destination conflicts.
+func planMoveFile(op Operation, destDir string) (opResult, error) {
+	if op.Path == "" || op.To == "" {
+		return opResult{op: op}, fmt.Errorf("move_file requires both path and to")
+	}
+	res := opResult{op: op}
+	src := filepath.Join(destDir, filepath.FromSlash(op.Path))
+	dst := filepath.Join(destDir, filepath.FromSlash(op.To))
+	res.targetPath = src
+
+	srcBytes, srcErr := os.ReadFile(src)
+	dstBytes, dstErr := os.ReadFile(dst)
+
+	srcExists := srcErr == nil
+	dstExists := dstErr == nil
+
+	if srcErr != nil && !os.IsNotExist(srcErr) {
+		return res, srcErr
+	}
+	if dstErr != nil && !os.IsNotExist(dstErr) {
+		return res, dstErr
+	}
+
+	if !srcExists {
+		if dstExists {
+			res.status = opNoop
+			res.note = fmt.Sprintf("source %s already relocated to %s", op.Path, op.To)
+		} else {
+			res.status = opNoop
+			res.note = fmt.Sprintf("source %s not present — nothing to move", op.Path)
+		}
+		return res, nil
+	}
+
+	plan := movePlan{
+		sourceAbs: src,
+		destAbs:   dst,
+		relPath:   op.To,
+	}
+	switch {
+	case !dstExists:
+		plan.status = opCreate
+		res.status = opCreate
+	case string(dstBytes) == string(srcBytes):
+		plan.status = opNoop
+		plan.note = "destination matches source — will just remove source"
+		res.status = opChange
+	default:
+		plan.status = opConflict
+		plan.note = "destination exists with different content"
+		res.status = opConflict
+		res.note = plan.note
+	}
+	res.movePlans = []movePlan{plan}
+	return res, nil
+}
+
+// applyMoveFile performs a single planned file relocation. Conflicts skip
+// silently (source left in place for the user to handle).
+func applyMoveFile(res opResult) error {
+	if len(res.movePlans) == 0 {
+		return nil
+	}
+	p := res.movePlans[0]
+	switch p.status {
+	case opConflict:
+		return nil
+	case opNoop:
+		if err := os.Remove(p.sourceAbs); err != nil && !os.IsNotExist(err) {
+			return fmt.Errorf("remove %s: %w", p.sourceAbs, err)
+		}
+		return nil
+	case opCreate:
+		if err := os.MkdirAll(filepath.Dir(p.destAbs), 0o755); err != nil {
+			return err
+		}
+		if err := copyFile(p.sourceAbs, p.destAbs); err != nil {
+			return err
+		}
+		if err := os.Remove(p.sourceAbs); err != nil && !os.IsNotExist(err) {
+			return fmt.Errorf("remove %s: %w", p.sourceAbs, err)
+		}
+	}
+	return nil
+}
+
+// planDeleteFile reports the planned removal of a single file. Idempotent:
+// missing target is a no-op.
+func planDeleteFile(op Operation, destDir string) (opResult, error) {
+	res := opResult{op: op}
+	target := filepath.Join(destDir, filepath.FromSlash(op.Path))
+	res.targetPath = target
+
+	info, err := os.Stat(target)
+	if err != nil {
+		if os.IsNotExist(err) {
+			res.status = opNoop
+			res.note = "file already absent"
+			return res, nil
+		}
+		return res, err
+	}
+	if info.IsDir() {
+		return res, fmt.Errorf("delete_file target %s is a directory", op.Path)
+	}
+	res.status = opChange
+	return res, nil
+}
+
+// applyDeleteFile removes the file at the target path.
+func applyDeleteFile(res opResult) error {
+	if err := os.Remove(res.targetPath); err != nil && !os.IsNotExist(err) {
+		return err
+	}
+	return nil
 }
 
 // planDeleteDir reports the planned removal of an empty directory. Conflicts

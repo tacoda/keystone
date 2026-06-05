@@ -20,14 +20,52 @@ const PolicyManifestFile = "keystone-policy.yaml"
 // (README.md at repo root, the manifest itself, .git, etc.) is ignored.
 const PolicyContentRoot = "policy"
 
-// Manifest describes one org policy (a.k.a. "pack" — a distributable bundle
-// of governance content). Loaded from keystone-policy.yaml at the policy
-// repo root.
+// Tier classifies a policy's authority level relative to the project.
+// `org` policies sit above `team` policies in the override cascade; project
+// is the leaf (the harness root itself) and is implicit — never recorded
+// here. Defaults to `org` when omitted, preserving pre-tier policy behavior.
+const (
+	TierOrg  = "org"
+	TierTeam = "team"
+)
+
+// StrictSpec lists items, by kind, for either a `strict` or `required`
+// declaration on a policy. Corpus is intentionally absent — it is background
+// reference loaded on-demand and not subject to the cascade.
+type StrictSpec struct {
+	Guides    []string `yaml:"guides,omitempty"`
+	Playbooks []string `yaml:"playbooks,omitempty"`
+	Actions   []string `yaml:"actions,omitempty"`
+}
+
+// IsEmpty reports whether the spec names any items.
+func (s StrictSpec) IsEmpty() bool {
+	return len(s.Guides) == 0 && len(s.Playbooks) == 0 && len(s.Actions) == 0
+}
+
+// Manifest describes one policy (a distributable bundle of governance
+// content). Loaded from keystone-policy.yaml at the policy repo root.
+//
+// `strict` items are shipped by this policy and locked against override
+// from lower tiers. `required` items are NOT shipped by this policy — the
+// policy declares they should exist somewhere in the cascade (typically the
+// project); verify surfaces missing ones so the project knows what to fill in.
 type Manifest struct {
-	Name        string `yaml:"name"`
-	Version     string `yaml:"version"`
-	KeystoneMin string `yaml:"keystone_min,omitempty"`
-	Description string `yaml:"description,omitempty"`
+	Name        string     `yaml:"name"`
+	Version     string     `yaml:"version"`
+	Tier        string     `yaml:"tier,omitempty"`        // "org" (default) or "team"
+	KeystoneMin string     `yaml:"keystone_min,omitempty"`
+	Description string     `yaml:"description,omitempty"`
+	Strict      StrictSpec `yaml:"strict,omitempty"`
+	Required    StrictSpec `yaml:"required,omitempty"`
+}
+
+// ResolvedTier returns the policy's tier, applying the default if unset.
+func (m *Manifest) ResolvedTier() string {
+	if m.Tier == "" {
+		return TierOrg
+	}
+	return m.Tier
 }
 
 // Namespace returns the on-disk directory name used inside harness/policies/
@@ -55,7 +93,7 @@ func loadManifest(policyRoot string) (*Manifest, error) {
 
 var namePattern = regexp.MustCompile(`^[a-z][a-z0-9-]{0,63}$`)
 
-// validate enforces required fields and name format.
+// validate enforces required fields, name format, and tier values.
 func (m *Manifest) validate() error {
 	if m.Name == "" {
 		return fmt.Errorf("%s: missing required field 'name'", PolicyManifestFile)
@@ -65,6 +103,11 @@ func (m *Manifest) validate() error {
 	}
 	if m.Version == "" {
 		return fmt.Errorf("%s: missing required field 'version'", PolicyManifestFile)
+	}
+	switch m.Tier {
+	case "", TierOrg, TierTeam:
+	default:
+		return fmt.Errorf("%s: tier %q must be %q or %q", PolicyManifestFile, m.Tier, TierOrg, TierTeam)
 	}
 	return nil
 }

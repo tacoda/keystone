@@ -61,6 +61,13 @@ operations:
       <exact prior text>
     replacement: |
       <new text>
+
+  - type: move_file                     # relocate a single file
+    path: harness/actions/task.md       # source
+    to:   harness/playbooks/task.md     # destination
+
+  - type: delete_file                   # remove a single file
+    path: harness/actions/obsolete.md   # idempotent — missing target no-ops
 ```
 
 ## Operation idempotency

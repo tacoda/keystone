@@ -93,6 +93,16 @@ func runInit(args []string, assets embed.FS) error {
 		return fmt.Errorf("initialize lockfile: %w", err)
 	}
 
+	if len(installedPolicies) > 0 {
+		res, verr := verifyPolicies(absDir)
+		if verr != nil {
+			return fmt.Errorf("policy verify: %w", verr)
+		}
+		if printVerifyReport(absDir, res) {
+			return fmt.Errorf("init succeeded but strict policy cascade is violated — resolve the shadowing file(s) above")
+		}
+	}
+
 	if err := writeInstallProfile(absDir, flags.selections, installedPolicies); err != nil {
 		return fmt.Errorf("write install profile: %w", err)
 	}

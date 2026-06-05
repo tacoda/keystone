@@ -1,0 +1,119 @@
+id: 004-update-policies-readme
+description: |
+  Update harness/policies/README.md to describe the Org → Team → Project
+  cascade, the new optional `playbooks/` and `actions/` policy subdirs,
+  and the `strict` / `required` manifest fields.
+
+operations:
+  - type: replace_block
+    path: harness/policies/README.md
+    match: |
+      **Level 3 extensions.** Policies are distributable bundles of governance content that ship alongside the project harness. Each policy lives in its own namespace under `policies/` and is treated as a unit — installed, updated, and pinned together.
+
+      There are two kinds:
+
+      - **`universal/`** — the default policy. Ships embedded in the keystone binary. Contains the universal engineering principles (reasoning + rule extracts) that apply to every Keystone install regardless of stack, domain, or org.
+      - **`<name>/`** — org-authored policies installed via `keystone init --policy <ref>`, `keystone policy add <ref>`, or `keystone policy update`. Vendor lists, license rules, release gates, compliance regimes, internal coding standards — anything an org wants to push down across many projects.
+    replacement: |
+      **Level 3 extensions.** Policies are distributable bundles of governance content that ship alongside the project harness. Each policy lives in its own namespace under `policies/` and is treated as a unit — installed, updated, and pinned together.
+
+      Policies sit at one of two tiers — declared in the policy manifest's `tier:` field:
+
+      - **`org`** — distributed by the whole organization. Authoritative for cross-team standards (vendor lists, license rules, release gates, compliance regimes).
+      - **`team`** — distributed by a specific team within the org. Layered on top of org policies, can refine or extend, can mark its own items strict (subject to any org strict above it).
+
+      The **project** is the third tier: the harness root itself (`harness/{guides,playbooks,actions}/`). The project is always the leaf — items here are not distributed as policies. Org and team policies are **optional**; a harness works for a single project alone.
+
+      There are two kinds of installed policies on disk:
+
+      - **`universal/`** — the default policy. Ships embedded in the keystone binary at tier `org`. Contains the universal engineering principles (reasoning + rule extracts) that apply to every Keystone install regardless of stack, domain, or org.
+      - **`<name>/`** — installed via `keystone init --policy <ref>`, `keystone policy add <ref>`, or `keystone policy update`. Tier is declared by the policy author in the manifest.
+
+  - type: replace_block
+    path: harness/policies/README.md
+    match: |
+      ## Layout inside a policy
+
+      Each policy mirrors the project layout — `corpus/` for reasoning, `guides/` for rules — but scoped to that policy's namespace:
+
+      ```
+      harness/policies/<name>/
+      ├── corpus/              # on-demand reasoning (reached via guide forward-link)
+      │   └── <topic>/<file>.md
+      └── guides/              # ambient rules — always loaded
+          └── <topic>/<file>.md
+      ```
+    replacement: |
+      ## Layout inside a policy
+
+      Each policy mirrors the project layout — `corpus/` for reasoning, `guides/` for rules, plus optional `playbooks/` and `actions/` — scoped to that policy's namespace:
+
+      ```
+      harness/policies/<name>/
+      ├── corpus/              # on-demand reasoning (reached via guide forward-link)
+      │   └── <topic>/<file>.md
+      ├── guides/              # ambient rules — always loaded
+      │   └── <topic>/<file>.md
+      ├── playbooks/           # optional — ordered sets of actions an org distributes
+      │   └── <name>.md
+      └── actions/             # optional — shared actions (e.g., rubocop_for_ruby)
+          └── <name>.md
+      ```
+
+      A policy playbook references actions by name; the action itself can live in the same policy, in another policy, or in the project tree. Policies do not embed action definitions inside their playbooks.
+
+  - type: ensure_section
+    path: harness/policies/README.md
+    after_heading: "## Activation"
+    heading: "## Override model — Org → Team → Project cascade"
+    body: |
+      Each lower tier can override the same-basename item from any tier above it — **unless** a higher tier marks that item strict. Cascade order is: **project beats team beats org**.
+
+      For any `<kind>/<name>` (kind ∈ `guides`, `playbooks`, `actions`), the file that wins at runtime is the highest-priority one that exists:
+
+      | Tier | File location |
+      |---|---|
+      | Project (leaf) | `harness/<kind>/<name>.md` |
+      | Team policy | `harness/policies/<team-policy>/<kind>/<name>.md` (manifest `tier: team`) |
+      | Org policy | `harness/policies/<org-policy>/<kind>/<name>.md` (manifest `tier: org`) |
+
+      **Corpus does not cascade.** Corpus is loaded on-demand by forward-link from a guide — every guide links to its own intended corpus, so corpus from different tiers coexists without collision. `corpus` is never strict-able.
+
+      ### `strict` — block override from below
+
+      Any policy tier can lock specific items against override from below. Declare it in the manifest:
+
+      ```yaml
+      # keystone-policy.yaml
+      name: acme
+      version: 1.0.0
+      tier: org              # or `team`
+      strict:
+        guides:
+          - documentation
+        playbooks:
+          - trunk_based_development
+        actions:
+          - rubocop_for_ruby
+      ```
+
+      - Each key is a kind (`guides`, `playbooks`, `actions`); under it a list of item basenames.
+      - `corpus` is **not** strict-able.
+      - Default is `strict: {}` (empty). Nothing is strict unless declared.
+      - **Org-strict** blocks both team and project overrides of that item.
+      - **Team-strict** blocks project overrides only.
+      - `keystone policy verify` errors on any lower-tier shadowing of a strict item.
+
+      ### `required` — declare items the project must define
+
+      A policy can flag items that should exist somewhere in the cascade but which the policy itself does not ship — surfacing gaps the project must fill:
+
+      ```yaml
+      required:
+        guides:
+          - business_continuity_plan
+        actions:
+          - oncall_rotation_handoff
+      ```
+
+      `keystone policy verify` reports unmet required items as advisory **gaps** (not hard errors).

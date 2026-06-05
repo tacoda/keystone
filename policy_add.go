@@ -103,6 +103,9 @@ func runPolicyAdd(args []string) error {
 		ResolvedSHA:     resolved.ResolvedSHA,
 		PolicyVersion:   manifest.Version,
 		KeystoneVersion: version,
+		Tier:            manifest.ResolvedTier(),
+		Strict:          manifest.Strict,
+		Required:        manifest.Required,
 		Files:           fileHashes,
 	}
 	if err := writeLockfile(absDir, lf); err != nil {
@@ -111,6 +114,14 @@ func runPolicyAdd(args []string) error {
 
 	fmt.Fprintf(os.Stdout, "✓ installed %s %s (%s)\n",
 		manifest.Name, manifest.Version, resolved.ResolvedSHA[:displaySHALen(resolved.ResolvedSHA)])
+
+	res, verr := verifyPolicies(absDir)
+	if verr != nil {
+		return fmt.Errorf("policy verify: %w", verr)
+	}
+	if printVerifyReport(absDir, res) {
+		return fmt.Errorf("policy %q installed but strict cascade is violated — resolve the shadowing file(s) above", manifest.Name)
+	}
 	return nil
 }
 

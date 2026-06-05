@@ -18,28 +18,88 @@ func runPolicy(args []string) error {
 		return runPolicyAdd(args[1:])
 	case "update":
 		return runPolicyUpdate(args[1:])
+	case "verify":
+		return runPolicyVerify(args[1:])
 	case "help", "--help", "-h":
 		printPolicyUsage(os.Stdout)
 		return nil
 	default:
-		return fmt.Errorf("unknown policy subcommand %q (try: add, update)", args[0])
+		return fmt.Errorf("unknown policy subcommand %q (try: add, update, verify)", args[0])
 	}
 }
 
 func printPolicyUsage(w *os.File) {
-	fmt.Fprint(w, `keystone policy — manage installed org policies
+	fmt.Fprint(w, `keystone policy — manage installed policies
 
 Usage:
   keystone policy add <ref> [--dir <path>]
   keystone policy update <name> [<new-ref>] [--dir <path>] [--force]
+  keystone policy verify [--dir <path>]
   keystone policy help
 
 Commands:
-  add       Install a new org policy into an existing harness. Errors if a
+  add       Install a new policy into an existing harness. Errors if a
             policy with the same name is already recorded in the lockfile.
   update    Re-resolve a policy and replace its content. Refuses to overwrite
             local edits unless --force.
+  verify    Walk every installed policy's strict items and report any file in
+            a lower tier (team policies, project tree) that overrides them.
+            Exits non-zero on any violation.
 `)
+}
+
+// runPolicyVerify handles `keystone policy verify [--dir <path>]`. Reports
+// any strict-cascade violations in the install dir. Exits non-zero when
+// violations exist; returns nil on a clean tree.
+func runPolicyVerify(args []string) error {
+	dir := "."
+	for i := 0; i < len(args); i++ {
+		a := args[i]
+		switch {
+		case a == "--help" || a == "-h":
+			fmt.Fprint(os.Stdout, `keystone policy verify — audit the strict cascade
+
+Usage:
+  keystone policy verify [--dir <path>]
+
+For each installed policy with strict items, walks lower tiers (team
+policies + project tree) and reports any file that overrides a strict
+item. Exits non-zero on any violation.
+
+Flags:
+  --dir <path>   Directory containing harness/ (defaults to cwd).
+`)
+			return nil
+		case a == "--dir":
+			if i+1 >= len(args) {
+				return fmt.Errorf("flag %s requires a value", a)
+			}
+			dir = args[i+1]
+			i++
+		default:
+			return fmt.Errorf("unknown argument %s", a)
+		}
+	}
+
+	absDir, err := filepath.Abs(dir)
+	if err != nil {
+		return fmt.Errorf("resolve dir: %w", err)
+	}
+	if _, err := os.Stat(filepath.Join(absDir, "harness")); err != nil {
+		if os.IsNotExist(err) {
+			return fmt.Errorf("no harness/ in %s — run `keystone init` first", absDir)
+		}
+		return err
+	}
+
+	res, err := verifyPolicies(absDir)
+	if err != nil {
+		return err
+	}
+	if printVerifyReport(absDir, res) {
+		return fmt.Errorf("strict cascade is violated")
+	}
+	return nil
 }
 
 // installPolicies resolves, validates, and copies every policy in refs into
@@ -118,6 +178,9 @@ func installOnePolicy(destDir, raw string) (string, PolicyLock, error) {
 		ResolvedSHA:     resolved.ResolvedSHA,
 		PolicyVersion:   manifest.Version,
 		KeystoneVersion: version,
+		Tier:            manifest.ResolvedTier(),
+		Strict:          manifest.Strict,
+		Required:        manifest.Required,
 		Files:           fileHashes,
 	}
 	return manifest.Name, lock, nil

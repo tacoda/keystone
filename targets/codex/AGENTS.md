@@ -9,9 +9,14 @@ This project uses a **keystone harness**. The harness at [`harness/`](harness/) 
 - [`harness/adapters/codex/`](harness/adapters/codex/) — Codex bindings (shell execution, sandbox model).
 - [`harness/corpus/domain/`](harness/corpus/domain/) — business rules for this project.
 
-**Lifecycle actions** — to kick off a unit of work, say "**run task on `<ticket-id>`**". To invoke any single action, ask in natural language ("run verify," "do a review pass"). Each action's playbook lives in [`harness/actions/`](harness/actions/):
+**Lifecycle** — to kick off a unit of work, say "**run task on `<ticket-id>`**" (runs the **task playbook**). To invoke any single action, ask in natural language ("run verify," "do a review pass"). Org and team policies (under `harness/policies/<name>/`, manifest `tier: org` or `tier: team`) can ship playbooks, actions, and guides. Cascade is **project beats team beats org** — project files at `harness/<kind>/<name>.md` override the same-basename file from any policy above, unless a higher tier declares that item `strict`.
 
-- **[task](harness/actions/task.md)** — end-to-end workflow: spec → orient → implementation → check-drift → verify → review.
+**Playbooks** ([`harness/playbooks/`](harness/playbooks/)):
+
+- **[task](harness/playbooks/task.md)** — end-to-end workflow: spec → orient → implementation → check-drift → verify → review.
+
+**Actions** ([`harness/actions/`](harness/actions/)):
+
 - **[bootstrap](harness/actions/bootstrap.md)** — one-time scaffold; detect stack, seed state, classify sensors. Run once per project.
 - **[spec](harness/actions/spec.md)** — capture intent + acceptance criteria. First action on any task.
 - **[orient](harness/actions/orient.md)** — load `CODEBASE_STATE.md` and idioms for the touched region; sketch a plan.

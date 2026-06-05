@@ -50,8 +50,14 @@ type Operation struct {
 	// destination files with diverged content surface as conflicts. After all
 	// files are moved, the source directory is removed if empty.
 	//
+	// move_file: relocate a single file from Path to To. Same idempotency
+	// semantics as move_dir, scoped to one file.
+	//
 	// delete_dir: remove Path if it is empty (after a prior move_dir, for
 	// instance). Conflicts if Path still contains files.
+	//
+	// delete_file: remove the single file at Path. Idempotent — missing
+	// target no-ops.
 	To string `yaml:"to,omitempty"`
 }
 

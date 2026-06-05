@@ -174,9 +174,9 @@ func processMigration(m Migration, destDir string, flags *migrateFlags, reader *
 				return err
 			}
 			switch res.op.Type {
-			case "move_dir":
+			case "move_dir", "move_file":
 				fmt.Fprintf(os.Stdout, "    ✓ moved %s → %s\n", res.op.Path, res.op.To)
-			case "delete_dir":
+			case "delete_dir", "delete_file":
 				fmt.Fprintf(os.Stdout, "    ✓ removed %s\n", res.op.Path)
 			default:
 				fmt.Fprintf(os.Stdout, "    ✓ wrote %s\n", res.targetPath)
@@ -217,9 +217,25 @@ func printOpPreview(res opResult) {
 				fmt.Fprintf(os.Stdout, "      %s (already at destination)\n", p.relPath)
 			}
 		}
+	case "move_file":
+		fmt.Fprintf(os.Stdout, "    move_file: %s → %s\n", res.op.Path, res.op.To)
+		if len(res.movePlans) == 1 {
+			p := res.movePlans[0]
+			switch p.status {
+			case opCreate:
+				fmt.Fprintf(os.Stdout, "    + %s\n", p.relPath)
+			case opConflict:
+				fmt.Fprintf(os.Stdout, "    ! %s (%s)\n", p.relPath, p.note)
+			case opNoop:
+				fmt.Fprintf(os.Stdout, "      %s (already at destination)\n", p.relPath)
+			}
+		}
 	case "delete_dir":
 		fmt.Fprintf(os.Stdout, "    delete_dir: %s\n", res.op.Path)
 		fmt.Fprintf(os.Stdout, "    - %s/\n", res.op.Path)
+	case "delete_file":
+		fmt.Fprintf(os.Stdout, "    delete_file: %s\n", res.op.Path)
+		fmt.Fprintf(os.Stdout, "    - %s\n", res.op.Path)
 	}
 }
 
@@ -233,8 +249,12 @@ func writeOpResult(res opResult) error {
 	switch res.op.Type {
 	case "move_dir":
 		return applyMoveDir(res)
+	case "move_file":
+		return applyMoveFile(res)
 	case "delete_dir":
 		return applyDeleteDir(res)
+	case "delete_file":
+		return applyDeleteFile(res)
 	default:
 		if err := os.MkdirAll(filepath.Dir(res.targetPath), 0o755); err != nil {
 			return err

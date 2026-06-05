@@ -31,13 +31,27 @@ type KeystoneInfo struct {
 	Agents    []string `yaml:"agents,omitempty"`    // agent IDs with menu files installed
 }
 
-// PolicyLock describes one installed policy (org pack).
+// PolicyLock describes one installed policy. Tier, Strict, and Required
+// are recorded at install time so `keystone policy verify` can run without
+// re-resolving the source policy.
 type PolicyLock struct {
 	SourceRef       string            `yaml:"source_ref"`       // exact ref string the user passed
 	ResolvedSHA     string            `yaml:"resolved_sha"`     // commit SHA / artifact digest
 	PolicyVersion   string            `yaml:"policy_version"`   // value from manifest.version
 	KeystoneVersion string            `yaml:"keystone_version"` // binary version at install time
+	Tier            string            `yaml:"tier,omitempty"`   // "org" (default) or "team"
+	Strict          StrictSpec        `yaml:"strict,omitempty"` // items this policy locks against override
+	Required        StrictSpec        `yaml:"required,omitempty"` // items this policy expects to exist somewhere in the cascade
 	Files           map[string]string `yaml:"files"`            // path-relative-to-installdir → "sha256:<hex>"
+}
+
+// ResolvedTier returns the lock's tier, applying the default for older
+// lockfiles that predate the field.
+func (p PolicyLock) ResolvedTier() string {
+	if p.Tier == "" {
+		return TierOrg
+	}
+	return p.Tier
 }
 
 // Lockfile is the root document.

@@ -20,11 +20,13 @@ The Pruning flywheel reads the [harness-debt sensor](../sensors/harness-debt.md)
 6. **Uncited policies** — installed policies whose guides were never referenced.
 7. **Unresolved gaps** — `harness/adapters/<agent>/<topic>.md` TODO placeholders.
 8. **Drifted state** — [stack-drift](../sensors/stack-drift.md) findings + `CODEBASE_STATE.md` stale-`last_reconciled`.
+9. **Strict-cascade violations** — run `keystone policy verify`; any strict-violation output is a hard debt entry. A project file at `harness/<kind>/<name>.md` is overriding a `strict` item from a team or org policy. Remove the shadowing file or escalate to the policy owner.
+10. **Required-item gaps** — same `keystone policy verify` run. Required items with no definition anywhere in the cascade are advisory debt: the project is expected to define them at `harness/<kind>/<name>.md`. Pruning surfaces them; the project decides which to fill in.
 
 Then update the empirical state files:
 
-9. **Risk fingerprint** — read [`harness/sensors/risk-fingerprint.md`](../sensors/risk-fingerprint.md) and update `harness/corpus/state/risk-fingerprints.md`.
-10. **Traffic topology** — read [`harness/sensors/traffic-topology.md`](../sensors/traffic-topology.md) and update `harness/corpus/state/traffic-topology.md`.
+11. **Risk fingerprint** — read [`harness/sensors/risk-fingerprint.md`](../sensors/risk-fingerprint.md) and update `harness/corpus/state/risk-fingerprints.md`.
+12. **Traffic topology** — read [`harness/sensors/traffic-topology.md`](../sensors/traffic-topology.md) and update `harness/corpus/state/traffic-topology.md`.
 
 ## Output
 

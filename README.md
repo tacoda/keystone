@@ -13,11 +13,13 @@ Universal engineering content is just the default plugin; org policies are the s
 
 Keystone is a **project harness installer** — a single Go binary with the entire markdown-only harness embedded. `keystone init` writes two things into your repo:
 
-1. **A harness** (`harness/`) — five components:
+1. **A harness** (`harness/`) — six components:
    - `guides/` — **rules**. Always loaded. What the agent must do and not do (project-authored).
    - `corpus/` — **informational reference**. On-demand. The reasoning behind the rules (project-authored).
+   - `playbooks/` — **ordered chains of actions** (e.g., the `task` playbook runs spec → orient → verify → review).
+   - `actions/` — **single units of lifecycle work** (spec, orient, verify, review, etc.).
    - `sensors/` — **automated checks**. Lint, type-check, test, build, drift, coverage.
-   - `policies/` — **org policy plugins**. Markdown plugins (`universal/` by default; org policies via `--policy`).
+   - `policies/` — **policy plugins**. Markdown plugins (`universal/` by default; org and team policies via `--policy`).
    - `learning/` + `archive/` — **flywheels** that keep the harness current.
    Plus per-agent bindings under `harness/adapters/<agent>/`.
 2. **An activation file** (the "menu") — `CLAUDE.md`, `AGENTS.md`, `.cursor/rules/*.mdc`, `CONVENTIONS.md`, etc. — depending on your agent. The menu tells the agent to read the harness.
@@ -112,9 +114,13 @@ Missing one degrades the corresponding phase but does not break the harness.
 
 From then on, every task flows through the six phases, and the Learning flywheel grows the harness as your project teaches you new patterns (rules into `guides/`, supplemental reasoning into `corpus/`).
 
-## Org policy plugins
+## Org and team policy plugins
 
-Orgs distributing shared governance across many projects (vendor lists, license rules, release gates, compliance regimes) ship that content as a **policy** — a git repo with a small manifest. Consumers install it during `init`:
+Orgs distributing shared governance across many projects (vendor lists, license rules, release gates, compliance regimes) ship that content as a **policy** — a git repo with a small manifest. Teams within an org can ship their own policies too. The override cascade is **project → team → org**: a project file overrides the same-basename file from any policy above unless that higher tier declares the item `strict`.
+
+A policy may also declare items as `required` — things the project must define because no higher tier has prescribed them. `keystone policy verify` surfaces unmet required items as advisory gaps. Org and team policies are optional; the harness works for a single project alone.
+
+Consumers install a policy during `init`:
 
 ```bash
 keystone init --policy git+https://github.com/acme/keystone-policy.git#v1.2.0
@@ -133,16 +139,18 @@ keystone policy update <name>                # re-resolve the recorded ref
 keystone policy update <name> <new-ref>      # bump to a new ref
 ```
 
-`policy update` refuses to overwrite locally edited policy files unless `--force`. See [`harness/policies/README.md`](harness/policies/README.md) for the layer's full shape, including the universal default and the corpus/guides convention inside each policy namespace.
+`policy update` refuses to overwrite locally edited policy files unless `--force`. Run `keystone policy verify` any time to re-check the cascade. See [`harness/policies/README.md`](harness/policies/README.md) for the layer's full shape, including the universal default, the cascade rules, and the `strict` / `required` manifest fields.
 
 A policy repo is just a small directory tree:
 
 ```
-keystone-policy.yaml       # name, version, optional description
+keystone-policy.yaml       # name, version, tier, strict, required, description
 policy/
   harness/policies/<name>/
     corpus/<topic>/<file>.md
     guides/<topic>/<file>.md
+    playbooks/<name>.md       # optional — ordered action sets
+    actions/<name>.md         # optional — shared actions (e.g., rubocop_for_ruby)
 ```
 
 The policy author owns the namespace; the installer enforces that policy writes cannot escape it. Sensors are not part of a policy — they describe project tooling.
@@ -172,10 +180,12 @@ keystone/
 │   │   ├── domain/          # business-rule constraints
 │   │   ├── process/         # six workflow phases + modes
 │   │   └── computational/   # language servers, formatters, editor enforcement
+│   ├── playbooks/           # ordered action chains (task, etc.)
+│   ├── actions/             # single units of lifecycle work
 │   ├── sensors/             # automated checks (lint, type-check, test, etc.)
-│   ├── policies/            # org policy plugins — universal default + named org policies
+│   ├── policies/            # policy plugins — universal default + named org/team policies
 │   │   ├── universal/       # default policy: engineering principles (corpus + guides)
-│   │   └── <name>/          # org-installed policies (corpus + guides)
+│   │   └── <name>/          # installed policies (corpus + guides + optional playbooks/actions)
 │   ├── adapters/            # per-agent bindings
 │   ├── learning/            # Learning flywheel staging
 │   └── archive/             # Pruning flywheel destination

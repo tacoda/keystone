@@ -1,34 +1,40 @@
 # policy-audit
 
-**Audit the codebase against every installed org policy.** Read [`harness/policies/README.md`](../policies/README.md) and walk the installed policies recorded in `harness/.keystone.lock`.
+**Audit the codebase against every installed policy.** Read [`harness/policies/README.md`](../policies/README.md) and walk the installed policies recorded in `harness/.keystone.lock`.
 
-This is the **compliance** half of policy auditing — does the code actually do what the policies require? Lockfile integrity (hashes, local edits, ref freshness) is out of scope here.
+This is the **compliance** half of policy auditing — does the code actually do what the policies require, and is the strict cascade intact? Lockfile integrity (hashes, local edits, ref freshness) is out of scope here.
 
 ## Activities
 
-1. **List installed policies.** Read `harness/.keystone.lock` and enumerate every entry under `policies:`. For each policy:
-   - Name and resolved ref.
-   - Path: `harness/policies/<name>/guides/` (rules to enforce) and `harness/policies/<name>/corpus/` (reasoning context, on-demand).
-2. **Load each policy's guides.** For each `harness/policies/<name>/guides/**/*.md`, read the file. Treat every rule as a claim the codebase should be checkable against.
-3. **Check the codebase against each rule.** For each rule, decide one of:
+1. **Run `keystone policy verify`.** Reports two categories:
+   - **Strict violations** — items a policy declared `strict` that are overridden by a lower tier (team policy or project file). Hard findings; the strict contract has been broken. The user must remove the shadowing file or raise the change with the policy author before the rest of this action's findings can be trusted.
+   - **Required gaps** — items a policy declared `required` that no tier has defined. Advisory findings; the project should define them at `harness/<kind>/<name>.md`.
+2. **List installed policies.** Read `harness/.keystone.lock` and enumerate every entry under `policies:`. For each policy:
+   - Name, tier (`org` or `team`), resolved ref.
+   - Path: `harness/policies/<name>/guides/` (rules to enforce), `harness/policies/<name>/playbooks/` and `harness/policies/<name>/actions/` (workflows and units of work), and `harness/policies/<name>/corpus/` (reasoning context, on-demand).
+3. **Load each policy's guides, playbooks, and actions.** For each `harness/policies/<name>/{guides,playbooks,actions}/**/*.md`, read the file. Treat every rule as a claim the codebase should be checkable against.
+4. **Check the codebase against each rule.** For each rule, decide one of:
    - **compliant** — the codebase satisfies the rule. Cite the evidence (file:line or pattern).
    - **violation** — the codebase contradicts the rule. Cite the offending file:line.
    - **inapplicable** — the rule's preconditions don't apply to this project (e.g., a Python rule in a Go-only repo). Say why.
    - **uncheckable** — the rule is prose without a verifiable claim. Say what would be needed to make it checkable.
-4. **Report findings** grouped by policy, then by rule. One bullet per finding with the cited evidence.
+5. **Report findings** grouped by policy, then by rule. One bullet per finding with the cited evidence. Strict-cascade violations are reported first.
 
 ## Output
 
 One report:
 
 ```
-Policy: <name> @ <ref>
+Strict cascade
+  <empty if clean, else one block per violation from `keystone policy verify`>
+
+Policy: <name> (tier: <org|team>) @ <ref>
   ✓ <rule-path>: compliant — <evidence>
   ✗ <rule-path>: violation — <file:line>
   · <rule-path>: inapplicable — <reason>
   ? <rule-path>: uncheckable — <reason>
 
-Policy: <name> @ <ref>
+Policy: <name> (tier: <org|team>) @ <ref>
   ...
 ```
 
