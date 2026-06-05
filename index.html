@@ -954,7 +954,7 @@
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <h1>Keystone</h1>
-      <p>v0.12.0 · project harness + org/team policy plugins</p>
+      <p>v0.13.0 · project harness + org/team policy plugins</p>
     </div>
 
     <nav>
@@ -1014,7 +1014,7 @@
   <!-- ===================== INTRODUCTION (landing) ===================== -->
   <section id="introduction" class="page" data-title="Introduction">
     <div class="page-head">
-      <div class="crumb">Overview · Keystone v0.12.0</div>
+      <div class="crumb">Overview · Keystone v0.13.0</div>
       <h1>A project harness installer with org &amp; team policy plugins.</h1>
       <p class="tagline">A single Go binary that drops a self-updating, markdown-only harness — guides, corpus, playbooks, actions, sensors, policies, and flywheels — into your repo and wires it to your AI coding agent. One command, agent-agnostic, owned by your team. Org and team policies cascade <strong>Org → Team → Project</strong>, with <code>strict</code> locking what shouldn't be overridden.</p>
     </div>
@@ -1535,7 +1535,7 @@ flowchart LR
     <div class="page-head">
       <div class="crumb">Capabilities · Project layer</div>
       <h1>Sensors — automated checks at phase boundaries.</h1>
-      <p class="tagline">Twenty-three sensors fire from inside lifecycle actions. Each declares <strong>kind</strong> (inferential or computational), trigger, inputs, exit condition, and output. Verify gates the commit; review spawns four reviewers in parallel on the diff; audit sweeps the whole codebase. <span class="badge" style="font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.12em; color: var(--accent3); background: rgba(245,158,11,0.10); border: 1px solid rgba(245,158,11,0.25); padding: 1px 6px; border-radius: 2px;">+7 in 0.11.0</span></p>
+      <p class="tagline">Twenty-three sensors fire from inside lifecycle actions. Each declares <strong>kind</strong> (inferential or computational), trigger, inputs, exit condition, and output. Verify gates the commit; review spawns four reviewers in parallel on the diff; audit sweeps the whole codebase. <span class="badge" style="font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.12em; color: var(--accent3); background: rgba(245,158,11,0.10); border: 1px solid rgba(245,158,11,0.25); padding: 1px 6px; border-radius: 2px;">+7 in 0.11.0</span> <span class="badge" style="font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.12em; color: var(--accent2); background: rgba(96,165,250,0.10); border: 1px solid rgba(96,165,250,0.25); padding: 1px 6px; border-radius: 2px;">team-distributable in 0.13.0</span></p>
     </div>
 
     <div class="section-label">Kind taxonomy</div>
@@ -1591,9 +1591,9 @@ flowchart LR
   <!-- ===================== POLICIES ===================== -->
   <section id="policies" class="page" data-title="Policies">
     <div class="page-head">
-      <div class="crumb">Capabilities · Policy plugins <span style="color:var(--accent3);">· Updated in 0.12.0</span></div>
+      <div class="crumb">Capabilities · Policy plugins <span style="color:var(--accent3);">· Updated in 0.13.0</span></div>
       <h1>Policies — distributable governance, with a tiered cascade.</h1>
-      <p class="tagline">Markdown plugins under <code>harness/policies/</code>. Each policy is its own namespace with its own <code>corpus/</code>, <code>guides/</code>, optional <code>playbooks/</code>, and optional <code>actions/</code>. Policies stack: <strong>Org → Team → Project</strong>. The project owns its harness; org and team policies are optional, opt-in, and overridable unless a higher tier marks an item <code>strict</code>.</p>
+      <p class="tagline">Markdown plugins under <code>harness/policies/</code>. Each policy is its own namespace with its own <code>corpus/</code>, <code>guides/</code>, optional <code>playbooks/</code>, <code>actions/</code>, and (team-tier only) <code>sensors/</code>. Policies stack: <strong>Org → Team → Project</strong> for guides, playbooks, and actions; <strong>Team → Project</strong> for sensors. The project owns its harness; org and team policies are optional, opt-in, and overridable unless a higher tier marks an item <code>strict</code>.</p>
     </div>
 
     <div class="definition">
@@ -1619,11 +1619,11 @@ flowchart LR
     </div>
 
     <div class="section-label">Manifest fields</div>
-<pre class="code"><span class="comment"># keystone-policy.yaml</span>
+<pre class="code"><span class="comment"># keystone-policy.yaml — org-tier</span>
 name: acme
 version: 1.0.0
-tier: org              <span class="comment"># or `team`. Default: org.</span>
-keystone_min: 0.12.0
+tier: org              <span class="comment"># default. Org-tier cannot ship or declare `sensors`.</span>
+keystone_min: 0.13.0
 
 <span class="comment"># Items this policy ships and locks against override from below.</span>
 strict:
@@ -1632,13 +1632,25 @@ strict:
   playbooks:
     - trunk_based_development
   actions:
-    - rubocop_for_ruby
+    - static-analysis             <span class="comment"># mandate the check; teams pick the tool</span>
 
 <span class="comment"># Items the policy expects to exist in the cascade but does not ship.</span>
 <span class="comment"># Project (or a team policy) fills them in.</span>
 required:
   actions:
     - release-notes</pre>
+
+<pre class="code"><span class="comment"># keystone-policy.yaml — team-tier (can ship sensors)</span>
+name: acme-rb
+version: 1.0.0
+tier: team             <span class="comment"># sensors require tier: team</span>
+keystone_min: 0.13.0
+
+strict:
+  actions:
+    - rubocop_for_ruby
+  sensors:                          <span class="comment"># team-tier only; org policies are rejected at install</span>
+    - rubocop                       <span class="comment"># concrete sensor satisfying the org's static-analysis action</span></pre>
 
     <p style="font-size: 0.78rem; color: var(--muted); font-family: var(--mono); margin: 16px 0; line-height: 1.7;"><strong>Corpus is never strict-able</strong> — it's reference loaded on-demand by forward-link from a guide; every guide links to its own intended corpus, so corpus from different tiers coexists without collision.</p>
 
@@ -1652,10 +1664,11 @@ required:
       <div class="tree-line"><span class="tree-structure">        ├──</span><span class="tree-dir">corpus/</span><span class="tree-annotation ann-2">on-demand reasoning</span></div>
       <div class="tree-line"><span class="tree-structure">        ├──</span><span class="tree-dir">guides/</span><span class="tree-annotation ann-1">ambient rules</span></div>
       <div class="tree-line"><span class="tree-structure">        ├──</span><span class="tree-dir">playbooks/</span><span class="tree-annotation ann-3">ordered action chains · optional</span></div>
-      <div class="tree-line"><span class="tree-structure">        └──</span><span class="tree-dir">actions/</span><span class="tree-annotation ann-4">single units · optional</span></div>
+      <div class="tree-line"><span class="tree-structure">        ├──</span><span class="tree-dir">actions/</span><span class="tree-annotation ann-4">single units · optional</span></div>
+      <div class="tree-line"><span class="tree-structure">        └──</span><span class="tree-dir">sensors/</span><span class="tree-annotation ann-3">concrete checks · team-tier only · optional</span></div>
     </div>
 
-    <p style="font-size: 0.78rem; color: var(--muted); font-family: var(--mono); margin: 16px 0; line-height: 1.7;">Sensors are <strong>not</strong> part of a policy. Sensors describe project tooling (lint, test commands) — they're an integration concern the project owns.</p>
+    <p style="font-size: 0.78rem; color: var(--muted); font-family: var(--mono); margin: 16px 0; line-height: 1.7;"><strong>Sensors cascade across two tiers only — team → project.</strong> Org policies cannot ship or declare sensors (too stack-specific for the org layer; a team often shares them). An org policy mandates <em>what</em> must be checked via an <code>action</code>; a team policy ships the concrete sensor (e.g., <code>rubocop</code>); the project can override unless the team marks it <code>strict</code>. The installer rejects an org-tier policy that puts files under <code>sensors/</code>. <span style="color:var(--accent3);">(0.13.0)</span></p>
 
     <div class="section-label">Install, update, verify</div>
 <pre class="code"><span class="comment"># Install during init</span>
@@ -1686,7 +1699,7 @@ required:
       <div class="action">
         <span class="action-tag">tier: team</span>
         <h3 style="color: var(--accent2);"><a href="https://github.com/tacoda/tacoda-team" target="_blank" rel="noopener" style="color: inherit;"><code>tacoda-team</code></a></h3>
-        <p>Layers on top of <code>tacoda-org</code>. Legitimately overrides the org's non-strict <code>playbooks/release</code>, <code>guides/release-process</code>, and <code>actions/announce-release</code> with team-specific versions. Adds <code>actions/pre-release-smoke</code> as a team-strict gate that projects cannot skip. Cannot ship <code>actions/changelog-check</code> — the org locked that name.</p>
+        <p>Layers on top of <code>tacoda-org</code>. Legitimately overrides the org's non-strict <code>playbooks/release</code>, <code>guides/release-process</code>, and <code>actions/announce-release</code> with team-specific versions. Adds <code>actions/pre-release-smoke</code> as a team-strict gate that projects cannot skip. Can also ship <code>sensors/&lt;name&gt;.md</code> — e.g., a <code>rubocop</code> sensor that satisfies the org's <code>actions/static-analysis</code> mandate; projects override unless the team marks it strict. Cannot ship <code>actions/changelog-check</code> — the org locked that name.</p>
       </div>
     </div>
 
