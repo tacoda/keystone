@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://keystone.tacoda.dev/schemas/keystone.lock.json",
+  "title": "Keystone Lockfile",
+  "description": "Per-install state record at harness/keystone.lock.json. Records the keystone binary version that last touched the install, agent IDs with menu files installed, and one entry per installed policy (source ref, resolved SHA, policy version, file hashes).",
+  "type": "object",
+  "properties": {
+    "version": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Lockfile schema version. Bumped when fields are renamed or removed."
+    },
+    "keystone": {
+      "type": "object",
+      "properties": {
+        "version":   { "type": "string", "description": "Binary version that last touched the install." },
+        "installed": { "type": "string", "description": "YYYY-MM-DD of original install." },
+        "agents":    { "type": "array", "items": { "type": "string" }, "description": "Agent IDs with menu files installed." }
+      },
+      "required": ["version"],
+      "additionalProperties": false
+    },
+    "policies": {
+      "type": "object",
+      "description": "Map of policy name → installed-policy record.",
+      "additionalProperties": {
+        "$ref": "#/$defs/policyLock"
+      }
+    }
+  },
+  "required": ["version", "keystone"],
+  "additionalProperties": false,
+  "$defs": {
+    "policyLock": {
+      "type": "object",
+      "properties": {
+        "source_ref":       { "type": "string", "description": "Exact ref string the user passed (e.g. git+https://...#v1.0.0)." },
+        "resolved_sha":     { "type": "string", "description": "Commit SHA or artifact digest the policy resolved to." },
+        "policy_version":   { "type": "string", "description": "Value from the policy manifest's version field." },
+        "keystone_version": { "type": "string", "description": "Binary version at install time." },
+        "tier":             { "type": "string", "enum": ["org", "team"] },
+        "strict":           { "$ref": "#/$defs/strictSpec" },
+        "required":         { "$ref": "#/$defs/strictSpec" },
+        "files": {
+          "type": "object",
+          "description": "Map of file path (relative to install dir, slash-separated) to content hash ('sha256:<hex>').",
+          "additionalProperties": { "type": "string" }
+        }
+      },
+      "required": ["source_ref", "resolved_sha", "policy_version", "keystone_version", "files"],
+      "additionalProperties": false
+    },
+    "strictSpec": {
+      "type": "object",
+      "properties": {
+        "guides":    { "type": "array", "items": { "type": "string" } },
+        "playbooks": { "type": "array", "items": { "type": "string" } },
+        "actions":   { "type": "array", "items": { "type": "string" } },
+        "sensors":   { "type": "array", "items": { "type": "string" } }
+      },
+      "additionalProperties": false
+    }
+  }
+}

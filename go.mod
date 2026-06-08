@@ -5,7 +5,6 @@ go 1.25.5
 require (
 	github.com/charmbracelet/huh v1.0.0
 	golang.org/x/term v0.43.0
-	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (

@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://keystone.tacoda.dev/schemas/keystone.json",
+  "title": "Keystone Consumer Config",
+  "description": "Top-level keystone.json at the consumer repo root. Declares the nested plugin tree and pins the framework version. Plan §3 spells out the precedence semantics (pre-order walk, project layer always at the front, strict locks downward). Phase 3 will finalize the schema alongside the vendoring flow; this draft captures the shape committed to in Phase 1.",
+  "type": "object",
+  "properties": {
+    "version": {
+      "type": "string",
+      "description": "Schema version of keystone.json itself. Currently \"1\"."
+    },
+    "framework_version": {
+      "type": "string",
+      "description": "Keystone binary version this project is pinned to (SemVer)."
+    },
+    "plugins": {
+      "type": "array",
+      "description": "Ordered list of plugin nodes. Pre-order walk produces the cascade priority list. The implicit project layer (harness/) always sits at the front before the first node here.",
+      "items": { "$ref": "#/$defs/pluginNode" }
+    },
+    "budgets": {
+      "type": "object",
+      "description": "Optional per-port context-budget caps. Phase 5 wires these into keystone doctor --budget.",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "max_tokens":          { "type": "integer", "minimum": 0 },
+          "max_tokens_per_load": { "type": "integer", "minimum": 0 }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": ["version", "plugins"],
+  "additionalProperties": false,
+  "$defs": {
+    "pluginNode": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{0,63}$",
+          "description": "Plugin name. Must match the manifest's name."
+        },
+        "source": {
+          "type": "string",
+          "description": "Plugin source. v1 supports git+<url>; local-path may follow as an opt-in for plugin authors (PLAN §6 open question 2)."
+        },
+        "version": {
+          "type": "string",
+          "description": "Plugin version pin (tag, branch, or SHA after the # in the source URL — captured here for readability)."
+        },
+        "strict": {
+          "type": "object",
+          "description": "Per-port lock list. Blocks descendants/later-tree siblings from shipping the named items.",
+          "additionalProperties": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        },
+        "children": {
+          "type": "array",
+          "description": "Child plugins nested under this one. Pre-order walk descends before moving to siblings.",
+          "items": { "$ref": "#/$defs/pluginNode" }
+        }
+      },
+      "required": ["name", "source", "version"],
+      "additionalProperties": false
+    }
+  }
+}

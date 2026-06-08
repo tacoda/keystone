@@ -1,6 +1,6 @@
 # Keystone 1.0 — Harness Framework Plan
 
-**Status:** Approved · Phase 0 complete · Phase 1 in progress
+**Status:** Approved · Phases 0–1 complete · Phase 2 next
 **Last updated:** 2026-06-08
 
 Convert Keystone from a "harness installer with org policy plugins" into a **harness framework**: a small, stable Go runtime with Rails-style conventions for project content, and a vendored, read-only plugin system for sharing policy across projects. 1.0 is a clean break from 0.x — no backward-compatibility shims.
@@ -10,7 +10,7 @@ Convert Keystone from a "harness installer with org policy plugins" into a **har
 | Phase | Target | Status |
 |---|---|---|
 | 0 — Foundation & decision log | 0.14.0 | ✅ Complete (2026-06-08, commit `6b6295f`) |
-| 1 — Framework/client boundary + YAML→JSON sweep | 0.15.0 | 🔄 In progress (started 2026-06-08) |
+| 1 — Framework/client boundary + YAML→JSON sweep | 0.15.0 | ✅ Complete (2026-06-08, 6 sub-commits + 1 fixup) |
 | 2 — Convention-scaffolded defaults | 0.16.0 | ⏳ Pending |
 | 3 — Vendored read-only plugins | 0.17.0 | ⏳ Pending |
 | 4 — Conventions, generators, doctor | 0.18.0 | ⏳ Pending |
@@ -212,7 +212,7 @@ Each phase: scope → deliverables → exit criteria → risks.
 
 ### Phase 1 — Framework / client boundary + YAML→JSON sweep (target: 0.15.0)
 
-**Status:** 🔄 In progress (started 2026-06-08).
+**Status:** ✅ Complete (2026-06-08). Six sub-commits: CLI relocation (`c967b23` + fixup `1791f5c`), loader + manifest extraction (`0e598fc`), lockfile + cascade verify (`8779834`), migrate runner with JSON-only ops (`309ebbe`), YAML→JSON sweep + 0.x migration deletion (`5b30b67`), yaml.v3 drop + JSON Schemas (this commit).
 
 **Scope.** Physically separate framework Go code from default content. Move sources under `internal/framework/`, `cmd/keystone/`. Convert every config/manifest/lockfile in the repo from YAML to JSON. Drop YAML loaders entirely. The 0.x migration files are removed (no backward compat to preserve).
 

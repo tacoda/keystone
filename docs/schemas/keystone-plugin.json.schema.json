@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://keystone.tacoda.dev/schemas/keystone-plugin.json",
+  "title": "Keystone Plugin Manifest",
+  "description": "Manifest at the root of a keystone plugin/policy repo. Filename on disk: keystone-plugin.json.",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]{0,63}$",
+      "description": "The plugin's unique name. Lowercase, kebab-case, ≤64 chars."
+    },
+    "version": {
+      "type": "string",
+      "description": "Plugin version (SemVer recommended)."
+    },
+    "tier": {
+      "type": "string",
+      "enum": ["org", "team"],
+      "description": "Authority level in the cascade. Defaults to 'org'. Sensors are team-tier only."
+    },
+    "keystone_min": {
+      "type": "string",
+      "description": "Minimum keystone binary version this plugin requires (SemVer)."
+    },
+    "description": {
+      "type": "string"
+    },
+    "strict": {
+      "$ref": "#/$defs/strictSpec",
+      "description": "Items this plugin ships and locks against override from lower tiers."
+    },
+    "required": {
+      "$ref": "#/$defs/strictSpec",
+      "description": "Items this plugin expects to exist somewhere in the cascade but does not ship itself."
+    }
+  },
+  "required": ["name", "version"],
+  "additionalProperties": false,
+  "$defs": {
+    "strictSpec": {
+      "type": "object",
+      "description": "Items by kind. `sensors` is only valid on tier: team plugins.",
+      "properties": {
+        "guides":    { "type": "array", "items": { "type": "string" } },
+        "playbooks": { "type": "array", "items": { "type": "string" } },
+        "actions":   { "type": "array", "items": { "type": "string" } },
+        "sensors":   { "type": "array", "items": { "type": "string" } }
+      },
+      "additionalProperties": false
+    }
+  }
+}

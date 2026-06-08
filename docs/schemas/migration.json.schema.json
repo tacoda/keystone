@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://keystone.tacoda.dev/schemas/migration.json",
+  "title": "Keystone Migration",
+  "description": "One migration file under migrations/<version>/<NNN>-<name>.json. The migrate runner walks every migration whose version directory is strictly greater than the install's recorded keystone_version, in (version asc, filename asc) order.",
+  "type": "object",
+  "properties": {
+    "description": {
+      "type": "string",
+      "description": "One-line human-readable summary."
+    },
+    "operations": {
+      "type": "array",
+      "description": "Ordered list of file-level operations to apply.",
+      "items": { "$ref": "#/$defs/operation" }
+    }
+  },
+  "required": ["operations"],
+  "additionalProperties": false,
+  "$defs": {
+    "operation": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "add_file",
+            "frontmatter_set",
+            "ensure_section",
+            "replace_block",
+            "move_dir",
+            "move_file",
+            "delete_dir",
+            "delete_file"
+          ],
+          "description": "The op kind. Per-op fields populated below; see PLAN-1.0.md §5.3 for the contract."
+        },
+        "path": {
+          "type": "string",
+          "description": "Slash-separated path under the install dir. For move_* and delete_dir, this is the source; for delete_file and others, the target."
+        },
+        "content":       { "type": "string", "description": "add_file: the file body to write." },
+        "key":           { "type": "string", "description": "frontmatter_set: the frontmatter key." },
+        "value":         { "type": "string", "description": "frontmatter_set: the literal value." },
+        "after_heading": { "type": "string", "description": "ensure_section: anchor heading to insert after; empty appends at EOF." },
+        "heading":       { "type": "string", "description": "ensure_section: the heading line to insert (used for idempotency check)." },
+        "body":          { "type": "string", "description": "ensure_section: body content under the heading." },
+        "match":         { "type": "string", "description": "replace_block: exact-string match block to replace." },
+        "replacement":   { "type": "string", "description": "replace_block: replacement block. No-op if already present." },
+        "to":            { "type": "string", "description": "move_dir / move_file: destination path." }
+      },
+      "required": ["type", "path"]
+    }
+  }
+}
