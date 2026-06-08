@@ -2,20 +2,26 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://keystone.tacoda.dev/schemas/keystone.json",
   "title": "Keystone Consumer Config",
-  "description": "Top-level keystone.json at the consumer repo root. Declares the nested plugin tree and pins the framework version. Plan §3 spells out the precedence semantics (pre-order walk, project layer always at the front, strict locks downward). Phase 3 will finalize the schema alongside the vendoring flow; this draft captures the shape committed to in Phase 1.",
+  "description": "Top-level keystone.json at the consumer repo root. Records the harness folder name, the framework version pin, and the nested plugin tree. Pre-order walk over plugins[] produces the cascade priority list; the project layer (harness root contents) always sits in front. See PLAN-1.0.md §3 for full semantics.",
   "type": "object",
   "properties": {
     "version": {
       "type": "string",
+      "const": "1",
       "description": "Schema version of keystone.json itself. Currently \"1\"."
     },
     "framework_version": {
       "type": "string",
       "description": "Keystone binary version this project is pinned to (SemVer)."
     },
+    "harness_root": {
+      "type": "string",
+      "description": "Directory name where the harness is installed inside the repo. Defaults to \"harness\" when omitted. Downstream commands read this so users do not have to re-pass --harness-root after init.",
+      "pattern": "^[A-Za-z0-9._-]+$"
+    },
     "plugins": {
       "type": "array",
-      "description": "Ordered list of plugin nodes. Pre-order walk produces the cascade priority list. The implicit project layer (harness/) always sits at the front before the first node here.",
+      "description": "Ordered list of plugin nodes. Pre-order walk produces the cascade priority list. The project layer (the harness root) always sits at the front before the first node here.",
       "items": { "$ref": "#/$defs/pluginNode" }
     },
     "budgets": {
@@ -40,19 +46,19 @@
         "name": {
           "type": "string",
           "pattern": "^[a-z][a-z0-9-]{0,63}$",
-          "description": "Plugin name. Must match the manifest's name."
+          "description": "Plugin name. Must match the manifest's name. Lowercase, kebab-case, ≤64 chars."
         },
         "source": {
           "type": "string",
-          "description": "Plugin source. v1 supports git+<url>; local-path may follow as an opt-in for plugin authors (PLAN §6 open question 2)."
+          "description": "Shorthand source: `[<host>/]<owner>/<repo>`. When the host is omitted (single slash, no dots in the first segment), the resolver prepends `github.com`. Examples: `tacoda/tacoda-org`, `github.com/acme/policies`, `gitlab.com/acme/team/policies`."
         },
         "version": {
           "type": "string",
-          "description": "Plugin version pin (tag, branch, or SHA after the # in the source URL — captured here for readability)."
+          "description": "Git ref (tag, branch, or SHA). Required."
         },
         "strict": {
           "type": "object",
-          "description": "Per-port lock list. Blocks descendants/later-tree siblings from shipping the named items.",
+          "description": "Per-port lock list. Blocks descendants/later-tree siblings from shipping the named items. Key is the port name (e.g. \"guides\", \"sensors\"); value is a list of item basenames (no .md extension).",
           "additionalProperties": {
             "type": "array",
             "items": { "type": "string" }
