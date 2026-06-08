@@ -17,7 +17,7 @@ import (
 // installed.
 //
 // The profile is the human-readable record. Machine state (keystone version,
-// agents, packs) lives in harness/.keystone.lock — written separately. The
+// agents, packs) lives in harness/keystone.lock.json — written separately. The
 // profile no longer emits `keystone_version:` frontmatter; that field was
 // promoted to the lockfile.
 func writeInstallProfile(destDir string, sel Selections, policies map[string]lockfile.PolicyLock) error {
@@ -31,7 +31,7 @@ func writeInstallProfile(destDir string, sel Selections, policies map[string]loc
 	fmt.Fprintf(&b, "created: %s\n", time.Now().UTC().Format("2006-01-02"))
 	fmt.Fprintf(&b, "---\n\n")
 	fmt.Fprintf(&b, "# Install Profile\n\n")
-	fmt.Fprintf(&b, "Selections captured by `keystone init`. Read by the **bootstrap** action; safe to edit by hand. Machine state (keystone version, agents, packs) lives in [`../../.keystone.lock`](../../.keystone.lock).\n\n")
+	fmt.Fprintf(&b, "Selections captured by `keystone init`. Read by the **bootstrap** action; safe to edit by hand. Machine state (keystone version, agents, packs) lives in [`../../keystone.lock.json`](../../keystone.lock.json).\n\n")
 	fmt.Fprintf(&b, "## Selections\n\n")
 	fmt.Fprintf(&b, "| Category | Value(s) |\n")
 	fmt.Fprintf(&b, "|---|---|\n")

@@ -128,7 +128,7 @@ Consumers install a policy during `init`:
 keystone init --policy git+https://github.com/acme/keystone-policy.git#v1.2.0
 ```
 
-Policy content lands under `harness/policies/<name>/`, with `guides/` ambient and `corpus/` on-demand inside the namespace. Pin state (resolved SHA, per-file hashes) is recorded in `harness/.keystone.lock`. Add a policy after `init` with:
+Policy content lands under `harness/policies/<name>/`, with `guides/` ambient and `corpus/` on-demand inside the namespace. Pin state (resolved SHA, per-file hashes) is recorded in `harness/keystone.lock.json`. Add a policy after `init` with:
 
 ```bash
 keystone policy add git+https://github.com/acme/keystone-policy.git#v1.2.0
@@ -146,7 +146,7 @@ keystone policy update <name> <new-ref>      # bump to a new ref
 A policy repo is just a small directory tree:
 
 ```
-keystone-policy.yaml       # name, version, tier, strict, required, description
+keystone-plugin.json       # name, version, tier, strict, required, description
 policy/
   harness/policies/<name>/
     corpus/<topic>/<file>.md

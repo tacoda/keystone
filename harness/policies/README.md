@@ -71,21 +71,20 @@ For any `<kind>/<name>` (kind ∈ `guides`, `playbooks`, `actions`), the file th
 
 Any policy tier can lock specific items against override from below. Declare it in the manifest:
 
-```yaml
-# keystone-policy.yaml
-name: acme
-version: 1.0.0
-tier: team             # `sensors` requires tier: team
-strict:
-  guides:
-    - documentation
-  playbooks:
-    - trunk_based_development
-  actions:
-    - rubocop_for_ruby
-  sensors:
-    - rubocop
+```json
+{
+  "name": "acme",
+  "version": "1.0.0",
+  "tier": "team",
+  "strict": {
+    "guides": ["documentation"],
+    "playbooks": ["trunk_based_development"],
+    "actions": ["rubocop_for_ruby"],
+    "sensors": ["rubocop"]
+  }
+}
 ```
+(`keystone-plugin.json`; `sensors` requires `"tier": "team"`.)
 
 Rules:
 
@@ -103,16 +102,17 @@ Non-strict items remain freely overridable down the chain.
 
 A policy can flag items that should exist somewhere in the cascade but which the policy itself does not ship. The intent is to surface gaps — things the project needs to define because no higher tier has prescribed them:
 
-```yaml
-# keystone-policy.yaml
-name: acme
-tier: org
-required:
-  guides:
-    - business_continuity_plan
-  actions:
-    - oncall_rotation_handoff
+```json
+{
+  "name": "acme",
+  "tier": "org",
+  "required": {
+    "guides": ["business_continuity_plan"],
+    "actions": ["oncall_rotation_handoff"]
+  }
+}
 ```
+(`keystone-plugin.json`)
 
 Rules:
 
@@ -132,28 +132,33 @@ If a project needs to soften or extend a non-strict policy item, the override mo
 
 ## Pinning + updates
 
-Each installed policy is pinned in [`../.keystone.lock`](../.keystone.lock):
+Each installed policy is pinned in [`../keystone.lock.json`](../keystone.lock.json):
 
-```yaml
-policies:
-  acme:
-    source_ref: "git+https://github.com/acme/keystone-policy.git#v1.2.0"
-    resolved_sha: "abc1234..."
-    policy_version: "1.2.0"
-    keystone_version: "0.9.0"
-    files:
-      "harness/policies/acme/guides/vendors.md": "sha256:..."
+```json
+{
+  "policies": {
+    "acme": {
+      "source_ref": "git+https://github.com/acme/keystone-policy.git#v1.2.0",
+      "resolved_sha": "abc1234...",
+      "policy_version": "1.2.0",
+      "keystone_version": "0.9.0",
+      "files": {
+        "harness/policies/acme/guides/vendors.md": "sha256:..."
+      }
+    }
+  }
+}
 ```
 
 The lockfile records per-file hashes so `keystone policy update <name>` can detect locally edited files before clobbering them.
 
 ## Authoring a policy
 
-A policy is a git repo with two things at its root: a `keystone-policy.yaml` manifest and a `policy/` content directory:
+A policy is a git repo with two things at its root: a `keystone-plugin.json` manifest and a `policy/` content directory:
 
 ```
 my-policy-repo/
-├── keystone-policy.yaml      # name, version, optional strict map, optional description
+├── keystone-plugin.json      # name, version, optional strict map, optional description
 ├── README.md                 # for humans browsing the repo; ignored at install
 └── policy/
     └── harness/policies/<name>/

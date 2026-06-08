@@ -205,7 +205,7 @@ func printPolicyUpdateUsage(w *os.File) {
 Usage:
   keystone policy update <name> [<new-ref>] [--dir <path>] [--force]
 
-Re-resolves the policy using the ref recorded in harness/.keystone.lock, or
+Re-resolves the policy using the ref recorded in harness/keystone.lock.json, or
 the new ref if supplied. For a moving ref (e.g. a branch like #main) this
 picks up new commits; for a pinned tag it's a no-op unless the tag was moved.
 Refuses to overwrite files that have been edited since install — pass --force

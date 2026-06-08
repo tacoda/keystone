@@ -116,7 +116,7 @@ func runInit(args []string, assets embed.FS) error {
 	return nil
 }
 
-// initializeLockfile creates harness/.keystone.lock if it doesn't exist yet,
+// initializeLockfile creates harness/keystone.lock.json if it doesn't exist yet,
 // or fills in the keystone section if a prior call (e.g. installPacks) wrote
 // only the packs section. Records the binary version, install date, and the
 // agent IDs whose menu files were just installed.

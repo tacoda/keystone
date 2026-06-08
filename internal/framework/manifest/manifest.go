@@ -3,14 +3,12 @@
 // policy or plugin repo that names it, sets its version, and declares which
 // items it ships strictly and which it requires from elsewhere in the cascade.
 //
-// In 0.x the manifest file is keystone-policy.yaml. At 1.0 it becomes
-// keystone-plugin.json (Phase 1 commit 5). The Go type stays stable across
-// that format switch; only the loader changes.
+// The manifest file is keystone-plugin.json. JSON format.
 package manifest
 
-// PolicyManifestFile is the on-disk name of the policy manifest at the policy
+// PolicyManifestFile is the on-disk name of the manifest at the policy/plugin
 // repo root.
-const PolicyManifestFile = "keystone-policy.yaml"
+const PolicyManifestFile = "keystone-plugin.json"
 
 // PolicyContentRoot is the directory inside a policy repo that holds the
 // files to be copied into a consumer install. Everything outside this prefix
@@ -31,10 +29,10 @@ const (
 // reference loaded on-demand and not subject to the cascade. Sensors cascade
 // across two tiers only (team → project); org policies cannot declare them.
 type StrictSpec struct {
-	Guides    []string `yaml:"guides,omitempty"    json:"guides,omitempty"`
-	Playbooks []string `yaml:"playbooks,omitempty" json:"playbooks,omitempty"`
-	Actions   []string `yaml:"actions,omitempty"   json:"actions,omitempty"`
-	Sensors   []string `yaml:"sensors,omitempty"   json:"sensors,omitempty"`
+	Guides    []string `json:"guides,omitempty"`
+	Playbooks []string `json:"playbooks,omitempty"`
+	Actions   []string `json:"actions,omitempty"`
+	Sensors   []string `json:"sensors,omitempty"`
 }
 
 // IsEmpty reports whether the spec names any items.
@@ -43,20 +41,20 @@ func (s StrictSpec) IsEmpty() bool {
 }
 
 // Manifest describes one policy (a distributable bundle of governance
-// content). Loaded from keystone-policy.yaml at the policy repo root.
+// content). Loaded from keystone-plugin.json at the policy repo root.
 //
 // `strict` items are shipped by this policy and locked against override
 // from lower tiers. `required` items are NOT shipped by this policy — the
 // policy declares they should exist somewhere in the cascade (typically the
 // project); verify surfaces missing ones so the project knows what to fill in.
 type Manifest struct {
-	Name        string     `yaml:"name"                  json:"name"`
-	Version     string     `yaml:"version"               json:"version"`
-	Tier        string     `yaml:"tier,omitempty"        json:"tier,omitempty"` // "org" (default) or "team"
-	KeystoneMin string     `yaml:"keystone_min,omitempty" json:"keystone_min,omitempty"`
-	Description string     `yaml:"description,omitempty" json:"description,omitempty"`
-	Strict      StrictSpec `yaml:"strict,omitempty"      json:"strict,omitempty"`
-	Required    StrictSpec `yaml:"required,omitempty"    json:"required,omitempty"`
+	Name        string     `json:"name"`
+	Version     string     `json:"version"`
+	Tier        string     `json:"tier,omitempty"` // "org" (default) or "team"
+	KeystoneMin string     `json:"keystone_min,omitempty"`
+	Description string     `json:"description,omitempty"`
+	Strict      StrictSpec `json:"strict,omitempty"`
+	Required    StrictSpec `json:"required,omitempty"`
 }
 
 // ResolvedTier returns the policy's tier, applying the default if unset.

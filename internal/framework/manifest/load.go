@@ -1,14 +1,13 @@
 package manifest
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
-
-	"gopkg.in/yaml.v3"
 )
 
-// Load reads and parses the policy manifest from policyRoot. Returns a
+// Load reads and parses the plugin manifest from policyRoot. Returns a
 // validated *Manifest on success.
 func Load(policyRoot string) (*Manifest, error) {
 	path := filepath.Join(policyRoot, PolicyManifestFile)
@@ -17,7 +16,7 @@ func Load(policyRoot string) (*Manifest, error) {
 		return nil, fmt.Errorf("read %s: %w", PolicyManifestFile, err)
 	}
 	var m Manifest
-	if err := yaml.Unmarshal(data, &m); err != nil {
+	if err := json.Unmarshal(data, &m); err != nil {
 		return nil, fmt.Errorf("parse %s: %w", PolicyManifestFile, err)
 	}
 	if err := m.validate(); err != nil {

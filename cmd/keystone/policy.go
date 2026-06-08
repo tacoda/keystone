@@ -107,7 +107,7 @@ Flags:
 }
 
 // installPolicies resolves, validates, and copies every policy in refs into
-// destDir. Updates harness/.keystone.lock with one entry per installed policy.
+// destDir. Updates harness/keystone.lock.json with one entry per installed policy.
 // Stops at the first failure (no rollback in v1) — partial state on disk is
 // possible if a later policy errors after an earlier one succeeded.
 //

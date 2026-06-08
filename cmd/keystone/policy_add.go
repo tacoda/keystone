@@ -139,7 +139,7 @@ Fetches and installs a policy from <ref>. v1 supports git+<url>[#<rev>]:
   keystone policy add git+https://github.com/acme/policy.git#v1.2.0
 
 Errors out if a policy with the same name is already recorded in
-harness/.keystone.lock — use 'keystone policy update' to re-resolve, or
+harness/keystone.lock.json — use 'keystone policy update' to re-resolve, or
 remove the policy first to re-add it.
 
 Flags:
