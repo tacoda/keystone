@@ -1002,7 +1002,6 @@
         <a class="nav-link" href="#getting-started">Your first project</a>
         <a class="nav-link" href="#first-task">Your first task</a>
         <a class="nav-link" href="#first-plugin">Adding a plugin</a>
-        <a class="nav-link" href="#first-generator">Authoring with generators</a>
       </div>
 
       <div class="nav-group">
@@ -1020,6 +1019,12 @@
         <a class="nav-link" href="#failure-modes">Agent failure modes</a>
         <a class="nav-link" href="#modes">Pacing modes</a>
         <a class="nav-link" href="#budget">Context budgeting</a>
+      </div>
+
+      <div class="nav-group">
+        <span class="nav-label">Authoring</span>
+        <a class="nav-link" href="#first-generator">With generators</a>
+        <a class="nav-link" href="#patterns">Patterns</a>
       </div>
 
       <div class="nav-group">
@@ -1686,11 +1691,90 @@ For reasoning, see `corpus/domain/refunds.md`.</pre>
     <div class="section-label">Where to go next</div>
     <ul class="iron-list">
       <li>The <a href="#guides">Framework</a> section in the sidebar covers each port (guides, corpus, sensors, actions, playbooks, adapters, state ledgers, flywheels) in detail.</li>
+      <li><a href="#patterns">Patterns</a> — direction for getting the best results out of each abstraction, plus the cross-cutting habits that hold the harness together.</li>
       <li><a href="#rules">Rules &amp; iron laws</a> explains the three-tier strength gradient inside any guide.</li>
       <li><a href="#failure-modes">Agent failure modes</a> documents the guardrails the harness puts on the agent.</li>
       <li><a href="https://github.com/tacoda/keystone/blob/main/docs/conventions.md" target="_blank" rel="noopener">docs/conventions.md ↗</a> is the canonical path-and-shape reference.</li>
       <li><a href="https://github.com/tacoda/keystone/blob/main/docs/compatibility.md" target="_blank" rel="noopener">docs/compatibility.md ↗</a> is the 1.x contract — what stays stable, what's free to evolve.</li>
     </ul>
+  </section>
+
+  <!-- ===================== PATTERNS ===================== -->
+  <section id="patterns" class="page" data-title="Patterns">
+    <div class="page-head">
+      <div class="crumb">Authoring · How to get the most out of each abstraction</div>
+      <h1>Patterns — direction for authoring the harness.</h1>
+      <p class="tagline">Each framework abstraction has shapes that work well and shapes that don't. These are the patterns that produce harness content the agent actually reads correctly — short, scannable, separable. Treat them as direction, not law: the iron laws are in <a href="#rules">guides</a>; this page is for taste.</p>
+    </div>
+
+    <div class="definition">
+      <p><strong>Why patterns matter.</strong> The harness is markdown the agent reads every turn. Bad shapes cost tokens, bury the rule under prose, or scatter one concern across files the agent never loads together. Good shapes keep ambient context lean, make the rule the first thing the agent sees, and let each file carry exactly one concern.</p>
+      <p>If you've authored Rails, Phoenix, or Django code, the instinct transfers: <em>one responsibility per file, conventions over configuration, surgical edits over sweeping rewrites</em>. The same posture works here.</p>
+    </div>
+
+    <div class="section-label">Per-abstraction direction</div>
+    <div class="action-grid">
+      <div class="action">
+        <span class="action-tag">Guides</span>
+        <h3 style="color: var(--accent);">Rules — short, dense, ambient</h3>
+        <p><strong>Lead with the rule, not the reasoning.</strong> First line is the directive; the why lives in the paired corpus. One sentence per rule; long rationale belongs in corpus.<br><br><strong>Default to <code>## RULES</code>.</strong> Promote to <strong>GOLDEN</strong> only when deviation needs explicit reasoning; <strong>IRON LAW</strong> only when violation causes real damage. The strength of the special tiers comes from rarity.<br><br><strong>Constrain scope by region when you can.</strong> Region-specific rules belong in <code>guides/idioms/&lt;stack&gt;/</code> — they shouldn't pay the ambient cost everywhere.</p>
+      </div>
+
+      <div class="action">
+        <span class="action-tag">Corpus</span>
+        <h3 style="color: var(--accent2);">Reasoning — paired, on-demand</h3>
+        <p><strong>Pair every guide with a corpus file.</strong> The rule alone often isn't enough when the situation gets weird; the corpus carries the worked examples, anti-patterns, and citations.<br><br><strong>Cite specifics.</strong> RFC numbers, ticket IDs, paper references — enough that the next reader can verify the claim, not just trust it.<br><br><strong>Edit when understanding shifts.</strong> When the team's mental model changes, the corpus usually moves before the rule does. A stale corpus is the early warning that a rule is about to be wrong.</p>
+      </div>
+
+      <div class="action">
+        <span class="action-tag">Sensors</span>
+        <h3 style="color: var(--accent3);">Checks — one concern per sensor</h3>
+        <p><strong>One sensor per concern.</strong> <code>lint</code>, <code>type-check</code>, <code>test</code>, <code>drift</code> — never one sensor that does two of these. Composite sensors hide which check actually failed.<br><br><strong>Declare <code>kind</code> precisely.</strong> Computational sensors return deterministic exit codes; inferential sensors return reasoned findings. The action that invokes them reads only what the contract promises.<br><br><strong>Name after the gate, not the tool.</strong> <code>drift</code>, not <code>regex-check</code>. The tool can change; the gate stays.</p>
+      </div>
+
+      <div class="action">
+        <span class="action-tag">Actions</span>
+        <h3 style="color: var(--accent4);">Units — one verb per action</h3>
+        <p><strong>One verb per action.</strong> <code>spec</code>, <code>verify</code>, <code>review</code> — not <code>spec-and-orient</code>. Compound actions defeat the playbook's ability to compose them.<br><br><strong>Forward-link, don't duplicate.</strong> The action lists the sensors it runs and the guides it reads — short. The substance lives in the linked files.<br><br><strong>Make the gate explicit.</strong> "<em>Proceed when X</em>" — not "after this is done." The agent reads the gate to decide whether to stop and ask.</p>
+      </div>
+
+      <div class="action">
+        <span class="action-tag">Playbooks</span>
+        <h3 style="color: var(--accent5);">Chains — thin orchestration only</h3>
+        <p><strong>Keep playbooks thin.</strong> Bullet the activities and link to each action — no reasoning, no duplication. A playbook over ~40 lines is doing too much.<br><br><strong>One playbook per workflow shape.</strong> <code>task</code> is the six-phase loop; <code>release</code> is the release gate. Don't merge them because they share a step or two.<br><br><strong>Order is the structure.</strong> Steps 1 → 2 → 3, with the gate between each. Anything else lives in the linked actions.</p>
+      </div>
+
+      <div class="action">
+        <span class="action-tag">Adapters</span>
+        <h3 style="color: var(--accent);">Bindings — what <em>this</em> agent can do</h3>
+        <p><strong>Document the capability, not the contrast.</strong> The adapter describes what this specific agent does — not what every other agent does or doesn't. Comparisons live in the <a href="#agents">Supported agents</a> matrix.<br><br><strong>Name gaps explicitly.</strong> If the agent can't spawn sub-agents, say so in <code>sensors.md</code> with the remedy (e.g., spawn separate sessions). Don't hope the user notices.<br><br><strong>Edit when usage diverges.</strong> The shipped adapter is a starting point. If your team uses Claude Code's sub-agents differently than the default suggests, update <code>lifecycle.md</code> — that's the file the agent actually reads.</p>
+      </div>
+    </div>
+
+    <div class="section-label">Cross-cutting patterns</div>
+    <div class="action-grid">
+      <div class="action">
+        <span class="action-tag">discipline</span>
+        <h3 style="color: var(--accent2);">Pair guide + corpus with a forward-link</h3>
+        <p>Every rule worth keeping has reasoning behind it. Put the rule in <code>guides/&lt;topic&gt;.md</code> and the reasoning in <code>corpus/&lt;topic&gt;.md</code>; the guide forward-links to the corpus. The drift sensor enforces the rule; the agent loads the corpus only when the rule alone isn't enough. Skipping the corpus inflates ambient context with reasoning the situation rarely needs — and erases the audit trail when a teammate asks "why this rule?"</p>
+      </div>
+
+      <div class="action">
+        <span class="action-tag">discipline</span>
+        <h3 style="color: var(--accent3);">Change the file that owns the concern</h3>
+        <p>When the patterns shift, the rule in <code>guides/idioms/&lt;stack&gt;/</code> moves; the reasoning in <code>corpus/idioms/&lt;stack&gt;/</code> moves; the action that runs the check stays put. Pulling related material into one big file is the harness equivalent of a god class — easy to write, painful to maintain. Surgical authoring matches surgical edits: every change traces to the file that owns the concern.</p>
+      </div>
+
+      <div class="action">
+        <span class="action-tag">discipline</span>
+        <h3 style="color: var(--accent4);">Let harness debt accrue before you prune</h3>
+        <p>The <a href="#flywheels">Pruning flywheel</a> reads <code>corpus/state/harness-debt.md</code> — staleness is a signal, not an emergency. Aggressive pruning loses the worked examples a future engineer would cite and erases the rule's history. Prune in batches at audit, not opportunistically; archive rather than delete; let the debt ledger tell you what's actually stale before you act.</p>
+      </div>
+    </div>
+
+    <div class="definition" style="margin-top: 24px; border-left-color: var(--accent3);">
+      <p><strong style="color: var(--accent3);">The recurring shape.</strong> Across every abstraction, the same instinct works: <em>one concern per file, the rule before the reasoning, forward-links instead of duplication, explicit gates instead of implicit assumptions</em>. When you're stuck on a design choice, ask which of those four the current shape violates — the answer is usually obvious in retrospect.</p>
+    </div>
   </section>
 
   <!-- ===================== GUIDES ===================== -->
@@ -1915,38 +1999,41 @@ For reasoning, see `corpus/domain/refunds.md`.</pre>
   <section id="plugins" class="page" data-title="Plugins">
     <div class="page-head">
       <div class="crumb">Framework · Plugins <span style="color:var(--accent);">· 1.0</span></div>
-      <h1>Plugins — vendored, read-only shared policy.</h1>
-      <p class="tagline">Plugins ship shared governance across projects — markdown rules, sensors, actions, playbooks. They live at <code>harness/plugins/&lt;name&gt;/</code>, are gitignored, pinned in <code>keystone.json</code>, hash-verified via <code>keystone.lock.json</code>, and reset on any drift. Declared with an npm-style shorthand (<code>tacoda/tacoda-org@v1.0.0</code>), materialized by <code>keystone install</code>. The project layer always wins; among plugins, a nested tree resolves in pre-order.</p>
+      <h1>Plugins — vendored, read-only shared harness content.</h1>
+      <p class="tagline">Plugins ship reusable harness content across projects — guides, corpus, sensors, actions, playbooks, adapters. Anything you'd want to share lives in a plugin: org-wide standards, team-wide standards, security policy, release gates, vendor allowlists, language-idiom bundles, domain libraries, compliance regimes. Every plugin has the same shape; precedence is deterministic, driven by where each plugin sits in your <code>keystone.json</code> nesting.</p>
     </div>
 
     <div class="definition">
+      <p><strong>One plugin shape, many purposes.</strong> A plugin is a folder of markdown organized by port (<code>guides/</code>, <code>corpus/</code>, <code>sensors/</code>, <code>actions/</code>, <code>playbooks/</code>, <code>adapters/</code>) plus a <code>keystone-plugin.json</code> manifest. Nothing about the format distinguishes "an org policy bundle" from "a Rust idiom pack" from "a compliance regime" — they all materialize the same way and override the same way.</p>
       <p><strong>Plugins are read-only.</strong> The vendor directory is regenerable: <code>keystone install</code> fetches each pin into a content-addressable cache (<code>~/.cache/keystone/plugins/</code>) and copies it into <code>harness/plugins/&lt;name&gt;/</code>, chmod'd 0o444 on POSIX. The lockfile pins per-file hashes; <code>keystone verify</code> walks each vendored file and resets the directory the moment anything diverges. Edits to vendored content don't stick — the next verify wipes them.</p>
-      <p><strong>To override a plugin, edit the project layer.</strong> Drop a file with the same path at <code>harness/&lt;port&gt;/&lt;name&gt;.md</code> and the project layer beats every plugin. Plugin authors can mark items <code>strict</code> to block override; <code>keystone verify</code> reports violations with path context (<code>acme-org &gt; acme-platform &gt; acme-payments</code>) so you see exactly which node in the tree locked the rule.</p>
+      <p><strong>To override a plugin, edit the project layer.</strong> Drop a file with the same path at <code>harness/&lt;port&gt;/&lt;name&gt;.md</code> and the project layer beats every plugin. Plugin authors can mark items <code>strict</code> to block override from anything deeper in the cascade; <code>keystone verify</code> reports violations with path context so you see exactly which node in the tree locked the rule.</p>
     </div>
 
-    <div class="section-label">The cascade</div>
+    <div class="section-label">The cascade — deterministic, by nesting</div>
     <div class="mermaid-wrap">
-      <p class="mermaid-caption">Project layer always wins. Among plugins, pre-order tree walk: parent before children, children before later-tree siblings. Strict items lock downward.</p>
+      <p class="mermaid-caption">Project layer always wins. Among plugins, pre-order tree walk through <code>keystone.json</code>: parent before children, children before later-tree siblings. Strict items lock downward — nothing deeper can override them.</p>
       <div class="mermaid">
 flowchart LR
   project["Project<br/><i>harness/{guides,corpus,sensors,…}/</i>"] --> r{Cascade<br/>resolution}
-  org["acme-org<br/><i>harness/plugins/acme-org/</i>"] --> r
-  platform["acme-platform<br/><i>(child of acme-org)</i>"] --> r
-  payments["acme-payments<br/><i>(child of acme-platform)</i>"] --> r
+  parent["Parent plugin<br/><i>e.g. tacoda-org</i>"] --> r
+  child["Nested plugin<br/><i>(child of parent)</i>"] --> r
+  sibling["Sibling plugin<br/><i>(later in keystone.json)</i>"] --> r
   r --> agent["Agent reads<br/>one file per name"]
   project -. wins .-> r
-  org -. strict locks down .-> r
-  platform -. strict locks down .-> r
+  parent -. strict locks downward .-> r
+  child -. strict locks downward .-> r
   classDef green fill:#13161d,stroke:#4ade9a,color:#4ade9a
   classDef purple fill:#13161d,stroke:#a78bfa,color:#a78bfa
   classDef blue fill:#13161d,stroke:#60a5fa,color:#60a5fa
   classDef orange fill:#13161d,stroke:#f59e0b,color:#f59e0b
   class project green
-  class org purple
-  class platform blue
-  class payments orange
+  class parent purple
+  class child blue
+  class sibling orange
       </div>
     </div>
+
+    <p style="font-size: 0.82rem; color: var(--muted); line-height: 1.7;">There are no plugin tiers. Whether a plugin ships org-wide standards or team-wide standards or a compliance bundle is a question for the author's README — the cascade does not care. Precedence is whatever the nesting in <code>keystone.json</code> says it is. Want team standards to override an org plugin? Nest the team plugin under the org plugin. Want them peer-equal? Declare them side by side. The model is one mechanism, applied deterministically.</p>
 
     <div class="section-label">Pin format: shorthand sources</div>
     <div class="definition">
@@ -1965,15 +2052,14 @@ flowchart LR
   "harness_root": "harness",
   "plugins": [
     {
-      "name": "acme-org",
-      "source": "acme/policies",
-      "version": "v2.0.0",
-      "strict": { "guides": ["data-handling"] },
+      "name": "tacoda-org",
+      "source": "tacoda/tacoda-org",
+      "version": "v1.0.0",
       "children": [
         {
-          "name": "acme-platform",
-          "source": "acme/platform-policies",
-          "version": "v1.4.0",
+          "name": "acme-team",
+          "source": "acme/team-standards",
+          "version": "v0.4.0",
           "strict": { "sensors": ["rubocop"] }
         }
       ]
@@ -1981,24 +2067,25 @@ flowchart LR
   ]
 }</pre>
 
-    <p style="font-size: 0.78rem; color: var(--muted); font-family: var(--mono); margin: 16px 0; line-height: 1.7;">Pre-order: <code>acme-org</code> resolves before its children; <code>acme-platform</code> resolves before any later-tree sibling. <code>acme-org</code>'s strict on <code>guides/data-handling</code> blocks <code>acme-platform</code> (and any deeper node) from shipping <code>guides/data-handling.md</code>. The project layer can always override unless an ancestor locked it. <code>keystone verify</code> checks the whole tree.</p>
+    <p style="font-size: 0.78rem; color: var(--muted); font-family: var(--mono); margin: 16px 0; line-height: 1.7;">Pre-order: <code>tacoda-org</code> resolves before its children; <code>acme-team</code> resolves before any later-tree sibling. Strict items at any node lock against override from anything deeper. The project layer at <code>harness/&lt;port&gt;/&lt;name&gt;.md</code> always wins unless an ancestor locked the item. <code>keystone verify</code> checks the whole tree.</p>
 
     <div class="section-label">keystone-plugin.json — the plugin manifest</div>
 <pre class="code"><span class="comment">// keystone-plugin.json at the plugin repo root</span>
 {
-  "name": "acme-org",
-  "version": "2.0.0",
-  "description": "Acme org-wide engineering policy.",
+  "name": "tacoda-org",
+  "version": "1.0.0",
+  "keystone_min": "1.0.0",
+  "description": "Example shared-standards plugin for Keystone.",
   "strict": {
-    "guides": ["data-handling", "todos"],
-    "actions": ["release-notes"]
+    "guides": ["documentation", "todos"],
+    "actions": ["changelog-check", "static-analysis"]
   },
   "required": {
-    "actions": ["release"]
+    "actions": ["release-notes"]
   }
 }</pre>
 
-    <p style="font-size: 0.78rem; color: var(--muted); font-family: var(--mono); margin: 16px 0; line-height: 1.7;"><strong>strict</strong>: items this plugin ships and locks against override from deeper nodes (children and later-tree siblings). <strong>required</strong>: items this plugin expects to exist somewhere in the cascade but does not ship itself — <code>keystone verify</code> reports unmet requireds as advisory gaps. <strong>Corpus is not strict-able</strong>; it's reasoning loaded on demand by forward-link.</p>
+    <p style="font-size: 0.78rem; color: var(--muted); font-family: var(--mono); margin: 16px 0; line-height: 1.7;"><strong>strict</strong>: items this plugin ships and locks against override from anything deeper in the cascade. <strong>required</strong>: items this plugin expects to exist somewhere in the cascade but does not ship itself — <code>keystone verify</code> reports unmet requireds as advisory gaps. <strong>keystone_min</strong>: minimum binary version this plugin needs (SemVer). <strong>Corpus is not strict-able</strong>; it's reasoning loaded on demand by forward-link.</p>
 
     <div class="section-label">Layout of a plugin repo</div>
     <div class="tree">
@@ -2039,9 +2126,11 @@ flowchart LR
       <div class="action">
         <span class="action-tag">plugin</span>
         <h3 style="color: var(--accent5);"><a href="https://github.com/tacoda/tacoda-org" target="_blank" rel="noopener" style="color: inherit;"><code>tacoda-org</code></a></h3>
-        <p>An example org-wide policy plugin. Ships guides on documentation discipline, release process, and the changelog gate. <strong>Strict</strong> on <code>guides/documentation</code> and <code>actions/changelog-check</code> — no project may override. <strong>Required</strong>: <code>actions/release-notes</code> — the plugin declares it but doesn't ship it; the consuming project must define a release-notes action. Pin with <code>keystone plugin add tacoda/tacoda-org@v1.0.0</code>.</p>
+        <p>The reference plugin — ships all four content kinds (guides, corpus, actions, playbooks) and demonstrates both <code>strict</code> and <code>required</code>. Includes <code>guides/documentation</code> (Hemingway-test discipline), <code>guides/todos</code> (ownership + context), <code>actions/changelog-check</code>, <code>actions/static-analysis</code>, plus a non-strict <code>playbooks/release</code> projects can extend. <strong>Strict</strong> on the items above — no consumer overrides. <strong>Required</strong>: <code>actions/release-notes</code> — declared but not shipped; the consumer (or another plugin) must define it. Pin with <code>keystone plugin add tacoda/tacoda-org@v1.0.0</code>.</p>
       </div>
     </div>
+
+    <p style="font-size: 0.82rem; color: var(--muted); line-height: 1.7; margin-top: 16px;"><strong style="color: var(--text);">One example, many shapes.</strong> <code>tacoda-org</code> happens to demonstrate shared-standards content; a plugin could just as easily ship a Rust-idiom bundle, a SOC 2 compliance pack, a vendor-allowlist enforcement bundle, or your team's domain glossary. The format is identical — content under the port directories, manifest at the root, declared in <code>keystone.json</code>, materialized by <code>keystone install</code>.</p>
 
     <p style="font-size: 0.85rem; color: var(--muted); line-height: 1.7; margin-top: 16px;">Solo project, no plugins installed? Everything above is opt-in — the harness works for a single project alone.</p>
   </section>
@@ -2747,7 +2836,7 @@ flowchart LR
         <li><span class="il-tag">No harness yet</span><span>Tell us what's blocking adoption — friction, missing agent support, unclear docs, or workflows that don't fit your project.</span></li>
         <li><span class="il-tag">Hit a bug</span><span>File it, even with a rough repro. Sensors and guides get sharper every time someone shows us a corner we missed.</span></li>
         <li><span class="il-tag">Write an adapter</span><span>Adapters for agents currently marked "real · gaps" can be promoted to "full" — see <code>harness/adapters/README.md</code> for the shape.</span></li>
-        <li><span class="il-tag">Publish a policy</span><span>Vendor lists, license rules, release gates, compliance regimes — anything an org or team would push down. <a href="https://github.com/tacoda/tacoda-org" target="_blank" rel="noopener">tacoda-org</a> (org tier) and <a href="https://github.com/tacoda/tacoda-team" target="_blank" rel="noopener">tacoda-team</a> (team tier) are reference shapes covering all four components, <code>strict</code>, and <code>required</code>.</span></li>
+        <li><span class="il-tag">Publish a plugin</span><span>Vendor lists, license rules, release gates, compliance regimes, idiom bundles, domain libraries — anything reusable across projects ships as a plugin. <a href="https://github.com/tacoda/tacoda-org" target="_blank" rel="noopener">tacoda-org</a> is the reference shape, covering all four content kinds plus <code>strict</code> and <code>required</code>.</span></li>
       </ul>
       <div class="cta-buttons">
         <a class="cta-btn cta-primary" href="https://github.com/tacoda/keystone/discussions" target="_blank" rel="noopener">▸ Start a Discussion</a>
