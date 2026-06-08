@@ -1238,7 +1238,7 @@ flowchart TB
     playbooks["playbooks/<br/><i>ordered action<br/>chains</i>"]
     actions["actions/<br/><i>single units</i>"]
     sensors["sensors/<br/><i>invoked · checks</i>"]
-    adapters["adapters/&lt;agent&gt;/<br/><i>per-agent bindings</i>"]
+    adapters["adapters/{agent}/<br/><i>per-agent bindings</i>"]
     state["corpus/state/<br/><i>state ledgers</i>"]
     fly["learning/ + archive/<br/><i>flywheels</i>"]
   end
@@ -1253,7 +1253,7 @@ flowchart TB
   pluginB --> guides
   pluginA -. strict locks .-> projectHarness
   pluginB -. strict locks .-> projectHarness
-  projectHarness -.->|always wins| projectHarness
+  plugins -.->|project layer wins| projectHarness
   classDef green fill:#13161d,stroke:#4ade9a,color:#4ade9a
   classDef blue fill:#13161d,stroke:#60a5fa,color:#60a5fa
   classDef orange fill:#13161d,stroke:#f59e0b,color:#f59e0b
