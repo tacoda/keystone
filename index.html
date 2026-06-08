@@ -3,8 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Keystone — A Project Harness Installer with Org & Team Policy Plugins</title>
-<meta name="description" content="Keystone is a project harness installer for coding agents. A project harness with org and team policy plugins — markdown only, agent-agnostic, owned by your team. Three-tier cascade: Org → Team → Project.">
+<title>Keystone — the agent harness framework for any project</title>
+<meta name="description" content="Keystone is the agent harness framework for any project. A small Go binary plus Rails-style conventions that drop a markdown-only harness — guides, corpus, sensors, actions, playbooks, adapters — into your repo, wired to whichever coding agent you use. Vendored read-only plugins for shared policy; convention-over-configuration generators; opinionated defaults.">
+<link rel="icon" type="image/png" href="keystone_logo.png">
 <style>
   @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;600&family=IBM+Plex+Sans:wght@300;400;600&display=swap');
 
@@ -74,6 +75,33 @@
   .brand {
     border-left: 3px solid var(--accent);
     padding: 4px 0 4px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .brand-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .brand-logo {
+    width: 28px;
+    height: 28px;
+    flex-shrink: 0;
+    border-radius: 4px;
+    animation: keystone-logo-drop 0.65s var(--ease) both;
+  }
+  .brand-logo.replay {
+    animation: keystone-logo-drop 0.65s var(--ease) both;
+  }
+  @keyframes keystone-logo-drop {
+    0%   { transform: translateY(-48px); opacity: 0; }
+    65%  { transform: translateY(5px);   opacity: 1; }
+    85%  { transform: translateY(-2px);  opacity: 1; }
+    100% { transform: translateY(0);     opacity: 1; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .brand-logo, .brand-logo.replay { animation: none; }
   }
   .brand h1 {
     font-family: var(--mono);
@@ -88,7 +116,7 @@
     font-family: var(--mono);
     font-size: 0.66rem;
     letter-spacing: 0.08em;
-    margin-top: 4px;
+    margin-top: 0;
     line-height: 1.5;
   }
 
@@ -953,8 +981,11 @@
 
   <aside class="sidebar" id="sidebar">
     <div class="brand">
-      <h1>Keystone</h1>
-      <p>v0.13.0 · project harness + org/team policy plugins</p>
+      <div class="brand-row">
+        <img src="keystone_logo.png" alt="Keystone" class="brand-logo">
+        <h1>Keystone</h1>
+      </div>
+      <p>v1.0.0 · the agent harness framework</p>
     </div>
 
     <nav>
@@ -963,23 +994,30 @@
         <a class="nav-link" href="#introduction">Introduction</a>
         <a class="nav-link" href="#how-it-works">How it works</a>
         <a class="nav-link" href="#override">Override by markdown</a>
-        <a class="nav-link" href="#install">Install</a>
       </div>
 
       <div class="nav-group">
-        <span class="nav-label">Capabilities</span>
+        <span class="nav-label">Getting started</span>
+        <a class="nav-link" href="#install">Install</a>
+        <a class="nav-link" href="#getting-started">Your first project</a>
+        <a class="nav-link" href="#first-task">Your first task</a>
+        <a class="nav-link" href="#first-plugin">Adding a plugin</a>
+        <a class="nav-link" href="#first-generator">Authoring with generators</a>
+      </div>
+
+      <div class="nav-group">
+        <span class="nav-label">Framework</span>
         <a class="nav-link" href="#guides">Guides <span class="ext">— rules</span></a>
-        <a class="nav-link" href="#corpus">Corpus <span class="ext">— reference</span></a>
+        <a class="nav-link" href="#corpus">Corpus <span class="ext">— reasoning</span></a>
         <a class="nav-link" href="#state">State ledgers</a>
         <a class="nav-link" href="#sensors">Sensors</a>
-        <a class="nav-link" href="#policies">Policies <span class="badge">UPDATED 0.12</span></a>
+        <a class="nav-link" href="#plugins">Plugins <span class="badge">1.0</span></a>
         <a class="nav-link" href="#flywheels">Flywheels</a>
         <a class="nav-link" href="#learning">Learning pipeline</a>
-        <a class="nav-link" href="#playbooks">Playbooks <span class="badge">NEW 0.12</span></a>
+        <a class="nav-link" href="#playbooks">Playbooks</a>
         <a class="nav-link" href="#actions">Actions</a>
         <a class="nav-link" href="#rules">Rules &amp; iron laws</a>
         <a class="nav-link" href="#failure-modes">Agent failure modes</a>
-        <a class="nav-link" href="#migrations">Migrations</a>
         <a class="nav-link" href="#modes">Pacing modes</a>
         <a class="nav-link" href="#budget">Context budgeting</a>
       </div>
@@ -991,6 +1029,8 @@
         <a class="nav-link" href="#adapters">Adapters</a>
         <a class="nav-link" href="#options">Install-time options</a>
         <a class="nav-link" href="#assumptions">Tool assumptions</a>
+        <a class="nav-link" href="https://github.com/tacoda/keystone/blob/main/docs/upgrade-0.x-to-1.0.md" target="_blank" rel="noopener">0.x → 1.0 upgrade <span class="ext">↗</span></a>
+        <a class="nav-link" href="https://github.com/tacoda/keystone/blob/main/docs/compatibility.md" target="_blank" rel="noopener">1.x compatibility <span class="ext">↗</span></a>
         <a class="nav-link" href="https://github.com/tacoda/keystone/blob/main/CHANGELOG.md" target="_blank" rel="noopener">Changelog <span class="ext">↗</span></a>
       </div>
 
@@ -1014,9 +1054,9 @@
   <!-- ===================== INTRODUCTION (landing) ===================== -->
   <section id="introduction" class="page" data-title="Introduction">
     <div class="page-head">
-      <div class="crumb">Overview · Keystone v0.13.0</div>
-      <h1>A project harness installer with org &amp; team policy plugins.</h1>
-      <p class="tagline">A single Go binary that drops a self-updating, markdown-only harness — guides, corpus, playbooks, actions, sensors, policies, and flywheels — into your repo and wires it to your AI coding agent. One command, agent-agnostic, owned by your team. Org and team policies cascade <strong>Org → Team → Project</strong>, with <code>strict</code> locking what shouldn't be overridden.</p>
+      <div class="crumb">Overview · Keystone v1.0.0</div>
+      <h1>The agent harness framework for any project.</h1>
+      <p class="tagline">A small Go binary plus Rails-style conventions that drop a markdown-only harness — guides, corpus, sensors, actions, playbooks, adapters — into your repo, wired to whichever coding agent you use. Convention-over-configuration generators, vendored read-only plugins for shared policy, opinionated defaults you own and edit. Markdown only, no central service, no runtime dependency after install.</p>
     </div>
 
     <section class="hero-term">
@@ -1027,14 +1067,15 @@
         </div>
         <div class="term-body">
           <span class="pr">$</span> brew install tacoda/tap/keystone<br>
-          <span class="ok">●</span> keystone installed<br>
+          <span class="ok">●</span> keystone v1.0.0 installed<br>
           <span class="pr">$</span> keystone init<div class="huh" id="huh-form">┌─ Select your agent ────────────────────────────┐
 │ <span class="hcur">›</span> <span class="hsel">claude-code</span>   Anthropic Claude Code          │
 │   codex         OpenAI Codex / Codex CLI       │
 │   cursor        Cursor editor                  │
-└────────────────────────────────────────────────┘</div><span class="ar">▸</span> installing harness <span class="dim">→</span> harness/{guides,corpus,sensors,policies,…}/<br>
+└────────────────────────────────────────────────┘</div><span class="ar">▸</span> installing harness <span class="dim">→</span> harness/{guides,corpus,sensors,actions,playbooks,adapters}/<br>
           <span class="ar">▸</span> installing claude-code target <span class="dim">→</span> CLAUDE.md<br>
-          <span class="ar">▸</span> installing universal policy <span class="dim">→</span> harness/policies/universal/<br>
+          <span class="ar">▸</span> wrote keystone.json + harness/keystone.lock.json<br>
+          <span class="ar">▸</span> ambient load: 23,547 tokens across 6 port(s)<br>
           <span class="ok">✓</span> harness installed for claude-code.<br>
           <span class="ar">▶</span> <span class="dim">Next:</span> run the bootstrap action in claude-code.<br>
           <span class="pr">$</span> claude<br>
@@ -1045,16 +1086,19 @@
     </section>
 
     <div class="definition">
-      <p><strong>Keystone</strong> is a project harness installer that ships with org policy plugins — markdown only, no central service, no runtime dependency after install. The split:</p>
-      <p><strong style="color:var(--accent);">Project harness</strong> — <code>guides/</code>, <code>corpus/</code>, <code>sensors/</code>, plus the Learning and Pruning flywheels. Owned by the team, versioned with the code, edited freely.</p>
-      <p><strong style="color:var(--accent3);">Org policy plugins</strong> — rooted at <code>policies/</code>. Markdown plugins, owned by whoever published them. The <code>universal/</code> default ships with the binary; named org policies install via <code>keystone init --policy &lt;ref&gt;</code> from git.</p>
-      <p>After <code>keystone init</code>, your agent drives a six-phase workflow (spec → planning → implementation → verification → review → release) under always-loaded guides, reaching for corpus reasoning only when the rules aren't enough.</p>
+      <p><strong>Keystone is the agent harness framework.</strong> Small Go runtime + a set of conventions that drop an engineering harness — rules, reasoning, sensors, lifecycle workflow — into your repo. Markdown only, no central service, no runtime dependency after install. After <code>keystone init</code>, your agent drives a six-phase workflow (spec → planning → implementation → verification → review → release) under always-loaded guides, reaching for corpus reasoning only when the rules aren't enough.</p>
+      <p><strong style="color:var(--accent);">Project content</strong> — <code>harness/guides/</code>, <code>harness/corpus/</code>, <code>harness/sensors/</code>, <code>harness/actions/</code>, <code>harness/playbooks/</code>, <code>harness/adapters/</code>, plus the Learning and Pruning flywheels. Owned by the team, versioned with the code, edited freely.</p>
+      <p><strong style="color:var(--accent3);">Plugins</strong> — read-only, vendored markdown for shared policy across projects. Pinned in <code>keystone.json</code> with the npm-style shorthand <code>tacoda/tacoda-org@0.2.0</code>, hash-verified via <code>keystone.lock.json</code>, drift-reset by <code>keystone verify</code>. They live in a gitignored <code>harness/plugins/</code> and are repopulated by <code>keystone install</code>.</p>
+    </div>
+
+    <div class="definition" style="border-color: var(--accent2);">
+      <p style="margin: 0;"><strong style="color:var(--accent2);">If you've used Rails:</strong> the mental model is similar. <code>keystone init</code> is <code>rails new</code>. <code>keystone new guide|sensor|action|...</code> is <code>rails generate</code>. <code>keystone.json</code> is your <code>Gemfile</code> (with <code>keystone.lock.json</code> as the <code>Gemfile.lock</code>); plugins are gems. <code>keystone patch</code> is <code>rails db:migrate</code> — scoped to config-schema bumps at 1.0. Convention over configuration; generators emit conformant code; strong defaults you can override by editing a file. The framework is for agent harnesses, not web apps — same posture, different domain.</p>
     </div>
 
     <div class="section-label">It's all just markdown — override by editing a file</div>
     <div class="definition">
-      <p><strong>Every layer of the harness is markdown the agent reads and you edit.</strong> Rules, reasoning, sensor contracts, action playbooks, ledgers, policies, adapter docs — all of it. No DSL, no compiled config, no runtime service. If something doesn't match your team, change the markdown. The agent stops applying a rule the moment its file is gone; starts applying a new one the moment its file lands.</p>
-      <p><strong>Defaults are <em>seeds</em>, not the shape.</strong> The harness ships with a default set of guides, sensors, actions, and a six-phase workflow because most teams want <em>something</em> to start from. They're also the worked examples for how to author your own — copy any file, edit, rename, ship. The whole point of the markdown-only design is that the harness bends to your project, not the other way around.</p>
+      <p><strong>Every layer of the harness is markdown the agent reads and you edit.</strong> Rules, reasoning, sensor contracts, action playbooks, ledgers, adapter docs — all of it. No DSL, no compiled config, no runtime service. If something doesn't match your team, change the markdown. The agent stops applying a rule the moment its file is gone; starts applying a new one the moment its file lands.</p>
+      <p><strong>Defaults are <em>seeds</em>, not the shape.</strong> The harness ships with a default set of guides, sensors, actions, and a six-phase workflow because most teams want <em>something</em> to start from. They're also the worked examples for how to author your own — copy any file, edit, rename, ship. The whole point of the markdown-only design is that the harness bends to your project, not the other way around. Plugin content lives at <code>harness/plugins/&lt;name&gt;/</code> as read-only vendored markdown; if you want to override a plugin file, drop your version at the project layer and it wins.</p>
     </div>
 
     <div class="section-label">What you can change, and how</div>
@@ -1062,17 +1106,17 @@
       <div class="action">
         <span class="action-tag">Workflow</span>
         <h3 style="color: var(--accent);">Don't like six phases?</h3>
-        <p>The pipeline is just <code>harness/playbooks/task.md</code> orchestrating <code>spec.md</code>, <code>orient.md</code>, <code>verify.md</code>, etc. Edit <code>task.md</code> to change the order; replace any phase by editing its action; add a phase by dropping in <code>harness/actions/&lt;new-phase&gt;.md</code> and referencing it from the playbook. Remove one by deleting the file.</p>
+        <p>The pipeline is just <code>harness/playbooks/task.md</code> orchestrating <code>spec.md</code>, <code>orient.md</code>, <code>verify.md</code>, etc. Edit <code>task.md</code> to change the order; replace any phase by editing its action; add a phase with <code>keystone new action &lt;new-phase&gt;</code> and reference it from the playbook. Remove one by deleting the file.</p>
       </div>
       <div class="action">
         <span class="action-tag">Rules</span>
         <h3 style="color: var(--accent2);">Guide doesn't fit?</h3>
-        <p>Open the markdown under <code>harness/guides/</code>, edit it, soften it, strengthen it, or delete the file. The drift sensor enforces what's there — nothing else. Authoring a new rule is one new file in the right subdirectory.</p>
+        <p>Open the markdown under <code>harness/guides/</code>, edit it, soften it, strengthen it, or delete the file. The drift sensor enforces what's there — nothing else. Authoring a new rule is one command: <code>keystone new guide &lt;topic&gt;/&lt;name&gt;</code>, then fill in the rules (and the paired corpus stub the generator drops alongside).</p>
       </div>
       <div class="action">
         <span class="action-tag">Sensors</span>
         <h3 style="color: var(--accent3);">Need a new check?</h3>
-        <p>Sensors are markdown contracts — kind, trigger, inputs, exit condition, output. Add <code>harness/sensors/&lt;name&gt;.md</code> with that shape; the action that should invoke it picks it up next pass. The shipped sensors (lint, type-check, the four reviewers, the security trio) are the worked examples.</p>
+        <p>Sensors are markdown contracts — <code>kind</code> frontmatter, sections for command, interpretation, remediation. Run <code>keystone new sensor &lt;name&gt;</code> for the skeleton; fill it in; the action that should invoke it picks it up next pass. The shipped sensors (lint, type-check, the four reviewers, the security trio) are the worked examples.</p>
       </div>
       <div class="action">
         <span class="action-tag">Reasoning</span>
@@ -1080,47 +1124,47 @@
         <p><code>harness/corpus/idioms/&lt;stack&gt;/*.md</code> is the empirical map of how your stack is used here. Edit when patterns shift; add files when new patterns emerge. State ledgers (<code>code-debt.md</code>, <code>harness-debt.md</code>, <code>quality-radar.md</code>) are markdown too — read during planning, written by sensors, edited by humans.</p>
       </div>
       <div class="action">
-        <span class="action-tag">Policies</span>
-        <h3 style="color: var(--accent4);">Org or team policy doesn't fit?</h3>
-        <p>Drop a file with the same basename at the matching project path — <code>harness/&lt;kind&gt;/&lt;name&gt;.md</code> — and your version wins. The cascade is <strong>project → team → org</strong>. The only exception: items the higher tier declared <code>strict</code>, which <code>keystone policy verify</code> blocks from being shadowed. Non-strict items are freely overridable.</p>
+        <span class="action-tag">Plugins</span>
+        <h3 style="color: var(--accent4);">Plugin doesn't fit?</h3>
+        <p>Plugins are read-only and pinned. To override a plugin's rule, drop a file with the same basename at the matching <em>project</em> path — <code>harness/guides/&lt;name&gt;.md</code> — and the project layer wins. Plugin authors can mark items <code>strict</code> to block override; <code>keystone verify</code> catches violations. Edit the vendored plugin file directly and <code>keystone verify</code> resets it from cache — vendored content is regenerable.</p>
       </div>
       <div class="action">
         <span class="action-tag">Adapters &amp; modes</span>
         <h3 style="color: var(--accent);">Agent-specific friction?</h3>
-        <p><code>harness/adapters/&lt;agent&gt;/lifecycle.md</code> and <code>activation.md</code> document how that agent runs the harness — edit to capture how your team actually uses it. Pacing modes live in <code>harness/guides/process/modes.md</code>; redefine the modes themselves, not just pick one.</p>
+        <p><code>harness/adapters/&lt;agent&gt;/lifecycle.md</code> and <code>activation.md</code> document how that agent runs the harness — edit to capture how your team actually uses it. Pacing modes live in <code>harness/guides/process/modes.md</code> (paired / solo / autopilot); switch via the <code>mode</code> action or redefine the modes themselves.</p>
       </div>
     </div>
 
     <div class="action-grid">
       <div class="action">
-        <span class="action-tag" style="background: rgba(245,158,11,0.12); color: var(--accent3); border: 1px solid rgba(245,158,11,0.3);">NEW</span>
-        <h3 style="color: var(--accent3);">Security sensors</h3>
-        <p>Three new computational sensors — <code>secret-scan</code>, <code>vuln-scan</code>, <code>sast</code> — wrap whatever tool the project picks (gitleaks/trivy/semgrep/etc.). Gate the commit in <strong>verify</strong>; advisory-only in <strong>audit</strong>.</p>
+        <span class="action-tag" style="background: rgba(74,222,154,0.12); color: var(--accent); border: 1px solid rgba(74,222,154,0.3);">1.0</span>
+        <h3 style="color: var(--accent);">Vendored read-only plugins</h3>
+        <p>Plugins live at <code>harness/plugins/&lt;name&gt;/</code> — gitignored, pinned in <code>keystone.json</code>, per-file SHA-verified via <code>keystone.lock.json</code>. <code>keystone plugin add tacoda/tacoda-org@0.2.0</code> declares; <code>keystone install</code> materializes; <code>keystone verify</code> detects drift and resets. Default host is <code>github.com</code>; override per-source by writing the host explicitly.</p>
       </div>
       <div class="action">
-        <span class="action-tag">NEW</span>
-        <h3 style="color: var(--accent);">Code debt + harness debt</h3>
-        <p>Two paired ledgers. <code>corpus/state/code-debt.md</code> tracks debt in your codebase (TODO/FIXME/complexity hotspots). <code>corpus/state/harness-debt.md</code> tracks debt in the <em>harness itself</em> — stale rules, placeholders, failing sensors, drifted state. Read during planning so debt is visible before you touch the region.</p>
+        <span class="action-tag">1.0</span>
+        <h3 style="color: var(--accent2);">Scaffolding generators</h3>
+        <p><code>keystone new guide &lt;topic&gt;/&lt;name&gt;</code> drops a guide + paired corpus stub. <code>new sensor</code>, <code>new action</code>, <code>new playbook</code>, <code>new adapter</code>, <code>new plugin</code> each emit conformant frontmatter, sections, and harness-root-relative cross-references. Authoring a new port file is one command.</p>
       </div>
       <div class="action">
-        <span class="action-tag">NEW</span>
-        <h3 style="color: var(--accent2);">Quality Radar</h3>
-        <p>Five-dimension scorecard (type safety, test quality, readability, security, performance) aggregating the verify + review sensors. Not a gate — a signal the review action discusses. Persisted with append-only history in <code>corpus/state/quality-radar.md</code>.</p>
+        <span class="action-tag">1.0</span>
+        <h3 style="color: var(--accent3);"><code>keystone doctor</code></h3>
+        <p>Audits an existing install: path-convention violations (with <code>--fix</code> to auto-rewrite), plugin drift (auto-reset), template drift (advisory), and per-port context-budget utilization (<code>--budget</code>). Run in CI to gate merges; run locally to keep the harness clean as content grows.</p>
       </div>
       <div class="action">
-        <span class="action-tag">NEW</span>
-        <h3 style="color: var(--accent5);">Stack-drift sensor</h3>
-        <p>Detects when <code>CODEBASE_STATE.md</code> has diverged from the actual repo — declared stacks vanished, undeclared manifests appeared, region map stale, tool commands missing. No rebootstrap; the <strong>audit</strong> action reconciles incrementally.</p>
+        <span class="action-tag">1.0</span>
+        <h3 style="color: var(--accent5);">Configurable harness root</h3>
+        <p>Default folder name is <code>harness/</code>, but teams can pick any name via <code>--harness-root &lt;name&gt;</code> at init. Recorded in <code>keystone.json</code>; every downstream command reads it from there. Move existing content to a new path with one flag.</p>
       </div>
       <div class="action">
-        <span class="action-tag">NEW</span>
-        <h3 style="color: var(--accent4);"><code>policy-audit</code> action</h3>
-        <p>Agent walks every installed policy's guides and reports <code>compliant</code> / <code>violation</code> / <code>inapplicable</code> / <code>uncheckable</code> per rule against the codebase. Run before release or per audit cycle.</p>
+        <span class="action-tag">1.0</span>
+        <h3 style="color: var(--accent4);">Context budgeting</h3>
+        <p>Declare per-port token caps in <code>keystone.json</code>'s <code>budgets</code> block. <code>keystone init</code> reports ambient load after scaffold; <code>keystone doctor --budget</code> shows per-port utilization + top contributors. Whitespace-approximate at 1.0; tiktoken opt-in planned.</p>
       </div>
       <div class="action">
-        <span class="action-tag">NEW</span>
-        <h3 style="color: var(--accent3);"><code>debt-review</code> action</h3>
-        <p>Periodic triage of the code-debt ledger. Walks <code>discovery</code> items, re-scores existing entries, prunes <code>stale</code> items. <strong>Audit</strong>'s Pruning flywheel now persists harness-debt findings instead of producing an ephemeral report.</p>
+        <span class="action-tag">1.0</span>
+        <h3 style="color: var(--accent3);">Idempotent <code>init</code></h3>
+        <p>Re-running <code>keystone init</code> in an existing project is safe by default — new files are written; existing files are kept. <code>--reset --i-understand-this-is-destructive</code> overwrites when you do want a rewrite. <code>--force</code> is gone.</p>
       </div>
     </div>
 
@@ -1164,10 +1208,11 @@
       <p class="mermaid-caption">From <code>brew install</code> to a project-specific harness</p>
       <div class="mermaid">
 flowchart LR
-  binary["keystone binary<br/><i>embedded harness +<br/>universal policy</i>"] -->|init| repo["your repo"]
-  repo --> hr["harness/<br/>(5 components)"]
+  binary["keystone binary<br/><i>embedded templates +<br/>vendored-plugin runtime</i>"] -->|init| repo["your repo"]
+  repo --> hr["harness/<br/>(every framework abstraction)"]
   repo --> menu["CLAUDE.md ·<br/>AGENTS.md · …"]
-  repo --> lock[".keystone.lock"]
+  repo --> kj["keystone.json<br/>(plugin pins +<br/>harness_root)"]
+  hr --> lock["harness/keystone.lock.json<br/>(per-file plugin hashes)"]
   hr --> bs["bootstrap action<br/><i>(agent-driven)</i>"]
   bs --> state["corpus/state/<br/>CODEBASE_STATE.md"]
   bs --> idioms["corpus/idioms/&lt;stack&gt;/<br/>+ guides/idioms/&lt;stack&gt;/"]
@@ -1183,41 +1228,42 @@ flowchart LR
 
     <div class="section-label">Project harness + org/team policy plugins</div>
     <div class="mermaid-wrap">
-      <p class="mermaid-caption">Six components under <code>harness/</code>; policies cascade Org → Team → Project</p>
+      <p class="mermaid-caption">Project ports under <code>harness/</code>; plugins resolve in pre-order; project layer always wins.</p>
       <div class="mermaid">
 flowchart TB
-  subgraph projectHarness ["project harness (project-owned)"]
+  subgraph projectHarness ["project layer (project-owned · edit freely)"]
     direction LR
     guides["guides/<br/><i>ambient · rules</i>"]
     corpus["corpus/<br/><i>on-demand ·<br/>reasoning</i>"]
     playbooks["playbooks/<br/><i>ordered action<br/>chains</i>"]
     actions["actions/<br/><i>single units</i>"]
     sensors["sensors/<br/><i>invoked · checks</i>"]
+    adapters["adapters/&lt;agent&gt;/<br/><i>per-agent bindings</i>"]
+    state["corpus/state/<br/><i>state ledgers</i>"]
     fly["learning/ + archive/<br/><i>flywheels</i>"]
   end
-  subgraph orgPolicyPlugins ["policies (policy-owner-owned)"]
-    universal["policies/universal/<br/><i>shipped default · org</i>"]
-    org["policies/&lt;org&gt;/<br/><i>tier: org</i>"]
-    team["policies/&lt;team&gt;/<br/><i>tier: team</i>"]
+  subgraph plugins ["plugins (vendored · read-only · pinned)"]
+    pluginA["harness/plugins/acme-org/"]
+    pluginB["harness/plugins/acme-platform/<br/><i>(child of acme-org)</i>"]
   end
   guides <-->|paired forward-link| corpus
   playbooks --> actions
   guides --> drift["drift sensor enforces"]
-  universal --> guides
-  org --> guides
-  team --> guides
-  org -. strict locks .-> projectHarness
-  team -. strict locks .-> projectHarness
+  pluginA --> guides
+  pluginB --> guides
+  pluginA -. strict locks .-> projectHarness
+  pluginB -. strict locks .-> projectHarness
+  projectHarness -.->|always wins| projectHarness
   classDef green fill:#13161d,stroke:#4ade9a,color:#4ade9a
   classDef blue fill:#13161d,stroke:#60a5fa,color:#60a5fa
   classDef orange fill:#13161d,stroke:#f59e0b,color:#f59e0b
   classDef pink fill:#13161d,stroke:#e879a0,color:#e879a0
   classDef purple fill:#13161d,stroke:#a78bfa,color:#a78bfa
-  class guides,actions green
-  class corpus,team blue
+  class guides,actions,adapters green
+  class corpus,state blue
   class sensors,drift orange
   class fly,playbooks pink
-  class universal,org purple
+  class pluginA,pluginB purple
       </div>
     </div>
 
@@ -1304,19 +1350,19 @@ flowchart LR
         <p><code>harness/corpus/idioms/&lt;stack&gt;/*.md</code> is the empirical map of how your stack is used here. Edit when patterns shift; add files when new patterns emerge. State ledgers (<code>code-debt.md</code>, <code>harness-debt.md</code>, <code>quality-radar.md</code>) are markdown too — read during planning, written by sensors, edited by humans.</p>
       </div>
       <div class="action">
-        <span class="action-tag">Policies</span>
-        <h3 style="color: var(--accent4);">Org or team policy doesn't fit?</h3>
-        <p>Drop a file with the same basename at the matching project path — <code>harness/&lt;kind&gt;/&lt;name&gt;.md</code> — and your version wins. The cascade is <strong>project → team → org</strong>. The only exception: items the higher tier declared <code>strict</code>, which <code>keystone policy verify</code> blocks from being shadowed. Non-strict items are freely overridable.</p>
+        <span class="action-tag">Plugins</span>
+        <h3 style="color: var(--accent4);">Plugin doesn't fit?</h3>
+        <p>Drop a file with the same path at the matching project location — <code>harness/&lt;port&gt;/&lt;name&gt;.md</code> — and the project layer beats every plugin. Plugins are read-only at the vendor location; editing there is reverted on the next <code>keystone verify</code>. Plugin authors can mark items <code>strict</code> to block override; verify reports violations with path context.</p>
       </div>
       <div class="action">
         <span class="action-tag">Adapters &amp; modes</span>
         <h3 style="color: var(--accent);">Agent-specific friction?</h3>
-        <p><code>harness/adapters/&lt;agent&gt;/lifecycle.md</code> and <code>activation.md</code> document how that agent runs the harness — edit to capture how your team actually uses it. Pacing modes live in <code>harness/guides/process/modes.md</code>; redefine the modes themselves, not just pick one.</p>
+        <p><code>harness/adapters/&lt;agent&gt;/lifecycle.md</code> and <code>activation.md</code> document how that agent runs the harness — edit to capture how your team actually uses it. Pacing modes live in <code>harness/guides/process/modes.md</code> (paired / solo / autopilot); switch via the <code>mode</code> action or redefine the modes themselves.</p>
       </div>
     </div>
 
     <div class="definition" style="margin-top: 24px; border-left-color: var(--accent3);">
-      <p><strong style="color: var(--accent3);">Upstream improvements are not lost when you edit.</strong> <code>keystone migrate</code> (see <a href="#migrations">Migrations</a>) keeps the generic harness aligned with each release without touching your edits — it applies idempotent operations, flags conflicts where you've diverged, and never silently overwrites. So bending the harness to your team and pulling in upstream improvements aren't mutually exclusive.</p>
+      <p><strong style="color: var(--accent3);">Upstream improvements are not lost when you edit.</strong> Plugin updates re-vendor atomically from a pinned tag — your project layer overrides survive. <code>keystone doctor</code> reports template drift between your scaffolded defaults and the binary's current templates so you can decide what to refresh. Bending the harness to your team and pulling in upstream improvements aren't mutually exclusive.</p>
     </div>
   </section>
 
@@ -1341,7 +1387,7 @@ flowchart LR
 <pre class="code"><span class="prompt">$</span> curl -fsSL https://raw.githubusercontent.com/tacoda/keystone/main/install.sh &gt; install.sh
 <span class="prompt">$</span> less install.sh
 <span class="prompt">$</span> sh install.sh</pre>
-      <p>Override the install dir with <code>KEYSTONE_PREFIX=/some/path</code> or pin the release with <code>KEYSTONE_VERSION=v0.11.0</code>. The installer does not run <code>keystone init</code> — open a new shell and run it yourself in a project to scaffold the harness.</p>
+      <p>Override the install dir with <code>KEYSTONE_PREFIX=/some/path</code> or pin the release with <code>KEYSTONE_VERSION=v1.0.0</code>. The installer does not run <code>keystone init</code> — open a new shell and run it yourself in a project to scaffold the harness.</p>
     </div>
 
     <div class="install-method">
@@ -1357,7 +1403,7 @@ flowchart LR
 
     <div class="section-label">First-run: <code>keystone init</code> in your project</div>
     <p style="font-size: 0.85rem; color: var(--muted); line-height: 1.7; margin-bottom: 14px;">
-      In a TTY, <code>init</code> prompts for any unset option (agent, app-type, architecture, testing, compliance). Outside a TTY it runs non-interactively from flags — handy for CI, dotfiles, and onboarding scripts.
+      In a TTY, <code>init</code> prompts for any unset option (agent, app-type, architecture, testing, compliance, starter content). Outside a TTY it runs non-interactively from flags — handy for CI, dotfiles, and onboarding scripts.
     </p>
 <pre class="code"><span class="prompt">$</span> keystone init \
     --agent claude-code \
@@ -1365,25 +1411,286 @@ flowchart LR
     --architecture hexagonal,continuous-delivery \
     --testing tdd,property-based \
     --compliance soc2 \
-    --policy git+https://github.com/tacoda/tacoda-org.git#v0.2.0 \
-    --policy git+https://github.com/tacoda/tacoda-team.git#v0.1.0</pre>
+    --starter universal-principles</pre>
 
-    <p style="font-size: 0.78rem; color: var(--muted); font-family: var(--mono); margin-top: 12px; line-height: 1.7;">Multi-select flags take comma-separated values. <code>--policy</code> is repeatable and may be supplied multiple times for multiple org policies. Run <code style="color:var(--accent);">keystone options</code> for the full catalog.</p>
+    <p style="font-size: 0.78rem; color: var(--muted); font-family: var(--mono); margin-top: 12px; line-height: 1.7;">Multi-select flags take comma-separated values. <code>--starter</code> opts into starter content packs (the universal engineering principles corpus + guides ships as a starter — not scaffolded by default). Use <code>--harness-root &lt;name&gt;</code> if you want the harness folder named something other than <code>harness/</code>. Run <code style="color:var(--accent);">keystone options</code> for the full catalog. Plugins are added <em>after</em> init via <code style="color:var(--accent);">keystone plugin add</code>.</p>
 
     <ol class="steps">
       <li>
         <strong>Read <code>harness/README.md</code></strong>
-        <p>Orientation to the five components (guides, corpus, sensors, policies, flywheels), the three rule tiers, and the nine iron laws.</p>
+        <p>Orientation to the framework abstractions (guides, corpus, sensors, actions, playbooks, adapters, state ledgers, flywheels), the three rule tiers, and the iron laws.</p>
+      </li>
+      <li>
+        <strong>Add any plugins you depend on</strong>
+        <p>For org/team policy shared across projects, use the npm-style shorthand: <code>keystone plugin add tacoda/tacoda-org@0.2.0</code>. Plugins are vendored to <code>harness/plugins/&lt;name&gt;/</code> (gitignored) and hash-verified via <code>harness/keystone.lock.json</code>.</p>
       </li>
       <li>
         <strong>Ask your agent to run <code>bootstrap</code></strong>
         <p>Seeds <code>corpus/state/CODEBASE_STATE.md</code>, paired <code>corpus/idioms/&lt;stack&gt;/</code> + <code>guides/idioms/&lt;stack&gt;/</code>, populates <code>guides/computational/</code> with the language servers your stack supports, and confirms sensor commands.</p>
       </li>
       <li>
-        <strong>Commit <code>harness/</code> and any agent files</strong>
-        <p>The harness lives in your repo from here. <code>keystone</code> is not a runtime dependency — the agent reads markdown directly.</p>
+        <strong>Commit <code>keystone.json</code>, <code>harness/</code>, and any agent files</strong>
+        <p>The harness lives in your repo from here. <code>keystone</code> is not a runtime dependency — the agent reads markdown directly. The vendored <code>harness/plugins/</code> directory is gitignored; <code>keystone install</code> repopulates it on fresh clones.</p>
       </li>
     </ol>
+  </section>
+
+  <!-- ===================== GETTING STARTED: FIRST PROJECT ===================== -->
+  <section id="getting-started" class="page" data-title="Your first project">
+    <div class="page-head">
+      <div class="crumb">Getting started · Step 1 of 4</div>
+      <h1>Your first project with Keystone.</h1>
+      <p class="tagline">A walkthrough — install the binary, scaffold a harness into a real project, understand what landed, and commit the result. By the end you'll have a working agent harness in a git repo and know which directories matter.</p>
+    </div>
+
+    <div class="definition">
+      <p><strong>What you'll need.</strong> A git repository (a fresh empty one is fine), a coding agent installed locally (Claude Code, Codex, Cursor, Aider, GitHub Copilot, Continue, Cline, Goose, or pi), and the Keystone binary installed (<a href="#install">install instructions</a>). The harness is agent-agnostic; pick whichever agent you actually use day-to-day.</p>
+    </div>
+
+    <div class="section-label">1.1 — Scaffold the harness</div>
+    <p style="font-size: 0.9rem; color: var(--text-dim); line-height: 1.7;">In a TTY, <code>keystone init</code> prompts you through the install options (agent, app-type, architecture preferences, testing approach, compliance scope, optional starter content). Pass them as flags to skip the prompts:</p>
+<pre class="code"><span class="prompt">$</span> cd ~/my-project        <span class="comment"># a git-tracked project, fresh or existing</span>
+<span class="prompt">$</span> keystone init \
+    --agent claude-code \
+    --app-type web-api \
+    --architecture hexagonal \
+    --testing tdd \
+    --starter universal-principles
+<span class="ok">▸</span> installing corpus to /Users/you/my-project/harness
+  wrote: /Users/you/my-project/harness/README.md
+  wrote: /Users/you/my-project/harness/keystone.lock.json
+  ... (~120 files)
+<span class="ok">▸</span> installing claude-code target  <span class="dim">→</span> CLAUDE.md
+<span class="ok">▸</span> installing optional content for starter=universal-principles
+<span class="ok">▸</span> ambient load: 47,891 tokens across 6 port(s)
+    actions    2,955
+    adapters   2,612
+    corpus    33,258
+    guides     7,829
+    playbooks    634
+    sensors    4,620
+<span class="ok">✓</span> harness installed for claude-code.</pre>
+
+    <div class="section-label">1.2 — Tour the layout</div>
+    <p style="font-size: 0.9rem; color: var(--text-dim); line-height: 1.7;">Run <code>tree</code> (or just <code>ls</code>) to see what landed. The shape is the same convention every Keystone install follows — learn it once.</p>
+<pre class="code"><span class="prompt">$</span> tree -L 2 harness
+harness
+├── README.md           <span class="comment"># start here</span>
+├── keystone.lock.json  <span class="comment"># pin state for vendored plugins</span>
+├── actions/            <span class="comment"># lifecycle units (spec, orient, verify, review, ...)</span>
+├── adapters/           <span class="comment"># per-agent bindings (lifecycle, sensors, activation)</span>
+├── archive/            <span class="comment"># Pruning flywheel destination</span>
+├── corpus/             <span class="comment"># reasoning · on-demand</span>
+│   ├── idioms/
+│   ├── principles/     <span class="comment"># from --starter universal-principles</span>
+│   └── state/          <span class="comment"># state ledgers (CODEBASE_STATE, code-debt, ...)</span>
+├── guides/             <span class="comment"># rules · always loaded</span>
+├── learning/           <span class="comment"># Learning flywheel intake</span>
+├── playbooks/          <span class="comment"># ordered action chains (`task` is the default)</span>
+└── sensors/            <span class="comment"># automated checks</span></pre>
+
+    <div class="definition" style="border-color: var(--accent2);">
+      <p style="margin: 0;"><strong style="color:var(--accent2);">Two files live outside <code>harness/</code>:</strong> <code>keystone.json</code> at the project root (the plugin tree + harness-root pointer) and <code>.gitignore</code> (now contains <code>harness/plugins/</code>). Both are project-root concerns; everything else is under the harness folder you can rename via <code>--harness-root</code>.</p>
+    </div>
+
+    <div class="section-label">1.3 — Commit the harness</div>
+    <p style="font-size: 0.9rem; color: var(--text-dim); line-height: 1.7;">The harness lives in your git from here. After init, the binary is not a runtime dependency — your agent reads markdown directly.</p>
+<pre class="code"><span class="prompt">$</span> git add harness/ keystone.json .gitignore CLAUDE.md
+<span class="prompt">$</span> git commit -m "add keystone harness"</pre>
+
+    <div class="section-label">1.4 — Bootstrap the harness against your codebase</div>
+    <p style="font-size: 0.9rem; color: var(--text-dim); line-height: 1.7;">The first thing to ask your agent is to run the <strong>bootstrap</strong> action. It reads your codebase and seeds <code>harness/corpus/state/CODEBASE_STATE.md</code> (language, frameworks, libraries, database, CI), plus paired <code>corpus/idioms/&lt;your-stack&gt;/</code> + <code>guides/idioms/&lt;your-stack&gt;/</code>, and confirms the sensor commands.</p>
+<pre class="code"><span class="prompt">$</span> claude
+<span class="dim">&gt;</span> run bootstrap</pre>
+    <p style="font-size: 0.78rem; color: var(--muted); font-family: var(--mono); margin-top: 12px; line-height: 1.7;">Each agent invokes actions slightly differently; <code>harness/adapters/claude-code/lifecycle.md</code> documents how Claude Code does it. The same pattern applies to every supported agent.</p>
+
+    <div class="section-label">Next</div>
+    <p style="font-size: 0.9rem; color: var(--text-dim); line-height: 1.7;">You have a working harness committed to git. <strong><a href="#first-task">Your first task →</a></strong> walks through the six-phase task workflow on a tiny change.</p>
+  </section>
+
+  <!-- ===================== GETTING STARTED: FIRST TASK ===================== -->
+  <section id="first-task" class="page" data-title="Your first task">
+    <div class="page-head">
+      <div class="crumb">Getting started · Step 2 of 4</div>
+      <h1>Your first task: the six-phase workflow in practice.</h1>
+      <p class="tagline">Every meaningful change in a Keystone project flows through six phases: <strong>spec → orient → verify → review</strong> (with planning and release on either end). The <code>task</code> playbook orchestrates them. Walk through it once on a small change so the pattern is muscle memory.</p>
+    </div>
+
+    <div class="definition">
+      <p><strong>The shape of a task.</strong> The agent reads the playbook at <code>harness/playbooks/task.md</code> and runs the actions in order. Each phase is one markdown file under <code>harness/actions/</code> — entry condition, activities, exit condition. The default playbook can be re-ordered, shortened, or extended by editing the file.</p>
+    </div>
+
+    <div class="section-label">2.1 — Pick a small change</div>
+    <p style="font-size: 0.9rem; color: var(--text-dim); line-height: 1.7;">Anything small enough to fit in one commit. A typo fix, a one-line bug, a renamed variable. The point is the <em>workflow</em>, not the code.</p>
+
+    <div class="section-label">2.2 — Run the task playbook</div>
+<pre class="code"><span class="prompt">$</span> claude
+<span class="dim">&gt;</span> run task: fix the typo in src/handler.go at line 42</pre>
+
+    <ol class="steps">
+      <li>
+        <strong>spec</strong>
+        <p>The agent captures what you want done as testable acceptance criteria. With a tracker (Jira, Linear, GitHub Issues), spec sources the card; without one, it asks you for the intent and AC inline. Output: the spec the rest of the phases anchor to.</p>
+      </li>
+      <li>
+        <strong>orient</strong>
+        <p>The agent maps the change to your codebase — which files, which functions, what's at risk. Reads <code>corpus/state/CODEBASE_STATE.md</code> and <code>corpus/state/risk-fingerprints.md</code>. Output: a focused list of files to read and the path the change will take.</p>
+      </li>
+      <li>
+        <strong>verify</strong>
+        <p>The agent makes the change and runs sensors (lint, type-check, test, build, the security trio if configured). Each sensor's <code>Command</code> / <code>Interpretation</code> / <code>Remediation</code> sections drive how failures are handled. Output: a green build (or a fix-and-re-run loop until green).</p>
+      </li>
+      <li>
+        <strong>review</strong>
+        <p>The agent spawns four parallel reviewers (functional, risk, security, deployment) on the diff. Each is a sensor with its own contract. The reviews surface issues; you triage. Output: the change is reviewer-clean or you take it back to verify.</p>
+      </li>
+    </ol>
+
+    <div class="section-label">2.3 — Inspect what the harness recorded</div>
+    <p style="font-size: 0.9rem; color: var(--text-dim); line-height: 1.7;">Sensors that wrote into state ledgers will have updated them — <code>code-debt.md</code> for TODOs found, <code>quality-radar.md</code> for the run-over-run signal, <code>harness-debt.md</code> for anything stale in the harness itself. Diff to see what changed.</p>
+<pre class="code"><span class="prompt">$</span> git diff harness/corpus/state/</pre>
+
+    <div class="section-label">2.4 — Commit and move on</div>
+    <p style="font-size: 0.9rem; color: var(--text-dim); line-height: 1.7;">The state-ledger updates are part of your project's git history. They accumulate signal over time — the longer the harness runs, the better the orient phase becomes.</p>
+
+    <div class="section-label">Next</div>
+    <p style="font-size: 0.9rem; color: var(--text-dim); line-height: 1.7;"><strong><a href="#first-plugin">Adding a plugin →</a></strong> covers how to install shared policy across projects.</p>
+  </section>
+
+  <!-- ===================== GETTING STARTED: FIRST PLUGIN ===================== -->
+  <section id="first-plugin" class="page" data-title="Adding a plugin">
+    <div class="page-head">
+      <div class="crumb">Getting started · Step 3 of 4</div>
+      <h1>Adding your first plugin.</h1>
+      <p class="tagline">Plugins ship shared policy — engineering practices, compliance regimes, release gates — that you want consistent across multiple projects. They're vendored, read-only, and pinned in <code>keystone.json</code>. Add one, see what changes.</p>
+    </div>
+
+    <div class="definition">
+      <p><strong>What plugins do.</strong> A plugin is a git repo with a <code>keystone-plugin.json</code> manifest + the same port layout your harness has (<code>guides/</code>, <code>corpus/</code>, <code>sensors/</code>, …). When you add one, its content gets vendored to <code>harness/plugins/&lt;name&gt;/</code> and merged into the cascade — the agent reads it alongside your project content. The project layer always wins, so your local files override the plugin.</p>
+    </div>
+
+    <div class="section-label">3.1 — Add the example plugin</div>
+    <p style="font-size: 0.9rem; color: var(--text-dim); line-height: 1.7;"><a href="https://github.com/tacoda/tacoda-org" target="_blank" rel="noopener"><code>tacoda/tacoda-org</code></a> is a worked-example plugin: a small org-policy bundle (documentation discipline, release process, the changelog gate) shipped for the docs and as a template to fork.</p>
+<pre class="code"><span class="prompt">$</span> keystone plugin add tacoda/tacoda-org@0.2.0
+<span class="ar">▸</span> tacoda/tacoda-org @ 0.2.0
+<span class="ok">  ✓</span> 14 file(s) installed at harness/plugins/tacoda-org
+  wrote: ./harness/keystone.lock.json
+<span class="ok">✓</span> added tacoda/tacoda-org @ 0.2.0 as "tacoda-org"</pre>
+
+    <div class="section-label">3.2 — What just happened</div>
+    <ul class="iron-list">
+      <li><strong style="color: var(--accent);">keystone.json</strong> got a new entry under <code>plugins[]</code> with <code>name</code>, <code>source</code>, <code>version</code>.</li>
+      <li><strong style="color: var(--accent2);">harness/plugins/tacoda-org/</strong> was vendored from the git tag <code>0.2.0</code> — chmod'd 0o444 on POSIX as a read-only signal.</li>
+      <li><strong style="color: var(--accent3);">harness/keystone.lock.json</strong> recorded the resolved git SHA + per-file SHA-256 hashes for drift detection.</li>
+      <li>The <code>.gitignore</code> entry (added by init) keeps <code>harness/plugins/</code> out of your repo. <code>keystone install</code> repopulates it on a fresh clone.</li>
+    </ul>
+
+    <div class="section-label">3.3 — Verify integrity</div>
+<pre class="code"><span class="prompt">$</span> keystone verify
+<span class="ok">✓</span> keystone verify clean — no drift, no strict violations (.)</pre>
+    <p style="font-size: 0.78rem; color: var(--muted); font-family: var(--mono); margin-top: 12px; line-height: 1.7;">If you ever edit a vendored file by hand, the next <code>keystone verify</code> detects drift, removes the plugin directory, and tells you to re-run <code>keystone install</code>. Vendored content is regenerable — the source of truth is the pinned git tag.</p>
+
+    <div class="section-label">3.4 — Override a plugin rule (when you need to)</div>
+    <p style="font-size: 0.9rem; color: var(--text-dim); line-height: 1.7;">Plugins are read-only at the vendor location, but the cascade always lets the project layer win. To soften a plugin rule, drop a file with the same path at the project layer:</p>
+<pre class="code"><span class="prompt">$</span> cat harness/plugins/tacoda-org/guides/release-process.md
+<span class="comment"># inspect the plugin's rule</span>
+
+<span class="prompt">$</span> keystone new guide process/release
+  wrote: harness/guides/process/release.md
+  wrote: harness/corpus/process/release.md
+<span class="comment"># edit the new file — your version wins for `guides/process/release.md`</span></pre>
+    <p style="font-size: 0.78rem; color: var(--muted); font-family: var(--mono); margin-top: 12px; line-height: 1.7;">If the plugin author marked the item <code>strict</code> in <code>keystone-plugin.json</code>, your override fails <code>keystone verify</code>. Strict items are a contract — the plugin says "this rule is non-negotiable for any consumer." Take it up with the plugin author rather than overriding silently.</p>
+
+    <div class="section-label">3.5 — Update or remove</div>
+<pre class="code"><span class="comment"># Bump to a new version</span>
+<span class="prompt">$</span> keystone plugin update tacoda-org @0.3.0
+
+<span class="comment"># Re-fetch the recorded ref (useful for moving refs like @main)</span>
+<span class="prompt">$</span> keystone plugin update tacoda-org
+
+<span class="comment"># Uninstall</span>
+<span class="prompt">$</span> keystone plugin remove tacoda-org</pre>
+
+    <div class="section-label">Next</div>
+    <p style="font-size: 0.9rem; color: var(--text-dim); line-height: 1.7;"><strong><a href="#first-generator">Authoring with generators →</a></strong> covers <code>keystone new</code> for adding your own rules, sensors, actions, and more.</p>
+  </section>
+
+  <!-- ===================== GETTING STARTED: GENERATORS ===================== -->
+  <section id="first-generator" class="page" data-title="Authoring with generators">
+    <div class="page-head">
+      <div class="crumb">Getting started · Step 4 of 4</div>
+      <h1>Authoring with generators.</h1>
+      <p class="tagline">Every port has a one-command scaffold. <code>keystone new &lt;port&gt; &lt;name&gt;</code> drops a skeleton with the right frontmatter, sections, and harness-root-relative cross-references — you fill in the body. No more guessing where a file goes or what shape it needs.</p>
+    </div>
+
+    <div class="section-label">4.1 — Author a new guide (with paired corpus)</div>
+    <p style="font-size: 0.9rem; color: var(--text-dim); line-height: 1.7;">Guides are rules the agent is always under. Corpus is the paired reasoning loaded on-demand. The <code>guide</code> generator scaffolds both:</p>
+<pre class="code"><span class="prompt">$</span> keystone new guide domain/refunds
+  wrote: harness/guides/domain/refunds.md
+  wrote: harness/corpus/domain/refunds.md
+
+<span class="prompt">$</span> cat harness/guides/domain/refunds.md
+<span class="comment"># Refunds — rules</span>
+
+One-sentence framing of what this guide governs.
+
+- Non-negotiable rule one.
+- Non-negotiable rule two.
+- Strongly-preferred rule three.
+
+For reasoning, see `corpus/domain/refunds.md`.</pre>
+    <p style="font-size: 0.78rem; color: var(--muted); font-family: var(--mono); margin-top: 12px; line-height: 1.7;">Note the forward-link uses the harness-root-relative path (<code>corpus/domain/refunds.md</code>) — not <code>../corpus/...</code>. <code>keystone doctor --paths-only</code> enforces this convention for inter-harness links.</p>
+
+    <div class="section-label">4.2 — Author a new sensor</div>
+<pre class="code"><span class="prompt">$</span> keystone new sensor accessibility-check --kind computational
+  wrote: harness/sensors/accessibility-check.md</pre>
+    <p style="font-size: 0.9rem; color: var(--text-dim); line-height: 1.7;">Sensor frontmatter declares <code>kind</code> (<code>computational</code> for tool-output checks, <code>drift</code> for state-vs-reality, <code>coverage</code> for coverage signals). Sections are <code>## Command</code>, <code>## Interpretation</code>, <code>## Remediation</code> — fill them in with the actual shell invocation and how to interpret its output.</p>
+
+    <div class="section-label">4.3 — Author a new action and add it to a playbook</div>
+<pre class="code"><span class="prompt">$</span> keystone new action accessibility-audit
+  wrote: harness/actions/accessibility-audit.md
+
+<span class="prompt">$</span> <span class="comment"># Open harness/playbooks/task.md and add accessibility-audit to the sequence</span></pre>
+
+    <div class="section-label">4.4 — Run doctor</div>
+    <p style="font-size: 0.9rem; color: var(--text-dim); line-height: 1.7;">After authoring, <code>keystone doctor</code> audits the install: path conventions (any <code>../</code> in inter-harness links?), plugin integrity (drift detected, auto-reset), template drift (changes vs the binary's templates).</p>
+<pre class="code"><span class="prompt">$</span> keystone doctor
+<span class="ok">✓</span> paths: every inter-harness link is harness-root-relative
+<span class="ok">✓</span> plugins: all 1 plugin(s) clean (no drift, no strict violations)
+<span class="ok">✓</span> drift: every default file matches the binary's current templates
+
+<span class="prompt">$</span> keystone doctor --budget
+  budget: per-port token estimate (whitespace-approximate)
+    • actions    2,955 tokens
+    • adapters   2,612 tokens
+    • corpus    33,398 tokens   <span class="comment"># grew by 140 — that's your new refunds.md</span>
+    • guides     7,969 tokens
+    • playbooks    634 tokens
+    • sensors    4,710 tokens
+  ℹ no budgets declared in keystone.json — add a `budgets` block to enforce caps</pre>
+
+    <div class="section-label">4.5 — Scaffold a fresh plugin (for org-wide policy)</div>
+    <p style="font-size: 0.9rem; color: var(--text-dim); line-height: 1.7;">When you have policy you want shared across projects, scaffold a new plugin repo:</p>
+<pre class="code"><span class="prompt">$</span> keystone new plugin acme-engineering
+  wrote: ./acme-engineering/keystone-plugin.json
+  wrote: ./acme-engineering/README.md
+  wrote: ./acme-engineering/{guides,corpus,sensors,actions,playbooks}/.gitkeep
+
+<span class="prompt">$</span> cd acme-engineering
+<span class="prompt">$</span> <span class="comment"># Fill in guides/, sensors/, etc. with your shared policy.</span>
+<span class="prompt">$</span> git init &amp;&amp; git add . &amp;&amp; git commit -m "initial"
+<span class="prompt">$</span> git tag v0.1.0
+<span class="prompt">$</span> git push --tags                <span class="comment"># publish to your git host</span></pre>
+    <p style="font-size: 0.78rem; color: var(--muted); font-family: var(--mono); margin-top: 12px; line-height: 1.7;">Other projects install it with <code>keystone plugin add &lt;your-org&gt;/acme-engineering@v0.1.0</code>.</p>
+
+    <div class="section-label">Where to go next</div>
+    <ul class="iron-list">
+      <li>The <a href="#guides">Framework</a> section in the sidebar covers each port (guides, corpus, sensors, actions, playbooks, adapters, state ledgers, flywheels) in detail.</li>
+      <li><a href="#rules">Rules &amp; iron laws</a> explains the three-tier strength gradient inside any guide.</li>
+      <li><a href="#failure-modes">Agent failure modes</a> documents the guardrails the harness puts on the agent.</li>
+      <li><a href="https://github.com/tacoda/keystone/blob/main/docs/conventions.md" target="_blank" rel="noopener">docs/conventions.md ↗</a> is the canonical path-and-shape reference.</li>
+      <li><a href="https://github.com/tacoda/keystone/blob/main/docs/compatibility.md" target="_blank" rel="noopener">docs/compatibility.md ↗</a> is the 1.x contract — what stays stable, what's free to evolve.</li>
+    </ul>
   </section>
 
   <!-- ===================== GUIDES ===================== -->
@@ -1604,120 +1911,139 @@ flowchart LR
     <p style="font-size: 0.82rem; color: var(--muted); line-height: 1.7;">Adapters with sub-agent parallelism (Claude Code) spawn the four review-* sensors concurrently; adapters without (Codex, Pi) run them sequentially. <strong style="color: var(--text);">Strong recommendation</strong> for adapters that can't parallelize: run the four reviewers in separate sessions and combine findings outside the agent — the independent context windows are the point.</p>
   </section>
 
-  <!-- ===================== POLICIES ===================== -->
-  <section id="policies" class="page" data-title="Policies">
+  <!-- ===================== PLUGINS ===================== -->
+  <section id="plugins" class="page" data-title="Plugins">
     <div class="page-head">
-      <div class="crumb">Capabilities · Policy plugins <span style="color:var(--accent3);">· Updated in 0.13.0</span></div>
-      <h1>Policies — distributable governance, with a tiered cascade.</h1>
-      <p class="tagline">Markdown plugins under <code>harness/policies/</code>. Each policy is its own namespace with its own <code>corpus/</code>, <code>guides/</code>, optional <code>playbooks/</code>, <code>actions/</code>, and (team-tier only) <code>sensors/</code>. Policies stack: <strong>Org → Team → Project</strong> for guides, playbooks, and actions; <strong>Team → Project</strong> for sensors. The project owns its harness; org and team policies are optional, opt-in, and overridable unless a higher tier marks an item <code>strict</code>.</p>
+      <div class="crumb">Framework · Plugins <span style="color:var(--accent);">· 1.0</span></div>
+      <h1>Plugins — vendored, read-only shared policy.</h1>
+      <p class="tagline">Plugins ship shared governance across projects — markdown rules, sensors, actions, playbooks. They live at <code>harness/plugins/&lt;name&gt;/</code>, are gitignored, pinned in <code>keystone.json</code>, hash-verified via <code>keystone.lock.json</code>, and reset on any drift. Declared with an npm-style shorthand (<code>tacoda/tacoda-org@0.2.0</code>), materialized by <code>keystone install</code>. The project layer always wins; among plugins, a nested tree resolves in pre-order.</p>
     </div>
 
     <div class="definition">
-      <p><strong>Everything belongs to the project.</strong> A project file at <code>harness/&lt;kind&gt;/&lt;name&gt;.md</code> overrides the same-basename file from any team or org policy — unless a higher tier declares that item <code>strict</code>, in which case the project must remove the shadow. A policy can also declare items <code>required</code>: things it expects to exist somewhere in the cascade but does not itself ship. <code>keystone policy verify</code> reports both: <em>strict violations</em> as hard errors, <em>required gaps</em> as advisory findings.</p>
+      <p><strong>Plugins are read-only.</strong> The vendor directory is regenerable: <code>keystone install</code> fetches each pin into a content-addressable cache (<code>~/.cache/keystone/plugins/</code>) and copies it into <code>harness/plugins/&lt;name&gt;/</code>, chmod'd 0o444 on POSIX. The lockfile pins per-file hashes; <code>keystone verify</code> walks each vendored file and resets the directory the moment anything diverges. Edits to vendored content don't stick — the next verify wipes them.</p>
+      <p><strong>To override a plugin, edit the project layer.</strong> Drop a file with the same path at <code>harness/&lt;port&gt;/&lt;name&gt;.md</code> and the project layer beats every plugin. Plugin authors can mark items <code>strict</code> to block override; <code>keystone verify</code> reports violations with path context (<code>acme-org &gt; acme-platform &gt; acme-payments</code>) so you see exactly which node in the tree locked the rule.</p>
     </div>
 
     <div class="section-label">The cascade</div>
     <div class="mermaid-wrap">
-      <p class="mermaid-caption">Project beats team beats org. Corpus is reference and does not cascade.</p>
+      <p class="mermaid-caption">Project layer always wins. Among plugins, pre-order tree walk: parent before children, children before later-tree siblings. Strict items lock downward.</p>
       <div class="mermaid">
 flowchart LR
-  org["Org policy<br/><i>harness/policies/&lt;org&gt;/<br/>tier: org</i>"] --> team["Team policy<br/><i>harness/policies/&lt;team&gt;/<br/>tier: team</i>"]
-  team --> project["Project<br/><i>harness/{guides,playbooks,actions}/</i>"]
-  org -. strict locks .-> project
-  team -. strict locks .-> project
+  project["Project<br/><i>harness/{guides,corpus,sensors,…}/</i>"] --> r{Cascade<br/>resolution}
+  org["acme-org<br/><i>harness/plugins/acme-org/</i>"] --> r
+  platform["acme-platform<br/><i>(child of acme-org)</i>"] --> r
+  payments["acme-payments<br/><i>(child of acme-platform)</i>"] --> r
+  r --> agent["Agent reads<br/>one file per name"]
+  project -. wins .-> r
+  org -. strict locks down .-> r
+  platform -. strict locks down .-> r
+  classDef green fill:#13161d,stroke:#4ade9a,color:#4ade9a
   classDef purple fill:#13161d,stroke:#a78bfa,color:#a78bfa
   classDef blue fill:#13161d,stroke:#60a5fa,color:#60a5fa
-  classDef green fill:#13161d,stroke:#4ade9a,color:#4ade9a
-  class org purple
-  class team blue
+  classDef orange fill:#13161d,stroke:#f59e0b,color:#f59e0b
   class project green
+  class org purple
+  class platform blue
+  class payments orange
       </div>
     </div>
 
-    <div class="section-label">Manifest fields</div>
-<pre class="code"><span class="comment"># keystone-policy.yaml — org-tier (tacoda-org)</span>
-name: tacoda-org
-version: 1.0.0
-tier: org              <span class="comment"># default. Org-tier cannot ship or declare `sensors`.</span>
-keystone_min: 0.13.0
-
-<span class="comment"># Items this policy ships and locks against override from below.</span>
-strict:
-  guides:
-    - documentation             <span class="comment"># locked — no team/project may override</span>
-  actions:
-    - static-analysis           <span class="comment"># mandate the check; team ships the concrete sensor</span>
-
-<span class="comment"># Also shipped, but non-strict — teams/projects may override:</span>
-<span class="comment">#   guides/release-process.md</span>
-<span class="comment">#   actions/announce-release.md</span></pre>
-
-<pre class="code"><span class="comment"># keystone-policy.yaml — team-tier (tacoda-team, can ship sensors)</span>
-name: tacoda-team
-version: 1.0.0
-tier: team             <span class="comment"># sensors require tier: team</span>
-keystone_min: 0.13.0
-
-strict:
-  guides:
-    - release-process           <span class="comment"># team locks its override of the org's non-strict guide</span>
-  actions:
-    - announce-release          <span class="comment"># team locks its release-announcement workflow</span>
-  sensors:                       <span class="comment"># team-tier only — org policies are rejected at install</span>
-    - rubocop                   <span class="comment"># concrete sensor; project may still override unless strict</span></pre>
-
-    <p style="font-size: 0.78rem; color: var(--muted); font-family: var(--mono); margin: 16px 0; line-height: 1.7;"><strong>Corpus is never strict-able</strong> — it's reference loaded on-demand by forward-link from a guide; every guide links to its own intended corpus, so corpus from different tiers coexists without collision.</p>
-
-    <div class="section-label">Layout inside a policy</div>
-    <div class="tree">
-      <div class="tree-line"><span class="tree-structure"></span><span class="tree-dir">my-policy-repo/</span></div>
-      <div class="tree-line"><span class="tree-structure">├──</span><span class="tree-file">keystone-policy.yaml</span><span class="tree-annotation ann-default">name · version · tier · strict · required</span></div>
-      <div class="tree-line"><span class="tree-structure">├──</span><span class="tree-file">README.md</span><span class="tree-annotation ann-default">for humans — ignored at install</span></div>
-      <div class="tree-line"><span class="tree-structure">└──</span><span class="tree-dir">policy/</span></div>
-      <div class="tree-line"><span class="tree-structure">    └──</span><span class="tree-dir">harness/policies/&lt;name&gt;/</span></div>
-      <div class="tree-line"><span class="tree-structure">        ├──</span><span class="tree-dir">corpus/</span><span class="tree-annotation ann-2">on-demand reasoning</span></div>
-      <div class="tree-line"><span class="tree-structure">        ├──</span><span class="tree-dir">guides/</span><span class="tree-annotation ann-1">ambient rules</span></div>
-      <div class="tree-line"><span class="tree-structure">        ├──</span><span class="tree-dir">playbooks/</span><span class="tree-annotation ann-3">ordered action chains · optional</span></div>
-      <div class="tree-line"><span class="tree-structure">        ├──</span><span class="tree-dir">actions/</span><span class="tree-annotation ann-4">single units · optional</span></div>
-      <div class="tree-line"><span class="tree-structure">        └──</span><span class="tree-dir">sensors/</span><span class="tree-annotation ann-3">concrete checks · team-tier only · optional</span></div>
+    <div class="section-label">Pin format: shorthand sources</div>
+    <div class="definition">
+      <p>Plugin sources use a short, npm-style format: <code>[&lt;host&gt;/]&lt;owner&gt;/&lt;repo&gt;[@&lt;version&gt;]</code>. When the host is omitted, <code>github.com</code> is prepended. The version is a git ref (tag, branch, or SHA) — required.</p>
+      <ul class="iron-list">
+        <li><code>tacoda/tacoda-org@0.2.0</code> → <code>github.com/tacoda/tacoda-org</code> at tag <code>0.2.0</code></li>
+        <li><code>github.com/acme/policies@v1.0</code> → explicit host, same as <code>acme/policies@v1.0</code></li>
+        <li><code>gitlab.com/acme/policies@main</code> → off-github host, branch ref</li>
+      </ul>
     </div>
 
-    <p style="font-size: 0.78rem; color: var(--muted); font-family: var(--mono); margin: 16px 0; line-height: 1.7;"><strong>Sensors cascade across two tiers only — team → project.</strong> Org policies cannot ship or declare sensors (too stack-specific for the org layer; a team often shares them). An org policy mandates <em>what</em> must be checked via an <code>action</code>; a team policy ships the concrete sensor (e.g., <code>rubocop</code>); the project can override unless the team marks it <code>strict</code>. The installer rejects an org-tier policy that puts files under <code>sensors/</code>. <span style="color:var(--accent3);">(0.13.0)</span></p>
+    <div class="section-label">keystone.json — the plugin tree</div>
+<pre class="code"><span class="comment">// keystone.json at the project root</span>
+{
+  "version": "1",
+  "harness_root": "harness",
+  "plugins": [
+    {
+      "name": "acme-org",
+      "source": "acme/policies",
+      "version": "v2.0.0",
+      "strict": { "guides": ["data-handling"] },
+      "children": [
+        {
+          "name": "acme-platform",
+          "source": "acme/platform-policies",
+          "version": "v1.4.0",
+          "strict": { "sensors": ["rubocop"] }
+        }
+      ]
+    }
+  ]
+}</pre>
+
+    <p style="font-size: 0.78rem; color: var(--muted); font-family: var(--mono); margin: 16px 0; line-height: 1.7;">Pre-order: <code>acme-org</code> resolves before its children; <code>acme-platform</code> resolves before any later-tree sibling. <code>acme-org</code>'s strict on <code>guides/data-handling</code> blocks <code>acme-platform</code> (and any deeper node) from shipping <code>guides/data-handling.md</code>. The project layer can always override unless an ancestor locked it. <code>keystone verify</code> checks the whole tree.</p>
+
+    <div class="section-label">keystone-plugin.json — the plugin manifest</div>
+<pre class="code"><span class="comment">// keystone-plugin.json at the plugin repo root</span>
+{
+  "name": "acme-org",
+  "version": "2.0.0",
+  "description": "Acme org-wide engineering policy.",
+  "strict": {
+    "guides": ["data-handling", "todos"],
+    "actions": ["release-notes"]
+  },
+  "required": {
+    "actions": ["release"]
+  }
+}</pre>
+
+    <p style="font-size: 0.78rem; color: var(--muted); font-family: var(--mono); margin: 16px 0; line-height: 1.7;"><strong>strict</strong>: items this plugin ships and locks against override from deeper nodes (children and later-tree siblings). <strong>required</strong>: items this plugin expects to exist somewhere in the cascade but does not ship itself — <code>keystone verify</code> reports unmet requireds as advisory gaps. <strong>Corpus is not strict-able</strong>; it's reasoning loaded on demand by forward-link.</p>
+
+    <div class="section-label">Layout of a plugin repo</div>
+    <div class="tree">
+      <div class="tree-line"><span class="tree-structure"></span><span class="tree-dir">my-plugin-repo/</span></div>
+      <div class="tree-line"><span class="tree-structure">├──</span><span class="tree-file">keystone-plugin.json</span><span class="tree-annotation ann-default">name · version · strict · required</span></div>
+      <div class="tree-line"><span class="tree-structure">├──</span><span class="tree-file">README.md</span><span class="tree-annotation ann-default">for humans browsing the repo</span></div>
+      <div class="tree-line"><span class="tree-structure">├──</span><span class="tree-dir">guides/</span><span class="tree-annotation ann-1">ambient rules</span></div>
+      <div class="tree-line"><span class="tree-structure">├──</span><span class="tree-dir">corpus/</span><span class="tree-annotation ann-2">on-demand reasoning</span></div>
+      <div class="tree-line"><span class="tree-structure">├──</span><span class="tree-dir">sensors/</span><span class="tree-annotation ann-3">automated checks</span></div>
+      <div class="tree-line"><span class="tree-structure">├──</span><span class="tree-dir">actions/</span><span class="tree-annotation ann-4">single lifecycle units</span></div>
+      <div class="tree-line"><span class="tree-structure">└──</span><span class="tree-dir">playbooks/</span><span class="tree-annotation ann-3">ordered action chains</span></div>
+    </div>
+
+    <p style="font-size: 0.78rem; color: var(--muted); font-family: var(--mono); margin: 16px 0; line-height: 1.7;">No <code>policy/</code> wrapper, no nested <code>harness/policies/&lt;name&gt;/</code>. The plugin repo root <em>is</em> the content root — when installed, the entire tree (minus the manifest + README) is copied into <code>harness/plugins/&lt;name&gt;/</code>. Scaffold a fresh plugin repo with <code>keystone new plugin &lt;name&gt;</code>.</p>
 
     <div class="section-label">Install, update, verify</div>
-<pre class="code"><span class="comment"># Install during init</span>
-<span class="prompt">$</span> keystone init \
-    --policy git+https://github.com/tacoda/tacoda-org.git#v0.2.0 \
-    --policy git+https://github.com/tacoda/tacoda-team.git#v0.1.0
+<pre class="code"><span class="comment"># Add a plugin (declared in keystone.json + materialized into harness/plugins/)</span>
+<span class="prompt">$</span> keystone plugin add tacoda/tacoda-org@0.2.0
 
-<span class="comment"># Add a policy to an existing install</span>
-<span class="prompt">$</span> keystone policy add git+https://github.com/tacoda/tacoda-team.git#v0.1.0
+<span class="comment"># Materialize every plugin declared in keystone.json (after `git clone`, etc.)</span>
+<span class="prompt">$</span> keystone install
 
-<span class="comment"># Re-resolve the recorded ref (pull latest of the same ref)</span>
-<span class="prompt">$</span> keystone policy update tacoda-team
+<span class="comment"># Bump a plugin's pinned version</span>
+<span class="prompt">$</span> keystone plugin update tacoda-org @0.3.0
 
-<span class="comment"># Bump to a new ref</span>
-<span class="prompt">$</span> keystone policy update tacoda-team git+https://github.com/tacoda/tacoda-team.git#v0.2.0
+<span class="comment"># Or re-fetch the recorded ref without changing the version (moving refs)</span>
+<span class="prompt">$</span> keystone plugin update tacoda-org
 
-<span class="comment"># Audit the strict cascade and surface required-but-missing items</span>
-<span class="prompt">$</span> keystone policy verify
-✓ policy verify clean — no strict items overridden, no required items unmet (.)</pre>
+<span class="comment"># Uninstall</span>
+<span class="prompt">$</span> keystone plugin remove tacoda-org
 
-    <div class="section-label">Worked example: <code>tacoda-org</code> + <code>tacoda-team</code></div>
+<span class="comment"># Verify: walk every vendored plugin, check hashes, reset drift, audit strict cascade</span>
+<span class="prompt">$</span> keystone verify
+✓ keystone verify clean — no drift, no strict violations (.)</pre>
+
+    <div class="section-label">Worked example: <code>tacoda-org</code></div>
     <div class="action-grid">
       <div class="action">
-        <span class="action-tag">tier: org</span>
+        <span class="action-tag">plugin</span>
         <h3 style="color: var(--accent5);"><a href="https://github.com/tacoda/tacoda-org" target="_blank" rel="noopener" style="color: inherit;"><code>tacoda-org</code></a></h3>
-        <p>All four components. <strong>Strict</strong> on <code>guides/documentation</code>, <code>guides/todos</code>, <code>actions/changelog-check</code> — no team or project may override. <strong>Required</strong>: <code>actions/release-notes</code> — declared but not shipped; the project must define it. Non-strict <code>playbooks/release</code>, <code>guides/release-process</code>, and <code>actions/announce-release</code> let teams refine the release flow.</p>
-      </div>
-      <div class="action">
-        <span class="action-tag">tier: team</span>
-        <h3 style="color: var(--accent2);"><a href="https://github.com/tacoda/tacoda-team" target="_blank" rel="noopener" style="color: inherit;"><code>tacoda-team</code></a></h3>
-        <p>Layers on top of <code>tacoda-org</code>. Legitimately overrides the org's non-strict <code>playbooks/release</code>, <code>guides/release-process</code>, and <code>actions/announce-release</code> with team-specific versions. Adds <code>actions/pre-release-smoke</code> as a team-strict gate that projects cannot skip. Can also ship <code>sensors/&lt;name&gt;.md</code> — e.g., a <code>rubocop</code> sensor that satisfies the org's <code>actions/static-analysis</code> mandate; projects override unless the team marks it strict. Cannot ship <code>actions/changelog-check</code> — the org locked that name.</p>
+        <p>An example org-wide policy plugin. Ships guides on documentation discipline, release process, and the changelog gate. <strong>Strict</strong> on <code>guides/documentation</code> and <code>actions/changelog-check</code> — no project may override. <strong>Required</strong>: <code>actions/release-notes</code> — the plugin declares it but doesn't ship it; the consuming project must define a release-notes action. Pin with <code>keystone plugin add tacoda/tacoda-org@0.2.0</code>.</p>
       </div>
     </div>
 
-    <p style="font-size: 0.85rem; color: var(--muted); line-height: 1.7; margin-top: 16px;">Solo project, no policies installed? Everything above is opt-in — the harness works for a single project alone.</p>
+    <p style="font-size: 0.85rem; color: var(--muted); line-height: 1.7; margin-top: 16px;">Solo project, no plugins installed? Everything above is opt-in — the harness works for a single project alone.</p>
   </section>
 
   <!-- ===================== FLYWHEELS ===================== -->
@@ -2031,71 +2357,6 @@ strict:
     </div>
   </section>
 
-  <!-- ===================== MIGRATIONS ===================== -->
-  <section id="migrations" class="page" data-title="Migrations">
-    <div class="page-head">
-      <div class="crumb">Capabilities · Upgrade flow</div>
-      <h1>Migrate the harness forward with <code>keystone migrate</code>.</h1>
-      <p class="tagline"><code>keystone migrate</code> brings the <em>generic</em> harness — the parts every install gets from the binary — up to the version you have. It does not touch the files your team has edited.</p>
-    </div>
-
-    <div class="definition">
-      <p><strong>What <code>migrate</code> updates.</strong> Every release ships a <code>migrations/&lt;version&gt;/</code> directory of YAML files declaring idempotent operations against the generic harness — adding new sensors, action playbooks, README index entries, frontmatter keys; relocating layers; updating the templates that ship inside the binary. The runner reads <code>keystone_version</code> from <code>INSTALL_PROFILE.md</code> and applies every migration newer than that, version directory by version directory.</p>
-      <p><strong>What <code>migrate</code> never touches.</strong> Anything your team has edited. Every operation is idempotent and reads the target's current state before writing:</p>
-      <ul class="iron-list">
-        <li>If the file is missing, <code>add_file</code> creates it; if it's already there with matching content, no-op; if it's there with <em>different</em> content, the runner reports a <strong style="color: var(--text);">conflict</strong> and leaves the file alone. Same shape for <code>replace_block</code> — exact text match required, or it's flagged for you to merge by hand.</li>
-        <li><code>frontmatter_set</code> only adds keys; existing values are never overwritten.</li>
-        <li><code>ensure_section</code> appends a heading + body only if the heading isn't already present.</li>
-        <li>Customized rules, hand-tuned sensor commands, project-specific corpus, state ledgers, policy guides — all of it stays as you left it. Migrations carry the <em>defaults</em> forward; your edits are sacrosanct.</li>
-      </ul>
-      <p>Bring the binary up first, then run <code>migrate</code> in your project. If a migration encounters a divergence, it surfaces — never silently overwrites.</p>
-    </div>
-
-    <div class="install-method">
-      <h3>Upgrade the binary</h3>
-      <p>Homebrew:</p>
-<pre class="code"><span class="prompt">$</span> brew upgrade tacoda/tap/keystone</pre>
-      <p>Curl bootstrap (re-run — binary-only by default):</p>
-<pre class="code"><span class="prompt">$</span> curl -fsSL https://raw.githubusercontent.com/tacoda/keystone/main/install.sh | sh</pre>
-    </div>
-
-    <div class="install-method">
-      <h3>Migrate the harness</h3>
-      <p>From the project root (or pass the project directory). Preview first, then apply:</p>
-<pre class="code"><span class="comment"># Preview every pending change without writing anything</span>
-<span class="prompt">$</span> keystone migrate --dry-run
-
-<span class="comment"># Interactive: y/N/q per file</span>
-<span class="prompt">$</span> keystone migrate
-
-<span class="comment"># Apply every non-conflict change without prompting (good for CI)</span>
-<span class="prompt">$</span> keystone migrate --apply
-
-<span class="comment"># Override the recorded version (rare — recovery only)</span>
-<span class="prompt">$</span> keystone migrate --from 0.8.0</pre>
-      <p>If a file you have customized no longer matches the migration's expected text, the operation is reported as a <strong style="color: var(--text);">conflict</strong> — review the proposed change, merge by hand, and re-run.</p>
-    </div>
-
-    <div class="section-label">Operation types — all idempotent</div>
-    <ul class="iron-list">
-      <li><strong style="color: var(--accent);">ADD_FILE</strong> Create only if missing. Conflict if present with different content.</li>
-      <li><strong style="color: var(--accent2);">FRONTMATTER_SET</strong> Set a YAML frontmatter key only if absent. Existing values are never overwritten.</li>
-      <li><strong style="color: var(--accent3);">ENSURE_SECTION</strong> Append a heading + body anchored after another heading. No-op if the heading already exists.</li>
-      <li><strong style="color: var(--accent5);">REPLACE_BLOCK</strong> Exact-string swap. Conflict if the expected text is not found.</li>
-      <li><strong style="color: var(--accent4);">MOVE_DIR</strong> <span class="ver">0.9.0</span> Relocate a directory tree. Detects conflicts on diverged destinations.</li>
-      <li><strong style="color: var(--accent4);">DELETE_DIR</strong> <span class="ver">0.9.0</span> Remove an emptied source directory after a move.</li>
-    </ul>
-
-    <div class="section-label">Migrating to 0.11.0</div>
-    <div class="definition">
-      <p><code>migrations/0.11.0/</code> ships five files: <strong style="color: var(--accent);">001-add-sensors.yaml</strong> (seven new sensor playbooks), <strong style="color: var(--accent);">002-add-state-files.yaml</strong> (three state ledger templates), <strong style="color: var(--accent);">003-add-actions.yaml</strong> (debt-review and policy-audit), <strong style="color: var(--accent);">004-update-audit.yaml</strong> (Pruning flywheel rewrite), and <strong style="color: var(--accent);">005-update-readmes.yaml</strong> (sensor/action/state index updates).</p>
-      <p><strong style="color: var(--accent3);">Backfill:</strong> 0.10.0 and 0.10.1 shipped without migration directories — running <code>migrate</code> from a 0.9.x install used to silently produce an incomplete install (the entire <code>harness/actions/</code> tree from 0.10.0 was missed). This release backfills both: <code>migrations/0.10.0/</code> adds the twelve action playbooks plus README updates, and <code>migrations/0.10.1/</code> tightens the bootstrap playbook. Users already at 0.10.1 no-op the backfill on idempotent re-apply.</p>
-      <p><strong style="color: var(--text);">Not touched by migration:</strong> your <code>CODEBASE_STATE.md</code>. The template grew new slots (security tool commands, severity thresholds, the seven new Sensor rows) but the file in an existing install has been populated with your project's actual values — replacing it would clobber your edits. To wire up the new sensors, add the rows by hand or run the <strong>bootstrap</strong> action through your agent and review the proposed diff.</p>
-    </div>
-
-    <p style="font-size: 0.82rem; color: var(--muted); line-height: 1.7;"><strong style="color: var(--text);">For users still on 0.9.x:</strong> <code>migrate</code> walks <code>0.10.0 → 0.10.1 → 0.11.0</code> in sequence; each migration's changes are on disk before the next runs, so the <code>replace_block</code> operations in 0.10.1 and 0.11.0 find the files added by 0.10.0. One pass, three version directories, one final bump of <code>keystone_version</code> to <code>0.11.0</code>.</p>
-  </section>
-
   <!-- ===================== PACING MODES ===================== -->
   <section id="modes" class="page" data-title="Pacing modes">
     <div class="page-head">
@@ -2128,63 +2389,77 @@ strict:
     <div class="page-head">
       <div class="crumb">Reference · Command-line</div>
       <h1>CLI usage.</h1>
-      <p class="tagline"><code>init</code> is interactive in a terminal, scriptable in CI. The other commands (<code>migrate</code>, <code>target add</code>, <code>policy add</code>, <code>policy update</code>) operate on an existing install.</p>
+      <p class="tagline"><code>init</code> is interactive in a terminal, scriptable in CI. Everything else operates on an existing install.</p>
     </div>
 
 <pre class="code"><span class="comment"># Scaffold harness/ and the agent's menu file into &lt;dir&gt;.
-# Prompts interactively (huh) for any unset options when stdin is a TTY;
-# fails fast with a useful error when stdin is not a TTY and --agent is unset.</span>
+# Prompts interactively (huh) for any unset options when stdin is a TTY.
+# Idempotent by default — existing files are kept; pass --reset to overwrite.</span>
 <span class="prompt">$</span> keystone init [&lt;dir&gt;] [flags]
 
-<span class="comment"># Forward-only harness migrations. Idempotent. Conflicts surfaced rather than auto-resolved.</span>
-<span class="prompt">$</span> keystone migrate [&lt;dir&gt;] [--apply|-y] [--dry-run] [--from &lt;version&gt;]
+<span class="comment"># Materialize every plugin declared in keystone.json into harness/plugins/.
+# Implicit on the first cascade resolution; explicit when you want to confirm.</span>
+<span class="prompt">$</span> keystone install [--dir &lt;path&gt;] [--harness-root &lt;name&gt;]
 
-<span class="comment"># Install an org or team policy into an existing harness/.
-# Errors out if a policy with the same name is already recorded in the lockfile —
-# use `policy update` to re-resolve or change the ref instead.</span>
-<span class="prompt">$</span> keystone policy add &lt;ref&gt; [--dir &lt;path&gt;]
+<span class="comment"># Plugin management. Shorthand: [&lt;host&gt;/]&lt;owner&gt;/&lt;repo&gt;@&lt;version&gt;</span>
+<span class="prompt">$</span> keystone plugin add tacoda/tacoda-org@0.2.0
+<span class="prompt">$</span> keystone plugin update tacoda-org [@&lt;new-version&gt;]
+<span class="prompt">$</span> keystone plugin remove tacoda-org
 
-<span class="comment"># Re-resolve a named policy (or bump it to a new ref).</span>
-<span class="prompt">$</span> keystone policy update &lt;name&gt; [&lt;new-ref&gt;] [--dir &lt;path&gt;] [--force]
+<span class="comment"># Cascade verify: per-file hashes against the lockfile, drift-reset,
+# strict-violation report with path context. Exits non-zero on violations.</span>
+<span class="prompt">$</span> keystone verify [--dir &lt;path&gt;] [--harness-root &lt;name&gt;]
 
-<span class="comment"># Audit the strict cascade and required-item gaps. Exits non-zero on
-# any strict violation; required gaps are advisory.</span>
-<span class="prompt">$</span> keystone policy verify [--dir &lt;path&gt;]
+<span class="comment"># Audit an existing install. Three checks (paths, plugin integrity,
+# template drift) by default; add --budget for per-port token usage.</span>
+<span class="prompt">$</span> keystone doctor [flags]
+<span class="prompt">$</span> keystone doctor --paths-only --fix     <span class="comment"># auto-rewrite ../-style links</span>
+<span class="prompt">$</span> keystone doctor --budget                <span class="comment"># per-port token usage + top contributors</span>
+
+<span class="comment"># Scaffolding generators. One command per port; each emits conformant
+# frontmatter, sections, and harness-root-relative cross-references.</span>
+<span class="prompt">$</span> keystone new guide &lt;topic&gt;/&lt;name&gt;       <span class="comment"># + paired corpus stub</span>
+<span class="prompt">$</span> keystone new sensor &lt;name&gt; [--kind &lt;k&gt;]
+<span class="prompt">$</span> keystone new action &lt;name&gt;
+<span class="prompt">$</span> keystone new playbook &lt;name&gt;
+<span class="prompt">$</span> keystone new adapter &lt;agent&gt;
+<span class="prompt">$</span> keystone new plugin &lt;name&gt;              <span class="comment"># scaffolds a fresh plugin repo</span>
 
 <span class="comment"># Install another agent's target bundle into an existing harness/.
-# Merges the new agent(s) into the lockfile's agents list.
-# Errors out if any requested agent is already recorded — remove it first to re-add.</span>
+# Merges the new agent(s) into the lockfile's agents list.</span>
 <span class="prompt">$</span> keystone target add &lt;agent&gt;[,&lt;agent&gt;...] [--dir &lt;path&gt;]
+
+<span class="comment"># Apply pending framework patches (config-schema bumps from a binary upgrade).
+# Almost always a no-op at 1.0 — reserved for future schema changes.</span>
+<span class="prompt">$</span> keystone patch [&lt;dir&gt;] [--apply|-y] [--dry-run] [--from &lt;version&gt;]
 
 <span class="comment"># Print the catalog of allowed labels for every option flag</span>
 <span class="prompt">$</span> keystone options
 
-<span class="comment"># Print the binary version</span>
+<span class="comment"># Print the binary version + usage</span>
 <span class="prompt">$</span> keystone version
-
-<span class="comment"># Print usage</span>
 <span class="prompt">$</span> keystone help</pre>
 
     <div class="action-grid" style="margin-top: 24px;">
       <div class="action">
         <span class="action-tag">--agent &lt;label&gt;[,…]</span>
         <h3>Agent target(s)</h3>
-        <p>Multi-select. <code>claude-code · codex · cursor · aider · github-copilot · continue · cline · goose · pi · generic</code>. Pass a comma-separated list and every target bundle installs in one pass. If omitted, keystone detects from marker files; falls back to interactive prompt in a TTY.</p>
+        <p>Multi-select at init. <code>claude-code · codex · cursor · aider · github-copilot · continue · cline · goose · pi · generic</code>. Comma-separated; every target bundle installs in one pass. If omitted, keystone detects from marker files; falls back to interactive prompt in a TTY.</p>
       </div>
       <div class="action">
-        <span class="action-tag">--policy &lt;ref&gt;</span>
-        <h3 style="color: var(--accent3);">Org policy (multi)</h3>
-        <p>Repeatable. Each value is a git ref of the form <code>git+&lt;url&gt;[#&lt;rev&gt;]</code>. Fetches the policy and installs it at <code>harness/policies/&lt;name&gt;/</code>. Validated against the manifest's namespace.</p>
+        <span class="action-tag">--starter &lt;label&gt;[,…]</span>
+        <h3 style="color: var(--accent3);">Starter content</h3>
+        <p>Opt-in content packs. <code>universal-principles</code> is the engineering-principles corpus + guides (SOLID, TDD, BDD, naming, …) — not scaffolded by default. Pass at init or add later by re-running init with <code>--reset --i-understand-this-is-destructive --starter universal-principles</code>.</p>
       </div>
       <div class="action">
-        <span class="action-tag">--app-type · --architecture · --testing · --compliance</span>
-        <h3>Declared intent</h3>
-        <p>Multi-select where applicable. See <a href="#options">Install-time options</a> for the full catalog. Each <code>--architecture</code> / <code>--compliance</code> label installs as its own policy namespace (<code>policies/hexagonal/</code>, <code>policies/soc2/</code>, …).</p>
+        <span class="action-tag">--harness-root &lt;name&gt;</span>
+        <h3 style="color: var(--accent2);">Harness folder name</h3>
+        <p>Defaults to <code>harness</code>. Pick any name (recorded in <code>keystone.json</code>); downstream commands read the value from there so you don't pass the flag every time.</p>
       </div>
       <div class="action">
-        <span class="action-tag">--force</span>
-        <h3>Overwrite harness/</h3>
-        <p>Re-run with <code>--force</code> to overwrite an existing <code>harness/</code>. Menu files (<code>CLAUDE.md</code>, <code>CONVENTIONS.md</code>, etc.) <strong>merge additively</strong>.</p>
+        <span class="action-tag">--reset --i-understand-this-is-destructive</span>
+        <h3 style="color: var(--accent5);">Destructive rewrite</h3>
+        <p>The init default is idempotent — existing files are kept. Pass both flags to wipe and rewrite the harness folder from templates. Use only after committing or tagging your current state.</p>
       </div>
     </div>
   </section>
@@ -2311,16 +2586,16 @@ strict:
       <div class="action">
         <span class="action-tag">--compliance (multi)</span>
         <h3 style="color: var(--accent5);">Compliance</h3>
-        <p><code>gdpr</code>, <code>hipaa</code>, <code>pci-dss</code>, <code>soc2</code>, <code>fedramp</code>. Each label installs as its own policy namespace.</p>
+        <p><code>gdpr</code>, <code>hipaa</code>, <code>pci-dss</code>, <code>soc2</code>, <code>fedramp</code>. Each label scaffolds its own opinion content (guides + corpus) under the harness root.</p>
       </div>
       <div class="action">
-        <span class="action-tag">--policy (multi)</span>
-        <h3 style="color: var(--accent3);">Org policy</h3>
-        <p>Repeatable. Each value <code>git+&lt;url&gt;[#&lt;rev&gt;]</code> fetches an external policy and installs it at <code>policies/&lt;name&gt;/</code>. See <a href="#policies">Policies</a>.</p>
+        <span class="action-tag">--starter (multi)</span>
+        <h3 style="color: var(--accent3);">Starter content</h3>
+        <p>Opt-in opinion packs. <code>universal-principles</code> is the engineering principles corpus + guides — not scaffolded by default. Pass at init or run init again with <code>--reset</code> to add later.</p>
       </div>
     </div>
 
-    <p style="font-size: 0.78rem; color: var(--muted); font-family: var(--mono); margin-top: 16px; line-height: 1.7;">Language stack, frameworks &amp; libraries, database, CI platform — <strong style="color: var(--text);">not asked here</strong>. Bootstrap detects them from the codebase on first run, where it has accurate context. Run <code>keystone options</code> for the full catalog.</p>
+    <p style="font-size: 0.78rem; color: var(--muted); font-family: var(--mono); margin-top: 16px; line-height: 1.7;">Language stack, frameworks &amp; libraries, database, CI platform — <strong style="color: var(--text);">not asked here</strong>. Bootstrap detects them from the codebase on first run, where it has accurate context. Run <code>keystone options</code> for the full catalog. To install plugins for shared policy, use <code>keystone plugin add &lt;shorthand&gt;</code> after init — see <a href="#plugins">Plugins</a>.</p>
   </section>
 
   <!-- ===================== TOOL ASSUMPTIONS ===================== -->
@@ -2607,6 +2882,52 @@ strict:
     }
   })();
 
+  // ---------- Logo drop animation: replay on scroll-to-top ----------
+  (function(){
+    var logo = document.querySelector('.brand-logo');
+    if (!logo) return;
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduce) return;
+
+    var hasScrolled = false;
+    var raf = null;
+
+    function replay() {
+      logo.classList.remove('replay');
+      // Force reflow so the next class add restarts the animation.
+      void logo.offsetWidth;
+      logo.classList.add('replay');
+    }
+
+    function onScroll() {
+      if (raf) return;
+      raf = requestAnimationFrame(function(){
+        raf = null;
+        var top = (window.scrollY || document.documentElement.scrollTop) <= 1;
+        if (!top) {
+          hasScrolled = true;
+        } else if (hasScrolled) {
+          hasScrolled = false;
+          replay();
+        }
+      });
+    }
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+
+    // Replay when the SPA router scrolls back to the top on section change.
+    // (window.scrollTo with smooth behavior triggers scroll events that the
+    // listener above already handles, but the very last frame can settle to
+    // 0 without firing again on some browsers — explicitly replay on
+    // hashchange to cover that case.)
+    window.addEventListener('hashchange', function(){
+      if ((window.scrollY || document.documentElement.scrollTop) <= 1 && hasScrolled) {
+        hasScrolled = false;
+        replay();
+      }
+    });
+  })();
+
   // ---------- Terminal hero animation ----------
   (function(){
     var hf = document.getElementById('huh-form');
@@ -2640,10 +2961,10 @@ strict:
         '│   [ ] hipaa           HIPAA                    │\n' +
         '└────────────────────────────────────────────────┘',
 
-        '┌─ Org / team policy ────────────────────────────┐\n' +
-        '│ <span class="hcur">›</span> <span class="hsel">git+github.com/tacoda/tacoda-org.git#v0.2.0</span>   │\n' +
-        '│   git+github.com/tacoda/tacoda-team.git#v0.1.0 │\n' +
-        '│   add more with --policy                       │\n' +
+        '┌─ Starter content · multi-select ───────────────┐\n' +
+        '│ <span class="hcur">›</span> [•] <span class="hsel">universal-principles</span>  SOLID / TDD / BDD │\n' +
+        '│   [ ] (more packs in later releases)           │\n' +
+        '│   add plugins after init: keystone plugin add  │\n' +
         '└────────────────────────────────────────────────┘'
       ];
       var fi = 0;
