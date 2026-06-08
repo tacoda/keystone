@@ -8,25 +8,31 @@ import (
 	"strings"
 
 	"github.com/tacoda/keystone/internal/framework/config"
+	"github.com/tacoda/keystone/internal/framework/manifest"
 	"github.com/tacoda/keystone/internal/framework/plugins"
 )
 
 // VerifyResult is the outcome of a cascade verification: per-plugin drift
-// reports, per-port strict-cascade violations, plus depth-rule violations
-// (sensors at deeper-than-top plugins). Drift is informational (the runtime
-// will reset on next load); violations are hard errors that block clean
-// installs.
+// reports, per-port strict-cascade violations, depth-rule violations
+// (sensors at deeper-than-top plugins), and advisory required-item gaps.
+// Drift and required gaps are informational; strict and depth violations
+// are hard errors that block clean installs.
 type VerifyResult struct {
 	Violations      []ShadowViolation
 	DepthViolations []DepthViolation
+	RequiredGaps    []RequiredGap
 	Drift           []PluginDrift
 }
 
-// HasErrors reports whether any strict or depth rule was violated. Drift is
-// advisory.
+// HasErrors reports whether any strict or depth rule was violated. Drift
+// and required gaps are advisory.
 func (r VerifyResult) HasErrors() bool {
 	return len(r.Violations) > 0 || len(r.DepthViolations) > 0
 }
+
+// HasGaps reports whether any plugin's `required` item was not satisfied.
+// Advisory only — does not affect HasErrors.
+func (r VerifyResult) HasGaps() bool { return len(r.RequiredGaps) > 0 }
 
 // HasDrift reports whether any vendored plugin diverges from its
 // lockfile entry.
@@ -72,6 +78,22 @@ func (v DepthViolation) String() string {
 		v.Plugin, v.PathContext, v.Depth, strings.Join(parts, "\n  "))
 }
 
+// RequiredGap reports a plugin that declares a `required` item that no
+// outer layer (any plugin shallower in keystone.json, or the project)
+// provides. The gap is advisory — `keystone verify` surfaces it but does
+// not fail; solo installs may legitimately defer providing the item.
+type RequiredGap struct {
+	Plugin      string
+	PathContext string
+	Port        string
+	Item        string
+}
+
+func (g RequiredGap) String() string {
+	return fmt.Sprintf("plugin %q (%s) requires %s/%s — define it at <harness-root>/%s/%s.md (or in an outer plugin)",
+		g.Plugin, g.PathContext, g.Port, g.Item, g.Port, g.Item)
+}
+
 // PluginDrift reports a single drifted plugin: which files differ from the
 // lockfile, and what kind of difference.
 type PluginDrift struct {
@@ -96,8 +118,8 @@ type PluginDrift struct {
 // load time by file count.
 //
 // Default (non-strict) cascade resolution: the project always wins; among
-// plugins, the outer plugin (shallower in keystone.json) wins over plugins
-// nested inside it.
+// plugins, deeper-nested plugins (children in keystone.json) refine the
+// outer plugins they're nested in.
 func Verify(installDir string, cfg *config.ProjectConfig, expectedFiles map[string]map[string]string) (*VerifyResult, error) {
 	harnessRoot := cfg.ResolvedHarnessRoot()
 	res := &VerifyResult{}
@@ -149,6 +171,29 @@ func Verify(installDir string, cfg *config.ProjectConfig, expectedFiles map[stri
 					Item:        item,
 					ShadowPaths: shadowed,
 				})
+			}
+		}
+		// Required-item gaps: each item this plugin declares as `required`
+		// must be satisfied by an outer layer (an ancestor in the plugin
+		// tree, or the project). Siblings and descendants do NOT satisfy
+		// required. Missing items are advisory gaps, not errors.
+		m, err := loadInstalledManifest(installDir, harnessRoot, node.Name)
+		if err != nil {
+			return fmt.Errorf("load manifest for %q: %w", node.Name, err)
+		}
+		if m != nil {
+			for port, items := range requiredByPort(m.Required) {
+				for _, item := range items {
+					if requiredSatisfied(installDir, harnessRoot, path, port, item) {
+						continue
+					}
+					res.RequiredGaps = append(res.RequiredGaps, RequiredGap{
+						Plugin:      node.Name,
+						PathContext: ctx,
+						Port:        port,
+						Item:        item,
+					})
+				}
 			}
 		}
 		return nil
@@ -211,4 +256,59 @@ func findShadowing(installDir, harnessRoot, plugin, port, item string) ([]string
 		return nil, err
 	}
 	return hits, nil
+}
+
+// loadInstalledManifest reads the vendored keystone-plugin.json for `plugin`
+// from <installDir>/<harnessRoot>/plugins/<plugin>/. Returns nil with no
+// error when the manifest is missing (older installs may omit it); the
+// caller should treat absence as "no required claims to check."
+func loadInstalledManifest(installDir, harnessRoot, plugin string) (*manifest.Manifest, error) {
+	pluginRoot := filepath.Join(installDir, harnessRoot, "plugins", plugin)
+	if _, err := os.Stat(filepath.Join(pluginRoot, manifest.PluginManifestFile)); err != nil {
+		if os.IsNotExist(err) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return manifest.Load(pluginRoot)
+}
+
+// requiredByPort flattens a StrictSpec into a port-keyed map (mirroring
+// PluginNode.Strict's shape) so the verify walker can iterate uniformly.
+func requiredByPort(s manifest.StrictSpec) map[string][]string {
+	out := map[string][]string{}
+	if len(s.Guides) > 0 {
+		out["guides"] = s.Guides
+	}
+	if len(s.Playbooks) > 0 {
+		out["playbooks"] = s.Playbooks
+	}
+	if len(s.Actions) > 0 {
+		out["actions"] = s.Actions
+	}
+	if len(s.Sensors) > 0 {
+		out["sensors"] = s.Sensors
+	}
+	return out
+}
+
+// requiredSatisfied reports whether an item required by a plugin at depth
+// len(path) is supplied by an outer layer — either by a plugin ancestor in
+// the same path, or by the project layer. Siblings and descendants do not
+// satisfy `required`.
+func requiredSatisfied(installDir, harnessRoot string, ancestors []string, port, item string) bool {
+	want := item + ".md"
+	// Project layer.
+	projectPath := filepath.Join(installDir, harnessRoot, port, want)
+	if _, err := os.Stat(projectPath); err == nil {
+		return true
+	}
+	// Ancestor plugins, in order outer → inner.
+	for _, anc := range ancestors {
+		ancPath := filepath.Join(installDir, harnessRoot, "plugins", anc, port, want)
+		if _, err := os.Stat(ancPath); err == nil {
+			return true
+		}
+	}
+	return false
 }

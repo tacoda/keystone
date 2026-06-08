@@ -2,6 +2,37 @@
 
 All notable changes to keystone are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); the project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.3] — 2026-06-08
+
+Dead-code cleanup, starter-pack relocation, `required`-item enforcement, and a course-correction on the cascade-model prose. The intuitive read of `keystone.json` — outermost-first — matches the actual override direction: **the project always wins by default; among plugins, plugins nested deeper refine the outer plugins they're nested in; `strict` locks an item absolutely so nothing can override it.** v1.0.2 described it the other way around; this release fixes the prose and the code's docstrings to match the long-standing behavior.
+
+### Removed (dead code & dead templates)
+
+- `lockfile.PolicyLock` and `Lockfile.Policies` — never written by 1.0 code. Existing lockfiles with a `policies` map still load (Go ignores unknown JSON fields); the next write drops it.
+- `manifest.ValidateContent` and `manifest.PolicyContentRoot` — the 0.x `policy/` content-root validator. No callers.
+- `manifest.PolicyManifestFile` alias — renamed to `PluginManifestFile`. The on-disk filename (`keystone-plugin.json`) is unchanged.
+- `loader/resolver.go` — orphaned 0.x `PolicyRef`/`ResolvePolicy` types and their `runGit` helpers. Superseded by `plugins.Install`.
+- The `policies` parameter on `writeInstallProfile` and its dead "Policies" section. Only ever called with `nil`.
+- The scaffolded `harness/policies/README.md` stub and `harness/actions/policy-audit.md` action — both vestiges of the 0.x policy model. The new `patches/1.0.3/001-remove-policies-stub.json` removes them from existing installs on `keystone patch`.
+
+### Changed (starter packs)
+
+- Architecture and compliance starter packs (`optional/{architecture,compliance}/<label>/`) moved their content from the obsolete `harness/policies/<label>/{corpus,guides}/<label>.md` layout to the 1.0 layout: `harness/{corpus,guides}/<category>/<label>.md`. Files now land where the runtime actually reads them. `--architecture hexagonal --compliance soc2` now installs into `harness/corpus/architecture/hexagonal.md`, `harness/guides/architecture/hexagonal.md`, `harness/corpus/compliance/soc2.md`, `harness/guides/compliance/soc2.md`. Consistent with the existing `--starter universal-principles` layout under `harness/{corpus,guides}/principles/`.
+
+### Added (`required` enforcement)
+
+- `keystone verify` now reads each installed plugin's `keystone-plugin.json` and reports advisory `RequiredGap`s for any `required` item that isn't supplied by an outer layer (a plugin ancestor in the consumer's `keystone.json`, or the project itself). Required gaps are advisory — they don't fail the verify, but they print so the user knows what to fill in.
+- New types in `loader/cascade.go`: `RequiredGap`, `VerifyResult.RequiredGaps`, `VerifyResult.HasGaps()`. The existing `HasErrors()` is unchanged — gaps are not errors.
+
+### Changed (cascade-model prose)
+
+- Reverted the cascade-direction wording across the 7 agent activation templates, the two scaffold `README.md`s under `harness/{playbooks,actions}/`, all six `docs/ports/*.md` port contracts, `docs/conventions.md`, `docs/compatibility.md`, both schemas in `docs/schemas/`, and the Go docstrings in `loader/cascade.go`, `loader/types.go`, and `config/projectconfig.go`. v1.0.2 said "outer plugins win"; v1.0.3 says "deeper-nested plugins refine outer plugins" — matching what the code has always done and the natural top-to-bottom reading of `keystone.json`.
+- Replaced the last remaining "policies" framing in the scaffolded `harness/README.md` (`Extension: policies/` → `Extension: plugins/`), the playbook README's link, and the `synthesize`/`check-drift` action paths.
+
+### Patches
+
+- `patches/1.0.3/001-remove-policies-stub.json` removes `harness/policies/README.md`, `harness/actions/policy-audit.md`, and the empty `harness/policies/` directory from existing installs. Idempotent. Run with `keystone patch` after upgrading the binary.
+
 ## [1.0.2] — 2026-06-08
 
 Cascade-model wording fix. The behavior the code has always implemented didn't match the prose in the templates, port docs, schemas, and Go comments — which all described an older "deeper wins, outer locks via strict" model. The actual model is: **project wins by default; among plugins, outer wins over inner; `strict` locks the item absolutely so nothing can override it.** This release aligns all documentation and template prose with that model.

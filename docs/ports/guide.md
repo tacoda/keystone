@@ -56,7 +56,7 @@ The tier framing is part of the agent's reading discipline: iron laws short-circ
 For a given `guides/<topic>/<name>.md`:
 
 1. The project's `harness/guides/<topic>/<name>.md` always wins by default.
-2. Otherwise, among plugins, outer plugins (shallower in `keystone.json`) win over plugins nested inside them — the first occurrence in a pre-order walk of `plugins[]`.
+2. Otherwise, among plugins, plugins nested deeper in `keystone.json` refine the outer plugins they're nested in.
 3. A `strict.guides: [<name>]` declaration on any tree node makes that item absolute — nothing else can override it, not the project, not any other plugin. `keystone verify` reports a violation if any layer attempts to shadow a strict item.
 
 The framework never composes overlapping guides for the same name. Exactly one file loads.

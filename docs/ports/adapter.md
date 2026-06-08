@@ -36,7 +36,7 @@ Each file:
 
 ## Cascade behavior
 
-Same as other ports: project's `harness/adapters/<agent>/...` always wins by default. Plugins can ship adapters too (e.g., an org-specific Claude Code adapter); among plugins, outer plugins win over plugins nested inside them.
+Same as other ports: project's `harness/adapters/<agent>/...` always wins by default. Plugins can ship adapters too (e.g., an org-specific Claude Code adapter); among plugins, plugins nested deeper in `keystone.json` refine the outer plugins they're nested in.
 
 `strict.adapters: ["<agent>"]` on any plugin makes that adapter absolute — nothing else (project or any other plugin) can ship a competing adapter for that agent.
 

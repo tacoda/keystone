@@ -4,21 +4,19 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"sort"
 	"strings"
 	"time"
 
 	"github.com/tacoda/keystone/internal/framework/lockfile"
 )
 
-// writeInstallProfile renders sel + packs as <harnessRoot>/corpus/state/INSTALL_PROFILE.md
+// writeInstallProfile renders sel as <harnessRoot>/corpus/state/INSTALL_PROFILE.md
 // under destDir. Overwrites any existing file (the file is install-scoped —
-// re-running init should reset it). Packs is nil/empty when no org packs were
-// installed.
+// re-running init should reset it).
 //
 // The profile is the human-readable record. Machine state (keystone version,
-// agents, packs) lives in <harnessRoot>/keystone.lock.json — written separately.
-func writeInstallProfile(destDir, harnessRoot string, sel Selections, policies map[string]lockfile.PolicyLock) error {
+// agents, plugins) lives in <harnessRoot>/keystone.lock.json — written separately.
+func writeInstallProfile(destDir, harnessRoot string, sel Selections) error {
 	path := filepath.Join(destDir, harnessRoot, "corpus", "state", "INSTALL_PROFILE.md")
 	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
 		return err
@@ -30,7 +28,7 @@ func writeInstallProfile(destDir, harnessRoot string, sel Selections, policies m
 	fmt.Fprintf(&b, "---\n\n")
 	fmt.Fprintf(&b, "# Install Profile\n\n")
 	lockPath := filepath.ToSlash(filepath.Join(harnessRoot, "keystone.lock.json"))
-	fmt.Fprintf(&b, "Selections captured by `keystone init`. Read by the **bootstrap** action; safe to edit by hand. Machine state (keystone version, agents, packs) lives in [`%s`](%s) at the repo root.\n\n", lockPath, lockPath)
+	fmt.Fprintf(&b, "Selections captured by `keystone init`. Read by the **bootstrap** action; safe to edit by hand. Machine state (keystone version, agents, plugins) lives in [`%s`](%s) at the repo root.\n\n", lockPath, lockPath)
 	fmt.Fprintf(&b, "## Selections\n\n")
 	fmt.Fprintf(&b, "| Category | Value(s) |\n")
 	fmt.Fprintf(&b, "|---|---|\n")
@@ -43,22 +41,6 @@ func writeInstallProfile(destDir, harnessRoot string, sel Selections, policies m
 			continue
 		}
 		fmt.Fprintf(&b, "| %s | %s |\n", c.ID, strings.Join(values, ", "))
-	}
-
-	if len(policies) > 0 {
-		fmt.Fprintf(&b, "\n## Policies\n\n")
-		fmt.Fprintf(&b, "Org policies installed under `%s/policies/`. Detailed pin state (resolved SHA, file hashes) lives in the lockfile.\n\n", harnessRoot)
-		fmt.Fprintf(&b, "| Policy | Version | Source |\n")
-		fmt.Fprintf(&b, "|---|---|---|\n")
-		names := make([]string, 0, len(policies))
-		for name := range policies {
-			names = append(names, name)
-		}
-		sort.Strings(names)
-		for _, name := range names {
-			p := policies[name]
-			fmt.Fprintf(&b, "| %s | %s | %s |\n", name, p.PolicyVersion, p.SourceRef)
-		}
 	}
 
 	if err := os.WriteFile(path, []byte(b.String()), 0o644); err != nil {

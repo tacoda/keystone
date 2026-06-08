@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://keystone.tacoda.dev/schemas/keystone.json",
   "title": "Keystone Consumer Config",
-  "description": "Top-level keystone.json at the consumer repo root. Records the harness folder name, the framework version pin, and the nested plugin tree. The project layer (harness root contents) wins by default; among plugins, outer (shallower in the tree) wins over plugins nested inside; a plugin's `strict` declarations lock items absolutely. See PLAN-1.0.md §3 for full semantics.",
+  "description": "Top-level keystone.json at the consumer repo root. Records the harness folder name, the framework version pin, and the nested plugin tree. The project layer (harness root contents) wins by default; among plugins, plugins nested deeper in the tree refine the outer plugins they're nested in; a plugin's `strict` declarations lock items absolutely. See PLAN-1.0.md §3 for full semantics.",
   "type": "object",
   "properties": {
     "version": {
@@ -21,7 +21,7 @@
     },
     "plugins": {
       "type": "array",
-      "description": "Ordered list of plugin nodes. Among plugins, outer plugins (shallower in this tree) win over plugins nested inside them. The project layer always wins by default; a plugin's `strict` declarations are the only thing that locks an item against the project.",
+      "description": "Ordered list of plugin nodes. Among plugins, plugins nested deeper refine the outer plugins they're nested in. The project layer always wins by default; a plugin's `strict` declarations are the only thing that locks an item against the project.",
       "items": { "$ref": "#/$defs/pluginNode" }
     },
     "budgets": {
@@ -66,7 +66,7 @@
         },
         "children": {
           "type": "array",
-          "description": "Child plugins nested under this one. Among plugins, this parent wins over its children for non-strict items.",
+          "description": "Child plugins nested under this one. For non-strict items, the children (deeper-nested) refine this parent; for strict items declared anywhere in the tree, no layer can override.",
           "items": { "$ref": "#/$defs/pluginNode" }
         }
       },

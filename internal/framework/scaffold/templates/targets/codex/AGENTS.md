@@ -3,13 +3,13 @@
 This project uses a **keystone harness**. The harness at [`harness/`](harness/) defines the engineering knowledge, rules, sensors, and self-update flywheels you operate within.
 
 **Read first:**
-- [`harness/README.md`](harness/README.md) — five components (corpus, guides, sensors, policies, flywheels), the lifecycle, and the iron laws.
+- [`harness/README.md`](harness/README.md) — five components (corpus, guides, sensors, plugins, flywheels), the lifecycle, and the iron laws.
 - [`harness/guides/`](harness/guides/) — rules. **Always loaded.** What you must do and not do.
 - [`harness/corpus/`](harness/corpus/) — informational reference. **On-demand.** Reasoning behind the rules; reach via forward-link from a guide.
 - [`harness/adapters/codex/`](harness/adapters/codex/) — Codex bindings (shell execution, sandbox model).
 - [`harness/corpus/domain/`](harness/corpus/domain/) — business rules for this project.
 
-**Lifecycle** — to kick off a unit of work, say "**run task on `<ticket-id>`**" (runs the **task playbook**). To invoke any single action, ask in natural language ("run verify," "do a review pass"). Plugins (vendored at `harness/plugins/<name>/`) can ship playbooks, actions, and guides. Override: your project files at `harness/<kind>/<name>.md` always win by default. Among plugins, outer plugins (shallower in `keystone.json`) win over plugins nested inside them. A plugin can mark an item `strict` to make it absolute — nothing else can override a strict item, not the project, not any other plugin.
+**Lifecycle** — to kick off a unit of work, say "**run task on `<ticket-id>`**" (runs the **task playbook**). To invoke any single action, ask in natural language ("run verify," "do a review pass"). Plugins (vendored at `harness/plugins/<name>/`) can ship playbooks, actions, and guides. Override: your project files at `harness/<kind>/<name>.md` always win by default. Among plugins, plugins nested deeper in `keystone.json` refine the outer plugins they're nested in. A plugin can mark an item `strict` to make it absolute — nothing else can override a strict item, not the project, not any other plugin.
 
 **Playbooks** ([`harness/playbooks/`](harness/playbooks/)):
 

@@ -5,7 +5,7 @@
 ## Activities
 
 1. **Identify the diff** — `git diff`, the staged changes, or the in-progress edits.
-2. **List which guides apply** — load `harness/guides/idioms/<stack>/*.md` for each touched stack, plus `harness/guides/process/implementation.md` and any active policy guides (`harness/policies/*/guides/`).
+2. **List which guides apply** — load `harness/guides/idioms/<stack>/*.md` for each touched stack, plus `harness/guides/process/implementation.md` and any guides from installed plugins (`harness/plugins/*/guides/`).
 3. **Compare diff to guides** — line by line, surface violations or hot drift signals.
 4. **Report findings** — one bullet per drift. Cite the guide that was violated.
 

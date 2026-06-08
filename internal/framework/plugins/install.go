@@ -34,8 +34,7 @@ type Installed struct {
 
 // pluginManifestFile is the basename of a plugin's manifest at the root of
 // its content tree. Local to this package so plugins doesn't depend on the
-// manifest package (which still ships the legacy 0.x ValidateContent
-// shape).
+// manifest package.
 const pluginManifestFile = "keystone-plugin.json"
 
 // pluginManifest is the minimal subset of keystone-plugin.json the

@@ -8,7 +8,7 @@ For each file in `harness/learning/inbox/`:
 
 1. **Read the candidate.** Note its `proposed-layer` frontmatter.
 2. **Decide the destination:**
-   - Universal principle → `harness/policies/universal/corpus/principles/<name>.md` and `harness/policies/universal/guides/principles/<name>.md`
+   - Universal principle → `harness/corpus/principles/<name>.md` and `harness/guides/principles/<name>.md`
    - Stack idiom → `harness/corpus/idioms/<stack>/<name>.md` and `harness/guides/idioms/<stack>/<name>.md`
    - Process rule → `harness/guides/process/<name>.md`
    - Sensor → `harness/sensors/<name>.md`

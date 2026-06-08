@@ -198,6 +198,105 @@ func TestVerify_DepthGate_TopLevelPluginMayShipSensors(t *testing.T) {
 	}
 }
 
+func TestVerify_RequiredGap_ProjectSatisfies(t *testing.T) {
+	dir := t.TempDir()
+	// Project ships actions/release-notes.md → satisfies tacoda-org's required claim.
+	writeFile(t, dir, "harness/actions/release-notes.md")
+	// Drop a minimal manifest for the installed plugin that declares the required item.
+	writeFile(t, dir, "harness/plugins/tacoda-org/dummy.md") // ensure dir exists
+	manifest := `{
+  "name": "tacoda-org",
+  "version": "1.0.0",
+  "required": {"actions": ["release-notes"]}
+}`
+	if err := os.WriteFile(filepath.Join(dir, "harness/plugins/tacoda-org/keystone-plugin.json"), []byte(manifest), 0o644); err != nil {
+		t.Fatalf("write manifest: %v", err)
+	}
+
+	cfg := &config.ProjectConfig{
+		Version: config.SchemaVersion,
+		Plugins: []config.PluginNode{
+			{Name: "tacoda-org", Source: "tacoda/tacoda-org", Version: "v1.0.0"},
+		},
+	}
+	res, err := Verify(dir, cfg, nil)
+	if err != nil {
+		t.Fatalf("Verify: %v", err)
+	}
+	if res.HasGaps() {
+		t.Errorf("expected no gaps when project ships the required item, got %+v", res.RequiredGaps)
+	}
+}
+
+func TestVerify_RequiredGap_Missing(t *testing.T) {
+	dir := t.TempDir()
+	writeFile(t, dir, "harness/plugins/tacoda-org/dummy.md")
+	manifest := `{
+  "name": "tacoda-org",
+  "version": "1.0.0",
+  "required": {"actions": ["release-notes"]}
+}`
+	if err := os.WriteFile(filepath.Join(dir, "harness/plugins/tacoda-org/keystone-plugin.json"), []byte(manifest), 0o644); err != nil {
+		t.Fatalf("write manifest: %v", err)
+	}
+
+	cfg := &config.ProjectConfig{
+		Version: config.SchemaVersion,
+		Plugins: []config.PluginNode{
+			{Name: "tacoda-org", Source: "tacoda/tacoda-org", Version: "v1.0.0"},
+		},
+	}
+	res, err := Verify(dir, cfg, nil)
+	if err != nil {
+		t.Fatalf("Verify: %v", err)
+	}
+	if !res.HasGaps() {
+		t.Fatalf("expected gap when no layer satisfies required, got none")
+	}
+	if res.HasErrors() {
+		t.Errorf("required gaps should be advisory, not errors: %+v", res.Violations)
+	}
+	if len(res.RequiredGaps) != 1 {
+		t.Fatalf("RequiredGaps = %d, want 1", len(res.RequiredGaps))
+	}
+	g := res.RequiredGaps[0]
+	if g.Plugin != "tacoda-org" || g.Port != "actions" || g.Item != "release-notes" {
+		t.Errorf("RequiredGap = %+v, want {tacoda-org actions release-notes}", g)
+	}
+}
+
+func TestVerify_RequiredGap_OuterPluginSatisfies(t *testing.T) {
+	dir := t.TempDir()
+	// Outer plugin ships the required item; inner declares it as required.
+	writeFile(t, dir, "harness/plugins/outer/actions/release-notes.md")
+	writeFile(t, dir, "harness/plugins/inner/dummy.md")
+	innerManifest := `{
+  "name": "inner",
+  "version": "1.0.0",
+  "required": {"actions": ["release-notes"]}
+}`
+	if err := os.WriteFile(filepath.Join(dir, "harness/plugins/inner/keystone-plugin.json"), []byte(innerManifest), 0o644); err != nil {
+		t.Fatalf("write manifest: %v", err)
+	}
+
+	cfg := &config.ProjectConfig{
+		Version: config.SchemaVersion,
+		Plugins: []config.PluginNode{
+			{
+				Name: "outer", Source: "x/outer", Version: "v1",
+				Children: []config.PluginNode{{Name: "inner", Source: "x/inner", Version: "v1"}},
+			},
+		},
+	}
+	res, err := Verify(dir, cfg, nil)
+	if err != nil {
+		t.Fatalf("Verify: %v", err)
+	}
+	if res.HasGaps() {
+		t.Errorf("expected no gaps (outer ancestor satisfies inner's required), got %+v", res.RequiredGaps)
+	}
+}
+
 func TestVerify_NoStrictItems(t *testing.T) {
 	dir := t.TempDir()
 	cfg := &config.ProjectConfig{

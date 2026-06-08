@@ -18,7 +18,7 @@ that contains `keystone.json`.
 - **Activation:** Ambient (always loaded).
 - **Frontmatter:** none required.
 - **Required shape:** H1 title `# <Name> — rules`, body of rules, optional forward-link to paired corpus.
-- **Cascade:** project wins by default; among plugins, shallower (outer in `keystone.json`) wins; `strict` locks absolutely.
+- **Cascade:** project wins by default; among plugins, deeper-nested plugins refine outer plugins; `strict` locks absolutely.
 - **Strict-able:** yes (per-port `strict.guides: [...]` in keystone.json).
 - **Generator:** `keystone new guide <topic>/<name>` (scaffolds guide + paired corpus stub).
 
@@ -29,7 +29,7 @@ that contains `keystone.json`.
 - **Activation:** On-demand (loaded when a guide forward-links to it).
 - **Frontmatter:** none required.
 - **Required shape:** H1 title `# <Name> — reasoning`, long-form explanation, back-link to paired guide.
-- **Cascade:** project wins by default; among plugins, shallower (outer in `keystone.json`) wins.
+- **Cascade:** project wins by default; among plugins, deeper-nested plugins refine outer plugins.
 - **Strict-able:** no (corpus is reference, not policy).
 
 ### Sensor
@@ -39,7 +39,7 @@ that contains `keystone.json`.
 - **Activation:** Invoked inside an action.
 - **Frontmatter:** `kind: <computational | drift | coverage | ...>` (required).
 - **Required shape:** H1 title `# Sensor: <name>`, sections `## Command`, `## Interpretation`, `## Remediation`.
-- **Cascade:** project wins by default; among plugins, shallower (outer in `keystone.json`) wins; `strict` locks absolutely. Sensors are only allowed at the project layer and at top-level plugins — nested plugins that ship sensors fail `keystone verify`.
+- **Cascade:** project wins by default; among plugins, deeper-nested plugins refine outer plugins; `strict` locks absolutely. Sensors are only allowed at the project layer and at top-level plugins — nested plugins that ship sensors fail `keystone verify`.
 - **Strict-able:** yes (only at the project layer or top-level plugins, per the depth limit above).
 - **Generator:** `keystone new sensor <name>`.
 
@@ -50,7 +50,7 @@ that contains `keystone.json`.
 - **Activation:** Invoked by name (playbook, another action, agent menu, or `keystone <action>`).
 - **Frontmatter:** none required.
 - **Required shape:** H1 title `# Action: <name>`, sections `## Entry condition`, `## Activities`, `## Exit condition`.
-- **Cascade:** project wins by default; among plugins, shallower (outer in `keystone.json`) wins; `strict` locks absolutely.
+- **Cascade:** project wins by default; among plugins, deeper-nested plugins refine outer plugins; `strict` locks absolutely.
 - **Strict-able:** yes.
 - **Generator:** `keystone new action <name>`.
 
@@ -61,7 +61,7 @@ that contains `keystone.json`.
 - **Activation:** Invoked by name; runs an ordered sequence of actions.
 - **Frontmatter:** none required.
 - **Required shape:** H1 title `# Playbook: <name>`, sections `## Sequence` (numbered list of action names), `## Halt conditions`.
-- **Cascade:** project wins by default; among plugins, shallower (outer in `keystone.json`) wins; `strict` locks absolutely.
+- **Cascade:** project wins by default; among plugins, deeper-nested plugins refine outer plugins; `strict` locks absolutely.
 - **Strict-able:** yes.
 - **Generator:** `keystone new playbook <name>`.
 
@@ -72,7 +72,7 @@ that contains `keystone.json`.
 - **Activation:** Loaded at session start by the agent.
 - **Frontmatter:** none required.
 - **Required shape:** three files per agent — `lifecycle.md` (how the agent invokes playbooks/actions), `sensors.md` (sensor invocation), `activation.md` (the agent's menu file content).
-- **Cascade:** project wins by default; among plugins, shallower (outer in `keystone.json`) wins; `strict` locks absolutely.
+- **Cascade:** project wins by default; among plugins, deeper-nested plugins refine outer plugins; `strict` locks absolutely.
 - **Strict-able:** yes (per-agent).
 - **Generator:** `keystone new adapter <agent>`.
 

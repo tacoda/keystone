@@ -7,7 +7,6 @@ import (
 	"testing"
 
 	"github.com/tacoda/keystone/internal/framework/config"
-	"github.com/tacoda/keystone/internal/framework/manifest"
 )
 
 func TestRead_MissingReturnsEmpty(t *testing.T) {
@@ -22,8 +21,8 @@ func TestRead_MissingReturnsEmpty(t *testing.T) {
 	if lf.Version != Version {
 		t.Errorf("Version = %d, want %d", lf.Version, Version)
 	}
-	if lf.Policies == nil {
-		t.Error("Policies map is nil, want empty map")
+	if lf.Plugins == nil {
+		t.Error("Plugins map is nil, want empty map")
 	}
 }
 
@@ -44,17 +43,6 @@ func TestWriteRead_Roundtrip(t *testing.T) {
 				Files:         map[string]string{"harness/plugins/tacoda-org/guides/x.md": "sha256:abc"},
 			},
 		},
-		Policies: map[string]PolicyLock{
-			"acme": {
-				SourceRef:       "git+https://github.com/acme/policy.git#v1.0.0",
-				ResolvedSHA:     "deadbeef00000000000000000000000000000000",
-				PolicyVersion:   "1.0.0",
-				KeystoneVersion: "0.15.0",
-				Strict:          manifest.StrictSpec{Guides: []string{"data-handling"}},
-				Required:        manifest.StrictSpec{Actions: []string{"release"}},
-				Files:           map[string]string{"harness/policies/acme/guides/x.md": "sha256:abc"},
-			},
-		},
 	}
 	if err := Write(dir, config.DefaultHarnessRoot, in); err != nil {
 		t.Fatalf("Write: %v", err)
@@ -71,8 +59,8 @@ func TestWriteRead_Roundtrip(t *testing.T) {
 	if !reflect.DeepEqual(in.Keystone, out.Keystone) {
 		t.Errorf("Keystone differs:\n  in:  %+v\n  out: %+v", in.Keystone, out.Keystone)
 	}
-	if !reflect.DeepEqual(in.Policies, out.Policies) {
-		t.Errorf("Policies differ:\n  in:  %+v\n  out: %+v", in.Policies, out.Policies)
+	if !reflect.DeepEqual(in.Plugins, out.Plugins) {
+		t.Errorf("Plugins differ:\n  in:  %+v\n  out: %+v", in.Plugins, out.Plugins)
 	}
 }
 

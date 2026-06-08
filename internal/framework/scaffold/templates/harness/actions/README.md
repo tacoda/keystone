@@ -31,4 +31,4 @@ Each action is short (~20–40 lines): the agent reads it, executes the listed a
 
 ## Override cascade
 
-For any `<name>.md`, the project's `harness/actions/<name>.md` always wins by default. Among plugins, outer plugins (shallower in `keystone.json`) win over plugins nested inside them. A plugin can mark an item `strict` to make it absolute — nothing else can override a strict item, not the project, not any other plugin. `keystone verify` reports a violation if any layer attempts to shadow a strict item.
+For any `<name>.md`, the project's `harness/actions/<name>.md` always wins by default. Among plugins, plugins nested deeper in `keystone.json` refine the outer plugins they're nested in. A plugin can mark an item `strict` to make it absolute — nothing else can override a strict item, not the project, not any other plugin. `keystone verify` reports a violation if any layer attempts to shadow a strict item.

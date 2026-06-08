@@ -39,7 +39,7 @@ kind: <computational | drift | coverage | ...>
 
 ## Cascade behavior
 
-Same as other ports: project wins by default; among plugins, outer plugins win over plugins nested inside them; a plugin may declare `strict.sensors: [<name>]` to lock the item absolutely so nothing else (project or any other plugin) can override it. Exactly one file loads per `<name>`.
+Same as other ports: project wins by default; among plugins, plugins nested deeper in `keystone.json` refine the outer plugins they're nested in; a plugin may declare `strict.sensors: [<name>]` to lock the item absolutely so nothing else (project or any other plugin) can override it. Exactly one file loads per `<name>`.
 
 **Depth limit.** Sensors are only allowed at the project layer and at top-level plugins in `keystone.json`. Plugins nested under another plugin that declare `strict.sensors` or ship vendored sensor files fail `keystone verify` with a `DepthViolation`.
 

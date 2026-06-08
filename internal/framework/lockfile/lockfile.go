@@ -1,5 +1,5 @@
 // Package lockfile reads and writes the per-install state record at
-// <harness-root>/keystone.lock.json. Pins every installed policy by source
+// <harness-root>/keystone.lock.json. Pins every installed plugin by source
 // ref + resolved SHA + per-file hashes. JSON format.
 //
 // The harness root is configurable (default "harness", overridable per
@@ -14,7 +14,6 @@ import (
 	"path/filepath"
 
 	"github.com/tacoda/keystone/internal/framework/config"
-	"github.com/tacoda/keystone/internal/framework/manifest"
 )
 
 // Version is the schema version of the lockfile format. Bump when fields are
@@ -50,25 +49,11 @@ type PluginLock struct {
 	Files         map[string]string `json:"files"`          // path-relative-to-installdir → "sha256:<hex>"
 }
 
-// PolicyLock describes one installed policy. Strict and Required are
-// recorded at install time so `keystone verify` can run without re-resolving
-// the source policy.
-type PolicyLock struct {
-	SourceRef       string              `json:"source_ref"`
-	ResolvedSHA     string              `json:"resolved_sha"`
-	PolicyVersion   string              `json:"policy_version"`
-	KeystoneVersion string              `json:"keystone_version"`
-	Strict          manifest.StrictSpec `json:"strict,omitempty"`
-	Required        manifest.StrictSpec `json:"required,omitempty"`
-	Files           map[string]string   `json:"files"`
-}
-
 // Lockfile is the root document.
 type Lockfile struct {
 	Version  int                   `json:"version"`
 	Keystone KeystoneInfo          `json:"keystone"`
 	Plugins  map[string]PluginLock `json:"plugins,omitempty"`
-	Policies map[string]PolicyLock `json:"policies,omitempty"`
 }
 
 // Read loads the lockfile at <installDir>/<harnessRoot>/keystone.lock.json,
@@ -80,9 +65,8 @@ func Read(installDir, harnessRoot string) (*Lockfile, error) {
 	if err != nil {
 		if os.IsNotExist(err) {
 			return &Lockfile{
-				Version:  Version,
-				Plugins:  map[string]PluginLock{},
-				Policies: map[string]PolicyLock{},
+				Version: Version,
+				Plugins: map[string]PluginLock{},
 			}, nil
 		}
 		return nil, fmt.Errorf("read %s: %w", rel, err)
@@ -90,9 +74,6 @@ func Read(installDir, harnessRoot string) (*Lockfile, error) {
 	var lf Lockfile
 	if err := json.Unmarshal(data, &lf); err != nil {
 		return nil, fmt.Errorf("parse %s: %w", rel, err)
-	}
-	if lf.Policies == nil {
-		lf.Policies = map[string]PolicyLock{}
 	}
 	if lf.Plugins == nil {
 		lf.Plugins = map[string]PluginLock{}

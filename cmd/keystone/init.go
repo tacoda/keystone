@@ -112,7 +112,7 @@ func runInit(args []string, assets fs.FS) error {
 		return fmt.Errorf("update .gitignore: %w", err)
 	}
 
-	if err := writeInstallProfile(absDir, flags.harnessRoot, flags.selections, nil); err != nil {
+	if err := writeInstallProfile(absDir, flags.harnessRoot, flags.selections); err != nil {
 		return fmt.Errorf("write install profile: %w", err)
 	}
 
@@ -165,8 +165,8 @@ func reportAmbientLoad(projectDir, harnessRoot string) error {
 }
 
 // initializeLockfile creates <harnessRoot>/keystone.lock.json if it doesn't
-// exist yet, or fills in the keystone section if a prior call wrote only the
-// policies section. Records the binary version, install date, the configured
+// exist yet, or fills in the keystone section if a prior call only wrote
+// plugin entries. Records the binary version, install date, the configured
 // harness root, and the agent IDs whose menu files were just installed.
 func initializeLockfile(destDir, harnessRoot string, agents []string) error {
 	lf, err := ensureLockfile(destDir, harnessRoot)
@@ -354,7 +354,7 @@ func printNextSteps(agents []string, harnessRoot string) {
 Also:
 
   • Read %s/README.md for an overview of the five components
-    (corpus, guides, sensors, policies, flywheels).
+    (corpus, guides, sensors, plugins, flywheels).
   • Review %s/corpus/state/INSTALL_PROFILE.md and adjust if needed.
   • Commit %s/ and any agent-specific files this installer created.
 `, list, bootstrapIn, harnessRoot, harnessRoot, harnessRoot, lifecycle, harnessRoot, harnessRoot, harnessRoot)

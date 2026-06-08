@@ -35,7 +35,7 @@
   "$defs": {
     "strictSpec": {
       "type": "object",
-      "description": "Items by kind. `sensors` is only valid for top-level plugins in the consumer's keystone.json — plugins nested deeper may not ship or strict-claim sensors.",
+      "description": "Items by kind. `sensors` may only be shipped by the project layer or by top-level plugins in the consumer's keystone.json — plugins nested under another plugin may not ship or strict-claim sensors.",
       "properties": {
         "guides":    { "type": "array", "items": { "type": "string" } },
         "playbooks": { "type": "array", "items": { "type": "string" } },
