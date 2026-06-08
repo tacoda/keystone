@@ -1,6 +1,6 @@
 # Keystone 1.0 — Harness Framework Plan
 
-**Status:** Approved · Phases 0–1 complete · Phase 2 next
+**Status:** Approved · Phases 0–2 complete · Phase 3 next
 **Last updated:** 2026-06-08
 
 Convert Keystone from a "harness installer with org policy plugins" into a **harness framework**: a small, stable Go runtime with Rails-style conventions for project content, and a vendored, read-only plugin system for sharing policy across projects. 1.0 is a clean break from 0.x — no backward-compatibility shims.
@@ -11,7 +11,7 @@ Convert Keystone from a "harness installer with org policy plugins" into a **har
 |---|---|---|
 | 0 — Foundation & decision log | 0.14.0 | ✅ Complete (2026-06-08, commit `6b6295f`) |
 | 1 — Framework/client boundary + YAML→JSON sweep | 0.15.0 | ✅ Complete (2026-06-08, 6 sub-commits + 1 fixup) |
-| 2 — Convention-scaffolded defaults | 0.16.0 | ⏳ Pending |
+| 2 — Convention-scaffolded defaults | 0.16.0 | ✅ Complete (2026-06-08, 5 sub-commits) |
 | 3 — Vendored read-only plugins | 0.17.0 | ⏳ Pending |
 | 4 — Conventions, generators, doctor | 0.18.0 | ⏳ Pending |
 | 5 — Context budgeting | 0.19.0 | ⏳ Pending |
@@ -239,9 +239,13 @@ Each phase: scope → deliverables → exit criteria → risks.
 
 ### Phase 2 — Convention-scaffolded defaults (target: 0.16.0)
 
-**Status:** ⏳ Pending.
+**Status:** ✅ Complete (2026-06-08). Five sub-commits: relocate templates under `internal/framework/scaffold/templates/` (`aabc012`), make universal-principles opt-in via a `starter` category (`8ebda8d`), configurable harness root via `--harness-root` (`07efbdc`), idempotent default `init` + `--reset --i-understand-this-is-destructive` (`b2a87eb`), docs + plan status (this commit).
 
-**Scope.** Move every piece of default content into the scaffold templates directory. `keystone init` copies the templates into the consumer's `harness/<port>/` at conventional paths. The user owns those files after init.
+Diverged from the originally drafted scope in two ways, both at user direction:
+- **Universal content is opt-in**, not always-scaffolded. It lives at `templates/optional/starter/universal-principles/harness/{guides,corpus}/principles/` and is installed only when the user passes `--starter universal-principles` (or selects it in the `huh` menu). Treats engineering-principles content as opinion, not as a built-in default.
+- **Harness root is configurable.** `--harness-root <name>` at init picks the folder name (default `harness`); downstream commands accept the same flag. `internal/framework/config.DefaultHarnessRoot` is the single source of truth.
+
+**Scope (original).** Move every piece of default content into the scaffold templates directory. `keystone init` copies the templates into the consumer's `harness/<port>/` at conventional paths. The user owns those files after init.
 
 **Deliverables.**
 - `internal/framework/scaffold/templates/` — the canonical default content, embedded via `go:embed`:

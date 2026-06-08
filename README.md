@@ -9,21 +9,23 @@ Two ways to change harness behavior:
 
 Changing harness behavior never requires editing framework files. New rules, new sensors, new lifecycle actions, new agents — all of it lands by dropping a markdown file at a conventional path.
 
-> **1.0 in progress.** Keystone is migrating from "project harness installer with org policy plugins" (0.x) to "harness framework" (1.0). The plan is at [`PLAN-1.0.md`](PLAN-1.0.md); architectural decisions are under [`docs/adr/`](docs/adr/); port contracts under [`docs/ports/`](docs/ports/). The sections below describe the 0.x install — current as of v0.13.0.
+> **1.0 in progress.** Keystone is migrating from "project harness installer with org policy plugins" (0.x) to "harness framework" (1.0). The plan is at [`PLAN-1.0.md`](PLAN-1.0.md); architectural decisions are under [`docs/adr/`](docs/adr/); port contracts under [`docs/ports/`](docs/ports/). Phases 0–2 are complete; the binary on `main` already reflects: templates under `internal/framework/scaffold/templates/`, opt-in universal-principles via `--starter universal-principles`, configurable harness root via `--harness-root <name>`, and idempotent `init` (`--reset --i-understand-this-is-destructive` for destructive overwrite). The sections below describe the 0.x install shape — being revised as 1.0 lands.
 
 ## What it is
 
 Keystone is a **project harness installer** — a single Go binary with the entire markdown-only harness embedded. `keystone init` writes two things into your repo:
 
-1. **A harness** (`harness/`) — six components:
+1. **A harness** (`harness/` by default, configurable via `--harness-root <name>`) — six components:
    - `guides/` — **rules**. Always loaded. What the agent must do and not do (project-authored).
    - `corpus/` — **informational reference**. On-demand. The reasoning behind the rules (project-authored).
    - `playbooks/` — **ordered chains of actions** (e.g., the `task` playbook runs spec → orient → verify → review).
    - `actions/` — **single units of lifecycle work** (spec, orient, verify, review, etc.).
    - `sensors/` — **automated checks**. Lint, type-check, test, build, drift, coverage.
-   - `policies/` — **policy plugins**. Markdown plugins (`universal/` by default; org and team policies via `--policy`).
+   - `policies/` — **org policy plugins**, installed via `--policy <ref>` or `keystone policy add` (transitional 0.x path; 1.0 vendors plugins under `<harness-root>/plugins/`).
    - `learning/` + `archive/` — **flywheels** that keep the harness current.
-   Plus per-agent bindings under `harness/adapters/<agent>/`.
+   Plus per-agent bindings under `<harness-root>/adapters/<agent>/`.
+
+   The universal engineering-principles pack (SOLID, TDD, BDD, naming, error handling, ...) is **opt-in**: pass `--starter universal-principles` at init (or select it in the interactive menu) to scaffold it into `<harness-root>/guides/principles/` and `<harness-root>/corpus/principles/`.
 2. **An activation file** (the "menu") — `CLAUDE.md`, `AGENTS.md`, `.cursor/rules/*.mdc`, `CONVENTIONS.md`, etc. — depending on your agent. The menu tells the agent to read the harness.
 
 After `init`, the binary is no longer required — the harness and menu are plain markdown files you own.
