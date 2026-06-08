@@ -240,6 +240,28 @@
     max-width: 720px;
   }
 
+  /* Hero-title color-cycle: italicized "any" in the introduction title cycles
+     through the five accent colors with a soft underline glow. Same posture
+     as the pipeline-pulse but on a single element instead of moving across
+     a row of phases. 5 colors × 1.2s per stop = 6s loop. */
+  .hero-any {
+    font-style: italic;
+    font-weight: 600;
+    color: var(--accent);
+    text-shadow: 0 0 0 transparent;
+    animation: hero-any-cycle 6s ease-in-out infinite;
+  }
+  @keyframes hero-any-cycle {
+    0%, 100% { color: var(--accent);  text-shadow: 0 0 18px rgba(74, 222, 154, 0.45); }
+    20%      { color: var(--accent2); text-shadow: 0 0 18px rgba(96, 165, 250, 0.45); }
+    40%      { color: var(--accent3); text-shadow: 0 0 18px rgba(245, 158, 11, 0.45); }
+    60%      { color: var(--accent4); text-shadow: 0 0 18px rgba(232, 121, 160, 0.45); }
+    80%      { color: var(--accent5); text-shadow: 0 0 18px rgba(167, 139, 250, 0.45); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .hero-any { animation: none; }
+  }
+
   /* Section labels */
   .section-label {
     font-family: var(--mono);
@@ -985,7 +1007,7 @@
         <img src="keystone_logo.png" alt="Keystone" class="brand-logo">
         <h1>Keystone</h1>
       </div>
-      <p>v1.0.2 · the agent harness framework</p>
+      <p>v1.0.3 · the agent harness framework</p>
     </div>
 
     <nav>
@@ -1010,7 +1032,7 @@
         <a class="nav-link" href="#corpus">Corpus <span class="ext">— reasoning</span></a>
         <a class="nav-link" href="#state">State ledgers</a>
         <a class="nav-link" href="#sensors">Sensors</a>
-        <a class="nav-link" href="#plugins">Plugins <span class="badge">1.0</span></a>
+        <a class="nav-link" href="#plugins">Policy Plugins <span class="badge">1.0</span></a>
         <a class="nav-link" href="#flywheels">Flywheels</a>
         <a class="nav-link" href="#learning">Learning pipeline</a>
         <a class="nav-link" href="#playbooks">Playbooks</a>
@@ -1059,8 +1081,8 @@
   <!-- ===================== INTRODUCTION (landing) ===================== -->
   <section id="introduction" class="page" data-title="Introduction">
     <div class="page-head">
-      <div class="crumb">Overview · Keystone v1.0.2</div>
-      <h1>The agent harness framework for any project.</h1>
+      <div class="crumb">Overview · Keystone v1.0.3</div>
+      <h1>The agent harness framework for <em class="hero-any">any</em> project.</h1>
       <p class="tagline">A small Go binary plus Rails-style conventions that drop a markdown-only harness — guides, corpus, sensors, actions, playbooks, adapters — into your repo, wired to whichever coding agent you use. Convention-over-configuration generators, vendored read-only plugins for shared policy, opinionated defaults you own and edit. Markdown only, no central service, no runtime dependency after install.</p>
     </div>
 
@@ -1072,7 +1094,7 @@
         </div>
         <div class="term-body">
           <span class="pr">$</span> brew install tacoda/tap/keystone<br>
-          <span class="ok">●</span> keystone v1.0.2 installed<br>
+          <span class="ok">●</span> keystone v1.0.3 installed<br>
           <span class="pr">$</span> keystone init<div class="huh" id="huh-form">┌─ Select your agent ────────────────────────────┐
 │ <span class="hcur">›</span> <span class="hsel">claude-code</span>   Anthropic Claude Code          │
 │   codex         OpenAI Codex / Codex CLI       │
@@ -1093,7 +1115,7 @@
     <div class="definition">
       <p><strong>Keystone is the agent harness framework.</strong> Small Go runtime + a set of conventions that drop an engineering harness — rules, reasoning, sensors, lifecycle workflow — into your repo. Markdown only, no central service, no runtime dependency after install. After <code>keystone init</code>, your agent drives a six-phase workflow (spec → planning → implementation → verification → review → release) under always-loaded guides, reaching for corpus reasoning only when the rules aren't enough.</p>
       <p><strong style="color:var(--accent);">Project content</strong> — <code>harness/guides/</code>, <code>harness/corpus/</code>, <code>harness/sensors/</code>, <code>harness/actions/</code>, <code>harness/playbooks/</code>, <code>harness/adapters/</code>, plus the Learning and Pruning flywheels. Owned by the team, versioned with the code, edited freely.</p>
-      <p><strong style="color:var(--accent3);">Plugins</strong> — read-only, vendored markdown for shared policy across projects. Pinned in <code>keystone.json</code> with the npm-style shorthand <code>tacoda/tacoda-org@v1.1.1</code>, hash-verified via <code>keystone.lock.json</code>, drift-reset by <code>keystone verify</code>. They live in a gitignored <code>harness/plugins/</code> and are repopulated by <code>keystone install</code>.</p>
+      <p><strong style="color:var(--accent3);">Plugins</strong> — read-only, vendored markdown for shared policy across projects. Pinned in <code>keystone.json</code> with the npm-style shorthand <code>tacoda/tacoda-org@v1.1.2</code>, hash-verified via <code>keystone.lock.json</code>, drift-reset by <code>keystone verify</code>. They live in a gitignored <code>harness/plugins/</code> and are repopulated by <code>keystone install</code>.</p>
     </div>
 
     <div class="definition" style="border-color: var(--accent2);">
@@ -1144,7 +1166,7 @@
       <div class="action">
         <span class="action-tag" style="background: rgba(74,222,154,0.12); color: var(--accent); border: 1px solid rgba(74,222,154,0.3);">1.0</span>
         <h3 style="color: var(--accent);">Vendored read-only plugins</h3>
-        <p>Plugins live at <code>harness/plugins/&lt;name&gt;/</code> — gitignored, pinned in <code>keystone.json</code>, per-file SHA-verified via <code>keystone.lock.json</code>. <code>keystone plugin add tacoda/tacoda-org@v1.1.1</code> declares; <code>keystone install</code> materializes; <code>keystone verify</code> detects drift and resets. Default host is <code>github.com</code>; override per-source by writing the host explicitly.</p>
+        <p>Plugins live at <code>harness/plugins/&lt;name&gt;/</code> — gitignored, pinned in <code>keystone.json</code>, per-file SHA-verified via <code>keystone.lock.json</code>. <code>keystone plugin add tacoda/tacoda-org@v1.1.2</code> declares; <code>keystone install</code> materializes; <code>keystone verify</code> detects drift and resets. Default host is <code>github.com</code>; override per-source by writing the host explicitly.</p>
       </div>
       <div class="action">
         <span class="action-tag">1.0</span>
@@ -1392,7 +1414,7 @@ flowchart LR
 <pre class="code"><span class="prompt">$</span> curl -fsSL https://raw.githubusercontent.com/tacoda/keystone/main/install.sh &gt; install.sh
 <span class="prompt">$</span> less install.sh
 <span class="prompt">$</span> sh install.sh</pre>
-      <p>Override the install dir with <code>KEYSTONE_PREFIX=/some/path</code> or pin the release with <code>KEYSTONE_VERSION=v1.0.2</code>. The installer does not run <code>keystone init</code> — open a new shell and run it yourself in a project to scaffold the harness.</p>
+      <p>Override the install dir with <code>KEYSTONE_PREFIX=/some/path</code> or pin the release with <code>KEYSTONE_VERSION=v1.0.3</code>. The installer does not run <code>keystone init</code> — open a new shell and run it yourself in a project to scaffold the harness.</p>
     </div>
 
     <div class="install-method">
@@ -1427,7 +1449,7 @@ flowchart LR
       </li>
       <li>
         <strong>Add any plugins you depend on</strong>
-        <p>For org/team policy shared across projects, use the npm-style shorthand: <code>keystone plugin add tacoda/tacoda-org@v1.1.1</code>. Plugins are vendored to <code>harness/plugins/&lt;name&gt;/</code> (gitignored) and hash-verified via <code>harness/keystone.lock.json</code>.</p>
+        <p>For org/team policy shared across projects, use the npm-style shorthand: <code>keystone plugin add tacoda/tacoda-org@v1.1.2</code>. Plugins are vendored to <code>harness/plugins/&lt;name&gt;/</code> (gitignored) and hash-verified via <code>harness/keystone.lock.json</code>.</p>
       </li>
       <li>
         <strong>Ask your agent to run <code>bootstrap</code></strong>
@@ -1576,16 +1598,16 @@ harness
 
     <div class="section-label">3.1 — Add the example plugin</div>
     <p style="font-size: 0.9rem; color: var(--text-dim); line-height: 1.7;"><a href="https://github.com/tacoda/tacoda-org" target="_blank" rel="noopener"><code>tacoda/tacoda-org</code></a> is a worked-example plugin: a small org-policy bundle (documentation discipline, release process, the changelog gate) shipped for the docs and as a template to fork.</p>
-<pre class="code"><span class="prompt">$</span> keystone plugin add tacoda/tacoda-org@v1.1.1
-<span class="ar">▸</span> tacoda/tacoda-org @ v1.1.1
+<pre class="code"><span class="prompt">$</span> keystone plugin add tacoda/tacoda-org@v1.1.2
+<span class="ar">▸</span> tacoda/tacoda-org @ v1.1.2
 <span class="ok">  ✓</span> 13 file(s) installed at harness/plugins/tacoda-org
   wrote: ./harness/keystone.lock.json
-<span class="ok">✓</span> added tacoda/tacoda-org @ v1.1.1 as "tacoda-org"</pre>
+<span class="ok">✓</span> added tacoda/tacoda-org @ v1.1.2 as "tacoda-org"</pre>
 
     <div class="section-label">3.2 — What just happened</div>
     <ul class="iron-list">
       <li><strong style="color: var(--accent);">keystone.json</strong> got a new entry under <code>plugins[]</code> with <code>name</code>, <code>source</code>, <code>version</code>.</li>
-      <li><strong style="color: var(--accent2);">harness/plugins/tacoda-org/</strong> was vendored from the git tag <code>v1.1.1</code> — chmod'd 0o444 on POSIX as a read-only signal.</li>
+      <li><strong style="color: var(--accent2);">harness/plugins/tacoda-org/</strong> was vendored from the git tag <code>v1.1.2</code> — chmod'd 0o444 on POSIX as a read-only signal.</li>
       <li><strong style="color: var(--accent3);">harness/keystone.lock.json</strong> recorded the resolved git SHA + per-file SHA-256 hashes for drift detection.</li>
       <li>The <code>.gitignore</code> entry (added by init) keeps <code>harness/plugins/</code> out of your repo. <code>keystone install</code> repopulates it on a fresh clone.</li>
     </ul>
@@ -1608,7 +1630,7 @@ harness
 
     <div class="section-label">3.5 — Update or remove</div>
 <pre class="code"><span class="comment"># Bump to a new version</span>
-<span class="prompt">$</span> keystone plugin update tacoda-org @v1.1.1
+<span class="prompt">$</span> keystone plugin update tacoda-org @v1.1.2
 
 <span class="comment"># Re-fetch the recorded ref (useful for moving refs like @main)</span>
 <span class="prompt">$</span> keystone plugin update tacoda-org
@@ -1996,32 +2018,32 @@ For reasoning, see `corpus/domain/refunds.md`.</pre>
   </section>
 
   <!-- ===================== PLUGINS ===================== -->
-  <section id="plugins" class="page" data-title="Plugins">
+  <section id="plugins" class="page" data-title="Policy Plugins">
     <div class="page-head">
-      <div class="crumb">Framework · Plugins <span style="color:var(--accent);">· 1.0</span></div>
-      <h1>Plugins — vendored, read-only shared harness content.</h1>
-      <p class="tagline">Plugins ship reusable harness content across projects — guides, corpus, sensors, actions, playbooks, adapters. Anything you'd want to share lives in a plugin: org-wide standards, team-wide standards, security policy, release gates, vendor allowlists, language-idiom bundles, domain libraries, compliance regimes. Every plugin has the same shape; precedence is deterministic, driven by where each plugin sits in your <code>keystone.json</code> nesting.</p>
+      <div class="crumb">Framework · Policy Plugins <span style="color:var(--accent);">· 1.0</span></div>
+      <h1>Policy Plugins — layered governance, vendored read-only.</h1>
+      <p class="tagline">Policies are layers of governance — org standards, team conventions, compliance regimes, idiom bundles, release gates — and <strong>every layer is implemented as a plugin</strong>. Layers nest arbitrarily in your <code>keystone.json</code>; the JSON structure determines winners and losers. One uniform mechanism, used to compose policy at any granularity from "this team alone" to "the whole org."</p>
     </div>
 
     <div class="definition">
-      <p><strong>One plugin shape, many purposes.</strong> A plugin is a folder of markdown organized by port (<code>guides/</code>, <code>corpus/</code>, <code>sensors/</code>, <code>actions/</code>, <code>playbooks/</code>, <code>adapters/</code>) plus a <code>keystone-plugin.json</code> manifest. Nothing about the format distinguishes "an org policy bundle" from "a Rust idiom pack" from "a compliance regime" — they all materialize the same way and override the same way.</p>
+      <p><strong>One shape, many uses.</strong> A plugin is a folder of markdown organized by port (<code>guides/</code>, <code>corpus/</code>, <code>sensors/</code>, <code>actions/</code>, <code>playbooks/</code>, <code>adapters/</code>) plus a <code>keystone-plugin.json</code> manifest. Nothing about the format distinguishes "an org policy bundle" from "a Rust idiom pack" from "a SOC 2 compliance regime" — they all materialize the same way and override the same way.</p>
       <p><strong>Plugins are read-only.</strong> The vendor directory is regenerable: <code>keystone install</code> fetches each pin into a content-addressable cache (<code>~/.cache/keystone/plugins/</code>) and copies it into <code>harness/plugins/&lt;name&gt;/</code>, chmod'd 0o444 on POSIX. The lockfile pins per-file hashes; <code>keystone verify</code> walks each vendored file and resets the directory the moment anything diverges. Edits to vendored content don't stick — the next verify wipes them.</p>
-      <p><strong>To override a plugin, edit the project layer.</strong> Drop a file with the same path at <code>harness/&lt;port&gt;/&lt;name&gt;.md</code> and the project layer beats every plugin by default. Plugin authors can mark items <code>strict</code> to lock them absolutely — a strict item refuses every other layer, the project included; <code>keystone verify</code> reports violations with path context so you see exactly which node in the tree set the lock.</p>
+      <p><strong>Override by editing the project layer.</strong> The project's <code>harness/&lt;port&gt;/&lt;name&gt;.md</code> always wins by default. Among plugins, plugins nested deeper in <code>keystone.json</code> refine the outer plugins they're nested in — the more specific layer takes precedence (like CSS or Rails). A plugin author can mark an item <code>strict</code> to lock it absolutely — a strict item refuses every other layer, the project included; <code>keystone verify</code> reports violations with path context so you see exactly which node in the tree set the lock.</p>
     </div>
 
     <div class="section-label">The cascade — deterministic, by nesting</div>
     <div class="mermaid-wrap">
-      <p class="mermaid-caption">Project always wins by default. Among plugins, outer (shallower in <code>keystone.json</code>) wins over plugins nested inside it. A plugin's <code>strict</code> declaration locks the item absolutely — nothing else, project or other plugin, can override it.</p>
+      <p class="mermaid-caption">Project always wins by default. Among plugins, deeper-nested plugins refine the outer plugins they're nested in. A plugin's <code>strict</code> declaration locks the item absolutely — nothing else, project or other plugin, can override it.</p>
       <div class="mermaid">
 flowchart LR
   project["Project<br/><i>harness/{guides,corpus,sensors,…}/</i>"] --> r{Cascade<br/>resolution}
-  outer["Outer plugin<br/><i>e.g. acme-team (wraps org)</i>"] --> r
-  inner["Nested plugin<br/><i>e.g. tacoda-org (inside the team)</i>"] --> r
+  outer["Outer plugin<br/><i>e.g. tacoda-org (broader)</i>"] --> r
+  inner["Nested plugin<br/><i>e.g. acme-team (more specific)</i>"] --> r
   sibling["Sibling plugin<br/><i>(later in keystone.json)</i>"] --> r
   r --> agent["Agent reads<br/>one file per name"]
   project -. wins by default .-> r
-  outer -. wins over nested by default .-> r
-  inner -. strict locks absolutely .-> r
+  inner -. refines outer for non-strict .-> r
+  outer -. strict locks absolutely .-> r
   classDef green fill:#13161d,stroke:#4ade9a,color:#4ade9a
   classDef purple fill:#13161d,stroke:#a78bfa,color:#a78bfa
   classDef blue fill:#13161d,stroke:#60a5fa,color:#60a5fa
@@ -2033,47 +2055,47 @@ flowchart LR
       </div>
     </div>
 
-    <p style="font-size: 0.82rem; color: var(--muted); line-height: 1.7;">There are no plugin tiers — the cascade does not distinguish "org" from "team" structurally. But the typical composition does: <strong style="color: var(--text);">put the team plugin on the outside and nest the org plugin inside it.</strong> The team wins by default (outer plugins beat the plugins they nest), so the team can refine the org's defaults wherever they differ. The org's baseline still applies anywhere the team doesn't override. The org can mark items <code>strict</code> to set an absolute floor — those items lock against the team and the project too.</p>
+    <p style="font-size: 0.82rem; color: var(--muted); line-height: 1.7;">There are no plugin <em>tiers</em> in the schema — the cascade does not distinguish "org" from "team" structurally. The natural composition matches the natural JSON reading: <strong style="color: var(--text);">the broader policy on the outside, the more specific one nested inside.</strong> An org plugin sets baseline; a team plugin nested under it refines those defaults for the team's context; the project still wins for everything not strict-locked. The org can mark items <code>strict</code> to set an absolute floor — those items lock against the team and the project both.</p>
 
     <div class="section-label">Pin format: shorthand sources</div>
     <div class="definition">
       <p>Plugin sources use a short, npm-style format: <code>[&lt;host&gt;/]&lt;owner&gt;/&lt;repo&gt;[@&lt;version&gt;]</code>. When the host is omitted, <code>github.com</code> is prepended. The version is a git ref (tag, branch, or SHA) — required.</p>
       <ul class="iron-list">
-        <li><code>tacoda/tacoda-org@v1.1.1</code> → <code>github.com/tacoda/tacoda-org</code> at tag <code>v1.1.1</code></li>
+        <li><code>tacoda/tacoda-org@v1.1.2</code> → <code>github.com/tacoda/tacoda-org</code> at tag <code>v1.1.2</code></li>
         <li><code>github.com/acme/policies@v1.0</code> → explicit host, same as <code>acme/policies@v1.0</code></li>
         <li><code>gitlab.com/acme/policies@main</code> → off-github host, branch ref</li>
       </ul>
     </div>
 
-    <div class="section-label">keystone.json — the plugin tree</div>
-<pre class="code"><span class="comment">// keystone.json at the project root — team wraps org</span>
+    <div class="section-label">keystone.json — the policy plugin tree</div>
+<pre class="code"><span class="comment">// keystone.json at the project root — org wraps team (broad → specific)</span>
 {
   "version": "1",
   "harness_root": "harness",
   "plugins": [
     {
-      "name": "acme-team",
-      "source": "acme/team-standards",
-      "version": "v0.4.0",
+      "name": "tacoda-org",
+      "source": "tacoda/tacoda-org",
+      "version": "v1.1.2",
+      "strict": { "actions": ["changelog-check"] },
       "children": [
         {
-          "name": "tacoda-org",
-          "source": "tacoda/tacoda-org",
-          "version": "v1.1.1",
-          "strict": { "actions": ["changelog-check"] }
+          "name": "acme-team",
+          "source": "acme/team-standards",
+          "version": "v0.4.0"
         }
       ]
     }
   ]
 }</pre>
 
-    <p style="font-size: 0.78rem; color: var(--muted); font-family: var(--mono); margin: 16px 0; line-height: 1.7;">Resolution: <code>acme-team</code> (outer) wins over <code>tacoda-org</code> (nested inside it) for non-strict items, so the team can refine the org's defaults. <code>tacoda-org</code>'s <code>strict.actions: ["changelog-check"]</code> locks the changelog gate absolutely — neither <code>acme-team</code> nor the project can ship a competing <code>actions/changelog-check.md</code>. The project at <code>harness/&lt;port&gt;/&lt;name&gt;.md</code> wins by default for everything not locked. <code>keystone verify</code> checks the whole tree.</p>
+    <p style="font-size: 0.78rem; color: var(--muted); font-family: var(--mono); margin: 16px 0; line-height: 1.7;">Reads top-to-bottom from broad to specific. Resolution: <code>acme-team</code> (the deeper, more specific plugin) refines <code>tacoda-org</code> (the outer baseline) for non-strict items. <code>tacoda-org</code>'s <code>strict.actions: ["changelog-check"]</code> locks the changelog gate absolutely — neither <code>acme-team</code> nor the project can ship a competing <code>actions/changelog-check.md</code>. The project at <code>harness/&lt;port&gt;/&lt;name&gt;.md</code> wins by default for everything not locked. <code>keystone verify</code> checks the whole tree.</p>
 
     <div class="section-label">keystone-plugin.json — the plugin manifest</div>
 <pre class="code"><span class="comment">// keystone-plugin.json at the plugin repo root</span>
 {
   "name": "tacoda-org",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "keystone_min": "1.0.0",
   "description": "Example shared-standards plugin for Keystone.",
   "strict": {
@@ -2103,13 +2125,13 @@ flowchart LR
 
     <div class="section-label">Install, update, verify</div>
 <pre class="code"><span class="comment"># Add a plugin (declared in keystone.json + materialized into harness/plugins/)</span>
-<span class="prompt">$</span> keystone plugin add tacoda/tacoda-org@v1.1.1
+<span class="prompt">$</span> keystone plugin add tacoda/tacoda-org@v1.1.2
 
 <span class="comment"># Materialize every plugin declared in keystone.json (after `git clone`, etc.)</span>
 <span class="prompt">$</span> keystone install
 
 <span class="comment"># Bump a plugin's pinned version</span>
-<span class="prompt">$</span> keystone plugin update tacoda-org @v1.1.1
+<span class="prompt">$</span> keystone plugin update tacoda-org @v1.1.2
 
 <span class="comment"># Or re-fetch the recorded ref without changing the version (moving refs)</span>
 <span class="prompt">$</span> keystone plugin update tacoda-org
@@ -2126,7 +2148,7 @@ flowchart LR
       <div class="action">
         <span class="action-tag">plugin</span>
         <h3 style="color: var(--accent5);"><a href="https://github.com/tacoda/tacoda-org" target="_blank" rel="noopener" style="color: inherit;"><code>tacoda-org</code></a></h3>
-        <p>The reference plugin — ships all four content kinds (guides, corpus, actions, playbooks) and demonstrates both <code>strict</code> and <code>required</code>. Includes <code>guides/documentation</code> (Hemingway-test discipline), <code>guides/todos</code> (ownership + context), <code>actions/changelog-check</code>, <code>actions/static-analysis</code>, plus a non-strict <code>playbooks/release</code> projects can extend. <strong>Strict</strong> on the items above — no consumer overrides. <strong>Required</strong>: <code>actions/release-notes</code> — declared but not shipped; the consumer (or another plugin) must define it. Pin with <code>keystone plugin add tacoda/tacoda-org@v1.1.1</code>.</p>
+        <p>The reference plugin — ships all four content kinds (guides, corpus, actions, playbooks) and demonstrates both <code>strict</code> and <code>required</code>. Includes <code>guides/documentation</code> (Hemingway-test discipline), <code>guides/todos</code> (ownership + context), <code>actions/changelog-check</code>, <code>actions/static-analysis</code>, plus a non-strict <code>playbooks/release</code> projects can extend. <strong>Strict</strong> on the items above — no consumer overrides. <strong>Required</strong>: <code>actions/release-notes</code> — declared but not shipped; the consumer (or another plugin) must define it. Pin with <code>keystone plugin add tacoda/tacoda-org@v1.1.2</code>.</p>
       </div>
     </div>
 
@@ -2491,7 +2513,7 @@ flowchart LR
 <span class="prompt">$</span> keystone install [--dir &lt;path&gt;] [--harness-root &lt;name&gt;]
 
 <span class="comment"># Plugin management. Shorthand: [&lt;host&gt;/]&lt;owner&gt;/&lt;repo&gt;@&lt;version&gt;</span>
-<span class="prompt">$</span> keystone plugin add tacoda/tacoda-org@v1.1.1
+<span class="prompt">$</span> keystone plugin add tacoda/tacoda-org@v1.1.2
 <span class="prompt">$</span> keystone plugin update tacoda-org [@&lt;new-version&gt;]
 <span class="prompt">$</span> keystone plugin remove tacoda-org
 
