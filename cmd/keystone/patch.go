@@ -8,10 +8,10 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/tacoda/keystone/internal/framework/migrate"
+	"github.com/tacoda/keystone/internal/framework/patch"
 )
 
-type migrateFlags struct {
+type patchFlags struct {
 	dir         string
 	apply       bool // skip prompts; write every non-conflict change
 	dryRun      bool // never write, never prompt
@@ -19,12 +19,12 @@ type migrateFlags struct {
 	harnessRoot string
 }
 
-func runMigrate(args []string, assets fs.FS) error {
+func runPatch(args []string, assets fs.FS) error {
 	flagValue, args, err := extractHarnessRootFlag(args)
 	if err != nil {
 		return err
 	}
-	flags, err := parseMigrateArgs(args)
+	flags, err := parsePatchArgs(args)
 	if err != nil {
 		return err
 	}
@@ -53,26 +53,26 @@ func runMigrate(args []string, assets fs.FS) error {
 		}
 	}
 	if from == "dev" {
-		fmt.Fprintf(os.Stdout, "▸ harness is on a dev version; skipping migration (use --from <version> to override)\n")
+		fmt.Fprintf(os.Stdout, "▸ harness is on a dev version; skipping patch (use --from <version> to override)\n")
 		return nil
 	}
 
-	migrations, err := migrate.Load(assets, from)
+	patches, err := patch.Load(assets, from)
 	if err != nil {
-		return fmt.Errorf("load migrations: %w", err)
+		return fmt.Errorf("load patches: %w", err)
 	}
-	if len(migrations) == 0 {
+	if len(patches) == 0 {
 		if from == "" {
-			fmt.Fprintf(os.Stdout, "✓ no migrations available\n")
+			fmt.Fprintf(os.Stdout, "✓ no patches available\n")
 		} else {
 			fmt.Fprintf(os.Stdout, "✓ harness is up to date (at %s)\n", from)
 		}
 		return nil
 	}
 
-	versions := groupByVersion(migrations)
-	fmt.Fprintf(os.Stdout, "keystone migrate — %d migration(s) pending across %d version(s)\n",
-		len(migrations), len(versions))
+	versions := groupByVersion(patches)
+	fmt.Fprintf(os.Stdout, "keystone patch — %d patch(es) pending across %d version(s)\n",
+		len(patches), len(versions))
 	if from != "" {
 		fmt.Fprintf(os.Stdout, "  current keystone_version: %s\n", from)
 	}
@@ -87,8 +87,8 @@ func runMigrate(args []string, assets fs.FS) error {
 	for _, vg := range versions {
 		fmt.Fprintf(os.Stdout, "═══ %s ═══\n\n", vg.version)
 		quit := false
-		for _, m := range vg.migrations {
-			if err := processMigration(m, absDir, flags, reader, tty, &quit); err != nil {
+		for _, p := range vg.patches {
+			if err := processPatch(p, absDir, flags, reader, tty, &quit); err != nil {
 				return err
 			}
 			if quit {
@@ -109,49 +109,49 @@ func runMigrate(args []string, assets fs.FS) error {
 		}
 	}
 
-	fmt.Fprintf(os.Stdout, "✓ migration complete\n")
+	fmt.Fprintf(os.Stdout, "✓ patching complete\n")
 	return nil
 }
 
 type versionGroup struct {
-	version    string
-	migrations []migrate.Migration
+	version string
+	patches []patch.Patch
 }
 
-func groupByVersion(ms []migrate.Migration) []versionGroup {
+func groupByVersion(ps []patch.Patch) []versionGroup {
 	var out []versionGroup
-	for _, m := range ms {
-		if len(out) == 0 || out[len(out)-1].version != m.Version {
-			out = append(out, versionGroup{version: m.Version})
+	for _, p := range ps {
+		if len(out) == 0 || out[len(out)-1].version != p.Version {
+			out = append(out, versionGroup{version: p.Version})
 		}
-		out[len(out)-1].migrations = append(out[len(out)-1].migrations, m)
+		out[len(out)-1].patches = append(out[len(out)-1].patches, p)
 	}
 	return out
 }
 
-func processMigration(m migrate.Migration, destDir string, flags *migrateFlags, reader *bufio.Reader, tty bool, quit *bool) error {
-	fmt.Fprintf(os.Stdout, "▸ %s/%s", m.Version, m.ID)
-	if m.Description != "" {
-		fmt.Fprintf(os.Stdout, " — %s", m.Description)
+func processPatch(p patch.Patch, destDir string, flags *patchFlags, reader *bufio.Reader, tty bool, quit *bool) error {
+	fmt.Fprintf(os.Stdout, "▸ %s/%s", p.Version, p.ID)
+	if p.Description != "" {
+		fmt.Fprintf(os.Stdout, " — %s", p.Description)
 	}
 	fmt.Fprintln(os.Stdout)
 
-	for i, op := range m.Operations {
-		res, err := migrate.PlanOperation(op, destDir)
+	for i, op := range p.Operations {
+		res, err := patch.PlanOperation(op, destDir)
 		if err != nil {
-			return fmt.Errorf("%s op %d: %w", m.SourcePath, i+1, err)
+			return fmt.Errorf("%s op %d: %w", p.SourcePath, i+1, err)
 		}
-		label := fmt.Sprintf("  [%d/%d] %s", i+1, len(m.Operations), op.Path)
+		label := fmt.Sprintf("  [%d/%d] %s", i+1, len(p.Operations), op.Path)
 		switch res.Status {
-		case migrate.OpNoop:
+		case patch.OpNoop:
 			fmt.Fprintf(os.Stdout, "%s  (no change — %s)\n", label, res.Note)
 			continue
-		case migrate.OpConflict:
+		case patch.OpConflict:
 			fmt.Fprintf(os.Stdout, "%s\n    ! conflict: %s\n", label, res.Note)
 			continue
 		}
 
-		// opCreate / opChange — show preview then prompt (or auto-apply).
+		// OpCreate / OpChange — show preview then prompt (or auto-apply).
 		fmt.Fprintf(os.Stdout, "%s\n", label)
 		printOpPreview(res)
 
@@ -182,7 +182,7 @@ func processMigration(m migrate.Migration, destDir string, flags *migrateFlags, 
 		}
 
 		if apply {
-			if err := migrate.WriteOpResult(res); err != nil {
+			if err := patch.WriteOpResult(res); err != nil {
 				return err
 			}
 			switch res.Op.Type {
@@ -202,7 +202,7 @@ func processMigration(m migrate.Migration, destDir string, flags *migrateFlags, 
 // printOpPreview renders a small, op-type-aware diff. For creates we show the
 // proposed content with `+` prefix; for changes we show the relevant slice
 // (added section, frontmatter line, or before/after match block).
-func printOpPreview(res migrate.OpResult) {
+func printOpPreview(res patch.OpResult) {
 	switch res.Op.Type {
 	case "add_file":
 		fmt.Fprintln(os.Stdout, "    add_file (new):")
@@ -221,11 +221,11 @@ func printOpPreview(res migrate.OpResult) {
 		fmt.Fprintf(os.Stdout, "    move_dir: %s → %s\n", res.Op.Path, res.Op.To)
 		for _, p := range res.MovePlans {
 			switch p.Status {
-			case migrate.OpCreate:
+			case patch.OpCreate:
 				fmt.Fprintf(os.Stdout, "    + %s\n", p.RelPath)
-			case migrate.OpConflict:
+			case patch.OpConflict:
 				fmt.Fprintf(os.Stdout, "    ! %s (%s)\n", p.RelPath, p.Note)
-			case migrate.OpNoop:
+			case patch.OpNoop:
 				fmt.Fprintf(os.Stdout, "      %s (already at destination)\n", p.RelPath)
 			}
 		}
@@ -234,11 +234,11 @@ func printOpPreview(res migrate.OpResult) {
 		if len(res.MovePlans) == 1 {
 			p := res.MovePlans[0]
 			switch p.Status {
-			case migrate.OpCreate:
+			case patch.OpCreate:
 				fmt.Fprintf(os.Stdout, "    + %s\n", p.RelPath)
-			case migrate.OpConflict:
+			case patch.OpConflict:
 				fmt.Fprintf(os.Stdout, "    ! %s (%s)\n", p.RelPath, p.Note)
-			case migrate.OpNoop:
+			case patch.OpNoop:
 				fmt.Fprintf(os.Stdout, "      %s (already at destination)\n", p.RelPath)
 			}
 		}
@@ -277,15 +277,15 @@ func promptYesNoQuit(reader *bufio.Reader) (string, error) {
 	}
 }
 
-func parseMigrateArgs(args []string) (*migrateFlags, error) {
-	flags := &migrateFlags{dir: "."}
+func parsePatchArgs(args []string) (*patchFlags, error) {
+	flags := &patchFlags{dir: "."}
 	positional := []string{}
 
 	for i := 0; i < len(args); i++ {
 		a := args[i]
 		switch {
 		case a == "--help" || a == "-h":
-			printMigrateUsage(os.Stdout)
+			printPatchUsage(os.Stdout)
 			os.Exit(0)
 		case a == "--apply" || a == "-y":
 			flags.apply = true
@@ -306,7 +306,7 @@ func parseMigrateArgs(args []string) (*migrateFlags, error) {
 		}
 	}
 	if len(positional) > 1 {
-		return nil, fmt.Errorf("migrate takes at most one positional argument (got %d)", len(positional))
+		return nil, fmt.Errorf("patch takes at most one positional argument (got %d)", len(positional))
 	}
 	if len(positional) == 1 {
 		flags.dir = positional[0]
@@ -317,21 +317,24 @@ func parseMigrateArgs(args []string) (*migrateFlags, error) {
 	return flags, nil
 }
 
-func printMigrateUsage(w *os.File) {
-	fmt.Fprint(w, `keystone migrate — apply pending harness migrations
+func printPatchUsage(w *os.File) {
+	fmt.Fprint(w, `keystone patch — apply pending framework patches
 
 Usage:
-  keystone migrate [<dir>] [--apply|-y] [--dry-run] [--from <version>]
+  keystone patch [<dir>] [--apply|-y] [--dry-run] [--from <version>] [--harness-root <name>]
 
-Reads harness/corpus/state/INSTALL_PROFILE.md to find the current
-keystone_version, then applies every embedded migration newer than that.
-By default each planned change is previewed and prompted for. After all
-migrations in a version directory are processed, keystone_version is bumped.
+Reads the install's recorded keystone_version (from keystone.lock.json,
+falling back to INSTALL_PROFILE.md), then applies every embedded patch
+newer than that. By default each planned change is previewed and prompted
+for. After all patches in a version directory are processed,
+keystone_version is bumped.
 
 Flags:
-  --apply, -y    Apply every non-conflict change without prompting.
-  --dry-run      Preview every change; write nothing.
-  --from <v>     Override the version recorded in INSTALL_PROFILE.md.
+  --apply, -y            Apply every non-conflict change without prompting.
+  --dry-run              Preview every change; write nothing.
+  --from <v>             Override the version recorded in the lockfile.
+  --harness-root <name>  Harness directory name (defaults to keystone.json's
+                         harness_root, then "harness").
 
 Per-prompt options:
   y    apply this change

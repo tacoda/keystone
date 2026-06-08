@@ -9,7 +9,7 @@ import (
 )
 
 // assets is the embedded scaffold template tree, rooted at templates/ so
-// callers see harness/, targets/, optional/, migrations/ at its top level.
+// callers see harness/, targets/, optional/, patches/ at its top level.
 // scaffold.Templates is an fs.FS; embed.FS lives inside the scaffold package.
 var assets fs.FS = scaffold.Templates
 
@@ -35,11 +35,14 @@ func main() {
 	case "policy":
 		fmt.Fprintln(os.Stderr, "keystone: the policy command was removed in 1.0; use `keystone plugin add|update|remove` against keystone.json instead.")
 		os.Exit(2)
-	case "migrate":
-		if err := runMigrate(os.Args[2:], assets); err != nil {
+	case "patch":
+		if err := runPatch(os.Args[2:], assets); err != nil {
 			fmt.Fprintf(os.Stderr, "keystone: %v\n", err)
 			os.Exit(1)
 		}
+	case "migrate":
+		fmt.Fprintln(os.Stderr, "keystone: `migrate` was renamed to `patch` in 1.0. Run `keystone patch ...` instead.")
+		os.Exit(2)
 	case "options":
 		printOptionLabels(os.Stdout)
 	case "version", "--version", "-v":
@@ -59,7 +62,7 @@ func printUsage(w *os.File) {
 Usage:
   keystone init [<dir>] [flags]
   keystone target add <agent>[,<agent>...] [--dir <path>] [--harness-root <name>]
-  keystone migrate [<dir>] [--apply|-y] [--dry-run] [--from <version>] [--harness-root <name>]
+  keystone patch [<dir>] [--apply|-y] [--dry-run] [--from <version>] [--harness-root <name>]
   keystone options
   keystone version
   keystone help
@@ -67,7 +70,7 @@ Usage:
 Commands:
   init       Scaffold the harness folder and the agent menu file(s) into <dir> (default: .)
   target     Manage agent targets installed under <harness-root>/adapters/ (see 'target help')
-  migrate    Apply pending framework migrations to an existing install
+  patch      Apply pending framework patches to an existing install
   options    Print the allowed labels for every option flag
   version    Print the binary version
   help       Print this message

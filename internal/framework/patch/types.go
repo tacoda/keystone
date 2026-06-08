@@ -1,18 +1,18 @@
-// Package migrate loads and applies harness migrations. Each migration is a
-// JSON file under migrations/<version>/<NNN>-<name>.json declaring a list of
-// operations against the consumer's harness/ tree.
+// Package patch loads and applies framework patches. Each patch is a JSON
+// file under patches/<version>/<NNN>-<name>.json declaring a list of
+// operations against the consumer's harness/ tree or keystone config files.
 //
-// At 1.0 the migration runner is reserved for framework-binary schema bumps
+// At 1.0 the patch runner is reserved for framework-binary schema bumps
 // (keystone.json, lockfile). The 0.x content-rewriting operations
 // (add_file, frontmatter_set, ensure_section, replace_block, move_file,
 // move_dir, delete_file, delete_dir) survive the move into this package but
-// are not used post-1.0; they remain available for future schema migrations
-// that target config files only.
-package migrate
+// are not used for content post-1.0; they remain available for future
+// schema patches that target config files only.
+package patch
 
-// Migration is one loaded migration file. ID is the filename without
-// extension; Version is the parent directory name (e.g. "0.6.0").
-type Migration struct {
+// Patch is one loaded patch file. ID is the filename without extension;
+// Version is the parent directory name (e.g. "0.6.0").
+type Patch struct {
 	Version    string `json:"-"`
 	ID         string `json:"-"`
 	SourcePath string `json:"-"`
@@ -21,7 +21,7 @@ type Migration struct {
 	Operations  []Operation `json:"operations"`
 }
 
-// Operation is the raw shape of a single op in a migration file. Op-specific
+// Operation is the raw shape of a single op in a patch file. Op-specific
 // fields are union-style; only the ones matching Type are populated.
 type Operation struct {
 	Type string `json:"type"`

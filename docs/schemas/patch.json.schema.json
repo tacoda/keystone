@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://keystone.tacoda.dev/schemas/migration.json",
-  "title": "Keystone Migration",
-  "description": "One migration file under migrations/<version>/<NNN>-<name>.json. The migrate runner walks every migration whose version directory is strictly greater than the install's recorded keystone_version, in (version asc, filename asc) order.",
+  "$id": "https://keystone.tacoda.dev/schemas/patch.json",
+  "title": "Keystone Patch",
+  "description": "One patch file under patches/<version>/<NNN>-<name>.json. The patch runner walks every patch whose version directory is strictly greater than the install's recorded keystone_version, in (version asc, filename asc) order.",
   "type": "object",
   "properties": {
     "description": {

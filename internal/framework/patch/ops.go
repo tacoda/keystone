@@ -1,4 +1,4 @@
-package migrate
+package patch
 
 import (
 	"fmt"
@@ -75,7 +75,7 @@ func WriteOpResult(res OpResult) error {
 }
 
 // planAddFile: create a brand-new file. If the target already exists, the
-// migration's intent has already been carried out — but only if the content
+// patch's intent has already been carried out — but only if the content
 // is unchanged. Otherwise the user has customized it; surface as conflict.
 func planAddFile(res OpResult, exists bool) (OpResult, error) {
 	want := []byte(res.Op.Content)

@@ -1,4 +1,4 @@
-package migrate
+package patch
 
 import (
 	"testing"
@@ -49,17 +49,17 @@ func TestCompareSemver(t *testing.T) {
 
 func TestLoad_FiltersByVersionAndExtension(t *testing.T) {
 	assets := fstest.MapFS{
-		"migrations/0.1.0/001-first.json": &fstest.MapFile{Data: []byte(`{
+		"patches/0.1.0/001-first.json": &fstest.MapFile{Data: []byte(`{
 "description": "first",
 "operations": [{"type": "add_file", "path": "a.md", "content": "A"}]
 }`)},
-		"migrations/0.2.0/001-second.json": &fstest.MapFile{Data: []byte(`{
+		"patches/0.2.0/001-second.json": &fstest.MapFile{Data: []byte(`{
 "description": "second",
 "operations": []
 }`)},
-		"migrations/0.2.0/skipped.yaml": &fstest.MapFile{Data: []byte("ignored: yes")},
-		"migrations/templates/x.json":   &fstest.MapFile{Data: []byte(`{"description":"x","operations":[]}`)},
-		"migrations/README.md":          &fstest.MapFile{Data: []byte("docs")},
+		"patches/0.2.0/skipped.yaml": &fstest.MapFile{Data: []byte("ignored: yes")},
+		"patches/templates/x.json":   &fstest.MapFile{Data: []byte(`{"description":"x","operations":[]}`)},
+		"patches/README.md":          &fstest.MapFile{Data: []byte("docs")},
 	}
 
 	got, err := Load(assets, "")
@@ -67,7 +67,7 @@ func TestLoad_FiltersByVersionAndExtension(t *testing.T) {
 		t.Fatalf("Load: %v", err)
 	}
 	if len(got) != 2 {
-		t.Fatalf("got %d migrations, want 2: %+v", len(got), got)
+		t.Fatalf("got %d patches, want 2: %+v", len(got), got)
 	}
 	if got[0].Version != "0.1.0" || got[0].ID != "001-first" {
 		t.Errorf("got[0] = %+v, want version 0.1.0 / id 001-first", got[0])
@@ -79,9 +79,9 @@ func TestLoad_FiltersByVersionAndExtension(t *testing.T) {
 
 func TestLoad_FromVersionExcludesLowerAndEqual(t *testing.T) {
 	assets := fstest.MapFS{
-		"migrations/0.1.0/001-a.json": &fstest.MapFile{Data: []byte(`{"description":"a","operations":[]}`)},
-		"migrations/0.2.0/001-b.json": &fstest.MapFile{Data: []byte(`{"description":"b","operations":[]}`)},
-		"migrations/0.3.0/001-c.json": &fstest.MapFile{Data: []byte(`{"description":"c","operations":[]}`)},
+		"patches/0.1.0/001-a.json": &fstest.MapFile{Data: []byte(`{"description":"a","operations":[]}`)},
+		"patches/0.2.0/001-b.json": &fstest.MapFile{Data: []byte(`{"description":"b","operations":[]}`)},
+		"patches/0.3.0/001-c.json": &fstest.MapFile{Data: []byte(`{"description":"c","operations":[]}`)},
 	}
 
 	got, err := Load(assets, "0.2.0")
@@ -89,7 +89,7 @@ func TestLoad_FromVersionExcludesLowerAndEqual(t *testing.T) {
 		t.Fatalf("Load: %v", err)
 	}
 	if len(got) != 1 {
-		t.Fatalf("got %d migrations, want 1", len(got))
+		t.Fatalf("got %d patches, want 1", len(got))
 	}
 	if got[0].Version != "0.3.0" {
 		t.Errorf("got[0].Version = %q, want 0.3.0", got[0].Version)

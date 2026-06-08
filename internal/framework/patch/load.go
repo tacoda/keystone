@@ -1,4 +1,4 @@
-package migrate
+package patch
 
 import (
 	"encoding/json"
@@ -10,20 +10,20 @@ import (
 	"strings"
 )
 
-// Load walks the embedded migrations/ tree on assets and returns every
-// migration whose version directory is strictly greater than fromVersion,
-// sorted by (version asc, filename asc). fromVersion may be empty or "dev";
-// "dev" returns nothing (callers should short-circuit before calling).
+// Load walks the embedded patches/ tree on assets and returns every patch
+// whose version directory is strictly greater than fromVersion, sorted by
+// (version asc, filename asc). fromVersion may be empty or "dev"; "dev"
+// returns nothing (callers should short-circuit before calling).
 //
-// Migration files must be JSON under migrations/<version>/<NNN>-<name>.json.
+// Patch files must be JSON under patches/<version>/<NNN>-<name>.json.
 // Files with other extensions are ignored.
-func Load(assets fs.FS, fromVersion string) ([]Migration, error) {
-	versionDirs, err := fs.ReadDir(assets, "migrations")
+func Load(assets fs.FS, fromVersion string) ([]Patch, error) {
+	versionDirs, err := fs.ReadDir(assets, "patches")
 	if err != nil {
 		return nil, err
 	}
 
-	var out []Migration
+	var out []Patch
 	for _, vd := range versionDirs {
 		if !vd.IsDir() {
 			continue
@@ -36,7 +36,7 @@ func Load(assets fs.FS, fromVersion string) ([]Migration, error) {
 			continue
 		}
 
-		dir := path.Join("migrations", v)
+		dir := path.Join("patches", v)
 		entries, err := fs.ReadDir(assets, dir)
 		if err != nil {
 			return nil, err
@@ -60,14 +60,14 @@ func Load(assets fs.FS, fromVersion string) ([]Migration, error) {
 			if err != nil {
 				return nil, fmt.Errorf("read %s: %w", full, err)
 			}
-			var m Migration
-			if err := json.Unmarshal(data, &m); err != nil {
+			var p Patch
+			if err := json.Unmarshal(data, &p); err != nil {
 				return nil, fmt.Errorf("parse %s: %w", full, err)
 			}
-			m.Version = v
-			m.ID = strings.TrimSuffix(n, ".json")
-			m.SourcePath = full
-			out = append(out, m)
+			p.Version = v
+			p.ID = strings.TrimSuffix(n, ".json")
+			p.SourcePath = full
+			out = append(out, p)
 		}
 	}
 

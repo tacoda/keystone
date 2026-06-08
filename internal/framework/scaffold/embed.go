@@ -3,17 +3,17 @@
 // on disk after install:
 //
 //	templates/
-//	├── harness/      — the harness layout (guides, corpus, sensors,
-//	│                   actions, playbooks, adapters, learning, archive)
-//	├── targets/      — per-agent menu files (CLAUDE.md, AGENTS.md,
-//	│                   .cursor/rules/, etc.) installed at the project root
-//	├── optional/     — opt-in content (architecture/, compliance/)
-//	│                   pulled in by --architecture / --compliance flags
-//	└── migrations/   — framework migrations (currently empty; Phase 1
-//	                    deleted the 0.x chain — only the README remains)
+//	├── harness/   — the harness layout (guides, corpus, sensors,
+//	│                actions, playbooks, adapters, learning, archive)
+//	├── targets/   — per-agent menu files (CLAUDE.md, AGENTS.md,
+//	│                .cursor/rules/, etc.) installed at the project root
+//	├── optional/  — opt-in content (architecture/, compliance/, starter/)
+//	│                pulled in by --architecture / --compliance / --starter
+//	└── patches/   — framework patches (currently empty; Phase 1 deleted
+//	                 the 0.x chain — only the README remains)
 //
 // The Templates fs.FS is rooted at templates/, so callers see "harness",
-// "targets", "optional", and "migrations" at its top level.
+// "targets", "optional", and "patches" at its top level.
 package scaffold
 
 import (
@@ -25,7 +25,7 @@ import (
 var rawTemplates embed.FS
 
 // Templates is the embedded scaffold tree, rooted at the templates directory.
-// Top-level entries: harness/, targets/, optional/, migrations/.
+// Top-level entries: harness/, targets/, optional/, patches/.
 var Templates fs.FS
 
 func init() {
