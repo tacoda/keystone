@@ -1,6 +1,6 @@
 # Keystone 1.0 — Harness Framework Plan
 
-**Status:** Approved · Phases 0–3 complete · Phase 4 next
+**Status:** Approved · Phases 0–4 complete · Phase 5 next
 **Last updated:** 2026-06-08
 
 Convert Keystone from a "harness installer with org policy plugins" into a **harness framework**: a small, stable Go runtime with Rails-style conventions for project content, and a vendored, read-only plugin system for sharing policy across projects. 1.0 is a clean break from 0.x — no backward-compatibility shims.
@@ -13,7 +13,7 @@ Convert Keystone from a "harness installer with org policy plugins" into a **har
 | 1 — Framework/client boundary + YAML→JSON sweep | 0.15.0 | ✅ Complete (2026-06-08, 6 sub-commits + 1 fixup) |
 | 2 — Convention-scaffolded defaults | 0.16.0 | ✅ Complete (2026-06-08, 5 sub-commits) |
 | 3 — Vendored read-only plugins | 0.17.0 | ✅ Complete (2026-06-08, 8 sub-commits) |
-| 4 — Conventions, generators, doctor | 0.18.0 | ⏳ Pending |
+| 4 — Conventions, generators, doctor | 0.18.0 | ✅ Complete (2026-06-08, 5 sub-commits) |
 | 5 — Context budgeting | 0.19.0 | ⏳ Pending |
 | 6 — Hardening, upgrade guide, 1.0 | 1.0.0 | ⏳ Pending |
 
@@ -315,7 +315,12 @@ Diverged from the originally drafted scope in two user-directed ways:
 
 ### Phase 4 — Conventions, generators, doctor (target: 0.18.0)
 
-**Status:** ⏳ Pending.
+**Status:** ✅ Complete (2026-06-08). Five sub-commits:
+- `8faa819` — `docs/conventions.md` canonical convention table (port paths, frontmatter, activation, cascade behavior, path-convention rules).
+- `3c6049e` — `keystone new <port> <name>` generators for every port (guide+corpus pair, sensor, action, playbook, adapter triple, plugin repo). Generators emit harness-root-relative inter-harness links.
+- `85bb7d0` — `keystone doctor` with three checks (path conformance, plugin integrity + auto-reset, template drift).
+- (path-rewrite, folded into the doctor commit) — `keystone doctor --fix` rewrites '../' and './' links in place using path.Join arithmetic.
+- `9da161c` — applied the rewrite to embedded templates (106 auto-fixes + 6 hand-edits for code-block illustrations + INSTALL_PROFILE.md generator). Fresh `keystone init` now produces an install where `keystone doctor --paths-only` reports zero violations.
 
 **Scope.** Lock in Rails-like ergonomics. Document conventions exhaustively. Ship scaffolding generators. Add `keystone doctor` to flag convention violations and plugin drift. Normalize cross-file path references in scaffolded content.
 
