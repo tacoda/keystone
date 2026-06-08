@@ -140,7 +140,6 @@ func initializeLockfile(destDir, harnessRoot string, agents []string) error {
 	if lf.Keystone.Installed == "" {
 		lf.Keystone.Installed = time.Now().UTC().Format("2006-01-02")
 	}
-	lf.Keystone.HarnessRoot = harnessRoot
 	seen := map[string]bool{}
 	for _, a := range lf.Keystone.Agents {
 		seen[a] = true

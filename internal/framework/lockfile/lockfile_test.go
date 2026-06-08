@@ -51,10 +51,18 @@ func TestWriteRead_Roundtrip(t *testing.T) {
 	dir := t.TempDir()
 	in := &Lockfile{
 		Keystone: KeystoneInfo{
-			Version:     "0.15.0",
-			Installed:   "2026-06-08",
-			Agents:      []string{"claude-code", "codex"},
-			HarnessRoot: config.DefaultHarnessRoot,
+			Version:   "0.15.0",
+			Installed: "2026-06-08",
+			Agents:    []string{"claude-code", "codex"},
+		},
+		Plugins: map[string]PluginLock{
+			"tacoda-org": {
+				SourceRef:     "tacoda/tacoda-org",
+				ResolvedSHA:   "deadbeef00000000000000000000000000000000",
+				PluginVersion: "0.2.0",
+				Version:       "0.2.0",
+				Files:         map[string]string{"harness/plugins/tacoda-org/guides/x.md": "sha256:abc"},
+			},
 		},
 		Policies: map[string]PolicyLock{
 			"acme": {
