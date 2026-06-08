@@ -33,10 +33,8 @@ func main() {
 			os.Exit(1)
 		}
 	case "policy":
-		if err := runPolicy(os.Args[2:]); err != nil {
-			fmt.Fprintf(os.Stderr, "keystone: %v\n", err)
-			os.Exit(1)
-		}
+		fmt.Fprintln(os.Stderr, "keystone: the policy command was removed in 1.0; use `keystone plugin add|update|remove` against keystone.json instead.")
+		os.Exit(2)
 	case "migrate":
 		if err := runMigrate(os.Args[2:], assets); err != nil {
 			fmt.Fprintf(os.Stderr, "keystone: %v\n", err)
@@ -61,8 +59,6 @@ func printUsage(w *os.File) {
 Usage:
   keystone init [<dir>] [flags]
   keystone target add <agent>[,<agent>...] [--dir <path>] [--harness-root <name>]
-  keystone policy add <ref> [--dir <path>] [--harness-root <name>]
-  keystone policy update <name> [<new-ref>] [--dir <path>] [--harness-root <name>] [--force]
   keystone migrate [<dir>] [--apply|-y] [--dry-run] [--from <version>] [--harness-root <name>]
   keystone options
   keystone version
@@ -71,8 +67,7 @@ Usage:
 Commands:
   init       Scaffold the harness folder and the agent menu file(s) into <dir> (default: .)
   target     Manage agent targets installed under <harness-root>/adapters/ (see 'target help')
-  policy     Manage org policies installed under <harness-root>/policies/ (see 'policy help')
-  migrate    Apply pending harness migrations to an existing install
+  migrate    Apply pending framework migrations to an existing install
   options    Print the allowed labels for every option flag
   version    Print the binary version
   help       Print this message

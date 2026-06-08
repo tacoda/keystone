@@ -20,7 +20,7 @@ type migrateFlags struct {
 }
 
 func runMigrate(args []string, assets fs.FS) error {
-	harnessRoot, args, err := extractHarnessRoot(args)
+	flagValue, args, err := extractHarnessRootFlag(args)
 	if err != nil {
 		return err
 	}
@@ -28,12 +28,16 @@ func runMigrate(args []string, assets fs.FS) error {
 	if err != nil {
 		return err
 	}
-	flags.harnessRoot = harnessRoot
 
 	absDir, err := filepath.Abs(flags.dir)
 	if err != nil {
 		return fmt.Errorf("resolve dir: %w", err)
 	}
+	harnessRoot, err := resolveHarnessRoot(absDir, flagValue)
+	if err != nil {
+		return err
+	}
+	flags.harnessRoot = harnessRoot
 	if _, err := os.Stat(filepath.Join(absDir, harnessRoot)); err != nil {
 		if os.IsNotExist(err) {
 			return fmt.Errorf("no %s/ in %s — run `keystone init` first", harnessRoot, absDir)

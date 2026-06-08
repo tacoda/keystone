@@ -42,7 +42,7 @@ Commands:
 // recorded in the lockfile — the user must explicitly remove it first
 // rather than risk silent overwrites.
 func runTargetAdd(args []string, assets fs.FS) error {
-	harnessRoot, args, err := extractHarnessRoot(args)
+	flagValue, args, err := extractHarnessRootFlag(args)
 	if err != nil {
 		return err
 	}
@@ -78,6 +78,10 @@ func runTargetAdd(args []string, assets fs.FS) error {
 	absDir, err := filepath.Abs(dir)
 	if err != nil {
 		return fmt.Errorf("resolve dir: %w", err)
+	}
+	harnessRoot, err := resolveHarnessRoot(absDir, flagValue)
+	if err != nil {
+		return err
 	}
 	if _, err := os.Stat(filepath.Join(absDir, harnessRoot)); err != nil {
 		if os.IsNotExist(err) {

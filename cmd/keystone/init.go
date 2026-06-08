@@ -97,26 +97,11 @@ func runInit(args []string, assets fs.FS) error {
 		return fmt.Errorf("install optional content: %w", err)
 	}
 
-	installedPolicies, err := installPolicies(absDir, flags.harnessRoot, flags.policies)
-	if err != nil {
-		return fmt.Errorf("install policies: %w", err)
-	}
-
 	if err := initializeLockfile(absDir, flags.harnessRoot, agents); err != nil {
 		return fmt.Errorf("initialize lockfile: %w", err)
 	}
 
-	if len(installedPolicies) > 0 {
-		res, verr := verifyPolicies(absDir, flags.harnessRoot)
-		if verr != nil {
-			return fmt.Errorf("policy verify: %w", verr)
-		}
-		if printVerifyReport(absDir, res) {
-			return fmt.Errorf("init succeeded but strict policy cascade is violated — resolve the shadowing file(s) above")
-		}
-	}
-
-	if err := writeInstallProfile(absDir, flags.harnessRoot, flags.selections, installedPolicies); err != nil {
+	if err := writeInstallProfile(absDir, flags.harnessRoot, flags.selections, nil); err != nil {
 		return fmt.Errorf("write install profile: %w", err)
 	}
 
