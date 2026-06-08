@@ -91,7 +91,7 @@ Usage:
   keystone plugin update <name> [@<new-version>] [--dir <path>] [--harness-root <name>]
   keystone plugin remove <name> [--dir <path>] [--harness-root <name>]
   keystone verify [--dir <path>] [--harness-root <name>]
-  keystone doctor [--dir <path>] [--harness-root <name>] [--paths-only|--plugins-only|--drift-only]
+  keystone doctor [--dir <path>] [--harness-root <name>] [--paths-only|--plugins-only|--drift-only|--budget]
   keystone new <port> <name> [flags]                          (see 'new help')
   keystone target add <agent>[,<agent>...] [--dir <path>] [--harness-root <name>]
   keystone patch [<dir>] [--apply|-y] [--dry-run] [--from <version>] [--harness-root <name>]

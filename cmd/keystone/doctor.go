@@ -10,6 +10,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/tacoda/keystone/internal/framework/budget"
 	"github.com/tacoda/keystone/internal/framework/config"
 	"github.com/tacoda/keystone/internal/framework/loader"
 	"github.com/tacoda/keystone/internal/framework/lockfile"
@@ -43,7 +44,7 @@ func runDoctor(args []string) error {
 	}
 	dir := "."
 	runAll := true
-	var runPaths, runPluginsCheck, runDriftCheck, fix bool
+	var runPaths, runPluginsCheck, runDriftCheck, runBudget, fix bool
 
 	for i := 0; i < len(args); i++ {
 		a := args[i]
@@ -68,6 +69,9 @@ func runDoctor(args []string) error {
 		case a == "--drift-only":
 			runAll = false
 			runDriftCheck = true
+		case a == "--budget":
+			runAll = false
+			runBudget = true
 		case a == "--fix":
 			fix = true
 		case strings.HasPrefix(a, "-"):
@@ -128,10 +132,121 @@ func runDoctor(args []string) error {
 		// Template drift is informational — never sets hadErrors.
 	}
 
+	if runBudget {
+		if err := runBudgetReport(absDir, harnessRoot); err != nil {
+			return fmt.Errorf("budget check: %w", err)
+		}
+		// Budget over-runs are warnings, not errors — never sets hadErrors.
+	}
+
 	if hadErrors {
 		return fmt.Errorf("doctor found issues — see above")
 	}
 	return nil
+}
+
+// runBudgetReport walks the harness, estimates per-file token use, and
+// renders the per-port breakdown vs the budgets declared in keystone.json.
+// Always informational — over-budget ports print a warning but never
+// set a non-zero exit. Projects that want stricter enforcement can wrap
+// `keystone doctor --budget` in a script that greps for the warning marker.
+func runBudgetReport(projectDir, harnessRoot string) error {
+	alloc, err := walkHarnessBudget(projectDir, harnessRoot)
+	if err != nil {
+		return err
+	}
+	cfg, _ := config.ReadProjectConfig(projectDir) // nil cfg = no budgets
+
+	reps := alloc.Report(cfg, 5)
+	if len(reps) == 0 {
+		fmt.Fprintf(os.Stdout, "  no markdown content under %s/ — nothing to count\n", harnessRoot)
+		return nil
+	}
+
+	overBudget := 0
+	fmt.Fprintln(os.Stdout, "  budget: per-port token estimate (whitespace-approximate)")
+	for _, r := range reps {
+		marker := "•"
+		budgetCol := "no cap"
+		if r.MaxTokens > 0 {
+			budgetCol = fmt.Sprintf("%d / %d", r.Tokens, r.MaxTokens)
+			if r.IsOverBudget() {
+				marker = "!"
+				overBudget++
+			} else {
+				budgetCol += fmt.Sprintf("  (%d%% used)", 100*r.Tokens/r.MaxTokens)
+			}
+		} else {
+			budgetCol = fmt.Sprintf("%d tokens", r.Tokens)
+		}
+		fmt.Fprintf(os.Stdout, "    %s %-10s %s\n", marker, r.Port, budgetCol)
+		for _, f := range r.TopFiles {
+			fmt.Fprintf(os.Stdout, "        %5d  %s\n", f.Tokens, f.Path)
+		}
+	}
+	if overBudget > 0 {
+		fmt.Fprintf(os.Stdout, "  ⚠ %d port(s) over their declared budget — top contributors above\n", overBudget)
+	} else if anyBudgetDeclared(cfg) {
+		fmt.Fprintln(os.Stdout, "  ✓ every port with a declared budget is within cap")
+	} else {
+		fmt.Fprintln(os.Stdout, "  ℹ no budgets declared in keystone.json — add a `budgets` block to enforce caps")
+	}
+	return nil
+}
+
+// walkHarnessBudget scans every .md file under <harnessRoot>/, classifies
+// it by port (skipping non-port paths like README, learning/, archive/),
+// estimates its tokens, and records the result in an Allocator.
+func walkHarnessBudget(projectDir, harnessRoot string) (*budget.Allocator, error) {
+	alloc := budget.NewAllocator()
+	root := filepath.Join(projectDir, harnessRoot)
+	skip := filepath.Join(harnessRoot, plugins.PluginRoot)
+
+	err := filepath.WalkDir(root, func(p string, d fs.DirEntry, err error) error {
+		if err != nil {
+			if os.IsNotExist(err) {
+				return nil
+			}
+			return err
+		}
+		rel, _ := filepath.Rel(projectDir, p)
+		rel = filepath.ToSlash(rel)
+		if d.IsDir() {
+			if strings.HasPrefix(rel, filepath.ToSlash(skip)) {
+				return filepath.SkipDir
+			}
+			return nil
+		}
+		if filepath.Ext(p) != ".md" {
+			return nil
+		}
+		port := budget.PortForPath(rel, harnessRoot)
+		if port == "" {
+			return nil
+		}
+		body, err := os.ReadFile(p)
+		if err != nil {
+			return err
+		}
+		alloc.Add(port, rel, budget.Estimate(body))
+		return nil
+	})
+	return alloc, err
+}
+
+// anyBudgetDeclared reports whether cfg.Budgets has any non-zero
+// MaxTokens entry — used to decide between the "no budgets declared"
+// and "everything within cap" closing messages.
+func anyBudgetDeclared(cfg *config.ProjectConfig) bool {
+	if cfg == nil {
+		return false
+	}
+	for _, spec := range cfg.Budgets {
+		if spec.MaxTokens > 0 || spec.MaxTokensPerLoad > 0 {
+			return true
+		}
+	}
+	return false
 }
 
 func printDoctorUsage(w *os.File) {
@@ -155,6 +270,10 @@ Flags:
   --paths-only            Run only the path-convention check.
   --plugins-only          Run only the plugin-integrity check.
   --drift-only            Run only the template-drift check.
+  --budget                Run only the per-port budget report (whitespace-
+                          approximate token count vs keystone.json's
+                          budgets block). Always informational — never
+                          exits non-zero.
   --fix                   Rewrite path violations in place (paths check only).
                           Each '../' or './' link is resolved against the
                           source file's directory and replaced with the
