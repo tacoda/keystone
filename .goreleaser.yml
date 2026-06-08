@@ -8,7 +8,7 @@ before:
 
 builds:
   - id: keystone
-    main: .
+    main: ./cmd/keystone
     binary: keystone
     env:
       - CGO_ENABLED=0

@@ -1,8 +1,21 @@
 # Keystone 1.0 — Harness Framework Plan
 
-*Draft. Not yet accepted.*
+**Status:** Approved · Phase 0 complete · Phase 1 in progress
+**Last updated:** 2026-06-08
 
 Convert Keystone from a "harness installer with org policy plugins" into a **harness framework**: a small, stable Go runtime with Rails-style conventions for project content, and a vendored, read-only plugin system for sharing policy across projects. 1.0 is a clean break from 0.x — no backward-compatibility shims.
+
+## Progress
+
+| Phase | Target | Status |
+|---|---|---|
+| 0 — Foundation & decision log | 0.14.0 | ✅ Complete (2026-06-08, commit `6b6295f`) |
+| 1 — Framework/client boundary + YAML→JSON sweep | 0.15.0 | 🔄 In progress (started 2026-06-08) |
+| 2 — Convention-scaffolded defaults | 0.16.0 | ⏳ Pending |
+| 3 — Vendored read-only plugins | 0.17.0 | ⏳ Pending |
+| 4 — Conventions, generators, doctor | 0.18.0 | ⏳ Pending |
+| 5 — Context budgeting | 0.19.0 | ⏳ Pending |
+| 6 — Hardening, upgrade guide, 1.0 | 1.0.0 | ⏳ Pending |
 
 ---
 
@@ -173,6 +186,8 @@ Each phase: scope → deliverables → exit criteria → risks.
 
 ### Phase 0 — Foundation & decision log (target: 0.14.0)
 
+**Status:** ✅ Complete (2026-06-08, commit `6b6295f`).
+
 **Scope.** Settle naming, contract surface, and the major design decisions before shuffling code. Capture ADRs.
 
 **Deliverables.**
@@ -196,6 +211,8 @@ Each phase: scope → deliverables → exit criteria → risks.
 ---
 
 ### Phase 1 — Framework / client boundary + YAML→JSON sweep (target: 0.15.0)
+
+**Status:** 🔄 In progress (started 2026-06-08).
 
 **Scope.** Physically separate framework Go code from default content. Move sources under `internal/framework/`, `cmd/keystone/`. Convert every config/manifest/lockfile in the repo from YAML to JSON. Drop YAML loaders entirely. The 0.x migration files are removed (no backward compat to preserve).
 
@@ -222,6 +239,8 @@ Each phase: scope → deliverables → exit criteria → risks.
 
 ### Phase 2 — Convention-scaffolded defaults (target: 0.16.0)
 
+**Status:** ⏳ Pending.
+
 **Scope.** Move every piece of default content into the scaffold templates directory. `keystone init` copies the templates into the consumer's `harness/<port>/` at conventional paths. The user owns those files after init.
 
 **Deliverables.**
@@ -247,6 +266,8 @@ Each phase: scope → deliverables → exit criteria → risks.
 ---
 
 ### Phase 3 — Vendored read-only plugins (target: 0.17.0)
+
+**Status:** ⏳ Pending.
 
 **Scope.** Replace the flat Org/Team/Project tier semantics with the nested plugin tree declared in `keystone.json`. Build the vendor flow: fetch → hash → write → verify-on-load → drift-reset.
 
@@ -278,6 +299,8 @@ Each phase: scope → deliverables → exit criteria → risks.
 
 ### Phase 4 — Conventions, generators, doctor (target: 0.18.0)
 
+**Status:** ⏳ Pending.
+
 **Scope.** Lock in Rails-like ergonomics. Document conventions exhaustively. Ship scaffolding generators. Add `keystone doctor` to flag convention violations and plugin drift.
 
 **Deliverables.**
@@ -306,6 +329,8 @@ Each phase: scope → deliverables → exit criteria → risks.
 
 ### Phase 5 — Context budgeting as a first-class feature (target: 0.19.0)
 
+**Status:** ⏳ Pending.
+
 **Scope.** Make context budget a framework concern, not an emergent property. Define per-port budgets, measure load, report, enforce.
 
 **Deliverables.**
@@ -331,6 +356,8 @@ Each phase: scope → deliverables → exit criteria → risks.
 ---
 
 ### Phase 6 — Hardening, upgrade guide, 1.0 (target: 1.0.0)
+
+**Status:** ⏳ Pending.
 
 **Scope.** Freeze the surface. Document compatibility guarantees. Write the one-time 0.x → 1.0 upgrade narrative. Cut the release via tag push.
 
