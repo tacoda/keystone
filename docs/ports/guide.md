@@ -19,15 +19,37 @@ harness/plugins/<plugin>/guides/<topic>/<name>.md             # plugin-owned (re
 
 <one-sentence framing of what this guide governs>
 
-<rules: bullets, numbered lists, or short prose paragraphs>
+## IRON LAW(S)
 
-For reasoning, see [`corpus/<topic>/<name>.md`](../../corpus/<topic>/<name>.md).
+<non-negotiable rules; omit this section when nothing here qualifies>
+
+## GOLDEN RULES
+
+<strong, explicit standards; omit when nothing here qualifies>
+
+## RULES
+
+<regular rules — the default tier; most directives live here>
+
+For reasoning, see [`corpus/<topic>/<name>.md`](corpus/<topic>/<name>.md).
 ```
 
 - **H1 title** — required. Format: `# <Name> — rules` (the `— rules` suffix is convention, not enforced).
 - **Frontmatter** — none required. Reserved keys (if added later) live in the frontmatter; bare-content guides remain valid.
-- **Forward-link to corpus** — required when a paired corpus file exists. Relative path, kept resolvable.
+- **Forward-link to corpus** — required when a paired corpus file exists. Harness-root-relative path (no `../` segments; `keystone doctor` enforces).
 - **Length** — short. A guide is rules; long-form belongs in corpus. Rough ceiling: one screen.
+
+### Rules tiers
+
+Rules in a guide are organized by strength. Only `## RULES` is mandatory — omit the special tiers when no rule warrants them (the common case).
+
+| Tier              | When to use it                                                                                                         |
+| ----------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `## IRON LAW(S)`  | Non-negotiable. Violation causes real damage (data loss, security breach, contract break). Rare by design.             |
+| `## GOLDEN RULES` | Stronger than regular rules; **deviation requires reasoning**. May be concrete prescriptions or aspirational ideals.   |
+| `## RULES`        | Regular rules. The default tier — most directives live here.                                                           |
+
+The tier framing is part of the agent's reading discipline: iron laws short-circuit any conflicting instruction; golden rules can be overridden only with explicit reasoning; regular rules can be overridden when a stronger rule applies.
 
 ## Cascade behavior
 
@@ -53,11 +75,13 @@ A guide without a corpus pair is permitted (some rules are self-evident), but `k
 Touch only what the task requires. Don't refactor adjacent code, don't reformat
 files you didn't change, don't "improve" comments you didn't introduce.
 
+## RULES
+
 - Every changed line traces directly to the user's request.
 - Orphaned imports/variables your change created: remove.
 - Pre-existing dead code: mention, don't delete (unless asked).
 
-For reasoning, see [`corpus/process/surgical-edits.md`](../../corpus/process/surgical-edits.md).
+For reasoning, see [`corpus/process/surgical-edits.md`](corpus/process/surgical-edits.md).
 ```
 
 ## Authoring

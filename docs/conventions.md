@@ -83,6 +83,80 @@ that contains `keystone.json`.
 - **Frontmatter:** `status: new | reviewed | accepted | rejected` (inbox); `archived_from: <path>, reason: <one line>` (archive).
 - **Not part of the cascade.** These are project-owned state, not policy.
 
+### State ledger
+
+- **Project path:** `<harness-root>/corpus/state/<name>.md`
+- **Activation:** Read at session start; mutated by `bootstrap`, `audit`, `learn` actions.
+- **Required shape:** free-form markdown; section-bounded updates (an action rewrites named sections in place, leaves others alone).
+- **Recognized files:** `CODEBASE_STATE.md`, `INSTALL_PROFILE.md`, `code-debt.md`, `harness-debt.md`, `quality-radar.md`, `risk-fingerprints.md`, `traffic-topology.md`. Project-specific ledgers welcome.
+- **Cascade:** project-only. Plugins do not ship state.
+- **Not strict-able.** Full port contract at [`docs/ports/state-ledger.md`](ports/state-ledger.md).
+
+### Patch
+
+- **Path (framework only):** `internal/framework/scaffold/templates/patches/<version>/<NNN>-<slug>.json`, embedded into the binary.
+- **Activation:** Applied by `keystone patch [<dir>]` — not loaded ambient.
+- **Required shape:** JSON document with `description` + `operations[]`. Eight operation types (`add_file`, `frontmatter_set`, `ensure_section`, `replace_block`, `move_file`, `move_dir`, `delete_file`, `delete_dir`).
+- **Scope at 1.0:** config-schema bumps only (keystone.json, lockfile). Project content is git-tracked.
+- Full port contract at [`docs/ports/patch.md`](ports/patch.md); schema at [`docs/schemas/patch.json.schema.json`](schemas/patch.json.schema.json).
+
+### Budget
+
+- **Where declared:** `keystone.json`'s optional `budgets` block, keyed by port name.
+- **Shape:** `BudgetSpec { max_tokens, max_tokens_per_load }`.
+- **CLI:** `keystone doctor --budget` for per-port utilization + top contributors; `keystone init` prints ambient load after a fresh scaffold.
+- **Estimator:** whitespace-approximate at 1.0; documented under-count vs real tokenizers ~25–35%. Tiktoken opt-in planned (PLAN §6 open question).
+- Full port contract at [`docs/ports/budget.md`](ports/budget.md).
+
+## Rules tiers
+
+Rules inside any guide are organized in three tiers, only the last of which is mandatory:
+
+| Tier              | When                                                                                              |
+| ----------------- | ------------------------------------------------------------------------------------------------- |
+| `## IRON LAW(S)`  | Non-negotiable. Violation causes real damage. Rare by design.                                     |
+| `## GOLDEN RULES` | Stronger than regular rules; deviation requires reasoning.                                        |
+| `## RULES`        | Regular rules. The default tier — most directives live here.                                      |
+
+The tier framing is a reading-discipline contract: iron laws short-circuit any conflicting instruction; golden rules can be overridden only with explicit reasoning; regular rules can be overridden when a stronger rule applies. Full convention in the [Guide port contract](ports/guide.md#rules-tiers).
+
+## Pacing modes
+
+How the agent paces work — orthogonal to the four-phase lifecycle. Three modes:
+
+| Mode        | Behavior                                                                                          |
+| ----------- | ------------------------------------------------------------------------------------------------- |
+| `paired`    | Pair-programming. Agent asks for feedback at phase boundaries and decision points. Default.       |
+| `solo`      | Agent works independently but raises a hand on ambiguity, rule conflicts, inscrutable failures.   |
+| `autopilot` | Agent works through the lifecycle without prompting; surfaces only when blocked.                  |
+
+Source of truth is the `**Active mode:**` line in `<harness-root>/guides/process/modes.md`. Switched by invoking the `mode` action with the desired mode name. Per-agent invocation conventions live in `<harness-root>/adapters/<agent>/lifecycle.md`. Agents without a notion of autonomy levels can ignore modes.
+
+## Agent failure modes
+
+Recurring agent-level failure modes are documented as process guides under `<harness-root>/guides/process/`. They are loaded ambient like any other guide and serve as guardrails the agent reads at session start:
+
+| Guide                  | Failure mode it guards against                                                                |
+| ---------------------- | --------------------------------------------------------------------------------------------- |
+| `dangerous-actions.md` | Hard-to-reverse operations (destructive git, force-push, dropping DB tables).                 |
+| `escalation.md`        | When to stop and ask vs. when to proceed; what to surface to the user.                        |
+| `grounding.md`         | Distinguishing what the agent knows from what it's been told.                                 |
+| `pushback.md`          | When to push back on a user request rather than comply silently.                              |
+| `sensitive-files.md`   | Files the agent must never touch without explicit approval (.env, credentials, etc.).         |
+| `subagent-trust.md`    | How much to trust subagent output before acting on it.                                        |
+| `self-validation.md`   | Verifying claims about the codebase against the codebase itself, not memory.                  |
+
+These are not their own port — they are guides under the `process` topic — but they form a coherent category worth knowing exists. The category list is curated in `<harness-root>/guides/process/README.md`.
+
+## Learning pipeline
+
+Two-flywheel content evolution:
+
+- **Learning** — `learn` action collects rule candidates from agent sessions and writes them into `<harness-root>/learning/inbox/<date>-<slug>.md`. Each candidate carries evidence. Triage advances candidates through `new → reviewed → accepted | rejected`. Accepted candidates promote to actual guides/corpus.
+- **Pruning** — `audit` action identifies stale guides/corpus and moves them into `<harness-root>/archive/<date>-<slug>.md` with a one-line reason. Stale corpus is rare; stale guides are routine as a project's understanding evolves.
+
+The flywheels are not a port — they are write-only sinks fed by actions. See the [Flywheel sink port contract](ports/flywheel-sink.md).
+
 ## Path conventions
 
 Two rules govern how files refer to each other.
@@ -172,6 +246,10 @@ not at deeper-nested plugins. Adjustable via `sensors.max_depth` in
 
 ## Reference
 
-- Port contracts (long form, one per file): [`docs/ports/`](ports/).
-- JSON Schemas for config files: [`docs/schemas/`](schemas/).
+- Port contracts (long form, one per file): [`docs/ports/`](ports/) —
+  guide, corpus, sensor, action, playbook, adapter, flywheel-sink,
+  state-ledger, patch, budget.
+- JSON Schemas for config files: [`docs/schemas/`](schemas/) —
+  `keystone.json`, `keystone.lock.json`, `keystone-plugin.json`,
+  `patch.json`.
 - Architecture decisions: [`docs/adr/`](adr/).

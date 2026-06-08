@@ -24,15 +24,22 @@ Changing harness behavior never requires editing framework files. New rules, new
 
 Keystone is a **project harness installer** — a single Go binary with the entire markdown-only harness embedded. `keystone init` writes two things into your repo:
 
-1. **A harness** (`harness/` by default, configurable via `--harness-root <name>`) — six components:
-   - `guides/` — **rules**. Always loaded. What the agent must do and not do (project-authored).
-   - `corpus/` — **informational reference**. On-demand. The reasoning behind the rules (project-authored).
-   - `playbooks/` — **ordered chains of actions** (e.g., the `task` playbook runs spec → orient → verify → review).
-   - `actions/` — **single units of lifecycle work** (spec, orient, verify, review, etc.).
+1. **A harness** (`harness/` by default, configurable via `--harness-root <name>`) — the full set of framework abstractions:
+   - `guides/` — **rules** (with `## IRON LAW(S)`, `## GOLDEN RULES`, `## RULES` tiers). Always loaded.
+   - `corpus/` — **reference** (long-form reasoning). On-demand.
+   - `corpus/state/` — **state ledgers**: the empirical map of *this* project (codebase state, code debt, quality radar, risk fingerprints, traffic topology). Mutable; updated by `bootstrap`, `audit`, `learn`.
    - `sensors/` — **automated checks**. Lint, type-check, test, build, drift, coverage.
-   - `policies/` — **org policy plugins**, installed via `--policy <ref>` or `keystone policy add` (transitional 0.x path; 1.0 vendors plugins under `<harness-root>/plugins/`).
-   - `learning/` + `archive/` — **flywheels** that keep the harness current.
-   Plus per-agent bindings under `<harness-root>/adapters/<agent>/`.
+   - `actions/` — **single units of lifecycle work** (spec, orient, verify, review, learn, audit, …).
+   - `playbooks/` — **ordered action chains** (e.g. `task` runs spec → orient → verify → review).
+   - `adapters/<agent>/` — **per-agent bindings** (activation, lifecycle, sensors).
+   - `learning/` + `archive/` — **flywheels**: `learn` files rule candidates into `learning/inbox/`; `audit` retires stale content into `archive/`.
+   - `plugins/<name>/` — **vendored read-only plugins** (the 1.0 replacement for 0.x policies). Pinned in `keystone.json`, hash-verified, drift-reset by `keystone verify`.
+
+   Plus several framework concepts that aren't directories:
+   - **Patches** (`keystone patch`) — versioned forward-only config-schema updates the binary applies on upgrade.
+   - **Pacing modes** (`paired` / `solo` / `autopilot`) — orthogonal to the lifecycle; switched via the `mode` action.
+   - **Context budgeting** (`keystone doctor --budget`, ambient-load on `init`) — per-port token caps declared in `keystone.json`.
+   - **Agent failure modes** — guardrail guides under `guides/process/` (dangerous-actions, escalation, grounding, pushback, sensitive-files, subagent-trust, self-validation).
 
    The universal engineering-principles pack (SOLID, TDD, BDD, naming, error handling, ...) is **opt-in**: pass `--starter universal-principles` at init (or select it in the interactive menu) to scaffold it into `<harness-root>/guides/principles/` and `<harness-root>/corpus/principles/`.
 2. **An activation file** (the "menu") — `CLAUDE.md`, `AGENTS.md`, `.cursor/rules/*.mdc`, `CONVENTIONS.md`, etc. — depending on your agent. The menu tells the agent to read the harness.

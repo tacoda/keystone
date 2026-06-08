@@ -1,6 +1,6 @@
 # Keystone 1.0 — Harness Framework Plan
 
-**Status:** Approved · Phases 0–4 complete · Phase 5 next
+**Status:** Approved · Phases 0–5 complete · Phase 6 next
 **Last updated:** 2026-06-08
 
 Convert Keystone from a "harness installer with org policy plugins" into a **harness framework**: a small, stable Go runtime with Rails-style conventions for project content, and a vendored, read-only plugin system for sharing policy across projects. 1.0 is a clean break from 0.x — no backward-compatibility shims.
@@ -14,7 +14,7 @@ Convert Keystone from a "harness installer with org policy plugins" into a **har
 | 2 — Convention-scaffolded defaults | 0.16.0 | ✅ Complete (2026-06-08, 5 sub-commits) |
 | 3 — Vendored read-only plugins | 0.17.0 | ✅ Complete (2026-06-08, 8 sub-commits) |
 | 4 — Conventions, generators, doctor | 0.18.0 | ✅ Complete (2026-06-08, 5 sub-commits) |
-| 5 — Context budgeting | 0.19.0 | ⏳ Pending |
+| 5 — Context budgeting | 0.19.0 | ✅ Complete (2026-06-08, 5 sub-commits) |
 | 6 — Hardening, upgrade guide, 1.0 | 1.0.0 | ⏳ Pending |
 
 ---
@@ -357,7 +357,12 @@ Diverged from the originally drafted scope in two user-directed ways:
 
 ### Phase 5 — Context budgeting as a first-class feature (target: 0.19.0)
 
-**Status:** ⏳ Pending.
+**Status:** ✅ Complete (2026-06-08). Five sub-commits:
+- `9fdc3f0` — `internal/framework/budget/` — whitespace-approximate `Estimate`, `Allocator` aggregating per-port + per-file, `Report` with declared budgets from `keystone.json`.
+- `101b3e4` — `keystone doctor --budget` mode with marker-based output (per-port utilization, top-5 contributors, declared-vs-actual comparison).
+- `618c57b` — `keystone init` ambient-load report after scaffolding.
+- `9bf4eee` — `docs/ports/budget.md` port contract.
+- (this commit) — framework-abstractions audit: added `docs/ports/state-ledger.md` and `docs/ports/patch.md`; documented rules tiers in `docs/ports/guide.md`; expanded `docs/conventions.md` with State Ledger, Patch, Budget, Rules tiers, Pacing modes, Agent failure modes, and Learning pipeline sections so every capability from the keystone narrative maps to a 1.0 framework slot.
 
 **Scope.** Make context budget a framework concern, not an emergent property. Define per-port budgets, measure load, report, enforce.
 
