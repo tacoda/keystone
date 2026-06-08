@@ -7,6 +7,8 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+
+	"github.com/tacoda/keystone/internal/framework/manifest"
 )
 
 // VerifyResult is the outcome of policy verify against an install directory.
@@ -131,7 +133,7 @@ func isItemDefined(installDir, kind, item string, policies map[string]PolicyLock
 }
 
 // strictItemsFor returns the basenames listed for the given kind.
-func strictItemsFor(s StrictSpec, kind string) []string {
+func strictItemsFor(s manifest.StrictSpec, kind string) []string {
 	switch kind {
 	case "guides":
 		return s.Guides
@@ -160,13 +162,13 @@ func findShadowing(installDir, kind, item, declaringTier string, policies map[st
 	}
 	hits = append(hits, projectPaths...)
 
-	if declaringTier == TierOrg {
+	if declaringTier == manifest.TierOrg {
 		for _, name := range sortedPolicyNames(policies) {
 			if name == declaringName {
 				continue
 			}
 			peer := policies[name]
-			if peer.ResolvedTier() != TierTeam {
+			if peer.ResolvedTier() != manifest.TierTeam {
 				continue
 			}
 			teamPaths, err := findItemInTree(installDir, filepath.Join("harness", "policies", name, kind), item)

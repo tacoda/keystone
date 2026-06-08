@@ -4,6 +4,9 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+
+	"github.com/tacoda/keystone/internal/framework/loader"
+	"github.com/tacoda/keystone/internal/framework/manifest"
 )
 
 // runPolicy dispatches `keystone policy <subcommand> ...`. `list` and `remove`
@@ -140,34 +143,34 @@ func installPolicies(destDir string, refs []string) (map[string]PolicyLock, erro
 // → validate content → copy into destDir → hash installed files. Returns the
 // policy's manifest name and the lockfile entry to record.
 func installOnePolicy(destDir, raw string) (string, PolicyLock, error) {
-	ref, err := parsePolicyRef(raw)
+	ref, err := loader.ParsePolicyRef(raw)
 	if err != nil {
 		return "", PolicyLock{}, err
 	}
 
 	fmt.Fprintf(os.Stdout, "▸ installing policy %s\n", raw)
 
-	resolved, err := resolvePolicy(ref)
+	resolved, err := loader.ResolvePolicy(ref)
 	if err != nil {
 		return "", PolicyLock{}, err
 	}
 	defer os.RemoveAll(resolved.LocalDir)
 
-	manifest, err := loadManifest(resolved.LocalDir)
+	mf, err := manifest.Load(resolved.LocalDir)
 	if err != nil {
 		return "", PolicyLock{}, err
 	}
 
-	if _, err := validatePolicyContent(resolved.LocalDir, manifest); err != nil {
+	if _, err := manifest.ValidateContent(resolved.LocalDir, mf); err != nil {
 		return "", PolicyLock{}, err
 	}
 
 	srcFS := os.DirFS(resolved.LocalDir)
-	if err := copyTree(srcFS, PolicyContentRoot, destDir, overwrite); err != nil {
+	if err := copyTree(srcFS, manifest.PolicyContentRoot, destDir, overwrite); err != nil {
 		return "", PolicyLock{}, fmt.Errorf("copy policy content: %w", err)
 	}
 
-	namespaceDir := filepath.Join("harness", "policies", manifest.Namespace())
+	namespaceDir := filepath.Join("harness", "policies", mf.Namespace())
 	fileHashes, err := hashFilesUnder(destDir, namespaceDir)
 	if err != nil {
 		return "", PolicyLock{}, fmt.Errorf("hash installed files: %w", err)
@@ -176,12 +179,12 @@ func installOnePolicy(destDir, raw string) (string, PolicyLock, error) {
 	lock := PolicyLock{
 		SourceRef:       raw,
 		ResolvedSHA:     resolved.ResolvedSHA,
-		PolicyVersion:   manifest.Version,
+		PolicyVersion:   mf.Version,
 		KeystoneVersion: version,
-		Tier:            manifest.ResolvedTier(),
-		Strict:          manifest.Strict,
-		Required:        manifest.Required,
+		Tier:            mf.ResolvedTier(),
+		Strict:          mf.Strict,
+		Required:        mf.Required,
 		Files:           fileHashes,
 	}
-	return manifest.Name, lock, nil
+	return mf.Name, lock, nil
 }

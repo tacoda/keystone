@@ -10,6 +10,8 @@ import (
 	"sort"
 
 	"gopkg.in/yaml.v3"
+
+	"github.com/tacoda/keystone/internal/framework/manifest"
 )
 
 // KeystoneLockfile is the on-disk name of the combined lockfile, relative to
@@ -40,16 +42,16 @@ type PolicyLock struct {
 	PolicyVersion   string            `yaml:"policy_version"`   // value from manifest.version
 	KeystoneVersion string            `yaml:"keystone_version"` // binary version at install time
 	Tier            string            `yaml:"tier,omitempty"`   // "org" (default) or "team"
-	Strict          StrictSpec        `yaml:"strict,omitempty"` // items this policy locks against override
-	Required        StrictSpec        `yaml:"required,omitempty"` // items this policy expects to exist somewhere in the cascade
-	Files           map[string]string `yaml:"files"`            // path-relative-to-installdir → "sha256:<hex>"
+	Strict          manifest.StrictSpec `yaml:"strict,omitempty"`   // items this policy locks against override
+	Required        manifest.StrictSpec `yaml:"required,omitempty"` // items this policy expects to exist somewhere in the cascade
+	Files           map[string]string   `yaml:"files"`              // path-relative-to-installdir → "sha256:<hex>"
 }
 
 // ResolvedTier returns the lock's tier, applying the default for older
 // lockfiles that predate the field.
 func (p PolicyLock) ResolvedTier() string {
 	if p.Tier == "" {
-		return TierOrg
+		return manifest.TierOrg
 	}
 	return p.Tier
 }

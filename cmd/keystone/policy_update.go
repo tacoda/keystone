@@ -6,6 +6,9 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+
+	"github.com/tacoda/keystone/internal/framework/loader"
+	"github.com/tacoda/keystone/internal/framework/manifest"
 )
 
 // runPolicyUpdate handles `keystone policy update <name> [<new-ref>] [--dir <path>]`.
@@ -74,31 +77,31 @@ func runPolicyUpdate(args []string) error {
 		sourceRef = newRef
 	}
 
-	ref, err := parsePolicyRef(sourceRef)
+	ref, err := loader.ParsePolicyRef(sourceRef)
 	if err != nil {
 		return err
 	}
 
 	fmt.Fprintf(os.Stdout, "▸ updating policy %s (%s)\n", name, sourceRef)
 
-	resolved, err := resolvePolicy(ref)
+	resolved, err := loader.ResolvePolicy(ref)
 	if err != nil {
 		return err
 	}
 	defer os.RemoveAll(resolved.LocalDir)
 
-	manifest, err := loadManifest(resolved.LocalDir)
+	mf, err := manifest.Load(resolved.LocalDir)
 	if err != nil {
 		return err
 	}
-	if manifest.Name != name {
-		return fmt.Errorf("policy at %s declares name %q, but you're updating %q", sourceRef, manifest.Name, name)
+	if mf.Name != name {
+		return fmt.Errorf("policy at %s declares name %q, but you're updating %q", sourceRef, mf.Name, name)
 	}
-	if _, err := validatePolicyContent(resolved.LocalDir, manifest); err != nil {
+	if _, err := manifest.ValidateContent(resolved.LocalDir, mf); err != nil {
 		return err
 	}
 
-	namespaceDir := filepath.Join("harness", "policies", manifest.Namespace())
+	namespaceDir := filepath.Join("harness", "policies", mf.Namespace())
 	if !force {
 		dirty, err := dirtyFiles(absDir, namespaceDir, existing.Files)
 		if err != nil {
@@ -122,7 +125,7 @@ func runPolicyUpdate(args []string) error {
 	}
 
 	srcFS := os.DirFS(resolved.LocalDir)
-	if err := copyTree(srcFS, PolicyContentRoot, absDir, overwrite); err != nil {
+	if err := copyTree(srcFS, manifest.PolicyContentRoot, absDir, overwrite); err != nil {
 		return fmt.Errorf("copy policy content: %w", err)
 	}
 
@@ -134,11 +137,11 @@ func runPolicyUpdate(args []string) error {
 	lf.Policies[name] = PolicyLock{
 		SourceRef:       sourceRef,
 		ResolvedSHA:     resolved.ResolvedSHA,
-		PolicyVersion:   manifest.Version,
+		PolicyVersion:   mf.Version,
 		KeystoneVersion: version,
-		Tier:            manifest.ResolvedTier(),
-		Strict:          manifest.Strict,
-		Required:        manifest.Required,
+		Tier:            mf.ResolvedTier(),
+		Strict:          mf.Strict,
+		Required:        mf.Required,
 		Files:           newHashes,
 	}
 	if err := writeLockfile(absDir, lf); err != nil {
@@ -146,7 +149,7 @@ func runPolicyUpdate(args []string) error {
 	}
 
 	fmt.Fprintf(os.Stdout, "✓ updated %s → %s (%s)\n",
-		name, manifest.Version, resolved.ResolvedSHA[:displaySHALen(resolved.ResolvedSHA)])
+		name, mf.Version, resolved.ResolvedSHA[:displaySHALen(resolved.ResolvedSHA)])
 
 	res, verr := verifyPolicies(absDir)
 	if verr != nil {

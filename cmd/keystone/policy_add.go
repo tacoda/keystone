@@ -5,6 +5,9 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/tacoda/keystone/internal/framework/loader"
+	"github.com/tacoda/keystone/internal/framework/manifest"
 )
 
 // runPolicyAdd handles `keystone policy add <ref> [--dir <path>]`.
@@ -58,54 +61,54 @@ func runPolicyAdd(args []string) error {
 		return err
 	}
 
-	ref, err := parsePolicyRef(raw)
+	ref, err := loader.ParsePolicyRef(raw)
 	if err != nil {
 		return err
 	}
 
 	fmt.Fprintf(os.Stdout, "▸ installing policy %s\n", raw)
 
-	resolved, err := resolvePolicy(ref)
+	resolved, err := loader.ResolvePolicy(ref)
 	if err != nil {
 		return err
 	}
 	defer os.RemoveAll(resolved.LocalDir)
 
-	manifest, err := loadManifest(resolved.LocalDir)
+	mf, err := manifest.Load(resolved.LocalDir)
 	if err != nil {
 		return err
 	}
 
-	if _, exists := lf.Policies[manifest.Name]; exists {
+	if _, exists := lf.Policies[mf.Name]; exists {
 		return fmt.Errorf(
 			"policy %q is already installed (recorded in %s); use `keystone policy update %s` to re-resolve or change the ref",
-			manifest.Name, KeystoneLockfile, manifest.Name,
+			mf.Name, KeystoneLockfile, mf.Name,
 		)
 	}
 
-	if _, err := validatePolicyContent(resolved.LocalDir, manifest); err != nil {
+	if _, err := manifest.ValidateContent(resolved.LocalDir, mf); err != nil {
 		return err
 	}
 
 	srcFS := os.DirFS(resolved.LocalDir)
-	if err := copyTree(srcFS, PolicyContentRoot, absDir, overwrite); err != nil {
+	if err := copyTree(srcFS, manifest.PolicyContentRoot, absDir, overwrite); err != nil {
 		return fmt.Errorf("copy policy content: %w", err)
 	}
 
-	namespaceDir := filepath.Join("harness", "policies", manifest.Namespace())
+	namespaceDir := filepath.Join("harness", "policies", mf.Namespace())
 	fileHashes, err := hashFilesUnder(absDir, namespaceDir)
 	if err != nil {
 		return fmt.Errorf("hash installed files: %w", err)
 	}
 
-	lf.Policies[manifest.Name] = PolicyLock{
+	lf.Policies[mf.Name] = PolicyLock{
 		SourceRef:       raw,
 		ResolvedSHA:     resolved.ResolvedSHA,
-		PolicyVersion:   manifest.Version,
+		PolicyVersion:   mf.Version,
 		KeystoneVersion: version,
-		Tier:            manifest.ResolvedTier(),
-		Strict:          manifest.Strict,
-		Required:        manifest.Required,
+		Tier:            mf.ResolvedTier(),
+		Strict:          mf.Strict,
+		Required:        mf.Required,
 		Files:           fileHashes,
 	}
 	if err := writeLockfile(absDir, lf); err != nil {
@@ -113,14 +116,14 @@ func runPolicyAdd(args []string) error {
 	}
 
 	fmt.Fprintf(os.Stdout, "✓ installed %s %s (%s)\n",
-		manifest.Name, manifest.Version, resolved.ResolvedSHA[:displaySHALen(resolved.ResolvedSHA)])
+		mf.Name, mf.Version, resolved.ResolvedSHA[:displaySHALen(resolved.ResolvedSHA)])
 
 	res, verr := verifyPolicies(absDir)
 	if verr != nil {
 		return fmt.Errorf("policy verify: %w", verr)
 	}
 	if printVerifyReport(absDir, res) {
-		return fmt.Errorf("policy %q installed but strict cascade is violated — resolve the shadowing file(s) above", manifest.Name)
+		return fmt.Errorf("policy %q installed but strict cascade is violated — resolve the shadowing file(s) above", mf.Name)
 	}
 	return nil
 }

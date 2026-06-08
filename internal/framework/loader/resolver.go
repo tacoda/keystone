@@ -1,4 +1,4 @@
-package main
+package loader
 
 import (
 	"fmt"
@@ -8,7 +8,9 @@ import (
 )
 
 // PolicyRef is a parsed `--policy` argument. In v1 only the git transport is
-// supported: `git+<url>` with an optional `#<rev>` suffix.
+// supported: `git+<url>` with an optional `#<rev>` suffix. Phase 3 will rename
+// this to PluginRef alongside the broader plugin work; for now the type
+// preserves the 0.x name and shape.
 type PolicyRef struct {
 	Raw    string // original user-supplied string
 	Scheme string // "git" in v1
@@ -16,7 +18,7 @@ type PolicyRef struct {
 	Rev    string // tag, branch, or SHA; empty means "default branch HEAD"
 }
 
-// parsePolicyRef parses a user-supplied --policy argument. Format:
+// ParsePolicyRef parses a user-supplied --policy argument. Format:
 //
 //	git+<url>[#<rev>]
 //
@@ -25,7 +27,7 @@ type PolicyRef struct {
 //	git+https://github.com/acme/policy.git
 //	git+https://github.com/acme/policy.git#v1.2.0
 //	git+ssh://git@github.com/acme/policy.git#main
-func parsePolicyRef(raw string) (*PolicyRef, error) {
+func ParsePolicyRef(raw string) (*PolicyRef, error) {
 	if raw == "" {
 		return nil, fmt.Errorf("empty policy ref")
 	}
@@ -56,8 +58,8 @@ type ResolvedPolicy struct {
 	ResolvedSHA string // exact commit checked out
 }
 
-// resolvePolicy dispatches by scheme. Only git is implemented in v1.
-func resolvePolicy(ref *PolicyRef) (*ResolvedPolicy, error) {
+// ResolvePolicy dispatches by scheme. Only git is implemented in v1.
+func ResolvePolicy(ref *PolicyRef) (*ResolvedPolicy, error) {
 	switch ref.Scheme {
 	case "git":
 		return resolveGit(ref)
