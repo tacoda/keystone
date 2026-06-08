@@ -1,8 +1,8 @@
 package main
 
 import (
-	"embed"
 	"fmt"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"strings"
@@ -11,7 +11,7 @@ import (
 	"github.com/tacoda/keystone/internal/framework/lockfile"
 )
 
-func runInit(args []string, assets embed.FS) error {
+func runInit(args []string, assets fs.FS) error {
 	flags, err := parseInitArgs(args)
 	if err != nil {
 		return err
@@ -150,7 +150,7 @@ func initializeLockfile(destDir string, agents []string) error {
 // menu file. Existing target files are left alone (skipIfExists). If the agent
 // has no shipped target bundle, prints a notice and returns nil — callers treat
 // this as a soft success since the corpus alone is still useful.
-func installAgentTarget(assets embed.FS, agent, destDir string) error {
+func installAgentTarget(assets fs.FS, agent, destDir string) error {
 	targetRoot := filepath.Join("targets", agentTargetDir(agent))
 	if _, err := assets.Open(targetRoot); err != nil {
 		fmt.Fprintf(os.Stderr, "! no target bundle for %s; configure activation manually\n", agent)

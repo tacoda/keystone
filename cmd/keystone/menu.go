@@ -1,7 +1,6 @@
 package main
 
 import (
-	"embed"
 	"fmt"
 	"io/fs"
 	"os"
@@ -42,7 +41,7 @@ const (
 //
 // Returns the relative path (or "") to signal callers what to skip in the regular
 // target copy. An agent without a registered menu file is a no-op.
-func installMenuFile(assets embed.FS, agent, destDir string) (string, error) {
+func installMenuFile(assets fs.FS, agent, destDir string) (string, error) {
 	rel, ok := agentMenuFile[agent]
 	if !ok {
 		return "", nil

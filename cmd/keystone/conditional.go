@@ -1,7 +1,6 @@
 package main
 
 import (
-	"embed"
 	"fmt"
 	"io/fs"
 	"os"
@@ -21,7 +20,7 @@ import (
 //
 // Missing optional roots are silently skipped — the directory is only present
 // for categories the project chose to maintain content for.
-func installConditional(assets embed.FS, destDir string, sel Selections) error {
+func installConditional(assets fs.FS, destDir string, sel Selections) error {
 	for catID, values := range sel {
 		if catID == "agent" {
 			continue

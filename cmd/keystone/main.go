@@ -2,15 +2,16 @@ package main
 
 import (
 	"fmt"
+	"io/fs"
 	"os"
 
-	"github.com/tacoda/keystone"
+	"github.com/tacoda/keystone/internal/framework/scaffold"
 )
 
-// assets re-exports the embedded asset filesystem owned by the root package.
-// The embed.FS lives at the repo root because //go:embed cannot reference
-// paths outside its own source file's directory tree.
-var assets = keystone.Assets
+// assets is the embedded scaffold template tree, rooted at templates/ so
+// callers see harness/, targets/, optional/, migrations/ at its top level.
+// scaffold.Templates is an fs.FS; embed.FS lives inside the scaffold package.
+var assets fs.FS = scaffold.Templates
 
 var version = "dev"
 

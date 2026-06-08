@@ -2,8 +2,8 @@ package main
 
 import (
 	"bufio"
-	"embed"
 	"fmt"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"strings"
@@ -18,7 +18,7 @@ type migrateFlags struct {
 	from    string
 }
 
-func runMigrate(args []string, assets embed.FS) error {
+func runMigrate(args []string, assets fs.FS) error {
 	flags, err := parseMigrateArgs(args)
 	if err != nil {
 		return err

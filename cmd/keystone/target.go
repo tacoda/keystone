@@ -1,15 +1,15 @@
 package main
 
 import (
-	"embed"
 	"fmt"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"strings"
 )
 
 // runTarget dispatches `keystone target <subcommand> ...`.
-func runTarget(args []string, assets embed.FS) error {
+func runTarget(args []string, assets fs.FS) error {
 	if len(args) == 0 {
 		printTargetUsage(os.Stderr)
 		return fmt.Errorf("target requires a subcommand")
@@ -41,7 +41,7 @@ Commands:
 // existing harness directory. Errors out if any requested agent is already
 // recorded in the lockfile — the user must explicitly remove it first
 // rather than risk silent overwrites.
-func runTargetAdd(args []string, assets embed.FS) error {
+func runTargetAdd(args []string, assets fs.FS) error {
 	dir := "."
 	var positional []string
 

@@ -1,0 +1,39 @@
+// Package scaffold owns the embedded template tree that `keystone init`
+// writes into a consumer's repo. The templates are organized as they appear
+// on disk after install:
+//
+//	templates/
+//	├── harness/      — the harness layout (guides, corpus, sensors,
+//	│                   actions, playbooks, adapters, learning, archive)
+//	├── targets/      — per-agent menu files (CLAUDE.md, AGENTS.md,
+//	│                   .cursor/rules/, etc.) installed at the project root
+//	├── optional/     — opt-in content (architecture/, compliance/)
+//	│                   pulled in by --architecture / --compliance flags
+//	└── migrations/   — framework migrations (currently empty; Phase 1
+//	                    deleted the 0.x chain — only the README remains)
+//
+// The Templates fs.FS is rooted at templates/, so callers see "harness",
+// "targets", "optional", and "migrations" at its top level.
+package scaffold
+
+import (
+	"embed"
+	"io/fs"
+)
+
+//go:embed all:templates
+var rawTemplates embed.FS
+
+// Templates is the embedded scaffold tree, rooted at the templates directory.
+// Top-level entries: harness/, targets/, optional/, migrations/.
+var Templates fs.FS
+
+func init() {
+	sub, err := fs.Sub(rawTemplates, "templates")
+	if err != nil {
+		// Embed paths are verified at compile time; a Sub failure here is a
+		// programmer error during package setup, not a runtime condition.
+		panic(err)
+	}
+	Templates = sub
+}
