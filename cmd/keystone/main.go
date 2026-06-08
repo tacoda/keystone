@@ -42,6 +42,11 @@ func main() {
 			fmt.Fprintf(os.Stderr, "keystone: %v\n", err)
 			os.Exit(1)
 		}
+	case "verify":
+		if err := runVerify(os.Args[2:]); err != nil {
+			fmt.Fprintf(os.Stderr, "keystone: %v\n", err)
+			os.Exit(1)
+		}
 	case "policy":
 		fmt.Fprintln(os.Stderr, "keystone: the policy command was removed in 1.0; use `keystone plugin add|update|remove` against keystone.json instead.")
 		os.Exit(2)
@@ -75,6 +80,7 @@ Usage:
   keystone plugin add <shorthand> [--name <n>] [--dir <path>] [--harness-root <name>]
   keystone plugin update <name> [@<new-version>] [--dir <path>] [--harness-root <name>]
   keystone plugin remove <name> [--dir <path>] [--harness-root <name>]
+  keystone verify [--dir <path>] [--harness-root <name>]
   keystone target add <agent>[,<agent>...] [--dir <path>] [--harness-root <name>]
   keystone patch [<dir>] [--apply|-y] [--dry-run] [--from <version>] [--harness-root <name>]
   keystone options
@@ -85,6 +91,7 @@ Commands:
   init       Scaffold the harness folder and the agent menu file(s) into <dir> (default: .)
   install    Materialize every plugin declared in keystone.json
   plugin     Manage installed plugins (add, update, remove) — see 'plugin help'
+  verify     Check vendored plugins for drift and the strict cascade for violations
   target     Manage agent targets installed under <harness-root>/adapters/ (see 'target help')
   patch      Apply pending framework patches to an existing install
   options    Print the allowed labels for every option flag
