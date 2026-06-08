@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/tacoda/keystone/internal/framework/loader"
+	"github.com/tacoda/keystone/internal/framework/lockfile"
 	"github.com/tacoda/keystone/internal/framework/manifest"
 )
 
@@ -63,13 +64,13 @@ func runPolicyUpdate(args []string) error {
 		return fmt.Errorf("resolve dir: %w", err)
 	}
 
-	lf, err := readLockfile(absDir)
+	lf, err := lockfile.Read(absDir)
 	if err != nil {
 		return err
 	}
 	existing, ok := lf.Policies[name]
 	if !ok {
-		return fmt.Errorf("policy %q is not installed (not recorded in %s)", name, KeystoneLockfile)
+		return fmt.Errorf("policy %q is not installed (not recorded in %s)", name, lockfile.File)
 	}
 
 	sourceRef := existing.SourceRef
@@ -129,12 +130,12 @@ func runPolicyUpdate(args []string) error {
 		return fmt.Errorf("copy policy content: %w", err)
 	}
 
-	newHashes, err := hashFilesUnder(absDir, namespaceDir)
+	newHashes, err := lockfile.HashFilesUnder(absDir, namespaceDir)
 	if err != nil {
 		return fmt.Errorf("hash installed files: %w", err)
 	}
 
-	lf.Policies[name] = PolicyLock{
+	lf.Policies[name] = lockfile.PolicyLock{
 		SourceRef:       sourceRef,
 		ResolvedSHA:     resolved.ResolvedSHA,
 		PolicyVersion:   mf.Version,
@@ -144,7 +145,7 @@ func runPolicyUpdate(args []string) error {
 		Required:        mf.Required,
 		Files:           newHashes,
 	}
-	if err := writeLockfile(absDir, lf); err != nil {
+	if err := lockfile.Write(absDir, lf); err != nil {
 		return err
 	}
 
@@ -165,7 +166,7 @@ func runPolicyUpdate(args []string) error {
 // hashes recorded in expected, returning a sorted list of "<path> (state)"
 // entries for any file that differs. State is one of: modified, added, removed.
 func dirtyFiles(installDir, namespaceDir string, expected map[string]string) ([]string, error) {
-	current, err := hashFilesUnder(installDir, namespaceDir)
+	current, err := lockfile.HashFilesUnder(installDir, namespaceDir)
 	if err != nil {
 		return nil, err
 	}

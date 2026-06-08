@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 
 	"github.com/tacoda/keystone/internal/framework/loader"
+	"github.com/tacoda/keystone/internal/framework/lockfile"
 	"github.com/tacoda/keystone/internal/framework/manifest"
 )
 
@@ -110,9 +111,9 @@ Flags:
 // Stops at the first failure (no rollback in v1) — partial state on disk is
 // possible if a later policy errors after an earlier one succeeded.
 //
-// Returns the map of policy-name → PolicyLock for the policies installed in
+// Returns the map of policy-name → lockfile.PolicyLock for the policies installed in
 // this call, suitable for rendering into INSTALL_PROFILE.md.
-func installPolicies(destDir string, refs []string) (map[string]PolicyLock, error) {
+func installPolicies(destDir string, refs []string) (map[string]lockfile.PolicyLock, error) {
 	if len(refs) == 0 {
 		return nil, nil
 	}
@@ -122,7 +123,7 @@ func installPolicies(destDir string, refs []string) (map[string]PolicyLock, erro
 		return nil, err
 	}
 
-	installed := map[string]PolicyLock{}
+	installed := map[string]lockfile.PolicyLock{}
 	for _, raw := range refs {
 		name, lock, err := installOnePolicy(destDir, raw)
 		if err != nil {
@@ -132,51 +133,51 @@ func installPolicies(destDir string, refs []string) (map[string]PolicyLock, erro
 		installed[name] = lock
 	}
 
-	if err := writeLockfile(destDir, lf); err != nil {
+	if err := lockfile.Write(destDir, lf); err != nil {
 		return nil, err
 	}
-	fmt.Fprintf(os.Stdout, "  wrote: %s\n", filepath.Join(destDir, KeystoneLockfile))
+	fmt.Fprintf(os.Stdout, "  wrote: %s\n", filepath.Join(destDir, lockfile.File))
 	return installed, nil
 }
 
 // installOnePolicy handles one ref end-to-end: parse → resolve → load manifest
 // → validate content → copy into destDir → hash installed files. Returns the
 // policy's manifest name and the lockfile entry to record.
-func installOnePolicy(destDir, raw string) (string, PolicyLock, error) {
+func installOnePolicy(destDir, raw string) (string, lockfile.PolicyLock, error) {
 	ref, err := loader.ParsePolicyRef(raw)
 	if err != nil {
-		return "", PolicyLock{}, err
+		return "", lockfile.PolicyLock{}, err
 	}
 
 	fmt.Fprintf(os.Stdout, "▸ installing policy %s\n", raw)
 
 	resolved, err := loader.ResolvePolicy(ref)
 	if err != nil {
-		return "", PolicyLock{}, err
+		return "", lockfile.PolicyLock{}, err
 	}
 	defer os.RemoveAll(resolved.LocalDir)
 
 	mf, err := manifest.Load(resolved.LocalDir)
 	if err != nil {
-		return "", PolicyLock{}, err
+		return "", lockfile.PolicyLock{}, err
 	}
 
 	if _, err := manifest.ValidateContent(resolved.LocalDir, mf); err != nil {
-		return "", PolicyLock{}, err
+		return "", lockfile.PolicyLock{}, err
 	}
 
 	srcFS := os.DirFS(resolved.LocalDir)
 	if err := copyTree(srcFS, manifest.PolicyContentRoot, destDir, overwrite); err != nil {
-		return "", PolicyLock{}, fmt.Errorf("copy policy content: %w", err)
+		return "", lockfile.PolicyLock{}, fmt.Errorf("copy policy content: %w", err)
 	}
 
 	namespaceDir := filepath.Join("harness", "policies", mf.Namespace())
-	fileHashes, err := hashFilesUnder(destDir, namespaceDir)
+	fileHashes, err := lockfile.HashFilesUnder(destDir, namespaceDir)
 	if err != nil {
-		return "", PolicyLock{}, fmt.Errorf("hash installed files: %w", err)
+		return "", lockfile.PolicyLock{}, fmt.Errorf("hash installed files: %w", err)
 	}
 
-	lock := PolicyLock{
+	lock := lockfile.PolicyLock{
 		SourceRef:       raw,
 		ResolvedSHA:     resolved.ResolvedSHA,
 		PolicyVersion:   mf.Version,

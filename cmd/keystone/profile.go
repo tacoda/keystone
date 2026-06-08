@@ -7,6 +7,8 @@ import (
 	"sort"
 	"strings"
 	"time"
+
+	"github.com/tacoda/keystone/internal/framework/lockfile"
 )
 
 // writeInstallProfile renders sel + packs as harness/corpus/state/INSTALL_PROFILE.md
@@ -18,7 +20,7 @@ import (
 // agents, packs) lives in harness/.keystone.lock — written separately. The
 // profile no longer emits `keystone_version:` frontmatter; that field was
 // promoted to the lockfile.
-func writeInstallProfile(destDir string, sel Selections, policies map[string]PolicyLock) error {
+func writeInstallProfile(destDir string, sel Selections, policies map[string]lockfile.PolicyLock) error {
 	path := filepath.Join(destDir, "harness", "corpus", "state", "INSTALL_PROFILE.md")
 	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
 		return err
@@ -71,7 +73,7 @@ func writeInstallProfile(destDir string, sel Selections, policies map[string]Pol
 // Falls back to parsing INSTALL_PROFILE.md for installs that predate the
 // lockfile.
 func readInstalledAgents(destDir string) ([]string, error) {
-	lf, err := readLockfile(destDir)
+	lf, err := lockfile.Read(destDir)
 	if err != nil {
 		return nil, err
 	}
@@ -85,7 +87,7 @@ func readInstalledAgents(destDir string) ([]string, error) {
 // from the lockfile. Falls back to INSTALL_PROFILE.md frontmatter for installs
 // that predate the lockfile. Returns "" if neither source has a value.
 func readKeystoneVersion(destDir string) (string, error) {
-	lf, err := readLockfile(destDir)
+	lf, err := lockfile.Read(destDir)
 	if err != nil {
 		return "", err
 	}
@@ -104,7 +106,7 @@ func updateKeystoneVersion(destDir, newVersion string) error {
 		return err
 	}
 	lf.Keystone.Version = newVersion
-	return writeLockfile(destDir, lf)
+	return lockfile.Write(destDir, lf)
 }
 
 // appendInstalledAgents adds newAgents to the lockfile's agent list, preserving
@@ -132,10 +134,10 @@ func appendInstalledAgents(destDir string, newAgents []string) error {
 			seen[a] = true
 		}
 	}
-	if err := writeLockfile(destDir, lf); err != nil {
+	if err := lockfile.Write(destDir, lf); err != nil {
 		return err
 	}
-	fmt.Fprintf(os.Stdout, "  updated: %s\n", filepath.Join(destDir, KeystoneLockfile))
+	fmt.Fprintf(os.Stdout, "  updated: %s\n", filepath.Join(destDir, lockfile.File))
 	return nil
 }
 

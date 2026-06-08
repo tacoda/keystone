@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/tacoda/keystone/internal/framework/loader"
+	"github.com/tacoda/keystone/internal/framework/lockfile"
 	"github.com/tacoda/keystone/internal/framework/manifest"
 )
 
@@ -82,7 +83,7 @@ func runPolicyAdd(args []string) error {
 	if _, exists := lf.Policies[mf.Name]; exists {
 		return fmt.Errorf(
 			"policy %q is already installed (recorded in %s); use `keystone policy update %s` to re-resolve or change the ref",
-			mf.Name, KeystoneLockfile, mf.Name,
+			mf.Name, lockfile.File, mf.Name,
 		)
 	}
 
@@ -96,12 +97,12 @@ func runPolicyAdd(args []string) error {
 	}
 
 	namespaceDir := filepath.Join("harness", "policies", mf.Namespace())
-	fileHashes, err := hashFilesUnder(absDir, namespaceDir)
+	fileHashes, err := lockfile.HashFilesUnder(absDir, namespaceDir)
 	if err != nil {
 		return fmt.Errorf("hash installed files: %w", err)
 	}
 
-	lf.Policies[mf.Name] = PolicyLock{
+	lf.Policies[mf.Name] = lockfile.PolicyLock{
 		SourceRef:       raw,
 		ResolvedSHA:     resolved.ResolvedSHA,
 		PolicyVersion:   mf.Version,
@@ -111,7 +112,7 @@ func runPolicyAdd(args []string) error {
 		Required:        mf.Required,
 		Files:           fileHashes,
 	}
-	if err := writeLockfile(absDir, lf); err != nil {
+	if err := lockfile.Write(absDir, lf); err != nil {
 		return err
 	}
 

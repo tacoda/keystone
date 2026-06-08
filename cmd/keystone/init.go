@@ -7,6 +7,8 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
+
+	"github.com/tacoda/keystone/internal/framework/lockfile"
 )
 
 func runInit(args []string, assets embed.FS) error {
@@ -137,10 +139,10 @@ func initializeLockfile(destDir string, agents []string) error {
 			seen[a] = true
 		}
 	}
-	if err := writeLockfile(destDir, lf); err != nil {
+	if err := lockfile.Write(destDir, lf); err != nil {
 		return err
 	}
-	fmt.Fprintf(os.Stdout, "  wrote: %s\n", filepath.Join(destDir, KeystoneLockfile))
+	fmt.Fprintf(os.Stdout, "  wrote: %s\n", filepath.Join(destDir, lockfile.File))
 	return nil
 }
 
