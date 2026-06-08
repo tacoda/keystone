@@ -1,6 +1,6 @@
 # Keystone 1.0 — Harness Framework Plan
 
-**Status:** Approved · Phases 0–2 complete · Phase 3 next
+**Status:** Approved · Phases 0–3 complete · Phase 4 next
 **Last updated:** 2026-06-08
 
 Convert Keystone from a "harness installer with org policy plugins" into a **harness framework**: a small, stable Go runtime with Rails-style conventions for project content, and a vendored, read-only plugin system for sharing policy across projects. 1.0 is a clean break from 0.x — no backward-compatibility shims.
@@ -12,7 +12,7 @@ Convert Keystone from a "harness installer with org policy plugins" into a **har
 | 0 — Foundation & decision log | 0.14.0 | ✅ Complete (2026-06-08, commit `6b6295f`) |
 | 1 — Framework/client boundary + YAML→JSON sweep | 0.15.0 | ✅ Complete (2026-06-08, 6 sub-commits + 1 fixup) |
 | 2 — Convention-scaffolded defaults | 0.16.0 | ✅ Complete (2026-06-08, 5 sub-commits) |
-| 3 — Vendored read-only plugins | 0.17.0 | ⏳ Pending |
+| 3 — Vendored read-only plugins | 0.17.0 | ✅ Complete (2026-06-08, 8 sub-commits) |
 | 4 — Conventions, generators, doctor | 0.18.0 | ⏳ Pending |
 | 5 — Context budgeting | 0.19.0 | ⏳ Pending |
 | 6 — Hardening, upgrade guide, 1.0 | 1.0.0 | ⏳ Pending |
@@ -271,9 +271,21 @@ Diverged from the originally drafted scope in two ways, both at user direction:
 
 ### Phase 3 — Vendored read-only plugins (target: 0.17.0)
 
-**Status:** ⏳ Pending.
+**Status:** ✅ Complete (2026-06-08). Eight sub-commits:
+- `80fdcc9` — `keystone.json` data model + shorthand source format (`tacoda/tacoda-org@0.2.0`).
+- `2cd8de4` — `lockfile.Plugins` field; drop transitional `KeystoneInfo.HarnessRoot` (now lives in `keystone.json`).
+- `7da637f` — `internal/framework/plugins/` (Fetch + content-addressable cache, Install with per-file hashes, Verify, Reset).
+- `0d9e78c` — refactor: centralize harness-root resolution (`keystone.json` → flag → default); remove policy CLI.
+- `36894af` — rename `migrate` → `patch` across the codebase (cmd, package, schema, templates, embed comments). `keystone migrate` prints a rename notice.
+- `d4db3b5` — `keystone install`, `keystone plugin add|update|remove`. Shorthand parser, default-name derivation, top-level tree append, idempotent re-install.
+- `af92007` — loader cascade refactored against the plugin tree (no more tier enum); new `keystone verify` runs drift detection + strict-cascade reporting with path context (`acme-org > acme-platform`).
+- `167ed05` — `keystone init` writes `keystone.json` and ensures `<harness-root>/plugins/` is in `.gitignore`.
 
-**Scope.** Replace the flat Org/Team/Project tier semantics with the nested plugin tree declared in `keystone.json`. Build the vendor flow: fetch → hash → write → verify-on-load → drift-reset.
+Diverged from the originally drafted scope in two user-directed ways:
+- **Shorthand source format**: `[<host>/]<owner>/<repo>@<version>` instead of the prior `git+<url>#<rev>`. Default host is `github.com`; per-source override by writing the host explicitly.
+- **`migrate` → `patch` rename**: the framework's notion of a versioned forward-only change is now called a `patch`, reflecting its narrowed 1.0 scope (config-schema bumps; project content is git-tracked).
+
+**Scope (original).** Replace the flat Org/Team/Project tier semantics with the nested plugin tree declared in `keystone.json`. Build the vendor flow: fetch → hash → write → verify-on-load → drift-reset.
 
 **Deliverables.**
 - `keystone.json` consumer-side schema finalized at `docs/schemas/keystone.json.schema.json`.
