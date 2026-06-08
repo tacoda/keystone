@@ -60,18 +60,18 @@ func printUsage(w *os.File) {
 
 Usage:
   keystone init [<dir>] [flags]
-  keystone target add <agent>[,<agent>...] [--dir <path>]
-  keystone policy add <ref> [--dir <path>]
-  keystone policy update <name> [<new-ref>] [--dir <path>] [--force]
-  keystone migrate [<dir>] [--apply|-y] [--dry-run] [--from <version>]
+  keystone target add <agent>[,<agent>...] [--dir <path>] [--harness-root <name>]
+  keystone policy add <ref> [--dir <path>] [--harness-root <name>]
+  keystone policy update <name> [<new-ref>] [--dir <path>] [--harness-root <name>] [--force]
+  keystone migrate [<dir>] [--apply|-y] [--dry-run] [--from <version>] [--harness-root <name>]
   keystone options
   keystone version
   keystone help
 
 Commands:
-  init       Scaffold harness/ and the agent menu file(s) into <dir> (default: .)
-  target     Manage agent targets installed under harness/adapters/ (see 'target help')
-  policy     Manage org policies installed under harness/policies/ (see 'policy help')
+  init       Scaffold the harness folder and the agent menu file(s) into <dir> (default: .)
+  target     Manage agent targets installed under <harness-root>/adapters/ (see 'target help')
+  policy     Manage org policies installed under <harness-root>/policies/ (see 'policy help')
   migrate    Apply pending harness migrations to an existing install
   options    Print the allowed labels for every option flag
   version    Print the binary version
@@ -82,8 +82,15 @@ Behavior:
   (via huh) for each missing option. When stdin is not a TTY, the agent
   must be supplied via --agent (or detected); other options stay unset.
 
+  Existing harness folders are kept intact by default — only new files are
+  written. Pass --reset --i-understand-this-is-destructive to wipe and
+  rewrite an existing harness.
+
 Flags for init:
-  --force          Overwrite an existing harness/ in <dir> without prompting.
+  --reset                              Wipe the existing harness and rewrite from
+                                       templates. Requires the confirm flag below.
+  --i-understand-this-is-destructive   Pair with --reset to confirm the wipe.
+  --harness-root <name>                Folder name for the harness (default: harness).
 
   --agent <label>             Agent target to install. Detected from marker
                               files if unset.
@@ -91,7 +98,8 @@ Flags for init:
   --architecture <a,b,...>    Architecture preference(s) — comma-separated.
   --testing <a,b,...>         Testing approach(es) — comma-separated.
   --compliance <a,...>        Compliance scope — comma-separated.
-  --policy <ref>              Install an org policy into harness/policies/. Repeatable.
+  --starter <a,b,...>         Starter content pack(s) — e.g. universal-principles.
+  --policy <ref>              Install an org policy. Repeatable.
                               v1 supports git+<url>[#<rev>]:
                                 --policy git+https://github.com/acme/policy.git#v1.2.0
 

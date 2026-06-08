@@ -62,17 +62,28 @@ func runInit(args []string, assets fs.FS) error {
 	preflight(absDir)
 
 	harnessDest := filepath.Join(absDir, flags.harnessRoot)
+	harnessExists := false
 	if _, err := os.Stat(harnessDest); err == nil {
-		if !flags.force {
-			return fmt.Errorf("%s already exists; pass --force to overwrite", harnessDest)
-		}
-		fmt.Fprintf(os.Stdout, "▸ overwriting existing %s/\n", flags.harnessRoot)
+		harnessExists = true
 	} else if !os.IsNotExist(err) {
 		return err
 	}
 
+	mode := skipIfExists
+	if flags.reset {
+		if harnessExists {
+			fmt.Fprintf(os.Stdout, "▸ --reset: removing existing %s/\n", harnessDest)
+			if err := os.RemoveAll(harnessDest); err != nil {
+				return fmt.Errorf("reset harness: %w", err)
+			}
+		}
+		mode = overwrite
+	} else if harnessExists {
+		fmt.Fprintf(os.Stdout, "▸ %s/ already exists — writing only new files (existing files are kept; pass --reset to rewrite)\n", harnessDest)
+	}
+
 	fmt.Fprintf(os.Stdout, "▸ installing corpus to %s\n", harnessDest)
-	if err := copyTree(assets, "harness", harnessDest, overwrite); err != nil {
+	if err := copyTree(assets, "harness", harnessDest, mode); err != nil {
 		return fmt.Errorf("copy harness: %w", err)
 	}
 

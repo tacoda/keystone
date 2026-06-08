@@ -12,7 +12,8 @@ import (
 // for interactively, or left blank (depending on category and TTY).
 type initFlags struct {
 	dir         string
-	force       bool
+	reset       bool // --reset: destructive overwrite of an existing harness
+	confirm     bool // --i-understand-this-is-destructive: pairs with --reset
 	harnessRoot string
 
 	// selections: category ID → list of chosen labels.
@@ -49,8 +50,15 @@ func parseInitArgs(args []string) (*initFlags, error) {
 	for i := 0; i < len(args); i++ {
 		a := args[i]
 		switch {
+		case a == "--reset":
+			flags.reset = true
+
+		case a == "--i-understand-this-is-destructive":
+			flags.confirm = true
+
 		case a == "--force" || a == "-force":
-			flags.force = true
+			return nil, fmt.Errorf("--force was removed in 1.0; the default now leaves existing files in place. " +
+				"To destructively rewrite an existing harness, pass --reset --i-understand-this-is-destructive.")
 
 		case a == "--policy":
 			// --policy <ref> — repeatable, free-form (not a category).
@@ -117,6 +125,14 @@ func parseInitArgs(args []string) (*initFlags, error) {
 
 	if flags.harnessRoot == "" {
 		return nil, fmt.Errorf("--harness-root cannot be empty")
+	}
+
+	if flags.reset && !flags.confirm {
+		return nil, fmt.Errorf("--reset is destructive (it removes and rewrites the existing harness). " +
+			"Re-run with --reset --i-understand-this-is-destructive to confirm.")
+	}
+	if flags.confirm && !flags.reset {
+		return nil, fmt.Errorf("--i-understand-this-is-destructive only applies alongside --reset")
 	}
 
 	return flags, nil
