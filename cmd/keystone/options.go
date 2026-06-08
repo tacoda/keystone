@@ -107,6 +107,15 @@ var categories = []Category{
 			{"none", "None applicable"},
 		},
 	},
+	{
+		ID:          "starter",
+		Label:       "Starter content",
+		Description: "Opt-in opinion packs the installer can drop into harness/. Multiple allowed; skip if you want a blank slate.",
+		MultiSelect: true,
+		Values: []OptionValue{
+			{"universal-principles", "Engineering principles corpus + guides (SOLID, TDD, BDD, naming, error handling, ...)"},
+		},
+	},
 }
 
 // categoryByID looks up a category. Returns nil if not found.
