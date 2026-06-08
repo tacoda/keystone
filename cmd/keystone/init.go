@@ -116,10 +116,51 @@ func runInit(args []string, assets fs.FS) error {
 		return fmt.Errorf("write install profile: %w", err)
 	}
 
+	if err := reportAmbientLoad(absDir, flags.harnessRoot); err != nil {
+		// Non-fatal: budget reporting is a nicety, not a precondition.
+		fmt.Fprintf(os.Stderr, "! ambient-load report skipped: %v\n", err)
+	}
+
 	for _, agent := range agents {
 		printAgentWarnings(agent, flags.harnessRoot)
 	}
 	printNextSteps(agents, flags.harnessRoot)
+	return nil
+}
+
+// reportAmbientLoad prints a one-line per-port token count after a fresh
+// install. Gives the user an at-a-glance sense of how heavy the install
+// is before they start adding plugins or custom content. Honors
+// keystone.json's budgets block (just-written by init), so users with a
+// pre-existing budgets section see the over-budget warning surfaced on
+// the first run too.
+func reportAmbientLoad(projectDir, harnessRoot string) error {
+	alloc, err := walkHarnessBudget(projectDir, harnessRoot)
+	if err != nil {
+		return err
+	}
+	cfg, _ := config.ReadProjectConfig(projectDir)
+	reps := alloc.Report(cfg, 0)
+	if len(reps) == 0 {
+		return nil
+	}
+	total := 0
+	for _, r := range reps {
+		total += r.Tokens
+	}
+	fmt.Fprintf(os.Stdout, "\n▸ ambient load: %d tokens across %d port(s)\n", total, len(reps))
+	for _, r := range reps {
+		suffix := ""
+		if r.MaxTokens > 0 {
+			if r.IsOverBudget() {
+				suffix = fmt.Sprintf(" (over budget by %d)", r.OverBy)
+			} else {
+				suffix = fmt.Sprintf(" (cap %d, %d%% used)", r.MaxTokens, 100*r.Tokens/r.MaxTokens)
+			}
+		}
+		fmt.Fprintf(os.Stdout, "    %-10s %d%s\n", r.Port, r.Tokens, suffix)
+	}
+	fmt.Fprintln(os.Stdout, "  (run `keystone doctor --budget` later for top contributors per port)")
 	return nil
 }
 
