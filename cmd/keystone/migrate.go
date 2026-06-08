@@ -7,6 +7,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/tacoda/keystone/internal/framework/migrate"
 )
 
 type migrateFlags struct {
@@ -45,7 +47,7 @@ func runMigrate(args []string, assets embed.FS) error {
 		return nil
 	}
 
-	migrations, err := loadMigrations(assets, from)
+	migrations, err := migrate.Load(assets, from)
 	if err != nil {
 		return fmt.Errorf("load migrations: %w", err)
 	}
@@ -103,10 +105,10 @@ func runMigrate(args []string, assets embed.FS) error {
 
 type versionGroup struct {
 	version    string
-	migrations []Migration
+	migrations []migrate.Migration
 }
 
-func groupByVersion(ms []Migration) []versionGroup {
+func groupByVersion(ms []migrate.Migration) []versionGroup {
 	var out []versionGroup
 	for _, m := range ms {
 		if len(out) == 0 || out[len(out)-1].version != m.Version {
@@ -117,7 +119,7 @@ func groupByVersion(ms []Migration) []versionGroup {
 	return out
 }
 
-func processMigration(m Migration, destDir string, flags *migrateFlags, reader *bufio.Reader, tty bool, quit *bool) error {
+func processMigration(m migrate.Migration, destDir string, flags *migrateFlags, reader *bufio.Reader, tty bool, quit *bool) error {
 	fmt.Fprintf(os.Stdout, "▸ %s/%s", m.Version, m.ID)
 	if m.Description != "" {
 		fmt.Fprintf(os.Stdout, " — %s", m.Description)
@@ -125,17 +127,17 @@ func processMigration(m Migration, destDir string, flags *migrateFlags, reader *
 	fmt.Fprintln(os.Stdout)
 
 	for i, op := range m.Operations {
-		res, err := planOperation(op, destDir)
+		res, err := migrate.PlanOperation(op, destDir)
 		if err != nil {
 			return fmt.Errorf("%s op %d: %w", m.SourcePath, i+1, err)
 		}
 		label := fmt.Sprintf("  [%d/%d] %s", i+1, len(m.Operations), op.Path)
-		switch res.status {
-		case opNoop:
-			fmt.Fprintf(os.Stdout, "%s  (no change — %s)\n", label, res.note)
+		switch res.Status {
+		case migrate.OpNoop:
+			fmt.Fprintf(os.Stdout, "%s  (no change — %s)\n", label, res.Note)
 			continue
-		case opConflict:
-			fmt.Fprintf(os.Stdout, "%s\n    ! conflict: %s\n", label, res.note)
+		case migrate.OpConflict:
+			fmt.Fprintf(os.Stdout, "%s\n    ! conflict: %s\n", label, res.Note)
 			continue
 		}
 
@@ -170,16 +172,16 @@ func processMigration(m Migration, destDir string, flags *migrateFlags, reader *
 		}
 
 		if apply {
-			if err := writeOpResult(res); err != nil {
+			if err := migrate.WriteOpResult(res); err != nil {
 				return err
 			}
-			switch res.op.Type {
+			switch res.Op.Type {
 			case "move_dir", "move_file":
-				fmt.Fprintf(os.Stdout, "    ✓ moved %s → %s\n", res.op.Path, res.op.To)
+				fmt.Fprintf(os.Stdout, "    ✓ moved %s → %s\n", res.Op.Path, res.Op.To)
 			case "delete_dir", "delete_file":
-				fmt.Fprintf(os.Stdout, "    ✓ removed %s\n", res.op.Path)
+				fmt.Fprintf(os.Stdout, "    ✓ removed %s\n", res.Op.Path)
 			default:
-				fmt.Fprintf(os.Stdout, "    ✓ wrote %s\n", res.targetPath)
+				fmt.Fprintf(os.Stdout, "    ✓ wrote %s\n", res.TargetPath)
 			}
 		}
 	}
@@ -190,76 +192,58 @@ func processMigration(m Migration, destDir string, flags *migrateFlags, reader *
 // printOpPreview renders a small, op-type-aware diff. For creates we show the
 // proposed content with `+` prefix; for changes we show the relevant slice
 // (added section, frontmatter line, or before/after match block).
-func printOpPreview(res opResult) {
-	switch res.op.Type {
+func printOpPreview(res migrate.OpResult) {
+	switch res.Op.Type {
 	case "add_file":
 		fmt.Fprintln(os.Stdout, "    add_file (new):")
-		printPrefixed(string(res.proposed), "    + ")
+		printPrefixed(string(res.Proposed), "    + ")
 	case "frontmatter_set":
-		fmt.Fprintf(os.Stdout, "    frontmatter_set: %s = %s\n", res.op.Key, res.op.Value)
-		fmt.Fprintf(os.Stdout, "    + %s: %s\n", res.op.Key, res.op.Value)
+		fmt.Fprintf(os.Stdout, "    frontmatter_set: %s = %s\n", res.Op.Key, res.Op.Value)
+		fmt.Fprintf(os.Stdout, "    + %s: %s\n", res.Op.Key, res.Op.Value)
 	case "ensure_section":
-		fmt.Fprintf(os.Stdout, "    ensure_section: %q\n", res.op.Heading)
-		printPrefixed(strings.TrimRight(res.op.Heading, "\n")+"\n\n"+strings.TrimRight(res.op.Body, "\n")+"\n", "    + ")
+		fmt.Fprintf(os.Stdout, "    ensure_section: %q\n", res.Op.Heading)
+		printPrefixed(strings.TrimRight(res.Op.Heading, "\n")+"\n\n"+strings.TrimRight(res.Op.Body, "\n")+"\n", "    + ")
 	case "replace_block":
-		fmt.Fprintf(os.Stdout, "    replace_block in %s:\n", res.op.Path)
-		printPrefixed(res.op.Match, "    - ")
-		printPrefixed(res.op.Replacement, "    + ")
+		fmt.Fprintf(os.Stdout, "    replace_block in %s:\n", res.Op.Path)
+		printPrefixed(res.Op.Match, "    - ")
+		printPrefixed(res.Op.Replacement, "    + ")
 	case "move_dir":
-		fmt.Fprintf(os.Stdout, "    move_dir: %s → %s\n", res.op.Path, res.op.To)
-		for _, p := range res.movePlans {
-			switch p.status {
-			case opCreate:
-				fmt.Fprintf(os.Stdout, "    + %s\n", p.relPath)
-			case opConflict:
-				fmt.Fprintf(os.Stdout, "    ! %s (%s)\n", p.relPath, p.note)
-			case opNoop:
-				fmt.Fprintf(os.Stdout, "      %s (already at destination)\n", p.relPath)
+		fmt.Fprintf(os.Stdout, "    move_dir: %s → %s\n", res.Op.Path, res.Op.To)
+		for _, p := range res.MovePlans {
+			switch p.Status {
+			case migrate.OpCreate:
+				fmt.Fprintf(os.Stdout, "    + %s\n", p.RelPath)
+			case migrate.OpConflict:
+				fmt.Fprintf(os.Stdout, "    ! %s (%s)\n", p.RelPath, p.Note)
+			case migrate.OpNoop:
+				fmt.Fprintf(os.Stdout, "      %s (already at destination)\n", p.RelPath)
 			}
 		}
 	case "move_file":
-		fmt.Fprintf(os.Stdout, "    move_file: %s → %s\n", res.op.Path, res.op.To)
-		if len(res.movePlans) == 1 {
-			p := res.movePlans[0]
-			switch p.status {
-			case opCreate:
-				fmt.Fprintf(os.Stdout, "    + %s\n", p.relPath)
-			case opConflict:
-				fmt.Fprintf(os.Stdout, "    ! %s (%s)\n", p.relPath, p.note)
-			case opNoop:
-				fmt.Fprintf(os.Stdout, "      %s (already at destination)\n", p.relPath)
+		fmt.Fprintf(os.Stdout, "    move_file: %s → %s\n", res.Op.Path, res.Op.To)
+		if len(res.MovePlans) == 1 {
+			p := res.MovePlans[0]
+			switch p.Status {
+			case migrate.OpCreate:
+				fmt.Fprintf(os.Stdout, "    + %s\n", p.RelPath)
+			case migrate.OpConflict:
+				fmt.Fprintf(os.Stdout, "    ! %s (%s)\n", p.RelPath, p.Note)
+			case migrate.OpNoop:
+				fmt.Fprintf(os.Stdout, "      %s (already at destination)\n", p.RelPath)
 			}
 		}
 	case "delete_dir":
-		fmt.Fprintf(os.Stdout, "    delete_dir: %s\n", res.op.Path)
-		fmt.Fprintf(os.Stdout, "    - %s/\n", res.op.Path)
+		fmt.Fprintf(os.Stdout, "    delete_dir: %s\n", res.Op.Path)
+		fmt.Fprintf(os.Stdout, "    - %s/\n", res.Op.Path)
 	case "delete_file":
-		fmt.Fprintf(os.Stdout, "    delete_file: %s\n", res.op.Path)
-		fmt.Fprintf(os.Stdout, "    - %s\n", res.op.Path)
+		fmt.Fprintf(os.Stdout, "    delete_file: %s\n", res.Op.Path)
+		fmt.Fprintf(os.Stdout, "    - %s\n", res.Op.Path)
 	}
 }
 
 func printPrefixed(s, prefix string) {
 	for _, line := range strings.Split(strings.TrimRight(s, "\n"), "\n") {
 		fmt.Fprintf(os.Stdout, "%s%s\n", prefix, line)
-	}
-}
-
-func writeOpResult(res opResult) error {
-	switch res.op.Type {
-	case "move_dir":
-		return applyMoveDir(res)
-	case "move_file":
-		return applyMoveFile(res)
-	case "delete_dir":
-		return applyDeleteDir(res)
-	case "delete_file":
-		return applyDeleteFile(res)
-	default:
-		if err := os.MkdirAll(filepath.Dir(res.targetPath), 0o755); err != nil {
-			return err
-		}
-		return os.WriteFile(res.targetPath, res.proposed, 0o644)
 	}
 }
 

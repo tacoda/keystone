@@ -1,71 +1,23 @@
-package main
+package migrate
 
 import (
-	"embed"
+	"encoding/json"
 	"fmt"
 	"io/fs"
 	"path"
 	"sort"
 	"strconv"
 	"strings"
-
-	"gopkg.in/yaml.v3"
 )
 
-// Migration is one loaded migration file. ID is the filename without
-// extension; Version is the parent directory name (e.g. "0.6.0").
-type Migration struct {
-	Version    string
-	ID         string
-	SourcePath string // path within the embedded FS, for error messages
-
-	Description string      `yaml:"description"`
-	Operations  []Operation `yaml:"operations"`
-}
-
-// Operation is the raw shape of a single op in a migration file. Op-specific
-// fields are union-style; only the ones matching Type are populated.
-type Operation struct {
-	Type string `yaml:"type"`
-	Path string `yaml:"path"`
-
-	// add_file
-	Content string `yaml:"content,omitempty"`
-
-	// frontmatter_set
-	Key   string `yaml:"key,omitempty"`
-	Value string `yaml:"value,omitempty"`
-
-	// ensure_section
-	AfterHeading string `yaml:"after_heading,omitempty"`
-	Heading      string `yaml:"heading,omitempty"`
-	Body         string `yaml:"body,omitempty"`
-
-	// replace_block (reuses Heading)
-	Match       string `yaml:"match,omitempty"`
-	Replacement string `yaml:"replacement,omitempty"`
-
-	// move_dir: relocate every file under Path (source) into To (destination),
-	// preserving subpath structure. Idempotent — already-moved files no-op;
-	// destination files with diverged content surface as conflicts. After all
-	// files are moved, the source directory is removed if empty.
-	//
-	// move_file: relocate a single file from Path to To. Same idempotency
-	// semantics as move_dir, scoped to one file.
-	//
-	// delete_dir: remove Path if it is empty (after a prior move_dir, for
-	// instance). Conflicts if Path still contains files.
-	//
-	// delete_file: remove the single file at Path. Idempotent — missing
-	// target no-ops.
-	To string `yaml:"to,omitempty"`
-}
-
-// loadMigrations walks the embedded migrations/ tree and returns every
+// Load walks the embedded migrations/ tree on assets and returns every
 // migration whose version directory is strictly greater than fromVersion,
 // sorted by (version asc, filename asc). fromVersion may be empty or "dev";
 // "dev" returns nothing (callers should short-circuit before calling).
-func loadMigrations(assets embed.FS, fromVersion string) ([]Migration, error) {
+//
+// Migration files must be JSON under migrations/<version>/<NNN>-<name>.json.
+// Files with other extensions are ignored.
+func Load(assets fs.FS, fromVersion string) ([]Migration, error) {
 	versionDirs, err := fs.ReadDir(assets, "migrations")
 	if err != nil {
 		return nil, err
@@ -95,7 +47,7 @@ func loadMigrations(assets embed.FS, fromVersion string) ([]Migration, error) {
 				continue
 			}
 			n := e.Name()
-			if !strings.HasSuffix(n, ".yaml") && !strings.HasSuffix(n, ".yml") {
+			if !strings.HasSuffix(n, ".json") {
 				continue
 			}
 			names = append(names, n)
@@ -109,11 +61,11 @@ func loadMigrations(assets embed.FS, fromVersion string) ([]Migration, error) {
 				return nil, fmt.Errorf("read %s: %w", full, err)
 			}
 			var m Migration
-			if err := yaml.Unmarshal(data, &m); err != nil {
+			if err := json.Unmarshal(data, &m); err != nil {
 				return nil, fmt.Errorf("parse %s: %w", full, err)
 			}
 			m.Version = v
-			m.ID = strings.TrimSuffix(strings.TrimSuffix(n, ".yaml"), ".yml")
+			m.ID = strings.TrimSuffix(n, ".json")
 			m.SourcePath = full
 			out = append(out, m)
 		}
