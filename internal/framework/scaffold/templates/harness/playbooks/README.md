@@ -23,6 +23,6 @@ The agent reads its menu file (`CLAUDE.md`, `AGENTS.md`, etc.) on session start.
 
 ## Override cascade
 
-For any `<name>.md`, the file that wins at runtime is from the highest-priority tier present, in order: **project → team → org**. A project playbook at `harness/playbooks/<name>.md` overrides the same-basename file in any team or org policy unless the higher tier declared that item `strict`.
+For any `<name>.md`, the project's `harness/playbooks/<name>.md` always wins by default. Among plugins, outer plugins (shallower in `keystone.json`) win over plugins nested inside them. A plugin can mark an item `strict` to make it absolute — nothing else can override a strict item, not the project, not any other plugin. `keystone verify` reports a violation if any layer attempts to shadow a strict item.
 
-The same cascade applies to **actions** (`harness/actions/`) and **guides** (`harness/guides/`). **Corpus** is background reference loaded on-demand by forward-link from a guide; it doesn't cascade and is never strict-able. See [`harness/policies/README.md`](policies/README.md) for the full rule and `keystone policy verify` behavior.
+The same cascade applies to **actions** (`harness/actions/`) and **guides** (`harness/guides/`). **Corpus** is background reference loaded on-demand by forward-link from a guide; it doesn't cascade and is never strict-able.

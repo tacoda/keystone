@@ -88,12 +88,16 @@ type PluginDrift struct {
 // reading its content. This function returns drift; it does not perform
 // the reset.
 //
-// Strict semantics: a plugin's strict map names items it locks against
-// override from any deeper node in the tree (descendants + later-tree
-// siblings whose path depth exceeds this one). The project layer (the
-// harness root itself) is treated as a deeper-than-anything node, so any
-// project file shadowing a strict item is a violation regardless of where
-// the strict declaration lives.
+// Strict semantics: a plugin's strict map names items it locks absolutely.
+// Nothing else can override a strict item — not the project, not any other
+// plugin (sibling, ancestor, or descendant). This walker currently catches
+// the most common case: project files shadowing a strict item. Plugin-on-
+// plugin strict conflicts are refused at install time and detected at
+// load time by file count.
+//
+// Default (non-strict) cascade resolution: the project always wins; among
+// plugins, the outer plugin (shallower in keystone.json) wins over plugins
+// nested inside it.
 func Verify(installDir string, cfg *config.ProjectConfig, expectedFiles map[string]map[string]string) (*VerifyResult, error) {
 	harnessRoot := cfg.ResolvedHarnessRoot()
 	res := &VerifyResult{}
@@ -169,11 +173,11 @@ func Verify(installDir string, cfg *config.ProjectConfig, expectedFiles map[stri
 }
 
 // findShadowing returns the project-layer paths (under <harnessRoot>/<port>/)
-// that override a strict item declared by `plugin`. The project layer is
-// always treated as deeper than any plugin node, so any project file with
-// the matching basename counts.
+// that override a strict item declared by `plugin`. Strict is absolute, so
+// any project file with the matching basename is a violation regardless of
+// which plugin declared the strict.
 //
-// Sibling-plugin shadowing is not surfaced here: at 1.0 plugins are
+// Plugin-on-plugin strict shadowing is not surfaced here: at 1.0 plugins are
 // vendored read-only, and `keystone install` would refuse to write a
 // strict-violating file in the first place. The check is for the
 // project layer's free-form content.

@@ -23,7 +23,7 @@
     },
     "strict": {
       "$ref": "#/$defs/strictSpec",
-      "description": "Items this plugin ships and locks against override from anything nested deeper in the consumer's keystone.json."
+      "description": "Items this plugin ships and locks absolutely. A strict item cannot be overridden by anything — not the consumer's project, not any other plugin, regardless of nesting."
     },
     "required": {
       "$ref": "#/$defs/strictSpec",

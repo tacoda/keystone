@@ -1,7 +1,8 @@
 // Package loader resolves <port>/<name> against a cascade of project +
-// plugin layers. The cascade is the ordered set of content sources the
-// framework walks at session start: the project's harness/ comes first, then
-// each plugin in pre-order tree-walk order from keystone.json's plugins[].
+// plugin layers. The project's harness/ always wins by default; among
+// plugins, outer plugins (shallower in keystone.json's plugins[] tree) win
+// over plugins nested inside them. A plugin's strict declarations lock items
+// absolutely — nothing else can override them.
 //
 // The Loader interface is the framework's read-side abstraction over the
 // cascade. Phase 3 will wire it into the runtime once vendored plugins land;
@@ -20,8 +21,9 @@ type Plugin struct {
 }
 
 // Cascade is the ordered set of plugin layers, with the project at index 0
-// followed by plugins in pre-order tree-walk order. The Loader resolves
-// against Project first, then walks Plugins in slice order.
+// followed by plugins in pre-order tree-walk order (outer plugins before
+// their children). The Loader resolves against Project first; among plugins,
+// the first match wins (outer over inner).
 type Cascade struct {
 	Project Plugin
 	Plugins []Plugin

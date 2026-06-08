@@ -36,9 +36,9 @@ Each file:
 
 ## Cascade behavior
 
-Same as other ports: project's `harness/adapters/<agent>/...` wins. Plugins can ship adapters too (e.g., an org-specific Claude Code adapter); project overrides always win.
+Same as other ports: project's `harness/adapters/<agent>/...` always wins by default. Plugins can ship adapters too (e.g., an org-specific Claude Code adapter); among plugins, outer plugins win over plugins nested inside them.
 
-`strict.adapters: ["<agent>"]` blocks deeper nodes from shipping a competing adapter for that agent.
+`strict.adapters: ["<agent>"]` on any plugin makes that adapter absolute — nothing else (project or any other plugin) can ship a competing adapter for that agent.
 
 ## Per-agent menu generation
 

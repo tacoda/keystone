@@ -39,7 +39,7 @@ What "stable" means for a port:
 - **Path convention** for the port stays put. Guides at `<harness-root>/guides/<topic>/<name>.md` are forever.
 - **Required frontmatter keys** keep their names and meanings. Optional keys can be added.
 - **Required sections** (e.g. sensors' `## Command`, `## Interpretation`, `## Remediation`) keep their names.
-- **Cascade behavior** is fixed — project beats plugin; pre-order walk of the plugin tree; `strict` blocks downward.
+- **Cascade behavior** is fixed — project wins by default; among plugins, outer (shallower in `keystone.json`) wins over plugins nested inside them; a plugin's `strict` declaration locks the item absolutely so nothing (project or any other plugin) can override it.
 
 ### CLI surface
 These commands and their flags don't disappear or change semantics in 1.x:

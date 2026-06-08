@@ -2,6 +2,25 @@
 
 All notable changes to keystone are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); the project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.2] — 2026-06-08
+
+Cascade-model wording fix. The behavior the code has always implemented didn't match the prose in the templates, port docs, schemas, and Go comments — which all described an older "deeper wins, outer locks via strict" model. The actual model is: **project wins by default; among plugins, outer wins over inner; `strict` locks the item absolutely so nothing can override it.** This release aligns all documentation and template prose with that model.
+
+### Changed
+
+- All seven agent activation templates (`internal/framework/scaffold/templates/targets/*/...`) now describe the cascade as "project wins by default; outer plugins beat nested plugins; strict locks absolutely."
+- The two scaffold READMEs (`harness/playbooks/README.md`, `harness/actions/README.md`) rewrote their "Override cascade" sections to match.
+- Port contracts (`docs/ports/{guide,corpus,sensor,action,playbook,adapter}.md`) updated.
+- `docs/conventions.md` per-port `Cascade:` lines, plus the "Sensor depth limit" section.
+- `docs/compatibility.md` cascade-stability promise rewritten.
+- `docs/schemas/keystone-plugin.json.schema.json` and `docs/schemas/keystone.json.schema.json` strict/precedence descriptions updated.
+- Go docstrings in `loader/cascade.go`, `loader/types.go`, and `config/projectconfig.go`.
+- Removed dead `tacoda-team` reference and stale `harness/policies/<team>/` paths from the historical 0.x model where they still surfaced.
+
+### Behavior
+
+- No behavior changes. The cascade walker, `findShadowing`, the depth-gate `DepthViolation`, and `keystone verify` all do exactly what they did in 1.0.1 — the docs just now describe it accurately.
+
 ## [1.0.1] — 2026-06-08
 
 Plugin model cleanup. Tier labels (`org` / `team`) were the last carryover from the 0.x policy model and weren't load-bearing in 1.0 — precedence is already determined by `keystone.json` nesting. Removed the field outright and replaced the sensor restriction with a structural depth gate that means the same thing in cleaner terms.

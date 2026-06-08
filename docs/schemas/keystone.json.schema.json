@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://keystone.tacoda.dev/schemas/keystone.json",
   "title": "Keystone Consumer Config",
-  "description": "Top-level keystone.json at the consumer repo root. Records the harness folder name, the framework version pin, and the nested plugin tree. Pre-order walk over plugins[] produces the cascade priority list; the project layer (harness root contents) always sits in front. See PLAN-1.0.md §3 for full semantics.",
+  "description": "Top-level keystone.json at the consumer repo root. Records the harness folder name, the framework version pin, and the nested plugin tree. The project layer (harness root contents) wins by default; among plugins, outer (shallower in the tree) wins over plugins nested inside; a plugin's `strict` declarations lock items absolutely. See PLAN-1.0.md §3 for full semantics.",
   "type": "object",
   "properties": {
     "version": {
@@ -21,7 +21,7 @@
     },
     "plugins": {
       "type": "array",
-      "description": "Ordered list of plugin nodes. Pre-order walk produces the cascade priority list. The project layer (the harness root) always sits at the front before the first node here.",
+      "description": "Ordered list of plugin nodes. Among plugins, outer plugins (shallower in this tree) win over plugins nested inside them. The project layer always wins by default; a plugin's `strict` declarations are the only thing that locks an item against the project.",
       "items": { "$ref": "#/$defs/pluginNode" }
     },
     "budgets": {
@@ -58,7 +58,7 @@
         },
         "strict": {
           "type": "object",
-          "description": "Per-port lock list. Blocks descendants/later-tree siblings from shipping the named items. Key is the port name (e.g. \"guides\", \"sensors\"); value is a list of item basenames (no .md extension).",
+          "description": "Per-port lock list. A strict item is absolute — nothing else (project, sibling plugins, descendant plugins) can override it. Key is the port name (e.g. \"guides\", \"sensors\"); value is a list of item basenames (no .md extension).",
           "additionalProperties": {
             "type": "array",
             "items": { "type": "string" }
@@ -66,7 +66,7 @@
         },
         "children": {
           "type": "array",
-          "description": "Child plugins nested under this one. Pre-order walk descends before moving to siblings.",
+          "description": "Child plugins nested under this one. Among plugins, this parent wins over its children for non-strict items.",
           "items": { "$ref": "#/$defs/pluginNode" }
         }
       },

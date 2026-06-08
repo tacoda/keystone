@@ -9,7 +9,7 @@ This project uses a **keystone harness**. The harness at [`harness/`](../harness
 - [`harness/adapters/github-copilot/`](../harness/adapters/github-copilot/) — Copilot bindings: native `gh` CLI integration, per-command approval mode.
 - [`harness/corpus/domain/`](../harness/corpus/domain/) — business rules for this project.
 
-**Lifecycle** — to kick off a unit of work, say "**run task on `<ticket-id>`**" (runs the **task playbook**). To invoke any single action, ask in natural language ("run verify," "do a review pass"). Org and team policies (under `harness/policies/<name>/`, manifest `tier: org` or `tier: team`) can ship playbooks, actions, and guides. Cascade is **project beats team beats org** — project files at `harness/<kind>/<name>.md` override the same-basename file from any policy above, unless a higher tier declares that item `strict`.
+**Lifecycle** — to kick off a unit of work, say "**run task on `<ticket-id>`**" (runs the **task playbook**). To invoke any single action, ask in natural language ("run verify," "do a review pass"). Plugins (vendored at `harness/plugins/<name>/`) can ship playbooks, actions, and guides. Override: your project files at `harness/<kind>/<name>.md` always win by default. Among plugins, outer plugins (shallower in `keystone.json`) win over plugins nested inside them. A plugin can mark an item `strict` to make it absolute — nothing else can override a strict item, not the project, not any other plugin.
 
 **Playbooks** ([`harness/playbooks/`](../harness/playbooks/)):
 

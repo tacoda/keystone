@@ -35,8 +35,10 @@ type ProjectConfig struct {
 }
 
 // PluginNode is one node in the nested plugin tree declared in keystone.json.
-// Children resolve in pre-order; the strict map declares per-port locks
-// scoped at this node and its descendants.
+// Among plugins, outer plugins (shallower in the tree) win over plugins
+// nested inside them for non-strict items; the project layer always wins
+// by default. The strict map declares per-port absolute locks — strict items
+// cannot be overridden by anything (project, sibling plugin, descendant).
 //
 // Source format: `[<host>/]<owner>/<repo>`. When the host is omitted (one
 // slash, no dots), DefaultPluginHost is prepended. Examples:

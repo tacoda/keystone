@@ -37,7 +37,7 @@ Flat — no topic directory. Actions are global by name across the cascade.
 
 ## Cascade behavior
 
-Same as other ports: project wins, pre-order over plugin tree, `strict.actions: [<name>]` locks downward. Exactly one file loads per `<name>`.
+Same as other ports: project wins by default; among plugins, outer plugins win over plugins nested inside them; a `strict.actions: [<name>]` declaration locks the item absolutely — nothing else (project or any other plugin) can override it. Exactly one file loads per `<name>`.
 
 ## Example
 

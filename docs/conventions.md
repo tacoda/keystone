@@ -18,7 +18,7 @@ that contains `keystone.json`.
 - **Activation:** Ambient (always loaded).
 - **Frontmatter:** none required.
 - **Required shape:** H1 title `# <Name> — rules`, body of rules, optional forward-link to paired corpus.
-- **Cascade:** project beats plugin; among plugins, first occurrence in `keystone.json` pre-order wins.
+- **Cascade:** project wins by default; among plugins, shallower (outer in `keystone.json`) wins; `strict` locks absolutely.
 - **Strict-able:** yes (per-port `strict.guides: [...]` in keystone.json).
 - **Generator:** `keystone new guide <topic>/<name>` (scaffolds guide + paired corpus stub).
 
@@ -29,7 +29,7 @@ that contains `keystone.json`.
 - **Activation:** On-demand (loaded when a guide forward-links to it).
 - **Frontmatter:** none required.
 - **Required shape:** H1 title `# <Name> — reasoning`, long-form explanation, back-link to paired guide.
-- **Cascade:** project beats plugin; pre-order over plugin tree.
+- **Cascade:** project wins by default; among plugins, shallower (outer in `keystone.json`) wins.
 - **Strict-able:** no (corpus is reference, not policy).
 
 ### Sensor
@@ -39,8 +39,8 @@ that contains `keystone.json`.
 - **Activation:** Invoked inside an action.
 - **Frontmatter:** `kind: <computational | drift | coverage | ...>` (required).
 - **Required shape:** H1 title `# Sensor: <name>`, sections `## Command`, `## Interpretation`, `## Remediation`.
-- **Cascade:** project beats plugin; pre-order; per-port depth limit (`max_depth: 2` by default).
-- **Strict-able:** yes.
+- **Cascade:** project wins by default; among plugins, shallower (outer in `keystone.json`) wins; `strict` locks absolutely. Sensors are only allowed at the project layer and at top-level plugins — nested plugins that ship sensors fail `keystone verify`.
+- **Strict-able:** yes (only at the project layer or top-level plugins, per the depth limit above).
 - **Generator:** `keystone new sensor <name>`.
 
 ### Action
@@ -50,7 +50,7 @@ that contains `keystone.json`.
 - **Activation:** Invoked by name (playbook, another action, agent menu, or `keystone <action>`).
 - **Frontmatter:** none required.
 - **Required shape:** H1 title `# Action: <name>`, sections `## Entry condition`, `## Activities`, `## Exit condition`.
-- **Cascade:** project beats plugin; pre-order.
+- **Cascade:** project wins by default; among plugins, shallower (outer in `keystone.json`) wins; `strict` locks absolutely.
 - **Strict-able:** yes.
 - **Generator:** `keystone new action <name>`.
 
@@ -61,7 +61,7 @@ that contains `keystone.json`.
 - **Activation:** Invoked by name; runs an ordered sequence of actions.
 - **Frontmatter:** none required.
 - **Required shape:** H1 title `# Playbook: <name>`, sections `## Sequence` (numbered list of action names), `## Halt conditions`.
-- **Cascade:** project beats plugin; pre-order.
+- **Cascade:** project wins by default; among plugins, shallower (outer in `keystone.json`) wins; `strict` locks absolutely.
 - **Strict-able:** yes.
 - **Generator:** `keystone new playbook <name>`.
 
@@ -72,7 +72,7 @@ that contains `keystone.json`.
 - **Activation:** Loaded at session start by the agent.
 - **Frontmatter:** none required.
 - **Required shape:** three files per agent — `lifecycle.md` (how the agent invokes playbooks/actions), `sensors.md` (sensor invocation), `activation.md` (the agent's menu file content).
-- **Cascade:** project beats plugin; pre-order.
+- **Cascade:** project wins by default; among plugins, shallower (outer in `keystone.json`) wins; `strict` locks absolutely.
 - **Strict-able:** yes (per-agent).
 - **Generator:** `keystone new adapter <agent>`.
 
@@ -239,10 +239,10 @@ new files look like without affecting already-scaffolded content.
 
 ## Sensor depth limit
 
-The `sensors` port has a default `max_depth: 2` — that is, sensors are
-permitted at the project layer and at the immediate plugin level, but
-not at deeper-nested plugins. Adjustable via `sensors.max_depth` in
-`keystone.json` (when added in Phase 5's budgets/limits section).
+Sensors are only permitted at the project layer and at top-level plugins
+in `keystone.json` (a plugin with no plugin ancestors). Plugins nested
+under another plugin that declare `strict.sensors` or ship vendored
+sensor files fail `keystone verify` with a `DepthViolation`.
 
 ## Reference
 

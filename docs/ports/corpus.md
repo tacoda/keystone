@@ -37,9 +37,9 @@ Back to the rules: [`guides/<topic>/<name>.md`](../../guides/<topic>/<name>.md).
 
 For a given `corpus/<topic>/<name>.md`:
 
-1. The project's `harness/corpus/<topic>/<name>.md` always wins.
-2. Otherwise, the first occurrence in a pre-order walk of `keystone.json`'s `plugins[]` tree wins.
-3. A `strict.corpus: [<name>]` declaration on a tree node blocks deeper nodes from shipping it. Violations fail `keystone verify`.
+1. The project's `harness/corpus/<topic>/<name>.md` always wins by default.
+2. Otherwise, among plugins, outer plugins (shallower in `keystone.json`) win over plugins nested inside them — the first occurrence in a pre-order walk of `plugins[]`.
+3. A `strict.corpus: [<name>]` declaration on any tree node makes that item absolute — nothing else can override it. `keystone verify` reports a violation if any layer attempts to shadow it.
 
 Exactly one file loads per `<topic>/<name>`.
 
