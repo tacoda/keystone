@@ -1,13 +1,16 @@
 package main
 
 import (
-	"embed"
 	"fmt"
 	"os"
+
+	"github.com/tacoda/keystone"
 )
 
-//go:embed all:harness all:targets all:optional all:migrations
-var assets embed.FS
+// assets re-exports the embedded asset filesystem owned by the root package.
+// The embed.FS lives at the repo root because //go:embed cannot reference
+// paths outside its own source file's directory tree.
+var assets = keystone.Assets
 
 var version = "dev"
 
