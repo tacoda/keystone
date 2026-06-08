@@ -1,6 +1,6 @@
 # spec
 
-**Capture intent and acceptance criteria** for a unit of work. First action on any task. Read [`harness/guides/process/spec.md`](../guides/process/spec.md) for the full discipline.
+**Capture intent and acceptance criteria** for a unit of work. First action on any task. Read [`harness/guides/process/spec.md`](guides/process/spec.md) for the full discipline.
 
 ## Inputs
 

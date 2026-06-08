@@ -4,7 +4,7 @@ last_reconciled: <YYYY-MM-DD>
 
 # Harness Debt Ledger
 
-> **Template.** The **audit** action's Pruning flywheel populates this from the [harness-debt sensor](../../sensors/harness-debt.md). Until then, leave as-is or fill in by hand.
+> **Template.** The **audit** action's Pruning flywheel populates this from the [harness-debt sensor](sensors/harness-debt.md). Until then, leave as-is or fill in by hand.
 
 Paired ledger: [`code-debt.md`](code-debt.md) — debt in the codebase. Tracked separately on purpose.
 
@@ -18,7 +18,7 @@ The debt the harness itself is carrying. When the harness gives stale or wrong g
 
 ## Categories
 
-See [`harness/sensors/harness-debt.md`](../../sensors/harness-debt.md) for category and severity definitions.
+See [`harness/sensors/harness-debt.md`](sensors/harness-debt.md) for category and severity definitions.
 
 ## How to use it
 

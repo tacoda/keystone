@@ -27,7 +27,7 @@ Each rule file:
 ```markdown
 # <Rule Set> — rules
 
-The rules from [`corpus/domain/<file>.md`](../../corpus/domain/<file>.md).
+The rules from [`corpus/domain/<file>.md`](corpus/domain/<file>.md).
 
 ## IRON LAWS
 

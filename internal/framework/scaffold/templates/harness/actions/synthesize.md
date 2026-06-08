@@ -1,6 +1,6 @@
 # synthesize
 
-**Promote learning-inbox candidates into the right corpus or guide layer.** Read [`harness/learning/README.md`](../learning/README.md).
+**Promote learning-inbox candidates into the right corpus or guide layer.** Read [`harness/learning/README.md`](learning/README.md).
 
 ## Activities
 

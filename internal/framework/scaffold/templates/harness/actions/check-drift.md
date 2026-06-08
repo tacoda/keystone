@@ -1,6 +1,6 @@
 # check-drift
 
-**Run the drift sensor on the current diff.** Compare the in-progress changes against loaded harness rules. Fast pre-verify check. Read [`harness/sensors/drift.md`](../sensors/drift.md) and [`harness/guides/process/implementation.md`](../guides/process/implementation.md).
+**Run the drift sensor on the current diff.** Compare the in-progress changes against loaded harness rules. Fast pre-verify check. Read [`harness/sensors/drift.md`](sensors/drift.md) and [`harness/guides/process/implementation.md`](guides/process/implementation.md).
 
 ## Activities
 

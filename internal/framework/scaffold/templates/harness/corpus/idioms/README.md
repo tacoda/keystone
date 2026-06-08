@@ -43,7 +43,7 @@ An idiom is split across two files — informational in `corpus/`, prescriptive 
 
 One-paragraph statement of the pattern in this stack.
 
-> **Rules extracted:** [`guides/idioms/<stack>/<idiom>.md`](../../../guides/idioms/<stack>/<idiom>.md).
+> **Rules extracted:** [`guides/idioms/<stack>/<idiom>.md`](guides/idioms/<stack>/<idiom>.md).
 
 ## How to apply
 
@@ -53,7 +53,7 @@ Concrete steps, code shape, anti-patterns to avoid.
 
 Bullet list a reviewer can run through.
 
-**Traces to:** [Principle Name](../../principles/<file>.md)
+**Traces to:** [Principle Name](principles/<file>.md)
 ```
 
 **`guides/idioms/<stack>/<idiom>.md`** — the rules:
@@ -61,7 +61,7 @@ Bullet list a reviewer can run through.
 ```markdown
 # <Idiom Name> — rules
 
-The rules from [`corpus/idioms/<stack>/<idiom>.md`](../../../corpus/idioms/<stack>/<idiom>.md).
+The rules from [`corpus/idioms/<stack>/<idiom>.md`](corpus/idioms/<stack>/<idiom>.md).
 
 ## IRON LAW
 

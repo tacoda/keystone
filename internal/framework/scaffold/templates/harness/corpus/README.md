@@ -2,7 +2,7 @@
 
 Informational reference — what the agent should *know* when the rules aren't enough. The reasoning, the literature, the anti-patterns, the lived state of the codebase.
 
-**Loaded on demand, not ambient.** The agent reaches a corpus file when it follows the forward-link from a guide, or when process explicitly references one. Rules live in [`../guides/`](../guides/README.md) and are always loaded; corpus is read only when the agent needs the *why* behind a rule, the history behind an ideal, or the anti-patterns the team has chosen to call out.
+**Loaded on demand, not ambient.** The agent reaches a corpus file when it follows the forward-link from a guide, or when process explicitly references one. Rules live in [`../guides/`](guides/README.md) and are always loaded; corpus is read only when the agent needs the *why* behind a rule, the history behind an ideal, or the anti-patterns the team has chosen to call out.
 
 ## Layers
 
@@ -12,9 +12,9 @@ Informational reference — what the agent should *know* when the rules aren't e
 | [`domain/`](domain/README.md) | What does the product do, what does it ship, what survives a release? | When following a forward-link from `guides/domain/<file>.md`, or when reasoning about scope and invariants |
 | [`state/`](state/README.md) | What is true about the codebase right now? | At the start of planning (**orient**), and whenever a sensor reads or writes state |
 
-**Engineering principles** (the universal reasoning that used to live under `corpus/principles/`) now ship inside the default policy at [`../policies/universal/corpus/principles/`](../policies/universal/) — they're a Level-3 plugin, not project-authored content.
+**Engineering principles** (the universal reasoning that used to live under `corpus/principles/`) now ship inside the default policy at [`../policies/universal/corpus/principles/`](policies/universal) — they're a Level-3 plugin, not project-authored content.
 
-Process is not represented here — the workflow phases are entirely prescriptive, so they live under [`../guides/process/`](../guides/process/README.md).
+Process is not represented here — the workflow phases are entirely prescriptive, so they live under [`../guides/process/`](guides/process/README.md).
 
 ## Pairing with guides
 
@@ -25,14 +25,14 @@ For each principle, idiom, or domain concern that has rules:
 
 Corpus files include a forward-link to the paired guide when one exists:
 
-> **Rules extracted:** [`guides/<layer>/<name>.md`](../guides/<layer>/<name>.md).
+> **Rules extracted:** [`guides/<layer>/<name>.md`](guides/<layer>/<name>.md).
 
 ## Authorship
 
 - `idioms/` — lead engineer + agent (via Learning flywheel).
 - `domain/` — domain expert + lead engineer.
 - `state/` — agent + human (state sensors propose diffs; humans accept).
-- Engineering principles — shipped via the `universal` default policy; see [`../policies/`](../policies/README.md).
+- Engineering principles — shipped via the `universal` default policy; see [`../policies/`](policies/README.md).
 
 ## Activation
 

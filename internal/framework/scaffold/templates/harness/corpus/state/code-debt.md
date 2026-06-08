@@ -4,7 +4,7 @@ last_reconciled: <YYYY-MM-DD>
 
 # Code Debt Ledger
 
-> **Template.** The **audit** action and **debt-review** action will populate this from the [code-debt sensor](../../sensors/code-debt.md). Until then, leave as-is or fill in by hand.
+> **Template.** The **audit** action and **debt-review** action will populate this from the [code-debt sensor](sensors/code-debt.md). Until then, leave as-is or fill in by hand.
 
 Paired ledger: [`harness-debt.md`](harness-debt.md) — debt in the harness itself. Tracked separately on purpose.
 
@@ -18,7 +18,7 @@ The known debt this codebase carries. One row per item. The point of the ledger 
 
 ## Categories
 
-See [`harness/sensors/code-debt.md`](../../sensors/code-debt.md) for category and severity definitions. Keep them consistent — the planning phase reads this table verbatim.
+See [`harness/sensors/code-debt.md`](sensors/code-debt.md) for category and severity definitions. Keep them consistent — the planning phase reads this table verbatim.
 
 ## How to use it
 

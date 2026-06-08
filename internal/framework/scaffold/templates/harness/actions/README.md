@@ -2,7 +2,7 @@
 
 Each file here is one **action** — a single unit of lifecycle work. Actions are agent-agnostic: read by Claude Code, Cursor, Codex, Aider, GitHub Copilot, Continue, Cline, Goose, pi, or any other coding agent the project's menu file points here.
 
-For ordered sets of actions, see [`harness/playbooks/`](../playbooks/README.md). For example, the end-to-end task workflow lives at [`harness/playbooks/task.md`](../playbooks/task.md).
+For ordered sets of actions, see [`harness/playbooks/`](playbooks/README.md). For example, the end-to-end task workflow lives at [`harness/playbooks/task.md`](playbooks/task.md).
 
 ## How invocation works
 
@@ -31,4 +31,4 @@ Each action is short (~20–40 lines): the agent reads it, executes the listed a
 
 ## Override cascade
 
-For any `<name>.md`, the file that wins at runtime is from the highest-priority tier present, in order: **project → team → org**. A project action at `harness/actions/<name>.md` overrides the same-basename file in any team or org policy unless the higher tier declared that item `strict`. See [`harness/policies/README.md`](../policies/README.md) for the full rule and `keystone policy verify` behavior.
+For any `<name>.md`, the file that wins at runtime is from the highest-priority tier present, in order: **project → team → org**. A project action at `harness/actions/<name>.md` overrides the same-basename file in any team or org policy unless the higher tier declared that item `strict`. See [`harness/policies/README.md`](policies/README.md) for the full rule and `keystone policy verify` behavior.

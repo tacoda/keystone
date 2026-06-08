@@ -1,6 +1,6 @@
 # mode
 
-**Switch the harness pacing mode** (paired / solo / autopilot). Read [`harness/guides/process/modes.md`](../guides/process/modes.md).
+**Switch the harness pacing mode** (paired / solo / autopilot). Read [`harness/guides/process/modes.md`](guides/process/modes.md).
 
 ## Activities
 

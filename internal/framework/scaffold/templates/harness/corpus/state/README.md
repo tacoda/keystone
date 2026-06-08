@@ -22,7 +22,7 @@ Plus migration tracking:
 
 On-demand, like the rest of corpus — but with one always-fires touch-point: the **orient** action loads `CODEBASE_STATE.md` (and any active migrations affecting the touched region) at the start of every planning phase. The agent reads State before planning a change so it knows which regions are well-covered, which are risky, and what migrations are mid-flight.
 
-Beyond **orient**, the agent reads state files when it explicitly needs them (e.g., the [risk-fingerprint sensor](../../sensors/risk-fingerprint.md) reads `risk-fingerprints.md`).
+Beyond **orient**, the agent reads state files when it explicitly needs them (e.g., the [risk-fingerprint sensor](sensors/risk-fingerprint.md) reads `risk-fingerprints.md`).
 
 ## Authorship
 

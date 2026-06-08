@@ -1,6 +1,6 @@
 # learn
 
-**Capture a learning candidate** from a surprise, an incident, or a review finding. Writes to `harness/learning/inbox/` for later synthesis. Read [`harness/learning/README.md`](../learning/README.md).
+**Capture a learning candidate** from a surprise, an incident, or a review finding. Writes to `harness/learning/inbox/` for later synthesis. Read [`harness/learning/README.md`](learning/README.md).
 
 ## Activities
 

@@ -32,7 +32,7 @@ Each rule file:
 ```markdown
 # <Idiom Name> — rules
 
-The rules from [`corpus/idioms/<stack>/<idiom>.md`](../../../corpus/idioms/<stack>/<idiom>.md).
+The rules from [`corpus/idioms/<stack>/<idiom>.md`](corpus/idioms/<stack>/<idiom>.md).
 
 ## IRON LAW
 

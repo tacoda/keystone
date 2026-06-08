@@ -1,6 +1,6 @@
 # debt-review
 
-**Triage the code-debt ledger.** Read [`harness/sensors/code-debt.md`](../sensors/code-debt.md) and [`harness/corpus/state/code-debt.md`](../corpus/state/code-debt.md).
+**Triage the code-debt ledger.** Read [`harness/sensors/code-debt.md`](sensors/code-debt.md) and [`harness/corpus/state/code-debt.md`](corpus/state/code-debt.md).
 
 For **harness debt** (stale rules, placeholder bootstrap, empty idiom dirs, uncited policies), use the [`audit`](audit.md) action — its Pruning flywheel writes to `corpus/state/harness-debt.md`.
 

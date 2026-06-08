@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/fs"
 	"os"
+	"path"
 	"path/filepath"
 	"regexp"
 	"sort"
@@ -42,7 +43,7 @@ func runDoctor(args []string) error {
 	}
 	dir := "."
 	runAll := true
-	var runPaths, runPluginsCheck, runDriftCheck bool
+	var runPaths, runPluginsCheck, runDriftCheck, fix bool
 
 	for i := 0; i < len(args); i++ {
 		a := args[i]
@@ -67,6 +68,8 @@ func runDoctor(args []string) error {
 		case a == "--drift-only":
 			runAll = false
 			runDriftCheck = true
+		case a == "--fix":
+			fix = true
 		case strings.HasPrefix(a, "-"):
 			return fmt.Errorf("unknown flag %s", a)
 		default:
@@ -89,6 +92,13 @@ func runDoctor(args []string) error {
 	hadErrors := false
 
 	if runPaths {
+		if fix {
+			fixed, err := fixPathConventions(absDir, harnessRoot)
+			if err != nil {
+				return fmt.Errorf("path fix: %w", err)
+			}
+			fmt.Fprintf(os.Stdout, "✓ paths: rewrote %d link(s) to harness-root-relative form\n", fixed)
+		}
 		violations, err := checkPathConventions(absDir, harnessRoot)
 		if err != nil {
 			return fmt.Errorf("path check: %w", err)
@@ -145,6 +155,10 @@ Flags:
   --paths-only            Run only the path-convention check.
   --plugins-only          Run only the plugin-integrity check.
   --drift-only            Run only the template-drift check.
+  --fix                   Rewrite path violations in place (paths check only).
+                          Each '../' or './' link is resolved against the
+                          source file's directory and replaced with the
+                          harness-root-relative form.
   --dir <path>            Project root (defaults to cwd).
   --harness-root <name>   Override the harness folder (defaults to the
                           value in keystone.json, then "harness").
@@ -202,6 +216,89 @@ func checkPathConventions(projectDir, harnessRoot string) ([]pathViolation, erro
 		return nil
 	})
 	return hits, err
+}
+
+// fixPathConventions walks every markdown file under <harness-root>/
+// (excluding vendored plugins) and rewrites markdown links with '../'
+// or './' segments to their harness-root-relative form. Returns the
+// total count of rewritten links.
+//
+// Resolution: for a link `target` in a file at `<harnessRoot>/<rel>`,
+// the harness-root-relative form is path.Join(dir(rel), target). Go's
+// path.Join normalizes the '..' and '.' segments correctly.
+func fixPathConventions(projectDir, harnessRoot string) (int, error) {
+	root := filepath.Join(projectDir, harnessRoot)
+	skip := filepath.Join(harnessRoot, plugins.PluginRoot)
+	count := 0
+
+	err := filepath.WalkDir(root, func(p string, d fs.DirEntry, err error) error {
+		if err != nil {
+			if os.IsNotExist(err) {
+				return nil
+			}
+			return err
+		}
+		rel, _ := filepath.Rel(projectDir, p)
+		rel = filepath.ToSlash(rel)
+		if d.IsDir() {
+			if strings.HasPrefix(rel, filepath.ToSlash(skip)) {
+				return filepath.SkipDir
+			}
+			return nil
+		}
+		if filepath.Ext(p) != ".md" {
+			return nil
+		}
+		body, err := os.ReadFile(p)
+		if err != nil {
+			return err
+		}
+		// Path of this file's directory relative to harness root.
+		insideHarness := strings.TrimPrefix(rel, harnessRoot+"/")
+		fileDir := path.Dir(insideHarness)
+		if fileDir == "." {
+			fileDir = ""
+		}
+
+		fileChanged := false
+		newBody := markdownLink.ReplaceAllStringFunc(string(body), func(match string) string {
+			submatches := markdownLink.FindStringSubmatch(match)
+			if len(submatches) < 2 {
+				return match
+			}
+			target := strings.TrimSpace(submatches[1])
+			if !hasForbiddenSegment(target) {
+				return match
+			}
+			// Preserve any #anchor or ?query suffix verbatim.
+			suffix := ""
+			if i := strings.IndexAny(target, "#?"); i >= 0 {
+				suffix = target[i:]
+				target = target[:i]
+			}
+			resolved := path.Join(fileDir, target)
+			fileChanged = true
+			count++
+			// Splice the new target back into the original [text](target)
+			// match, preserving the leading [...]( and trailing ).
+			openParen := strings.IndexByte(match, '(')
+			closeParen := strings.LastIndexByte(match, ')')
+			if openParen < 0 || closeParen < 0 {
+				return match
+			}
+			return match[:openParen+1] + resolved + suffix + match[closeParen:]
+		})
+		if fileChanged {
+			if err := os.WriteFile(p, []byte(newBody), 0o644); err != nil {
+				return err
+			}
+		}
+		return nil
+	})
+	if err != nil {
+		return 0, err
+	}
+	return count, nil
 }
 
 // hasForbiddenSegment returns true for inter-harness link targets that

@@ -132,7 +132,7 @@ If a project needs to soften or extend a non-strict policy item, the override mo
 
 ## Pinning + updates
 
-Each installed policy is pinned in [`../keystone.lock.json`](../keystone.lock.json):
+Each installed policy is pinned in [`../keystone.lock.json`](keystone.lock.json):
 
 ```json
 {

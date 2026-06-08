@@ -1,6 +1,6 @@
 # policy-audit
 
-**Audit the codebase against every installed policy.** Read [`harness/policies/README.md`](../policies/README.md) and walk the installed policies recorded in `harness/.keystone.lock`.
+**Audit the codebase against every installed policy.** Read [`harness/policies/README.md`](policies/README.md) and walk the installed policies recorded in `harness/.keystone.lock`.
 
 This is the **compliance** half of policy auditing — does the code actually do what the policies require, and is the strict cascade intact? Lockfile integrity (hashes, local edits, ref freshness) is out of scope here.
 

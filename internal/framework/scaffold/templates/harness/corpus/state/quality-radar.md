@@ -6,7 +6,7 @@ last_reconciled: <YYYY-MM-DD>
 
 > **Template.** The **audit** or **review** action will populate this from the underlying sensors. Until then, leave as-is or fill in by hand.
 
-Five-dimension scorecard for the codebase (or for the most recent reviewed diff). Captured periodically by the [quality-radar sensor](../../sensors/quality-radar.md).
+Five-dimension scorecard for the codebase (or for the most recent reviewed diff). Captured periodically by the [quality-radar sensor](sensors/quality-radar.md).
 
 ## Latest scorecard
 
@@ -39,4 +39,4 @@ Append a new dated section per audit pass. Do not overwrite — trend matters mo
 
 ## Scoring conventions
 
-Per-dimension thresholds live in [`harness/sensors/quality-radar.md`](../../sensors/quality-radar.md). If your project needs different thresholds (e.g., a research codebase where coverage drops are expected), edit the sensor and document the deviation here.
+Per-dimension thresholds live in [`harness/sensors/quality-radar.md`](sensors/quality-radar.md). If your project needs different thresholds (e.g., a research codebase where coverage drops are expected), edit the sensor and document the deviation here.

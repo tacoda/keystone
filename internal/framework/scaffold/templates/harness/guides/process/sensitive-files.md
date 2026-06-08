@@ -36,8 +36,8 @@ Default patterns the harness treats as sensitive. The **bootstrap** action augme
 
 ## Sensors
 
-- The [drift sensor](../../sensors/drift.md) reads this list and flags any diff that adds a path matching a sensitive pattern.
-- The [commit-message sensor](../../sensors/commit-message.md) blocks commits that touch matching paths.
+- The [drift sensor](sensors/drift.md) reads this list and flags any diff that adds a path matching a sensitive pattern.
+- The [commit-message sensor](sensors/commit-message.md) blocks commits that touch matching paths.
 
 ## Anti-patterns
 

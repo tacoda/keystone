@@ -14,18 +14,18 @@ Sensor commands come from `harness/corpus/state/CODEBASE_STATE.md`, populated by
 
 | Sensor | Fires inside | Implementation |
 |---|---|---|
-| [lint](../../sensors/lint.md) | **verify** action | `execute_command` running `<lint command>` |
-| [type-check](../../sensors/type-check.md) | **verify** action | `execute_command` running `<type-check command>`. Skipped when no type checker. |
-| [test](../../sensors/test.md) | **verify** action | `execute_command` running `<test command>`. Fresh run per turn. |
-| [build](../../sensors/build.md) | **verify** action | `execute_command` running `<build command>` |
-| [drift](../../sensors/drift.md) | **check-drift** + **verify** + **audit** | `execute_command` for `git diff`; agent reads loaded guides and compares. No state writes. |
-| [coverage](../../sensors/coverage.md) | **verify** + **audit** | `execute_command` running `<coverage command>`; agent proposes a diff to `corpus/state/CODEBASE_STATE.md` via the file-edit tool. |
-| [risk-fingerprint](../../sensors/risk-fingerprint.md) | **audit** | `execute_command` for complexity metrics + `git log --stat`; agent writes table to `corpus/state/risk-fingerprints.md`. |
-| [traffic-topology](../../sensors/traffic-topology.md) | **audit** | `git log` + criticality from `corpus/state/CODEBASE_STATE.md` → `corpus/state/traffic-topology.md`. |
-| [state-region](../../sensors/state-region.md) | **orient** action | Agent reads `corpus/state/CODEBASE_STATE.md` and active migrations via `read_file`. No shell needed. |
-| [commit-message](../../sensors/commit-message.md) | **release** phase, pre-commit | Agent inspects the proposed message; runs `git commit` via `execute_command` only after the message passes. |
-| [tracker-card-fetcher](../../sensors/tracker-card-fetcher.md) | **spec** action | MCP tracker server (if configured) — Atlassian, Linear, GitHub — or `execute_command` with `gh issue view`. Fallback: user pastes. |
-| [spec-adherence](../../sensors/spec-adherence.md) | **review** action | Agent reads spec + diff and walks AC. No shell needed. |
+| [lint](sensors/lint.md) | **verify** action | `execute_command` running `<lint command>` |
+| [type-check](sensors/type-check.md) | **verify** action | `execute_command` running `<type-check command>`. Skipped when no type checker. |
+| [test](sensors/test.md) | **verify** action | `execute_command` running `<test command>`. Fresh run per turn. |
+| [build](sensors/build.md) | **verify** action | `execute_command` running `<build command>` |
+| [drift](sensors/drift.md) | **check-drift** + **verify** + **audit** | `execute_command` for `git diff`; agent reads loaded guides and compares. No state writes. |
+| [coverage](sensors/coverage.md) | **verify** + **audit** | `execute_command` running `<coverage command>`; agent proposes a diff to `corpus/state/CODEBASE_STATE.md` via the file-edit tool. |
+| [risk-fingerprint](sensors/risk-fingerprint.md) | **audit** | `execute_command` for complexity metrics + `git log --stat`; agent writes table to `corpus/state/risk-fingerprints.md`. |
+| [traffic-topology](sensors/traffic-topology.md) | **audit** | `git log` + criticality from `corpus/state/CODEBASE_STATE.md` → `corpus/state/traffic-topology.md`. |
+| [state-region](sensors/state-region.md) | **orient** action | Agent reads `corpus/state/CODEBASE_STATE.md` and active migrations via `read_file`. No shell needed. |
+| [commit-message](sensors/commit-message.md) | **release** phase, pre-commit | Agent inspects the proposed message; runs `git commit` via `execute_command` only after the message passes. |
+| [tracker-card-fetcher](sensors/tracker-card-fetcher.md) | **spec** action | MCP tracker server (if configured) — Atlassian, Linear, GitHub — or `execute_command` with `gh issue view`. Fallback: user pastes. |
+| [spec-adherence](sensors/spec-adherence.md) | **review** action | Agent reads spec + diff and walks AC. No shell needed. |
 
 ## State writes
 

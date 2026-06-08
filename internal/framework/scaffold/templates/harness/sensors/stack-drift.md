@@ -29,4 +29,4 @@ Detects when the empirical reality of the repo has diverged from what `CODEBASE_
 
 ## Why no rebootstrap action
 
-[`bootstrap`](../actions/bootstrap.md) is a one-time initial seed of state, idioms, and sensor classification. Re-running it would either overwrite human edits or no-op against existing content — neither is useful. Stack drift is an **incremental** problem the **audit** action is built for: reconcile only the parts that drifted, leave the rest alone.
+[`bootstrap`](actions/bootstrap.md) is a one-time initial seed of state, idioms, and sensor classification. Re-running it would either overwrite human edits or no-op against existing content — neither is useful. Stack drift is an **incremental** problem the **audit** action is built for: reconcile only the parts that drifted, leave the rest alone.
