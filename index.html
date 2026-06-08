@@ -134,29 +134,36 @@
   }
   /* …and a sparkle pops in the top-right corner exactly when the shine
      hits it. Cued to the same 2s cycle, peak timed to overlap the shine's
-     leading edge at the top-right. */
+     leading edge at the top-right. Shaped as a 4-point star via clip-path
+     with thin, ✨-style rays. */
   .brand-logo-wrap::before {
     content: '';
     position: absolute;
-    top: 1px;
-    right: 1px;
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-    background: radial-gradient(
-      circle,
-      rgba(255, 255, 255, 1)    0%,
-      rgba(255, 255, 255, 0.95) 25%,
-      rgba(255, 255, 255, 0)    72%
+    top: -4px;
+    right: -4px;
+    width: 18px;
+    height: 18px;
+    background: #fff;
+    /* Thin-rayed 4-point star — inner corners pulled close to center
+       so the rays are sleek, like the ✨ emoji. */
+    clip-path: polygon(
+      50% 0%,
+      54% 46%,
+      100% 50%,
+      54% 54%,
+      50% 100%,
+      46% 54%,
+      0% 50%,
+      46% 46%
     );
-    box-shadow:
-      0 0 8px 2px rgba(255, 255, 255, 0.9),
-      0 0 16px 4px rgba(255, 255, 255, 0.5),
-      0 -5px 4px -2px rgba(255, 255, 255, 0.55),
-      0  5px 4px -2px rgba(255, 255, 255, 0.55),
-      -5px 0 4px -2px rgba(255, 255, 255, 0.55),
-       5px 0 4px -2px rgba(255, 255, 255, 0.55);
-    transform: scale(0);
+    /* Multi-layer drop-shadow gives a bright, shiny halo that hugs the
+       star's actual shape (drop-shadow respects clip-path, unlike
+       box-shadow). */
+    filter:
+      drop-shadow(0 0 4px rgba(255, 255, 255, 1))
+      drop-shadow(0 0 10px rgba(255, 255, 255, 0.7))
+      drop-shadow(0 0 18px rgba(255, 255, 255, 0.35));
+    transform: scale(0) rotate(-20deg);
     opacity: 0;
     pointer-events: none;
     z-index: 2;
@@ -181,13 +188,14 @@
     100% { background-position: 120% 50%; }
   }
   /* Sparkle peaks at ~8% of the cycle — the moment the shine's leading
-     edge arrives at the top-right corner of the keystone. */
+     edge arrives at the top-right corner of the keystone. A small rotation
+     during the twinkle so the 4-point star feels alive, not pasted on. */
   @keyframes keystone-logo-sparkle {
-    0%, 4%   { transform: scale(0);   opacity: 0; }
-    8%       { transform: scale(1.3); opacity: 1; }
-    14%      { transform: scale(1.0); opacity: 0.85; }
-    20%      { transform: scale(0.4); opacity: 0.3; }
-    28%, 100% { transform: scale(0);  opacity: 0; }
+    0%, 4%    { transform: scale(0)    rotate(-20deg); opacity: 0; }
+    8%        { transform: scale(1.5)  rotate(0deg);   opacity: 1; }
+    14%       { transform: scale(1.15) rotate(12deg);  opacity: 0.9; }
+    20%       { transform: scale(0.5)  rotate(24deg);  opacity: 0.35; }
+    28%, 100% { transform: scale(0)    rotate(30deg);  opacity: 0; }
   }
   @media (prefers-reduced-motion: reduce) {
     .brand-logo { animation: none; }
@@ -341,7 +349,13 @@
     font-weight: 600;
     color: var(--accent);
     text-shadow: 0 0 0 transparent;
+    display: inline-block; /* needed so transform shakes the glyph */
     animation: hero-any-cycle 6s ease-in-out infinite;
+  }
+  .hero-any:hover {
+    animation:
+      hero-any-cycle 6s ease-in-out infinite,
+      hero-any-shake 0.45s ease-in-out infinite;
   }
   @keyframes hero-any-cycle {
     0%, 100% { color: var(--accent);  text-shadow: 0 0 18px rgba(74, 222, 154, 0.45); }
@@ -350,8 +364,15 @@
     60%      { color: var(--accent4); text-shadow: 0 0 18px rgba(232, 121, 160, 0.45); }
     80%      { color: var(--accent5); text-shadow: 0 0 18px rgba(167, 139, 250, 0.45); }
   }
+  @keyframes hero-any-shake {
+    0%, 100% { transform: translate(0, 0)      rotate(0deg);     }
+    20%      { transform: translate(-1.5px, 1px)  rotate(-2.5deg); }
+    40%      { transform: translate( 1.5px, -1px) rotate( 2.5deg); }
+    60%      { transform: translate(-1px, -1px)   rotate(-1.5deg); }
+    80%      { transform: translate( 1px,  1px)   rotate( 1.5deg); }
+  }
   @media (prefers-reduced-motion: reduce) {
-    .hero-any { animation: none; }
+    .hero-any, .hero-any:hover { animation: none; }
   }
 
   /* Section labels */
@@ -1129,7 +1150,7 @@
         <a class="nav-link" href="#corpus">Corpus <span class="ext">— reasoning</span></a>
         <a class="nav-link" href="#state">State ledgers</a>
         <a class="nav-link" href="#sensors">Sensors</a>
-        <a class="nav-link" href="#plugins">Policy Plugins <span class="badge">1.0</span></a>
+        <a class="nav-link" href="#plugins">Policy Plugins</a>
         <a class="nav-link" href="#flywheels">Flywheels</a>
         <a class="nav-link" href="#learning">Learning pipeline</a>
         <a class="nav-link" href="#playbooks">Playbooks</a>
@@ -1212,7 +1233,7 @@
     <div class="definition">
       <p><strong>Keystone is the agent harness framework.</strong> Small Go runtime + a set of conventions that drop an engineering harness — rules, reasoning, sensors, lifecycle workflow — into your repo. Markdown only, no central service, no runtime dependency after install. After <code>keystone init</code>, your agent drives a six-phase workflow (spec → planning → implementation → verification → review → release) under always-loaded guides, reaching for corpus reasoning only when the rules aren't enough.</p>
       <p><strong style="color:var(--accent);">Project content</strong> — <code>harness/guides/</code>, <code>harness/corpus/</code>, <code>harness/sensors/</code>, <code>harness/actions/</code>, <code>harness/playbooks/</code>, <code>harness/adapters/</code>, plus the Learning and Pruning flywheels. Owned by the team, versioned with the code, edited freely.</p>
-      <p><strong style="color:var(--accent3);">Plugins</strong> — read-only, vendored markdown for shared policy across projects. Pinned in <code>keystone.json</code> with the npm-style shorthand <code>tacoda/tacoda-org@v1.1.2</code>, hash-verified via <code>keystone.lock.json</code>, drift-reset by <code>keystone verify</code>. They live in a gitignored <code>harness/plugins/</code> and are repopulated by <code>keystone install</code>.</p>
+      <p><strong style="color:var(--accent3);">Plugins (optional)</strong> — read-only, vendored markdown for shared policy across projects. The harness works fine without any; add a plugin when you have content you want consistent across multiple repos. Pinned in <code>keystone.json</code> with the npm-style shorthand <code>tacoda/tacoda-org@v1.1.2</code>, hash-verified via <code>keystone.lock.json</code>, drift-reset by <code>keystone verify</code>. They live in a gitignored <code>harness/plugins/</code> and are repopulated by <code>keystone install</code>.</p>
     </div>
 
     <div class="definition" style="border-color: var(--accent2);">
@@ -1230,32 +1251,26 @@
 
     <div class="action-grid">
       <div class="action">
-        <span class="action-tag" style="background: rgba(74,222,154,0.12); color: var(--accent); border: 1px solid rgba(74,222,154,0.3);">1.0</span>
         <h3 style="color: var(--accent);"><a href="#plugins" style="color: inherit; border-bottom: none;">Vendored read-only plugins →</a></h3>
         <p>Plugins live at <code>harness/plugins/&lt;name&gt;/</code> — gitignored, pinned in <code>keystone.json</code>, per-file SHA-verified via <code>keystone.lock.json</code>. <code>keystone plugin add tacoda/tacoda-org@v1.1.2</code> declares; <code>keystone install</code> materializes; <code>keystone verify</code> detects drift and resets. Default host is <code>github.com</code>; override per-source by writing the host explicitly.</p>
       </div>
       <div class="action">
-        <span class="action-tag">1.0</span>
         <h3 style="color: var(--accent2);"><a href="#first-generator" style="color: inherit; border-bottom: none;">Scaffolding generators →</a></h3>
         <p><code>keystone new guide &lt;topic&gt;/&lt;name&gt;</code> drops a guide + paired corpus stub. <code>new sensor</code>, <code>new action</code>, <code>new playbook</code>, <code>new adapter</code>, <code>new plugin</code> each emit conformant frontmatter, sections, and harness-root-relative cross-references. Authoring a new port file is one command.</p>
       </div>
       <div class="action">
-        <span class="action-tag">1.0</span>
         <h3 style="color: var(--accent3);"><a href="#cli" style="color: inherit; border-bottom: none;"><code style="color: inherit;">keystone doctor</code> →</a></h3>
         <p>Audits an existing install: path-convention violations (with <code>--fix</code> to auto-rewrite), plugin drift (auto-reset), template drift (advisory), and per-port context-budget utilization (<code>--budget</code>). Run in CI to gate merges; run locally to keep the harness clean as content grows.</p>
       </div>
       <div class="action">
-        <span class="action-tag">1.0</span>
         <h3 style="color: var(--accent5);"><a href="#options" style="color: inherit; border-bottom: none;">Configurable harness root →</a></h3>
         <p>Default folder name is <code>harness/</code>, but teams can pick any name via <code>--harness-root &lt;name&gt;</code> at init. Recorded in <code>keystone.json</code>; every downstream command reads it from there. Move existing content to a new path with one flag.</p>
       </div>
       <div class="action">
-        <span class="action-tag">1.0</span>
         <h3 style="color: var(--accent4);"><a href="#budget" style="color: inherit; border-bottom: none;">Context budgeting →</a></h3>
         <p>Declare per-port token caps in <code>keystone.json</code>'s <code>budgets</code> block. <code>keystone init</code> reports ambient load after scaffold; <code>keystone doctor --budget</code> shows per-port utilization + top contributors. Whitespace-approximate at 1.0; tiktoken opt-in planned.</p>
       </div>
       <div class="action">
-        <span class="action-tag">1.0</span>
         <h3 style="color: var(--accent3);"><a href="#install" style="color: inherit; border-bottom: none;">Idempotent <code style="color: inherit;">init</code> →</a></h3>
         <p>Re-running <code>keystone init</code> in an existing project is safe by default — new files are written; existing files are kept. <code>--reset --i-understand-this-is-destructive</code> overwrites when you do want a rewrite. <code>--force</code> is gone.</p>
       </div>
@@ -2089,9 +2104,9 @@ For reasoning, see `corpus/domain/refunds.md`.</pre>
   <!-- ===================== PLUGINS ===================== -->
   <section id="plugins" class="page" data-title="Policy Plugins">
     <div class="page-head">
-      <div class="crumb">Framework · Policy Plugins <span style="color:var(--accent);">· 1.0</span></div>
+      <div class="crumb">Framework · Policy Plugins</div>
       <h1>Policy Plugins — layered governance, vendored read-only.</h1>
-      <p class="tagline">Policies are layers of governance — org standards, team conventions, compliance regimes, idiom bundles, release gates — and <strong>every layer is implemented as a plugin</strong>. Layers nest arbitrarily in your <code>keystone.json</code>; the JSON structure determines winners and losers. One uniform mechanism, used to compose policy at any granularity from "this team alone" to "the whole org."</p>
+      <p class="tagline"><strong>Policy plugins are entirely optional — the harness works on its own without any.</strong> Plugins are how you share <em>layers of governance</em> across projects: org standards, team conventions, compliance regimes, idiom bundles, release gates. Every layer is implemented as a plugin; layers nest arbitrarily in your <code>keystone.json</code>, and the JSON structure determines winners and losers. One uniform mechanism, used to compose policy at any granularity from "this team alone" to "the whole org."</p>
     </div>
 
     <div class="definition">
