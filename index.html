@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Keystone — the agent harness framework for any project</title>
-<meta name="description" content="Keystone is the agent harness framework for any project. A small Go binary plus web-framework-style conventions that drop a markdown-only harness — guides, corpus, sensors, actions, playbooks, adapters — into your repo, wired to whichever coding agent you use. Vendored read-only plugins for shared policy; convention-over-configuration generators; opinionated defaults.">
+<title>Keystone — the agent-agnostic harness framework for any project</title>
+<meta name="description" content="Keystone is the agent-agnostic harness framework for any project. A small Go binary plus web-framework-style conventions that drop a markdown-only harness — guides, corpus, sensors, actions, playbooks, adapters — into your repo, wired to whichever coding agent you use. Vendored read-only plugins for shared policy; convention-over-configuration generators; opinionated defaults.">
 <link rel="icon" type="image/png" href="keystone_logo.png">
 <style>
   @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;600&family=IBM+Plex+Sans:wght@300;400;600&display=swap');
@@ -355,6 +355,12 @@
   .hero-any:hover {
     animation:
       hero-any-cycle 6s ease-in-out infinite,
+      hero-any-shake 0.45s ease-in-out infinite;
+  }
+  .hero-any.rev { animation-direction: reverse; }
+  .hero-any.rev:hover {
+    animation:
+      hero-any-cycle 6s ease-in-out infinite reverse,
       hero-any-shake 0.45s ease-in-out infinite;
   }
   @keyframes hero-any-cycle {
@@ -1200,7 +1206,7 @@
   <section id="introduction" class="page" data-title="Introduction">
     <div class="page-head">
       <div class="crumb">Overview · Keystone v1.0.3</div>
-      <h1>The agent harness framework for <em class="hero-any">any</em> project.</h1>
+      <h1>The agent-<em class="hero-any rev">agnostic</em> harness framework for <em class="hero-any">any</em> project.</h1>
       <p class="tagline">A small Go binary plus web-framework-style conventions that drop a markdown-only harness — guides, corpus, sensors, actions, playbooks, adapters — into your repo, wired to whichever coding agent you use. Convention-over-configuration generators, vendored read-only plugins for shared policy, opinionated defaults you own and edit. Markdown only, no central service, no runtime dependency after install.</p>
     </div>
 
