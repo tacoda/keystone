@@ -12,17 +12,21 @@ import (
 )
 
 // VerifyResult is the outcome of a cascade verification: per-plugin drift
-// reports plus per-port strict-cascade violations. Drift is informational
-// (the runtime will reset on next load); violations are hard errors that
-// block clean installs.
+// reports, per-port strict-cascade violations, plus depth-rule violations
+// (sensors at deeper-than-top plugins). Drift is informational (the runtime
+// will reset on next load); violations are hard errors that block clean
+// installs.
 type VerifyResult struct {
-	Violations []ShadowViolation
-	Drift      []PluginDrift
+	Violations      []ShadowViolation
+	DepthViolations []DepthViolation
+	Drift           []PluginDrift
 }
 
-// HasErrors reports whether any strict rule was violated. Drift is
+// HasErrors reports whether any strict or depth rule was violated. Drift is
 // advisory.
-func (r VerifyResult) HasErrors() bool { return len(r.Violations) > 0 }
+func (r VerifyResult) HasErrors() bool {
+	return len(r.Violations) > 0 || len(r.DepthViolations) > 0
+}
 
 // HasDrift reports whether any vendored plugin diverges from its
 // lockfile entry.
@@ -42,6 +46,30 @@ type ShadowViolation struct {
 func (v ShadowViolation) String() string {
 	return fmt.Sprintf("plugin %q (%s) marks %s/%s strict — overridden by:\n    %s",
 		v.Plugin, v.PathContext, v.Port, v.Item, strings.Join(v.ShadowPaths, "\n    "))
+}
+
+// DepthViolation reports a nested plugin that ships or strict-claims
+// sensors. Sensors are only allowed at the project layer and at top-level
+// plugins in the consumer's keystone.json; plugins nested below another
+// plugin may not contribute sensors.
+type DepthViolation struct {
+	Plugin          string
+	PathContext     string
+	Depth           int      // number of plugin ancestors above this node
+	StrictSensors   []string // sensor names this nested node strict-claims
+	VendoredSensors []string // sensor files this nested node ships
+}
+
+func (v DepthViolation) String() string {
+	parts := []string{}
+	if len(v.StrictSensors) > 0 {
+		parts = append(parts, fmt.Sprintf("strict.sensors: %s", strings.Join(v.StrictSensors, ", ")))
+	}
+	if len(v.VendoredSensors) > 0 {
+		parts = append(parts, fmt.Sprintf("shipped sensors:\n    %s", strings.Join(v.VendoredSensors, "\n    ")))
+	}
+	return fmt.Sprintf("plugin %q (%s) is nested at depth %d — sensors are only allowed at the project layer and at top-level plugins:\n  %s",
+		v.Plugin, v.PathContext, v.Depth, strings.Join(parts, "\n  "))
 }
 
 // PluginDrift reports a single drifted plugin: which files differ from the
@@ -81,6 +109,25 @@ func Verify(installDir string, cfg *config.ProjectConfig, expectedFiles map[stri
 		}
 		if len(drifts) > 0 {
 			res.Drift = append(res.Drift, PluginDrift{Plugin: node.Name, Files: drifts})
+		}
+		// Depth gate: nested plugins (any plugin with a plugin ancestor) may
+		// not contribute sensors. Top-level plugins and the project layer can.
+		if len(path) > 0 {
+			depthV := DepthViolation{
+				Plugin:        node.Name,
+				PathContext:   ctx,
+				Depth:         len(path),
+				StrictSensors: append([]string{}, node.Strict["sensors"]...),
+			}
+			sensorsPrefix := filepath.ToSlash(filepath.Join(harnessRoot, "plugins", node.Name, "sensors")) + "/"
+			for rel := range exp {
+				if strings.HasPrefix(rel, sensorsPrefix) {
+					depthV.VendoredSensors = append(depthV.VendoredSensors, rel)
+				}
+			}
+			if len(depthV.StrictSensors) > 0 || len(depthV.VendoredSensors) > 0 {
+				res.DepthViolations = append(res.DepthViolations, depthV)
+			}
 		}
 		for port, items := range node.Strict {
 			for _, item := range items {

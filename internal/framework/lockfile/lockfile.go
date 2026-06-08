@@ -50,27 +50,17 @@ type PluginLock struct {
 	Files         map[string]string `json:"files"`          // path-relative-to-installdir → "sha256:<hex>"
 }
 
-// PolicyLock describes one installed policy. Tier, Strict, and Required are
-// recorded at install time so `keystone policy verify` can run without re-
-// resolving the source policy.
+// PolicyLock describes one installed policy. Strict and Required are
+// recorded at install time so `keystone verify` can run without re-resolving
+// the source policy.
 type PolicyLock struct {
 	SourceRef       string              `json:"source_ref"`
 	ResolvedSHA     string              `json:"resolved_sha"`
 	PolicyVersion   string              `json:"policy_version"`
 	KeystoneVersion string              `json:"keystone_version"`
-	Tier            string              `json:"tier,omitempty"`
 	Strict          manifest.StrictSpec `json:"strict,omitempty"`
 	Required        manifest.StrictSpec `json:"required,omitempty"`
 	Files           map[string]string   `json:"files"`
-}
-
-// ResolvedTier returns the lock's tier, applying the default for older
-// lockfiles that predate the field.
-func (p PolicyLock) ResolvedTier() string {
-	if p.Tier == "" {
-		return manifest.TierOrg
-	}
-	return p.Tier
 }
 
 // Lockfile is the root document.

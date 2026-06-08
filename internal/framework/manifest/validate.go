@@ -11,7 +11,7 @@ import (
 
 var namePattern = regexp.MustCompile(`^[a-z][a-z0-9-]{0,63}$`)
 
-// validate enforces required fields, name format, and tier values.
+// validate enforces required fields and name format.
 func (m *Manifest) validate() error {
 	if m.Name == "" {
 		return fmt.Errorf("%s: missing required field 'name'", PolicyManifestFile)
@@ -21,19 +21,6 @@ func (m *Manifest) validate() error {
 	}
 	if m.Version == "" {
 		return fmt.Errorf("%s: missing required field 'version'", PolicyManifestFile)
-	}
-	switch m.Tier {
-	case "", TierOrg, TierTeam:
-	default:
-		return fmt.Errorf("%s: tier %q must be %q or %q", PolicyManifestFile, m.Tier, TierOrg, TierTeam)
-	}
-	if m.ResolvedTier() == TierOrg {
-		if len(m.Strict.Sensors) > 0 {
-			return fmt.Errorf("%s: org-tier policies cannot declare strict sensors (sensors cascade is team → project only)", PolicyManifestFile)
-		}
-		if len(m.Required.Sensors) > 0 {
-			return fmt.Errorf("%s: org-tier policies cannot declare required sensors (sensors cascade is team → project only)", PolicyManifestFile)
-		}
 	}
 	return nil
 }
@@ -53,11 +40,8 @@ func ValidateContent(policyRoot string, m *Manifest) ([]string, error) {
 	}
 
 	allowedPrefix := filepath.Join(PolicyContentRoot, "harness", "policies", m.Namespace())
-	sensorsPrefix := filepath.Join(allowedPrefix, "sensors")
-	isOrg := m.ResolvedTier() == TierOrg
 	var files []string
 	var stray []string
-	var sensorFilesInOrg []string
 
 	err = filepath.WalkDir(contentRoot, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
@@ -74,10 +58,6 @@ func ValidateContent(policyRoot string, m *Manifest) ([]string, error) {
 			stray = append(stray, rel)
 			return nil
 		}
-		if isOrg && strings.HasPrefix(rel, sensorsPrefix+string(filepath.Separator)) {
-			sensorFilesInOrg = append(sensorFilesInOrg, rel)
-			return nil
-		}
 		files = append(files, rel)
 		return nil
 	})
@@ -88,12 +68,6 @@ func ValidateContent(policyRoot string, m *Manifest) ([]string, error) {
 		return nil, fmt.Errorf(
 			"policy %q writes files outside its allowed namespace %s/:\n  %s",
 			m.Name, allowedPrefix, strings.Join(stray, "\n  "),
-		)
-	}
-	if len(sensorFilesInOrg) > 0 {
-		return nil, fmt.Errorf(
-			"policy %q is tier %q but ships sensor files (sensors cascade is team → project only):\n  %s",
-			m.Name, TierOrg, strings.Join(sensorFilesInOrg, "\n  "),
 		)
 	}
 	if len(files) == 0 {

@@ -27,26 +27,6 @@ func TestStrictSpec_IsEmpty(t *testing.T) {
 	}
 }
 
-func TestManifest_ResolvedTier(t *testing.T) {
-	tests := []struct {
-		name string
-		tier string
-		want string
-	}{
-		{"default empty", "", TierOrg},
-		{"org explicit", TierOrg, TierOrg},
-		{"team explicit", TierTeam, TierTeam},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			m := &Manifest{Tier: tt.tier}
-			if got := m.ResolvedTier(); got != tt.want {
-				t.Errorf("ResolvedTier() = %q, want %q", got, tt.want)
-			}
-		})
-	}
-}
-
 func TestManifest_Namespace(t *testing.T) {
 	m := &Manifest{Name: "acme-platform"}
 	if got := m.Namespace(); got != "acme-platform" {
@@ -69,8 +49,8 @@ func TestManifest_validate(t *testing.T) {
 			manifest: Manifest{Name: "acme", Version: "1.0.0", Strict: StrictSpec{Guides: []string{"data-handling"}}},
 		},
 		{
-			name:     "valid team-tier with sensors",
-			manifest: Manifest{Name: "acme", Version: "1.0.0", Tier: TierTeam, Strict: StrictSpec{Sensors: []string{"rubocop"}}},
+			name:     "valid with strict sensors",
+			manifest: Manifest{Name: "acme", Version: "1.0.0", Strict: StrictSpec{Sensors: []string{"rubocop"}}},
 		},
 		{
 			name:      "missing name",
@@ -91,21 +71,6 @@ func TestManifest_validate(t *testing.T) {
 			name:      "missing version",
 			manifest:  Manifest{Name: "acme"},
 			wantError: "missing required field 'version'",
-		},
-		{
-			name:      "invalid tier value",
-			manifest:  Manifest{Name: "acme", Version: "1.0.0", Tier: "platform"},
-			wantError: `tier "platform" must be`,
-		},
-		{
-			name:      "org tier cannot ship strict sensors",
-			manifest:  Manifest{Name: "acme", Version: "1.0.0", Strict: StrictSpec{Sensors: []string{"rubocop"}}},
-			wantError: "org-tier policies cannot declare strict sensors",
-		},
-		{
-			name:      "org tier cannot require sensors",
-			manifest:  Manifest{Name: "acme", Version: "1.0.0", Required: StrictSpec{Sensors: []string{"rubocop"}}},
-			wantError: "org-tier policies cannot declare required sensors",
 		},
 	}
 	for _, tt := range tests {

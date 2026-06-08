@@ -15,19 +15,9 @@ const PolicyManifestFile = "keystone-plugin.json"
 // (README.md at repo root, the manifest itself, .git, etc.) is ignored.
 const PolicyContentRoot = "policy"
 
-// Tier classifies a policy's authority level relative to the project.
-// `org` policies sit above `team` policies in the override cascade; project
-// is the leaf (the harness root itself) and is implicit — never recorded
-// here. Defaults to `org` when omitted, preserving pre-tier policy behavior.
-const (
-	TierOrg  = "org"
-	TierTeam = "team"
-)
-
 // StrictSpec lists items, by kind, for either a `strict` or `required`
 // declaration on a policy. Corpus is intentionally absent — it is background
-// reference loaded on-demand and not subject to the cascade. Sensors cascade
-// across two tiers only (team → project); org policies cannot declare them.
+// reference loaded on-demand and not subject to the cascade.
 type StrictSpec struct {
 	Guides    []string `json:"guides,omitempty"`
 	Playbooks []string `json:"playbooks,omitempty"`
@@ -44,25 +34,17 @@ func (s StrictSpec) IsEmpty() bool {
 // content). Loaded from keystone-plugin.json at the policy repo root.
 //
 // `strict` items are shipped by this policy and locked against override
-// from lower tiers. `required` items are NOT shipped by this policy — the
-// policy declares they should exist somewhere in the cascade (typically the
-// project); verify surfaces missing ones so the project knows what to fill in.
+// from deeper nodes in the cascade. `required` items are NOT shipped by this
+// policy — the policy declares they should exist somewhere in the cascade
+// (typically the project); verify surfaces missing ones so the project knows
+// what to fill in.
 type Manifest struct {
 	Name        string     `json:"name"`
 	Version     string     `json:"version"`
-	Tier        string     `json:"tier,omitempty"` // "org" (default) or "team"
 	KeystoneMin string     `json:"keystone_min,omitempty"`
 	Description string     `json:"description,omitempty"`
 	Strict      StrictSpec `json:"strict,omitempty"`
 	Required    StrictSpec `json:"required,omitempty"`
-}
-
-// ResolvedTier returns the policy's tier, applying the default if unset.
-func (m *Manifest) ResolvedTier() string {
-	if m.Tier == "" {
-		return TierOrg
-	}
-	return m.Tier
 }
 
 // Namespace returns the on-disk directory name used inside harness/policies/

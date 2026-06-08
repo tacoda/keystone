@@ -10,26 +10,6 @@ import (
 	"github.com/tacoda/keystone/internal/framework/manifest"
 )
 
-func TestPolicyLock_ResolvedTier(t *testing.T) {
-	tests := []struct {
-		name string
-		tier string
-		want string
-	}{
-		{"default empty", "", manifest.TierOrg},
-		{"explicit org", manifest.TierOrg, manifest.TierOrg},
-		{"explicit team", manifest.TierTeam, manifest.TierTeam},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			p := PolicyLock{Tier: tt.tier}
-			if got := p.ResolvedTier(); got != tt.want {
-				t.Errorf("ResolvedTier() = %q, want %q", got, tt.want)
-			}
-		})
-	}
-}
-
 func TestRead_MissingReturnsEmpty(t *testing.T) {
 	dir := t.TempDir()
 	lf, err := Read(dir, config.DefaultHarnessRoot)
@@ -70,7 +50,6 @@ func TestWriteRead_Roundtrip(t *testing.T) {
 				ResolvedSHA:     "deadbeef00000000000000000000000000000000",
 				PolicyVersion:   "1.0.0",
 				KeystoneVersion: "0.15.0",
-				Tier:            manifest.TierOrg,
 				Strict:          manifest.StrictSpec{Guides: []string{"data-handling"}},
 				Required:        manifest.StrictSpec{Actions: []string{"release"}},
 				Files:           map[string]string{"harness/policies/acme/guides/x.md": "sha256:abc"},

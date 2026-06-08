@@ -117,6 +117,87 @@ func TestVerify_NestedPluginPathContext(t *testing.T) {
 	}
 }
 
+func TestVerify_DepthGate_NestedPluginCannotShipSensors(t *testing.T) {
+	dir := t.TempDir()
+	// Vendored sensor file shipped by the nested plugin.
+	writeFile(t, dir, "harness/plugins/acme-platform/sensors/rubocop.md")
+
+	cfg := &config.ProjectConfig{
+		Version: config.SchemaVersion,
+		Plugins: []config.PluginNode{
+			{
+				Name:    "acme-org",
+				Source:  "acme/org",
+				Version: "v1",
+				Children: []config.PluginNode{
+					{
+						Name:    "acme-platform",
+						Source:  "acme/platform",
+						Version: "v1",
+						Strict:  map[string][]string{"sensors": {"rubocop"}},
+					},
+				},
+			},
+		},
+	}
+	expected := map[string]map[string]string{
+		"acme-platform": {"harness/plugins/acme-platform/sensors/rubocop.md": "sha256:deadbeef"},
+	}
+	res, err := Verify(dir, cfg, expected)
+	if err != nil {
+		t.Fatalf("Verify: %v", err)
+	}
+	if !res.HasErrors() {
+		t.Fatalf("expected errors, got none")
+	}
+	if len(res.DepthViolations) != 1 {
+		t.Fatalf("DepthViolations = %d, want 1: %+v", len(res.DepthViolations), res.DepthViolations)
+	}
+	dv := res.DepthViolations[0]
+	if dv.Plugin != "acme-platform" {
+		t.Errorf("Plugin = %q, want %q", dv.Plugin, "acme-platform")
+	}
+	if dv.Depth != 1 {
+		t.Errorf("Depth = %d, want 1", dv.Depth)
+	}
+	if dv.PathContext != "acme-org > acme-platform" {
+		t.Errorf("PathContext = %q, want %q", dv.PathContext, "acme-org > acme-platform")
+	}
+	if len(dv.StrictSensors) != 1 || dv.StrictSensors[0] != "rubocop" {
+		t.Errorf("StrictSensors = %v, want [rubocop]", dv.StrictSensors)
+	}
+	if len(dv.VendoredSensors) != 1 || dv.VendoredSensors[0] != "harness/plugins/acme-platform/sensors/rubocop.md" {
+		t.Errorf("VendoredSensors = %v, want [harness/plugins/acme-platform/sensors/rubocop.md]", dv.VendoredSensors)
+	}
+}
+
+func TestVerify_DepthGate_TopLevelPluginMayShipSensors(t *testing.T) {
+	dir := t.TempDir()
+	writeFile(t, dir, "harness/plugins/acme-org/sensors/rubocop.md")
+
+	cfg := &config.ProjectConfig{
+		Version: config.SchemaVersion,
+		Plugins: []config.PluginNode{
+			{
+				Name:    "acme-org",
+				Source:  "acme/org",
+				Version: "v1",
+				Strict:  map[string][]string{"sensors": {"rubocop"}},
+			},
+		},
+	}
+	expected := map[string]map[string]string{
+		"acme-org": {"harness/plugins/acme-org/sensors/rubocop.md": "sha256:deadbeef"},
+	}
+	res, err := Verify(dir, cfg, expected)
+	if err != nil {
+		t.Fatalf("Verify: %v", err)
+	}
+	if len(res.DepthViolations) != 0 {
+		t.Errorf("DepthViolations = %d, want 0 (top-level plugin may ship sensors): %+v", len(res.DepthViolations), res.DepthViolations)
+	}
+}
+
 func TestVerify_NoStrictItems(t *testing.T) {
 	dir := t.TempDir()
 	cfg := &config.ProjectConfig{

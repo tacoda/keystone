@@ -2,6 +2,23 @@
 
 All notable changes to keystone are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); the project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.1] — 2026-06-08
+
+Plugin model cleanup. Tier labels (`org` / `team`) were the last carryover from the 0.x policy model and weren't load-bearing in 1.0 — precedence is already determined by `keystone.json` nesting. Removed the field outright and replaced the sensor restriction with a structural depth gate that means the same thing in cleaner terms.
+
+### Changed
+
+- Dropped `tier` from the plugin manifest schema (`docs/schemas/keystone-plugin.json.schema.json`) and the `manifest.Manifest` struct. Plugins are uniform; there are no named tiers.
+- `keystone verify` now enforces a structural depth gate: sensors are only allowed at the project layer and at top-level plugins in `keystone.json`. Plugins nested under another plugin that declare `strict.sensors` or ship vendored sensor files surface as a new `DepthViolation`. This replaces the 0.x rule "sensors are team-tier only" with the equivalent positional rule.
+- Removed `PolicyLock.Tier` / `PolicyLock.ResolvedTier()` from the lockfile. Old lockfile entries that still carry a `tier` field load fine (JSON ignores it).
+- Updated schema descriptions to talk about override by `keystone.json` nesting depth rather than by tier label.
+
+### Removed
+
+- `manifest.TierOrg`, `manifest.TierTeam`, `manifest.Manifest.Tier`, `manifest.Manifest.ResolvedTier()`.
+- The "org-tier policies cannot declare strict sensors" / "cannot declare required sensors" validation in `validate.go`.
+- Tier-conditioned sensor-path enforcement inside `ValidateContent`.
+
 ## [1.0.0] — 2026-06-08
 
 **Keystone — the agent harness framework for any project.**

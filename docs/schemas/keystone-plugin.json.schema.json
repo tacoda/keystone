@@ -14,11 +14,6 @@
       "type": "string",
       "description": "Plugin version (SemVer recommended)."
     },
-    "tier": {
-      "type": "string",
-      "enum": ["org", "team"],
-      "description": "Authority level in the cascade. Defaults to 'org'. Sensors are team-tier only."
-    },
     "keystone_min": {
       "type": "string",
       "description": "Minimum keystone binary version this plugin requires (SemVer)."
@@ -28,7 +23,7 @@
     },
     "strict": {
       "$ref": "#/$defs/strictSpec",
-      "description": "Items this plugin ships and locks against override from lower tiers."
+      "description": "Items this plugin ships and locks against override from anything nested deeper in the consumer's keystone.json."
     },
     "required": {
       "$ref": "#/$defs/strictSpec",
@@ -40,7 +35,7 @@
   "$defs": {
     "strictSpec": {
       "type": "object",
-      "description": "Items by kind. `sensors` is only valid on tier: team plugins.",
+      "description": "Items by kind. `sensors` is only valid for top-level plugins in the consumer's keystone.json — plugins nested deeper may not ship or strict-claim sensors.",
       "properties": {
         "guides":    { "type": "array", "items": { "type": "string" } },
         "playbooks": { "type": "array", "items": { "type": "string" } },
