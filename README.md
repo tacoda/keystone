@@ -9,16 +9,7 @@ Two ways to change harness behavior:
 
 Changing harness behavior never requires editing framework files. New rules, new sensors, new lifecycle actions, new agents — all of it lands by dropping a markdown file at a conventional path.
 
-> **1.0 in progress.** Keystone is migrating from "project harness installer with org policy plugins" (0.x) to "harness framework" (1.0). The plan is at [`PLAN-1.0.md`](PLAN-1.0.md); architectural decisions are under [`docs/adr/`](docs/adr/); port contracts under [`docs/ports/`](docs/ports/); canonical conventions at [`docs/conventions.md`](docs/conventions.md). Phases 0–4 are complete; the binary on `main` already reflects:
-> - Templates under `internal/framework/scaffold/templates/`; opt-in starter content via `--starter universal-principles`.
-> - Configurable harness root via `--harness-root <name>` (recorded in `keystone.json`).
-> - Idempotent `init`; `--reset --i-understand-this-is-destructive` for destructive overwrite.
-> - **Vendored plugins** under `<harness-root>/plugins/` (gitignored), pinned in `keystone.json`, hash-verified via `keystone.lock.json`. `keystone plugin add tacoda/tacoda-org@0.2.0`, `keystone install`, `keystone verify`. Drift in the vendor directory is reset on `keystone verify`.
-> - **Scaffolding generators**: `keystone new guide <topic>/<name>` (+ paired corpus), `keystone new sensor <name>`, `keystone new action <name>`, `keystone new playbook <name>`, `keystone new adapter <agent>`, `keystone new plugin <name>` (scaffolds a fresh plugin repo).
-> - **`keystone doctor`** audits an install: path-convention violations (with `--fix` auto-rewrite), plugin drift (auto-reset), template drift (advisory).
-> - `migrate` is now `patch` (framework patches are scoped to config-schema bumps; project content lives in your git).
->
-> The 0.x sections below are progressively being replaced.
+> **1.0 shipped.** Keystone is now the harness framework laid out in [`PLAN-1.0.md`](PLAN-1.0.md). Architecture decisions under [`docs/adr/`](docs/adr/); per-port contracts under [`docs/ports/`](docs/ports/); canonical conventions at [`docs/conventions.md`](docs/conventions.md); 1.x compatibility contract at [`docs/compatibility.md`](docs/compatibility.md). Coming from 0.x? See [`docs/upgrade-0.x-to-1.0.md`](docs/upgrade-0.x-to-1.0.md) for the six-step upgrade.
 
 ## What it is
 

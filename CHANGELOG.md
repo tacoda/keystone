@@ -1,6 +1,60 @@
 # Changelog
 
-All notable changes to keystone are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); the project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and is pre-1.0 (minor versions may include breaking changes).
+All notable changes to keystone are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); the project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [1.0.0] — 2026-06-08
+
+**Keystone — the agent harness framework for any project.**
+
+1.0 is a clean break from 0.x. The runner, conventions, and CLI all settled into the framework shape laid out in [`PLAN-1.0.md`](PLAN-1.0.md). No backward compatibility with 0.x — the documented upgrade path is destructive on purpose. See [`docs/upgrade-0.x-to-1.0.md`](docs/upgrade-0.x-to-1.0.md) for the consumer-side narrative, and [`docs/compatibility.md`](docs/compatibility.md) for the going-forward 1.x contract.
+
+### Headline changes
+
+- **Framework / client division is physical.** All Go code under `internal/framework/` and `cmd/keystone/`; default content lives as embedded templates under `internal/framework/scaffold/templates/` and is copied into the consumer's `<harness-root>/` on `keystone init`. No more "embedded plugin" intermediate concept.
+- **`keystone.json` at the project root** — declares the nested plugin tree, the framework version pin, and the configurable harness folder name. Schema at [`docs/schemas/keystone.json.schema.json`](docs/schemas/keystone.json.schema.json).
+- **Vendored read-only plugins** at `<harness-root>/plugins/<name>/`, gitignored, hash-verified via the lockfile, drift-reset by `keystone verify`. Shorthand source format: `tacoda/tacoda-org@0.2.0` (default host `github.com`; override per-source by writing the host explicitly).
+- **JSON everywhere for config.** `keystone.json`, `keystone.lock.json`, `keystone-plugin.json`, `patch.json` — all JSON with published schemas under [`docs/schemas/`](docs/schemas/). `yaml.v3` dropped from `go.mod`.
+- **Universal engineering principles are opt-in.** A new `starter` category in the install menu (and `--starter universal-principles` flag) — install scaffolds the universal content only when chosen.
+- **Configurable harness root.** `keystone.json#harness_root` (default `harness`) and `--harness-root <name>` on every command.
+- **Idempotent `init`.** Default behavior keeps existing files; `--reset --i-understand-this-is-destructive` overwrites. `--force` removed.
+- **Path conventions for inter-file markdown links.** Inter-harness links are written *relative to the harness root* (no `../` or `./` segments); code-relevant paths are *repo-root-relative*. `keystone doctor --paths-only [--fix]` enforces and auto-rewrites.
+- **`migrate` renamed to `patch`.** Scoped at 1.0 to config-schema bumps; project content lives in your git, not in patches.
+
+### Added (CLI)
+
+- `keystone install` — materialize every plugin declared in `keystone.json`.
+- `keystone plugin add <shorthand>` / `update <name> [@<version>]` / `remove <name>` — manage the plugin tree.
+- `keystone verify` — cascade verify with plugin-drift detection and auto-reset.
+- `keystone doctor` — three checks (paths / plugins / template drift) plus `--budget` mode and `--fix` for path violations.
+- `keystone new guide|corpus|sensor|action|playbook|adapter|plugin` — scaffolding generators that emit conformant frontmatter, sections, and harness-root-relative cross-references.
+- `keystone patch` — replaces 0.x's `keystone migrate` (config-schema bumps only).
+
+### Added (framework abstractions)
+
+- **State ledger port** — `<harness-root>/corpus/state/<name>.md` is its own port (mutable; written by `bootstrap`/`audit`/`learn`). Full contract at [`docs/ports/state-ledger.md`](docs/ports/state-ledger.md).
+- **Patch port** — the framework-patch runner abstraction. Contract at [`docs/ports/patch.md`](docs/ports/patch.md).
+- **Budget port** — per-port context-token caps in `keystone.json`'s `budgets` block; whitespace-approximate estimator. Contract at [`docs/ports/budget.md`](docs/ports/budget.md).
+- **Rules tiers in guides** — `## IRON LAW(S)` / `## GOLDEN RULES` / `## RULES` strength gradient. Documented in [`docs/ports/guide.md`](docs/ports/guide.md) and [`docs/conventions.md`](docs/conventions.md).
+- **Pacing modes** (`paired` / `solo` / `autopilot`) — runtime feature switched via the `mode` action. Documented in `<harness-root>/guides/process/modes.md` and [`docs/conventions.md`](docs/conventions.md).
+
+### Removed
+
+- `keystone policy add|update|verify` — replaced by `keystone plugin add|update|remove` + `keystone install` + `keystone verify`. Running the old command prints a one-line migration notice and exits non-zero.
+- `keystone migrate` — renamed to `keystone patch`. Same migration notice + non-zero exit on the old name.
+- `--force` flag on `keystone init` — replaced by `--reset --i-understand-this-is-destructive`. Passing `--force` returns a clear migration-hint error.
+- `keystone-policy.yaml` and `.keystone.lock` formats. Replaced by `keystone-plugin.json` (manifests) and `<harness-root>/keystone.lock.json` (install state).
+- The Org / Team / Project tier enum on the cascade — depth in the nested plugin tree replaces it.
+- The 0.x `migrations/0.7.0..0.13.0/` chain — deleted, not converted (Phase 1).
+
+### Notes for consumers
+
+- **Upgrading from 0.x.** Follow [`docs/upgrade-0.x-to-1.0.md`](docs/upgrade-0.x-to-1.0.md). The six-step process tags your pre-1.0 state, upgrades the binary, resets the harness, re-declares plugins, ports customizations, and verifies.
+- **The 1.0 contract.** [`docs/compatibility.md`](docs/compatibility.md) names every stable surface and every "free to evolve" surface, plus the deprecation cycle.
+- **Convention enforcement.** `keystone doctor` is the new audit command — run it in CI, accept its `--fix` rewrites for path violations.
+
+### Architectural decisions (`docs/adr/`)
+
+ADRs accepted during the 1.0 work: 0001 Naming, 0002 Framework/client boundary, 0003 Ports and adapters, 0004 Cascade and JSON config, 0005 Conventions not plugins, 0006 Vendored read-only plugins, 0007 No backward compat at 1.0, 0008 Versioning policy.
 
 ## [0.13.0] — 2026-06-05
 

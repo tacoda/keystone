@@ -1,6 +1,6 @@
 # Keystone 1.0 — Harness Framework Plan
 
-**Status:** Approved · Phases 0–5 complete · Phase 6 next
+**Status:** ✅ Plan complete · all six phases shipped · 1.0.0 ready for tag push
 **Last updated:** 2026-06-08
 
 Convert Keystone from a "harness installer with org policy plugins" into a **harness framework**: a small, stable Go runtime with Rails-style conventions for project content, and a vendored, read-only plugin system for sharing policy across projects. 1.0 is a clean break from 0.x — no backward-compatibility shims.
@@ -15,7 +15,7 @@ Convert Keystone from a "harness installer with org policy plugins" into a **har
 | 3 — Vendored read-only plugins | 0.17.0 | ✅ Complete (2026-06-08, 8 sub-commits) |
 | 4 — Conventions, generators, doctor | 0.18.0 | ✅ Complete (2026-06-08, 5 sub-commits) |
 | 5 — Context budgeting | 0.19.0 | ✅ Complete (2026-06-08, 5 sub-commits) |
-| 6 — Hardening, upgrade guide, 1.0 | 1.0.0 | ⏳ Pending |
+| 6 — Hardening, upgrade guide, 1.0 | 1.0.0 | ✅ Complete (2026-06-08, 4 sub-commits) — awaiting tag push |
 
 ---
 
@@ -390,7 +390,11 @@ Diverged from the originally drafted scope in two user-directed ways:
 
 ### Phase 6 — Hardening, upgrade guide, 1.0 (target: 1.0.0)
 
-**Status:** ⏳ Pending.
+**Status:** ✅ Complete (2026-06-08), awaiting `git tag v1.0.0 && git push --tags`. Four sub-commits:
+- `f1d2b65` — `docs/upgrade-0.x-to-1.0.md` six-step canonical command sequence.
+- `db53ac1` — `docs/compatibility.md` 1.x contract: stable surfaces, free-to-evolve internals, deprecation cycle.
+- `d1fbc76` — End-to-end golden-file regression test for `keystone init` (cmd/keystone/init_test.go).
+- (this commit) — `CHANGELOG.md` 1.0.0 entry, plan + README closer.
 
 **Scope.** Freeze the surface. Document compatibility guarantees. Write the one-time 0.x → 1.0 upgrade narrative. Cut the release via tag push.
 
