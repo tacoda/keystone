@@ -1,13 +1,15 @@
-# Keystone
+# Keystone - the agent harness framework for any project
 
-A **project harness installer** for coding agents. Drops a self-updating set of engineering knowledge, rules, sensors, and lifecycle workflow into your repo, wired to whichever agent you use.
+Keystone is a small Go runtime and a set of Rails-style conventions that drop an engineering harness — rules, reasoning, sensors, lifecycle workflow — into your repo, wired to whichever coding agent you use. Markdown only, no central service.
 
-Keystone is **a project harness installer with org policy plugins** — markdown only, no central service.
+Two ways to change harness behavior:
 
-- **Project harness** — `harness/corpus/`, `harness/guides/`, `harness/sensors/`, plus the Learning and Pruning flywheels. Owned by the team that installs it, versioned with the code, edited freely.
-- **Org policy plugins** — `harness/policies/`. Markdown plugins owned by whoever published them. Two kinds: `policies/universal/` (the default, shipped with the binary, carrying the engineering principles every install gets) and `policies/<name>/` (org-authored, installed via `keystone init --policy <ref>`).
+- **Project content** — edit markdown at `harness/guides/`, `harness/corpus/`, `harness/sensors/`, `harness/playbooks/`, `harness/actions/`, `harness/adapters/`. The harness lives in your git, versioned with your project's tags.
+- **Plugins** — read-only, vendored markdown shared across projects. Pinned in `keystone.json`, hash-verified, reinstalled from scratch on any drift.
 
-Universal engineering content is just the default plugin; org policies are the same shape, sourced from outside. The split keeps the project harness ergonomic for the team while letting orgs distribute shared standards without forking it.
+Changing harness behavior never requires editing framework files. New rules, new sensors, new lifecycle actions, new agents — all of it lands by dropping a markdown file at a conventional path.
+
+> **1.0 in progress.** Keystone is migrating from "project harness installer with org policy plugins" (0.x) to "harness framework" (1.0). The plan is at [`PLAN-1.0.md`](PLAN-1.0.md); architectural decisions are under [`docs/adr/`](docs/adr/); port contracts under [`docs/ports/`](docs/ports/). The sections below describe the 0.x install — current as of v0.13.0.
 
 ## What it is
 

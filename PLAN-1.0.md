@@ -27,7 +27,7 @@ Convert Keystone from a "harness installer with org policy plugins" into a **har
 - **No backward compatibility with 0.x.** 1.0 is a clean break. The 0.x → 1.0 jump is a one-time `keystone init --reset` in the consumer repo, documented in an upgrade guide, performed by the user.
 
 ### Naming
-Keep the binary name **`keystone`**. Frame the project as **"Keystone — the harness framework."** No CLI rename, no import-path churn. Captured in `docs/adr/0001-naming.md` (Phase 0).
+Keep the binary name **`keystone`**. Frame the project as **"Keystone - the agent harness framework for any project."** No CLI rename, no import-path churn. Captured in `docs/adr/0001-naming.md` (Phase 0).
 
 ---
 
@@ -37,11 +37,12 @@ These rules every phase must respect.
 
 1. **Framework / client division is physical.** Framework code lives in `internal/framework/`. Default content lives as templates in `internal/framework/scaffold/templates/` and is *copied* into the consumer's `harness/<port>/` on `keystone init`. There is no "embedded plugin" intermediate concept and no `plugins/` directory inside the framework repo.
 2. **Ports and adapters, in English.** Each abstraction is a *port* — a named extension point the framework defines with a contract in `docs/ports/<port>.md`. Concrete files at `harness/<port>/...` (project) or `harness/plugins/<plugin>/<port>/...` (plugin) are *adapters*. Adding a new port requires a minor-version bump and a port-doc PR; adding an adapter requires only dropping a markdown file at the conventional path.
-3. **Convention over configuration.** Drop a file at the conventional path → it loads. The convention table lives at `docs/conventions.md` and is the canonical reference. Generators (`keystone new ...`) scaffold every shape so authors never have to remember a path.
-4. **Project content belongs to the user.** Anything under `harness/` *except* `harness/plugins/` is owned by the user, tracked in their git, freely editable. The framework writes to it only on `keystone init` (and refuses to overwrite without `--reset`).
-5. **Plugins are read-only and atomic.** Plugins under `harness/plugins/<name>/` exist exactly as they did at the pinned tag. The runtime verifies hashes on every cascade resolution; drift triggers wipe-and-reinstall. Editing plugin files is unsupported and silently reverted.
-6. **Determinism in the cascade.** For any `<port>/<name>`, exactly one file wins. Project files (`harness/<port>/<name>.md`) always beat plugin files. Among plugins, the first occurrence in a pre-order walk of the `keystone.json` tree wins. `strict` from any ancestor blocks descendants from overriding. The resolver is pure.
-7. **No backward-compat sludge inside the framework.** 1.0 is a clean break. Old 0.x layouts are not silently shimmed. The 0.x → 1.0 path is a documented one-time `init --reset`.
+3. **Open to extension, closed to modification — applied to *structure*.** The structure (port names, conventions, paths) is closed-to-modification: it changes only via deliberate framework releases. Behavior is open-to-extension via markdown: users add, edit, or remove markdown adapters at the conventional paths to change what the harness does. **It must be unnecessary for a user to modify framework files (Go source, embedded templates) to change behavior.** If a behavior change requires editing the framework, the port surface has a gap and the right answer is a new port or a richer contract — not a fork.
+4. **Convention over configuration.** Drop a file at the conventional path → it loads. The convention table lives at `docs/conventions.md` and is the canonical reference. Generators (`keystone new ...`) scaffold every shape so authors never have to remember a path.
+5. **Project content belongs to the user.** Anything under `harness/` *except* `harness/plugins/` is owned by the user, tracked in their git, freely editable. The framework writes to it only on `keystone init` (and refuses to overwrite without `--reset`).
+6. **Plugins are read-only and atomic.** Plugins under `harness/plugins/<name>/` exist exactly as they did at the pinned tag. The runtime verifies hashes on every cascade resolution; drift triggers wipe-and-reinstall. Editing plugin files is unsupported and silently reverted.
+7. **Determinism in the cascade.** For any `<port>/<name>`, exactly one file wins. Project files (`harness/<port>/<name>.md`) always beat plugin files. Among plugins, the first occurrence in a pre-order walk of the `keystone.json` tree wins. `strict` from any ancestor blocks descendants from overriding. The resolver is pure.
+8. **No backward-compat sludge inside the framework.** 1.0 is a clean break. Old 0.x layouts are not silently shimmed. The 0.x → 1.0 path is a documented one-time `init --reset`.
 
 ---
 
@@ -66,7 +67,7 @@ Each port has a one-page contract in `docs/ports/<port>.md`: required frontmatte
 ```
 keystone/
 ├── cmd/keystone/                      # CLI entrypoint
-├── internal/framework/                # framework runtime — closed to modification
+├── internal/framework/                # framework runtime — users never edit this
 │   ├── loader/                        # convention walk + cascade resolution
 │   ├── manifest/                      # JSON manifest parsing & validation
 │   ├── lockfile/                      # SHA + per-file hash pins
@@ -184,7 +185,7 @@ Each phase: scope → deliverables → exit criteria → risks.
 - `docs/adr/0007-no-backward-compat-at-1.0.md` — 0.x → 1.0 is a one-time `init --reset`; no shims.
 - `docs/adr/0008-versioning-policy.md` — SemVer with explicit compatibility guarantees post-1.0.
 - `docs/ports/` — first draft of port contracts (one page each).
-- `README.md` reframed: "Keystone — the harness framework."
+- `README.md` reframed: "Keystone - the agent harness framework for any project."
 
 **Exit criteria.**
 - All ADRs reviewed and merged.
