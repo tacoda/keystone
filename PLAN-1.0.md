@@ -301,10 +301,16 @@ Each phase: scope → deliverables → exit criteria → risks.
 
 **Status:** ⏳ Pending.
 
-**Scope.** Lock in Rails-like ergonomics. Document conventions exhaustively. Ship scaffolding generators. Add `keystone doctor` to flag convention violations and plugin drift.
+**Scope.** Lock in Rails-like ergonomics. Document conventions exhaustively. Ship scaffolding generators. Add `keystone doctor` to flag convention violations and plugin drift. Normalize cross-file path references in scaffolded content.
 
 **Deliverables.**
 - `docs/conventions.md` — the canonical convention table. Path → port → activation.
+- **Path convention for markdown cross-references** — codify and enforce two rules:
+  1. **Markdown links to other harness files** are written *relative to the harness root*, not relative to the source file. Example: a guide at `<harness-root>/guides/process/spec.md` linking to its paired corpus references `corpus/process/spec.md` (resolved against the harness root), not `../../corpus/process/spec.md`. Relative paths with `../` or `./` segments are forbidden inside harness markdown.
+  2. **Code-relevant content** (sensor commands, file paths the agent reads/writes, the lockfile, the project's source tree) is written *relative to the repo root* — the directory that owns the harness folder and the `keystone.lock.json`.
+  - One-time pass to rewrite the ~hundreds of existing relative links in `internal/framework/scaffold/templates/harness/` and `internal/framework/scaffold/templates/optional/starter/` to follow rule 1.
+  - `keystone doctor --paths` (or a default check) flags any `../` segment in harness markdown.
+  - Generators emit conformant paths by default.
 - Generators:
   - `keystone new guide <topic>/<name>` — guide + paired corpus stub.
   - `keystone new sensor <name>` — sensor with frontmatter.
@@ -313,7 +319,7 @@ Each phase: scope → deliverables → exit criteria → risks.
   - `keystone new adapter <agent>` — per-agent bindings.
   - `keystone new plugin <name>` — scaffold a *plugin repo* (a separate git repo that other projects can vendor).
 - `keystone doctor`:
-  - Checks every file under `harness/` (excluding `harness/plugins/`) against the conventions; reports misplacements, missing frontmatter, broken forward-links.
+  - Checks every file under `harness/` (excluding `harness/plugins/`) against the conventions; reports misplacements, missing frontmatter, broken forward-links, and any `../`-style paths that violate the rule above.
   - Diffs the user's scaffolded defaults against current templates; reports drift the user may want to refresh.
   - Calls `plugins.verify`; reports any drifted plugins that were reset.
 - Dropping a file at a conventional path is sufficient to activate it — no registry edits.
@@ -321,6 +327,7 @@ Each phase: scope → deliverables → exit criteria → risks.
 **Exit criteria.**
 - Authoring a new sensor / guide / action / playbook / plugin takes one command + filling in the body.
 - `doctor` runs in <2s on a fixture project with 200 markdown files.
+- `doctor` reports zero `../`-segment paths in a fresh `keystone init` install.
 - No code change required to support a new agent — the adapter generator + a default template suffice.
 
 **Risks.** Generator output drift from hand-authored files. Mitigation: a "regenerate" mode that diffs current scaffolds against canonical templates and reports rot.

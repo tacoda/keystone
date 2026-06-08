@@ -12,13 +12,17 @@ import (
 	"github.com/tacoda/keystone/internal/framework/manifest"
 )
 
-// runPolicyUpdate handles `keystone policy update <name> [<new-ref>] [--dir <path>]`.
+// runPolicyUpdate handles `keystone policy update <name> [<new-ref>] [--dir <path>] [--harness-root <name>]`.
 //
 // Re-resolves the named policy (using the lockfile's stored ref, or the new
 // ref if supplied), validates the new content, refuses to clobber locally
 // edited files unless --force, then replaces the namespace tree and rewrites
 // the lockfile entry.
 func runPolicyUpdate(args []string) error {
+	harnessRoot, args, err := extractHarnessRoot(args)
+	if err != nil {
+		return err
+	}
 	var force bool
 	dir := "."
 	var positional []string
@@ -64,13 +68,13 @@ func runPolicyUpdate(args []string) error {
 		return fmt.Errorf("resolve dir: %w", err)
 	}
 
-	lf, err := lockfile.Read(absDir)
+	lf, err := lockfile.Read(absDir, harnessRoot)
 	if err != nil {
 		return err
 	}
 	existing, ok := lf.Policies[name]
 	if !ok {
-		return fmt.Errorf("policy %q is not installed (not recorded in %s)", name, lockfile.File)
+		return fmt.Errorf("policy %q is not installed (not recorded in %s)", name, lockfile.RelPath(harnessRoot))
 	}
 
 	sourceRef := existing.SourceRef
@@ -102,7 +106,7 @@ func runPolicyUpdate(args []string) error {
 		return err
 	}
 
-	namespaceDir := filepath.Join("harness", "policies", mf.Namespace())
+	namespaceDir := filepath.Join(harnessRoot, "policies", mf.Namespace())
 	if !force {
 		dirty, err := dirtyFiles(absDir, namespaceDir, existing.Files)
 		if err != nil {
@@ -126,7 +130,9 @@ func runPolicyUpdate(args []string) error {
 	}
 
 	srcFS := os.DirFS(resolved.LocalDir)
-	if err := copyTree(srcFS, manifest.PolicyContentRoot, absDir, overwrite); err != nil {
+	srcRoot := filepath.Join(manifest.PolicyContentRoot, "harness")
+	dest := filepath.Join(absDir, harnessRoot)
+	if err := copyTree(srcFS, srcRoot, dest, overwrite); err != nil {
 		return fmt.Errorf("copy policy content: %w", err)
 	}
 
@@ -145,14 +151,14 @@ func runPolicyUpdate(args []string) error {
 		Required:        mf.Required,
 		Files:           newHashes,
 	}
-	if err := lockfile.Write(absDir, lf); err != nil {
+	if err := lockfile.Write(absDir, harnessRoot, lf); err != nil {
 		return err
 	}
 
 	fmt.Fprintf(os.Stdout, "✓ updated %s → %s (%s)\n",
 		name, mf.Version, resolved.ResolvedSHA[:displaySHALen(resolved.ResolvedSHA)])
 
-	res, verr := verifyPolicies(absDir)
+	res, verr := verifyPolicies(absDir, harnessRoot)
 	if verr != nil {
 		return fmt.Errorf("policy verify: %w", verr)
 	}
@@ -203,16 +209,17 @@ func printPolicyUpdateUsage(w *os.File) {
 	fmt.Fprint(w, `keystone policy update — update an installed org policy
 
 Usage:
-  keystone policy update <name> [<new-ref>] [--dir <path>] [--force]
+  keystone policy update <name> [<new-ref>] [--dir <path>] [--harness-root <name>] [--force]
 
-Re-resolves the policy using the ref recorded in harness/keystone.lock.json, or
-the new ref if supplied. For a moving ref (e.g. a branch like #main) this
+Re-resolves the policy using the ref recorded in <harness-root>/keystone.lock.json,
+or the new ref if supplied. For a moving ref (e.g. a branch like #main) this
 picks up new commits; for a pinned tag it's a no-op unless the tag was moved.
 Refuses to overwrite files that have been edited since install — pass --force
 to discard local changes.
 
 Flags:
-  --dir <path>   Directory containing harness/ (defaults to cwd).
-  --force        Discard local edits to policy files when updating.
+  --dir <path>           Directory containing the harness (defaults to cwd).
+  --harness-root <name>  Harness directory name (defaults to "harness").
+  --force                Discard local edits to policy files when updating.
 `)
 }

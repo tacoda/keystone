@@ -61,12 +61,12 @@ func runInit(args []string, assets fs.FS) error {
 
 	preflight(absDir)
 
-	harnessDest := filepath.Join(absDir, "harness")
+	harnessDest := filepath.Join(absDir, flags.harnessRoot)
 	if _, err := os.Stat(harnessDest); err == nil {
 		if !flags.force {
 			return fmt.Errorf("%s already exists; pass --force to overwrite", harnessDest)
 		}
-		fmt.Fprintf(os.Stdout, "▸ overwriting existing harness/\n")
+		fmt.Fprintf(os.Stdout, "▸ overwriting existing %s/\n", flags.harnessRoot)
 	} else if !os.IsNotExist(err) {
 		return err
 	}
@@ -82,21 +82,21 @@ func runInit(args []string, assets fs.FS) error {
 		}
 	}
 
-	if err := installConditional(assets, absDir, flags.selections); err != nil {
+	if err := installConditional(assets, absDir, flags.harnessRoot, flags.selections); err != nil {
 		return fmt.Errorf("install optional content: %w", err)
 	}
 
-	installedPolicies, err := installPolicies(absDir, flags.policies)
+	installedPolicies, err := installPolicies(absDir, flags.harnessRoot, flags.policies)
 	if err != nil {
 		return fmt.Errorf("install policies: %w", err)
 	}
 
-	if err := initializeLockfile(absDir, agents); err != nil {
+	if err := initializeLockfile(absDir, flags.harnessRoot, agents); err != nil {
 		return fmt.Errorf("initialize lockfile: %w", err)
 	}
 
 	if len(installedPolicies) > 0 {
-		res, verr := verifyPolicies(absDir)
+		res, verr := verifyPolicies(absDir, flags.harnessRoot)
 		if verr != nil {
 			return fmt.Errorf("policy verify: %w", verr)
 		}
@@ -105,23 +105,23 @@ func runInit(args []string, assets fs.FS) error {
 		}
 	}
 
-	if err := writeInstallProfile(absDir, flags.selections, installedPolicies); err != nil {
+	if err := writeInstallProfile(absDir, flags.harnessRoot, flags.selections, installedPolicies); err != nil {
 		return fmt.Errorf("write install profile: %w", err)
 	}
 
 	for _, agent := range agents {
-		printAgentWarnings(agent)
+		printAgentWarnings(agent, flags.harnessRoot)
 	}
-	printNextSteps(agents)
+	printNextSteps(agents, flags.harnessRoot)
 	return nil
 }
 
-// initializeLockfile creates harness/keystone.lock.json if it doesn't exist yet,
-// or fills in the keystone section if a prior call (e.g. installPacks) wrote
-// only the packs section. Records the binary version, install date, and the
-// agent IDs whose menu files were just installed.
-func initializeLockfile(destDir string, agents []string) error {
-	lf, err := ensureLockfile(destDir)
+// initializeLockfile creates <harnessRoot>/keystone.lock.json if it doesn't
+// exist yet, or fills in the keystone section if a prior call wrote only the
+// policies section. Records the binary version, install date, the configured
+// harness root, and the agent IDs whose menu files were just installed.
+func initializeLockfile(destDir, harnessRoot string, agents []string) error {
+	lf, err := ensureLockfile(destDir, harnessRoot)
 	if err != nil {
 		return err
 	}
@@ -129,6 +129,7 @@ func initializeLockfile(destDir string, agents []string) error {
 	if lf.Keystone.Installed == "" {
 		lf.Keystone.Installed = time.Now().UTC().Format("2006-01-02")
 	}
+	lf.Keystone.HarnessRoot = harnessRoot
 	seen := map[string]bool{}
 	for _, a := range lf.Keystone.Agents {
 		seen[a] = true
@@ -139,10 +140,10 @@ func initializeLockfile(destDir string, agents []string) error {
 			seen[a] = true
 		}
 	}
-	if err := lockfile.Write(destDir, lf); err != nil {
+	if err := lockfile.Write(destDir, harnessRoot, lf); err != nil {
 		return err
 	}
-	fmt.Fprintf(os.Stdout, "  wrote: %s\n", filepath.Join(destDir, lockfile.File))
+	fmt.Fprintf(os.Stdout, "  wrote: %s\n", filepath.Join(destDir, lockfile.RelPath(harnessRoot)))
 	return nil
 }
 
@@ -205,20 +206,20 @@ func preflight(dir string) {
 	fmt.Fprintf(os.Stderr, "! no CI config detected; the release phase assumes a CI pipeline\n")
 }
 
-func printNextSteps(agents []string) {
+func printNextSteps(agents []string, harnessRoot string) {
 	list := strings.Join(agents, ", ")
 
 	var bootstrapIn, lifecycle string
 	if len(agents) == 1 {
 		bootstrapIn = fmt.Sprintf("in %s", agents[0])
-		lifecycle = fmt.Sprintf("     See harness/adapters/%s/lifecycle.md for how to invoke it.\n",
-			agentTargetDir(agents[0]))
+		lifecycle = fmt.Sprintf("     See %s/adapters/%s/lifecycle.md for how to invoke it.\n",
+			harnessRoot, agentTargetDir(agents[0]))
 	} else {
 		bootstrapIn = "in any one of the agents above (the harness edits are agent-agnostic)"
 		var b strings.Builder
 		b.WriteString("     See:\n")
 		for _, a := range agents {
-			fmt.Fprintf(&b, "       harness/adapters/%s/lifecycle.md\n", agentTargetDir(a))
+			fmt.Fprintf(&b, "       %s/adapters/%s/lifecycle.md\n", harnessRoot, agentTargetDir(a))
 		}
 		b.WriteString("     for how to invoke it in each agent.\n")
 		lifecycle = b.String()
@@ -229,15 +230,15 @@ func printNextSteps(agents []string) {
 
   ▶ Next: run the bootstrap action %s.
 
-     Bootstrap reads your codebase and seeds harness/corpus/state/CODEBASE_STATE.md,
-     harness/corpus/idioms/<your-stack>/, and the paired harness/guides/idioms/<your-stack>/
+     Bootstrap reads your codebase and seeds %s/corpus/state/CODEBASE_STATE.md,
+     %s/corpus/idioms/<your-stack>/, and the paired %s/guides/idioms/<your-stack>/
      so the harness reflects your project. It also confirms the sensor commands.
 %s
 Also:
 
-  • Read harness/README.md for an overview of the five components
+  • Read %s/README.md for an overview of the five components
     (corpus, guides, sensors, policies, flywheels).
-  • Review harness/corpus/state/INSTALL_PROFILE.md and adjust if needed.
-  • Commit harness/ and any agent-specific files this installer created.
-`, list, bootstrapIn, lifecycle)
+  • Review %s/corpus/state/INSTALL_PROFILE.md and adjust if needed.
+  • Commit %s/ and any agent-specific files this installer created.
+`, list, bootstrapIn, harnessRoot, harnessRoot, harnessRoot, lifecycle, harnessRoot, harnessRoot, harnessRoot)
 }

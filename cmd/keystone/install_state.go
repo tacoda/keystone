@@ -11,18 +11,18 @@ import (
 //
 // This is a transitional helper for the 0.x → 1.0 path. At 1.0 the
 // INSTALL_PROFILE.md fallback can be dropped.
-func ensureLockfile(installDir string) (*lockfile.Lockfile, error) {
-	lf, err := lockfile.Read(installDir)
+func ensureLockfile(installDir, harnessRoot string) (*lockfile.Lockfile, error) {
+	lf, err := lockfile.Read(installDir, harnessRoot)
 	if err != nil {
 		return nil, err
 	}
 	if lf.Keystone.Version != "" {
 		return lf, nil
 	}
-	if v, perr := readKeystoneVersionFromProfile(installDir); perr == nil && v != "" {
+	if v, perr := readKeystoneVersionFromProfile(installDir, harnessRoot); perr == nil && v != "" {
 		lf.Keystone.Version = v
 	}
-	if agents, perr := readInstalledAgentsFromProfile(installDir); perr == nil && len(agents) > 0 {
+	if agents, perr := readInstalledAgentsFromProfile(installDir, harnessRoot); perr == nil && len(agents) > 0 {
 		lf.Keystone.Agents = agents
 	}
 	return lf, nil

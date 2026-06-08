@@ -11,17 +11,15 @@ import (
 	"github.com/tacoda/keystone/internal/framework/lockfile"
 )
 
-// writeInstallProfile renders sel + packs as harness/corpus/state/INSTALL_PROFILE.md
+// writeInstallProfile renders sel + packs as <harnessRoot>/corpus/state/INSTALL_PROFILE.md
 // under destDir. Overwrites any existing file (the file is install-scoped —
 // re-running init should reset it). Packs is nil/empty when no org packs were
 // installed.
 //
 // The profile is the human-readable record. Machine state (keystone version,
-// agents, packs) lives in harness/keystone.lock.json — written separately. The
-// profile no longer emits `keystone_version:` frontmatter; that field was
-// promoted to the lockfile.
-func writeInstallProfile(destDir string, sel Selections, policies map[string]lockfile.PolicyLock) error {
-	path := filepath.Join(destDir, "harness", "corpus", "state", "INSTALL_PROFILE.md")
+// agents, packs) lives in <harnessRoot>/keystone.lock.json — written separately.
+func writeInstallProfile(destDir, harnessRoot string, sel Selections, policies map[string]lockfile.PolicyLock) error {
+	path := filepath.Join(destDir, harnessRoot, "corpus", "state", "INSTALL_PROFILE.md")
 	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
 		return err
 	}
@@ -48,7 +46,7 @@ func writeInstallProfile(destDir string, sel Selections, policies map[string]loc
 
 	if len(policies) > 0 {
 		fmt.Fprintf(&b, "\n## Policies\n\n")
-		fmt.Fprintf(&b, "Org policies installed under `harness/policies/`. Detailed pin state (resolved SHA, file hashes) lives in the lockfile.\n\n")
+		fmt.Fprintf(&b, "Org policies installed under `%s/policies/`. Detailed pin state (resolved SHA, file hashes) lives in the lockfile.\n\n", harnessRoot)
 		fmt.Fprintf(&b, "| Policy | Version | Source |\n")
 		fmt.Fprintf(&b, "|---|---|---|\n")
 		names := make([]string, 0, len(policies))
@@ -72,48 +70,48 @@ func writeInstallProfile(destDir string, sel Selections, policies map[string]loc
 // readInstalledAgents returns the list of agent IDs recorded in the lockfile.
 // Falls back to parsing INSTALL_PROFILE.md for installs that predate the
 // lockfile.
-func readInstalledAgents(destDir string) ([]string, error) {
-	lf, err := lockfile.Read(destDir)
+func readInstalledAgents(destDir, harnessRoot string) ([]string, error) {
+	lf, err := lockfile.Read(destDir, harnessRoot)
 	if err != nil {
 		return nil, err
 	}
 	if len(lf.Keystone.Agents) > 0 {
 		return append([]string{}, lf.Keystone.Agents...), nil
 	}
-	return readInstalledAgentsFromProfile(destDir)
+	return readInstalledAgentsFromProfile(destDir, harnessRoot)
 }
 
 // readKeystoneVersion returns the binary version that last touched the install,
 // from the lockfile. Falls back to INSTALL_PROFILE.md frontmatter for installs
 // that predate the lockfile. Returns "" if neither source has a value.
-func readKeystoneVersion(destDir string) (string, error) {
-	lf, err := lockfile.Read(destDir)
+func readKeystoneVersion(destDir, harnessRoot string) (string, error) {
+	lf, err := lockfile.Read(destDir, harnessRoot)
 	if err != nil {
 		return "", err
 	}
 	if lf.Keystone.Version != "" {
 		return lf.Keystone.Version, nil
 	}
-	return readKeystoneVersionFromProfile(destDir)
+	return readKeystoneVersionFromProfile(destDir, harnessRoot)
 }
 
 // updateKeystoneVersion sets the binary version in the lockfile, creating
 // the file if needed. Backfills install state from INSTALL_PROFILE.md when
 // the lockfile is empty.
-func updateKeystoneVersion(destDir, newVersion string) error {
-	lf, err := ensureLockfile(destDir)
+func updateKeystoneVersion(destDir, harnessRoot, newVersion string) error {
+	lf, err := ensureLockfile(destDir, harnessRoot)
 	if err != nil {
 		return err
 	}
 	lf.Keystone.Version = newVersion
-	return lockfile.Write(destDir, lf)
+	return lockfile.Write(destDir, harnessRoot, lf)
 }
 
 // appendInstalledAgents adds newAgents to the lockfile's agent list, preserving
 // existing entries and order. Backfills from INSTALL_PROFILE.md when the
 // lockfile is empty so old installs get a lockfile on first agent-add.
-func appendInstalledAgents(destDir string, newAgents []string) error {
-	lf, err := ensureLockfile(destDir)
+func appendInstalledAgents(destDir, harnessRoot string, newAgents []string) error {
+	lf, err := ensureLockfile(destDir, harnessRoot)
 	if err != nil {
 		return err
 	}
@@ -134,18 +132,18 @@ func appendInstalledAgents(destDir string, newAgents []string) error {
 			seen[a] = true
 		}
 	}
-	if err := lockfile.Write(destDir, lf); err != nil {
+	if err := lockfile.Write(destDir, harnessRoot, lf); err != nil {
 		return err
 	}
-	fmt.Fprintf(os.Stdout, "  updated: %s\n", filepath.Join(destDir, lockfile.File))
+	fmt.Fprintf(os.Stdout, "  updated: %s\n", filepath.Join(destDir, lockfile.RelPath(harnessRoot)))
 	return nil
 }
 
 // readKeystoneVersionFromProfile parses the `keystone_version:` frontmatter
 // from INSTALL_PROFILE.md. Used as a backward-compat fallback for installs
 // created before the lockfile existed. Returns "" if the field is missing.
-func readKeystoneVersionFromProfile(destDir string) (string, error) {
-	path := filepath.Join(destDir, "harness", "corpus", "state", "INSTALL_PROFILE.md")
+func readKeystoneVersionFromProfile(destDir, harnessRoot string) (string, error) {
+	path := filepath.Join(destDir, harnessRoot, "corpus", "state", "INSTALL_PROFILE.md")
 	data, err := os.ReadFile(path)
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -164,8 +162,8 @@ func readKeystoneVersionFromProfile(destDir string) (string, error) {
 // readInstalledAgentsFromProfile parses the agent row of INSTALL_PROFILE.md.
 // Used as a backward-compat fallback for installs created before the lockfile
 // existed.
-func readInstalledAgentsFromProfile(destDir string) ([]string, error) {
-	path := filepath.Join(destDir, "harness", "corpus", "state", "INSTALL_PROFILE.md")
+func readInstalledAgentsFromProfile(destDir, harnessRoot string) ([]string, error) {
+	path := filepath.Join(destDir, harnessRoot, "corpus", "state", "INSTALL_PROFILE.md")
 	data, err := os.ReadFile(path)
 	if err != nil {
 		if os.IsNotExist(err) {

@@ -6,6 +6,7 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/tacoda/keystone/internal/framework/config"
 	"github.com/tacoda/keystone/internal/framework/manifest"
 )
 
@@ -31,7 +32,7 @@ func TestPolicyLock_ResolvedTier(t *testing.T) {
 
 func TestRead_MissingReturnsEmpty(t *testing.T) {
 	dir := t.TempDir()
-	lf, err := Read(dir)
+	lf, err := Read(dir, config.DefaultHarnessRoot)
 	if err != nil {
 		t.Fatalf("Read on missing file: %v", err)
 	}
@@ -50,9 +51,10 @@ func TestWriteRead_Roundtrip(t *testing.T) {
 	dir := t.TempDir()
 	in := &Lockfile{
 		Keystone: KeystoneInfo{
-			Version:   "0.15.0",
-			Installed: "2026-06-08",
-			Agents:    []string{"claude-code", "codex"},
+			Version:     "0.15.0",
+			Installed:   "2026-06-08",
+			Agents:      []string{"claude-code", "codex"},
+			HarnessRoot: config.DefaultHarnessRoot,
 		},
 		Policies: map[string]PolicyLock{
 			"acme": {
@@ -67,14 +69,15 @@ func TestWriteRead_Roundtrip(t *testing.T) {
 			},
 		},
 	}
-	if err := Write(dir, in); err != nil {
+	if err := Write(dir, config.DefaultHarnessRoot, in); err != nil {
 		t.Fatalf("Write: %v", err)
 	}
-	if _, err := os.Stat(filepath.Join(dir, File)); err != nil {
-		t.Fatalf("expected file at %s: %v", File, err)
+	rel := RelPath(config.DefaultHarnessRoot)
+	if _, err := os.Stat(filepath.Join(dir, rel)); err != nil {
+		t.Fatalf("expected file at %s: %v", rel, err)
 	}
 
-	out, err := Read(dir)
+	out, err := Read(dir, config.DefaultHarnessRoot)
 	if err != nil {
 		t.Fatalf("Read: %v", err)
 	}

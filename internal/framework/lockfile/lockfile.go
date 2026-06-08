@@ -1,6 +1,10 @@
-// Package lockfile reads and writes harness/keystone.lock.json, the install-
-// state record that pins every installed policy by source ref + resolved SHA
-// + per-file hashes. JSON format.
+// Package lockfile reads and writes the per-install state record at
+// <harness-root>/keystone.lock.json. Pins every installed policy by source
+// ref + resolved SHA + per-file hashes. JSON format.
+//
+// The harness root is configurable (default "harness", overridable per
+// install via the --harness-root flag at `keystone init`), so every
+// function accepts it explicitly.
 package lockfile
 
 import (
@@ -9,24 +13,29 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/tacoda/keystone/internal/framework/config"
 	"github.com/tacoda/keystone/internal/framework/manifest"
 )
-
-// File is the on-disk name of the lockfile, relative to the install directory.
-// Holds both keystone install state (version, agents, install date) and per-
-// policy records.
-const File = "harness/keystone.lock.json"
 
 // Version is the schema version of the lockfile format. Bump when fields are
 // renamed or removed.
 const Version = 1
 
+// RelPath returns the lockfile's path relative to the install directory:
+// <harness-root>/keystone.lock.json. Pass to filepath.Join(installDir, ...)
+// for the absolute path.
+func RelPath(harnessRoot string) string {
+	return filepath.Join(harnessRoot, config.LockfileName)
+}
+
 // KeystoneInfo records the install-scoped state: binary version, install
-// date, and agent IDs with menu files installed.
+// date, agent IDs with menu files installed, and the configured harness
+// root for this install.
 type KeystoneInfo struct {
-	Version   string   `json:"version"`
-	Installed string   `json:"installed,omitempty"`
-	Agents    []string `json:"agents,omitempty"`
+	Version     string   `json:"version"`
+	Installed   string   `json:"installed,omitempty"`
+	Agents      []string `json:"agents,omitempty"`
+	HarnessRoot string   `json:"harness_root,omitempty"` // directory name; empty means config.DefaultHarnessRoot
 }
 
 // PolicyLock describes one installed policy. Tier, Strict, and Required are
@@ -59,20 +68,21 @@ type Lockfile struct {
 	Policies map[string]PolicyLock `json:"policies,omitempty"`
 }
 
-// Read loads the lockfile from installDir, returning an empty Lockfile (not
-// an error) if the file does not exist.
-func Read(installDir string) (*Lockfile, error) {
-	path := filepath.Join(installDir, File)
+// Read loads the lockfile at <installDir>/<harnessRoot>/keystone.lock.json,
+// returning an empty Lockfile (not an error) if the file does not exist.
+func Read(installDir, harnessRoot string) (*Lockfile, error) {
+	rel := RelPath(harnessRoot)
+	path := filepath.Join(installDir, rel)
 	data, err := os.ReadFile(path)
 	if err != nil {
 		if os.IsNotExist(err) {
 			return &Lockfile{Version: Version, Policies: map[string]PolicyLock{}}, nil
 		}
-		return nil, fmt.Errorf("read %s: %w", File, err)
+		return nil, fmt.Errorf("read %s: %w", rel, err)
 	}
 	var lf Lockfile
 	if err := json.Unmarshal(data, &lf); err != nil {
-		return nil, fmt.Errorf("parse %s: %w", File, err)
+		return nil, fmt.Errorf("parse %s: %w", rel, err)
 	}
 	if lf.Policies == nil {
 		lf.Policies = map[string]PolicyLock{}
@@ -80,9 +90,10 @@ func Read(installDir string) (*Lockfile, error) {
 	return &lf, nil
 }
 
-// Write serializes the lockfile back to disk under installDir. Always emits
-// Version = lockfile.Version. Indents for human readability.
-func Write(installDir string, lf *Lockfile) error {
+// Write serializes the lockfile back to disk at
+// <installDir>/<harnessRoot>/keystone.lock.json. Always emits Version =
+// lockfile.Version. Indents for human readability.
+func Write(installDir, harnessRoot string, lf *Lockfile) error {
 	lf.Version = Version
 
 	out, err := json.MarshalIndent(lf, "", "  ")
@@ -91,12 +102,13 @@ func Write(installDir string, lf *Lockfile) error {
 	}
 	out = append(out, '\n')
 
-	path := filepath.Join(installDir, File)
+	rel := RelPath(harnessRoot)
+	path := filepath.Join(installDir, rel)
 	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
 		return err
 	}
 	if err := os.WriteFile(path, out, 0o644); err != nil {
-		return fmt.Errorf("write %s: %w", File, err)
+		return fmt.Errorf("write %s: %w", rel, err)
 	}
 	return nil
 }

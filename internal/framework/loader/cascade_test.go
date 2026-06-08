@@ -32,7 +32,7 @@ func TestVerify_CleanCascade(t *testing.T) {
 			Strict: manifest.StrictSpec{Guides: []string{"data-handling"}},
 		},
 	}
-	res, err := Verify(dir, policies)
+	res, err := Verify(dir, "harness", policies)
 	if err != nil {
 		t.Fatalf("Verify: %v", err)
 	}
@@ -55,7 +55,7 @@ func TestVerify_ProjectShadowsOrgStrict(t *testing.T) {
 			Strict: manifest.StrictSpec{Guides: []string{"data-handling"}},
 		},
 	}
-	res, err := Verify(dir, policies)
+	res, err := Verify(dir, "harness", policies)
 	if err != nil {
 		t.Fatalf("Verify: %v", err)
 	}
@@ -83,7 +83,7 @@ func TestVerify_TeamPolicyShadowsOrgStrict(t *testing.T) {
 		"acme":     {Tier: manifest.TierOrg, Strict: manifest.StrictSpec{Guides: []string{"data-handling"}}},
 		"platform": {Tier: manifest.TierTeam},
 	}
-	res, err := Verify(dir, policies)
+	res, err := Verify(dir, "harness", policies)
 	if err != nil {
 		t.Fatalf("Verify: %v", err)
 	}
@@ -101,7 +101,7 @@ func TestVerify_TeamStrict_OnlyProjectCanShadow(t *testing.T) {
 		"platform":   {Tier: manifest.TierTeam, Strict: manifest.StrictSpec{Sensors: []string{"rubocop"}}},
 		"other-team": {Tier: manifest.TierTeam},
 	}
-	res, err := Verify(dir, policies)
+	res, err := Verify(dir, "harness", policies)
 	if err != nil {
 		t.Fatalf("Verify: %v", err)
 	}
@@ -118,7 +118,7 @@ func TestVerify_RequiredGap(t *testing.T) {
 			Required: manifest.StrictSpec{Actions: []string{"release"}},
 		},
 	}
-	res, err := Verify(dir, policies)
+	res, err := Verify(dir, "harness", policies)
 	if err != nil {
 		t.Fatalf("Verify: %v", err)
 	}
@@ -144,7 +144,7 @@ func TestVerify_RequiredSatisfiedByProject(t *testing.T) {
 			Required: manifest.StrictSpec{Actions: []string{"release"}},
 		},
 	}
-	res, err := Verify(dir, policies)
+	res, err := Verify(dir, "harness", policies)
 	if err != nil {
 		t.Fatalf("Verify: %v", err)
 	}

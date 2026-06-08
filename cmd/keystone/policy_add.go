@@ -11,12 +11,16 @@ import (
 	"github.com/tacoda/keystone/internal/framework/manifest"
 )
 
-// runPolicyAdd handles `keystone policy add <ref> [--dir <path>]`.
+// runPolicyAdd handles `keystone policy add <ref> [--dir <path>] [--harness-root <name>]`.
 //
 // Resolves the policy from <ref>, validates its content, refuses to install
 // if a policy with the same name is already recorded in the lockfile, then
 // copies the namespace tree and writes the lockfile entry.
 func runPolicyAdd(args []string) error {
+	harnessRoot, args, err := extractHarnessRoot(args)
+	if err != nil {
+		return err
+	}
 	dir := "."
 	var positional []string
 
@@ -50,14 +54,14 @@ func runPolicyAdd(args []string) error {
 	if err != nil {
 		return fmt.Errorf("resolve dir: %w", err)
 	}
-	if _, err := os.Stat(filepath.Join(absDir, "harness")); err != nil {
+	if _, err := os.Stat(filepath.Join(absDir, harnessRoot)); err != nil {
 		if os.IsNotExist(err) {
-			return fmt.Errorf("no harness/ in %s — run `keystone init` first", absDir)
+			return fmt.Errorf("no %s/ in %s — run `keystone init` first", harnessRoot, absDir)
 		}
 		return err
 	}
 
-	lf, err := ensureLockfile(absDir)
+	lf, err := ensureLockfile(absDir, harnessRoot)
 	if err != nil {
 		return err
 	}
@@ -83,7 +87,7 @@ func runPolicyAdd(args []string) error {
 	if _, exists := lf.Policies[mf.Name]; exists {
 		return fmt.Errorf(
 			"policy %q is already installed (recorded in %s); use `keystone policy update %s` to re-resolve or change the ref",
-			mf.Name, lockfile.File, mf.Name,
+			mf.Name, lockfile.RelPath(harnessRoot), mf.Name,
 		)
 	}
 
@@ -92,11 +96,13 @@ func runPolicyAdd(args []string) error {
 	}
 
 	srcFS := os.DirFS(resolved.LocalDir)
-	if err := copyTree(srcFS, manifest.PolicyContentRoot, absDir, overwrite); err != nil {
+	srcRoot := filepath.Join(manifest.PolicyContentRoot, "harness")
+	dest := filepath.Join(absDir, harnessRoot)
+	if err := copyTree(srcFS, srcRoot, dest, overwrite); err != nil {
 		return fmt.Errorf("copy policy content: %w", err)
 	}
 
-	namespaceDir := filepath.Join("harness", "policies", mf.Namespace())
+	namespaceDir := filepath.Join(harnessRoot, "policies", mf.Namespace())
 	fileHashes, err := lockfile.HashFilesUnder(absDir, namespaceDir)
 	if err != nil {
 		return fmt.Errorf("hash installed files: %w", err)
@@ -112,14 +118,14 @@ func runPolicyAdd(args []string) error {
 		Required:        mf.Required,
 		Files:           fileHashes,
 	}
-	if err := lockfile.Write(absDir, lf); err != nil {
+	if err := lockfile.Write(absDir, harnessRoot, lf); err != nil {
 		return err
 	}
 
 	fmt.Fprintf(os.Stdout, "✓ installed %s %s (%s)\n",
 		mf.Name, mf.Version, resolved.ResolvedSHA[:displaySHALen(resolved.ResolvedSHA)])
 
-	res, verr := verifyPolicies(absDir)
+	res, verr := verifyPolicies(absDir, harnessRoot)
 	if verr != nil {
 		return fmt.Errorf("policy verify: %w", verr)
 	}
@@ -133,16 +139,17 @@ func printPolicyAddUsage(w *os.File) {
 	fmt.Fprint(w, `keystone policy add — install an org policy into an existing harness
 
 Usage:
-  keystone policy add <ref> [--dir <path>]
+  keystone policy add <ref> [--dir <path>] [--harness-root <name>]
 
 Fetches and installs a policy from <ref>. v1 supports git+<url>[#<rev>]:
   keystone policy add git+https://github.com/acme/policy.git#v1.2.0
 
 Errors out if a policy with the same name is already recorded in
-harness/keystone.lock.json — use 'keystone policy update' to re-resolve, or
-remove the policy first to re-add it.
+<harness-root>/keystone.lock.json — use 'keystone policy update' to re-resolve,
+or remove the policy first to re-add it.
 
 Flags:
-  --dir <path>   Directory containing harness/ (defaults to cwd).
+  --dir <path>           Directory containing the harness (defaults to cwd).
+  --harness-root <name>  Harness directory name (defaults to "harness").
 `)
 }

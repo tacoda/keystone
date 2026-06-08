@@ -42,6 +42,10 @@ Commands:
 // recorded in the lockfile — the user must explicitly remove it first
 // rather than risk silent overwrites.
 func runTargetAdd(args []string, assets fs.FS) error {
+	harnessRoot, args, err := extractHarnessRoot(args)
+	if err != nil {
+		return err
+	}
 	dir := "."
 	var positional []string
 
@@ -75,9 +79,9 @@ func runTargetAdd(args []string, assets fs.FS) error {
 	if err != nil {
 		return fmt.Errorf("resolve dir: %w", err)
 	}
-	if _, err := os.Stat(filepath.Join(absDir, "harness")); err != nil {
+	if _, err := os.Stat(filepath.Join(absDir, harnessRoot)); err != nil {
 		if os.IsNotExist(err) {
-			return fmt.Errorf("no harness/ in %s — run `keystone init` first", absDir)
+			return fmt.Errorf("no %s/ in %s — run `keystone init` first", harnessRoot, absDir)
 		}
 		return err
 	}
@@ -99,7 +103,7 @@ func runTargetAdd(args []string, assets fs.FS) error {
 		return fmt.Errorf("no agents supplied")
 	}
 
-	existing, err := readInstalledAgents(absDir)
+	existing, err := readInstalledAgents(absDir, harnessRoot)
 	if err != nil {
 		return fmt.Errorf("read installed agents: %w", err)
 	}
@@ -119,14 +123,14 @@ func runTargetAdd(args []string, assets fs.FS) error {
 		}
 	}
 
-	if err := appendInstalledAgents(absDir, requested); err != nil {
+	if err := appendInstalledAgents(absDir, harnessRoot, requested); err != nil {
 		return fmt.Errorf("update lockfile: %w", err)
 	}
 
 	for _, agent := range requested {
-		printAgentWarnings(agent)
+		printAgentWarnings(agent, harnessRoot)
 	}
-	printTargetAddNextSteps(requested)
+	printTargetAddNextSteps(requested, harnessRoot)
 	return nil
 }
 
@@ -144,15 +148,15 @@ Flags:
 `)
 }
 
-func printTargetAddNextSteps(agents []string) {
+func printTargetAddNextSteps(agents []string, harnessRoot string) {
 	fmt.Fprintf(os.Stdout, "\n✓ added %s to the harness.\n\n", strings.Join(agents, ", "))
 	if len(agents) == 1 {
-		fmt.Fprintf(os.Stdout, "  See harness/adapters/%s/lifecycle.md for how to invoke actions in it.\n",
-			agentTargetDir(agents[0]))
+		fmt.Fprintf(os.Stdout, "  See %s/adapters/%s/lifecycle.md for how to invoke actions in it.\n",
+			harnessRoot, agentTargetDir(agents[0]))
 	} else {
 		fmt.Fprint(os.Stdout, "  See:\n")
 		for _, a := range agents {
-			fmt.Fprintf(os.Stdout, "    harness/adapters/%s/lifecycle.md\n", agentTargetDir(a))
+			fmt.Fprintf(os.Stdout, "    %s/adapters/%s/lifecycle.md\n", harnessRoot, agentTargetDir(a))
 		}
 	}
 	fmt.Fprintln(os.Stdout)

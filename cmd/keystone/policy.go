@@ -52,10 +52,14 @@ Commands:
 `)
 }
 
-// runPolicyVerify handles `keystone policy verify [--dir <path>]`. Reports
-// any strict-cascade violations in the install dir. Exits non-zero when
-// violations exist; returns nil on a clean tree.
+// runPolicyVerify handles `keystone policy verify [--dir <path>] [--harness-root <name>]`.
+// Reports any strict-cascade violations in the install dir. Exits non-zero
+// when violations exist; returns nil on a clean tree.
 func runPolicyVerify(args []string) error {
+	harnessRoot, args, err := extractHarnessRoot(args)
+	if err != nil {
+		return err
+	}
 	dir := "."
 	for i := 0; i < len(args); i++ {
 		a := args[i]
@@ -64,14 +68,15 @@ func runPolicyVerify(args []string) error {
 			fmt.Fprint(os.Stdout, `keystone policy verify — audit the strict cascade
 
 Usage:
-  keystone policy verify [--dir <path>]
+  keystone policy verify [--dir <path>] [--harness-root <name>]
 
 For each installed policy with strict items, walks lower tiers (team
 policies + project tree) and reports any file that overrides a strict
 item. Exits non-zero on any violation.
 
 Flags:
-  --dir <path>   Directory containing harness/ (defaults to cwd).
+  --dir <path>           Directory containing the harness (defaults to cwd).
+  --harness-root <name>  Harness directory name (defaults to "harness").
 `)
 			return nil
 		case a == "--dir":
@@ -89,14 +94,14 @@ Flags:
 	if err != nil {
 		return fmt.Errorf("resolve dir: %w", err)
 	}
-	if _, err := os.Stat(filepath.Join(absDir, "harness")); err != nil {
+	if _, err := os.Stat(filepath.Join(absDir, harnessRoot)); err != nil {
 		if os.IsNotExist(err) {
-			return fmt.Errorf("no harness/ in %s — run `keystone init` first", absDir)
+			return fmt.Errorf("no %s/ in %s — run `keystone init` first", harnessRoot, absDir)
 		}
 		return err
 	}
 
-	res, err := verifyPolicies(absDir)
+	res, err := verifyPolicies(absDir, harnessRoot)
 	if err != nil {
 		return err
 	}
@@ -113,19 +118,19 @@ Flags:
 //
 // Returns the map of policy-name → lockfile.PolicyLock for the policies installed in
 // this call, suitable for rendering into INSTALL_PROFILE.md.
-func installPolicies(destDir string, refs []string) (map[string]lockfile.PolicyLock, error) {
+func installPolicies(destDir, harnessRoot string, refs []string) (map[string]lockfile.PolicyLock, error) {
 	if len(refs) == 0 {
 		return nil, nil
 	}
 
-	lf, err := ensureLockfile(destDir)
+	lf, err := ensureLockfile(destDir, harnessRoot)
 	if err != nil {
 		return nil, err
 	}
 
 	installed := map[string]lockfile.PolicyLock{}
 	for _, raw := range refs {
-		name, lock, err := installOnePolicy(destDir, raw)
+		name, lock, err := installOnePolicy(destDir, harnessRoot, raw)
 		if err != nil {
 			return nil, fmt.Errorf("policy %q: %w", raw, err)
 		}
@@ -133,17 +138,22 @@ func installPolicies(destDir string, refs []string) (map[string]lockfile.PolicyL
 		installed[name] = lock
 	}
 
-	if err := lockfile.Write(destDir, lf); err != nil {
+	if err := lockfile.Write(destDir, harnessRoot, lf); err != nil {
 		return nil, err
 	}
-	fmt.Fprintf(os.Stdout, "  wrote: %s\n", filepath.Join(destDir, lockfile.File))
+	fmt.Fprintf(os.Stdout, "  wrote: %s\n", filepath.Join(destDir, lockfile.RelPath(harnessRoot)))
 	return installed, nil
 }
 
 // installOnePolicy handles one ref end-to-end: parse → resolve → load manifest
 // → validate content → copy into destDir → hash installed files. Returns the
 // policy's manifest name and the lockfile entry to record.
-func installOnePolicy(destDir, raw string) (string, lockfile.PolicyLock, error) {
+//
+// Policy authors structure content under `policy/harness/policies/<name>/`
+// (literal "harness"). At install time we copy from `policy/harness/` into
+// the consumer's `<destDir>/<harnessRoot>/`, so non-default harness roots
+// are honored without breaking policy authoring conventions.
+func installOnePolicy(destDir, harnessRoot, raw string) (string, lockfile.PolicyLock, error) {
 	ref, err := loader.ParsePolicyRef(raw)
 	if err != nil {
 		return "", lockfile.PolicyLock{}, err
@@ -167,11 +177,13 @@ func installOnePolicy(destDir, raw string) (string, lockfile.PolicyLock, error) 
 	}
 
 	srcFS := os.DirFS(resolved.LocalDir)
-	if err := copyTree(srcFS, manifest.PolicyContentRoot, destDir, overwrite); err != nil {
+	srcRoot := filepath.Join(manifest.PolicyContentRoot, "harness")
+	dest := filepath.Join(destDir, harnessRoot)
+	if err := copyTree(srcFS, srcRoot, dest, overwrite); err != nil {
 		return "", lockfile.PolicyLock{}, fmt.Errorf("copy policy content: %w", err)
 	}
 
-	namespaceDir := filepath.Join("harness", "policies", mf.Namespace())
+	namespaceDir := filepath.Join(harnessRoot, "policies", mf.Namespace())
 	fileHashes, err := lockfile.HashFilesUnder(destDir, namespaceDir)
 	if err != nil {
 		return "", lockfile.PolicyLock{}, fmt.Errorf("hash installed files: %w", err)

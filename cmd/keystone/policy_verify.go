@@ -10,12 +10,12 @@ import (
 
 // verifyPolicies reads the lockfile at installDir and walks the cascade,
 // returning the combined result.
-func verifyPolicies(installDir string) (*loader.VerifyResult, error) {
-	lf, err := lockfile.Read(installDir)
+func verifyPolicies(installDir, harnessRoot string) (*loader.VerifyResult, error) {
+	lf, err := lockfile.Read(installDir, harnessRoot)
 	if err != nil {
 		return nil, err
 	}
-	return loader.Verify(installDir, lf.Policies)
+	return loader.Verify(installDir, harnessRoot, lf.Policies)
 }
 
 // printVerifyReport renders a result to stdout. The bool return is whether

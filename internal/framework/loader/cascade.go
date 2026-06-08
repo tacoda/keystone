@@ -62,7 +62,7 @@ func (m MissingRequired) String() string {
 // strict-cascade shadow violations (hard) and required-item gaps (advisory).
 // The returned *VerifyResult is always non-nil. Errors here are I/O failures,
 // not policy violations.
-func Verify(installDir string, policies map[string]lockfile.PolicyLock) (*VerifyResult, error) {
+func Verify(installDir, harnessRoot string, policies map[string]lockfile.PolicyLock) (*VerifyResult, error) {
 	res := &VerifyResult{}
 
 	for _, policyName := range sortedPolicyNames(policies) {
@@ -70,7 +70,7 @@ func Verify(installDir string, policies map[string]lockfile.PolicyLock) (*Verify
 		tier := lock.ResolvedTier()
 		for _, kind := range []string{"guides", "playbooks", "actions", "sensors"} {
 			for _, item := range strictItemsFor(lock.Strict, kind) {
-				paths, walkErr := findShadowing(installDir, kind, item, tier, policies, policyName)
+				paths, walkErr := findShadowing(installDir, harnessRoot, kind, item, tier, policies, policyName)
 				if walkErr != nil {
 					return nil, walkErr
 				}
@@ -86,7 +86,7 @@ func Verify(installDir string, policies map[string]lockfile.PolicyLock) (*Verify
 				})
 			}
 			for _, item := range strictItemsFor(lock.Required, kind) {
-				defined, walkErr := isItemDefined(installDir, kind, item, policies)
+				defined, walkErr := isItemDefined(installDir, harnessRoot, kind, item, policies)
 				if walkErr != nil {
 					return nil, walkErr
 				}
@@ -107,8 +107,8 @@ func Verify(installDir string, policies map[string]lockfile.PolicyLock) (*Verify
 
 // isItemDefined returns true when any tier — project tree or any installed
 // policy — has a file named `<item>.md` under the kind subtree.
-func isItemDefined(installDir, kind, item string, policies map[string]lockfile.PolicyLock) (bool, error) {
-	projectPaths, err := findItemInTree(installDir, filepath.Join("harness", kind), item)
+func isItemDefined(installDir, harnessRoot, kind, item string, policies map[string]lockfile.PolicyLock) (bool, error) {
+	projectPaths, err := findItemInTree(installDir, filepath.Join(harnessRoot, kind), item)
 	if err != nil {
 		return false, err
 	}
@@ -116,7 +116,7 @@ func isItemDefined(installDir, kind, item string, policies map[string]lockfile.P
 		return true, nil
 	}
 	for _, name := range sortedPolicyNames(policies) {
-		policyPaths, err := findItemInTree(installDir, filepath.Join("harness", "policies", name, kind), item)
+		policyPaths, err := findItemInTree(installDir, filepath.Join(harnessRoot, "policies", name, kind), item)
 		if err != nil {
 			return false, err
 		}
@@ -148,10 +148,10 @@ func strictItemsFor(s manifest.StrictSpec, kind string) []string {
 //
 // For org-tier strict rules, team-tier policies + project paths are
 // candidates. For team-tier strict rules, only project paths are.
-func findShadowing(installDir, kind, item, declaringTier string, policies map[string]lockfile.PolicyLock, declaringName string) ([]string, error) {
+func findShadowing(installDir, harnessRoot, kind, item, declaringTier string, policies map[string]lockfile.PolicyLock, declaringName string) ([]string, error) {
 	var hits []string
 
-	projectPaths, err := findItemInTree(installDir, filepath.Join("harness", kind), item)
+	projectPaths, err := findItemInTree(installDir, filepath.Join(harnessRoot, kind), item)
 	if err != nil {
 		return nil, err
 	}
@@ -166,7 +166,7 @@ func findShadowing(installDir, kind, item, declaringTier string, policies map[st
 			if peer.ResolvedTier() != manifest.TierTeam {
 				continue
 			}
-			teamPaths, err := findItemInTree(installDir, filepath.Join("harness", "policies", name, kind), item)
+			teamPaths, err := findItemInTree(installDir, filepath.Join(harnessRoot, "policies", name, kind), item)
 			if err != nil {
 				return nil, err
 			}

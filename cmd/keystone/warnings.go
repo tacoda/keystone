@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"strings"
 )
 
 // agentGap describes a harness feature the selected agent does not natively
@@ -164,7 +165,7 @@ var agentWarnings = map[string][]agentGap{
 //
 // Agents not in agentWarnings are silently skipped — these are the
 // fully-supported adapters (claude-code, codex, pi, cursor at this writing).
-func printAgentWarnings(agent string) {
+func printAgentWarnings(agent, harnessRoot string) {
 	gaps, ok := agentWarnings[agent]
 	if !ok || len(gaps) == 0 {
 		return
@@ -177,6 +178,9 @@ func printAgentWarnings(agent string) {
 	fmt.Fprintf(os.Stdout, "fundamentally cannot close certain gaps — fall back to the harness\n")
 	fmt.Fprintf(os.Stdout, "file approach in those cases.\n\n")
 
+	// The fallback paths in agentWarnings are written with the literal "harness/"
+	// prefix; rewrite to the configured harnessRoot at print time so the hint
+	// reflects the user's chosen directory name.
 	for _, g := range gaps {
 		fmt.Fprintf(os.Stdout, "  • %s\n", g.feature)
 		fmt.Fprintf(os.Stdout, "      Impact: %s.\n", g.impact)
@@ -184,10 +188,11 @@ func printAgentWarnings(agent string) {
 			fmt.Fprintf(os.Stdout, "      Configure: %s.\n", g.configFix)
 		}
 		if g.fallback != "" {
-			fmt.Fprintf(os.Stdout, "      Or document: add %s describing how your team handles this.\n", g.fallback)
+			fallback := strings.Replace(g.fallback, "harness/", harnessRoot+"/", 1)
+			fmt.Fprintf(os.Stdout, "      Or document: add %s describing how your team handles this.\n", fallback)
 		}
 		if g.configFix == "" && g.fallback == "" {
-			fmt.Fprintf(os.Stdout, "      Workaround: see harness/adapters/%s/.\n", agent)
+			fmt.Fprintf(os.Stdout, "      Workaround: see %s/adapters/%s/.\n", harnessRoot, agent)
 		}
 		fmt.Fprintln(os.Stdout)
 	}

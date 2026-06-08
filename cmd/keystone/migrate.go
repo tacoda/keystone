@@ -12,32 +12,38 @@ import (
 )
 
 type migrateFlags struct {
-	dir     string
-	apply   bool // skip prompts; write every non-conflict change
-	dryRun  bool // never write, never prompt
-	from    string
+	dir         string
+	apply       bool // skip prompts; write every non-conflict change
+	dryRun      bool // never write, never prompt
+	from        string
+	harnessRoot string
 }
 
 func runMigrate(args []string, assets fs.FS) error {
+	harnessRoot, args, err := extractHarnessRoot(args)
+	if err != nil {
+		return err
+	}
 	flags, err := parseMigrateArgs(args)
 	if err != nil {
 		return err
 	}
+	flags.harnessRoot = harnessRoot
 
 	absDir, err := filepath.Abs(flags.dir)
 	if err != nil {
 		return fmt.Errorf("resolve dir: %w", err)
 	}
-	if _, err := os.Stat(filepath.Join(absDir, "harness")); err != nil {
+	if _, err := os.Stat(filepath.Join(absDir, harnessRoot)); err != nil {
 		if os.IsNotExist(err) {
-			return fmt.Errorf("no harness/ in %s — run `keystone init` first", absDir)
+			return fmt.Errorf("no %s/ in %s — run `keystone init` first", harnessRoot, absDir)
 		}
 		return err
 	}
 
 	from := flags.from
 	if from == "" {
-		from, err = readKeystoneVersion(absDir)
+		from, err = readKeystoneVersion(absDir, harnessRoot)
 		if err != nil {
 			return fmt.Errorf("read install profile: %w", err)
 		}
@@ -90,7 +96,7 @@ func runMigrate(args []string, assets fs.FS) error {
 			return nil
 		}
 		if !flags.dryRun {
-			if err := updateKeystoneVersion(absDir, vg.version); err != nil {
+			if err := updateKeystoneVersion(absDir, harnessRoot, vg.version); err != nil {
 				return fmt.Errorf("bump keystone_version: %w", err)
 			}
 			fmt.Fprintf(os.Stdout, "  ✓ keystone_version → %s\n\n", vg.version)
