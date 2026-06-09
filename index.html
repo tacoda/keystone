@@ -1131,7 +1131,7 @@
         <span class="brand-logo-wrap"><img src="keystone_logo.png" alt="Keystone" class="brand-logo" width="512" height="512"></span>
         <h1>Keystone</h1>
       </div>
-      <p>v1.0.3 · the agent harness framework</p>
+      <p>v1.0.4 · the agent harness framework</p>
     </div>
 
     <nav>
@@ -1205,7 +1205,7 @@
   <!-- ===================== INTRODUCTION (landing) ===================== -->
   <section id="introduction" class="page" data-title="Introduction">
     <div class="page-head">
-      <div class="crumb">Overview · Keystone v1.0.3</div>
+      <div class="crumb">Overview · Keystone v1.0.4</div>
       <h1>The agent-<em class="hero-any rev">agnostic</em> harness framework for <em class="hero-any">any</em> project.</h1>
       <p class="tagline">A small Go binary plus web-framework-style conventions that drop a markdown-only harness — guides, corpus, sensors, actions, playbooks, adapters — into your repo, wired to whichever coding agent you use. Convention-over-configuration generators, vendored read-only plugins for shared policy, opinionated defaults you own and edit. Markdown only, no central service, no runtime dependency after install.</p>
     </div>
@@ -1218,7 +1218,7 @@
         </div>
         <div class="term-body">
           <span class="pr">$</span> brew install tacoda/tap/keystone<br>
-          <span class="ok">●</span> keystone v1.0.3 installed<br>
+          <span class="ok">●</span> keystone v1.0.4 installed<br>
           <span class="pr">$</span> keystone init<div class="huh" id="huh-form">┌─ Select your agent ────────────────────────────┐
 │ <span class="hcur">›</span> <span class="hsel">claude-code</span>   Anthropic Claude Code          │
 │   codex         OpenAI Codex / Codex CLI       │
@@ -1504,7 +1504,7 @@ flowchart LR
 <pre class="code"><span class="prompt">$</span> curl -fsSL https://raw.githubusercontent.com/tacoda/keystone/main/install.sh &gt; install.sh
 <span class="prompt">$</span> less install.sh
 <span class="prompt">$</span> sh install.sh</pre>
-      <p>Override the install dir with <code>KEYSTONE_PREFIX=/some/path</code> or pin the release with <code>KEYSTONE_VERSION=v1.0.3</code>. The installer does not run <code>keystone init</code> — open a new shell and run it yourself in a project to scaffold the harness.</p>
+      <p>Override the install dir with <code>KEYSTONE_PREFIX=/some/path</code> or pin the release with <code>KEYSTONE_VERSION=v1.0.4</code>. The installer does not run <code>keystone init</code> — open a new shell and run it yourself in a project to scaffold the harness.</p>
     </div>
 
     <div class="install-method">
@@ -1829,7 +1829,7 @@ For reasoning, see `corpus/domain/refunds.md`.</pre>
       <div class="action">
         <span class="action-tag">Guides</span>
         <h3 style="color: var(--accent);">Rules — short, dense, ambient</h3>
-        <p><strong>Lead with the rule, not the reasoning.</strong> First line is the directive; the why lives in the paired corpus. One sentence per rule; long rationale belongs in corpus.<br><br><strong>Default to <code>## RULES</code>.</strong> Promote to <strong>GOLDEN</strong> only when deviation needs explicit reasoning; <strong>IRON LAW</strong> only when violation causes real damage. The strength of the special tiers comes from rarity.<br><br><strong>Constrain scope by region when you can.</strong> Region-specific rules belong in <code>guides/idioms/&lt;stack&gt;/</code> — they shouldn't pay the ambient cost everywhere.</p>
+        <p><strong>Lead with the rule, not the reasoning.</strong> First line is the directive; the why lives in the paired corpus. One sentence per rule; long rationale belongs in corpus.<br><br><strong>Default to <code>## RULES</code>.</strong> Promote to <strong>GOLDEN</strong> only when deviation needs explicit reasoning; <strong>IRON LAW</strong> only when violation causes real damage. The strength of the special tiers comes from rarity.<br><br><strong>Narrow activation with <code>globs:</code> when you can.</strong> Region-specific rules belong in <code>guides/idioms/&lt;stack&gt;/</code>; for finer scoping, declare <code>globs:</code> on the guide's frontmatter so it only enters context when matching paths are touched. Rules shouldn't pay the ambient cost everywhere.</p>
       </div>
 
       <div class="action">
@@ -1950,6 +1950,8 @@ For reasoning, see `corpus/domain/refunds.md`.</pre>
         <div class="layer-cell"><span class="layer-act">Ambient (LSP-style)</span></div>
       </div>
     </div>
+
+    <p style="font-size: 0.82rem; color: var(--muted); line-height: 1.7;"><strong>Per-guide narrowing (<code>globs:</code>).</strong> The Activation column above shows each sublayer's <em>default</em>. Any guide can declare an optional <code>globs:</code> list in its frontmatter to narrow that default to a set of paths — the topic default fires first, then <code>globs:</code> intersects. A domain rule scoped to <code>src/billing/**</code> only enters context when the agent touches billing; an idiom for a specific app inside a TS stack only loads for that app. The narrowing is one-way: <code>globs:</code> can remove a guide from activation, never add it. Bootstrap seeds the initial globs from the region map in <code>corpus/state/CODEBASE_STATE.md</code> and writes a reverse-index at <code>corpus/state/GLOBS_INDEX.md</code> that pointer-style adapters read inside the <code>orient</code> playbook; Cursor gets native per-guide projection via <code>.cursor/rules/keystone-&lt;topic&gt;-&lt;name&gt;.mdc</code> with matching <code>globs:</code>. Shipped in v1.0.4.</p>
 
     <p style="font-size: 0.82rem; color: var(--muted); line-height: 1.7;">Universal engineering principles (SOLID, TDD, BDD, dependencies, logging, prompt-injection, …) ship as an opt-in starter pack. Install with <code>keystone init --starter universal-principles</code>; the rule files land at <code>harness/guides/principles/&lt;name&gt;.md</code> alongside the paired corpus under <code>harness/corpus/principles/&lt;name&gt;.md</code>.</p>
   </section>
