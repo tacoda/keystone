@@ -40,8 +40,9 @@ Guides should land in the menu (custom-instructions field) so the model is alway
 Cline has no glob-based auto-attachment. Region-scoped idiom loading happens inside the **orient** action, which:
 
 1. Reads `harness/corpus/state/CODEBASE_STATE.md` to map the touched paths to a stack.
-2. Reads `harness/guides/idioms/<stack>/*.md` and `harness/corpus/idioms/<stack>/*.md` as needed.
-3. Carries those rules forward in the task's context.
+2. Reads `harness/corpus/state/GLOBS_INDEX.md` and gates per-guide loading on declared `globs:` (guides without `globs:` keep stack-based loading).
+3. Reads `harness/guides/idioms/<stack>/*.md` and `harness/corpus/idioms/<stack>/*.md` for the resulting set as needed.
+4. Carries those rules forward in the task's context.
 
 The user can streamline this by attaching the relevant idiom files to the task via the "+ Add Files" button in the side panel, which forces them into context.
 

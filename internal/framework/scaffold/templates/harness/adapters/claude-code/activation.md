@@ -56,4 +56,4 @@ The corpus references these as "the agent's context-clear primitive." For Claude
 
 ## Lazy-by-region
 
-Claude Code does not have a built-in "load this file when editing this path" mechanism (unlike Cursor's `.cursor/rules/*.mdc` globs). The harness implements lazy-by-region inside the **orient** action playbook: the playbook tells the agent to read the touched paths, walk `harness/corpus/state/CODEBASE_STATE.md` to find matching idioms, and load them via Read.
+Claude Code does not have a built-in "load this file when editing this path" mechanism (unlike Cursor's `.cursor/rules/*.mdc` globs). The harness implements lazy-by-region inside the **orient** action playbook: the playbook tells the agent to read the touched paths, walk `harness/corpus/state/CODEBASE_STATE.md` to map paths to stacks, consult `harness/corpus/state/GLOBS_INDEX.md` to gate per-guide loading on declared `globs:`, and load the resulting guides via Read.

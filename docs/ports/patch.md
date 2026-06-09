@@ -1,7 +1,7 @@
 # Port: Patch
 
 **Activation:** Invoked explicitly by `keystone patch [<dir>]`. Patches are not loaded ambient — they exist to bring an install forward when the binary upgrades.
-**Purpose:** Versioned forward-only changes the framework applies to `keystone.json` or other config files when its expected shape evolves. At 1.0 patches are reserved for config-schema bumps; project content lives in git, not in patches.
+**Purpose:** Versioned forward-only changes the framework applies when its expected shape evolves — either to config files (`keystone.json`, lockfile) or to the prose it scaffolded (READMEs, sensor/action playbooks). The rules content the user authored stays in their git.
 
 ## Path convention
 
@@ -58,14 +58,17 @@ Conflicts are surfaced but never auto-resolved — a diverged file means the con
 
 ## Scope at 1.0
 
-Patches at 1.0 are **scoped to config-schema bumps**, not project content:
+Patches at 1.0 cover **config-schema bumps** and **framework-scaffolded scaffold updates** — never the rules content the user authored:
 
 - ✅ Add/rename a field in `keystone.json`.
 - ✅ Update the lockfile schema (with a corresponding `Version` bump in `internal/framework/lockfile/`).
 - ✅ Move a generated file (`INSTALL_PROFILE.md`) to a new location.
-- ❌ Edit user-authored harness content (guides, corpus, sensors, actions, playbooks, adapters). That's in their git; they own it.
+- ✅ Update framework-scaffolded scaffold prose — the READMEs under `harness/`, sensor playbooks (`harness/sensors/*.md`), and action playbooks (`harness/actions/*.md`) that ship from `keystone init`. These describe how the harness works; they are framework prose that happens to live in the user's tree.
+- ❌ Edit the rules content the user authored — anything they wrote into a guide body, a corpus entry, a domain invariant, or a custom adapter override. That's in their git; they own it.
 
-The 0.x notion of patches as content-rewriting "migrations" is dead. The runner still supports content-write operations, but no shipped patch should use them post-1.0.
+The bright line is **scaffold prose vs. user rules**: the framework owns the prose it scaffolded; the user owns the rules they wrote. `replace_block` failures (exact-match mismatch) surface user customizations as conflicts so they never get clobbered silently.
+
+The 0.x notion of patches as wholesale content-rewriting "migrations" is still dead. The runner supports content-write operations; their use post-1.0 is bounded by the scaffold/rules line above.
 
 ## Authoring a patch
 

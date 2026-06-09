@@ -27,7 +27,8 @@ Legacy `.cursorrules` (single-file format) is **not** used — the modern `.curs
 ```
 .cursor/
 └── rules/
-    └── keystone.mdc          # always-applied menu pointer (the only file the installer ships)
+    ├── keystone.mdc                            # always-applied menu pointer (shipped by installer)
+    └── keystone-<topic>-<name>.mdc             # one per guide with `globs:` (written by bootstrap)
 ```
 
 Lifecycle actions live in `harness/actions/<action>.md` and are invoked via natural language — no per-action `.mdc` files. The single always-applied rule lists every action with a pointer to its playbook, and the agent follows that pointer when the user asks to run an action.
@@ -39,13 +40,11 @@ Rules with `alwaysApply: true` enter every chat. Rules with a `globs:` pattern e
 Convention this harness follows:
 
 - **Menu pointer** → `alwaysApply: true`, no glob. (One file: `keystone.mdc`.)
-- **Region-scoped idioms** → `globs: "<path-pattern>"`. The **bootstrap** action writes these into `.cursor/rules/idiom-<stack>.mdc` as the project's stacks are detected; they auto-attach when the user opens matching files.
+- **Per-guide globs projection** → for every guide whose frontmatter declares `globs:`, the **bootstrap** action writes a `.cursor/rules/keystone-<topic>-<name>.mdc` whose `globs:` mirror the guide's. The body is a one-line pointer to the source guide — Cursor auto-attaches the rule when the user edits a matching file, and the agent follows the pointer to read the actual rules. Guides without `globs:` get no `.mdc`; they activate via the menu pointer's chat-on-demand reading.
 
 ## Lazy-by-region — native
 
-Cursor's biggest structural advantage over the other adapters in this harness: it can express "load this rule when editing this region" natively, via `globs:` frontmatter on each `.mdc`. The **bootstrap** action exploits this — for each detected stack, it writes a `.cursor/rules/idiom-<stack>.mdc` with the matching glob, so the right idioms enter context only when the right files are being edited.
-
-No equivalent mechanism exists in Aider, GitHub Copilot, or Claude Code (which implements lazy-by-region inside the **orient** action playbook instead). Cursor's framework does the work for free.
+Cursor's biggest structural advantage over the other adapters in this harness: it can express "load this rule when editing this region" natively, via `globs:` frontmatter on each `.mdc`. The **bootstrap** action exploits this — for every guide that declares `globs:` (idioms, scoped domain rules, etc.), it writes a matching `.cursor/rules/keystone-<topic>-<name>.mdc`, so the right rules enter context only when the right files are being edited. Pointer-style adapters (Claude Code, Codex, Aider) achieve the same effect by reading `corpus/state/GLOBS_INDEX.md` inside the **orient** playbook; Cursor gets it for free from the framework.
 
 ## Context-reset primitive
 

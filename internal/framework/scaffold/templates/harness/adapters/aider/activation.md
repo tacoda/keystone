@@ -46,9 +46,10 @@ The pattern this harness recommends: keep the read-set small (menu + harness/REA
 
 Aider has no glob-based auto-attachment. Region-scoped idiom loading is done by the **orient** action, which:
 
-1. Looks at the files the user is editing.
+1. Looks at the files the user is editing — the **touched-files set**.
 2. Cross-references `harness/corpus/state/CODEBASE_STATE.md` to find the stack and the idiom folder.
-3. Reads `harness/corpus/idioms/<stack>/*.md` and brings those rules into the conversation.
+3. Reads `harness/corpus/state/GLOBS_INDEX.md` and keeps only the guides whose `globs:` match at least one touched file (guides without `globs:` are still loaded by stack).
+4. Reads `harness/corpus/idioms/<stack>/*.md` for the resulting set and brings those rules into the conversation.
 
 The user can streamline this by adding the stack-relevant idiom files to `.aider.conf.yml`'s `read:` list for sessions that touch one stack heavily.
 

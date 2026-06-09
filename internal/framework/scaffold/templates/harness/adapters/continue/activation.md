@@ -65,7 +65,7 @@ Guides are ambient; corpus is on-demand. This maps cleanly onto Continue's provi
 
 Continue has no glob-based auto-attachment, but two providers approximate it:
 
-- **`codebase` provider** — semantic search the model invokes on demand. When the **orient** action lands in a region, it asks "find related idioms" and the model walks `harness/corpus/idioms/<stack>/` results into context.
+- **`codebase` provider** — semantic search the model invokes on demand. When the **orient** action lands in a region, it asks "find related idioms" and the model walks `harness/corpus/idioms/<stack>/` results into context. Orient also reads `harness/corpus/state/GLOBS_INDEX.md` and narrows the candidate set to guides whose `globs:` match at least one touched file.
 - **`folder` provider scoped to a single idiom** — e.g., `folder: harness/guides/idioms/<stack>` for sessions that touch one stack heavily.
 
 The general pattern: keep the `folder` provider scoped narrowly to `harness/guides/` so always-loaded content stays small, and let the model reach for corpus and stack-specific idioms via `codebase` search.

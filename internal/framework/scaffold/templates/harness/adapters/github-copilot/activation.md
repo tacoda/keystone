@@ -29,7 +29,7 @@ The harness places the short menu in `.github/copilot-instructions.md` and lets 
 
 ## Lazy-by-region — not native
 
-Copilot has no glob-based file auto-attachment (unlike Cursor's `.mdc` rules). The **orient** action implements lazy-by-region inside the chat: the agent reads `harness/corpus/state/CODEBASE_STATE.md` to find the stack for the touched paths, then reads `harness/corpus/idioms/<stack>/*.md`.
+Copilot has no glob-based file auto-attachment (unlike Cursor's `.mdc` rules). The **orient** action implements lazy-by-region inside the chat: the agent reads `harness/corpus/state/CODEBASE_STATE.md` to find the stack for the touched paths, consults `harness/corpus/state/GLOBS_INDEX.md` to keep only the guides whose `globs:` match at least one touched file (guides without `globs:` are still loaded by stack), then reads `harness/corpus/idioms/<stack>/*.md` for the resulting set.
 
 For VS Code specifically, the open-file context partially compensates — if the user has the relevant idiom files open in the editor, Copilot uses them as context. But this is incidental, not architectural.
 

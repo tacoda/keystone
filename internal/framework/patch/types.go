@@ -2,12 +2,13 @@
 // file under patches/<version>/<NNN>-<name>.json declaring a list of
 // operations against the consumer's harness/ tree or keystone config files.
 //
-// At 1.0 the patch runner is reserved for framework-binary schema bumps
-// (keystone.json, lockfile). The 0.x content-rewriting operations
-// (add_file, frontmatter_set, ensure_section, replace_block, move_file,
-// move_dir, delete_file, delete_dir) survive the move into this package but
-// are not used for content post-1.0; they remain available for future
-// schema patches that target config files only.
+// Scope at 1.0 covers two kinds of forward-only change: config-schema bumps
+// (keystone.json, lockfile) and updates to framework-scaffolded scaffold
+// prose (READMEs under harness/, sensor and action playbooks scaffolded by
+// keystone init). The rules content a user wrote — guide bodies, corpus
+// entries, domain invariants, custom adapters — is owned by the user's git
+// and stays out of patches. The 0.x notion of patches as wholesale content
+// migrations is dead. See docs/ports/patch.md for the bright line.
 package patch
 
 // Patch is one loaded patch file. ID is the filename without extension;

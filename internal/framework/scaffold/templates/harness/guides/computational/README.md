@@ -34,3 +34,7 @@ kind: computational
 ## Install-time options
 
 If a computational guide requires shipping a config file, a binary, or an agent setting, the project surfaces it as a flag on `keystone init` rather than scaffolding it unconditionally.
+
+## Globs
+
+`globs:` on a computational guide is **documentation, not enforcement**. The actual tool (LSP, formatter, hook) reads its own config file, not this frontmatter. Recording `globs:` here lets the **stack-drift** sensor compare the documented paths against the tool's effective configuration and flag divergence. The contract — including the narrow-only invariant — is the same as other guides; see [`../README.md`](../README.md).

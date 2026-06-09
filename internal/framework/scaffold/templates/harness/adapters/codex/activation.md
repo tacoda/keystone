@@ -6,12 +6,14 @@ How ambient corpus content gets loaded into Codex, where the menu lives, and how
 
 Codex reads `AGENTS.md` at the repo root on session start. Keystone drops one there pointing at `harness/README.md`.
 
-There is no convention for parent-directory walking or global `AGENTS.md` like pi has — Codex looks at the CWD's `AGENTS.md`.
+Codex actually walks a cascade — `~/.codex/AGENTS.md` (global) first, then every `AGENTS.md` from the git root down to the current working directory, concatenated in that order (closer to cwd = higher precedence, because it appears later in the prompt). At each level, `AGENTS.override.md` is checked before `AGENTS.md` and wins when present. The combined load is capped at `project_doc_max_bytes` (32 KiB default); accumulation stops once the cap is hit. The harness only ships the repo-root file; the cascade is bonus capability the user can layer their own content into without us prescribing.
 
 ## Where runtime config lives
 
-- `~/.codex/` — global config (model selection, API keys, etc.). User-owned, the installer does not touch.
-- `AGENTS.md` at repo root — project menu pointing at the corpus.
+- `~/.codex/AGENTS.md` (and `~/.codex/AGENTS.override.md`) — global instructions. User-owned, the installer does not touch.
+- `~/.codex/` — other global config (model selection, API keys, etc.). Same: user-owned.
+- `AGENTS.md` at repo root — project menu pointing at the corpus (the only file the installer writes).
+- Optional `AGENTS.override.md` at any level — local override for the matching `AGENTS.md`. Not used by the harness; available to the user.
 
 There is no `.codex/` directory convention for project-scoped commands, skills, or prompts. Codex has no slash-command or skill system; lifecycle actions are invoked by natural language.
 
@@ -31,7 +33,7 @@ Codex has no in-session `/clear`. To reset context after a flywheel write (**syn
 
 ## Lazy-by-region — manual
 
-Codex has no glob-based rules system. The **orient** action implements lazy-by-region manually: the agent reads the touched paths, walks `harness/corpus/state/CODEBASE_STATE.md` for matching idioms, and reads them on demand.
+Codex has no glob-based rules system. The **orient** action implements lazy-by-region manually: the agent reads the touched paths, walks `harness/corpus/state/CODEBASE_STATE.md` to map paths to stacks, consults `harness/corpus/state/GLOBS_INDEX.md` to gate per-guide loading on declared `globs:`, and reads the resulting guides on demand.
 
 ## Approval modes ↔ pacing modes
 

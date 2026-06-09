@@ -14,14 +14,42 @@ Every guide declares a `kind:` in its frontmatter. The kind says *how* the guida
 
 Kind classifies the guide, not the thing the guide is about. An inferential rule about *how to write good TypeScript types* lives under `idioms/typescript/`, not `computational/` — even though the underlying enforcement (a TS LSP) is computational. The folder reflects the guide's mechanism; the LSP entry lives separately under `computational/`.
 
+## Globs
+
+A guide's sub-directory sets a **default** activation (see the table below). An optional `globs:` field in the guide's frontmatter **narrows** that default to a set of paths:
+
+```
+activates ⇔ (sub-directory default fires) ∧ (globs match, or no globs declared)
+```
+
+Globs reflect the project's real code structure — the **bootstrap** action seeds initial globs from the region map in `corpus/state/CODEBASE_STATE.md`, and idiom guides pick up the regions of the stacks they live under. They are not invented patterns; they are paths that already exist in the codebase, recorded here in the guide's frontmatter.
+
+Globs can only remove a guide from activation — they never expand it. A `process/` rule's globs cannot make it ambient; an `idioms/typescript/` rule's globs cannot fire it inside the Go region. If a guide needs to reach paths its sub-directory does not cover, the answer is a different sub-directory, not a wider set of globs.
+
+```markdown
+---
+globs:
+  - "src/billing/**"
+  - "!src/billing/legacy/**"
+---
+# Billing — rules
+...
+```
+
+`globs:` is a list of gitignore-style patterns (`**` supported; `!`-prefix excludes). Paths are repo-relative POSIX. Omitting the field keeps today's default behavior — the change is opt-in.
+
+Full contract, including per-action match semantics and cascade interaction: the **Guide port contract** in the Keystone docs.
+
 ## Sub-directories
 
-| Directory | Kind | What lives here | Activation |
+| Directory | Kind | What lives here | Default activation |
 |---|---|---|---|
 | [`idioms/`](idioms/README.md) | inferential | Stack-specific rules (rules extracted from `corpus/idioms/<stack>/`). | Ambient (lazy by region) |
 | [`domain/`](domain/README.md) | inferential | Business-rule constraints (rules extracted from `corpus/domain/`). | Ambient (always) |
 | [`process/`](process/README.md) | inferential | What happens at each phase of the workflow. | Loaded when entering a phase |
 | [`computational/`](computational/README.md) | computational | Deterministic ambient enforcement — language servers, formatters, editor checks the stack supports. | Ambient (in-editor / on-save) |
+
+Any of these defaults can be narrowed per-guide via `globs:` (see above).
 
 **Universal engineering rules** (the principles rule extracts that used to live in `guides/principles/`) now ship inside the default policy at [`../policies/universal/guides/principles/`](policies/universal). They are still ambient and still part of the always-loaded rule set — they just live under the policies layer rather than under project-owned guides.
 
@@ -76,6 +104,14 @@ Anything a computational guide needs at install time (a particular editor config
 
 ## Activation
 
-Ambient (always loaded for domain, process; lazy-by-region for idioms; universal-policy rules also ambient). The agent operates under guide rules at all times. Enforced by the [drift sensor](sensors/drift.md) inside the **check-drift**, **verify**, and **audit** actions.
+Sub-directory default first, then optional `globs:` narrows it (see **Globs** above):
+
+- `domain/` — ambient, every action.
+- `process/` — loaded on phase entry.
+- `idioms/<stack>/` — ambient, lazy-by-region (when the touched region matches the stack).
+- `computational/` — driven by the underlying tool (LSP, formatter, hook).
+- Universal-policy principles — ambient.
+
+The agent operates under guide rules at all times within their activation window. Enforced by the [drift sensor](sensors/drift.md) inside the **check-drift**, **verify**, and **audit** actions.
 
 When the agent needs the reasoning *behind* a rule, it follows the forward-link from the guide to the paired corpus file. Corpus is on-demand; guides are not.

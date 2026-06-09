@@ -21,7 +21,19 @@ This directory ships **empty** in a fresh install. The **bootstrap** action popu
 
 ## Activation
 
-Ambient, **lazy by region**. When the agent enters a code region matching a stack, the corresponding `guides/idioms/<stack>/` folder activates. The agent does not load every rule for every edit.
+**Default** — ambient, **lazy by region**. When the agent enters a code region matching a stack, the corresponding `guides/idioms/<stack>/` folder activates. The agent does not load every rule for every edit.
+
+**With `globs:`** — narrows that default. An idiom guide with `globs:` fires only when the stack region matches **and** a touched file matches at least one glob. Useful when an idiom covers only a sub-tree within a stack:
+
+```markdown
+---
+globs:
+  - "apps/admin/**"
+---
+# Admin form validation — rules
+```
+
+The above fires inside the TypeScript region only when files under `apps/admin/**` are touched. Globs can never make an idiom fire outside its stack region — see [`../README.md`](../README.md) for the narrow-only contract.
 
 How "lazy by region" is enforced is agent-specific — see `harness/adapters/<your-agent>/activation.md`.
 

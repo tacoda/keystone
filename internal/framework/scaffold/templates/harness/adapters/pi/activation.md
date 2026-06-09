@@ -45,4 +45,4 @@ For pi, `/compact` is the right reset after corpus mutation, unless you want to 
 
 ## Lazy-by-region — manual
 
-Pi has no glob-based rules system (unlike Cursor's `.cursor/rules/*.mdc`). The **orient** action playbook implements lazy-by-region manually: the agent reads the touched paths, walks `harness/corpus/state/CODEBASE_STATE.md` for matching idioms, and reads them with pi's file-read tool.
+Pi has no glob-based rules system (unlike Cursor's `.cursor/rules/*.mdc`). The **orient** action playbook implements lazy-by-region manually: the agent reads the touched paths, walks `harness/corpus/state/CODEBASE_STATE.md` to map paths to stacks, consults `harness/corpus/state/GLOBS_INDEX.md` to gate per-guide loading on declared `globs:`, and reads the resulting guides with pi's file-read tool.

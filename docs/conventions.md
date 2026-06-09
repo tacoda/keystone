@@ -15,10 +15,10 @@ that contains `keystone.json`.
 
 - **Project path:** `<harness-root>/guides/<topic>/<name>.md`
 - **Plugin path:** `<harness-root>/plugins/<plugin>/guides/<topic>/<name>.md`
-- **Activation:** Ambient (always loaded).
-- **Frontmatter:** none required.
+- **Activation:** Topic default — ambient for `domain/` and `principles/`, lazy-by-region for `idioms/<stack>/`, phase-gated for `process/`, tool-driven for `computational/`. Optionally narrowed by per-guide `globs:`.
+- **Frontmatter:** optional. Recognized keys: `globs:` (list of globs; narrows activation, never expands it).
 - **Required shape:** H1 title `# <Name> — rules`, body of rules, optional forward-link to paired corpus.
-- **Cascade:** project wins by default; among plugins, deeper-nested plugins refine outer plugins; `strict` locks absolutely.
+- **Cascade:** project wins by default; among plugins, deeper-nested plugins refine outer plugins; `strict` locks absolutely. The winner's `globs:` is the only one consulted.
 - **Strict-able:** yes (per-port `strict.guides: [...]` in keystone.json).
 - **Generator:** `keystone new guide <topic>/<name>` (scaffolds guide + paired corpus stub).
 

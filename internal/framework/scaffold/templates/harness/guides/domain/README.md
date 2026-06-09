@@ -18,7 +18,20 @@ This directory ships **empty** in a fresh install. The **bootstrap** action seed
 
 ## Activation
 
-Ambient, always loaded. Domain rules constrain agent behavior across every action.
+**Default** — ambient, every action. Domain rules constrain agent behavior across every action.
+
+**With `globs:`** — narrows that default to a subset of paths. A domain rule with a clear regional boundary (billing, auth, search) keeps context lean by firing only where it applies:
+
+```markdown
+---
+globs:
+  - "src/billing/**"
+  - "tests/billing/**"
+---
+# Billing invariants — rules
+```
+
+The above is silent on files outside `src/billing/**` and `tests/billing/**`. Domain rules without `globs:` keep today's behavior (always loaded). See [`../README.md`](../README.md) for the full narrow-only contract.
 
 ## Format
 

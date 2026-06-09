@@ -31,3 +31,7 @@ Then update the empirical state files:
 ## Output
 
 One report with two sections (Learn / Prune), each listing concrete proposed harness edits. Pruning's diffs land in `corpus/state/harness-debt.md`. Propose every state-file diff before applying; do not silently overwrite.
+
+## Globs in audit
+
+Audit walks the full repo, but per-guide `globs:` still filter findings — a rule reports only against files it claims (see [`sensors/drift.md`](sensors/drift.md)). Audit is the only action where most guides match somewhere; rule-by-rule globs keep the report focused on real violations.

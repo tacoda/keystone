@@ -16,6 +16,9 @@ The candidate file uses this shape:
 captured: <ISO date>
 source: <what triggered this — review finding, surprise during implementation, etc.>
 proposed-layer: <corpus/principles | guides/idioms/<stack> | guides/process | sensor>
+proposed-globs:                       # optional; see below
+  - "src/billing/**"
+  - "tests/billing/**"
 ---
 
 ## What happened
@@ -30,6 +33,14 @@ proposed-layer: <corpus/principles | guides/idioms/<stack> | guides/process | se
 
 <the smallest harness edit that would prevent the next incident>
 ```
+
+### `proposed-globs:` — record the paths the lesson came from
+
+When the surprise happened in a specific region of the codebase, list the paths in `proposed-globs:`. These are the touched files (or their parent directories' globs) from the interaction that produced the candidate. **Synthesize** uses this as signal when deciding the guide's actual `globs:`.
+
+- If the lesson is cross-cutting (would apply to any file in any stack), **omit the field**. Synthesize will default to no `globs:` on the promoted guide.
+- If the lesson is regional, list the patterns that match the affected files. Prefer existing region globs from `corpus/state/CODEBASE_STATE.md` over hand-invented patterns — globs should reflect the real codebase, not the abstraction the rule is about.
+- Never set `proposed-globs:` wider than where the surprise actually occurred. Synthesize narrows on user confirmation; widening at learn-time loses the evidence.
 
 ## Gate
 

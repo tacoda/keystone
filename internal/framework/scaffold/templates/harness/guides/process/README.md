@@ -51,7 +51,9 @@ If no tracker card is provided, each phase asks the user for the relevant input 
 
 ## Activation
 
-A phase doc is loaded when the agent enters that phase. Not ambient — the **orient** action reads `planning.md` at task start; the agent stays inside the active phase doc until its gate passes.
+**Default** — a phase doc is loaded when the agent enters that phase. Not ambient — the **orient** action reads `planning.md` at task start; the agent stays inside the active phase doc until its gate passes.
+
+**With `globs:`** — narrows that default to paths within the phase. Usually unnecessary (phase docs are universal), but supported for symmetry: a `globs: ["infra/**"]` on `implementation.md` would fire only when implementation work touches infra. Globs can never make a phase doc fire outside its phase — see [`../README.md`](../README.md).
 
 ## Lifecycle actions
 

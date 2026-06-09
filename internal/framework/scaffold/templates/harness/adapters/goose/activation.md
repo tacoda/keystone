@@ -53,8 +53,9 @@ Guides should live in (or be reachable from) `.goosehints` so the model is alway
 Goose has no glob-based auto-attach. Region-scoped idiom loading happens inside the **orient** action, which:
 
 1. Reads `harness/corpus/state/CODEBASE_STATE.md` to map touched paths to a stack.
-2. Reads `harness/guides/idioms/<stack>/*.md` (rules) and, on demand, `harness/corpus/idioms/<stack>/*.md` (reasoning).
-3. Carries those rules forward in the session.
+2. Reads `harness/corpus/state/GLOBS_INDEX.md` and gates per-guide loading on declared `globs:` (guides without `globs:` keep stack-based loading).
+3. Reads `harness/guides/idioms/<stack>/*.md` (rules) for the resulting set and, on demand, `harness/corpus/idioms/<stack>/*.md` (reasoning).
+4. Carries those rules forward in the session.
 
 For sessions that touch one stack heavily, the user can add `harness/guides/idioms/<stack>/` to `.goosehints` so the rules load automatically.
 
