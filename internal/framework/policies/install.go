@@ -98,11 +98,12 @@ func Install(cached *Cached, name, projectDir, harnessRoot string) (*Installed, 
 			}
 			return nil
 		}
-		// 2.0 constraint: policies extend FRAMEWORK abstractions only.
-		// Agent-side abstractions (rule, skill, subagent, command) are
-		// project-owned — a policy that ships them is rejected.
+		// Policies extend FRAMEWORK abstractions only. Agent escape
+		// hatches (rule, skill, subagent, command) align with the
+		// project's chosen host and are project-owned — a policy that
+		// ships them is rejected at install time.
 		if top := topSegment(rel); isAgentAbstractionDir(top) {
-			return fmt.Errorf("policy %q ships an agent-abstraction directory %q; policies may only extend framework abstractions (guides, corpus, sensors, actions, playbooks, adapters)", name, top)
+			return fmt.Errorf("policy %q ships an agent-abstraction directory %q; policies may only extend framework abstractions (guides, corpus, sensors, actions, playbooks, personas, evals, sources, adapters)", name, top)
 		}
 
 		destPath := filepath.Join(target, rel)
@@ -193,9 +194,11 @@ func topSegment(rel string) string {
 }
 
 // isAgentAbstractionDir reports whether seg names a directory that
-// holds agent-side primitives (rule, skill, subagent, command).
-// Policies are forbidden from shipping these — agent abstractions are
-// project-owned.
+// holds an agent escape-hatch primitive (rule, skill, subagent,
+// command). Policies are forbidden from shipping these — they align
+// with the project's chosen host agent and are project-owned. The
+// framework wrappers (guide, sensor, action, playbook, persona) are
+// shippable and live under their own top-level dirs.
 func isAgentAbstractionDir(seg string) bool {
 	switch seg {
 	case "rules", "skills", "agents", "commands":

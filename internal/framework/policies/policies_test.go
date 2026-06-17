@@ -156,11 +156,53 @@ func TestInstall_CopiesAndHashes(t *testing.T) {
 	}
 }
 
+// TestInstall_AllowsFrameworkWrappers pins the post-2.0.2 contract:
+// the framework wrappers (guide, sensor, action, playbook, persona,
+// plus corpus / eval / source / adapter) all install cleanly. Persona
+// in particular moved from "agent abstraction" to "framework wrapper
+// of subagent" in 2.0.2, so policies are now allowed to ship it.
+func TestInstall_AllowsFrameworkWrappers(t *testing.T) {
+	if _, err := exec.LookPath("git"); err != nil {
+		t.Skip("git not available")
+	}
+
+	cache := t.TempDir()
+	t.Setenv(CacheDirEnv, cache)
+
+	repo := filepath.Join(t.TempDir(), "repo")
+	files := map[string]string{
+		"keystone-policy.json":             `{"name":"example","version":"1.0.0"}`,
+		"guides/principles/spec.md":        "guide body",
+		"sensors/lint.md":                  "sensor body",
+		"actions/verify.md":                "action body",
+		"playbooks/task.md":                "playbook body",
+		"personas/security-reviewer.md":    "persona body",
+		"corpus/principles/spec.md":        "corpus body",
+		"evals/demo/EVAL.md":               "eval body",
+		"sources/docs.md":                  "source body",
+	}
+	url := initBareRepoWithTag(t, repo, "v1", files)
+
+	cached, err := Fetch(url, "v1")
+	if err != nil {
+		t.Fatalf("Fetch: %v", err)
+	}
+	project := t.TempDir()
+	if _, err := Install(cached, "example", project, "harness"); err != nil {
+		t.Fatalf("install rejected a framework-wrapper policy: %v", err)
+	}
+
+	// Confirm persona file actually landed at the vendored path.
+	want := filepath.Join(project, "harness", PolicyRoot, "example", "personas", "security-reviewer.md")
+	if _, err := os.Stat(want); err != nil {
+		t.Errorf("expected vendored persona at %s, got %v", want, err)
+	}
+}
+
 // TestInstall_RejectsAgentAbstractions pins the 2.0 contract: policies
-// may only extend framework abstractions (guides, corpus, sensors,
-// actions, playbooks, adapters). Agent-side primitives (rule, skill,
-// subagent, command) are project-owned and a policy that ships them
-// fails install.
+// may only extend framework abstractions. Agent escape-hatch primitives
+// (rule, skill, subagent, command) are project-owned and a policy that
+// ships them fails install.
 func TestInstall_RejectsAgentAbstractions(t *testing.T) {
 	if _, err := exec.LookPath("git"); err != nil {
 		t.Skip("git not available")
