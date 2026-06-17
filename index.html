@@ -1788,16 +1788,16 @@ flowchart LR
 
     <div class="section-label">3.1 — Add the example policy</div>
     <p style="font-size: 0.9rem; color: var(--text-dim); line-height: 1.7;"><a href="https://github.com/tacoda/tacoda-org" target="_blank" rel="noopener"><code>tacoda/tacoda-org</code></a> is a worked-example policy: documentation discipline, release process, the changelog gate. Shipped for the docs and as a template to fork.</p>
-<pre class="code"><span class="prompt">$</span> keystone policy add tacoda/tacoda-org@v1.1.2
-<span class="ar">▸</span> tacoda/tacoda-org @ v1.1.2
+<pre class="code"><span class="prompt">$</span> keystone policy add tacoda/tacoda-org@v2.0.0
+<span class="ar">▸</span> tacoda/tacoda-org @ v2.0.0
 <span class="ok">  ✓</span> 13 file(s) installed at .keystone/harness/policies/tacoda-org
   wrote: .keystone/lockfile.json
-<span class="ok">✓</span> added tacoda/tacoda-org @ v1.1.2 as "tacoda-org"</pre>
+<span class="ok">✓</span> added tacoda/tacoda-org @ v2.0.0 as "tacoda-org"</pre>
 
     <div class="section-label">3.2 — What just happened</div>
     <ul class="iron-list">
       <li><strong style="color: var(--accent);">keystone.json</strong> got a new entry under <code>policies[]</code> with <code>name</code>, <code>source</code>, <code>version</code>.</li>
-      <li><strong style="color: var(--accent2);">.keystone/harness/policies/tacoda-org/</strong> was vendored from the git tag <code>v1.1.2</code> — chmod'd 0o444 on POSIX as a read-only signal.</li>
+      <li><strong style="color: var(--accent2);">.keystone/harness/policies/tacoda-org/</strong> was vendored from the git tag <code>v2.0.0</code> — chmod'd 0o444 on POSIX as a read-only signal.</li>
       <li><strong style="color: var(--accent3);">.keystone/lockfile.json</strong> recorded the resolved git SHA + per-file SHA-256 hashes for drift detection.</li>
       <li>The <code>.gitignore</code> entry (added by init) keeps <code>.keystone/harness/policies/</code> out of your repo. <code>keystone policy install</code> repopulates it on a fresh clone.</li>
     </ul>
@@ -1820,7 +1820,7 @@ flowchart LR
 
     <div class="section-label">3.5 — Update or remove</div>
 <pre class="code"><span class="comment"># Bump to a new version</span>
-<span class="prompt">$</span> keystone policy update tacoda-org @v1.1.2
+<span class="prompt">$</span> keystone policy update tacoda-org @v2.0.0
 
 <span class="comment"># Re-fetch the recorded ref (useful for moving refs like @main)</span>
 <span class="prompt">$</span> keystone policy update tacoda-org
@@ -2252,7 +2252,7 @@ flowchart LR
     <div class="definition">
       <p>Policy sources use a short, npm-style format: <code>[&lt;host&gt;/]&lt;owner&gt;/&lt;repo&gt;[@&lt;version&gt;]</code>. When the host is omitted, <code>github.com</code> is prepended. The version is a git ref (tag, branch, or SHA) — required.</p>
       <ul class="iron-list">
-        <li><code>tacoda/tacoda-org@v1.1.2</code> → <code>github.com/tacoda/tacoda-org</code> at tag <code>v1.1.2</code></li>
+        <li><code>tacoda/tacoda-org@v2.0.0</code> → <code>github.com/tacoda/tacoda-org</code> at tag <code>v2.0.0</code></li>
         <li><code>github.com/acme/policies@v1.0</code> → explicit host, same as <code>acme/policies@v1.0</code></li>
         <li><code>gitlab.com/acme/policies@main</code> → off-github host, branch ref</li>
       </ul>
@@ -2266,7 +2266,7 @@ flowchart LR
     {
       "name": "tacoda-org",
       "source": "tacoda/tacoda-org",
-      "version": "v1.1.2",
+      "version": "v2.0.0",
       "strict": { "actions": ["changelog-check"] },
       "children": [
         {
@@ -2317,13 +2317,13 @@ flowchart LR
 
     <div class="section-label">Install, update, verify</div>
 <pre class="code"><span class="comment"># Add a policy (declared in keystone.json + materialized into .keystone/harness/policies/)</span>
-<span class="prompt">$</span> keystone policy add tacoda/tacoda-org@v1.1.2
+<span class="prompt">$</span> keystone policy add tacoda/tacoda-org@v2.0.0
 
 <span class="comment"># Materialize every policy declared in keystone.json (after `git clone`, etc.)</span>
 <span class="prompt">$</span> keystone policy install
 
 <span class="comment"># Bump a policy's pinned version</span>
-<span class="prompt">$</span> keystone policy update tacoda-org @v1.1.2
+<span class="prompt">$</span> keystone policy update tacoda-org @v2.0.0
 
 <span class="comment"># Or re-fetch the recorded ref without changing the version (moving refs)</span>
 <span class="prompt">$</span> keystone policy update tacoda-org
@@ -2342,7 +2342,7 @@ flowchart LR
       <div class="action">
         <span class="action-tag">policy</span>
         <h3 style="color: var(--accent5);"><a href="https://github.com/tacoda/tacoda-org" target="_blank" rel="noopener" style="color: inherit;"><code>tacoda-org</code></a></h3>
-        <p>The reference policy — ships framework primitives (guides, corpus, actions, playbooks) and demonstrates both <code>strict</code> and <code>required</code>. Includes <code>guides/documentation</code> (Hemingway-test discipline), <code>guides/todos</code> (ownership + context), <code>actions/changelog-check</code>, <code>actions/static-analysis</code>, plus a non-strict <code>playbooks/release</code> projects can extend. <strong>Strict</strong> on the items above — no consumer overrides. <strong>Required</strong>: <code>actions/release-notes</code> — declared but not shipped; the consumer (or another policy) must define it. Pin with <code>keystone policy add tacoda/tacoda-org@v1.1.2</code>.</p>
+        <p>The reference policy — ships framework primitives (guides, corpus, actions, playbooks) and demonstrates both <code>strict</code> and <code>required</code>. Includes <code>guides/documentation</code> (Hemingway-test discipline), <code>guides/todos</code> (ownership + context), <code>actions/changelog-check</code>, <code>actions/static-analysis</code>, plus a non-strict <code>playbooks/release</code> projects can extend. <strong>Strict</strong> on the items above — no consumer overrides. <strong>Required</strong>: <code>actions/release-notes</code> — declared but not shipped; the consumer (or another policy) must define it. Pin with <code>keystone policy add tacoda/tacoda-org@v2.0.0</code>.</p>
       </div>
     </div>
 
@@ -2910,7 +2910,7 @@ description: Spec-phase posture — ask clarifying questions before proposing
 
 <span class="comment"># Policy management. Shorthand: [&lt;host&gt;/]&lt;owner&gt;/&lt;repo&gt;@&lt;version&gt;
 # Old `keystone plugin &lt;verb&gt;` redirects with a deprecation message.</span>
-<span class="prompt">$</span> keystone policy add tacoda/tacoda-org@v1.1.2
+<span class="prompt">$</span> keystone policy add tacoda/tacoda-org@v2.0.0
 <span class="prompt">$</span> keystone policy update tacoda-org [@&lt;new-version&gt;]
 <span class="prompt">$</span> keystone policy remove tacoda-org
 <span class="prompt">$</span> keystone policy install                <span class="comment"># materialize every policy in keystone.json</span>
