@@ -2,6 +2,82 @@
 
 All notable changes to keystone are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); the project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.2] — 2026-06-17
+
+Patch release. Adds the framework-wraps-agent doctrine — persona is
+now a framework primitive that compiles down to a subagent — fixes
+a dashboard hang on rapid pane clicks, and ships standard async UX
+cues across every action form.
+
+### Added
+
+- **Framework-wraps-agent doctrine.** Framework primitives now wrap
+  agent primitives the way an ORM wraps SQL: the framework primitive
+  is the canonical authoring surface, the agent primitive is the raw
+  host-native equivalent kept as an escape hatch.
+  - `persona` (new authoring surface) wraps `subagent`; `keystone
+    project` writes `.claude/agents/<id>.md`.
+  - `action` wraps `command`; now projects to `.claude/commands/<id>.md`.
+  - `playbook` wraps `skill`; now projects to `.claude/skills/<id>/SKILL.md`.
+  - `guide` and `sensor` conceptually wrap `rule` — INDEX-level wrap,
+    no file projection.
+  - Doctrine documented in `docs/ports/primitive.md`.
+- **Twelve default personas** shipped under
+  `scaffold/templates/harness/personas/`: `security-reviewer` plus one
+  paired with each seeded action — `auditor`, `bootstrap-scout`,
+  `drift-reviewer`, `debt-reviewer`, `learning-curator`,
+  `mode-switcher`, `planner`, `code-reviewer`, `spec-author`,
+  `synthesizer`, `verifier`. Every persona declares a `tools:`
+  allow-list, mirroring the subagent requirement.
+- **Web dashboard caches.** A `primitiveCache` reads the harness on
+  fsWatcher events (debounced) plus a 2-min safety-net ticker; page
+  handlers read from cache instead of re-walking on every request. A
+  `healthCache` refreshes source health on a 30s ticker with a
+  bounded worker pool (8 workers, 8s per-probe timeout) and runs
+  refreshes in the background on add / remove.
+- **Async UX cues** across every dashboard action form:
+  `hx-disabled-elt` on submit buttons, inline `running…` indicators
+  with a spinner glyph, a thin amber progress strip at the top of the
+  page that shows whenever any htmx request is in flight, and
+  `button:disabled` styling.
+- Dashboard now ships a favicon (the Keystone logo) and a properly
+  title-cased `<title>`.
+- Lint catches projection-target collisions — same id authored as
+  both a framework wrapper and its agent counterpart would write to
+  the same `.claude/<...>` path; lint now errors out.
+
+### Changed
+
+- Persona semantics reframed. Previously framed as a "system-prompt
+  overlay the main agent adopts." Now persona IS a delegated subagent,
+  just authored at the framework layer with a sharpened posture and
+  a tools allow-list.
+- `keystone project` now writes host projections for `action`,
+  `playbook`, and `persona` in addition to `skill`, `subagent`, and
+  `command`. **Behavioral change**: re-running `keystone project` in
+  an existing install will now write `.claude/commands/<action>.md`
+  and `.claude/skills/<playbook>/SKILL.md` for every shipped action
+  and playbook.
+- `http.Server` for the dashboard gains `IdleTimeout: 120s` and every
+  non-SSE route is wrapped in `http.TimeoutHandler` (30s) — defense
+  in depth against any future slow handler. `/events` stays bare so
+  the long-lived SSE stream is not killed at the timeout mark.
+- Harness `README.md` (shipped into every install) now lists the
+  full twelve-kind taxonomy in two-layer wrap form and renames
+  `plugins/` to `policies/` throughout — last vestiges of the
+  pre-2.0 naming.
+
+### Fixed
+
+- **Web dashboard hang on rapid pane clicks.** Page handlers were
+  synchronously probing every configured source's health on every
+  render — N sources × up to 10s per probe stacked behind the
+  browser's ~6-connection cap, plus the always-open SSE, made the
+  dashboard appear dead after a few quick clicks. Probes now run in
+  the background; handlers serve cached snapshots in microseconds.
+- `keystone init` banner says "harness" instead of "corpus" — last
+  stragglers from the 2.0 layout rename.
+
 ## [2.0.1] — 2026-06-17
 
 Patch release. Fixes the post-init slash-command surface and rounds
