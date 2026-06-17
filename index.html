@@ -3,8 +3,23 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Keystone — the agent-agnostic harness framework for any project</title>
-<meta name="description" content="Keystone is the agent harness framework for any project. A single Go binary — CLI + built-in MCP server + localhost dashboard — that drops a markdown-only harness with 11 primitive kinds across two layers (framework + agent) into your repo at .keystone/harness/. Convention over configuration. Vendored read-only policies for shared governance; generators for every primitive kind.">
+<title>Keystone — the agent harness framework. Discipline your AI agents won't drift from.</title>
+<meta name="description" content="Keystone is the agent harness framework. Encode team coding discipline as versioned markdown every AI agent reads. Ship org rules as pinned policy packages.">
+<link rel="canonical" href="https://www.tacoda.dev/keystone/">
+
+<!-- Open Graph -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://www.tacoda.dev/keystone/">
+<meta property="og:title" content="Keystone — the agent harness framework. Discipline your AI agents won't drift from.">
+<meta property="og:description" content="Keystone is the agent harness framework. Encode team coding discipline as versioned markdown every AI agent reads. Ship org rules as pinned policy packages.">
+<meta property="og:image" content="https://www.tacoda.dev/keystone/keystone_logo.png">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Keystone — the agent harness framework. Discipline your AI agents won't drift from.">
+<meta name="twitter:description" content="Keystone is the agent harness framework. Encode team coding discipline as versioned markdown every AI agent reads. Ship org rules as pinned policy packages.">
+<meta name="twitter:image" content="https://www.tacoda.dev/keystone/keystone_logo.png">
+
 <link rel="icon" type="image/png" href="keystone_logo.png">
 <style>
   @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;600&family=IBM+Plex+Sans:wght@300;400;600&display=swap');
@@ -1221,7 +1236,6 @@
     <div class="page-head">
       <div class="crumb">Overview · Keystone v2.0.1</div>
       <h1>The agent harness framework for <em class="hero-any">any</em> project.</h1>
-      <p class="tagline">Rails for agent harnesses. A single Go binary that drops a markdown-only harness — <strong>11 primitive kinds across two layers</strong> (framework + agent) — into your repo at <code>.keystone/harness/</code>, with a built-in MCP server and localhost dashboard. Convention over configuration. Single source of truth that the CLI authors, the MCP server dispatches, and the dashboard observes. Once installed, none of the tools are required at runtime — the harness is plain files.</p>
     </div>
 
     <section class="hero-term">
@@ -1252,8 +1266,21 @@
     </section>
 
     <div class="definition">
-      <p><strong>Keystone is the agent harness framework.</strong> A single Go binary that drops a structured, primitive-typed markdown harness into your repo at <code>.keystone/harness/</code> and keeps it healthy. <strong>The CLI authors it.</strong> <strong>The MCP server dispatches it</strong> to host agents (Claude Code, Cursor, Codex). <strong>The dashboard at <code>localhost:4773</code> is the operator view.</strong> None of those tools are required at runtime — the harness is plain files. Any agent that reads <code>.keystone/INDEX.json</code> and the bodies it points at can operate the project.</p>
-      <p><strong style="color:var(--accent);">11 primitive kinds in two layers.</strong> Framework abstractions (<code>guide</code>, <code>corpus</code>, <code>sensor</code>, <code>action</code>, <code>playbook</code>, <code>eval</code>, <code>source</code>) are keystone-canonical — the agent doesn't natively know about them, the harness teaches it. Agent abstractions (<code>rule</code>, <code>skill</code>, <code>subagent</code>, <code>command</code>, <code>persona</code>) align with what host agents already understand; keystone projects them to native paths on <code>keystone project</code>.</p>
+      <p><strong>AI coding agents are productive — and they go off-rails.</strong> They forget your team's conventions between sessions. Each repo reinvents the same prompt hacks and ad-hoc <code>CLAUDE.md</code> edits. Org-wide coding discipline can't be shared, versioned, or audited — switch agents and you lose all of it. Keystone fixes that by dropping a versioned markdown harness into every repo. The same rules apply across sessions, across repos, across agents. Org discipline ships as <strong style="color:var(--accent4);">policies</strong> — vendored, pinned, hash-verified packages your security and platform teams author once and every repo pulls. Agent output stays in bounds. New repos inherit org discipline on <code>keystone init</code>. Reviews stay consistent across teams. Swap tools, keep the rules. Engineering leadership gets one place to evolve coding discipline and one diff to roll it out org-wide.</p>
+      <p><strong style="color:var(--accent);">It's a framework, not a folder of markdown.</strong> A single Go binary: the CLI authors the harness at <code>.keystone/harness/</code>, a built-in MCP server dispatches it to host agents (Claude Code, Cursor, Codex), and a localhost dashboard at <code>:4773</code> observes. None of those tools are required at runtime — the harness is plain files; any agent that reads <code>.keystone/INDEX.json</code> and the bodies it points at can operate the project. Generators for every primitive (<code>keystone new &lt;kind&gt;</code>), a typed primitive index, a lockfile that pins what loads, and convention over configuration. The framework absorbs the boring parts — walking, indexing, projection, lint, drift, eval — so your team writes only the rules that matter. Two-layer primitive taxonomy: framework primitives (<code>guide</code>, <code>corpus</code>, <code>sensor</code>, <code>action</code>, <code>playbook</code>, <code>persona</code>, <code>eval</code>, <code>source</code>) wrap their agent counterparts (<code>rule</code>, <code>skill</code>, <code>subagent</code>, <code>command</code>) — ORM-over-SQL. You author at the framework layer; Keystone projects to host-native paths under <code>.claude/</code>.</p>
+    </div>
+
+    <div class="definition" style="border-color: var(--accent4);">
+      <p style="margin: 0 0 10px;"><strong style="color:var(--accent4);">Why Keystone vs. other harnesses?</strong> Other harnesses are a folder of markdown for one agent. Keystone is a framework for many.</p>
+      <ul style="margin: 0; padding-left: 22px; line-height: 1.7;">
+        <li><strong>Agent-agnostic.</strong> Other harnesses are Claude-only or Cursor-only. Keystone projects to multiple host formats — swap your agent, keep your rules.</li>
+        <li><strong>Typed primitives, not a folder of markdown.</strong> 12 primitive kinds with canonical frontmatter plus <code>INDEX.json</code> — the agent reads one descriptor file instead of crawling the tree.</li>
+        <li><strong>Framework wraps agent.</strong> Author higher-level primitives; Keystone compiles to host-native paths. ORM-over-SQL.</li>
+        <li><strong style="color: var(--accent4);">Policies = distribution layer.</strong> Other harnesses have no package manager — vendored, pinned, hash-verified packages give orgs one diff to ship rules to every repo.</li>
+        <li><strong>Batteries included.</strong> Single Go binary — CLI, MCP server, localhost dashboard, lint, drift, eval, and audit in one tool.</li>
+        <li><strong>Discipline + verify.</strong> Sensors, drift, lint, eval, and audit watch the harness itself — prose alone rots; Keystone checks itself.</li>
+        <li><strong>Convention over configuration.</strong> Fixed <code>.keystone/harness/</code> layout — no path bikeshedding.</li>
+      </ul>
     </div>
 
     <div class="definition" style="border-color: var(--accent2);">
@@ -1269,6 +1296,10 @@
 
     <div class="action-grid">
       <div class="action">
+        <h3 style="color: var(--accent4);"><a href="#first-plugin" style="color: inherit; border-bottom: none;">Policies — vendored governance →</a></h3>
+        <p>Ship org rules as pinned, hash-verified markdown packages. One diff to roll out org-wide. The distribution layer no other harness has. <code>keystone policy add</code> vendors a policy into <code>.keystone/harness/policies/&lt;name&gt;/</code> read-only; <code>strict</code> items lock absolutely. Cascade: project layer wins by default; deeper-nested policies refine outer ones.</p>
+      </div>
+      <div class="action">
         <h3 style="color: var(--accent);"><a href="#guides" style="color: inherit; border-bottom: none;">11 primitive kinds →</a></h3>
         <p>Two layers — <strong>Framework</strong> (7): <code>guide</code>, <code>corpus</code>, <code>sensor</code>, <code>action</code>, <code>playbook</code>, <code>eval</code>, <code>source</code>. <strong>Agent</strong> (5): <code>rule</code>, <code>skill</code>, <code>subagent</code>, <code>command</code>, <code>persona</code>. Every primitive carries canonical frontmatter — <code>kind</code>, <code>id</code>, <code>description</code> + per-kind required fields. The walker emits one <code>.keystone/INDEX.json</code>; agents read the index first.</p>
       </div>
@@ -1281,7 +1312,7 @@
         <p><code>keystone web serve</code> opens <code>http://localhost:4773</code> (KEYS on a phone keypad). Embedded HTMX + SSE push, fsnotify on <code>.keystone/</code>. <strong>14 pages:</strong> home, metrics, insights, primitives, policies, investigator, sources, verify, prune, inbox, flywheels, evals, search, graph. Read-only REST at <code>/api/*</code>.</p>
       </div>
       <div class="action">
-        <h3 style="color: var(--accent4);"><a href="#evals" style="color: inherit; border-bottom: none;">Evals + baseline diffs →</a></h3>
+        <h3 style="color: var(--accent2);"><a href="#evals" style="color: inherit; border-bottom: none;">Evals + baseline diffs →</a></h3>
         <p><code>.keystone/harness/evals/&lt;id&gt;/EVAL.md</code> + <code>expected.json</code> + optional <code>fixture/</code>. Static + sensor levels. <code>keystone eval run --baseline &lt;git-ref&gt;</code> materializes the ref in a git worktree, runs both sides, and diffs results into a regression report.</p>
       </div>
       <div class="action">
