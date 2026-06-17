@@ -12,6 +12,7 @@ import (
 	"github.com/tacoda/keystone/internal/framework/config"
 	"github.com/tacoda/keystone/internal/framework/lockfile"
 	"github.com/tacoda/keystone/internal/framework/policies"
+	"github.com/tacoda/keystone/internal/framework/primitive"
 )
 
 func runInit(args []string, assets fs.FS) error {
@@ -123,6 +124,18 @@ func runInit(args []string, assets fs.FS) error {
 		return fmt.Errorf("write install profile: %w", err)
 	}
 
+	// Index + project: write .keystone/INDEX.json so the agent can read
+	// the primitive descriptor at session start, and project skills /
+	// subagents / commands into the host-native tree (`.claude/skills/`,
+	// `.claude/agents/`, `.claude/commands/`) so they're discoverable as
+	// slash commands. Without this step a fresh install ships skills the
+	// host agent can't see. Errors are non-fatal — the structural install
+	// is already complete and these artifacts can be regenerated with
+	// `keystone index` / `keystone project`.
+	if err := indexAndProject(absDir, flags.harnessRoot); err != nil {
+		fmt.Fprintf(os.Stderr, "! post-install index/project skipped: %v\n", err)
+	}
+
 	if err := reportAmbientLoad(absDir, flags.harnessRoot); err != nil {
 		// Non-fatal: budget reporting is a nicety, not a precondition.
 		fmt.Fprintf(os.Stderr, "! ambient-load report skipped: %v\n", err)
@@ -167,7 +180,49 @@ func reportAmbientLoad(projectDir, harnessRoot string) error {
 		}
 		fmt.Fprintf(os.Stdout, "    %-10s %d%s\n", r.Port, r.Tokens, suffix)
 	}
-	fmt.Fprintln(os.Stdout, "  (run `keystone doctor --budget` later for top contributors per port)")
+	fmt.Fprintln(os.Stdout, "  (see the localhost dashboard via `keystone web serve` for per-port detail)")
+	return nil
+}
+
+// indexAndProject regenerates .keystone/INDEX.json and projects every
+// agent-kind primitive (skill / subagent / command) into the host-native
+// tree under .claude/. Called once at the end of `keystone init` so a
+// fresh install ships discoverable slash commands without an extra
+// manual step.
+func indexAndProject(projectDir, harnessRoot string) error {
+	primitives, warnings, err := primitive.Walk(projectDir, harnessRoot)
+	if err != nil {
+		return fmt.Errorf("walk primitives: %w", err)
+	}
+	for _, w := range warnings {
+		fmt.Fprintf(os.Stderr, "  ! %s: %s\n", w.Path, w.Message)
+	}
+
+	idx := primitive.Build(primitives, time.Now())
+	indexPath := filepath.Join(projectDir, config.KeystoneDir(harnessRoot), config.IndexName)
+	if err := primitive.Write(indexPath, idx); err != nil {
+		return fmt.Errorf("write index: %w", err)
+	}
+	if rel, e := filepath.Rel(projectDir, indexPath); e == nil {
+		fmt.Fprintf(os.Stdout, "  wrote: %s (%d primitive(s))\n", rel, len(primitives))
+	}
+
+	results, err := primitive.Project(projectDir, primitives)
+	if err != nil {
+		return fmt.Errorf("project primitives: %w", err)
+	}
+	wrote := 0
+	for _, r := range results {
+		if r.Action == "wrote" {
+			if rel, e := filepath.Rel(projectDir, r.Dest); e == nil {
+				fmt.Fprintf(os.Stdout, "  wrote: %s\n", rel)
+			}
+			wrote++
+		}
+	}
+	if wrote > 0 {
+		fmt.Fprintf(os.Stdout, "  projected %d primitive(s) to host-native paths\n", wrote)
+	}
 	return nil
 }
 
@@ -352,7 +407,7 @@ func printNextSteps(agents []string, harnessRoot string) {
 	fmt.Fprintf(os.Stdout, `
 ✓ harness installed for %s.
 
-  ▶ Next: run the bootstrap action %s.
+  ▶ Next: run the /keystone:bootstrap skill %s.
 
      Bootstrap reads your codebase and seeds %s/corpus/state/CODEBASE_STATE.md,
      %s/corpus/idioms/<your-stack>/, and the paired %s/guides/idioms/<your-stack>/

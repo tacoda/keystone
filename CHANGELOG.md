@@ -2,6 +2,52 @@
 
 All notable changes to keystone are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); the project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.1] — 2026-06-17
+
+Patch release. Fixes the post-init slash-command surface and rounds
+out the keystone-skill set so every action is reachable as
+`/keystone:<id>` from the host agent.
+
+### Fixed
+
+- `keystone init` now runs index + projection at the end of the install.
+  Previously only the canonical sources under `.keystone/harness/skills/`
+  were written; nothing landed at `.claude/skills/`, so Claude Code (and
+  any host agent that reads the projected surface) saw no
+  `/keystone:*` slash commands. The post-install step is idempotent,
+  preserves user edits to canonical sources (`skipIfExists` mode), and
+  creates `.claude/` if it does not exist. Errors are non-fatal —
+  `keystone index` + `keystone project` can regenerate at any time.
+- "Next steps" output after `keystone init` no longer says "run the
+  bootstrap action" — it now points at the canonical
+  `/keystone:bootstrap` slash command.
+- Removed the stale `keystone doctor --budget` reference from the
+  ambient-load report (the `doctor` command was retired in 2.0; the
+  localhost dashboard at `keystone web serve` is the replacement).
+
+### Added
+
+- Ten new bundled skills wrapping every existing action so they are all
+  reachable as slash commands in the host agent:
+  - `/keystone:bootstrap` — first-time harness scaffold
+  - `/keystone:spec` — capture intent + acceptance criteria
+  - `/keystone:orient` — enter the planning phase
+  - `/keystone:check-drift` — fast pre-verify drift sweep
+  - `/keystone:review` — run the four review sensors on the current diff
+  - `/keystone:debt-review` — triage the code-debt ledger
+  - `/keystone:mode` — switch pacing mode (paired / solo / autopilot)
+  - `/keystone:learn` — capture a learning candidate
+  - `/keystone:synthesize` — promote accepted inbox candidates
+  - `/keystone:audit` — periodic dual-flywheel review
+
+### Changed
+
+- Localhost dashboard `flywheels` page now copies canonical slash
+  commands (`/keystone:learn`, `/keystone:synthesize`, `/keystone:audit`)
+  instead of natural-language prompts ("run the learn action", etc.).
+  Click-to-copy lands a real, agent-recognizable command on the
+  clipboard.
+
 ## [2.0.0] — 2026-06-17
 
 Worthy 2.0. Layout move, primitive taxonomy, in-binary MCP server,
