@@ -49,6 +49,10 @@ func (s *server) handleActionSourceAdd(w http.ResponseWriter, r *http.Request) {
 		htmxFragment(w, errorFragment(err.Error()))
 		return
 	}
+	// Mutation invalidates the cached health snapshot — refresh now
+	// in the background so the redirect target sees fresh data
+	// without re-blocking the handler.
+	go s.healthCache.refresh(context.Background())
 	htmxRedirect(w, r, "/sources")
 }
 
@@ -72,6 +76,7 @@ func (s *server) handleActionSourceRemove(w http.ResponseWriter, r *http.Request
 		htmxFragment(w, errorFragment(err.Error()))
 		return
 	}
+	go s.healthCache.refresh(context.Background())
 	htmxRedirect(w, r, "/sources")
 }
 
@@ -173,7 +178,7 @@ func (s *server) handleActionSourceVerifyAll(w http.ResponseWriter, r *http.Requ
 		http.Error(w, "POST required", http.StatusMethodNotAllowed)
 		return
 	}
-	entries, err := sourceList(r.Context(), s.projectDir)
+	entries, err := s.sourceList(r.Context())
 	if err != nil {
 		htmxFragment(w, errorFragment(err.Error()))
 		return

@@ -9,10 +9,12 @@
         hx-get="/web/fragments/investigator"
         hx-trigger="input changed delay:150ms, change"
         hx-target="#investigator-layers"
-        hx-swap="innerHTML">
+        hx-swap="innerHTML"
+        hx-indicator="#ispin">
     <label>search id / description / path
       <input type="text" name="q" value="{{.Inventory.Search}}" placeholder="e.g. spec, billing/**, severity">
     </label>
+    <span id="ispin" class="htmx-indicator muted" style="align-self:flex-end;"><span class="spinner" aria-hidden="true"></span>filtering…</span>
   </form>
 
   <div id="investigator-layers">

@@ -12,11 +12,11 @@
       <code style="color: var(--fg);">{{.Name}}</code>
       {{if .Status}}<span class="pill" style="background:var(--bg);">{{.Status}}</span>{{end}}
       <span style="margin-left: auto; display: flex; gap: 0.4rem;">
-        <form hx-post="/web/actions/inbox/accept" style="display:inline;">
+        <form hx-post="/web/actions/inbox/accept" hx-disabled-elt="find button" style="display:inline;">
           <input type="hidden" name="name" value="{{.Name}}">
           <button class="btn" type="submit">accept</button>
         </form>
-        <form hx-post="/web/actions/inbox/reject" hx-confirm="Delete {{.Name}}?" style="display:inline;">
+        <form hx-post="/web/actions/inbox/reject" hx-confirm="Delete {{.Name}}?" hx-disabled-elt="find button" style="display:inline;">
           <input type="hidden" name="name" value="{{.Name}}">
           <button class="btn ghost danger" type="submit">reject</button>
         </form>

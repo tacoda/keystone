@@ -9,7 +9,8 @@
         hx-get="/web/fragments/primitives"
         hx-trigger="input changed delay:200ms, change"
         hx-target="#primitives-tbody"
-        hx-swap="outerHTML">
+        hx-swap="outerHTML"
+        hx-indicator="#prsp">
     <label>kind
       <select name="kind">
         <option value="">(any)</option>
@@ -19,6 +20,7 @@
     <label>glob
       <input type="text" name="glob" value="{{.Filter.glob}}" placeholder="src/billing/**">
     </label>
+    <span id="prsp" class="htmx-indicator muted" style="align-self:flex-end;"><span class="spinner" aria-hidden="true"></span>filtering…</span>
   </form>
 
   <table>

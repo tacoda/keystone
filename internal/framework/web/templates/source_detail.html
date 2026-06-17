@@ -13,12 +13,13 @@
     </dd>
   </dl>
 
-  <form hx-post="/web/actions/sources/health" hx-target="#health-badge" hx-swap="innerHTML" style="display: inline; margin-top: 0.5rem;">
+  <form hx-post="/web/actions/sources/health" hx-target="#health-badge" hx-swap="innerHTML" hx-indicator="#hspin" hx-disabled-elt="find button" style="display: inline; margin-top: 0.5rem;">
     <input type="hidden" name="name" value="{{.Source.Name}}">
     <button class="btn ghost" type="submit">re-probe health</button>
+    <span id="hspin" class="htmx-indicator muted"><span class="spinner" aria-hidden="true"></span>probing…</span>
   </form>
 
-  <form hx-post="/web/actions/sources/remove" hx-confirm="Remove source {{.Source.Name}}?" style="display: inline; margin-left: 0.4rem;">
+  <form hx-post="/web/actions/sources/remove" hx-confirm="Remove source {{.Source.Name}}?" hx-disabled-elt="find button" style="display: inline; margin-left: 0.4rem;">
     <input type="hidden" name="name" value="{{.Source.Name}}">
     <button class="btn ghost danger" type="submit">remove</button>
   </form>
@@ -27,14 +28,14 @@
 <section class="card">
   <h2>query</h2>
   <p class="muted">Run a query against this source. Result is stage-3 material — surface to the user before applying.</p>
-  <form hx-post="/web/actions/sources/query" hx-target="#query-result" hx-swap="innerHTML" hx-indicator="#qspin">
+  <form hx-post="/web/actions/sources/query" hx-target="#query-result" hx-swap="innerHTML" hx-indicator="#qspin" hx-disabled-elt="find button">
     <div class="row">
       <input type="hidden" name="name" value="{{.Source.Name}}">
       <label style="flex: 1; min-width: 280px;">query
         <input type="text" name="query" placeholder="search term">
       </label>
       <button class="btn" type="submit">query</button>
-      <span id="qspin" class="htmx-indicator muted"> running…</span>
+      <span id="qspin" class="htmx-indicator muted"><span class="spinner" aria-hidden="true"></span>running…</span>
     </div>
   </form>
   <div id="query-result"></div>

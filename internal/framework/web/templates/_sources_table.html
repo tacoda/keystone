@@ -11,7 +11,7 @@
         <td>{{if .Health.OK}}<span class="pill ok">ready</span>{{else}}<span class="pill bad">{{.Health.Status}}</span>{{end}}</td>
         <td class="muted">{{.Health.Message}}</td>
         <td>
-          <form hx-post="/web/actions/sources/remove" hx-confirm="Remove source {{.Name}}?" style="display: inline;">
+          <form hx-post="/web/actions/sources/remove" hx-confirm="Remove source {{.Name}}?" hx-disabled-elt="find button" style="display: inline;">
             <input type="hidden" name="name" value="{{.Name}}">
             <button class="btn ghost danger" type="submit">remove</button>
           </form>

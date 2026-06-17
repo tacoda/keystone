@@ -21,7 +21,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/tacoda/keystone/internal/framework/config"
 	"github.com/tacoda/keystone/internal/framework/primitive"
 )
 
@@ -66,9 +65,17 @@ func Serve(ctx context.Context, opts Options) error {
 
 	addr := fmt.Sprintf("127.0.0.1:%d", opts.Port)
 	httpSrv := &http.Server{
-		Addr:              addr,
-		Handler:           srv.mux,
+		Addr:    addr,
+		Handler: srv.mux,
+		// ReadHeaderTimeout caps how long a slow client can take to
+		// finish the request headers. IdleTimeout closes keep-alive
+		// connections that go quiet — bounded recovery from leaked
+		// connections without affecting in-progress requests. We
+		// deliberately leave WriteTimeout unset because /events is a
+		// long-lived SSE stream; per-handler caps live in the
+		// TimeoutHandler middleware in routes().
 		ReadHeaderTimeout: 5 * time.Second,
+		IdleTimeout:       120 * time.Second,
 	}
 
 	go func() {
@@ -78,6 +85,7 @@ func Serve(ctx context.Context, opts Options) error {
 		_ = httpSrv.Shutdown(shutdown)
 	}()
 
+	srv.startCacheRefreshers(ctx)
 	srv.watcher.Start(ctx)
 
 	fmt.Printf("keystone web — http://%s  (project: %s)\n", addr, abs)
@@ -95,6 +103,9 @@ type server struct {
 	funcs      template.FuncMap
 	hub        *sseHub
 	watcher    *fsWatcher
+
+	primitiveCache *primitiveCache
+	healthCache    *healthCache
 }
 
 func newServer(projectDir string) (*server, error) {
@@ -103,10 +114,6 @@ func newServer(projectDir string) (*server, error) {
 		return nil, err
 	}
 	hub := newSSEHub()
-	watcher, err := newFSWatcher(projectDir, hub)
-	if err != nil {
-		return nil, err
-	}
 
 	s := &server{
 		projectDir: projectDir,
@@ -115,9 +122,20 @@ func newServer(projectDir string) (*server, error) {
 		funcs: template.FuncMap{
 			"join": strings.Join,
 		},
-		hub:     hub,
-		watcher: watcher,
+		hub:            hub,
+		primitiveCache: newPrimitiveCache(projectDir),
+		healthCache:    newHealthCache(projectDir),
 	}
+
+	// Watcher rebuilds the primitive cache on every debounced file
+	// change. Wired before newFSWatcher returns so the first event
+	// drives a refresh.
+	watcher, err := newFSWatcher(projectDir, hub, s.primitiveCache.refresh)
+	if err != nil {
+		return nil, err
+	}
+	s.watcher = watcher
+
 	s.routes()
 	return s, nil
 }
@@ -127,75 +145,92 @@ func (s *server) routes() {
 	assetFS, _ := fs.Sub(embedded, "assets")
 	s.mux.Handle("/assets/", http.StripPrefix("/assets/", http.FileServer(http.FS(assetFS))))
 
-	// SSE hub.
+	// SSE hub — bare, no TimeoutHandler. /events is a long-lived
+	// stream; wrapping it would kill the connection at the 30s mark.
 	s.mux.HandleFunc("/events", s.hub.ServeHTTP)
 
-	// HTMX dashboard pages.
-	s.mux.HandleFunc("/", s.handleHome)
-	s.mux.HandleFunc("/metrics", s.handleMetrics)
-	s.mux.HandleFunc("/primitives", s.handlePrimitivesList)
-	s.mux.HandleFunc("/primitives/new", s.handlePrimitivesNew)
-	s.mux.HandleFunc("/primitives/", s.handlePrimitivesDetail)
-	s.mux.HandleFunc("/policies", s.handlePolicies)
-	s.mux.HandleFunc("/policies/investigate", s.handleInvestigator)
-	s.mux.HandleFunc("/sources", s.handleSources)
-	s.mux.HandleFunc("/sources/new", s.handleSourcesNew)
-	s.mux.HandleFunc("/sources/", s.handleSourceDetail)
-	s.mux.HandleFunc("/verify", s.handleVerifyPage)
-	s.mux.HandleFunc("/prune", s.handlePrune)
-	s.mux.HandleFunc("/inbox", s.handleInbox)
-	s.mux.HandleFunc("/flywheels", s.handleFlywheels)
-	s.mux.HandleFunc("/evals", s.handleEvals)
-	s.mux.HandleFunc("/search", s.handleSearch)
-	s.mux.HandleFunc("/graph", s.handleGraph)
-	s.mux.HandleFunc("/web/fragments/search", s.handleSearchFragment)
-	s.mux.HandleFunc("/api/search", s.apiSearch)
-	s.mux.HandleFunc("/api/evals", s.apiEvals)
-	s.mux.HandleFunc("/api/evals/run", s.apiEvalRun)
-	s.mux.HandleFunc("/web/actions/eval/run", s.handleActionEvalRun)
-	s.mux.HandleFunc("/insights", s.handleInsights)
-	s.mux.HandleFunc("/api/insights", s.apiInsights)
+	// HTMX dashboard pages. Wrapped via s.handle so a slow handler
+	// returns 503 instead of holding the connection forever.
+	s.handle("/", s.handleHome)
+	s.handle("/metrics", s.handleMetrics)
+	s.handle("/primitives", s.handlePrimitivesList)
+	s.handle("/primitives/new", s.handlePrimitivesNew)
+	s.handle("/primitives/", s.handlePrimitivesDetail)
+	s.handle("/policies", s.handlePolicies)
+	s.handle("/policies/investigate", s.handleInvestigator)
+	s.handle("/sources", s.handleSources)
+	s.handle("/sources/new", s.handleSourcesNew)
+	s.handle("/sources/", s.handleSourceDetail)
+	s.handle("/verify", s.handleVerifyPage)
+	s.handle("/prune", s.handlePrune)
+	s.handle("/inbox", s.handleInbox)
+	s.handle("/flywheels", s.handleFlywheels)
+	s.handle("/evals", s.handleEvals)
+	s.handle("/search", s.handleSearch)
+	s.handle("/graph", s.handleGraph)
+	s.handle("/web/fragments/search", s.handleSearchFragment)
+	s.handle("/api/search", s.apiSearch)
+	s.handle("/api/evals", s.apiEvals)
+	s.handle("/api/evals/run", s.apiEvalRun)
+	s.handle("/web/actions/eval/run", s.handleActionEvalRun)
+	s.handle("/insights", s.handleInsights)
+	s.handle("/api/insights", s.apiInsights)
 
 	// REST API (read-only).
-	s.mux.HandleFunc("/api/index", s.apiIndex)
-	s.mux.HandleFunc("/api/primitives", s.apiPrimitives)
-	s.mux.HandleFunc("/api/primitives/", s.apiPrimitiveDetail)
-	s.mux.HandleFunc("/api/sources", s.apiSources)
-	s.mux.HandleFunc("/api/sources/", s.apiSourceDetail)
-	s.mux.HandleFunc("/api/harness/status", s.apiHarnessStatus)
-	s.mux.HandleFunc("/api/metrics", s.apiMetrics)
+	s.handle("/api/index", s.apiIndex)
+	s.handle("/api/primitives", s.apiPrimitives)
+	s.handle("/api/primitives/", s.apiPrimitiveDetail)
+	s.handle("/api/sources", s.apiSources)
+	s.handle("/api/sources/", s.apiSourceDetail)
+	s.handle("/api/harness/status", s.apiHarnessStatus)
+	s.handle("/api/metrics", s.apiMetrics)
 
 	// HTMX fragment endpoints + write actions.
-	s.mux.HandleFunc("/web/fragments/primitives", s.handlePrimitivesFragment)
-	s.mux.HandleFunc("/web/fragments/investigator", s.handleInvestigatorFragment)
-	s.mux.HandleFunc("/web/actions/primitives/new", s.handleActionNewPrimitive)
-	s.mux.HandleFunc("/web/actions/primitives/delete", s.handleActionDeletePrimitive)
-	s.mux.HandleFunc("/web/actions/policy/add", s.handleActionPolicyAdd)
-	s.mux.HandleFunc("/web/actions/policy/remove", s.handleActionPolicyRemove)
-	s.mux.HandleFunc("/web/actions/verify", s.handleActionVerify)
-	s.mux.HandleFunc("/web/actions/sources/add", s.handleActionSourceAdd)
-	s.mux.HandleFunc("/web/actions/sources/remove", s.handleActionSourceRemove)
-	s.mux.HandleFunc("/web/actions/sources/query", s.handleActionSourceQuery)
-	s.mux.HandleFunc("/web/actions/sources/health", s.handleActionSourceHealth)
-	s.mux.HandleFunc("/web/actions/sources/verify-all", s.handleActionSourceVerifyAll)
-	s.mux.HandleFunc("/web/actions/inbox/accept", s.handleActionInboxAccept)
-	s.mux.HandleFunc("/web/actions/inbox/reject", s.handleActionInboxReject)
+	s.handle("/web/fragments/primitives", s.handlePrimitivesFragment)
+	s.handle("/web/fragments/investigator", s.handleInvestigatorFragment)
+	s.handle("/web/actions/primitives/new", s.handleActionNewPrimitive)
+	s.handle("/web/actions/primitives/delete", s.handleActionDeletePrimitive)
+	s.handle("/web/actions/policy/add", s.handleActionPolicyAdd)
+	s.handle("/web/actions/policy/remove", s.handleActionPolicyRemove)
+	s.handle("/web/actions/verify", s.handleActionVerify)
+	s.handle("/web/actions/sources/add", s.handleActionSourceAdd)
+	s.handle("/web/actions/sources/remove", s.handleActionSourceRemove)
+	s.handle("/web/actions/sources/query", s.handleActionSourceQuery)
+	s.handle("/web/actions/sources/health", s.handleActionSourceHealth)
+	s.handle("/web/actions/sources/verify-all", s.handleActionSourceVerifyAll)
+	s.handle("/web/actions/inbox/accept", s.handleActionInboxAccept)
+	s.handle("/web/actions/inbox/reject", s.handleActionInboxReject)
+}
+
+// handlerTimeout is the per-request ceiling enforced by the
+// TimeoutHandler middleware wrapping every non-SSE route. Generous
+// enough to cover an evicted-cache refill, tight enough that no
+// handler can pin a client connection forever. Adjust if write
+// actions that shell out to the keystone CLI ever need longer.
+const handlerTimeout = 30 * time.Second
+
+// handle registers an http.HandlerFunc wrapped in TimeoutHandler so
+// a slow handler returns 503 instead of holding the client
+// connection forever. Use this for every route except /events
+// (SSE — wrapping would kill the long-lived stream) and /assets/
+// (static file server, already non-blocking).
+func (s *server) handle(pattern string, h http.HandlerFunc) {
+	s.mux.Handle(pattern, http.TimeoutHandler(h, handlerTimeout, "request timed out"))
 }
 
 // loadPrimitives is the shared read path for both API + dashboard
-// handlers. Walks the harness on every request — cheap and avoids
-// stale state.
+// handlers. Reads from primitiveCache — the fsWatcher rebuilds the
+// cache on every debounced file-change event, plus a slow ticker
+// fallback in cache.go.
 func (s *server) loadPrimitives() ([]primitive.Primitive, error) {
-	primitives, _, err := primitive.Walk(s.projectDir, config.DefaultHarnessRoot)
-	return primitives, err
+	prims, _, err := s.primitiveCache.get()
+	return prims, err
 }
 
-// buildIndex is the same envelope `keystone index` emits, computed
-// fresh per request.
+// buildIndex is the same envelope `keystone index` emits, served
+// from primitiveCache. Build cost is paid by the cache refresh, not
+// the request goroutine.
 func (s *server) buildIndex() (primitive.Index, error) {
-	primitives, err := s.loadPrimitives()
-	if err != nil {
-		return primitive.Index{}, err
-	}
-	return primitive.Build(primitives, time.Now()), nil
+	_, idx, err := s.primitiveCache.get()
+	return idx, err
 }

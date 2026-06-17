@@ -15,7 +15,7 @@
         <td><code>{{.Version}}</code></td>
         <td class="muted">{{if .Strict}}{{range $k, $v := .Strict}}{{$k}}: {{len $v}}{{end}}{{else}}—{{end}}</td>
         <td>
-          <form hx-post="/web/actions/policy/remove" hx-confirm="Remove policy {{.Name}}?">
+          <form hx-post="/web/actions/policy/remove" hx-confirm="Remove policy {{.Name}}?" hx-disabled-elt="find button">
             <input type="hidden" name="name" value="{{.Name}}">
             <button class="btn ghost danger" type="submit">remove</button>
           </form>
@@ -31,7 +31,7 @@
 
 <section class="card">
   <h2>add a policy</h2>
-  <form hx-post="/web/actions/policy/add" hx-target="#result" hx-swap="innerHTML">
+  <form hx-post="/web/actions/policy/add" hx-target="#result" hx-swap="innerHTML" hx-indicator="#padd" hx-disabled-elt="find button">
     <div class="row">
       <label>spec (<owner>/<repo>@<version>)
         <input type="text" name="spec" required placeholder="acme/policies@v1.0.0">
@@ -40,6 +40,7 @@
         <input type="text" name="name" placeholder="acme">
       </label>
       <button class="btn" type="submit">add</button>
+      <span id="padd" class="htmx-indicator muted"><span class="spinner" aria-hidden="true"></span>fetching policy…</span>
     </div>
   </form>
   <div id="result"></div>

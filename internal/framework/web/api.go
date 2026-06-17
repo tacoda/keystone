@@ -107,7 +107,7 @@ func (s *server) apiPrimitiveDetail(w http.ResponseWriter, r *http.Request) {
 // -- /api/sources ------------------------------------------------------
 
 func (s *server) apiSources(w http.ResponseWriter, r *http.Request) {
-	entries, err := sourceList(r.Context(), s.projectDir)
+	entries, err := s.sourceList(r.Context())
 	if err != nil {
 		writeError(w, http.StatusInternalServerError, err.Error())
 		return
@@ -127,7 +127,7 @@ func (s *server) apiSourceDetail(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusBadRequest, "URL must be /api/sources/<name>/health")
 		return
 	}
-	entries, err := sourceList(r.Context(), s.projectDir)
+	entries, err := s.sourceList(r.Context())
 	if err != nil {
 		writeError(w, http.StatusInternalServerError, err.Error())
 		return
@@ -180,24 +180,11 @@ type sourceEntry struct {
 	Health mcp.Health `json:"health"`
 }
 
-// sourceList reads .keystone/context.json and probes each adapter's
-// health. Returns an empty slice when no config file exists.
-func sourceList(ctx context.Context, projectDir string) ([]sourceEntry, error) {
-	cfg, err := mcp.LoadContextConfig(projectDir)
-	if err != nil {
-		return nil, err
-	}
-	if cfg == nil {
-		return []sourceEntry{}, nil
-	}
-	out := make([]sourceEntry, 0, len(cfg.Sources))
-	for _, src := range cfg.Sources {
-		a := mcp.BuildAdapter(src)
-		out = append(out, sourceEntry{
-			Name:   a.Name(),
-			Type:   a.Type(),
-			Health: a.Health(ctx),
-		})
-	}
-	return out, nil
+// sourceList returns the most recent snapshot of configured sources
+// + their probed health from the server's healthCache. The cache is
+// refreshed in the background by a 30s ticker and on demand after
+// source-mutating actions — no handler should ever block on a
+// network probe.
+func (s *server) sourceList(ctx context.Context) ([]sourceEntry, error) {
+	return s.healthCache.get()
 }

@@ -28,11 +28,17 @@ type fsWatcher struct {
 	w              *fsnotify.Watcher
 	debounceWindow time.Duration
 
+	// onChange runs after every debounced burst, before the SSE
+	// publish. The server wires this to primitiveCache.refresh so the
+	// cache is up to date by the time the dashboard re-fetches.
+	// Optional — nil is allowed.
+	onChange func()
+
 	mu    sync.Mutex
 	timer *time.Timer
 }
 
-func newFSWatcher(projectDir string, hub *sseHub) (*fsWatcher, error) {
+func newFSWatcher(projectDir string, hub *sseHub, onChange func()) (*fsWatcher, error) {
 	w, err := fsnotify.NewWatcher()
 	if err != nil {
 		return nil, fmt.Errorf("init fsnotify: %w", err)
@@ -56,6 +62,7 @@ func newFSWatcher(projectDir string, hub *sseHub) (*fsWatcher, error) {
 		hub:            hub,
 		w:              w,
 		debounceWindow: 250 * time.Millisecond,
+		onChange:       onChange,
 	}, nil
 }
 
@@ -117,6 +124,13 @@ func (fw *fsWatcher) fire() {
 // re-fetches from the REST API on signal — keeps the watcher's job
 // trivial and the data path single-sourced.
 func (fw *fsWatcher) publish() {
+	// Rebuild any registered caches BEFORE notifying the dashboard.
+	// The dashboard re-fetches on the SSE ping; we want the cache
+	// warm by the time the request lands so the fetch doesn't race
+	// the refresh.
+	if fw.onChange != nil {
+		fw.onChange()
+	}
 	now := time.Now().Format(time.RFC3339)
 	fw.hub.Publish(sseEvent{
 		Name: "harness-changed",

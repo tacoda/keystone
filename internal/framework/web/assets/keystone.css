@@ -245,3 +245,65 @@ dt { color: var(--muted); font-size: 0.85rem; }
   font-size: 0.78rem;
 }
 .footer code { color: var(--fg-2); }
+
+/* ---------- async loading cues (htmx) ---------- */
+
+/* Per-form inline indicator. The htmx-indicator class is hidden by
+   default, fades in once htmx sets .htmx-request on the triggering
+   element. Pairs with `hx-indicator="#some-spinner"` in markup. */
+.htmx-indicator {
+  display: inline-block;
+  opacity: 0;
+  transition: opacity 120ms ease-in;
+}
+.htmx-request .htmx-indicator,
+.htmx-request.htmx-indicator {
+  opacity: 1;
+}
+
+/* Inline dot-spinner glyph the markup can drop in next to a label:
+   <span class="spinner" aria-hidden="true"></span> running… */
+.spinner {
+  display: inline-block;
+  width: 0.75em;
+  height: 0.75em;
+  margin-right: 0.4em;
+  border: 2px solid color-mix(in srgb, var(--muted) 60%, transparent);
+  border-top-color: var(--amber);
+  border-radius: 50%;
+  vertical-align: -0.12em;
+  animation: spin 0.7s linear infinite;
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Disabled-during-request buttons. Paired with
+   `hx-disabled-elt="this"` (or `find button`) — htmx adds the
+   `disabled` attribute for the lifetime of the in-flight request. */
+button:disabled,
+input[type="submit"]:disabled {
+  opacity: 0.55;
+  cursor: progress;
+}
+
+/* Top-of-page request strip. Visible whenever ANY htmx request is in
+   flight (body gets .htmx-request from hx-ext SSE). Subtle by design
+   — confirms the click registered without yanking focus. */
+body.htmx-request::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--amber), transparent);
+  background-size: 200% 100%;
+  animation: progress-strip 1.2s linear infinite;
+  z-index: 9999;
+  pointer-events: none;
+}
+@keyframes progress-strip {
+  from { background-position: 200% 0; }
+  to   { background-position: -200% 0; }
+}

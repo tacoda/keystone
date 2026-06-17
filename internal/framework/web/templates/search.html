@@ -5,10 +5,11 @@
   <h1>search</h1>
   <p class="muted">Substring match across every primitive's id, description, globs, traces, and body. Ranked: id &gt; description &gt; globs/traces &gt; body.</p>
 
-  <form class="filters" hx-get="/web/fragments/search" hx-trigger="input changed delay:200ms, change" hx-target="#search-results" hx-swap="innerHTML">
+  <form class="filters" hx-get="/web/fragments/search" hx-trigger="input changed delay:200ms, change" hx-target="#search-results" hx-swap="innerHTML" hx-indicator="#sspin">
     <label style="flex:1; min-width: 300px;">query
       <input type="text" name="q" value="{{.Query}}" placeholder="e.g. spec, billing, severity, /review">
     </label>
+    <span id="sspin" class="htmx-indicator muted" style="align-self:flex-end;"><span class="spinner" aria-hidden="true"></span>searching…</span>
   </form>
 
   <div id="search-results">

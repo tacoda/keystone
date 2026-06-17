@@ -27,7 +27,7 @@
         <td><a href="/primitives/{{.Kind}}/{{.ID}}">{{.ID}}</a></td>
         <td class="muted">{{.Reason}}</td>
         <td>
-          <form hx-post="/web/actions/primitives/delete" hx-confirm="Prune {{.Kind}}/{{.ID}}? Deletes {{.Path}}.">
+          <form hx-post="/web/actions/primitives/delete" hx-confirm="Prune {{.Kind}}/{{.ID}}? Deletes {{.Path}}." hx-disabled-elt="find button">
             <input type="hidden" name="kind" value="{{.Kind}}">
             <input type="hidden" name="id" value="{{.ID}}">
             <button class="btn ghost danger" type="submit">prune</button>

@@ -112,7 +112,7 @@ func (s *server) collectMetrics(ctx context.Context) (*MetricsSnapshot, error) {
 		}
 	}
 
-	sources, _ := sourceList(ctx, s.projectDir)
+	sources, _ := s.sourceList(ctx)
 
 	return &MetricsSnapshot{
 		ProjectDir:     s.projectDir,

@@ -6,8 +6,9 @@
     <h1 style="margin: 0;">external sources</h1>
     <div style="display: flex; gap: 0.5rem;">
       <a href="/sources/new" class="btn">+ add source</a>
-      <form hx-post="/web/actions/sources/verify-all" hx-target="#sources-table" hx-swap="outerHTML" style="display: inline;">
+      <form hx-post="/web/actions/sources/verify-all" hx-target="#sources-table" hx-swap="outerHTML" hx-indicator="#vspin" hx-disabled-elt="find button" style="display: inline;">
         <button class="btn ghost" type="submit">verify integrations</button>
+        <span id="vspin" class="htmx-indicator muted"><span class="spinner" aria-hidden="true"></span>probing all sources…</span>
       </form>
     </div>
   </div>

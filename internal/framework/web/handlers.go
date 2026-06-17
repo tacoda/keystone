@@ -64,7 +64,7 @@ func (s *server) handleHome(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	sources, _ := sourceList(r.Context(), s.projectDir)
+	sources, _ := s.sourceList(r.Context())
 	s.render(w, "home.html", map[string]any{
 		"ProjectDir":     s.projectDir,
 		"PrimitiveCount": len(idx.Primitives),
@@ -125,7 +125,7 @@ func (s *server) handlePrimitivesDetail(w http.ResponseWriter, r *http.Request) 
 }
 
 func (s *server) handleSources(w http.ResponseWriter, r *http.Request) {
-	entries, err := sourceList(r.Context(), s.projectDir)
+	entries, err := s.sourceList(r.Context())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -142,7 +142,7 @@ func (s *server) handleSourceDetail(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		return
 	}
-	entries, err := sourceList(r.Context(), s.projectDir)
+	entries, err := s.sourceList(r.Context())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
