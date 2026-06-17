@@ -1551,8 +1551,8 @@ flowchart LR
   cli --> tree
   mcp --> tree
   web --> tree
-  agent -. .mcp.json .-> mcp
-  browser -. http://localhost:4773 .-> web
+  agent -.->|.mcp.json| mcp
+  browser -.->|localhost:4773| web
   classDef green fill:#13161d,stroke:#4ade9a,color:#4ade9a
   classDef blue fill:#13161d,stroke:#60a5fa,color:#60a5fa
   classDef orange fill:#13161d,stroke:#f59e0b,color:#f59e0b
