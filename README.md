@@ -153,7 +153,7 @@ project wins by default; nested policies refine outer; `strict`
 declarations lock items absolutely.
 
 ```bash
-keystone policy add tacoda/tacoda-org@v1.1.0
+keystone policy add tacoda/tacoda-org@v2.0.0
 ```
 
 ## After install, the tools are optional
