@@ -2020,7 +2020,7 @@ For reasoning, see `corpus/domain/refunds.md`.</pre>
     <div class="page-head">
       <div class="crumb">Capabilities · Project layer</div>
       <h1>Guides — rules the agent is always under.</h1>
-      <p class="tagline">Guides are short, dense, ambient. Every guide loads on session start; the agent operates under every regular RULE, GOLDEN RULE, and IRON LAW at all times. The drift sensor checks the diff against them at implementation exit.</p>
+      <p class="tagline">Guides are short, dense, ambient. Every guide loads on session start; the agent operates under every regular RULE, GOLDEN RULE, and IRON LAW at all times. The drift sensor checks the diff against them at implementation exit. <strong>Guide conceptually wraps <code>rule</code></strong> (the agent escape hatch) with richer structure — severity tiers, globs, paired corpus — but no file-level projection; the wrap is INDEX-level, surfaced to the agent via <code>.keystone/INDEX.json</code>.</p>
     </div>
 
     <div class="definition">
@@ -2182,7 +2182,7 @@ For reasoning, see `corpus/domain/refunds.md`.</pre>
     <div class="page-head">
       <div class="crumb">Capabilities · Project layer</div>
       <h1>Sensors — automated checks at phase boundaries.</h1>
-      <p class="tagline">Twenty-three sensors fire from inside lifecycle actions. Each declares <code>kind: sensor</code> + <code>sensor_kind: computational | inferential</code>, plus trigger, inputs, exit condition, and output. Verify gates the commit; review spawns four reviewers in parallel on the diff; audit sweeps the whole codebase.</p>
+      <p class="tagline">Twenty-three sensors fire from inside lifecycle actions. Each declares <code>kind: sensor</code> + <code>sensor_kind: computational | inferential</code>, plus trigger, inputs, exit condition, and output. Verify gates the commit; review spawns four reviewers in parallel on the diff; audit sweeps the whole codebase. <strong>Sensor conceptually wraps <code>rule</code></strong> (the agent escape hatch) with sensor-specific structure — kind, trigger, exit condition — but no file-level projection; the wrap is INDEX-level.</p>
     </div>
 
     <div class="definition">
@@ -2495,9 +2495,9 @@ flowchart LR
   <!-- ===================== PLAYBOOKS ===================== -->
   <section id="playbooks" class="page" data-title="Playbooks">
     <div class="page-head">
-      <div class="crumb">Capabilities · Workflow <span style="color:var(--accent3);">· New in 0.12.0</span></div>
+      <div class="crumb">Framework primitive · Wraps skill</div>
       <h1>Playbooks — ordered chains of actions.</h1>
-      <p class="tagline">A playbook is a markdown file that runs an ordered set of <a href="#actions">actions</a>. Invoke the same way as any action: say "run <code>&lt;playbook&gt;</code>" and the agent reads the file and walks the steps.</p>
+      <p class="tagline">A playbook is a markdown file that runs an ordered set of <a href="#actions">actions</a>. Invoke the same way as any action: say "run <code>&lt;playbook&gt;</code>" and the agent reads the file and walks the steps. <strong>Playbook wraps <code>skill</code></strong> — <code>keystone project</code> writes <code>.claude/skills/&lt;id&gt;/SKILL.md</code> so the host agent surfaces it natively.</p>
     </div>
 
     <div class="definition">
@@ -2523,9 +2523,9 @@ flowchart LR
   <!-- ===================== ACTIONS ===================== -->
   <section id="actions" class="page" data-title="Actions">
     <div class="page-head">
-      <div class="crumb">Capabilities · Reference catalog</div>
+      <div class="crumb">Framework primitive · Wraps command</div>
       <h1>Actions — agent-agnostic units of lifecycle work.</h1>
-      <p class="tagline">Every action is one markdown file in <code>.keystone/harness/actions/&lt;id&gt;/ACTION.md</code>. The agent reads its menu file on session start, finds the action in the bulleted list, follows the link, and executes the playbook. In 2.0.1, every action also projects to a <code>/keystone:&lt;id&gt;</code> skill so it can be invoked as a slash command in the host agent. Chained into <a href="#playbooks">playbooks</a> like <code>task</code>; individually invokable too.</p>
+      <p class="tagline">Every action is one markdown file in <code>.keystone/harness/actions/&lt;id&gt;/ACTION.md</code>. The agent reads its menu file on session start, finds the action in the bulleted list, follows the link, and executes the playbook. <strong>Action wraps <code>command</code></strong> — <code>keystone project</code> writes <code>.claude/commands/&lt;id&gt;.md</code> so any host that reads slash-commands picks it up. (Playbooks project to <code>.claude/skills/</code>; actions project to <code>.claude/commands/</code>.) Chained into <a href="#playbooks">playbooks</a> like <code>task</code>; individually invokable too.</p>
     </div>
 
     <div class="section-label">Invocation</div>
@@ -2669,14 +2669,14 @@ flowchart LR
   <!-- ===================== AGENT PRIMITIVE: SKILLS ===================== -->
   <section id="agent-skills" class="page" data-title="Skills">
     <div class="page-head">
-      <div class="crumb">Agent primitive · Slash commands</div>
+      <div class="crumb">Agent primitive · Escape hatch (use playbook instead)</div>
       <h1>Skills — agent slash commands.</h1>
-      <p class="tagline">An agent primitive at <code>.keystone/harness/skills/&lt;id&gt;/SKILL.md</code>. Projects to <code>.claude/skills/&lt;id&gt;/SKILL.md</code> on <code>keystone project</code>; the host agent surfaces it as <code>/keystone:&lt;id&gt;</code>. Frontmatter: <code>kind: skill</code>, <code>id</code>, <code>description</code>, plus <code>triggers:</code> (natural-language phrases that invoke the skill).</p>
+      <p class="tagline">An agent primitive at <code>.keystone/harness/skills/&lt;id&gt;/SKILL.md</code>. Projects to <code>.claude/skills/&lt;id&gt;/SKILL.md</code> on <code>keystone project</code>; the host agent surfaces it as <code>/keystone:&lt;id&gt;</code>. Frontmatter: <code>kind: skill</code>, <code>id</code>, <code>description</code>, plus <code>triggers:</code> (natural-language phrases that invoke the skill). Most slash-command-shaped behavior should be authored as a framework <a href="#playbooks">playbook</a>, which projects to the same <code>.claude/skills/&lt;id&gt;/SKILL.md</code> path; direct <code>skill</code> authoring is the raw host-native escape hatch.</p>
     </div>
 
     <div class="definition">
-      <p><strong>13 bundled skills in 2.0.1.</strong> Every existing action is now also a skill, so it can be invoked as a slash command: <code>/keystone:bootstrap</code>, <code>/keystone:spec</code>, <code>/keystone:orient</code>, <code>/keystone:check-drift</code>, <code>/keystone:verify</code>, <code>/keystone:review</code>, <code>/keystone:debt-review</code>, <code>/keystone:mode</code>, <code>/keystone:learn</code>, <code>/keystone:synthesize</code>, <code>/keystone:audit</code>, <code>/keystone:index</code>, plus the family of <code>/keystone:new-{guide,corpus,sensor,action,playbook,adapter,policy}</code> generators.</p>
-      <p>The skill is the surface (a thin slash-command projection); the underlying action playbook is the substance. The skill body delegates to the action.</p>
+      <p><strong>Authoring path.</strong> Prefer authoring at the framework layer as a <a href="#playbooks">playbook</a>; <code>keystone project</code> compiles it down to a host-native <code>.claude/skills/&lt;id&gt;/SKILL.md</code>. Direct <code>skill</code> authoring is the escape hatch when you need to hand-write the raw host primitive (e.g., a behavior with no useful framework-layer abstraction).</p>
+      <p>Same-id collision between a framework playbook and a hand-authored skill under <code>harness/skills/</code> is a lint error — both would project to the same <code>.claude/skills/&lt;id&gt;/</code> path.</p>
     </div>
 
 <pre class="code"><span class="comment"># Frontmatter for a skill primitive</span>
@@ -2694,9 +2694,9 @@ triggers:
   <!-- ===================== AGENT PRIMITIVE: SUBAGENTS ===================== -->
   <section id="subagents" class="page" data-title="Subagents">
     <div class="page-head">
-      <div class="crumb">Agent primitive · Delegated sessions</div>
+      <div class="crumb">Agent primitive · Escape hatch (use persona instead)</div>
       <h1>Subagents — delegated agent sessions.</h1>
-      <p class="tagline">An agent primitive at <code>.keystone/harness/subagents/&lt;id&gt;.md</code>. Projects to <code>.claude/agents/&lt;id&gt;.md</code> on <code>keystone project</code>. Frontmatter requires <code>tools:</code> — the toolset the subagent inherits. Used to spawn the four review reviewers in parallel on capable adapters.</p>
+      <p class="tagline">An agent primitive at <code>.keystone/harness/subagents/&lt;id&gt;.md</code>. Projects to <code>.claude/agents/&lt;id&gt;.md</code> on <code>keystone project</code>. Frontmatter requires <code>tools:</code> — the toolset the subagent inherits. Used to spawn the four review reviewers in parallel on capable adapters. <a href="#personas">Persona</a> is the encouraged framework wrapper for this kind; the raw <code>subagent</code> primitive is the escape hatch for hand-authored host-native files.</p>
     </div>
 
 <pre class="code"><span class="comment"># Frontmatter for a subagent primitive</span>
@@ -2714,9 +2714,9 @@ tools:
   <!-- ===================== AGENT PRIMITIVE: COMMANDS ===================== -->
   <section id="commands" class="page" data-title="Commands">
     <div class="page-head">
-      <div class="crumb">Agent primitive · Argument-shaped invocations</div>
+      <div class="crumb">Agent primitive · Escape hatch (use action instead)</div>
       <h1>Commands — argument-shaped invocations.</h1>
-      <p class="tagline">An agent primitive at <code>.keystone/harness/commands/&lt;id&gt;.md</code>. Projects to <code>.claude/commands/&lt;id&gt;.md</code> on <code>keystone project</code>. Frontmatter requires <code>args:</code> — the argument schema the host agent uses to shape the invocation.</p>
+      <p class="tagline">An agent primitive at <code>.keystone/harness/commands/&lt;id&gt;.md</code>. Projects to <code>.claude/commands/&lt;id&gt;.md</code> on <code>keystone project</code>. Frontmatter requires <code>args:</code> — the argument schema the host agent uses to shape the invocation. Authoring via the framework <a href="#actions"><code>action</code></a> kind is the encouraged path; <code>command</code> is the raw host primitive escape hatch.</p>
     </div>
 
 <pre class="code"><span class="comment"># Frontmatter for a command primitive</span>
@@ -2731,26 +2731,31 @@ args:
 ---</pre>
   </section>
 
-  <!-- ===================== AGENT PRIMITIVE: PERSONAS ===================== -->
+  <!-- ===================== FRAMEWORK PRIMITIVE: PERSONAS ===================== -->
   <section id="personas" class="page" data-title="Personas">
     <div class="page-head">
-      <div class="crumb">Agent primitive · Voice + posture overlay</div>
-      <h1>Personas — voice and posture overlays. <span style="color:var(--accent3);">· New in 2.0</span></h1>
-      <p class="tagline">A new agent primitive in 2.0 at <code>.keystone/harness/personas/&lt;id&gt;.md</code>. A system-prompt overlay the main agent <em>adopts</em> — not a delegated subagent. Use to shift the agent's posture for a session (skeptical reviewer, deep-listener spec author, terse pair-programmer).</p>
+      <div class="crumb">Framework primitive · Wraps subagent</div>
+      <h1>Personas — framework wrappers for subagents. <span style="color:var(--accent3);">· New in 2.0</span></h1>
+      <p class="tagline">A framework primitive at <code>.keystone/harness/personas/&lt;id&gt;.md</code> that projects to <code>.claude/agents/&lt;id&gt;.md</code> on <code>keystone project</code>. Frontmatter requires <code>tools:</code> (mirrors <a href="#subagents">subagent</a>). Personas are the encouraged path for authoring posture-flavored delegated agents — <code>security-reviewer</code>, <code>code-reviewer</code>, <code>planner</code>, <code>verifier</code>, <code>auditor</code>. The raw <a href="#subagents"><code>subagent</code></a> kind remains as an escape hatch.</p>
     </div>
 
     <div class="definition">
-      <p><strong>Adopted, not delegated.</strong> Personas differ from subagents: a subagent is a separate session with its own context; a persona is a voice the main session adopts. The persona layers over the existing ambient rules — the rules still hold, the posture changes.</p>
+      <p><strong>Wraps subagent.</strong> Persona is the canonical authoring surface; <code>keystone project</code> compiles it down to <code>.claude/agents/&lt;id&gt;.md</code>, which the host agent spawns as a delegated session with its own context and tools allow-list. Same-id collision with a hand-authored subagent under <code>harness/subagents/</code> is a lint error — both would project to the same <code>.claude/agents/&lt;id&gt;.md</code> path.</p>
+      <p><strong>Posture-flavored.</strong> Each persona carries a sharpened system prompt for the role (skeptical reviewer, security-first auditor, terse planner). The shipped <code>security-reviewer</code> is the canonical example; every seeded action ships a paired persona (auditor, planner, code-reviewer, verifier, etc.) — grep the harness for examples.</p>
     </div>
 
-<pre class="code"><span class="prompt">$</span> keystone new persona deep-listener
-  wrote: .keystone/harness/personas/deep-listener.md</pre>
+<pre class="code"><span class="prompt">$</span> keystone new persona security-reviewer
+  wrote: .keystone/harness/personas/security-reviewer.md</pre>
 
 <pre class="code"><span class="comment"># Frontmatter for a persona primitive</span>
 ---
 kind: persona
-id: deep-listener
-description: Spec-phase posture — ask clarifying questions before proposing
+id: security-reviewer
+description: Security-focused PR reviewer that hunts OWASP-top-10 patterns and unsafe defaults.
+tools:
+  - Read
+  - Grep
+  - Glob
 ---</pre>
   </section>
 
