@@ -80,13 +80,23 @@ Walks the harness primitive locations and writes a single descriptor
 artifact at <keystone-dir>/INDEX.json (one level above the harness
 root — `+"`.keystone/INDEX.json`"+` for the default layout):
 
-  <harness-root>/guides/**/*.md          → kind: rule
-  <harness-root>/actions/*.md            → kind: action
-  <harness-root>/corpus/**/*.md          → kind: corpus
-  <harness-root>/sensors/*.md            → kind: sensor
-  <harness-root>/skills/<id>/SKILL.md    → kind: skill
-  <harness-root>/agents/*.md             → kind: subagent
-  <harness-root>/commands/*.md           → kind: command
+  Framework wrappers:
+    <harness-root>/guides/**/*.md          → kind: guide      (wraps rule)
+    <harness-root>/sensors/*.md            → kind: sensor     (wraps rule)
+    <harness-root>/actions/*.md            → kind: action     (wraps command)
+    <harness-root>/playbooks/*.md          → kind: playbook   (wraps skill)
+    <harness-root>/personas/*.md           → kind: persona    (wraps subagent)
+
+  Framework standalone:
+    <harness-root>/corpus/**/*.md          → kind: corpus
+    <harness-root>/evals/<id>/EVAL.md      → kind: eval
+    <harness-root>/sources/*.md            → kind: source
+
+  Agent escape hatches:
+    <harness-root>/rules/*.md              → kind: rule
+    <harness-root>/skills/<id>/SKILL.md    → kind: skill
+    <harness-root>/agents/*.md             → kind: subagent
+    <harness-root>/commands/*.md           → kind: command
 
 Files without canonical frontmatter are skipped (pre-migration state);
 files whose frontmatter fails to parse are reported on stderr and the

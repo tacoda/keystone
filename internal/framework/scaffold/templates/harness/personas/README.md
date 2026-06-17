@@ -1,26 +1,31 @@
 # Personas
 
-Agent abstraction. A persona is the identity the agent ADOPTS — a
-system-prompt overlay that shapes how it presents and what posture
-it takes. Different from `subagent` (a delegated agent invoked via
-the Task tool); the persona configures the main agent in-place.
+Framework abstraction. A persona is a posture-flavored subagent —
+the framework wrapper for the agent-side `subagent` primitive, the
+same way `action` wraps `command` and `playbook` wraps `skill`.
+Authoring a persona is the encouraged path; raw subagents under
+`agents/` remain as the escape hatch.
 
 ## File shape
 
 ```markdown
 ---
 kind: persona
-id: senior-reviewer
-description: Senior staff engineer doing rigorous PR review.
-triggers:
-  - review as senior
-  - rigorous review
+id: security-reviewer
+description: Security-focused PR reviewer that hunts OWASP-top-10 patterns.
+tools:
+  - Read
+  - Grep
 ---
 
-# Senior reviewer persona
+# Security reviewer
 
-System-prompt overlay the agent reads when the user invokes this
-persona. Describe voice, posture, what to prioritize, what to ignore.
+System prompt the persona runs under as a delegated subagent. Posture,
+priorities, what to ignore, what it returns.
+
+## Output
+
+Markdown table of findings: file:line, severity, issue, suggested fix.
 ```
 
 ## Authoring
@@ -31,15 +36,22 @@ keystone new persona <id>
 
 Scaffolds `personas/<id>.md` with canonical frontmatter.
 
+## Projection
+
+`keystone project` copies the canonical source verbatim to
+`.claude/agents/<id>.md` — the host-native subagent path. The
+`agents/` escape hatch projects to the same target, so a persona id
+and a subagent id cannot collide; the linter rejects.
+
 ## When to reach for it
 
-- Switching the agent into a different stance for one task
-  (security-paranoid, customer-support-empathy, performance-obsessed).
-- Capturing a recurring "act like X" prompt as a first-class
-  primitive — discoverable in INDEX.json, callable by name.
+- Capturing a recurring reviewer posture as a first-class primitive
+  (security-reviewer, perf-reviewer, accessibility-reviewer).
+- Any case where you'd otherwise hand-author a Claude Code subagent
+  with a curated tool allow-list.
 
 Do NOT use persona to ship safety / compliance rules — those belong
 in `guides/` so they're always loaded, not opt-in. Persona is for
-voice + posture, not for non-negotiables.
+delegated review/inspection postures.
 
 See [`docs/ports/primitive.md`](../../../docs/ports/primitive.md).

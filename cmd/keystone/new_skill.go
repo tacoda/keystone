@@ -62,6 +62,11 @@ the run will check.
 
 // runNewPersona handles `keystone new persona <id>`. Scaffolds
 // <harness>/personas/<id>.md with canonical primitive frontmatter.
+//
+// Persona is the framework wrapper for subagent: it projects to
+// .claude/agents/<id>.md via `keystone project`. Same id as a
+// hand-written subagent under harness/agents/ is a lint error
+// (projection collision).
 func runNewPersona(args []string) error {
 	projectDir, harnessRoot, remaining, err := parseDirAndHarnessRoot(args)
 	if err != nil {
@@ -79,16 +84,23 @@ func runNewPersona(args []string) error {
 	body := fmt.Sprintf(`---
 kind: persona
 id: %s
-description: TODO — one-line description of the posture / voice this persona adopts.
-triggers:
-  - act as %s
+description: TODO — one-line description of what this persona reviews / does.
+tools:
+  - Read
+  - Grep
 ---
 
 # %s
 
-System-prompt overlay. Describe the persona's voice, what it prioritizes,
-what it ignores, and the posture it should take in the session.
-`, id, id, id)
+System prompt this persona runs under as a delegated subagent. Describe
+posture, what it prioritizes, what it ignores, and what it returns.
+Keep it focused — one job per persona.
+
+## Output
+
+What the persona returns to its caller. Be explicit about format
+(JSON, markdown table, plain text) and length expectations.
+`, id, id)
 	return writeSkeleton(path, body)
 }
 

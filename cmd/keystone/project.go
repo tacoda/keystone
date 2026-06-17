@@ -78,9 +78,18 @@ Usage:
 Walks every primitive under .keystone/harness/ and writes host-native
 projections from the canonical sources:
 
-  kind: skill    → .claude/skills/<id>/SKILL.md
-  kind: subagent → .claude/agents/<id>.md
-  kind: command  → .claude/commands/<id>.md
+  Framework wrappers (encouraged authoring path):
+    kind: persona  → .claude/agents/<id>.md
+    kind: action   → .claude/commands/<id>.md
+    kind: playbook → .claude/skills/<id>/SKILL.md
+
+  Agent escape hatches (raw host-native, same targets):
+    kind: subagent → .claude/agents/<id>.md
+    kind: command  → .claude/commands/<id>.md
+    kind: skill    → .claude/skills/<id>/SKILL.md
+
+A framework wrapper and its agent counterpart share the same .claude/
+target by design — collisions on the same id are caught by ` + "`keystone lint`" + `.
 
 Disk-name normalization: ids containing ":" (canonical namespace
 separator) are rewritten to "-" in the projection filename; the

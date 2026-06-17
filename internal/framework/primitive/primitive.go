@@ -16,15 +16,31 @@ package primitive
 // triggered templated workflows; skills cover agent-self-triggered
 // patterns. A future MCP-only catalog can live outside this contract.
 //
-// Two-layer taxonomy:
+// Two-layer taxonomy. Framework primitives wrap agent primitives the
+// way an ORM wraps SQL: the framework primitive is the canonical
+// authoring surface, the agent primitive is the raw host-native
+// equivalent kept as an escape hatch.
 //
-//   Framework abstractions (encouraged by default — keystone's own
-//   structured primitives):
-//     - guide, corpus, sensor, action, playbook
+//   Framework abstractions (encouraged by default — author here):
+//     wrappers       guide, sensor (→ rule)
+//                    action        (→ command)
+//                    playbook      (→ skill)
+//                    persona       (→ subagent)
+//     standalone     corpus, eval, source
 //
-//   Agent abstractions (host-native primitives kept first-class so
-//   users can extend what the host already understands):
-//     - rule, skill, subagent, command
+//   Agent abstractions (raw host-native passthrough — escape hatches):
+//     rule, skill, subagent, command
+//
+// Wrap mechanics:
+//
+//   - persona/action/playbook compile to a host-native file under
+//     .claude/ via `keystone project`. The framework primitive owns
+//     the target path; collisions with same-id agent primitives are
+//     lint errors.
+//   - guide/sensor are conceptual wrappers — they share the agent's
+//     "rule" semantics but carry richer structure (severity, globs,
+//     paired corpus, sensor kind). No file projection; the agent
+//     reads them via INDEX.json.
 //
 // Both layers share the same canonical frontmatter shape and land in
 // the same INDEX.json. The distinction is *conceptual* — what each
@@ -32,27 +48,30 @@ package primitive
 type Kind string
 
 const (
-	// Framework abstractions.
-	KindGuide    Kind = "guide"
-	KindCorpus   Kind = "corpus"
-	KindSensor   Kind = "sensor"
-	KindAction   Kind = "action"
-	KindPlaybook Kind = "playbook"
-	KindEval     Kind = "eval"
-	KindSource   Kind = "source"
+	// Framework abstractions — wrappers.
+	KindGuide    Kind = "guide"    // wraps rule (conceptual)
+	KindSensor   Kind = "sensor"   // wraps rule (conceptual)
+	KindAction   Kind = "action"   // wraps command (projection)
+	KindPlaybook Kind = "playbook" // wraps skill   (projection)
+	KindPersona  Kind = "persona"  // wraps subagent (projection)
 
-	// Agent abstractions.
+	// Framework abstractions — standalone.
+	KindCorpus Kind = "corpus"
+	KindEval   Kind = "eval"
+	KindSource Kind = "source"
+
+	// Agent abstractions — escape hatches.
 	KindRule     Kind = "rule"
 	KindSkill    Kind = "skill"
 	KindSubagent Kind = "subagent"
 	KindCommand  Kind = "command"
-	KindPersona  Kind = "persona"
 )
 
 // KnownKinds is the closed set the indexer and linter validate against.
 var KnownKinds = []Kind{
-	KindGuide, KindCorpus, KindSensor, KindAction, KindPlaybook, KindEval, KindSource,
-	KindRule, KindSkill, KindSubagent, KindCommand, KindPersona,
+	KindGuide, KindSensor, KindAction, KindPlaybook, KindPersona,
+	KindCorpus, KindEval, KindSource,
+	KindRule, KindSkill, KindSubagent, KindCommand,
 }
 
 // Severity is the rule authority level. Replaces H2-tier parsing.

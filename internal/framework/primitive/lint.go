@@ -44,6 +44,10 @@ func (f Finding) String() string {
 //   - empty `globs: []` list (omit the key instead)
 //   - skill missing triggers
 //   - subagent missing tools
+//   - persona missing tools (persona wraps subagent — same constraint)
+//   - projection-target collision: a framework wrapper and its agent
+//     escape hatch sharing the same id project to the same .claude/
+//     path (e.g. persona `foo` and subagent `foo` both → .claude/agents/foo.md)
 //   - sensor_kind set to a value other than computational | inferential
 //
 // Warnings:
@@ -80,6 +84,8 @@ func Lint(primitives []Primitive) []Finding {
 	for _, p := range primitives {
 		findings = append(findings, lintOne(p, known, exists)...)
 	}
+
+	findings = append(findings, lintProjectionCollisions(primitives)...)
 
 	sort.SliceStable(findings, func(i, j int) bool {
 		if findings[i].Severity != findings[j].Severity {
@@ -126,6 +132,10 @@ func lintOne(p Primitive, known map[Kind]bool, exists map[string]bool) []Finding
 	case KindSubagent:
 		if len(p.Tools) == 0 {
 			add(FindingError, "subagent missing `tools:` — declare the tool allow-list explicitly")
+		}
+	case KindPersona:
+		if len(p.Tools) == 0 {
+			add(FindingError, "persona missing `tools:` — persona wraps subagent; declare the tool allow-list explicitly")
 		}
 	}
 
@@ -195,6 +205,58 @@ func badIDChars(id string) string {
 		return ""
 	}
 	return string(bad)
+}
+
+// lintProjectionCollisions reports two or more primitives that would
+// project to the same .claude/ target path. Framework wrappers
+// (persona/action/playbook) intentionally share projection targets
+// with their agent counterparts (subagent/command/skill); the author
+// must pick one authoring layer per id.
+func lintProjectionCollisions(primitives []Primitive) []Finding {
+	type ref struct {
+		kind string
+		id   string
+		path string
+	}
+	byTarget := map[string][]ref{}
+	for _, p := range primitives {
+		target := ProjectionRelPath(p)
+		if target == "" {
+			continue
+		}
+		byTarget[target] = append(byTarget[target], ref{kind: p.Kind, id: p.ID, path: p.Path})
+	}
+
+	var out []Finding
+	targets := make([]string, 0, len(byTarget))
+	for t := range byTarget {
+		targets = append(targets, t)
+	}
+	sort.Strings(targets)
+	for _, t := range targets {
+		refs := byTarget[t]
+		if len(refs) < 2 {
+			continue
+		}
+		// Build a "kind=id at path" list for the message; emit one
+		// finding per colliding primitive so each path surfaces.
+		summary := make([]string, 0, len(refs))
+		for _, r := range refs {
+			summary = append(summary, fmt.Sprintf("%s=%s", r.kind, r.id))
+		}
+		sort.Strings(summary)
+		msg := fmt.Sprintf("projection collision at %s — %s map to the same target; rename one (framework wrappers share targets with their agent escape hatches by design)", t, strings.Join(summary, " + "))
+		for _, r := range refs {
+			out = append(out, Finding{
+				Severity: FindingError,
+				Path:     r.path,
+				Kind:     r.kind,
+				ID:       r.id,
+				Message:  msg,
+			})
+		}
+	}
+	return out
 }
 
 // HasErrors reports whether any finding is severity=error.

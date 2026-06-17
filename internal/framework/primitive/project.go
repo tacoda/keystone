@@ -24,13 +24,25 @@ type ProjectionResult struct {
 //
 // Projection targets at 2.0:
 //
-//   kind: skill    → .claude/skills/<id>/SKILL.md
-//   kind: subagent → .claude/agents/<id>.md
-//   kind: command  → .claude/commands/<id>.md
+//   Framework wrappers (encouraged authoring path):
+//     kind: persona  → .claude/agents/<id>.md
+//     kind: action   → .claude/commands/<id>.md
+//     kind: playbook → .claude/skills/<id>/SKILL.md
 //
-// Other kinds (guide, corpus, sensor, action, playbook, rule) have no
+//   Agent escape hatches (raw host-native, same targets):
+//     kind: subagent → .claude/agents/<id>.md
+//     kind: command  → .claude/commands/<id>.md
+//     kind: skill    → .claude/skills/<id>/SKILL.md
+//
+// A framework wrapper and its agent counterpart project to the same
+// host path. Collisions on the same id are caught by the linter — the
+// authoring layer must be unambiguous.
+//
+// Other kinds (guide, corpus, sensor, eval, source, rule) have no
 // host-native projection at this layer — the agent reads them through
-// .keystone/INDEX.json + the canonical paths directly.
+// .keystone/INDEX.json + the canonical paths directly. Guide and
+// sensor are conceptual rule wrappers; the wrap is INDEX-level, not
+// file-level.
 //
 // Disk-name normalization: ids containing `:` (canonical namespace
 // separator) are rewritten to `-` for filesystem safety. The
@@ -67,11 +79,20 @@ func Project(projectDir string, primitives []Primitive) ([]ProjectionResult, err
 func ProjectionRelPath(p Primitive) string {
 	diskID := strings.ReplaceAll(p.ID, ":", "-")
 	switch Kind(p.Kind) {
+	// Agent escape hatches.
 	case KindSkill:
 		return filepath.Join(".claude", "skills", diskID, "SKILL.md")
 	case KindSubagent:
 		return filepath.Join(".claude", "agents", diskID+".md")
 	case KindCommand:
+		return filepath.Join(".claude", "commands", diskID+".md")
+	// Framework wrappers (project to the same host paths as their
+	// agent counterparts; collisions on same id are a lint error).
+	case KindPlaybook:
+		return filepath.Join(".claude", "skills", diskID, "SKILL.md")
+	case KindPersona:
+		return filepath.Join(".claude", "agents", diskID+".md")
+	case KindAction:
 		return filepath.Join(".claude", "commands", diskID+".md")
 	}
 	return ""

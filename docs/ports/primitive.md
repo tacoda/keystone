@@ -5,6 +5,39 @@
 
 Every other port doc in this directory — `guide.md`, `action.md`, `corpus.md`, `sensor.md`, `adapter.md`, `playbook.md` — refines this shape with its own required fields and activation rules. When those docs and this one disagree on a shared field, **this doc wins**.
 
+## Wrap doctrine
+
+Primitives split into two layers. Framework primitives wrap agent
+primitives the way an ORM wraps SQL: the framework primitive is the
+canonical authoring surface, the agent primitive is the raw
+host-native equivalent kept as an escape hatch.
+
+| Framework (encouraged) | wraps    | Agent (escape hatch)    | Projection target              |
+| ---------------------- | -------- | ----------------------- | ------------------------------ |
+| `guide`                | conceptual | `rule`                | (none — INDEX-only)            |
+| `sensor`               | conceptual | `rule`                | (none — INDEX-only)            |
+| `action`               | projects | `command`               | `.claude/commands/<id>.md`     |
+| `playbook`             | projects | `skill`                 | `.claude/skills/<id>/SKILL.md` |
+| `persona`              | projects | `subagent`              | `.claude/agents/<id>.md`       |
+
+Framework standalone (no wrap relationship): `corpus`, `eval`, `source`.
+
+Mechanics:
+
+- **Projection wraps** (`action`, `playbook`, `persona`) compile to
+  the same host path as their agent counterpart via `keystone
+  project`. Same id on both layers → projection collision → lint
+  error. Pick one authoring layer per id.
+- **Conceptual wraps** (`guide`, `sensor`) share the agent's "rule"
+  semantics but carry richer structure (severity, globs, paired
+  corpus, sensor kind). The wrap is INDEX-level; no file projection.
+  The agent reads them as authoritative-rule via `INDEX.json`.
+
+Default authoring path is the framework primitive (`keystone new
+persona`, not `keystone new subagent`). Reach for the agent escape
+hatch only when extending what the host already understands and the
+framework shape adds nothing.
+
 ## Why a shared shape
 
 `keystone-mcp` already factors harness content into typed primitives (`ContextDoc{kind, id, severity, source, …}`) and exposes a *descriptor* surface (`keystone_list_topics`) separate from body content. The agent reads descriptors; bodies stay cold until needed.
@@ -20,7 +53,7 @@ Every harness file ships this frontmatter block. Per-kind required and optional 
 ```yaml
 ---
 # Identity (every kind)
-kind: rule | action | corpus | skill | subagent | command | sensor
+kind: guide | sensor | action | playbook | persona | corpus | eval | source | rule | skill | subagent | command
 id: <stable-slug>            # globally unique within kind; survives renames
 description: <one line>      # surfaced in INDEX.json; agent reads this without opening the body
 
@@ -80,10 +113,12 @@ Bodies are unchanged markdown. Only the descriptor surface differs per kind.
 | Kind       | Required frontmatter                                                                           | Default activation                                              |
 | ---------- | ---------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
 | `rule`     | `kind`, `id`, `description`, `severity`                                                        | Ambient by topic + `globs` filter (see `guide.md`)              |
-| `action`   | `kind`, `id`, `description`, `phase`                                                           | Invoked by name                                                 |
+| `action`   | `kind`, `id`, `description`, `phase`                                                           | Invoked by name (projects to `command`)                         |
 | `corpus`   | `kind`, `id`, `description`                                                                    | On-demand via a guide's `traces`                                |
 | `skill`    | `kind`, `id`, `description`, `triggers`                                                        | Host-native trigger match (e.g. Claude Code skill auto-load)    |
+| `playbook` | `kind`, `id`, `description`, `triggers`                                                        | Host-native trigger match (projects to `skill`)                 |
 | `subagent` | `kind`, `id`, `description`, `tools`                                                           | Invoked by name via host's Task/agent mechanism                 |
+| `persona`  | `kind`, `id`, `description`, `tools`                                                           | Invoked by name via host's Task/agent mechanism (projects to `subagent`) |
 | `command`  | `kind`, `id`, `description`, `args`                                                            | Host slash-command invocation                                   |
 | `sensor`   | `kind`, `id`, `description`, `phase`                                                           | Per-phase, narrowed by `globs`                                  |
 

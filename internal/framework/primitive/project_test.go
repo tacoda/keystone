@@ -11,16 +11,22 @@ func TestProjectionRelPath(t *testing.T) {
 		kind, id string
 		want     string
 	}{
+		// Agent escape hatches.
 		{"skill", "keystone:index", filepath.Join(".claude", "skills", "keystone-index", "SKILL.md")},
 		{"subagent", "code-reviewer", filepath.Join(".claude", "agents", "code-reviewer.md")},
 		{"command", "review", filepath.Join(".claude", "commands", "review.md")},
+		// Framework wrappers project to the same host paths as their
+		// agent counterparts.
+		{"persona", "security-reviewer", filepath.Join(".claude", "agents", "security-reviewer.md")},
+		{"action", "verify", filepath.Join(".claude", "commands", "verify.md")},
+		{"playbook", "task", filepath.Join(".claude", "skills", "task", "SKILL.md")},
 		// Kinds without a projection target return "".
 		{"guide", "process/spec", ""},
 		{"corpus", "corpus/process/spec", ""},
 		{"sensor", "build", ""},
-		{"action", "verify", ""},
-		{"playbook", "task", ""},
 		{"rule", "no-secrets", ""},
+		{"eval", "demo", ""},
+		{"source", "docs", ""},
 	}
 	for _, c := range cases {
 		p := Primitive{Frontmatter: Frontmatter{Kind: c.kind, ID: c.id}}
@@ -36,9 +42,14 @@ func TestProject_CopiesSkillSubagentCommand(t *testing.T) {
 
 	// Seed canonical sources.
 	files := map[string]string{
+		// Agent escape hatches.
 		".keystone/harness/skills/keystone-demo/SKILL.md": "---\nkind: skill\nid: keystone:demo\ndescription: x\ntriggers: [demo]\n---\nbody\n",
 		".keystone/harness/agents/reviewer.md":            "---\nkind: subagent\nid: reviewer\ndescription: x\ntools: [Read]\n---\nbody\n",
 		".keystone/harness/commands/check.md":             "---\nkind: command\nid: check\ndescription: x\n---\nbody\n",
+		// Framework wrappers.
+		".keystone/harness/personas/security.md":  "---\nkind: persona\nid: security\ndescription: x\ntools: [Read]\n---\nbody\n",
+		".keystone/harness/actions/ship.md":       "---\nkind: action\nid: ship\ndescription: x\n---\nbody\n",
+		".keystone/harness/playbooks/onboard.md":  "---\nkind: playbook\nid: onboard\ndescription: x\ntriggers: [onboard]\n---\nbody\n",
 		// Source that has no projection target — should be ignored without error.
 		".keystone/harness/guides/process/spec.md": "---\nkind: guide\nid: process/spec\ndescription: x\n---\nbody\n",
 	}
@@ -78,6 +89,15 @@ func TestProject_CopiesSkillSubagentCommand(t *testing.T) {
 	}
 	if !wrote[".claude/commands/check.md"] {
 		t.Error("expected command projection")
+	}
+	if !wrote[".claude/agents/security.md"] {
+		t.Error("expected persona projection")
+	}
+	if !wrote[".claude/commands/ship.md"] {
+		t.Error("expected action projection")
+	}
+	if !wrote[".claude/skills/onboard/SKILL.md"] {
+		t.Error("expected playbook projection")
 	}
 	if skipped == 0 {
 		t.Error("expected at least one skipped (the guide)")

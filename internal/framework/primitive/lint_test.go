@@ -74,6 +74,39 @@ func TestLint_SubagentRequiresTools(t *testing.T) {
 	}
 }
 
+func TestLint_PersonaRequiresTools(t *testing.T) {
+	ps := []Primitive{
+		{Frontmatter: Frontmatter{Kind: "persona", ID: "security-reviewer", Description: "d"}},
+	}
+	fs := Lint(ps)
+	if !find(t, fs, FindingError, "persona missing `tools:`") {
+		t.Errorf("expected persona-missing-tools error, got %v", fs)
+	}
+}
+
+func TestLint_ProjectionCollision(t *testing.T) {
+	// persona id == subagent id → both project to .claude/agents/foo.md.
+	ps := []Primitive{
+		{Frontmatter: Frontmatter{Kind: "persona", ID: "foo", Description: "d", Tools: []string{"Read"}}, Path: "harness/personas/foo.md"},
+		{Frontmatter: Frontmatter{Kind: "subagent", ID: "foo", Description: "d", Tools: []string{"Read"}}, Path: "harness/agents/foo.md"},
+	}
+	fs := Lint(ps)
+	if !find(t, fs, FindingError, "projection collision") {
+		t.Errorf("expected projection-collision error, got %v", fs)
+	}
+}
+
+func TestLint_NoCollision_DifferentIds(t *testing.T) {
+	ps := []Primitive{
+		{Frontmatter: Frontmatter{Kind: "persona", ID: "security-reviewer", Description: "d", Tools: []string{"Read"}}, Path: "harness/personas/security-reviewer.md"},
+		{Frontmatter: Frontmatter{Kind: "subagent", ID: "code-reviewer", Description: "d", Tools: []string{"Read"}}, Path: "harness/agents/code-reviewer.md"},
+	}
+	fs := Lint(ps)
+	if HasErrors(fs) {
+		t.Errorf("expected no errors with distinct ids, got %v", fs)
+	}
+}
+
 func TestLint_TracesResolve(t *testing.T) {
 	ps := []Primitive{
 		{Frontmatter: Frontmatter{Kind: "guide", ID: "p/x", Description: "d", Traces: []string{"corpus/p/x", "corpus/missing"}}},

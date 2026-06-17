@@ -34,11 +34,13 @@ func runNew(args []string) error {
 		return runNewAction(args[1:])
 	case "playbook":
 		return runNewPlaybook(args[1:])
+	case "persona":
+		return runNewPersona(args[1:])
 	case "eval":
 		return runNewEval(args[1:])
 	case "source":
 		return runNewSource(args[1:])
-	// Agent abstractions (extension surface for host-native primitives).
+	// Agent abstractions (escape hatches — raw host-native primitives).
 	case "rule":
 		return runNewRule(args[1:])
 	case "skill":
@@ -47,8 +49,6 @@ func runNew(args []string) error {
 		return runNewSubagent(args[1:])
 	case "command":
 		return runNewCommand(args[1:])
-	case "persona":
-		return runNewPersona(args[1:])
 	// Higher-level concepts.
 	case "adapter":
 		return runNewAdapter(args[1:])
@@ -57,7 +57,7 @@ func runNew(args []string) error {
 	case "plugin":
 		return fmt.Errorf("`keystone new plugin` was renamed to `keystone new policy` in 2.0")
 	default:
-		return fmt.Errorf("unknown kind %q (framework: guide, corpus, sensor, action, playbook, eval, source; agent: rule, skill, subagent, command, persona; other: adapter, policy)", args[0])
+		return fmt.Errorf("unknown kind %q (framework: guide, corpus, sensor, action, playbook, persona, eval, source; agent: rule, skill, subagent, command; other: adapter, policy)", args[0])
 	}
 }
 
@@ -67,13 +67,16 @@ func printNewUsage(w *os.File) {
 Usage:
 
   Framework abstractions (encouraged by default):
-    keystone new guide <topic>/<name>     [--dir <path>]
+    keystone new guide <topic>/<name>     [--dir <path>]   # wraps rule
     keystone new corpus <topic>/<name>    [--dir <path>]
-    keystone new sensor <name>            [--dir <path>] [--kind <k>]
-    keystone new action <name>            [--dir <path>]
-    keystone new playbook <name>          [--dir <path>]
+    keystone new sensor <name>            [--dir <path>] [--kind <k>]   # wraps rule
+    keystone new action <name>            [--dir <path>]   # wraps command
+    keystone new playbook <name>          [--dir <path>]   # wraps skill
+    keystone new persona <id>             [--dir <path>]   # wraps subagent
+    keystone new eval <id>                [--dir <path>]
+    keystone new source <id>              [--dir <path>]
 
-  Agent abstractions (extend host-native primitives):
+  Agent abstractions (escape hatches — raw host-native primitives):
     keystone new rule <id>                [--dir <path>]
     keystone new skill <id>               [--dir <path>]
     keystone new subagent <id>            [--dir <path>]
@@ -95,6 +98,8 @@ Examples:
                                            # + paired .keystone/harness/corpus/process/release.md
   keystone new sensor lint --kind computational
   keystone new playbook ship
+  keystone new persona security-reviewer   # .keystone/harness/personas/security-reviewer.md
+                                           # projects to .claude/agents/security-reviewer.md
   keystone new rule no-secrets             # agent-side rule at .keystone/harness/rules/no-secrets.md
   keystone new skill keystone:index        # .keystone/harness/skills/keystone-index/SKILL.md
   keystone new subagent cavecrew-reviewer  # .keystone/harness/agents/cavecrew-reviewer.md
