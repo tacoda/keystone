@@ -2,6 +2,26 @@
 
 All notable changes to keystone are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); the project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.3] — 2026-06-17
+
+Patch release. Aligns the policy install-time guard with the
+framework-wraps-agent doctrine that landed in 2.0.2.
+
+### Changed
+
+- Policy install-time error message + comments now match the actual
+  guard. Rejected set is the agent escape hatches only — `rules`,
+  `skills`, `agents`, `commands`. Every framework primitive,
+  including `personas`, ships fine. The pre-2.0.2 message still
+  listed persona among the rejected set and named only an outdated
+  subset of framework primitives as shippable.
+
+### Added
+
+- `TestInstall_AllowsFrameworkWrappers` — pins the policy contract by
+  installing a fixture with every framework primitive type and
+  confirming the vendored persona file lands.
+
 ## [2.0.2] — 2026-06-17
 
 Patch release. Adds the framework-wraps-agent doctrine — persona is
