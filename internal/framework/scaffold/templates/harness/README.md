@@ -2,24 +2,50 @@
 
 This is the project's harness — a body of engineering knowledge, rules, sensors, and self-update flywheels, plus per-agent bindings. The harness is project-owned: every file under `harness/` is versioned with the code and may be edited freely by the team.
 
-## Four components
+## Twelve primitive kinds in two layers
 
-| Component | What it is | Activation |
+Every authored file declares a `kind:` in its frontmatter. Twelve kinds, split into a **framework layer** (the encouraged authoring surface — keystone's own structured primitives) and an **agent layer** (raw host-native primitives kept as escape hatches). Framework primitives **wrap** their agent counterparts the way an ORM wraps SQL: the framework primitive is canonical; `keystone project` compiles projection-wrappers down to host-native files under `.claude/`.
+
+### Framework layer (author here)
+
+| Kind | What it is | Wraps | Projection | Activation |
+|---|---|---|---|---|
+| [`guide`](guides/README.md) | **Rules** the agent must follow. Severity-tiered. | `rule` (conceptual — INDEX-only, no file projection) | — | **Ambient** — always loaded. Enforced by the [drift sensor](sensors/drift.md). |
+| [`sensor`](sensors/README.md) | **Automated checks** — lint, type-check, test, build, drift, the review reviewers. Fire inside actions at phase boundaries. | `rule` (conceptual) | — | Invoked |
+| [`action`](actions/README.md) | One unit of lifecycle work — `spec`, `verify`, `review`. The substance of a slash command. | `command` | `.claude/commands/<id>.md` | Invoked |
+| [`playbook`](playbooks/README.md) | Ordered chain of actions — the default `task` playbook walks the lifecycle. Surface for slash commands. | `skill` | `.claude/skills/<id>/SKILL.md` | Invoked via host slash command |
+| [`persona`](personas/README.md) | Posture-flavored delegated agent — `security-reviewer`, `code-reviewer`, `planner`, `verifier`. Frontmatter requires `tools:`. | `subagent` | `.claude/agents/<id>.md` | Invoked by name via the host's Task / agent mechanism |
+| [`corpus`](corpus/README.md) | **Informational reference** the agent reads when rules aren't enough. | (standalone) | — | **On-demand** — reached via a guide's `traces:` |
+| [`eval`](evals/README.md) | Fixture-based regression test for the harness. Static + sensor levels. | (standalone) | — | Invoked via `keystone eval run` |
+| [`source`](sources/README.md) | External knowledge source declared in `.keystone/context.json` for stage-3 resolution. | (standalone) | — | On-demand via MCP / dashboard |
+
+### Agent layer (escape hatches)
+
+Raw host-native primitives. Use only when you need to extend what the host already understands and the framework wrapper isn't a fit.
+
+| Kind | Wrapped by | Notes |
 |---|---|---|
-| [`guides/`](guides/README.md) | **Rules** — what the agent must *do* (and not do). Process phases, plus rule extracts from corpus. | **Ambient — always loaded.** Enforced by the [drift sensor](sensors/drift.md) |
-| [`corpus/`](corpus/README.md) | **Informational reference** — what the agent should *know* when the rules are not enough. Principles, idioms, domain, state. | **On-demand only.** Loaded when the agent needs reasoning, history, or anti-patterns beyond what the rules say |
-| [`sensors/`](sensors/README.md) | **Automated checks** — lint, type-check, test, build, drift, coverage, etc. Fire inside lifecycle actions at phase boundaries. | Invoked |
-| Flywheels — [`learning/`](learning/README.md) + [`archive/`](archive/README.md) | **Self-update** — additive (Learning) and subtractive (Pruning) loops that keep corpus and guides current. | Invoked via **synthesize** and **audit** |
+| `rule` (in `rules/`) | `guide`, `sensor` | Plain host-native rule directive. No severity tiering. |
+| `skill` (in `skills/`) | `playbook` | Hand-authored host slash command. |
+| `subagent` (in `agents/`) | `persona` | Hand-authored host delegated session. |
+| `command` (in `commands/`) | `action` | Hand-authored argument-shaped invocation. |
 
-Plus [`adapters/<agent>/`](adapters/README.md) — per-agent bindings that lift rules into the agent's rules surface (`.cursor/rules/*.mdc`, `CLAUDE.md` directives, etc.) and wire each lifecycle action to that agent's invocation mechanism.
+A framework wrapper and its agent counterpart share the same `.claude/` target. Same-id collisions are caught by `keystone lint`.
 
-### Extension: [`plugins/`](../keystone.json) — vendored shared content
+### Self-update + per-agent bindings
 
-A fifth layer that holds **plugins** — distributable harness content fetched from git and vendored read-only into `harness/plugins/<name>/`. Each plugin has the same shape as the project layer: it can ship `guides/`, `corpus/`, `sensors/`, `actions/`, `playbooks/`, and `adapters/`. Use plugins for anything reusable across projects — org/team standards, security policy, release gates, vendor allowlists, language-idiom bundles, compliance regimes.
+| Path | Role |
+|---|---|
+| [`learning/`](learning/README.md) + [`archive/`](archive/README.md) | **Flywheels** — additive (Learning) and subtractive (Pruning) loops that keep corpus + guides current. Driven by **synthesize** + **audit**. |
+| [`adapters/<agent>/`](adapters/README.md) | Per-agent bindings that wire lifecycle actions into that agent's invocation mechanism. |
 
-Plugins are declared in `keystone.json` and pinned by version. The project layer always wins by default; among plugins, outer plugins (shallower in the `keystone.json` tree) win over plugins nested inside them. A plugin can mark an item `strict` to lock it absolutely — nothing else (project or other plugin) can override a strict item.
+### Extension: [`policies/`](../keystone.json) — vendored shared governance
 
-Plugins are markdown, vendored, gitignored, hash-verified, and drift-reset by `keystone verify`. No central service.
+The distribution layer. **Policies** are distributable harness content fetched from git and vendored read-only into `harness/policies/<name>/`. Each policy has the same shape as the project layer — every primitive kind above is shippable. Use policies for anything reusable across projects: org / team baselines, security policy, release gates, vendor allowlists, language-idiom bundles, compliance regimes.
+
+Policies are declared in `keystone.json` and pinned by version. The project layer always wins by default; among policies, deeper-nested policies refine shallower ones. A policy can mark an item `strict` to lock it absolutely — nothing else (project or other policy) can override a strict item.
+
+Policies are markdown, vendored, gitignored, hash-verified, and drift-reset by `keystone verify`. No central service.
 
 ## Corpus vs. guides — the split
 
@@ -55,7 +81,7 @@ The harness is written for projects that already have these in place. Missing on
 
 ## Activation
 
-- **Ambient** — loaded by context. No invocation needed. **Guides** (from the project and from any installed plugins under `plugins/<name>/guides/`) are ambient.
+- **Ambient** — loaded by context. No invocation needed. **Guides** (from the project and from any installed policies under `policies/<name>/guides/`) are ambient.
 - **On-demand** — loaded by the agent when needed. **Corpus** is on-demand: each corpus file is reached via the forward-link in its paired guide, or via explicit reference in process.
 - **Invoked** — a lifecycle action. Either agent-invoked inside a process phase, or user-invoked for heavyweight operations. (Sensors fire from inside actions.)
 
