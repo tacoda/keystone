@@ -93,7 +93,7 @@ func runInit(args []string, assets fs.FS) error {
 		fmt.Fprintf(os.Stdout, "▸ %s/ already exists — writing only new files (existing files are kept; pass --reset to rewrite)\n", harnessDest)
 	}
 
-	fmt.Fprintf(os.Stdout, "▸ installing corpus to %s\n", harnessDest)
+	fmt.Fprintf(os.Stdout, "▸ installing harness to %s\n", harnessDest)
 	if err := copyTree(assets, "harness", harnessDest, mode); err != nil {
 		return fmt.Errorf("copy harness: %w", err)
 	}
