@@ -1,7 +1,8 @@
 ---
-last_reconciled: <YYYY-MM-DD>
+kind: corpus
+id: corpus/state/CODEBASE_STATE
+description: 'Empirical map of this codebase.'
 ---
-
 # Codebase State
 
 > **Template.** The **bootstrap** action will populate this from your project. Until then, fill in by hand or run bootstrap.

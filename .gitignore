@@ -1,3 +1,6 @@
 /keystone
 /keystone.exe
 /dist/
+
+# IDE / local tooling
+/.serena/

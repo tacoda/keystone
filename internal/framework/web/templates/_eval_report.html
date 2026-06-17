@@ -1,0 +1,37 @@
+{{define "_eval_report.html"}}
+<div class="card" style="background: var(--bg-3); margin-top: 0.75rem;">
+  <div style="display: flex; gap: 0.6rem; align-items: center; flex-wrap: wrap;">
+    <span class="pill ok">passed {{.Report.Passed}}</span>
+    {{if .Report.Failed}}<span class="pill bad">failed {{.Report.Failed}}</span>{{end}}
+    {{if .Report.Skipped}}<span class="pill warn">skipped {{.Report.Skipped}}</span>{{end}}
+    <span class="muted" style="font-size: 0.78rem; margin-left: auto;">{{.Report.StartedAt}} → {{.Report.EndedAt}}</span>
+  </div>
+
+  <table style="margin-top: 0.85rem;">
+    <thead><tr><th>id</th><th>level</th><th>status</th><th>duration</th></tr></thead>
+    <tbody>
+      {{range .Report.Results}}
+      <tr>
+        <td><a href="/primitives/eval/{{.ID}}">{{.ID}}</a></td>
+        <td><code>{{.Level}}</code></td>
+        <td>
+          {{if eq .Status "pass"}}<span class="pill ok">pass</span>
+          {{else if eq .Status "fail"}}<span class="pill bad">fail</span>
+          {{else}}<span class="pill warn">skip</span>{{end}}
+        </td>
+        <td class="muted">{{.Duration}}</td>
+      </tr>
+      {{end}}
+    </tbody>
+  </table>
+
+  {{range .Report.Results}}
+  <details style="margin-top: 0.75rem;">
+    <summary><code>{{.ID}}</code> — {{.Level}}</summary>
+    <ul style="margin: 0.5rem 0 0;">
+      {{range .Messages}}<li>{{.}}</li>{{end}}
+    </ul>
+  </details>
+  {{end}}
+</div>
+{{end}}

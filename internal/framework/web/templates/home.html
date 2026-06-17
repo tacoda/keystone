@@ -1,0 +1,39 @@
+{{define "home.html"}}{{template "layout" .}}{{end}}
+{{define "title"}}home{{end}}
+{{define "main"}}
+<section class="card">
+  <h1>harness</h1>
+  <p class="muted">{{.PrimitiveCount}} primitive(s) — generated {{.Generated}}</p>
+  <table class="kinds">
+    <thead><tr><th>kind</th><th>count</th></tr></thead>
+    <tbody>
+      {{range $k, $ids := .ByKind}}
+      <tr>
+        <td><a href="/primitives?kind={{$k}}">{{$k}}</a></td>
+        <td>{{len $ids}}</td>
+      </tr>
+      {{end}}
+    </tbody>
+  </table>
+</section>
+
+<section class="card">
+  <h2>external sources</h2>
+  {{if .Sources}}
+  <table>
+    <thead><tr><th>name</th><th>type</th><th>health</th></tr></thead>
+    <tbody>
+      {{range .Sources}}
+      <tr>
+        <td><a href="/sources/{{.Name}}">{{.Name}}</a></td>
+        <td><code>{{.Type}}</code></td>
+        <td>{{if .Health.OK}}<span class="ok">ready</span>{{else}}<span class="bad">{{.Health.Status}}</span>{{end}}</td>
+      </tr>
+      {{end}}
+    </tbody>
+  </table>
+  {{else}}
+  <p class="muted">no sources configured — add some to <code>.keystone/context.json</code> to enable stage 3 of the resolution flow.</p>
+  {{end}}
+</section>
+{{end}}

@@ -7,7 +7,7 @@ Loaded ambient; enforced by the [drift sensor](../../sensors/drift.md). The corp
 
 **Every mutation across a network must be idempotent — by design, by key, or by reconciliation.** The network is unreliable; retries are unavoidable; non-idempotent retries are a defect. If an operation cannot be made idempotent, the architecture has to absorb the cost — exactly-once protocols, two-phase commits, manual reconciliation — and pay it explicitly, not silently.
 
-## GOLDEN RULES
+## GOLDEN PATH
 
 - **Aim for idempotent operations by construction.** "Set X to value V" is idempotent; "increment X by 1" is not. Where the design admits a choice, prefer the idempotent shape.
 - **Aim for client-generated idempotency keys at every retry boundary.** Server-generated keys cannot deduplicate retries — by the time the server generates one, it has already done the work.

@@ -1,3 +1,8 @@
+---
+kind: guide
+id: process/sensitive-files
+description: 'Files the agent must never read into context, write to, or commit.'
+---
 # Sensitive Files
 
 Files the agent must never read into context, write to, or commit. Enforced at every phase — sensitive-file access is never a side effect of the task.
@@ -29,7 +34,7 @@ Default patterns the harness treats as sensitive. The **bootstrap** action augme
 - **If the agent needs a value from a sensitive file** (a hostname, a username, but not the secret), ask the user.
 - **A `.env.example` ships with placeholders, never real values.** Bootstrap diffs `.env.example` against `.env` to confirm.
 
-## GOLDEN RULES
+## GOLDEN PATH
 
 - **Aim to keep secrets out of the repo entirely.** Workload identity (IAM roles, OIDC) beats long-lived keys. See [[secrets-management]].
 - **Aim to fail loud on accidental sensitive reads.** If an agent action somehow pulls one in, the next sensor pass should flag it — drift sensor and commit-message sensor both consult this list.

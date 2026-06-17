@@ -1,7 +1,8 @@
 ---
-last_reconciled: <YYYY-MM-DD>
+kind: corpus
+id: corpus/state/GLOBS_INDEX
+description: 'Reverse-index of every guide that declares globs: in its frontmatter.'
 ---
-
 # Globs Index
 
 > **Generated.** The **bootstrap** action seeds this from the region map in `CODEBASE_STATE.md`; **synthesize** and **audit** regenerate it whenever a guide's `globs:` frontmatter changes. **Do not edit by hand** — manual edits are overwritten on the next regeneration.

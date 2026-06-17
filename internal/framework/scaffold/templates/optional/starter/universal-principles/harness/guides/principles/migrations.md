@@ -2,7 +2,7 @@
 
 The non-negotiable and strongly-preferred rules from [`corpus/principles/migrations.md`](../../corpus/principles/migrations.md). Loaded ambient; enforced at planning and review.
 
-## GOLDEN RULES
+## GOLDEN PATH
 
 - **Aim to never ship a destructive schema change in the same release as code that depends on the old shape.** Expand first; contract only after every reader and writer is on the new shape.
 - **Aim to never run a migration whose rollback path has not been written down.** "Drop the table" is not a rollback; restoring from backup is. If the rollback is restore-from-backup, that is the rollback — write it down and confirm the backup exists. See [[rollback]].

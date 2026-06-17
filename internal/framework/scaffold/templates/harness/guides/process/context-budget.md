@@ -1,3 +1,8 @@
+---
+kind: guide
+id: process/context-budget
+description: 'How much the agent reads, runs, or spawns before making a change.'
+---
 # Context Budget
 
 How much the agent reads, runs, or spawns before making a change. Counterpart to [[scoping]] (the *output* size limit); this is the *input* size limit.
@@ -10,7 +15,7 @@ How much the agent reads, runs, or spawns before making a change. Counterpart to
 - **Bound exploratory reads to a budget.** Default: ≤10 files for orientation, ≤5 files for a follow-up. Bootstrap may tune.
 - **Use sensors before reading.** The state-region sensor exists so the agent does not re-derive what is already recorded.
 
-## GOLDEN RULES
+## GOLDEN PATH
 
 - **Aim to defer subagent spawning until the problem is well-shaped.** A subagent is most useful when the parent has a clear question; spawning to "explore" usually returns a worse summary than a direct read. See [[subagent-trust]].
 - **Aim to compact long sessions at phase boundaries.** A 90-minute session that crosses phases has earned a context reset. See `planning.md` session hygiene.

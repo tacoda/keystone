@@ -1,0 +1,32 @@
+{{define "inbox.html"}}{{template "layout" .}}{{end}}
+{{define "title"}}learning inbox{{end}}
+{{define "main"}}
+<section class="card">
+  <h1>learning inbox</h1>
+  <p class="muted">Candidates the agent captured via the <code>learn</code> action. Accept marks them <code>status: accepted</code> for the next <code>synthesize</code> run; reject deletes outright.</p>
+
+  {{if .Items}}
+  {{range .Items}}
+  <div class="card" style="background: var(--bg-3); margin-top: 0.85rem;">
+    <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+      <code style="color: var(--fg);">{{.Name}}</code>
+      {{if .Status}}<span class="pill" style="background:var(--bg);">{{.Status}}</span>{{end}}
+      <span style="margin-left: auto; display: flex; gap: 0.4rem;">
+        <form hx-post="/web/actions/inbox/accept" style="display:inline;">
+          <input type="hidden" name="name" value="{{.Name}}">
+          <button class="btn" type="submit">accept</button>
+        </form>
+        <form hx-post="/web/actions/inbox/reject" hx-confirm="Delete {{.Name}}?" style="display:inline;">
+          <input type="hidden" name="name" value="{{.Name}}">
+          <button class="btn ghost danger" type="submit">reject</button>
+        </form>
+      </span>
+    </div>
+    <pre class="body" style="margin-top: 0.6rem;">{{.Body}}</pre>
+  </div>
+  {{end}}
+  {{else}}
+  <p class="muted">no candidates in <code>.keystone/harness/learning/inbox/</code>. The <code>learn</code> action writes here when the agent meets a gap.</p>
+  {{end}}
+</section>
+{{end}}

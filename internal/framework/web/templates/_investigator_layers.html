@@ -1,0 +1,44 @@
+{{define "_investigator_layers.html"}}
+{{range .Inventory.Layers}}
+<section style="margin-top: 1.25rem; padding-top: 1rem; border-top: 1px solid var(--line);">
+  <h2 style="margin-bottom: 0.25rem;">
+    {{if eq .Kind "project"}}
+      <span class="pill ok">project</span>
+    {{else}}
+      <span class="pill" style="background: rgba(167,139,250,0.13); color: var(--purple);">policy</span>
+    {{end}}
+    {{.Name}}
+    {{if .Version}}<span class="muted" style="font-weight: 400; font-size: 0.85rem;">@ {{.Version}}</span>{{end}}
+  </h2>
+  {{if .Source}}<p class="muted" style="font-size: 0.85rem; margin: 0;"><code>{{.Source}}</code></p>{{end}}
+
+  {{if .Strict}}
+  <p style="margin: 0.5rem 0;">
+    <span class="muted">strict locks:</span>
+    {{range $port, $items := .Strict}}
+      {{range $items}}
+        <span class="pill warn" style="margin-right: 0.25rem;">{{$port}}/{{.}}</span>
+      {{end}}
+    {{end}}
+  </p>
+  {{end}}
+
+  {{if .Primitives}}
+  <table>
+    <thead><tr><th>kind</th><th>id</th><th>description</th></tr></thead>
+    <tbody>
+      {{range .Primitives}}
+      <tr>
+        <td><span class="kind-tag {{.Kind}}">{{.Kind}}</span></td>
+        <td><a href="/primitives/{{.Kind}}/{{.ID}}">{{.ID}}</a></td>
+        <td class="muted">{{.Description}}</td>
+      </tr>
+      {{end}}
+    </tbody>
+  </table>
+  {{else}}
+  <p class="muted" style="font-style: italic;">no primitives match.</p>
+  {{end}}
+</section>
+{{end}}
+{{end}}

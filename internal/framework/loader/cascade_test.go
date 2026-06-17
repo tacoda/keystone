@@ -22,12 +22,11 @@ func writeFile(t *testing.T, dir, rel string) {
 
 func TestVerify_CleanCascade(t *testing.T) {
 	dir := t.TempDir()
-	writeFile(t, dir, "harness/guides/spec.md") // project file, unrelated
+	writeFile(t, dir, ".keystone/harness/guides/spec.md") // project file, unrelated
 
 	cfg := &config.ProjectConfig{
 		Version:     config.SchemaVersion,
-		HarnessRoot: "harness",
-		Plugins: []config.PluginNode{
+		Policies: []config.PolicyNode{
 			{
 				Name:    "acme",
 				Source:  "acme/policies",
@@ -47,11 +46,11 @@ func TestVerify_CleanCascade(t *testing.T) {
 
 func TestVerify_ProjectShadowsStrict(t *testing.T) {
 	dir := t.TempDir()
-	writeFile(t, dir, "harness/guides/data-handling.md") // project shadow
+	writeFile(t, dir, ".keystone/harness/guides/data-handling.md") // project shadow
 
 	cfg := &config.ProjectConfig{
-		Version: config.SchemaVersion,
-		Plugins: []config.PluginNode{
+		Version:     config.SchemaVersion,
+		Policies: []config.PolicyNode{
 			{
 				Name:    "acme",
 				Source:  "acme/policies",
@@ -71,29 +70,29 @@ func TestVerify_ProjectShadowsStrict(t *testing.T) {
 		t.Fatalf("expected 1 violation, got %d", got)
 	}
 	v := res.Violations[0]
-	if v.Plugin != "acme" || v.Port != "guides" || v.Item != "data-handling" {
+	if v.Policy != "acme" || v.Port != "guides" || v.Item != "data-handling" {
 		t.Errorf("unexpected violation: %+v", v)
 	}
 	if v.PathContext != "acme" {
 		t.Errorf("PathContext = %q, want %q", v.PathContext, "acme")
 	}
-	if len(v.ShadowPaths) != 1 || v.ShadowPaths[0] != "harness/guides/data-handling.md" {
+	if len(v.ShadowPaths) != 1 || v.ShadowPaths[0] != ".keystone/harness/guides/data-handling.md" {
 		t.Errorf("unexpected shadow paths: %+v", v.ShadowPaths)
 	}
 }
 
-func TestVerify_NestedPluginPathContext(t *testing.T) {
+func TestVerify_NestedPolicyPathContext(t *testing.T) {
 	dir := t.TempDir()
-	writeFile(t, dir, "harness/sensors/rubocop.md")
+	writeFile(t, dir, ".keystone/harness/sensors/rubocop.md")
 
 	cfg := &config.ProjectConfig{
-		Version: config.SchemaVersion,
-		Plugins: []config.PluginNode{
+		Version:     config.SchemaVersion,
+		Policies: []config.PolicyNode{
 			{
 				Name:    "acme-org",
 				Source:  "acme/org",
 				Version: "v1",
-				Children: []config.PluginNode{
+				Children: []config.PolicyNode{
 					{
 						Name:    "acme-platform",
 						Source:  "acme/platform",
@@ -117,19 +116,19 @@ func TestVerify_NestedPluginPathContext(t *testing.T) {
 	}
 }
 
-func TestVerify_DepthGate_NestedPluginCannotShipSensors(t *testing.T) {
+func TestVerify_DepthGate_NestedPolicyCannotShipSensors(t *testing.T) {
 	dir := t.TempDir()
 	// Vendored sensor file shipped by the nested plugin.
-	writeFile(t, dir, "harness/plugins/acme-platform/sensors/rubocop.md")
+	writeFile(t, dir, ".keystone/harness/policies/acme-platform/sensors/rubocop.md")
 
 	cfg := &config.ProjectConfig{
-		Version: config.SchemaVersion,
-		Plugins: []config.PluginNode{
+		Version:     config.SchemaVersion,
+		Policies: []config.PolicyNode{
 			{
 				Name:    "acme-org",
 				Source:  "acme/org",
 				Version: "v1",
-				Children: []config.PluginNode{
+				Children: []config.PolicyNode{
 					{
 						Name:    "acme-platform",
 						Source:  "acme/platform",
@@ -141,7 +140,7 @@ func TestVerify_DepthGate_NestedPluginCannotShipSensors(t *testing.T) {
 		},
 	}
 	expected := map[string]map[string]string{
-		"acme-platform": {"harness/plugins/acme-platform/sensors/rubocop.md": "sha256:deadbeef"},
+		"acme-platform": {".keystone/harness/policies/acme-platform/sensors/rubocop.md": "sha256:deadbeef"},
 	}
 	res, err := Verify(dir, cfg, expected)
 	if err != nil {
@@ -154,8 +153,8 @@ func TestVerify_DepthGate_NestedPluginCannotShipSensors(t *testing.T) {
 		t.Fatalf("DepthViolations = %d, want 1: %+v", len(res.DepthViolations), res.DepthViolations)
 	}
 	dv := res.DepthViolations[0]
-	if dv.Plugin != "acme-platform" {
-		t.Errorf("Plugin = %q, want %q", dv.Plugin, "acme-platform")
+	if dv.Policy != "acme-platform" {
+		t.Errorf("Policy = %q, want %q", dv.Policy, "acme-platform")
 	}
 	if dv.Depth != 1 {
 		t.Errorf("Depth = %d, want 1", dv.Depth)
@@ -166,18 +165,18 @@ func TestVerify_DepthGate_NestedPluginCannotShipSensors(t *testing.T) {
 	if len(dv.StrictSensors) != 1 || dv.StrictSensors[0] != "rubocop" {
 		t.Errorf("StrictSensors = %v, want [rubocop]", dv.StrictSensors)
 	}
-	if len(dv.VendoredSensors) != 1 || dv.VendoredSensors[0] != "harness/plugins/acme-platform/sensors/rubocop.md" {
-		t.Errorf("VendoredSensors = %v, want [harness/plugins/acme-platform/sensors/rubocop.md]", dv.VendoredSensors)
+	if len(dv.VendoredSensors) != 1 || dv.VendoredSensors[0] != ".keystone/harness/policies/acme-platform/sensors/rubocop.md" {
+		t.Errorf("VendoredSensors = %v, want [harness/policies/acme-platform/sensors/rubocop.md]", dv.VendoredSensors)
 	}
 }
 
-func TestVerify_DepthGate_TopLevelPluginMayShipSensors(t *testing.T) {
+func TestVerify_DepthGate_TopLevelPolicyMayShipSensors(t *testing.T) {
 	dir := t.TempDir()
-	writeFile(t, dir, "harness/plugins/acme-org/sensors/rubocop.md")
+	writeFile(t, dir, ".keystone/harness/policies/acme-org/sensors/rubocop.md")
 
 	cfg := &config.ProjectConfig{
 		Version: config.SchemaVersion,
-		Plugins: []config.PluginNode{
+		Policies: []config.PolicyNode{
 			{
 				Name:    "acme-org",
 				Source:  "acme/org",
@@ -187,7 +186,7 @@ func TestVerify_DepthGate_TopLevelPluginMayShipSensors(t *testing.T) {
 		},
 	}
 	expected := map[string]map[string]string{
-		"acme-org": {"harness/plugins/acme-org/sensors/rubocop.md": "sha256:deadbeef"},
+		"acme-org": {".keystone/harness/policies/acme-org/sensors/rubocop.md": "sha256:deadbeef"},
 	}
 	res, err := Verify(dir, cfg, expected)
 	if err != nil {
@@ -201,21 +200,21 @@ func TestVerify_DepthGate_TopLevelPluginMayShipSensors(t *testing.T) {
 func TestVerify_RequiredGap_ProjectSatisfies(t *testing.T) {
 	dir := t.TempDir()
 	// Project ships actions/release-notes.md → satisfies tacoda-org's required claim.
-	writeFile(t, dir, "harness/actions/release-notes.md")
+	writeFile(t, dir, ".keystone/harness/actions/release-notes.md")
 	// Drop a minimal manifest for the installed plugin that declares the required item.
-	writeFile(t, dir, "harness/plugins/tacoda-org/dummy.md") // ensure dir exists
+	writeFile(t, dir, ".keystone/harness/policies/tacoda-org/dummy.md") // ensure dir exists
 	manifest := `{
   "name": "tacoda-org",
   "version": "1.0.0",
   "required": {"actions": ["release-notes"]}
 }`
-	if err := os.WriteFile(filepath.Join(dir, "harness/plugins/tacoda-org/keystone-plugin.json"), []byte(manifest), 0o644); err != nil {
+	if err := os.WriteFile(filepath.Join(dir, ".keystone/harness/policies/tacoda-org/keystone-policy.json"), []byte(manifest), 0o644); err != nil {
 		t.Fatalf("write manifest: %v", err)
 	}
 
 	cfg := &config.ProjectConfig{
 		Version: config.SchemaVersion,
-		Plugins: []config.PluginNode{
+		Policies: []config.PolicyNode{
 			{Name: "tacoda-org", Source: "tacoda/tacoda-org", Version: "v1.0.0"},
 		},
 	}
@@ -230,19 +229,19 @@ func TestVerify_RequiredGap_ProjectSatisfies(t *testing.T) {
 
 func TestVerify_RequiredGap_Missing(t *testing.T) {
 	dir := t.TempDir()
-	writeFile(t, dir, "harness/plugins/tacoda-org/dummy.md")
+	writeFile(t, dir, ".keystone/harness/policies/tacoda-org/dummy.md")
 	manifest := `{
   "name": "tacoda-org",
   "version": "1.0.0",
   "required": {"actions": ["release-notes"]}
 }`
-	if err := os.WriteFile(filepath.Join(dir, "harness/plugins/tacoda-org/keystone-plugin.json"), []byte(manifest), 0o644); err != nil {
+	if err := os.WriteFile(filepath.Join(dir, ".keystone/harness/policies/tacoda-org/keystone-policy.json"), []byte(manifest), 0o644); err != nil {
 		t.Fatalf("write manifest: %v", err)
 	}
 
 	cfg := &config.ProjectConfig{
-		Version: config.SchemaVersion,
-		Plugins: []config.PluginNode{
+		Version:     config.SchemaVersion,
+		Policies: []config.PolicyNode{
 			{Name: "tacoda-org", Source: "tacoda/tacoda-org", Version: "v1.0.0"},
 		},
 	}
@@ -260,31 +259,31 @@ func TestVerify_RequiredGap_Missing(t *testing.T) {
 		t.Fatalf("RequiredGaps = %d, want 1", len(res.RequiredGaps))
 	}
 	g := res.RequiredGaps[0]
-	if g.Plugin != "tacoda-org" || g.Port != "actions" || g.Item != "release-notes" {
+	if g.Policy != "tacoda-org" || g.Port != "actions" || g.Item != "release-notes" {
 		t.Errorf("RequiredGap = %+v, want {tacoda-org actions release-notes}", g)
 	}
 }
 
-func TestVerify_RequiredGap_OuterPluginSatisfies(t *testing.T) {
+func TestVerify_RequiredGap_OuterPolicySatisfies(t *testing.T) {
 	dir := t.TempDir()
 	// Outer plugin ships the required item; inner declares it as required.
-	writeFile(t, dir, "harness/plugins/outer/actions/release-notes.md")
-	writeFile(t, dir, "harness/plugins/inner/dummy.md")
+	writeFile(t, dir, ".keystone/harness/policies/outer/actions/release-notes.md")
+	writeFile(t, dir, ".keystone/harness/policies/inner/dummy.md")
 	innerManifest := `{
   "name": "inner",
   "version": "1.0.0",
   "required": {"actions": ["release-notes"]}
 }`
-	if err := os.WriteFile(filepath.Join(dir, "harness/plugins/inner/keystone-plugin.json"), []byte(innerManifest), 0o644); err != nil {
+	if err := os.WriteFile(filepath.Join(dir, ".keystone/harness/policies/inner/keystone-policy.json"), []byte(innerManifest), 0o644); err != nil {
 		t.Fatalf("write manifest: %v", err)
 	}
 
 	cfg := &config.ProjectConfig{
 		Version: config.SchemaVersion,
-		Plugins: []config.PluginNode{
+		Policies: []config.PolicyNode{
 			{
 				Name: "outer", Source: "x/outer", Version: "v1",
-				Children: []config.PluginNode{{Name: "inner", Source: "x/inner", Version: "v1"}},
+				Children: []config.PolicyNode{{Name: "inner", Source: "x/inner", Version: "v1"}},
 			},
 		},
 	}
@@ -301,7 +300,7 @@ func TestVerify_NoStrictItems(t *testing.T) {
 	dir := t.TempDir()
 	cfg := &config.ProjectConfig{
 		Version: config.SchemaVersion,
-		Plugins: []config.PluginNode{
+		Policies: []config.PolicyNode{
 			{Name: "acme", Source: "acme/policies", Version: "v1"},
 		},
 	}

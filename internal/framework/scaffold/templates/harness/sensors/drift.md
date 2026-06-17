@@ -1,10 +1,11 @@
 ---
-kind: computational
+kind: sensor
+id: drift
+description: 'Compares the diff (or full codebase, during audit) against loaded guide rules.'
 ---
-
 # Sensor: drift
 
-Compares the diff (or full codebase, during audit) against loaded guide rules. Finds violations across all three rule tiers — regular **RULES**, **GOLDEN RULES**, and **IRON LAWS**.
+Compares the diff (or full codebase, during audit) against loaded guide rules. Finds violations across all three rule tiers — regular **RULES**, **GOLDEN PATH**, and **IRON LAWS**.
 
 - **Trigger** — **check-drift** (implementation), **verify** (verification), **audit** (discipline).
 - **Inputs** — current diff (or file set for audit), loaded guides (`guides/principles/`, `guides/idioms/`, `guides/domain/`, `guides/process/`), and the per-guide `globs:` from frontmatter (if present) that say which paths the guide claims.

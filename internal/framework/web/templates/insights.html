@@ -1,0 +1,50 @@
+{{define "insights.html"}}{{template "layout" .}}{{end}}
+{{define "title"}}insights{{end}}
+{{define "main"}}
+<section class="card">
+  <h1>insights</h1>
+  <p class="muted">Concrete suggestions to make the harness perform better. Derived from the same data the lint, prune, and metrics views use — distilled into "what to do next."</p>
+
+  <div class="stats">
+    <div class="stat"><div class="label">high</div><div class="value bad">{{index .Counts "high"}}</div></div>
+    <div class="stat"><div class="label">medium</div><div class="value">{{index .Counts "medium"}}</div></div>
+    <div class="stat"><div class="label">low</div><div class="value muted">{{index .Counts "low"}}</div></div>
+    <div class="stat"><div class="label">total</div><div class="value amber">{{len .Insights}}</div></div>
+  </div>
+
+  {{if .Insights}}
+  {{range .Insights}}
+  <div class="card" style="background: var(--bg-3); margin-top: 0.85rem;">
+    <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+      {{if eq .Severity "high"}}<span class="pill bad">high</span>
+      {{else if eq .Severity "medium"}}<span class="pill warn">medium</span>
+      {{else}}<span class="pill" style="background:var(--bg);color:var(--muted);">low</span>{{end}}
+      <strong style="margin-left: 0.25rem;">{{.Title}}</strong>
+    </div>
+    <p style="margin-top: 0.5rem;">{{.Detail}}</p>
+    {{if .Action}}
+    <p class="muted" style="margin-top: 0.4rem;">
+      next: {{if .ActionLink}}<a href="{{.ActionLink}}">{{.Action}}</a>{{else}}<code>{{.Action}}</code>{{end}}
+    </p>
+    {{end}}
+  </div>
+  {{end}}
+  {{else}}
+  <p class="muted">no suggestions — harness is in good shape.</p>
+  {{end}}
+</section>
+
+<section class="card">
+  <h2>signals checked</h2>
+  <ul>
+    <li>lint errors / warnings</li>
+    <li>learning inbox age + size</li>
+    <li>INDEX.json freshness</li>
+    <li>external-source coverage (stage 3 availability)</li>
+    <li>orphan corpus entries (no referencing rule)</li>
+    <li>missing project skills</li>
+    <li>severity distribution across guides (iron-law concentration)</li>
+  </ul>
+  <p class="muted">More signals land as the harness collects telemetry (rule activations, sensor outcomes, contradiction-resolutions).</p>
+</section>
+{{end}}

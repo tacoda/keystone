@@ -1,3 +1,8 @@
+---
+kind: action
+id: synthesize
+description: 'Promote learning-inbox candidates into the right corpus or guide layer.'
+---
 # synthesize
 
 **Promote learning-inbox candidates into the right corpus or guide layer.** Read [`harness/learning/README.md`](learning/README.md).
@@ -26,3 +31,7 @@ For each file in `harness/learning/inbox/`:
 ## Gate
 
 Synthesize is where the harness changes shape. Show the user every promotion and removal before applying. The `globs:` value on every promoted guide is part of that diff — never silently default it. After synthesize writes to `guides/` or `GLOBS_INDEX.md`, the active session has stale rules in context — recommend a context reset.
+
+## Index refresh
+
+After every promotion / removal, run `keystone index` so `.keystone/INDEX.json` reflects the new layout. If skills, subagents, or commands changed (rare for synthesize, possible for cross-cutting promotions), also run `keystone project` so host projections track.

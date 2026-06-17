@@ -1,3 +1,8 @@
+---
+kind: guide
+id: process/release
+description: 'The phase where the change lands and is announced.'
+---
 # Release
 
 The phase where the change lands and is announced.
@@ -35,7 +40,7 @@ Conventional commits: `<type>(<scope>): <subject>`.
 | `docs` | Documentation only |
 | `chore` | Tooling, dependencies, non-code changes |
 
-GOLDEN RULES:
+GOLDEN PATH:
 
 - **Aim for one logical change per commit.** A reviewer should read the diff in one sitting and explain it back.
 - **Aim for structural changes separated from behavioral changes.** A refactor commit and a feature commit on the same diff hide each other.

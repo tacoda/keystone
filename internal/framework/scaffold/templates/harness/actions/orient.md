@@ -1,3 +1,8 @@
+---
+kind: action
+id: orient
+description: 'Enter the planning phase.'
+---
 # orient
 
 **Enter the planning phase.** Load codebase state and matching idioms for the touched region, then sketch a plan. Read [`harness/guides/process/planning.md`](guides/process/planning.md) for the full discipline.

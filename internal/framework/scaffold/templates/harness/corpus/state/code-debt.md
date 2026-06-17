@@ -1,7 +1,8 @@
 ---
-last_reconciled: <YYYY-MM-DD>
+kind: corpus
+id: corpus/state/code-debt
+description: 'Paired ledger: [harness-debt.'
 ---
-
 # Code Debt Ledger
 
 > **Template.** The **audit** action and **debt-review** action will populate this from the [code-debt sensor](sensors/code-debt.md). Until then, leave as-is or fill in by hand.

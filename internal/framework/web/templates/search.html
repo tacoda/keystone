@@ -1,0 +1,18 @@
+{{define "search.html"}}{{template "layout" .}}{{end}}
+{{define "title"}}search{{end}}
+{{define "main"}}
+<section class="card">
+  <h1>search</h1>
+  <p class="muted">Substring match across every primitive's id, description, globs, traces, and body. Ranked: id &gt; description &gt; globs/traces &gt; body.</p>
+
+  <form class="filters" hx-get="/web/fragments/search" hx-trigger="input changed delay:200ms, change" hx-target="#search-results" hx-swap="innerHTML">
+    <label style="flex:1; min-width: 300px;">query
+      <input type="text" name="q" value="{{.Query}}" placeholder="e.g. spec, billing, severity, /review">
+    </label>
+  </form>
+
+  <div id="search-results">
+    {{template "_search_results.html" .}}
+  </div>
+</section>
+{{end}}

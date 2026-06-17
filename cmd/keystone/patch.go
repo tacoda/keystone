@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/tacoda/keystone/internal/framework/config"
 	"github.com/tacoda/keystone/internal/framework/patch"
 )
 
@@ -20,10 +21,6 @@ type patchFlags struct {
 }
 
 func runPatch(args []string, assets fs.FS) error {
-	flagValue, args, err := extractHarnessRootFlag(args)
-	if err != nil {
-		return err
-	}
 	flags, err := parsePatchArgs(args)
 	if err != nil {
 		return err
@@ -33,16 +30,21 @@ func runPatch(args []string, assets fs.FS) error {
 	if err != nil {
 		return fmt.Errorf("resolve dir: %w", err)
 	}
-	harnessRoot, err := resolveHarnessRoot(absDir, flagValue)
-	if err != nil {
-		return err
-	}
+	harnessRoot := config.DefaultHarnessRoot
 	flags.harnessRoot = harnessRoot
-	if _, err := os.Stat(filepath.Join(absDir, harnessRoot)); err != nil {
-		if os.IsNotExist(err) {
-			return fmt.Errorf("no %s/ in %s — run `keystone init` first", harnessRoot, absDir)
-		}
-		return err
+	// Accept either the 2.0 layout (.keystone/harness/) or a legacy
+	// 1.x layout (harness/) as a starting point. 2.0.0 patches move
+	// the latter into place; later patches operate on the former.
+	_, errNew := os.Stat(filepath.Join(absDir, harnessRoot))
+	_, errLegacy := os.Stat(filepath.Join(absDir, "harness"))
+	if os.IsNotExist(errNew) && os.IsNotExist(errLegacy) {
+		return fmt.Errorf("no %s/ or harness/ in %s — run `keystone init` first", harnessRoot, absDir)
+	}
+	if errNew != nil && !os.IsNotExist(errNew) {
+		return errNew
+	}
+	if errLegacy != nil && !os.IsNotExist(errLegacy) {
+		return errLegacy
 	}
 
 	from := flags.from

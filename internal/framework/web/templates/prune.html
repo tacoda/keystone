@@ -1,0 +1,54 @@
+{{define "prune.html"}}{{template "layout" .}}{{end}}
+{{define "title"}}prune{{end}}
+{{define "main"}}
+<section class="card">
+  <h1>prune</h1>
+  <p class="muted">The pruning flywheel finds candidates the harness could lose without giving anything up. Each row gets a one-click prune — the underlying file is deleted, INDEX.json refreshes, the row disappears.</p>
+
+  <div class="stats">
+    <div class="stat"><div class="label">errors</div><div class="value bad">{{index .Counts "error"}}</div></div>
+    <div class="stat"><div class="label">warnings</div><div class="value">{{index .Counts "warning"}}</div></div>
+    <div class="stat"><div class="label">info</div><div class="value muted">{{index .Counts "info"}}</div></div>
+    <div class="stat"><div class="label">total</div><div class="value amber">{{len .Candidates}}</div></div>
+  </div>
+
+  {{if .Candidates}}
+  <table>
+    <thead><tr><th>severity</th><th>kind</th><th>id</th><th>reason</th><th></th></tr></thead>
+    <tbody>
+      {{range .Candidates}}
+      <tr>
+        <td>
+          {{if eq .Severity "error"}}<span class="pill bad">error</span>
+          {{else if eq .Severity "warning"}}<span class="pill warn">warn</span>
+          {{else}}<span class="pill" style="background:var(--bg-3);color:var(--muted);">info</span>{{end}}
+        </td>
+        <td><span class="kind-tag {{.Kind}}">{{.Kind}}</span></td>
+        <td><a href="/primitives/{{.Kind}}/{{.ID}}">{{.ID}}</a></td>
+        <td class="muted">{{.Reason}}</td>
+        <td>
+          <form hx-post="/web/actions/primitives/delete" hx-confirm="Prune {{.Kind}}/{{.ID}}? Deletes {{.Path}}.">
+            <input type="hidden" name="kind" value="{{.Kind}}">
+            <input type="hidden" name="id" value="{{.ID}}">
+            <button class="btn ghost danger" type="submit">prune</button>
+          </form>
+        </td>
+      </tr>
+      {{end}}
+    </tbody>
+  </table>
+  {{else}}
+  <p class="muted">no candidates — the harness is lean.</p>
+  {{end}}
+</section>
+
+<section class="card">
+  <h2>heuristics in play</h2>
+  <dl>
+    <dt>error</dt><dd>lint hard errors — missing required frontmatter, unknown kind, duplicate ids, skill without triggers, subagent without tools.</dd>
+    <dt>warning</dt><dd>lint warnings (TODO descriptions, unresolved deps/traces) and duplicate descriptions across primitives.</dd>
+    <dt>info</dt><dd>not-referenced corpus entries (no rule's <code>traces:</code> points at them), empty-body files (≤ 200 bytes).</dd>
+  </dl>
+  <p class="muted">Effectiveness signals ("rule was applied but had no impact") need session telemetry the runtime doesn't capture yet. Once those land, this page surfaces them too.</p>
+</section>
+{{end}}

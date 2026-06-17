@@ -2,7 +2,7 @@
 
 Universal, language-agnostic engineering truths. SOLID, coupling/cohesion, information hiding, separation of concerns. The kind of thing that shows up in foundational literature and stays true across decades.
 
-> **Rules extracted:** [`guides/principles/`](../../guides/principles/) — every principle here has a paired guide carrying the IRON LAW(S) and GOLDEN RULES. This directory is the informational side: reasoning, anti-patterns, references.
+> **Rules extracted:** [`guides/principles/`](../../guides/principles/) — every principle here has a paired guide carrying the IRON LAW(S) and GOLDEN PATH. This directory is the informational side: reasoning, anti-patterns, references.
 
 ## What lives here
 
@@ -95,11 +95,11 @@ What it looks like when this principle is violated.
 Books, papers, talks. Real ones — not made-up citations.
 ```
 
-The rule sections (IRON LAW(S) / GOLDEN RULES) live in the paired file under `guides/principles/`.
+The rule sections (IRON LAW(S) / GOLDEN PATH) live in the paired file under `guides/principles/`.
 
 ## Conventions
 
-- **IRON LAW** / **GOLDEN RULES** belong in the paired guide, not here.
+- **IRON LAW** / **GOLDEN PATH** belong in the paired guide, not here.
 - No `Traces to:` footer — principles are root nodes; idioms trace to *them*.
 - No `## Project-Specific Notes` — principles are universal by definition.
 

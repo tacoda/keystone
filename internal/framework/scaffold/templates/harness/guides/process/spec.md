@@ -1,3 +1,8 @@
+---
+kind: guide
+id: process/spec
+description: 'The phase that captures what needs to happen, before deciding how.'
+---
 # Spec
 
 The phase that captures *what* needs to happen, before deciding *how*. The entry point to every task.

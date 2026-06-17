@@ -7,7 +7,7 @@ Loaded ambient; enforced by the [drift sensor](../../../sensors/drift.md).
 
 **The model is not a row.** A class with only fields and accessors is not a model — it is a persistence stub. Business logic that belongs on the model must live on the model. If logic lives in a controller, helper, or "service" only because the model is anemic, that is a violation.
 
-## GOLDEN RULES
+## GOLDEN PATH
 
 - **Aim for behavior on the model.** A method like `Customer#suspend!` beats a controller doing the same steps.
 - **Aim for validation on the model.** Controllers may surface errors, but the model decides what is valid.

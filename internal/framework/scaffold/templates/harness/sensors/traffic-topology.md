@@ -1,7 +1,8 @@
 ---
-kind: computational
+kind: sensor
+id: traffic-topology
+description: 'Combines git churn + recency + business criticality into a map of where attention concentrates.'
 ---
-
 # Sensor: traffic-topology
 
 Combines git churn + recency + business criticality into a map of where attention concentrates.

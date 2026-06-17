@@ -1,7 +1,8 @@
 ---
-kind: inferential
+kind: sensor
+id: review-security
+description: 'An agent reads the diff and reports security concerns — injection, auth, secrets, unsafe deserialization, weak crypto, missing authorizat...'
 ---
-
 # Sensor: review-security
 
 An agent reads the diff and reports security concerns — injection, auth, secrets, unsafe deserialization, weak crypto, missing authorization checks, dependency risk.

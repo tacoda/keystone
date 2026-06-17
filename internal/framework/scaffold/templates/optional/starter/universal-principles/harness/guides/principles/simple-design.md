@@ -7,7 +7,7 @@ Loaded ambient; enforced by the [drift sensor](../../sensors/drift.md). The corp
 
 **Simplicity is a property of the *next* reader, not the author.** The author already understands the code; their judgment that "this is simple" is uncalibrated. Simplicity is whether someone unfamiliar with the change can follow it.
 
-## GOLDEN RULES
+## GOLDEN PATH
 
 - **Aim for code that explains itself.** A comment that translates code into English is a sign the code was not written for the reader.
 - **Aim for two commits, not one.** Tidying then behavior. Or behavior then tidying. Never both.

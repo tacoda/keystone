@@ -1,0 +1,21 @@
+{{define "sources.html"}}{{template "layout" .}}{{end}}
+{{define "title"}}sources{{end}}
+{{define "main"}}
+<section class="card">
+  <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
+    <h1 style="margin: 0;">external sources</h1>
+    <div style="display: flex; gap: 0.5rem;">
+      <a href="/sources/new" class="btn">+ add source</a>
+      <form hx-post="/web/actions/sources/verify-all" hx-target="#sources-table" hx-swap="outerHTML" style="display: inline;">
+        <button class="btn ghost" type="submit">verify integrations</button>
+      </form>
+    </div>
+  </div>
+
+  <p class="muted">Stage 3 of the runtime resolution flow. Sources live in <code>.keystone/context.json</code>. Run "verify integrations" to re-probe every adapter's health.</p>
+
+  <div id="sources-table">
+    {{template "_sources_table.html" .}}
+  </div>
+</section>
+{{end}}

@@ -7,7 +7,7 @@ Loaded ambient; enforced by the [drift sensor](../../../sensors/drift.md). The c
 
 **Main is always shippable.** Every commit on the trunk must produce an artifact that could be deployed to production right now. A commit that breaks the pipeline, breaks the trunk, or leaves the system in a half-built state is reverted, not "fixed later." The asymmetry is intentional: the cost of reverting is small; the cost of keeping main broken is paid by every subsequent commit until the fix lands.
 
-## GOLDEN RULES
+## GOLDEN PATH
 
 - **Aim to release small.** Many small releases beat few large ones — smaller blast radius, faster diagnosis, easier rollback.
 - **Aim to remove the deploy ceremony.** Deploying should be a non-event. If the team holds a meeting before a deploy, the deploy is rarer than it should be.

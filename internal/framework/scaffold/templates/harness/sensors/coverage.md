@@ -1,7 +1,8 @@
 ---
-kind: computational
+kind: sensor
+id: coverage
+description: 'Reads test coverage and updates the State layer.'
 ---
-
 # Sensor: coverage
 
 Reads test coverage and updates the State layer.

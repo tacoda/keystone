@@ -7,8 +7,8 @@ import (
 )
 
 // runNewGuide handles `keystone new guide <topic>/<name>`. Scaffolds a
-// guide and a paired corpus stub, both linking each other via the
-// harness-root-relative path convention.
+// guide (declarative markdown — the framework's term for what hosts
+// call a "rule") and a paired corpus stub.
 func runNewGuide(args []string) error {
 	projectDir, harnessRoot, remaining, err := parseDirAndHarnessRoot(args)
 	if err != nil {
@@ -28,18 +28,35 @@ func runNewGuide(args []string) error {
 	corpusPath := filepath.Join(projectDir, harnessRoot, corpusRel)
 
 	title := titleize(name)
-	guideBody := fmt.Sprintf(`# %s — rules
+	id := topic + "/" + name
+	guideBody := fmt.Sprintf(`---
+kind: guide
+id: %s
+description: TODO — one-line description of what this guide governs.
+severity: must
+traces:
+  - %s
+---
+
+# %s — rules
 
 One-sentence framing of what this guide governs.
 
-- Non-negotiable rule one.
-- Non-negotiable rule two.
-- Strongly-preferred rule three.
+## RULES
+
+- Directive one.
+- Directive two.
 
 For reasoning, see [`+"`%s`"+`](%s).
-`, title, filepath.ToSlash(corpusRel), filepath.ToSlash(corpusRel))
+`, id, "corpus/"+id, title, filepath.ToSlash(corpusRel), filepath.ToSlash(corpusRel))
 
-	corpusBody := fmt.Sprintf(`# %s — reasoning
+	corpusBody := fmt.Sprintf(`---
+kind: corpus
+id: corpus/%s
+description: TODO — one-line description of the reasoning captured here.
+---
+
+# %s — reasoning
 
 Long-form explanation of why the rules in the paired guide exist.
 
@@ -52,7 +69,7 @@ Failure modes the rules guard against.
 Source material — papers, books, posts.
 
 Back to the rules: [`+"`%s`"+`](%s).
-`, title, filepath.ToSlash(guideRel), filepath.ToSlash(guideRel))
+`, id, title, filepath.ToSlash(guideRel), filepath.ToSlash(guideRel))
 
 	if err := writeSkeleton(guidePath, guideBody); err != nil {
 		return err

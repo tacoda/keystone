@@ -7,7 +7,7 @@ Loaded ambient; enforced by the [drift sensor](../../../sensors/drift.md). The c
 
 **Modules respect each other's public APIs.** A module that reaches into another module's internals — a database table, a private type, a tightly-coupled helper — has dissolved the boundary. The compiler, linter, or code-review process must reject the call. Boundaries enforced only by convention will be crossed under deadline.
 
-## GOLDEN RULES
+## GOLDEN PATH
 
 - **Aim for module boundaries you'd draw as service boundaries.** The eventual split (if it happens) should be cheap because the seams already exist.
 - **Aim for in-process calls between modules, not network calls.** That is the monolith's structural advantage — use it.

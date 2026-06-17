@@ -1,3 +1,8 @@
+---
+kind: action
+id: debt-review
+description: 'Triage the code-debt ledger.'
+---
 # debt-review
 
 **Triage the code-debt ledger.** Read [`harness/sensors/code-debt.md`](sensors/code-debt.md) and [`harness/corpus/state/code-debt.md`](corpus/state/code-debt.md).

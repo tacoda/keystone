@@ -13,46 +13,53 @@ import (
 // located at the repo root (not inside the harness folder).
 const ProjectConfigFile = "keystone.json"
 
-// SchemaVersion is the current keystone.json schema version. Bumped when
-// fields are renamed or removed.
-const SchemaVersion = "1"
+// SchemaVersion is the current keystone.json schema version. Bumped
+// when fields are renamed or removed. 2.0 dropped `harness_root` (the
+// layout is now fixed at .keystone/harness/); existing v1 installs are
+// upgraded by `keystone migrate`.
+const SchemaVersion = "2"
 
-// DefaultPluginHost is the git host prepended when a plugin source uses the
+// DefaultPolicyHost is the git host prepended when a plugin source uses the
 // `<owner>/<repo>` shorthand (e.g. `tacoda/tacoda-org` resolves to
-// `https://github.com/tacoda/tacoda-org.git`). Plugins hosted elsewhere
+// `https://github.com/tacoda/tacoda-org.git`). Policies hosted elsewhere
 // write the host explicitly (`gitlab.com/acme/policies`).
-const DefaultPluginHost = "github.com"
+const DefaultPolicyHost = "github.com"
 
-// ProjectConfig is the parsed shape of keystone.json. Records the harness
-// folder name, the framework version this project is pinned to, the nested
-// plugin tree, and optional per-port budgets (Phase 5).
+// ProjectConfig is the parsed shape of keystone.json. Records the
+// framework version this project is pinned to, the nested plugin tree,
+// and optional per-port budgets.
+//
+// 2.0 note: the harness layout is no longer configurable. Older
+// installs whose keystone.json carries a `harness_root` field continue
+// to parse cleanly — the field is decoded but ignored. The migrator
+// strips it on its way through.
 type ProjectConfig struct {
 	Version          string                `json:"version"`
 	FrameworkVersion string                `json:"framework_version,omitempty"`
-	HarnessRoot      string                `json:"harness_root,omitempty"`
-	Plugins          []PluginNode          `json:"plugins"`
+	HarnessRoot      string                `json:"harness_root,omitempty"` // Deprecated: ignored at 2.0; stripped by `keystone migrate`.
+	Policies          []PolicyNode          `json:"policies"`
 	Budgets          map[string]BudgetSpec `json:"budgets,omitempty"`
 }
 
-// PluginNode is one node in the nested plugin tree declared in keystone.json.
+// PolicyNode is one node in the nested plugin tree declared in keystone.json.
 // Among plugins, plugins nested deeper refine the outer plugins they're
 // nested in for non-strict items; the project layer always wins by default.
 // The strict map declares per-port absolute locks — strict items cannot be
 // overridden by anything (project, sibling plugin, ancestor, descendant).
 //
 // Source format: `[<host>/]<owner>/<repo>`. When the host is omitted (one
-// slash, no dots), DefaultPluginHost is prepended. Examples:
+// slash, no dots), DefaultPolicyHost is prepended. Examples:
 //   - "tacoda/tacoda-org"                   → github.com/tacoda/tacoda-org
 //   - "github.com/tacoda/tacoda-org"        → github.com/tacoda/tacoda-org
 //   - "gitlab.com/acme/policies"            → gitlab.com/acme/policies
 //
 // Version is a git ref (tag, branch, or SHA). Required at 1.0.
-type PluginNode struct {
+type PolicyNode struct {
 	Name     string              `json:"name"`
 	Source   string              `json:"source"`
 	Version  string              `json:"version"`
 	Strict   map[string][]string `json:"strict,omitempty"`
-	Children []PluginNode        `json:"children,omitempty"`
+	Children []PolicyNode        `json:"children,omitempty"`
 }
 
 // BudgetSpec is an optional cap on context loaded for one port. Wired up in
@@ -62,24 +69,22 @@ type BudgetSpec struct {
 	MaxTokensPerLoad int `json:"max_tokens_per_load,omitempty"`
 }
 
-// ResolvedHarnessRoot returns the configured harness root, falling back to
-// DefaultHarnessRoot when the field is unset. Use this everywhere a command
-// needs the harness folder name from a loaded ProjectConfig.
+// ResolvedHarnessRoot always returns the fixed harness path at 2.0.
+//
+// Deprecated: callers should reference config.DefaultHarnessRoot
+// directly. Retained so existing call sites compile while they migrate.
 func (c *ProjectConfig) ResolvedHarnessRoot() string {
-	if c == nil || c.HarnessRoot == "" {
-		return DefaultHarnessRoot
-	}
-	return c.HarnessRoot
+	return DefaultHarnessRoot
 }
 
 // DefaultProjectConfig returns the seed config written by `keystone init`
-// when no keystone.json exists yet. Empty plugins[] and the configured
-// harness root.
-func DefaultProjectConfig(harnessRoot string) *ProjectConfig {
+// when no keystone.json exists yet. The harness root is no longer a
+// per-project setting at 2.0 — the parameter is retained for back-compat
+// with existing call sites but is dropped from the emitted config.
+func DefaultProjectConfig(_ string) *ProjectConfig {
 	return &ProjectConfig{
-		Version:     SchemaVersion,
-		HarnessRoot: harnessRoot,
-		Plugins:     []PluginNode{},
+		Version: SchemaVersion,
+		Policies: []PolicyNode{},
 	}
 }
 
@@ -96,8 +101,8 @@ func ReadProjectConfig(projectDir string) (*ProjectConfig, error) {
 	if err := json.Unmarshal(data, &cfg); err != nil {
 		return nil, fmt.Errorf("parse %s: %w", ProjectConfigFile, err)
 	}
-	if cfg.Plugins == nil {
-		cfg.Plugins = []PluginNode{}
+	if cfg.Policies == nil {
+		cfg.Policies = []PolicyNode{}
 	}
 	if err := cfg.validate(); err != nil {
 		return nil, fmt.Errorf("validate %s: %w", ProjectConfigFile, err)
@@ -142,11 +147,11 @@ func ParseShorthand(spec string) (source, version string) {
 	return spec, ""
 }
 
-// DefaultPluginName derives the plugin name from a source string by taking
+// DefaultPolicyName derives the plugin name from a source string by taking
 // the last path segment. `tacoda/tacoda-org` → "tacoda-org";
 // `gitlab.com/acme/policies` → "policies". Used by `keystone plugin add`
 // when the user does not pass --name.
-func DefaultPluginName(source string) string {
+func DefaultPolicyName(source string) string {
 	source = strings.TrimSuffix(source, "/")
 	if i := strings.LastIndexByte(source, '/'); i >= 0 {
 		return source[i+1:]
@@ -158,7 +163,7 @@ func DefaultPluginName(source string) string {
 //   - "tacoda/tacoda-org"        → "https://github.com/tacoda/tacoda-org.git"
 //   - "gitlab.com/acme/policies" → "https://gitlab.com/acme/policies.git"
 //
-// Adds DefaultPluginHost when no host is present (the source has exactly
+// Adds DefaultPolicyHost when no host is present (the source has exactly
 // one slash and no dots in the leading segment). Always uses https. The
 // .git suffix is appended if not already present.
 func ExpandSource(source string) string {
@@ -166,7 +171,7 @@ func ExpandSource(source string) string {
 	parts := strings.Split(source, "/")
 	if len(parts) >= 2 && !strings.ContainsAny(parts[0], ".") {
 		// owner/repo form — prepend host
-		source = DefaultPluginHost + "/" + source
+		source = DefaultPolicyHost + "/" + source
 	}
 	if !strings.HasSuffix(source, ".git") {
 		source += ".git"
@@ -208,15 +213,15 @@ func (c *ProjectConfig) validate() error {
 		return fmt.Errorf("missing required field 'version'")
 	}
 	seen := map[string]bool{}
-	for i := range c.Plugins {
-		if err := validatePluginNode(&c.Plugins[i], seen); err != nil {
+	for i := range c.Policies {
+		if err := validatePolicyNode(&c.Policies[i], seen); err != nil {
 			return fmt.Errorf("plugins[%d]: %w", i, err)
 		}
 	}
 	return nil
 }
 
-func validatePluginNode(n *PluginNode, seen map[string]bool) error {
+func validatePolicyNode(n *PolicyNode, seen map[string]bool) error {
 	if n.Name == "" {
 		return fmt.Errorf("missing required field 'name'")
 	}
@@ -234,7 +239,7 @@ func validatePluginNode(n *PluginNode, seen map[string]bool) error {
 		return fmt.Errorf("plugin %q missing required field 'version'", n.Name)
 	}
 	for i := range n.Children {
-		if err := validatePluginNode(&n.Children[i], seen); err != nil {
+		if err := validatePolicyNode(&n.Children[i], seen); err != nil {
 			return fmt.Errorf("children[%d]: %w", i, err)
 		}
 	}

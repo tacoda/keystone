@@ -1,0 +1,9 @@
+{{define "_verify_result.html"}}
+<div class="card" style="background: var(--bg-3);">
+  <div>
+    {{if .Pass}}<span class="pill ok">PASS</span>{{else}}<span class="pill bad">FAIL</span>{{end}}
+    <span class="muted" style="margin-left: 0.5rem; font-size: 0.8rem;">ran {{.Ran}}</span>
+  </div>
+  <pre class="body" style="margin-top: 0.85rem;">{{.Output}}</pre>
+</div>
+{{end}}

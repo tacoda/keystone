@@ -9,7 +9,7 @@ Loaded ambient; enforced by the [drift sensor](../../sensors/drift.md). The corp
 
 **Flaky tests are not allowed.** A test whose result depends on timing, ordering, environment, or any other source of hidden non-determinism is not a green test — it is a future false signal. Fix the non-determinism (control the clock, control RNGs, control test ordering, isolate fixtures) or delete the test. Marking a test "flaky" and retrying it is forbidden — the retry hides the failure that the suite exists to surface.
 
-## GOLDEN RULES
+## GOLDEN PATH
 
 - **Test quality is the ideal — not coverage, not type passage.** A good test names a real use case or behavior, exercises it Chicago-style with real collaborators (see the IRON LAW), and fails meaningfully when that behavior breaks. Coverage percentage and a green type-checker are byproducts, not goals: a 100%-covered suite of tautology tests is worse than a 60%-covered suite of behavior tests. When evaluating tests, ask what user-visible or use-case-level fact this test would protect — not how many lines it touches.
 - **Aim for tests that survive refactoring.** A test that breaks when the implementation changes but the behavior does not is fighting you — see [[refactoring]].

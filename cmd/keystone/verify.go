@@ -9,20 +9,16 @@ import (
 	"github.com/tacoda/keystone/internal/framework/config"
 	"github.com/tacoda/keystone/internal/framework/loader"
 	"github.com/tacoda/keystone/internal/framework/lockfile"
-	"github.com/tacoda/keystone/internal/framework/plugins"
+	"github.com/tacoda/keystone/internal/framework/policies"
 )
 
 // runVerify handles `keystone verify [--dir <path>] [--harness-root <name>]`.
 //
-// Walks the plugin tree from keystone.json, checks each vendored plugin
+// Walks the policy tree from keystone.json, checks each vendored policy
 // for drift against the lockfile, and reports any strict-cascade
 // violations from project files shadowing locked items. Exits non-zero
 // on any violation; drift alone exits zero but is reported and reset.
 func runVerify(args []string) error {
-	flagValue, args, err := extractHarnessRootFlag(args)
-	if err != nil {
-		return err
-	}
 	dir := "."
 	for i := 0; i < len(args); i++ {
 		a := args[i]
@@ -49,10 +45,7 @@ func runVerify(args []string) error {
 	if err != nil {
 		return fmt.Errorf("resolve dir: %w", err)
 	}
-	harnessRoot, err := resolveHarnessRoot(absDir, flagValue)
-	if err != nil {
-		return err
-	}
+	harnessRoot := config.DefaultHarnessRoot
 
 	cfg, err := config.ReadProjectConfig(absDir)
 	if err != nil {
@@ -67,7 +60,7 @@ func runVerify(args []string) error {
 		return err
 	}
 	expected := map[string]map[string]string{}
-	for name, lock := range lf.Plugins {
+	for name, lock := range lf.Policies {
 		expected[name] = lock.Files
 	}
 
@@ -77,14 +70,14 @@ func runVerify(args []string) error {
 	}
 
 	if res.HasDrift() {
-		fmt.Fprintf(os.Stdout, "▸ drift detected — resetting %d plugin(s)\n", len(res.Drift))
+		fmt.Fprintf(os.Stdout, "▸ drift detected — resetting %d policy(s)\n", len(res.Drift))
 		for _, d := range res.Drift {
-			fmt.Fprintf(os.Stdout, "  • %s: %d drifted file(s)\n", d.Plugin, len(d.Files))
+			fmt.Fprintf(os.Stdout, "  • %s: %d drifted file(s)\n", d.Policy, len(d.Files))
 			for _, f := range d.Files {
 				fmt.Fprintf(os.Stdout, "      - %s (%s)\n", f.Path, f.Kind)
 			}
-			if err := plugins.Reset(d.Plugin, absDir, harnessRoot); err != nil {
-				return fmt.Errorf("reset %s: %w", d.Plugin, err)
+			if err := policies.Reset(d.Policy, absDir, harnessRoot); err != nil {
+				return fmt.Errorf("reset %s: %w", d.Policy, err)
 			}
 		}
 		fmt.Fprintln(os.Stdout, "  re-run `keystone install` to repopulate from cache")
@@ -96,7 +89,7 @@ func runVerify(args []string) error {
 			fmt.Fprintln(os.Stdout, "  "+v.String())
 			fmt.Fprintln(os.Stdout)
 		}
-		fmt.Fprintln(os.Stdout, "Strict plugin items cannot be overridden by the project layer. Remove the offending file(s) or take it up with the plugin author.")
+		fmt.Fprintln(os.Stdout, "Strict policy items cannot be overridden by the project layer. Remove the offending file(s) or take it up with the policy author.")
 		return fmt.Errorf("strict cascade is violated")
 	}
 
@@ -107,22 +100,22 @@ func runVerify(args []string) error {
 }
 
 func printVerifyUsage(w *os.File) {
-	fmt.Fprint(w, `keystone verify — check vendored plugins and the strict cascade
+	fmt.Fprint(w, `keystone verify — check vendored policies and the strict cascade
 
 Usage:
   keystone verify [--dir <path>] [--harness-root <name>]
 
 Reads keystone.json + the lockfile, then:
-  - Walks every vendored plugin and compares per-file hashes to the
-    lockfile. Any drift triggers an immediate plugins.Reset (run
+  - Walks every vendored policy and compares per-file hashes to the
+    lockfile. Any drift triggers an immediate policies.Reset (run
     `+"`keystone install`"+` afterward to repopulate).
-  - Walks each plugin's strict items and reports project-layer files
+  - Walks each policy's strict items and reports project-layer files
     that shadow them (e.g. <harness-root>/<port>/<item>.md present when
-    a plugin marks <port>/<item> strict).
+    a policy marks <port>/<item> strict).
 
 Exit codes:
   0  clean (no drift after reset, no violations)
-  0  drift only — drifted plugins were reset; user re-installs to recover
+  0  drift only — drifted policies were reset; user re-installs to recover
   1  any strict violation
 
 Flags:

@@ -1,0 +1,13 @@
+{{define "verify.html"}}{{template "layout" .}}{{end}}
+{{define "title"}}verify{{end}}
+{{define "main"}}
+<section class="card">
+  <h1>verify the harness</h1>
+  <p class="muted">Runs <code>keystone verify</code> — walks vendored policies, hash-checks every file against the lockfile, reports project-layer shadowing of any <code>strict</code> policy items.</p>
+  <form hx-post="/web/actions/verify" hx-target="#result" hx-swap="innerHTML" hx-indicator="#spin">
+    <button class="btn" type="submit">run verify</button>
+    <span id="spin" class="htmx-indicator muted"> running…</span>
+  </form>
+  <div id="result" style="margin-top: 1rem;"></div>
+</section>
+{{end}}

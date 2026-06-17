@@ -1,8 +1,13 @@
+---
+kind: guide
+id: process/subagent-trust
+description: 'The discipline of treating subagent reports as claims to verify, not as evidence to accept.'
+---
 # Subagent Trust
 
 The discipline of treating subagent reports as claims to verify, not as evidence to accept.
 
-## GOLDEN RULES
+## GOLDEN PATH
 
 - **Aim to verify subagent work by reading the diff, not the report.** A subagent's "done!" describes its intent, not the result. `git diff` is the result.
 - **Aim to run sensors after a subagent edits the code.** The parent agent's verify action runs against the actual state, not the subagent's narrative of it.

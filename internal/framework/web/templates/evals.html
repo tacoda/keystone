@@ -1,0 +1,38 @@
+{{define "evals.html"}}{{template "layout" .}}{{end}}
+{{define "title"}}evals{{end}}
+{{define "main"}}
+<section class="card">
+  <h1>evals</h1>
+  <p class="muted">Run-against-known-scenarios checks. Each eval is a primitive of kind <code>eval</code> at <code>.keystone/harness/evals/&lt;id&gt;/</code>. Static + sensor levels are implemented today; agent-level lands in 2.1.</p>
+
+  <form hx-post="/web/actions/eval/run" hx-target="#eval-report" hx-swap="innerHTML" hx-indicator="#espin">
+    <div class="row">
+      <label>filter
+        <input type="text" name="filter" placeholder="substring of eval id (empty = all)">
+      </label>
+      <button class="btn" type="submit">run evals</button>
+      <span id="espin" class="htmx-indicator muted"> running…</span>
+    </div>
+  </form>
+
+  <h2>declared evals</h2>
+  {{if .Evals}}
+  <table>
+    <thead><tr><th>id</th><th>level</th><th>description</th></tr></thead>
+    <tbody>
+      {{range .Evals}}
+      <tr>
+        <td><a href="/primitives/eval/{{.ID}}">{{.ID}}</a></td>
+        <td><code>{{.Level}}{{range .Levels}} {{.}}{{end}}</code></td>
+        <td class="muted">{{.Description}}</td>
+      </tr>
+      {{end}}
+    </tbody>
+  </table>
+  {{else}}
+  <p class="muted">no evals declared. <code>keystone new eval &lt;id&gt;</code> to scaffold one.</p>
+  {{end}}
+
+  <div id="eval-report" style="margin-top: 1rem;"></div>
+</section>
+{{end}}

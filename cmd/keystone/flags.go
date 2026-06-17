@@ -71,15 +71,8 @@ func parseInitArgs(args []string) (*initFlags, error) {
 		case strings.HasPrefix(a, "--policy="):
 			flags.policies = append(flags.policies, strings.TrimPrefix(a, "--policy="))
 
-		case a == "--harness-root":
-			if i+1 >= len(args) {
-				return nil, fmt.Errorf("flag %s requires a value", a)
-			}
-			flags.harnessRoot = args[i+1]
-			i++
-
-		case strings.HasPrefix(a, "--harness-root="):
-			flags.harnessRoot = strings.TrimPrefix(a, "--harness-root=")
+		case a == "--harness-root" || strings.HasPrefix(a, "--harness-root="):
+			return nil, fmt.Errorf("--harness-root was removed in 2.0; the harness layout is fixed at .keystone/harness/")
 
 		case strings.HasPrefix(a, "--") && strings.Contains(a, "="):
 			// --flag=value form
@@ -121,10 +114,6 @@ func parseInitArgs(args []string) (*initFlags, error) {
 
 	if err := validateSelections(flags.selections); err != nil {
 		return nil, err
-	}
-
-	if flags.harnessRoot == "" {
-		return nil, fmt.Errorf("--harness-root cannot be empty")
 	}
 
 	if flags.reset && !flags.confirm {

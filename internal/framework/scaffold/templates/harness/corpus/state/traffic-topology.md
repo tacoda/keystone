@@ -1,7 +1,8 @@
 ---
-last_reconciled: <YYYY-MM-DD>
+kind: corpus
+id: corpus/state/traffic-topology
+description: 'Where attention concentrates in the codebase.'
 ---
-
 # Traffic Topology
 
 > **Template.** The **bootstrap** or **audit** action will populate this from `git log` and your codebase. Until then, leave it as-is or fill in by hand.

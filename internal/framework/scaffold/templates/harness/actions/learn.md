@@ -1,3 +1,8 @@
+---
+kind: action
+id: learn
+description: 'Capture a learning candidate from a surprise, an incident, or a review finding.'
+---
 # learn
 
 **Capture a learning candidate** from a surprise, an incident, or a review finding. Writes to `harness/learning/inbox/` for later synthesis. Read [`harness/learning/README.md`](learning/README.md).
@@ -45,3 +50,7 @@ When the surprise happened in a specific region of the codebase, list the paths 
 ## Gate
 
 Learn writes only to the inbox. Promotion into corpus / guides happens in **synthesize**, not here. Capture liberally; prune aggressively later.
+
+## Index refresh
+
+Run `keystone index` after writing the candidate so the new entry appears in `.keystone/INDEX.json`. The `keystone:index` skill wraps the CLI invocation.

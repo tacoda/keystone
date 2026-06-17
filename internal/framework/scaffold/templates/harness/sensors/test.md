@@ -1,7 +1,8 @@
 ---
-kind: computational
+kind: sensor
+id: test
+description: 'The project''s test suite.'
 ---
-
 # Sensor: test
 
 The project's test suite.

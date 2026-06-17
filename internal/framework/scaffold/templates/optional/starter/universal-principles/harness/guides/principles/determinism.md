@@ -2,7 +2,7 @@
 
 The non-negotiable and strongly-preferred rules from [`corpus/principles/determinism.md`](../../corpus/principles/determinism.md). Loaded ambient; enforced at implementation and verification.
 
-## GOLDEN RULES
+## GOLDEN PATH
 
 - **Aim to treat a non-deterministic test as not-a-test.** A test whose outcome depends on time, randomness, ordering, the network, the filesystem, or any other ambient state must control that state explicitly. If it cannot, it does not belong in the test suite — it belongs in a separate, gated, flake-tolerant tier. (Builds on the existing testing IRON LAW *"flaky tests are not allowed."*)
 - **Aim to inject the clock.** `now()` is a dependency; let the test pass in a fixed value. Equivalents: `freeze_time`, `MockClock`, `time.tzset`, `sinon.useFakeTimers`.

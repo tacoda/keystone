@@ -7,7 +7,7 @@ Loaded ambient; enforced by the [drift sensor](../../sensors/drift.md). The corp
 
 **The test name is a promise to the next reader.** A test named for a behavior commits to specifying that behavior, and only that behavior. A test that asserts five unrelated things under one behavior name has broken the promise — split it. A test named *test_method_2* has made no promise at all, which is worse.
 
-## GOLDEN RULES
+## GOLDEN PATH
 
 - **Aim for tests that read aloud as English.** If the test cannot be read to a non-engineer, it is not yet a specification — it is still a test.
 - **Aim for examples produced *with* the people who care about the behavior, not for them.** A spec written alone is a spec rewritten under pressure.

@@ -1,7 +1,8 @@
 ---
-kind: computational
+kind: sensor
+id: commit-message
+description: 'Validates conventional-commit format and absence of AI attribution.'
 ---
-
 # Sensor: commit-message
 
 Validates conventional-commit format and absence of AI attribution.

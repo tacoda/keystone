@@ -50,7 +50,7 @@ When synthesize is ready to land a rule, it confirms the tier with the user:
 
 1. Show the rule text and the proposed `guides/<layer>/<name>.md` target.
 2. Default tier: **RULES**. If the candidate's content reads as non-negotiable or as an explicit aspiration, synthesize may say "this looks like it could be a GOLDEN RULE / IRON LAW — promote to that tier?" — but the user decides.
-3. Land under the confirmed heading (`## RULES`, `## GOLDEN RULES`, or `## IRON LAW(S)`) inside the target file.
+3. Land under the confirmed heading (`## RULES`, `## GOLDEN PATH`, or `## IRON LAW(S)`) inside the target file.
 
 ## Inbox item format
 

@@ -1,7 +1,8 @@
 ---
-kind: computational
+kind: sensor
+id: secret-scan
+description: 'Scans the diff (or repo, on audit) for committed secrets — API keys, tokens, private keys, credentials.'
 ---
-
 # Sensor: secret-scan
 
 Scans the diff (or repo, on **audit**) for committed secrets — API keys, tokens, private keys, credentials.

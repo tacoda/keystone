@@ -67,7 +67,7 @@ The rules from [`corpus/idioms/<stack>/<idiom>.md`](corpus/idioms/<stack>/<idiom
 
 Non-negotiable for this stack. (Optional — only when there is a true must.)
 
-## GOLDEN RULES
+## GOLDEN PATH
 
 Ideals. Deviation requires reasoning.
 ```

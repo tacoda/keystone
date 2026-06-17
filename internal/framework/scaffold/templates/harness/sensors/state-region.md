@@ -1,7 +1,8 @@
 ---
-kind: computational
+kind: sensor
+id: state-region
+description: 'Read-only.'
 ---
-
 # Sensor: state-region
 
 Read-only. Surfaces what is already in State for a touched region.

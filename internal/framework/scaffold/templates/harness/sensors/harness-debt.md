@@ -1,7 +1,8 @@
 ---
-kind: computational
+kind: sensor
+id: harness-debt
+description: 'Surfaces debt in the harness itself — content that exists but isn''t earning its keep.'
 ---
-
 # Sensor: harness-debt
 
 Surfaces **debt in the harness itself** — content that exists but isn't earning its keep. Distinct from [`code-debt`](code-debt.md), which covers debt in the codebase.

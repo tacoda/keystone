@@ -1,3 +1,8 @@
+---
+kind: guide
+id: process/verification
+description: 'The phase where claims are paired with evidence before commit.'
+---
 # Verification
 
 The phase where claims are paired with evidence before commit.

@@ -1,225 +1,181 @@
-# Keystone - the agent harness framework for any project
+# Keystone
 
-Keystone is a small Go runtime and a set of Rails-style conventions that drop an engineering harness — rules, reasoning, sensors, lifecycle workflow — into your repo, wired to whichever coding agent you use. Markdown only, no central service.
+**Keystone is the agent harness framework.** A small Go toolchain — CLI + MCP
+server + localhost dashboard — that drops a structured, primitive-typed
+markdown harness into your repo and keeps it healthy. Once installed,
+neither tool is required at runtime. The harness is plain files; any agent
+that reads `.keystone/INDEX.json` and the bodies it points at can operate
+the project.
 
-Two ways to change harness behavior:
+The CLI authors and maintains the harness. The MCP server dispatches the
+same harness to host agents (Claude Code, Cursor, Codex, …) over the
+model-context-protocol. The dashboard at `http://localhost:4773` gives a
+local operator view — metrics, insights, prune, eval runs, source query.
+All three are convenience. The harness alone is enough.
 
-- **Project content** — edit markdown at `harness/guides/`, `harness/corpus/`, `harness/sensors/`, `harness/playbooks/`, `harness/actions/`, `harness/adapters/`. The harness lives in your git, versioned with your project's tags.
-- **Plugins** — read-only, vendored markdown shared across projects. Pinned in `keystone.json`, hash-verified, reinstalled from scratch on any drift.
+```
+brew install tacoda/tap/keystone    # or grab a release binary
+keystone init                       # writes .keystone/ + agent menu
+keystone index                      # emits .keystone/INDEX.json
+keystone mcp install --agent claude-code   # one-line agent wiring
+keystone web serve                  # optional: open the dashboard
+```
 
-Changing harness behavior never requires editing framework files. New rules, new sensors, new lifecycle actions, new agents — all of it lands by dropping a markdown file at a conventional path.
+## What's in the harness
 
-> **1.0 shipped.** Keystone is now the harness framework laid out in [`PLAN-1.0.md`](PLAN-1.0.md). Architecture decisions under [`docs/adr/`](docs/adr/); per-port contracts under [`docs/ports/`](docs/ports/); canonical conventions at [`docs/conventions.md`](docs/conventions.md); 1.x compatibility contract at [`docs/compatibility.md`](docs/compatibility.md). Coming from 0.x? See [`docs/upgrade-0.x-to-1.0.md`](docs/upgrade-0.x-to-1.0.md) for the six-step upgrade.
+`.keystone/harness/` holds **11 primitive kinds** in two layers:
 
-## What it is
+| Layer        | Kinds                                                                 |
+| ------------ | --------------------------------------------------------------------- |
+| **Framework**| guide, corpus, sensor, action, playbook, eval, source                 |
+| **Agent**    | rule, skill, subagent, command, persona                               |
 
-Keystone is a **project harness installer** — a single Go binary with the entire markdown-only harness embedded. `keystone init` writes two things into your repo:
+Framework kinds are keystone-canonical (the agent doesn't natively know
+about them — the harness teaches it). Agent kinds align with what host
+agents already understand; keystone projects them to native paths
+(`.claude/skills/`, `.claude/agents/`, `.claude/commands/`,
+`.cursor/rules/`, …) on `keystone project`.
 
-1. **A harness** (`harness/` by default, configurable via `--harness-root <name>`) — the full set of framework abstractions:
-   - `guides/` — **rules** (with `## IRON LAW(S)`, `## GOLDEN RULES`, `## RULES` tiers). Always loaded.
-   - `corpus/` — **reference** (long-form reasoning). On-demand.
-   - `corpus/state/` — **state ledgers**: the empirical map of *this* project (codebase state, code debt, quality radar, risk fingerprints, traffic topology). Mutable; updated by `bootstrap`, `audit`, `learn`.
-   - `sensors/` — **automated checks**. Lint, type-check, test, build, drift, coverage.
-   - `actions/` — **single units of lifecycle work** (spec, orient, verify, review, learn, audit, …).
-   - `playbooks/` — **ordered action chains** (e.g. `task` runs spec → orient → verify → review).
-   - `adapters/<agent>/` — **per-agent bindings** (activation, lifecycle, sensors).
-   - `learning/` + `archive/` — **flywheels**: `learn` files rule candidates into `learning/inbox/`; `audit` retires stale content into `archive/`.
-   - `plugins/<name>/` — **vendored read-only plugins** (the 1.0 replacement for 0.x policies). Pinned in `keystone.json`, hash-verified, drift-reset by `keystone verify`.
+Every primitive carries canonical frontmatter — `kind`, `id`,
+`description`, plus per-kind required fields (`globs`, `phase`,
+`triggers`, `severity`, `tools`, `args`, `traces`, `deps`). The walker
+emits a single `.keystone/INDEX.json` listing every primitive's
+descriptor; agents read the index first and open bodies only when
+their activation conditions match.
 
-   Plus several framework concepts that aren't directories:
-   - **Patches** (`keystone patch`) — versioned forward-only config-schema updates the binary applies on upgrade.
-   - **Pacing modes** (`paired` / `solo` / `autopilot`) — orthogonal to the lifecycle; switched via the `mode` action.
-   - **Context budgeting** (`keystone doctor --budget`, ambient-load on `init`) — per-port token caps declared in `keystone.json`.
-   - **Agent failure modes** — guardrail guides under `guides/process/` (dangerous-actions, escalation, grounding, pushback, sensitive-files, subagent-trust, self-validation).
+## The contract: rules → corpus → external → ask
 
-   The universal engineering-principles pack (SOLID, TDD, BDD, naming, error handling, ...) is **opt-in**: pass `--starter universal-principles` at init (or select it in the interactive menu) to scaffold it into `<harness-root>/guides/principles/` and `<harness-root>/corpus/principles/`.
-2. **An activation file** (the "menu") — `CLAUDE.md`, `AGENTS.md`, `.cursor/rules/*.mdc`, `CONVENTIONS.md`, etc. — depending on your agent. The menu tells the agent to read the harness.
+Five-stage runtime resolution flow — encoded in the MCP server's
+`instructions` block and in `guides/process/runtime-resolution.md`.
 
-After `init`, the binary is no longer required — the harness and menu are plain markdown files you own.
+1. **Rules.** Find applicable guides + sensors via `INDEX.json`,
+   filtered by touched-files globs and phase. Project wins by default;
+   policies refine via nesting; `strict` items lock absolutely.
+2. **Corpus.** When a rule's body isn't enough, follow its `traces:`
+   to the linked corpus reasoning.
+3. **External.** Insufficient still? Query configured external sources
+   (Linear, Confluence, folder, URL) — only when the MCP server is
+   running and `.keystone/context.json` declares them.
+4. **Apply.** External results are never applied silently. The agent
+   asks the user: project, team policy, org policy, or session?
+5. **Contradictions.** Conflicts between rules, corpus, and external
+   answers trigger the agent to ask the user to resolve.
 
-After `keystone init`, your agent drives a six-phase workflow (spec → planning → implementation → verification → review → release) and two flywheels (Learning adds rules and reasoning; Pruning removes stale guides regularly and stale corpus rarely).
+## CLI
 
-## Install
+| Verb                     | What it does                                                                  |
+| ------------------------ | ----------------------------------------------------------------------------- |
+| `keystone init`          | Minimum-friction scaffold. One question (agent target) or zero with `--agent`. |
+| `keystone index`         | Walk `.keystone/harness/`, emit `INDEX.json`.                                  |
+| `keystone lint`          | Validate primitive frontmatter; required fields per kind, deps integrity.      |
+| `keystone project`       | Regenerate `.claude/` / `.cursor/` host projections from canonical sources.    |
+| `keystone verify`        | Cascade + policy-drift check.                                                  |
+| `keystone migrate`       | One-shot 1.x → 2.0 layout + schema upgrade.                                    |
+| `keystone new <kind>`    | Scaffold any of the 11 primitive kinds + adapter + policy.                     |
+| `keystone search <q>`    | Full-text search across every primitive.                                       |
+| `keystone graph`         | Render the primitive-relationship graph (Mermaid or DOT).                      |
+| `keystone watch`         | fsnotify loop: index + project + lint on change.                               |
+| `keystone snapshot`      | Save / list / restore tarballs of `.keystone/` for safe experiments.           |
+| `keystone eval run`      | Run static + sensor evals. `--baseline <ref>` for regression diffs.            |
+| `keystone policy`        | Add / update / remove vendored policies.                                       |
+| `keystone mcp serve`     | Launch the MCP server over stdio (host-launched).                              |
+| `keystone mcp install`   | Write the host agent's MCP config (`.mcp.json`, `.cursor/mcp.json`, …).        |
+| `keystone web serve`     | Open the localhost dashboard.                                                  |
 
-Keystone ships as a single binary. Three ways to get it:
+Every command has `--help`. `keystone completion bash|zsh|fish` for shell
+autocomplete.
 
-### Homebrew (macOS / Linux)
+## MCP server
+
+Same binary, separate verb. `keystone mcp install --agent claude-code`
+writes `.mcp.json`; the host launches the server on session start.
+
+Tool surface:
+
+- **Read** — `keystone_list_primitives`, `keystone_get_primitive`,
+  `keystone_get_corpus`
+- **Search** — `keystone_search`
+- **Eval** — `keystone_eval_list`, `keystone_eval_run`, `keystone_eval_report`,
+  `keystone_eval_baseline`
+- **Sources** — `keystone_source_list`, `keystone_source_query`,
+  `keystone_source_health`
+- **Write** — `keystone_new_<kind>` for every kind, plus
+  `keystone_harness_bootstrap`, `keystone_target_add`,
+  `keystone_index_refresh`, `keystone_project_refresh`
+
+Resource surface:
+
+- `keystone://index` — full `INDEX.json`
+- `keystone://primitive/{kind}/{id}` — one body
+- `keystone://harness/status` — install audit
+- `keystone://source/list`, `keystone://source/{name}/health`
+- `skill://list`, `skill://{name}/SKILL.md` — auto-discovery
+
+Prompt surface: `keystone_bootstrap`, `keystone_task`, `keystone_audit`,
+`keystone_learn`.
+
+## Dashboard
+
+`keystone web serve --port 4773` (the default — KEYS on a phone keypad).
+Localhost-only; same binary; reuses the same data model as the CLI and
+MCP server.
+
+Pages:
+
+- **home** — counts by kind, source healths
+- **metrics** — primitive counts, lint stats, freshness, index health
+- **insights** — suggested actions to improve harness performance
+- **primitives** — table w/ kind + glob filter; detail page w/
+  cross-references
+- **policies** — list + add/remove
+- **investigator** — primitives grouped by cascade layer, w/ search
+- **sources** — list + add/remove + per-source query + health probe
+- **verify** — one-click `keystone verify` + result pane
+- **prune** — lint findings + heuristics (orphan corpus, empty
+  bodies, duplicate descriptions) w/ per-row prune
+- **inbox** — walk learning candidates, accept/reject
+- **flywheels** — copy-paste invocations for learn / synthesize / audit
+- **evals** — declared evals + run button + report fragment
+- **search** — HTMX-live full-text across the harness
+- **graph** — Mermaid-rendered dependency graph
+
+SSE push at `/events` swaps fragments when files in `.keystone/` change.
+REST API under `/api/` is read-only.
+
+## Policies
+
+Vendored harness fragments — declared in `keystone.json`, pinned by
+version, hash-verified, drift-reset on `keystone verify`. Policies can
+ship every framework abstraction (guide, corpus, sensor, action,
+playbook, eval, source) but **never** agent abstractions (rule, skill,
+subagent, command, persona) — those stay project-owned. Cascade order:
+project wins by default; nested policies refine outer; `strict`
+declarations lock items absolutely.
 
 ```bash
-brew install tacoda/tap/keystone
+keystone policy add tacoda/tacoda-org@v1.1.0
 ```
 
-### Curl bootstrap (macOS / Linux)
+## After install, the tools are optional
 
-Downloads the binary into `~/.local/bin/keystone` and adds the install directory to your shell rc so `keystone` is on your `PATH`:
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/tacoda/keystone/main/install.sh | sh
-```
-
-Inspect before running (recommended):
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/tacoda/keystone/main/install.sh > install.sh
-less install.sh
-sh install.sh
-```
-
-Override the install dir with `KEYSTONE_PREFIX=/some/path` or pin the release with `KEYSTONE_VERSION=v0.7.0`. The installer does not run `keystone init` — open a new shell (or `source` your rc file) and run it yourself in any project to scaffold the harness.
-
-### PowerShell (Windows)
-
-```powershell
-iwr -useb https://raw.githubusercontent.com/tacoda/keystone/main/install.ps1 | iex
-```
-
-Installs `keystone.exe` under `%LOCALAPPDATA%\Programs\keystone` and adds it to your user `PATH`. Open a new terminal and run `keystone init` in any project to scaffold the harness.
-
-### Manual
-
-Download a prebuilt archive from the [releases page](https://github.com/tacoda/keystone/releases), extract `keystone` (or `keystone.exe`), and place it on your `PATH`.
-
-## Usage
-
-```
-keystone init [<dir>] [--agent <name>] [--force]
-keystone version
-keystone help
-```
-
-`init` is interactive in a TTY — every unset option becomes a prompt (via huh). Outside a TTY it is non-interactive and `--agent` must be supplied or detected (other options stay unset). It then copies `harness/` and the agent's menu file(s) into `<dir>` (default `.`) and exits. If `--agent` is omitted it detects from existing marker files in `<dir>`; if detection fails outside a TTY it errors out. Re-run with `--force` to overwrite an existing `harness/`. Existing target files (e.g. `CLAUDE.md`) are always skipped — review and merge by hand.
-
-## Supported agents
-
-| Agent | Status | Menu file installed |
-|---|---|---|
-| Claude Code | real adapter | `CLAUDE.md` |
-| Codex CLI | real adapter | `AGENTS.md` |
-| [pi.dev](https://pi.dev) | real adapter | `AGENTS.md` + `.pi/prompts/` |
-| Cursor | real adapter | `.cursor/rules/000-harness.mdc` (+ one per lifecycle action) |
-| Aider | real adapter | `CONVENTIONS.md` |
-| GitHub Copilot | real adapter | `.github/copilot-instructions.md` |
-| Continue | real adapter | `.continuerules` |
-| Cline / Roo Code | real adapter | `cline-instructions.md` (paste into Cline settings) |
-| Goose | real adapter | `.goosehints` |
-| (any other) | generic fallback | `AGENTS.md` |
-
-Every adapter ships `lifecycle.md`, `activation.md`, and `sensors.md`. When an agent does not natively cover a harness feature, `keystone init` prints a per-agent warning section pointing at the remedy — either a configuration step in the agent, or a small `harness/adapters/<agent>/<topic>.md` you fill in to document how your team handles the gap.
-
-## Prerequisites
-
-The harness assumes (soft — install runs regardless):
-
-- **A way to track work** — a tracker card (Jira / Linear / GitHub Issues / Asana), a `TODO.md`, or a conversation. The spec phase needs a unit of work to anchor; it doesn't care what tool you use.
-- **Sensor commands** — lint, type-check, test, build, optionally coverage. Recorded in `harness/corpus/state/CODEBASE_STATE.md`.
-- **PR workflow** — the review phase spawns review agents on a diff; the release phase opens the PR.
-- **CI pipeline** (ideally CD) — release assumes CI runs on PRs and CD triggers on merge.
-
-Missing one degrades the corresponding phase but does not break the harness.
-
-## After `keystone init`
-
-1. Read `harness/README.md` — orientation across project layers (corpus, guides, sensors, flywheels) and policies.
-2. Ask your agent to run the **bootstrap** action — it seeds `harness/corpus/state/CODEBASE_STATE.md`, `harness/corpus/idioms/<your-stack>/`, the paired `harness/guides/idioms/<your-stack>/`, and confirms the sensor commands.
-3. Commit `harness/` and any agent files `init` created.
-
-From then on, every task flows through the six phases, and the Learning flywheel grows the harness as your project teaches you new patterns (rules into `guides/`, supplemental reasoning into `corpus/`).
-
-## Org and team policy plugins
-
-Orgs distributing shared governance across many projects (vendor lists, license rules, release gates, compliance regimes) ship that content as a **policy** — a git repo with a small manifest. Teams within an org can ship their own policies too. The override cascade is **project → team → org**: a project file overrides the same-basename file from any policy above unless that higher tier declares the item `strict`.
-
-A policy may also declare items as `required` — things the project must define because no higher tier has prescribed them. `keystone policy verify` surfaces unmet required items as advisory gaps. Org and team policies are optional; the harness works for a single project alone.
-
-Consumers install a policy during `init`:
-
-```bash
-keystone init --policy git+https://github.com/acme/keystone-policy.git#v1.2.0
-```
-
-Policy content lands under `harness/policies/<name>/`, with `guides/` ambient and `corpus/` on-demand inside the namespace. Pin state (resolved SHA, per-file hashes) is recorded in `harness/keystone.lock.json`. Add a policy after `init` with:
-
-```bash
-keystone policy add git+https://github.com/acme/keystone-policy.git#v1.2.0
-```
-
-Update an installed policy with:
-
-```bash
-keystone policy update <name>                # re-resolve the recorded ref
-keystone policy update <name> <new-ref>      # bump to a new ref
-```
-
-`policy update` refuses to overwrite locally edited policy files unless `--force`. Run `keystone policy verify` any time to re-check the cascade. See [`harness/policies/README.md`](harness/policies/README.md) for the layer's full shape, including the universal default, the cascade rules, and the `strict` / `required` manifest fields.
-
-A policy repo is just a small directory tree:
-
-```
-keystone-plugin.json       # name, version, tier, strict, required, description
-policy/
-  harness/policies/<name>/
-    corpus/<topic>/<file>.md
-    guides/<topic>/<file>.md
-    playbooks/<name>.md       # optional — ordered action sets
-    actions/<name>.md         # optional — shared actions (e.g., rubocop_for_ruby)
-```
-
-The policy author owns the namespace; the installer enforces that policy writes cannot escape it. Sensors are not part of a policy — they describe project tooling.
-
-## Layout
-
-```
-keystone/
-├── README.md                # this file
-├── main.go                  # CLI entrypoint + //go:embed all:harness all:targets all:optional
-├── init.go                  # `keystone init` command
-├── scaffold.go              # walk embedded FS, write files to disk
-├── detect.go                # agent detection from marker files
-├── go.mod
-├── install.sh               # curl bootstrap (downloads binary, prompts, calls init)
-├── install.ps1              # PowerShell bootstrap
-├── .goreleaser.yml          # cross-compile + Homebrew tap publish
-├── .github/workflows/release.yml
-├── harness/                 # the harness dropped into consumer projects
-│   ├── README.md
-│   ├── corpus/              # informational reference (on-demand) — project-scoped
-│   │   ├── idioms/          # stack-specific patterns
-│   │   ├── domain/          # project-specific business knowledge
-│   │   └── state/           # empirical map of the codebase
-│   ├── guides/              # rules (always loaded) — project-scoped
-│   │   ├── idioms/          # rule extracts from corpus/idioms/
-│   │   ├── domain/          # business-rule constraints
-│   │   ├── process/         # six workflow phases + modes
-│   │   └── computational/   # language servers, formatters, editor enforcement
-│   ├── playbooks/           # ordered action chains (task, etc.)
-│   ├── actions/             # single units of lifecycle work
-│   ├── sensors/             # automated checks (lint, type-check, test, etc.)
-│   ├── policies/            # policy plugins — universal default + named org/team policies
-│   │   ├── universal/       # default policy: engineering principles (corpus + guides)
-│   │   └── <name>/          # installed policies (corpus + guides + optional playbooks/actions)
-│   ├── adapters/            # per-agent bindings
-│   ├── learning/            # Learning flywheel staging
-│   └── archive/             # Pruning flywheel destination
-├── optional/                # opt-in content seeded by --architecture / --compliance / etc.
-│   ├── architecture/<label>/harness/{corpus,guides}/...
-│   └── compliance/<label>/harness/{corpus,guides}/...
-└── targets/                 # per-agent menu files installed into consumer projects
-    ├── _generic/            # universal AGENTS.md fallback
-    ├── claude-code/         # CLAUDE.md
-    ├── codex/               # AGENTS.md
-    ├── pi/                  # AGENTS.md + .pi/prompts/*.md slash templates
-    ├── cursor/              # .cursor/rules/000-harness.mdc
-    ├── aider/               # CONVENTIONS.md
-    ├── github-copilot/      # .github/copilot-instructions.md
-    ├── continue/            # .continuerules
-    ├── cline/               # paste-into-settings text
-    └── goose/               # .goosehints
-```
-
-## Contributing
-
-If you write a real adapter for an agent currently listed as a stub, contribute it back. The shape is documented in [`harness/adapters/README.md`](harness/adapters/README.md): a `lifecycle.md`, `sensors.md`, and `activation.md` per agent, plus a target directory under `targets/<agent>/`.
+The harness is markdown on disk. An agent that reads
+`.keystone/INDEX.json` plus the primitive bodies it points at can
+operate the harness without keystone installed. The CLI helps you
+author + maintain; the MCP server gives the agent structured access;
+the dashboard gives you a local operator view. None are runtime
+dependencies.
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+MIT. See [`LICENSE`](LICENSE). Contributions welcome — see
+[`CONTRIBUTING.md`](CONTRIBUTING.md).
+
+---
+
+**Migration from 1.x:** run `keystone migrate` once. It moves
+`harness/` to `.keystone/harness/`, lifts `keystone.lock` to
+`.keystone/lockfile.json`, renames `plugins/` → `policies/` (and
+`keystone-plugin.json` → `keystone-policy.json`), rewrites
+`keystone.json` to v2 schema, regenerates `INDEX.json` and host
+projections. Idempotent — safe to re-run. Backup first via
+`keystone snapshot save --label pre-2.0`.

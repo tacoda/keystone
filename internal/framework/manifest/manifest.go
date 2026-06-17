@@ -3,12 +3,12 @@
 // version, and declares which items it ships strictly and which it requires
 // from elsewhere in the cascade.
 //
-// The manifest file is keystone-plugin.json. JSON format.
+// The manifest file is keystone-policy.json. JSON format.
 package manifest
 
-// PluginManifestFile is the on-disk name of the manifest at the plugin repo
+// PolicyManifestFile is the on-disk name of the manifest at the plugin repo
 // root.
-const PluginManifestFile = "keystone-plugin.json"
+const PolicyManifestFile = "keystone-policy.json"
 
 // StrictSpec lists items, by kind, for either a `strict` or `required`
 // declaration on a plugin. Corpus is intentionally absent — it is background
@@ -25,7 +25,7 @@ func (s StrictSpec) IsEmpty() bool {
 	return len(s.Guides) == 0 && len(s.Playbooks) == 0 && len(s.Actions) == 0 && len(s.Sensors) == 0
 }
 
-// Manifest describes one plugin. Loaded from keystone-plugin.json at the
+// Manifest describes one plugin. Loaded from keystone-policy.json at the
 // plugin repo root.
 //
 // `strict` items are shipped by this plugin and locked absolutely — nothing

@@ -1,8 +1,13 @@
+---
+kind: guide
+id: process/surgical-edits
+description: 'Touch only what serves the task.'
+---
 # Surgical Edits
 
 Touch only what serves the task. Counterpart to [[scoping]] (size budget on output) — this is the *scope* discipline: not "how much," but "*what kind* of changes are allowed."
 
-## GOLDEN RULES
+## GOLDEN PATH
 
 - **Aim to make every changed line trace to the user's request.** If a line cannot be justified by the task, it should not be in the diff.
 - **Aim to remove only the imports / variables / functions that *your* changes orphaned.** Pre-existing dead code is not in scope. Note it; do not delete it.

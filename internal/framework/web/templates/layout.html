@@ -1,0 +1,39 @@
+{{define "layout"}}<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>keystone — {{block "title" .}}dashboard{{end}}</title>
+  <link rel="stylesheet" href="/assets/keystone.css">
+  <script src="/assets/htmx.min.js"></script>
+  <script src="/assets/htmx-ext-sse.js"></script>
+</head>
+<body hx-ext="sse" sse-connect="/events">
+  <header class="topbar">
+    <a class="brand" href="/">
+      <img src="/assets/keystone_logo.png" alt="" class="brand-logo">
+      <span>keystone</span>
+    </a>
+    <nav>
+      <a href="/">home</a>
+      <a href="/metrics">metrics</a>
+      <a href="/insights">insights</a>
+      <a href="/primitives">primitives</a>
+      <a href="/policies">policies</a>
+      <a href="/policies/investigate">investigator</a>
+      <a href="/sources">sources</a>
+      <a href="/verify">verify</a>
+      <a href="/prune">prune</a>
+      <a href="/inbox">inbox</a>
+      <a href="/flywheels">flywheels</a>
+      <a href="/evals">evals</a>
+      <a href="/search">search</a>
+      <a href="/graph">graph</a>
+    </nav>
+    <span id="last-updated" sse-swap="harness-changed" class="updated">live</span>
+  </header>
+  <main>
+    {{block "main" .}}{{end}}
+  </main>
+  <footer class="footer">project: <code>{{.ProjectDir}}</code></footer>
+</body>
+</html>{{end}}

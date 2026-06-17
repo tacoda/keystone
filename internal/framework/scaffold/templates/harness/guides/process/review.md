@@ -1,3 +1,8 @@
+---
+kind: guide
+id: process/review
+description: 'The phase that confirms a mechanically-correct change is also the right change.'
+---
 # Review
 
 The phase that confirms a mechanically-correct change is also the *right* change. Where verification asks "does it work?", review asks "is it what we wanted, and is it good?"

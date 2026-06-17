@@ -1,100 +1,95 @@
 package main
 
 import (
-	"errors"
+	"bufio"
 	"fmt"
+	"io"
 	"os"
+	"strconv"
+	"strings"
 
-	"github.com/charmbracelet/huh"
 	"golang.org/x/term"
 )
 
-// isTerminal reports whether f is a real TTY. Uses an ioctl rather than the
-// character-device check, since /dev/null is a character device but not a TTY.
+// isTerminal reports whether f is a real TTY. Uses an ioctl rather
+// than the character-device check, since /dev/null is a character
+// device but not a TTY.
 func isTerminal(f *os.File) bool {
 	return term.IsTerminal(int(f.Fd()))
 }
 
-// promptMissing fills any unset categories in sel by running a huh form.
-// Only categories absent from sel are prompted; others are left as-is.
-// If skip[catID] is true, the category is skipped entirely (e.g. agent
-// after successful detection).
-func promptMissing(sel Selections, skip map[string]bool) error {
-	// Collect categories that need a prompt, in catalog order.
-	needs := []*Category{}
-	for i := range categories {
-		c := &categories[i]
-		if skip[c.ID] {
-			continue
-		}
-		if _, set := sel[c.ID]; set {
-			continue
-		}
-		needs = append(needs, c)
+// promptAgent is the ONE prompt `keystone init` runs at 2.0. Lists
+// every supported agent target with a number; user types the
+// number (or the agent name, or just hits Enter for the default).
+// Returns the chosen target name, or "" if the user picked default
+// — caller falls back to `_generic`.
+//
+// Deliberately no huh dependency. The harness should bootstrap with
+// the smallest possible interaction surface; later questions live
+// in the bootstrap action, where the agent can ask them
+// conversationally against the actual codebase.
+func promptAgent(in io.Reader, out io.Writer) (string, error) {
+	options := promptAgentOptions()
+	fmt.Fprintln(out, "Pick an agent target — type the number or the name, or press Enter for the default.")
+	for i, opt := range options {
+		fmt.Fprintf(out, "  %d) %-15s %s\n", i+1, opt.id, opt.desc)
 	}
-	if len(needs) == 0 {
-		return nil
-	}
+	fmt.Fprintf(out, "\n  [Enter = %s] > ", defaultAgent)
 
-	// Bound storage for each prompted category. We keep two parallel maps
-	// (single-select strings and multi-select slices) because huh's generic
-	// fields bind to typed pointers.
-	singleVals := map[string]*string{}
-	multiVals := map[string]*[]string{}
-
-	fields := make([]huh.Field, 0, len(needs))
-	for _, c := range needs {
-		options := make([]huh.Option[string], 0, len(c.Values))
-		for _, v := range c.Values {
-			label := fmt.Sprintf("%s — %s", v.ID, v.Description)
-			options = append(options, huh.NewOption(label, v.ID))
+	scanner := bufio.NewScanner(in)
+	if !scanner.Scan() {
+		return "", nil
+	}
+	pick := strings.TrimSpace(scanner.Text())
+	if pick == "" {
+		return defaultAgent, nil
+	}
+	// Numeric pick.
+	if n, err := strconv.Atoi(pick); err == nil {
+		if n < 1 || n > len(options) {
+			return "", fmt.Errorf("pick out of range: %d (expected 1..%d)", n, len(options))
 		}
-
-		// Agent stays MultiSelect=true at the catalog level so --agent a,b and
-		// `target add a,b` still accept comma-separated values; but the prompt
-		// renders as single-select. Users picking one agent interactively just
-		// press Enter on the highlighted row — no space-to-toggle required.
-		if c.MultiSelect && c.ID != "agent" {
-			val := []string{}
-			multiVals[c.ID] = &val
-			fields = append(fields,
-				huh.NewMultiSelect[string]().
-					Title(c.Label).
-					Description(c.Description).
-					Options(options...).
-					Value(&val),
-			)
-		} else {
-			var val string
-			singleVals[c.ID] = &val
-			fields = append(fields,
-				huh.NewSelect[string]().
-					Title(c.Label).
-					Description(c.Description).
-					Options(options...).
-					Value(&val),
-			)
+		return options[n-1].id, nil
+	}
+	// Name pick — must match an entry.
+	for _, opt := range options {
+		if opt.id == pick {
+			return pick, nil
 		}
 	}
+	return "", fmt.Errorf("unknown agent %q (supported: %v)", pick, supportedAgents())
+}
 
-	form := huh.NewForm(huh.NewGroup(fields...))
-	if err := form.Run(); err != nil {
-		if errors.Is(err, huh.ErrUserAborted) {
-			return fmt.Errorf("cancelled")
-		}
-		return fmt.Errorf("prompt: %w", err)
-	}
+const defaultAgent = "generic"
 
-	// Persist bound values back into sel.
-	for id, v := range singleVals {
-		if *v != "" {
-			sel[id] = []string{*v}
-		}
+type agentOption struct {
+	id, desc string
+}
+
+// promptAgentOptions returns the picker entries shown at init time.
+// Order matches the catalog; `_generic` lives at the bottom as the
+// "no specific host" escape hatch.
+func promptAgentOptions() []agentOption {
+	descs := map[string]string{
+		"claude-code":    "Anthropic Claude Code (CLI)",
+		"codex":          "OpenAI Codex / Codex CLI",
+		"cursor":         "Cursor editor",
+		"aider":          "aider CLI",
+		"cline":          "Cline (VS Code agent)",
+		"continue":       "Continue (VS Code / JetBrains)",
+		"goose":          "Block's Goose",
+		"github-copilot": "GitHub Copilot (chat + workspace)",
+		"pi":             "pi.dev",
+		"generic":        "no specific host — generic AGENTS.md",
 	}
-	for id, v := range multiVals {
-		if len(*v) > 0 {
-			sel[id] = *v
+	supported := supportedAgents()
+	out := make([]agentOption, 0, len(supported))
+	for _, a := range supported {
+		desc := descs[a]
+		if desc == "" {
+			desc = a
 		}
+		out = append(out, agentOption{id: a, desc: desc})
 	}
-	return nil
+	return out
 }

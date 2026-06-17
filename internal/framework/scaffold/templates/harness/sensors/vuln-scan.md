@@ -1,7 +1,8 @@
 ---
-kind: computational
+kind: sensor
+id: vuln-scan
+description: 'Scans declared dependencies for known vulnerabilities (CVEs, advisories).'
 ---
-
 # Sensor: vuln-scan
 
 Scans declared dependencies for known vulnerabilities (CVEs, advisories).

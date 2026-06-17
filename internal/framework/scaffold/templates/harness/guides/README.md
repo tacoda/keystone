@@ -1,6 +1,6 @@
 # Guides
 
-Rules — what the agent must *do* (and not do). Three tiers: regular **RULES** (the default), **GOLDEN RULES** (aspirational but explicit; stronger than regular), and **IRON LAWS** (non-negotiable; rare by design). Loaded ambient; enforced by the [drift sensor](sensors/drift.md). Per-agent adapters lift these into the agent's rules surface (`.cursor/rules/*.mdc`, the directive block of `CLAUDE.md`, etc.).
+Rules — what the agent must *do* (and not do). Three tiers: regular **RULES** (the default), **GOLDEN PATH** (aspirational but explicit; stronger than regular), and **IRON LAWS** (non-negotiable; rare by design). Loaded ambient; enforced by the [drift sensor](sensors/drift.md). Per-agent adapters lift these into the agent's rules surface (`.cursor/rules/*.mdc`, the directive block of `CLAUDE.md`, etc.).
 
 For the full reasoning and references behind each rule, see the paired file in [`../corpus/`](corpus/README.md).
 
@@ -67,7 +67,7 @@ Loaded ambient; enforced by the drift sensor.
 
 Non-negotiable. Violation causes real damage. Rare by design — omit this section if nothing here qualifies.
 
-## GOLDEN RULES
+## GOLDEN PATH
 
 Strong, explicit standards. Stronger than regular rules; deviation requires reasoning. May be concrete prescriptions or aspirational ideals. Omit if nothing here qualifies.
 

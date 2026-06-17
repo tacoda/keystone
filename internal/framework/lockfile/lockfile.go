@@ -1,10 +1,13 @@
 // Package lockfile reads and writes the per-install state record at
-// <harness-root>/keystone.lock.json. Pins every installed plugin by source
-// ref + resolved SHA + per-file hashes. JSON format.
+// <keystone-dir>/lockfile.json — the `.keystone/` umbrella holds the
+// lockfile alongside the harness tree and generated INDEX.json, so both
+// the CLI and keystone-mcp can locate it under one well-known prefix.
+// Pins every installed plugin by source ref + resolved SHA + per-file
+// hashes. JSON format.
 //
-// The harness root is configurable (default "harness", overridable per
-// install via the --harness-root flag at `keystone init`), so every
-// function accepts it explicitly.
+// The harness root is configurable (default `.keystone/harness`,
+// overridable per install via the --harness-root flag at
+// `keystone init`); the lockfile lives one level above it.
 package lockfile
 
 import (
@@ -21,10 +24,10 @@ import (
 const Version = 1
 
 // RelPath returns the lockfile's path relative to the install directory:
-// <harness-root>/keystone.lock.json. Pass to filepath.Join(installDir, ...)
-// for the absolute path.
+// <keystone-dir>/lockfile.json — one level above the harness root.
+// Pass to filepath.Join(installDir, ...) for the absolute path.
 func RelPath(harnessRoot string) string {
-	return filepath.Join(harnessRoot, config.LockfileName)
+	return filepath.Join(config.KeystoneDir(harnessRoot), config.LockfileName)
 }
 
 // KeystoneInfo records the install-scoped state: binary version, install
@@ -37,14 +40,14 @@ type KeystoneInfo struct {
 	Agents    []string `json:"agents,omitempty"`
 }
 
-// PluginLock describes one installed plugin: where it came from, the exact
+// PolicyLock describes one installed plugin: where it came from, the exact
 // commit it resolved to, and per-file content hashes used by the drift
 // detector. Written by `keystone install` / `keystone plugin add|update`,
 // consumed by `keystone verify` and the loader's drift-reset path.
-type PluginLock struct {
+type PolicyLock struct {
 	SourceRef     string            `json:"source_ref"`     // shorthand string from keystone.json (e.g. "tacoda/tacoda-org")
 	ResolvedSHA   string            `json:"resolved_sha"`   // exact commit hash resolved during fetch
-	PluginVersion string            `json:"plugin_version"` // value from the plugin's manifest, if available
+	PolicyVersion string            `json:"plugin_version"` // value from the plugin's manifest, if available
 	Version       string            `json:"version"`        // ref the consumer pinned (tag, branch, SHA)
 	Files         map[string]string `json:"files"`          // path-relative-to-installdir → "sha256:<hex>"
 }
@@ -53,7 +56,7 @@ type PluginLock struct {
 type Lockfile struct {
 	Version  int                   `json:"version"`
 	Keystone KeystoneInfo          `json:"keystone"`
-	Plugins  map[string]PluginLock `json:"plugins,omitempty"`
+	Policies  map[string]PolicyLock `json:"policies,omitempty"`
 }
 
 // Read loads the lockfile at <installDir>/<harnessRoot>/keystone.lock.json,
@@ -66,7 +69,7 @@ func Read(installDir, harnessRoot string) (*Lockfile, error) {
 		if os.IsNotExist(err) {
 			return &Lockfile{
 				Version: Version,
-				Plugins: map[string]PluginLock{},
+				Policies: map[string]PolicyLock{},
 			}, nil
 		}
 		return nil, fmt.Errorf("read %s: %w", rel, err)
@@ -75,8 +78,8 @@ func Read(installDir, harnessRoot string) (*Lockfile, error) {
 	if err := json.Unmarshal(data, &lf); err != nil {
 		return nil, fmt.Errorf("parse %s: %w", rel, err)
 	}
-	if lf.Plugins == nil {
-		lf.Plugins = map[string]PluginLock{}
+	if lf.Policies == nil {
+		lf.Policies = map[string]PolicyLock{}
 	}
 	return &lf, nil
 }

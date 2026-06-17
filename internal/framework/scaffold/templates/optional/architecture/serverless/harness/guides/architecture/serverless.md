@@ -7,7 +7,7 @@ Loaded ambient; enforced by the [drift sensor](../../../sensors/drift.md). The c
 
 **Every function is stateless.** Instance-local state is incidental — the platform may reuse an instance for the next invocation, or not. Code that assumes persistence between invocations is wrong by construction; correctness must derive entirely from inputs and external state (database, queue, parameter store).
 
-## GOLDEN RULES
+## GOLDEN PATH
 
 - **Aim for functions that do one thing.** A function that branches on event type to do five different jobs is five functions wearing one trench coat.
 - **Aim for synchronous chains kept short.** Each hop adds latency, error modes, and concurrency-limit interactions. Two hops is fine; six is a red flag.

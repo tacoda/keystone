@@ -1,7 +1,8 @@
 ---
-kind: computational
+kind: sensor
+id: stack-drift
+description: 'Detects when the empirical reality of the repo has diverged from what CODEBASESTATE.'
 ---
-
 # Sensor: stack-drift
 
 Detects when the empirical reality of the repo has diverged from what `CODEBASE_STATE.md` records. Re-running bootstrap is **not** the answer — bootstrap is a one-time initial scaffold. When this sensor flags drift, it's a trigger for **audit** to reconcile the relevant parts.

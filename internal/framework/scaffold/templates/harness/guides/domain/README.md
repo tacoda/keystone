@@ -46,7 +46,7 @@ The rules from [`corpus/domain/<file>.md`](corpus/domain/<file>.md).
 
 - **<RULE NAME IN CAPS.>** One-sentence rule. (When applicable.)
 
-## GOLDEN RULES
+## GOLDEN PATH
 
 - **<Rule name.>** Strongly-preferred behavior, deviation requires reasoning.
 ```

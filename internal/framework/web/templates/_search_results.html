@@ -1,0 +1,23 @@
+{{define "_search_results.html"}}
+{{if .Query}}
+<p class="muted">{{len .Hits}} hit(s) for <code>{{.Query}}</code></p>
+{{end}}
+{{if .Hits}}
+<table>
+  <thead><tr><th>score</th><th>kind</th><th>id</th><th>where</th><th>excerpt</th></tr></thead>
+  <tbody>
+    {{range .Hits}}
+    <tr>
+      <td><code>{{.Score}}</code></td>
+      <td><span class="kind-tag {{.Primitive.Kind}}">{{.Primitive.Kind}}</span></td>
+      <td><a href="/primitives/{{.Primitive.Kind}}/{{.Primitive.ID}}">{{.Primitive.ID}}</a></td>
+      <td class="muted">{{.Where}}</td>
+      <td class="muted">{{.Excerpt}}</td>
+    </tr>
+    {{end}}
+  </tbody>
+</table>
+{{else if .Query}}
+<p class="muted" style="font-style: italic;">no hits.</p>
+{{end}}
+{{end}}

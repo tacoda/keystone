@@ -1,0 +1,7 @@
+{{define "_health_badge.html"}}
+<div>
+  {{if .Health.OK}}<span class="pill ok">ready</span>{{else}}<span class="pill bad">{{.Health.Status}}</span>{{end}}
+  {{if .Health.Message}}<span class="muted" style="margin-left: 0.5rem;">{{.Health.Message}}</span>{{end}}
+  <p class="muted" style="font-size: 0.78rem; margin-top: 0.3rem;">probed {{.Probed}}</p>
+</div>
+{{end}}

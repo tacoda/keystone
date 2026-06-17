@@ -1,3 +1,8 @@
+---
+kind: action
+id: check-drift
+description: 'Run the drift sensor on the current diff.'
+---
 # check-drift
 
 **Run the drift sensor on the current diff.** Compare the in-progress changes against loaded harness rules. Fast pre-verify check. Read [`harness/sensors/drift.md`](sensors/drift.md) and [`harness/guides/process/implementation.md`](guides/process/implementation.md).
@@ -12,3 +17,7 @@
 ## When to invoke
 
 Between **implementation** and **verify**. Faster and cheaper than the full verify pass; meant to catch obvious drifts before sensors run.
+
+## Index freshness precondition
+
+check-drift reads `.keystone/INDEX.json` to know which guides apply to the touched files. If the index is stale (any guide file modified more recently than `INDEX.json`), run `keystone index` first — otherwise the drift check uses an outdated set of rules.

@@ -2,7 +2,7 @@
 
 The non-negotiable and strongly-preferred rules from [`corpus/principles/dependencies.md`](../../corpus/principles/dependencies.md). Loaded ambient; enforced at planning, implementation, and review.
 
-## GOLDEN RULES
+## GOLDEN PATH
 
 - **Aim to never add a dependency the team has not approved.** Adding a package is a planning-phase decision — surface it in the plan, get explicit approval, then add. No package gets installed as a side effect of solving an unrelated problem.
 - **Aim to never bypass the lockfile.** `package-lock.json`, `pnpm-lock.yaml`, `yarn.lock`, `poetry.lock`, `Gemfile.lock`, `Cargo.lock`, `go.sum` — these are committed, regenerated only by the package manager, and never hand-edited.

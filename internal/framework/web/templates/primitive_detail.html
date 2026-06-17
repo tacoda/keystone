@@ -1,0 +1,44 @@
+{{define "primitive_detail.html"}}{{template "layout" .}}{{end}}
+{{define "title"}}{{.Primitive.Kind}}/{{.Primitive.ID}}{{end}}
+{{define "main"}}
+<section class="card">
+  <p class="muted"><a href="/primitives">← primitives</a></p>
+  <h1><code>{{.Primitive.Kind}}</code> / {{.Primitive.ID}}</h1>
+  <p>{{.Primitive.Description}}</p>
+  <dl>
+    <dt>path</dt><dd><code>{{.Primitive.Path}}</code></dd>
+    {{if .Primitive.Globs}}<dt>globs</dt><dd>{{range .Primitive.Globs}}<code>{{.}}</code> {{end}}</dd>{{end}}
+    {{if .Primitive.Provenance}}<dt>provenance</dt><dd><code>{{.Primitive.Provenance}}</code></dd>{{end}}
+    {{if .Primitive.Phase}}<dt>phase</dt><dd><code>{{.Primitive.Phase}}</code></dd>{{end}}
+    {{if .Primitive.Severity}}<dt>severity</dt><dd><code>{{.Primitive.Severity}}</code></dd>{{end}}
+    {{if .Primitive.Triggers}}<dt>triggers</dt><dd>{{join .Primitive.Triggers ", "}}</dd>{{end}}
+    {{if .Primitive.Tools}}<dt>tools</dt><dd>{{join .Primitive.Tools ", "}}</dd>{{end}}
+    {{if .Primitive.Traces}}<dt>traces</dt><dd>{{join .Primitive.Traces ", "}}</dd>{{end}}
+  </dl>
+</section>
+
+<section class="card">
+  <h2>referenced by</h2>
+  {{if .Incoming}}
+  <table>
+    <thead><tr><th>kind</th><th>id</th><th>via</th></tr></thead>
+    <tbody>
+      {{range .Incoming}}
+      <tr>
+        <td><span class="kind-tag {{.From.Kind}}">{{.From.Kind}}</span></td>
+        <td><a href="/primitives/{{.From.Kind}}/{{.From.ID}}">{{.From.ID}}</a></td>
+        <td class="muted"><code>{{.Via}}</code></td>
+      </tr>
+      {{end}}
+    </tbody>
+  </table>
+  {{else}}
+  <p class="muted">no primitive references this one via <code>deps:</code> or <code>traces:</code>.</p>
+  {{end}}
+</section>
+
+<section class="card">
+  <h2>body</h2>
+  <pre class="body">{{.Body}}</pre>
+</section>
+{{end}}

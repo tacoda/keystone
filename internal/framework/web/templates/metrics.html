@@ -1,0 +1,46 @@
+{{define "metrics.html"}}{{template "layout" .}}{{end}}
+{{define "title"}}metrics{{end}}
+{{define "main"}}
+{{with .Metrics}}
+<section class="card">
+  <h1>metrics</h1>
+  <p class="muted">snapshot at {{.Generated}}</p>
+
+  <div class="stats">
+    <div class="stat"><div class="label">primitives</div><div class="value amber">{{.PrimitiveTotal}}</div></div>
+    <div class="stat"><div class="label">kinds</div><div class="value blue">{{len .ByKind}}</div></div>
+    <div class="stat"><div class="label">lint errors</div><div class="value {{if .LintErrors}}bad{{else}}green{{end}}">{{.LintErrors}}</div></div>
+    <div class="stat"><div class="label">lint warnings</div><div class="value">{{.LintWarnings}}</div></div>
+    <div class="stat"><div class="label">sources</div><div class="value purple">{{len .SourceHealths}}</div></div>
+    <div class="stat"><div class="label">index</div><div class="value">{{if .IndexFresh}}<span class="ok">fresh</span>{{else}}<span class="warn">stale</span>{{end}}</div></div>
+  </div>
+
+  <h2>counts by kind</h2>
+  <table>
+    <thead><tr><th>kind</th><th>count</th></tr></thead>
+    <tbody>
+      {{range $k, $v := .ByKind}}
+      <tr>
+        <td><a href="/primitives?kind={{$k}}"><span class="kind-tag {{$k}}">{{$k}}</span></a></td>
+        <td>{{$v}}</td>
+      </tr>
+      {{end}}
+    </tbody>
+  </table>
+
+  <h2>recently modified</h2>
+  <table>
+    <thead><tr><th>kind</th><th>id</th><th>modified</th></tr></thead>
+    <tbody>
+      {{range .Freshness}}
+      <tr>
+        <td><span class="kind-tag {{.Kind}}">{{.Kind}}</span></td>
+        <td><a href="/primitives/{{.Kind}}/{{.ID}}">{{.ID}}</a></td>
+        <td class="muted">{{.Modified}}</td>
+      </tr>
+      {{end}}
+    </tbody>
+  </table>
+</section>
+{{end}}
+{{end}}

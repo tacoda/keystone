@@ -1,0 +1,14 @@
+{{define "_primitives_table.html"}}
+<tbody id="primitives-tbody">
+  {{range .Primitives}}
+  <tr>
+    <td><code>{{.Kind}}</code></td>
+    <td><a href="/primitives/{{.Kind}}/{{.ID}}">{{.ID}}</a></td>
+    <td>{{.Description}}</td>
+    <td class="muted"><code>{{.Path}}</code></td>
+  </tr>
+  {{else}}
+  <tr><td colspan="4" class="muted">no primitives match.</td></tr>
+  {{end}}
+</tbody>
+{{end}}

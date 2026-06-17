@@ -8,7 +8,7 @@ The non-negotiable and strongly-preferred rules from [`corpus/principles/logging
 
 Tokens, passwords, session cookies, API keys, full credit-card numbers, government IDs, full email addresses (when avoidable), full request bodies (when they may contain credentials) — none of these go to a log. Once a value lands in a log file, it lands in log aggregation, in backups, in S3, in whatever the team's retention policy is. Treat logs as public.
 
-## GOLDEN RULES
+## GOLDEN PATH
 
 - **Aim for structured logs.** JSON or key-value pairs, not free-form strings. Searchable beats prosaic.
 - **Aim for one log line per request boundary**, not one per function call. Logging on the inside of a hot loop is how disks fill.

@@ -1,3 +1,8 @@
+---
+kind: action
+id: audit
+description: 'Full dual-flywheel audit.'
+---
 # audit
 
 **Full dual-flywheel audit.** Learning (capture from review) and Pruning (remove dead rules). Periodic. Read [`harness/README.md`](README.md) (flywheels section) and [`harness/learning/README.md`](learning/README.md).
@@ -35,3 +40,7 @@ One report with two sections (Learn / Prune), each listing concrete proposed har
 ## Globs in audit
 
 Audit walks the full repo, but per-guide `globs:` still filter findings — a rule reports only against files it claims (see [`sensors/drift.md`](sensors/drift.md)). Audit is the only action where most guides match somewhere; rule-by-rule globs keep the report focused on real violations.
+
+## Index refresh
+
+After any archive move or content change, run `keystone index` so `.keystone/INDEX.json` no longer references the archived primitive. The `keystone:index` skill wraps the CLI invocation. The dashboard's `/prune` view picks up the same heuristics this action surfaces — useful for spot-checking findings between audits.

@@ -1,3 +1,8 @@
+---
+kind: guide
+id: process/scoping
+description: 'How big any single commit, PR, or implementation pass is allowed to get before it must split.'
+---
 # Scoping
 
 How big any single commit, PR, or implementation pass is allowed to get before it must split.
@@ -8,9 +13,9 @@ How big any single commit, PR, or implementation pass is allowed to get before i
 - **Target a diff a reviewer can read in one sitting.** Default ceiling: **≤500 changed lines (excluding generated files and lockfiles), ≤10 source files**. Bootstrap may tighten these from project history.
 - **Split when the ceiling is reached.** If the change needs more, ship it as a sequence of dependent commits or PRs, each independently reviewable.
 - **Generated artifacts (lockfiles, snapshots, build output) sit in their own commit** when they cross 50 lines. Mixing them with logic hides the logic.
-- **Refactor and behavior change never share a commit.** See [[refactoring]] and `release.md` GOLDEN RULES.
+- **Refactor and behavior change never share a commit.** See [[refactoring]] and `release.md` GOLDEN PATH.
 
-## GOLDEN RULES
+## GOLDEN PATH
 
 - **Aim to keep the diff readable in one screen of `git diff --stat`.** If the stats themselves do not fit, the PR is too big.
 - **Aim to make every commit independently revertable.** Two intertwined changes in one commit make the revert worse than the original problem. See [[rollback]].

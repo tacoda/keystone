@@ -1,7 +1,8 @@
 ---
-kind: computational
+kind: sensor
+id: risk-fingerprint
+description: 'Computes complexity + coupling + coverage patterns per region.'
 ---
-
 # Sensor: risk-fingerprint
 
 Computes complexity + coupling + coverage patterns per region.

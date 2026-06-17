@@ -7,7 +7,7 @@ Loaded ambient; enforced by the [drift sensor](../../sensors/drift.md). The corp
 
 **Measure before you optimize, and measure after.** Without a before-and-after measurement against a realistic workload, an "optimization" is a guess. Guesses sometimes guess right; the discipline is to know which.
 
-## GOLDEN RULES
+## GOLDEN PATH
 
 - **Aim for the simplest implementation first.** It is the baseline against which any optimization must justify itself. See [[simplicity]], [[simple-design]].
 - **Aim to optimize the architecture, not the lines.** A correct algorithm in clear code beats a clever algorithm in unreadable code at almost every scale.

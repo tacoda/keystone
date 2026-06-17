@@ -1,7 +1,8 @@
 ---
-kind: computational
+kind: sensor
+id: type-check
+description: 'Signature and contract consistency.'
 ---
-
 # Sensor: type-check
 
 Signature and contract consistency.

@@ -6,16 +6,54 @@
 // the full keystone.json schema into this package.
 package config
 
-// DefaultHarnessRoot is the directory name where keystone installs the
-// harness inside a consumer's repo. Configurable per-install via the
-// --harness-root flag at `keystone init`; downstream commands accept the
-// same flag (or, post-Phase 3, pick it up from keystone.json).
+// DefaultHarnessRoot is the relative path where keystone installs the
+// harness inside a consumer's repo. At 2.0 this is `.keystone/harness` —
+// the harness lives under a `.keystone/` parent dir that also holds the
+// lockfile and generated INDEX.json, so both the CLI and keystone-mcp
+// can discover the harness with one well-known prefix.
 //
-// Teams that want a different name (e.g. "agent-rules" or "playbook")
-// pass --harness-root <name> at init time and re-pass it on every
-// subsequent command. Default falls back here.
-const DefaultHarnessRoot = "harness"
+// Configurable per-install via the --harness-root flag at
+// `keystone init`; downstream commands accept the same flag or pick it
+// up from keystone.json. The parent directory of harnessRoot is the
+// "keystone dir" — see KeystoneDir.
+const DefaultHarnessRoot = ".keystone/harness"
 
 // LockfileName is the basename of the per-install state record, written
-// at <harness-root>/keystone.lock.json.
-const LockfileName = "keystone.lock.json"
+// at <keystone-dir>/lockfile.json (i.e. one level above the harness
+// root). At 2.0 this resolves to `.keystone/lockfile.json`.
+const LockfileName = "lockfile.json"
+
+// IndexName is the basename of the generated primitive descriptor index,
+// written at <keystone-dir>/INDEX.json — alongside the lockfile, not
+// inside the harness tree.
+const IndexName = "INDEX.json"
+
+// KeystoneDir returns the parent directory of the configured harness
+// root — the `.keystone/` umbrella that holds the lockfile, the
+// INDEX.json, and the harness/ subtree. For the default
+// (`.keystone/harness`) it returns `.keystone`. When the user has
+// configured a flat harness root (no separator), it returns the
+// project-root sentinel `.`.
+func KeystoneDir(harnessRoot string) string {
+	if harnessRoot == "" {
+		harnessRoot = DefaultHarnessRoot
+	}
+	parent := pathDir(harnessRoot)
+	if parent == "" {
+		return "."
+	}
+	return parent
+}
+
+// pathDir is filepath.Dir-equivalent for forward-slash POSIX paths only
+// (the harness root is always declared in POSIX form in keystone.json).
+// Imported inline to avoid pulling filepath into the config package's
+// no-os surface.
+func pathDir(p string) string {
+	for i := len(p) - 1; i >= 0; i-- {
+		if p[i] == '/' {
+			return p[:i]
+		}
+	}
+	return ""
+}

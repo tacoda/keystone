@@ -52,26 +52,41 @@ func TestInit_FreshScaffoldGoldenFiles(t *testing.T) {
 	wantFiles := []string{
 		"keystone.json",
 		".gitignore",
-		"harness/keystone.lock.json",
-		"harness/README.md",
-		"harness/guides/README.md",
-		"harness/guides/process/spec.md",
-		"harness/guides/process/release.md",
-		"harness/corpus/README.md",
-		"harness/sensors/build.md",
-		"harness/sensors/lint.md",
-		"harness/sensors/test.md",
-		"harness/actions/spec.md",
-		"harness/actions/orient.md",
-		"harness/actions/verify.md",
-		"harness/actions/review.md",
-		"harness/playbooks/task.md",
-		"harness/adapters/codex/activation.md",
-		"harness/adapters/codex/lifecycle.md",
-		"harness/adapters/codex/sensors.md",
-		"harness/learning/README.md",
-		"harness/archive/README.md",
-		"harness/corpus/state/INSTALL_PROFILE.md",
+		".keystone/lockfile.json",
+		".keystone/harness/README.md",
+		".keystone/harness/guides/README.md",
+		".keystone/harness/guides/process/spec.md",
+		".keystone/harness/guides/process/release.md",
+		".keystone/harness/guides/process/runtime-resolution.md",
+		".keystone/harness/corpus/process/runtime-resolution.md",
+		".keystone/harness/corpus/README.md",
+		".keystone/harness/sensors/build.md",
+		".keystone/harness/sensors/lint.md",
+		".keystone/harness/sensors/test.md",
+		".keystone/harness/actions/spec.md",
+		".keystone/harness/actions/orient.md",
+		".keystone/harness/actions/verify.md",
+		".keystone/harness/actions/review.md",
+		".keystone/harness/playbooks/task.md",
+		".keystone/harness/adapters/codex/activation.md",
+		".keystone/harness/adapters/codex/lifecycle.md",
+		".keystone/harness/adapters/codex/sensors.md",
+		".keystone/harness/learning/README.md",
+		".keystone/harness/archive/README.md",
+		".keystone/harness/rules/README.md",
+		".keystone/harness/skills/README.md",
+		".keystone/harness/skills/keystone-index/SKILL.md",
+		".keystone/harness/skills/keystone-verify/SKILL.md",
+		".keystone/harness/skills/keystone-new-guide/SKILL.md",
+		".keystone/harness/skills/keystone-new-corpus/SKILL.md",
+		".keystone/harness/skills/keystone-new-sensor/SKILL.md",
+		".keystone/harness/skills/keystone-new-action/SKILL.md",
+		".keystone/harness/skills/keystone-new-playbook/SKILL.md",
+		".keystone/harness/skills/keystone-new-adapter/SKILL.md",
+		".keystone/harness/skills/keystone-new-policy/SKILL.md",
+		".keystone/harness/agents/README.md",
+		".keystone/harness/commands/README.md",
+		".keystone/harness/corpus/state/INSTALL_PROFILE.md",
 		"AGENTS.md", // codex's menu file at the project root
 	}
 
@@ -86,14 +101,14 @@ func TestInit_FreshScaffoldGoldenFiles(t *testing.T) {
 
 	// Universal-principles must NOT scaffold by default — it's opt-in
 	// via --starter universal-principles.
-	if _, err := os.Stat(filepath.Join(projectDir, "harness/guides/principles/tdd.md")); !os.IsNotExist(err) {
+	if _, err := os.Stat(filepath.Join(projectDir, ".keystone/harness/guides/principles/tdd.md")); !os.IsNotExist(err) {
 		t.Errorf("guides/principles/tdd.md should not exist on a default init (got err = %v)", err)
 	}
 
-	// Vendored plugins dir must not exist on a fresh install (no plugins
+	// Vendored policies dir must not exist on a fresh install (no policies
 	// declared yet). The .gitignore entry is created regardless so future
-	// `keystone install` calls don't accidentally commit plugin content.
-	if _, err := os.Stat(filepath.Join(projectDir, "harness/plugins")); !os.IsNotExist(err) {
-		t.Errorf("harness/plugins should not exist on a fresh init with no plugins declared (got err = %v)", err)
+	// `keystone install` calls don't accidentally commit policy content.
+	if _, err := os.Stat(filepath.Join(projectDir, ".keystone/harness/policies")); !os.IsNotExist(err) {
+		t.Errorf("harness/policies should not exist on a fresh init with no policies declared (got err = %v)", err)
 	}
 }

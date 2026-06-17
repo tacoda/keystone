@@ -1,0 +1,36 @@
+{{define "primitive_new.html"}}{{template "layout" .}}{{end}}
+{{define "title"}}new primitive{{end}}
+{{define "main"}}
+<section class="card">
+  <p class="muted"><a href="/primitives">← primitives</a></p>
+  <h1>scaffold a new primitive</h1>
+
+  <form hx-post="/web/actions/primitives/new" hx-target="#result" hx-swap="innerHTML">
+    <div class="row">
+      <label>kind
+        <select name="kind" required>
+          <optgroup label="framework abstractions (use first)">
+            {{range .FrameworkKinds}}<option value="{{.}}">{{.}}</option>{{end}}
+          </optgroup>
+          <optgroup label="agent abstractions (extend host primitives)">
+            {{range .AgentKinds}}<option value="{{.}}">{{.}}</option>{{end}}
+          </optgroup>
+        </select>
+      </label>
+      <label>id
+        <input type="text" name="id" required placeholder="process/release or keystone:demo">
+      </label>
+      <label>sensor kind (sensors only)
+        <select name="sensor_kind">
+          <option value="">—</option>
+          <option value="computational">computational</option>
+          <option value="inferential">inferential</option>
+        </select>
+      </label>
+      <button class="btn" type="submit">scaffold</button>
+    </div>
+  </form>
+
+  <div id="result"></div>
+</section>
+{{end}}

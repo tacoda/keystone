@@ -1,3 +1,8 @@
+---
+kind: playbook
+id: task
+description: 'End-to-end task workflow.'
+---
 # task
 
 **End-to-end task workflow.** Orchestrates `spec → orient → (implementation) → check-drift → verify → review` and an optional `learn` pass at the end. The canonical phrase to kick off a unit of work.

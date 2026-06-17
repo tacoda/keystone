@@ -1,7 +1,8 @@
 ---
-last_reconciled: <YYYY-MM-DD>
+kind: corpus
+id: corpus/state/risk-fingerprints
+description: 'Per-region risk score based on complexity + coupling + coverage.'
 ---
-
 # Risk Fingerprints
 
 > **Template.** The **bootstrap** or **audit** action will populate this from code metrics + coverage. Until then, leave as-is or fill in by hand.

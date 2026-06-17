@@ -1,3 +1,8 @@
+---
+kind: action
+id: verify
+description: 'Run the verification sensors — lint, type-check, test, build, drift, commit-message.'
+---
 # verify
 
 **Run the verification sensors** — lint, type-check, test, build, drift, commit-message. Pre-commit gate. Read [`harness/guides/process/verification.md`](guides/process/verification.md).

@@ -1,7 +1,8 @@
 ---
-kind: inferential
+kind: sensor
+id: review-functional
+description: 'An agent reads the diff and reports logic, correctness, and behavior issues.'
 ---
-
 # Sensor: review-functional
 
 An agent reads the diff and reports logic, correctness, and behavior issues.

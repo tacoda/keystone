@@ -1,0 +1,25 @@
+{
+  "description": "2.0 seeds: README pointers for the four new primitive-kind directories (skills, agents, commands, rules). Pure additions — add_file is idempotent and never overwrites. Re-run `keystone init` to backfill the full canonical templates (including the keystone:* maintenance skills).",
+  "operations": [
+    {
+      "type": "add_file",
+      "path": ".keystone/harness/skills/README.md",
+      "content": "# Skills\n\nProject-authored Claude Code skills. Each skill lives at\n`skills/<id>/SKILL.md` and declares canonical primitive frontmatter\n(`kind: skill`, `id`, `description`, `triggers`).\n\nThis is the source of truth. `keystone project` regenerates the host\nprojection at `.claude/skills/<id>/SKILL.md`.\n\nSee `docs/ports/primitive.md` for the descriptor shape.\n"
+    },
+    {
+      "type": "add_file",
+      "path": ".keystone/harness/agents/README.md",
+      "content": "# Subagents\n\nProject-authored subagent definitions. Each subagent lives at\n`agents/<id>.md` and declares canonical primitive frontmatter\n(`kind: subagent`, `id`, `description`, `tools`).\n\nThis is the source of truth. `keystone project` regenerates the host\nprojection at `.claude/agents/<id>.md`.\n\nSee `docs/ports/primitive.md` for the descriptor shape.\n"
+    },
+    {
+      "type": "add_file",
+      "path": ".keystone/harness/commands/README.md",
+      "content": "# Slash commands\n\nProject-authored slash commands. Each command lives at\n`commands/<id>.md` and declares canonical primitive frontmatter\n(`kind: command`, `id`, `description`, `args`).\n\nThis is the source of truth. `keystone project` regenerates the host\nprojection at `.claude/commands/<id>.md`.\n\nSee `docs/ports/primitive.md` for the descriptor shape.\n"
+    },
+    {
+      "type": "add_file",
+      "path": ".keystone/harness/rules/README.md",
+      "content": "# Rules (agent abstraction)\n\nHost-native flavor of a directive (Cursor `.mdc`, plain `CLAUDE.md`\nblock). Each rule lives at `rules/<id>.md` and declares canonical\nprimitive frontmatter (`kind: rule`, `id`, `description`).\n\nFramework default: use `guides/` instead. Reach for `rules/` only when\nthe directive matches a host-native rule slot exactly (e.g. a Cursor\nrule that should project 1:1 to `.cursor/rules/`).\n\nSee `docs/ports/primitive.md` for the descriptor shape.\n"
+    }
+  ]
+}

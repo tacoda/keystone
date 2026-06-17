@@ -21,8 +21,8 @@ func TestRead_MissingReturnsEmpty(t *testing.T) {
 	if lf.Version != Version {
 		t.Errorf("Version = %d, want %d", lf.Version, Version)
 	}
-	if lf.Plugins == nil {
-		t.Error("Plugins map is nil, want empty map")
+	if lf.Policies == nil {
+		t.Error("Policies map is nil, want empty map")
 	}
 }
 
@@ -34,13 +34,13 @@ func TestWriteRead_Roundtrip(t *testing.T) {
 			Installed: "2026-06-08",
 			Agents:    []string{"claude-code", "codex"},
 		},
-		Plugins: map[string]PluginLock{
+		Policies: map[string]PolicyLock{
 			"tacoda-org": {
 				SourceRef:     "tacoda/tacoda-org",
 				ResolvedSHA:   "deadbeef00000000000000000000000000000000",
-				PluginVersion: "0.2.0",
+				PolicyVersion: "0.2.0",
 				Version:       "0.2.0",
-				Files:         map[string]string{"harness/plugins/tacoda-org/guides/x.md": "sha256:abc"},
+				Files:         map[string]string{"harness/policies/tacoda-org/guides/x.md": "sha256:abc"},
 			},
 		},
 	}
@@ -59,8 +59,8 @@ func TestWriteRead_Roundtrip(t *testing.T) {
 	if !reflect.DeepEqual(in.Keystone, out.Keystone) {
 		t.Errorf("Keystone differs:\n  in:  %+v\n  out: %+v", in.Keystone, out.Keystone)
 	}
-	if !reflect.DeepEqual(in.Plugins, out.Plugins) {
-		t.Errorf("Plugins differ:\n  in:  %+v\n  out: %+v", in.Plugins, out.Plugins)
+	if !reflect.DeepEqual(in.Policies, out.Policies) {
+		t.Errorf("Policies differ:\n  in:  %+v\n  out: %+v", in.Policies, out.Policies)
 	}
 }
 

@@ -33,7 +33,7 @@ func TestParseShorthand(t *testing.T) {
 	}
 }
 
-func TestDefaultPluginName(t *testing.T) {
+func TestDefaultPolicyName(t *testing.T) {
 	tests := []struct {
 		source string
 		want   string
@@ -45,8 +45,8 @@ func TestDefaultPluginName(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.source, func(t *testing.T) {
-			if got := DefaultPluginName(tt.source); got != tt.want {
-				t.Errorf("DefaultPluginName(%q) = %q, want %q", tt.source, got, tt.want)
+			if got := DefaultPolicyName(tt.source); got != tt.want {
+				t.Errorf("DefaultPolicyName(%q) = %q, want %q", tt.source, got, tt.want)
 			}
 		})
 	}
@@ -105,27 +105,24 @@ func TestValidateSource(t *testing.T) {
 	}
 }
 
+// TestProjectConfig_ResolvedHarnessRoot pins 2.0's fixed-layout
+// contract: the harness path is no longer per-project, and the
+// deprecated HarnessRoot field is ignored when present in keystone.json.
 func TestProjectConfig_ResolvedHarnessRoot(t *testing.T) {
-	tests := []struct {
+	cases := []struct {
 		name string
-		root string
-		want string
+		cfg  *ProjectConfig
 	}{
-		{"default", "", DefaultHarnessRoot},
-		{"custom", "playbook", "playbook"},
+		{"empty", &ProjectConfig{}},
+		{"legacy-field-ignored", &ProjectConfig{HarnessRoot: "playbook"}},
+		{"nil", nil},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			c := &ProjectConfig{HarnessRoot: tt.root}
-			if got := c.ResolvedHarnessRoot(); got != tt.want {
-				t.Errorf("ResolvedHarnessRoot() = %q, want %q", got, tt.want)
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			if got := c.cfg.ResolvedHarnessRoot(); got != DefaultHarnessRoot {
+				t.Errorf("ResolvedHarnessRoot() = %q, want %q (fixed at 2.0)", got, DefaultHarnessRoot)
 			}
 		})
-	}
-	// Nil receiver also resolves to default.
-	var nilCfg *ProjectConfig
-	if got := nilCfg.ResolvedHarnessRoot(); got != DefaultHarnessRoot {
-		t.Errorf("nil.ResolvedHarnessRoot() = %q, want %q", got, DefaultHarnessRoot)
 	}
 }
 
@@ -143,13 +140,13 @@ func TestWriteReadProjectConfig_Roundtrip(t *testing.T) {
 		Version:          SchemaVersion,
 		FrameworkVersion: "1.0.0",
 		HarnessRoot:      "playbook",
-		Plugins: []PluginNode{
+		Policies: []PolicyNode{
 			{
 				Name:    "acme-org",
 				Source:  "github.com/acme/policies",
 				Version: "v2.0.0",
 				Strict:  map[string][]string{"guides": {"data-handling"}},
-				Children: []PluginNode{
+				Children: []PolicyNode{
 					{
 						Name:    "acme-platform",
 						Source:  "acme/platform-policies",
@@ -181,7 +178,7 @@ func TestWriteReadProjectConfig_Roundtrip(t *testing.T) {
 func TestProjectConfig_RejectsDuplicateNames(t *testing.T) {
 	cfg := &ProjectConfig{
 		Version: SchemaVersion,
-		Plugins: []PluginNode{
+		Policies: []PolicyNode{
 			{Name: "a", Source: "x/a", Version: "v1"},
 			{Name: "a", Source: "y/a", Version: "v2"},
 		},
@@ -195,10 +192,10 @@ func TestProjectConfig_RejectsDuplicateNames(t *testing.T) {
 func TestProjectConfig_RejectsDuplicateNamesAcrossDepth(t *testing.T) {
 	cfg := &ProjectConfig{
 		Version: SchemaVersion,
-		Plugins: []PluginNode{
+		Policies: []PolicyNode{
 			{
 				Name: "a", Source: "x/a", Version: "v1",
-				Children: []PluginNode{
+				Children: []PolicyNode{
 					{Name: "a", Source: "y/a", Version: "v2"},
 				},
 			},

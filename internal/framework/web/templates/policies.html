@@ -1,0 +1,47 @@
+{{define "policies.html"}}{{template "layout" .}}{{end}}
+{{define "title"}}policies{{end}}
+{{define "main"}}
+<section class="card">
+  <h1>policies</h1>
+  <p class="muted">vendored harness fragments declared in keystone.json. Pinned, hash-verified, drift-reset by <code>keystone verify</code>.</p>
+  {{if .Policies}}
+  <table>
+    <thead><tr><th>name</th><th>source</th><th>version</th><th>strict</th><th></th></tr></thead>
+    <tbody>
+      {{range .Policies}}
+      <tr>
+        <td><code>{{.Name}}</code></td>
+        <td class="muted"><code>{{.Source}}</code></td>
+        <td><code>{{.Version}}</code></td>
+        <td class="muted">{{if .Strict}}{{range $k, $v := .Strict}}{{$k}}: {{len $v}}{{end}}{{else}}—{{end}}</td>
+        <td>
+          <form hx-post="/web/actions/policy/remove" hx-confirm="Remove policy {{.Name}}?">
+            <input type="hidden" name="name" value="{{.Name}}">
+            <button class="btn ghost danger" type="submit">remove</button>
+          </form>
+        </td>
+      </tr>
+      {{end}}
+    </tbody>
+  </table>
+  {{else}}
+  <p class="muted">no policies declared. Add one below.</p>
+  {{end}}
+</section>
+
+<section class="card">
+  <h2>add a policy</h2>
+  <form hx-post="/web/actions/policy/add" hx-target="#result" hx-swap="innerHTML">
+    <div class="row">
+      <label>spec (<owner>/<repo>@<version>)
+        <input type="text" name="spec" required placeholder="acme/policies@v1.0.0">
+      </label>
+      <label>name (optional)
+        <input type="text" name="name" placeholder="acme">
+      </label>
+      <button class="btn" type="submit">add</button>
+    </div>
+  </form>
+  <div id="result"></div>
+</section>
+{{end}}

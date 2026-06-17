@@ -7,7 +7,7 @@ Loaded ambient; enforced by the [drift sensor](../../../sensors/drift.md).
 
 **Controllers translate, they do not decide.** A controller may parse input, call the model, and choose a view. A controller may not contain business rules. Any branching on domain state that is not "did the model succeed or fail" is a violation.
 
-## GOLDEN RULES
+## GOLDEN PATH
 
 - **Aim for controllers under ~10 actions.** Larger means a missing decomposition.
 - **Aim for action methods under ~15 lines.** Beyond that, a model method or domain service usually wants to exist.

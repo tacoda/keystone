@@ -1,0 +1,9 @@
+{{define "_source_query_result.html"}}
+<div class="card" style="background: var(--bg-3); margin-top: 0.75rem;">
+  <h2 style="margin-top: 0;">result</h2>
+  <p class="muted">{{.Result.Title}}</p>
+  {{if .Result.URI}}<p class="muted"><code>{{.Result.URI}}</code></p>{{end}}
+  {{if .Result.Body}}<pre class="body">{{.Result.Body}}</pre>{{else}}<p class="muted">no hits.</p>{{end}}
+  <p class="warn" style="margin-top: 0.75rem; font-size: 0.85rem;">stage 3 result — ask the user where to apply this (project, team policy, org policy) before recording.</p>
+</div>
+{{end}}

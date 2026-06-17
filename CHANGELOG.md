@@ -2,6 +2,189 @@
 
 All notable changes to keystone are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); the project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0] — 2026-06-17
+
+Worthy 2.0. Layout move, primitive taxonomy, in-binary MCP server,
+localhost dashboard, evals, and a lot more. Migration is one command.
+
+### Layout — `.keystone/` is the new home
+
+- Harness root moves from `harness/` to **`.keystone/harness/`**.
+  Lockfile lifts from `<harness>/keystone.lock.json` to
+  `.keystone/lockfile.json`. Primitive descriptor index lives at
+  `.keystone/INDEX.json`. Both the keystone CLI and the keystone MCP
+  server walk the same tree — same source of truth for the author
+  surface and the runtime surface.
+- `--harness-root` flag and the `harness_root` field in `keystone.json`
+  are gone. The path is fixed at 2.0 — a framework convention, not a
+  per-project setting.
+- One-shot `keystone migrate` moves every existing 1.x install onto
+  the new layout: directory shuffle + manifest filename renames +
+  `keystone.json` schema rewrite + index regen + projection refresh.
+  Idempotent. Pair with `keystone snapshot save --label pre-2.0` for
+  insurance.
+
+### Eleven primitive kinds — two layers
+
+- Canonical frontmatter shape (`kind`, `id`, `description`, plus
+  per-kind required fields) on every harness file. Replaces H2-tier
+  parsing for rules with explicit `severity:`. Documented in
+  `docs/ports/primitive.md`.
+- **Framework abstractions** (keystone-canonical): `guide`, `corpus`,
+  `sensor`, `action`, `playbook`, `eval`, `source`.
+- **Agent abstractions** (project-owned; align with host primitives):
+  `rule`, `skill`, `subagent`, `command`, `persona`.
+- Policies (vendored harness fragments — renamed from `plugin`) may
+  ship every framework abstraction but **not** agent abstractions.
+  Enforced at install.
+
+### CLI — Cobra-based, much bigger surface
+
+`keystone` is now a Cobra command tree. Every existing verb retained
+plus:
+
+- `keystone index` / `lint` / `project` — author/maintain INDEX.json
+  and host projections from canonical sources.
+- `keystone new <kind> <id>` — generators for every primitive kind
+  plus `adapter` and `policy`. Replaces `keystone new guide|action|
+  sensor|playbook|adapter|plugin`.
+- `keystone migrate` — 1.x → 2.0 one-shot.
+- `keystone search <q>` — weighted substring search across every
+  primitive (id, description, globs, traces, body).
+- `keystone graph --format mermaid|dot` — primitive-relationship
+  graph (deps + traces).
+- `keystone watch` — fsnotify loop: index + project + lint on change.
+- `keystone snapshot save|list|restore` — local tar.gz snapshots of
+  `.keystone/` for safe experiments.
+- `keystone eval run [--filter X] [--baseline <git-ref>]` — static +
+  sensor eval engine with regression-diff against a baseline.
+- `keystone mcp serve|install|status|show` — MCP server lifecycle +
+  per-agent config writers (Claude Code, Cursor, VS Code, Codex).
+- `keystone web serve` — localhost HTMX dashboard.
+- `keystone completion bash|zsh|fish|powershell` — shell autocomplete
+  (Cobra default).
+
+`huh` removed. `init` prompts at most once (agent target) — everything
+else detected by the `bootstrap` action.
+
+### Built-in MCP server
+
+Go port of `keystone-mcp`. Single binary; `keystone mcp serve` starts
+a stdio MCP server reading the same `.keystone/harness/` tree the CLI
+authors.
+
+- 21 tools across read / write / sources / evals / search
+- 4 prompts: `keystone_bootstrap`, `keystone_task`, `keystone_audit`,
+  `keystone_learn`
+- Resources: `keystone://index`, `keystone://primitive/{kind}/{id}`,
+  `keystone://harness/status`, `keystone://source/list`,
+  `keystone://source/{name}/health`, `skill://list`,
+  `skill://{name}/SKILL.md`
+- External-source adapter framework (folder, url; service adapters
+  Phase B) configured via `.keystone/context.json`. Stage 3 of the
+  resolution flow.
+- Runtime resolution contract — rules → corpus → external → ask user
+  → resolve contradictions — encoded in the server's `instructions`
+  block and in `process/runtime-resolution.md`.
+- One-line registration: `keystone mcp install --agent claude-code`
+  writes `.mcp.json`; same flags for `cursor`, `vscode`, `codex`.
+
+### Localhost dashboard
+
+`keystone web serve` (default port `4773` = KEYS on a phone keypad).
+Embedded HTMX + SSE push; same Go binary; styled to match
+`tacoda.dev/keystone`.
+
+Pages: home, metrics, insights, primitives (list + new + detail),
+policies, investigator, sources (list + new + per-source query +
+health probe), verify, prune, inbox, flywheels, evals, search, graph.
+
+Read-only REST API at `/api/*`. SSE push at `/events`. fsnotify on
+`.keystone/` swaps fragments when files change.
+
+### Evals
+
+New framework primitive. `.keystone/harness/evals/<id>/EVAL.md` +
+sibling `expected.json` + optional `fixture/`. Static + sensor
+levels; agent level reserved for 2.1. `keystone eval run --baseline
+<git-ref>` materializes the ref in a git worktree, runs both sides,
+diffs results into a regression report.
+
+### Personas
+
+New agent abstraction. System-prompt overlay the main agent ADOPTS
+(not a delegated subagent). `keystone new persona <id>` →
+`.keystone/harness/personas/<id>.md`.
+
+### Sources
+
+External-source declarations as a framework primitive. Backwards-
+compat with `.keystone/context.json`; full migration to source
+primitives is the 2.1 work.
+
+### Plugin → policy rename
+
+The `plugin` term is gone. Go package: `internal/framework/plugins/`
+→ `internal/framework/policies/`. JSON field: `keystone.json`
+`plugins:` → `policies:`. Manifest filename: `keystone-plugin.json`
+→ `keystone-policy.json`. CLI: `keystone plugin <verb>` → `keystone
+policy <verb>` (the old verb redirects with a deprecation message).
+Embedded dir: `harness/plugins/` → `harness/policies/`.
+Skill: `keystone:new-plugin` → `keystone:new-policy`. The migrator
+handles every rename in one pass.
+
+### Action playbooks now refresh the index
+
+`bootstrap`, `synthesize`, `learn`, `audit`, `check-drift` all
+append an "Index refresh" step pointing at `keystone index` (and
+`keystone project` where projections changed). The
+`keystone:index` skill wraps the CLI invocation so agents stay
+inside their native tooling.
+
+### Cross-cutting
+
+- Provenance metadata derived per-primitive at walk time (`project`
+  vs `policy/<name>`). Surfaced in INDEX.json + primitive detail
+  page.
+- Cross-reference panel on each primitive detail (incoming deps /
+  traces).
+- `keystone:` namespaced maintenance skills shipped with init
+  (`keystone:index`, `keystone:verify`, `keystone:new-guide`,
+  `keystone:new-corpus`, `keystone:new-sensor`, `keystone:new-action`,
+  `keystone:new-playbook`, `keystone:new-adapter`,
+  `keystone:new-policy`).
+- Convention doc, port docs, and templates fully swept for canonical
+  frontmatter.
+- LICENSE confirmed MIT; new CONTRIBUTING.md.
+
+### Breaking
+
+- Layout: `harness/` → `.keystone/harness/`. Run `keystone migrate`.
+- Schema: `keystone.json` v1 → v2 (`harness_root` field dropped,
+  `plugins:` → `policies:`).
+- Manifest filename: `keystone-plugin.json` → `keystone-policy.json`.
+- Lockfile location: `<harness>/keystone.lock.json` →
+  `.keystone/lockfile.json`.
+- CLI: `keystone plugin <verb>` removed (redirects to `keystone
+  policy <verb>` with a deprecation message). `--harness-root` flag
+  removed everywhere.
+- Sensor frontmatter: existing `kind: computational | inferential`
+  becomes `kind: sensor` + `sensor_kind: computational | inferential`
+  (preserved by the migrator).
+- H2-tier parsing on guides is gone in favor of `severity:`. Guides
+  keep the `## IRON LAW(S)` / `## GOLDEN PATH` / `## RULES`
+  sections for human reading; the parser no longer derives severity
+  from them.
+
+### Migration
+
+```bash
+keystone snapshot save --label pre-2.0   # insurance
+keystone migrate                         # one-shot
+keystone lint --verbose                  # verify
+keystone web serve                       # explore the new dashboard
+```
+
 ## [1.0.4] — 2026-06-09
 
 Guide globs — phases A through F shipped in one release. Documentation, schema, and playbook updates that introduce a `globs:` frontmatter field on guides so per-rule activation can be narrowed to a set of code paths. Bootstrap seeds globs into idiom and computational guides from the region map in `CODEBASE_STATE.md`, generates the `GLOBS_INDEX.md` reverse-index, and projects each guide's `globs:` into a matching `.cursor/rules/keystone-<topic>-<name>.mdc` for Cursor's native glob-attached rule system. The `orient` action reads `GLOBS_INDEX.md` to gate per-guide loading on the touched-files set; all eight pointer-style adapters (Claude Code, Codex, Aider, Cline, Continue, Goose, GitHub Copilot, Pi) had their `activation.md` lazy-by-region sections updated to describe the new flow. Learning candidates can record `proposed-globs:` so `synthesize` proposes the right globs at promotion time and regenerates `GLOBS_INDEX.md` plus Cursor `.mdc` projections in the same step. The patch doctrine has been expanded to formally cover framework-scaffolded scaffold updates (READMEs, sensor and action playbooks, per-adapter activation docs) alongside config-schema bumps, while keeping user-authored rule content out. All changes are markdown-only — the Go runtime is unchanged. (The field was briefly drafted as `scope:` during authoring before being renamed to `globs:` — matching what the value actually is: a list of glob patterns grounded in real project paths.)
@@ -132,7 +315,7 @@ Plugin model cleanup. Tier labels (`org` / `team`) were the last carryover from 
 - **State ledger port** — `<harness-root>/corpus/state/<name>.md` is its own port (mutable; written by `bootstrap`/`audit`/`learn`). Full contract at [`docs/ports/state-ledger.md`](docs/ports/state-ledger.md).
 - **Patch port** — the framework-patch runner abstraction. Contract at [`docs/ports/patch.md`](docs/ports/patch.md).
 - **Budget port** — per-port context-token caps in `keystone.json`'s `budgets` block; whitespace-approximate estimator. Contract at [`docs/ports/budget.md`](docs/ports/budget.md).
-- **Rules tiers in guides** — `## IRON LAW(S)` / `## GOLDEN RULES` / `## RULES` strength gradient. Documented in [`docs/ports/guide.md`](docs/ports/guide.md) and [`docs/conventions.md`](docs/conventions.md).
+- **Rules tiers in guides** — `## IRON LAW(S)` / `## GOLDEN PATH` / `## RULES` strength gradient. Documented in [`docs/ports/guide.md`](docs/ports/guide.md) and [`docs/conventions.md`](docs/conventions.md).
 - **Pacing modes** (`paired` / `solo` / `autopilot`) — runtime feature switched via the `mode` action. Documented in `<harness-root>/guides/process/modes.md` and [`docs/conventions.md`](docs/conventions.md).
 
 ### Removed
@@ -564,7 +747,7 @@ Introduces a third rule tier — regular **RULES** — as the default for any di
 
 ### Added
 
-- **`## RULES` section** in the guide file format. The default tier; most directives land here. `## IRON LAW(S)` and `## GOLDEN RULES` remain available but are now optional sections, omitted when nothing in a file qualifies.
+- **`## RULES` section** in the guide file format. The default tier; most directives land here. `## IRON LAW(S)` and `## GOLDEN PATH` remain available but are now optional sections, omitted when nothing in a file qualifies.
 - **Rule-tier table in `harness/learning/README.md`** documenting the three tiers, when each is appropriate, and the synthesize prompt flow that requires user confirmation before a candidate lands under a special heading.
 
 ### Changed
@@ -575,7 +758,7 @@ Introduces a third rule tier — regular **RULES** — as the default for any di
 
 ### Migration from 0.4.0
 
-- **Existing principle guides are unchanged.** The 29 shipped `harness/guides/principles/*.md` files keep their `## IRON LAW` / `## GOLDEN RULES` sections as authored — those designations were deliberate.
+- **Existing principle guides are unchanged.** The 29 shipped `harness/guides/principles/*.md` files keep their `## IRON LAW` / `## GOLDEN PATH` sections as authored — those designations were deliberate.
 - **Newly synthesized rules** going forward default to a `## RULES` section. Add the section to a guide file the first time a regular rule lands there; existing files with only the special tiers stay as-is until a regular rule joins them.
 - **Custom drift sensor integrations** that previously only inspected IRON LAW headings should be widened to read `## RULES` and treat its findings as warnings.
 
@@ -638,7 +821,7 @@ The split is the point: rules are short and high-value-per-token; corpus is long
 - **`harness/corpus/`** — informational layer. Houses `principles/`, `idioms/`, `domain/`, `state/`. Read on-demand via forward-links from paired guides, or when process explicitly references a file.
 - **`harness/guides/`** — rule layer. Houses `principles/`, `idioms/`, `domain/`, `process/`. Always loaded. Enforced by the drift sensor.
 - **`harness/sensors/`** — promoted from `harness/process/sensors.md` (one file) into one file per sensor: `lint`, `type-check`, `test`, `build`, `drift`, `coverage`, `risk-fingerprint`, `traffic-topology`, `state-region`, `commit-message`, `tracker-card-fetcher`, `spec-adherence`, plus a README index.
-- **Paired guide files for every principle** that previously carried `## IRON LAW` / `## GOLDEN RULES` sections. The rule sections moved into `harness/guides/principles/<name>.md`; the original corpus file keeps the reasoning, anti-patterns, and references, plus a forward-link.
+- **Paired guide files for every principle** that previously carried `## IRON LAW` / `## GOLDEN PATH` sections. The rule sections moved into `harness/guides/principles/<name>.md`; the original corpus file keeps the reasoning, anti-patterns, and references, plus a forward-link.
 - **Concern-specific MVC idioms** seeded when `--architecture mvc` is selected: `corpus/idioms/mvc/{models,controllers,views}.md` with paired `guides/idioms/mvc/{models,controllers,views}.md` covering "the model is not a row," "controllers translate, they do not decide," and "views render, they do not compute."
 - **Learning flywheel classification.** The **synthesize** action now explicitly routes each inbox candidate as **rule** (lands in `guides/`) or **information** (lands in `corpus/`). The inbox frontmatter carries a `candidate_kind` hint; synthesize confirms or overrides.
 - **Pruning flywheel asymmetry.** **audit** runs in two passes — a regular pass over guides (rules churn with the codebase) and a rare pass over corpus (only when design / strategy / ideals have moved on).
@@ -672,7 +855,7 @@ Path moves for hand-references inside any project that has installed an earlier 
 | `harness/process/sensors.md` | `harness/sensors/<sensor-name>.md` (one file per sensor) + `harness/sensors/README.md` |
 | `harness/state/INSTALL_PROFILE.md` | `harness/corpus/state/INSTALL_PROFILE.md` |
 
-Each principle file previously containing `## IRON LAW` / `## GOLDEN RULES` sections has had those sections moved into a paired `harness/guides/principles/<name>.md`. The corpus file now ends with a forward-link to the guide. If a project has extended a principle file in-place with custom rule sections, hand-port those sections to the matching guide file.
+Each principle file previously containing `## IRON LAW` / `## GOLDEN PATH` sections has had those sections moved into a paired `harness/guides/principles/<name>.md`. The corpus file now ends with a forward-link to the guide. If a project has extended a principle file in-place with custom rule sections, hand-port those sections to the matching guide file.
 
 The internal classification convention is: **rules go in `guides/`, reasoning goes in `corpus/`.** When in doubt during Learning flywheel reviews, default to corpus — adding a guide narrows the agent's behavior across the whole project, so the bar should be higher than adding context.
 

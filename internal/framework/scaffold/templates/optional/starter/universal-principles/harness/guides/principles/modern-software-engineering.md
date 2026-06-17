@@ -7,7 +7,7 @@ Loaded ambient; enforced by the [drift sensor](../../sensors/drift.md). The corp
 
 **Falsifiability before authority.** A design decision that cannot be tested — by a unit, an integration, a measurement in production, or a deliberate experiment — is a guess. Guesses are allowed; calling them engineering is not.
 
-## GOLDEN RULES
+## GOLDEN PATH
 
 - **Aim for short feedback loops.** Compile time, test time, integration time, deploy time, time-to-detect-in-prod. Each one shorter is each one of these loops tighter.
 - **Aim for changes that are small enough to be safe and large enough to be useful.** Increment size is a tuning parameter, not a fixed quantity.

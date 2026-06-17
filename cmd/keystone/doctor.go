@@ -14,20 +14,20 @@ import (
 	"github.com/tacoda/keystone/internal/framework/config"
 	"github.com/tacoda/keystone/internal/framework/loader"
 	"github.com/tacoda/keystone/internal/framework/lockfile"
-	"github.com/tacoda/keystone/internal/framework/plugins"
+	"github.com/tacoda/keystone/internal/framework/policies"
 	"github.com/tacoda/keystone/internal/framework/scaffold"
 )
 
 // runDoctor handles `keystone doctor [--dir <path>] [--harness-root <name>]
-// [--paths-only] [--plugins-only] [--drift-only]`.
+// [--paths-only] [--policies-only] [--drift-only]`.
 //
 // Runs three independent checks against an existing install:
 //
 //  1. Path conformance — scan every markdown file under <harness-root>/
 //     (excluding vendored plugins) and flag any inter-harness link with
 //     '../' or './' segments. See docs/conventions.md for the rule.
-//  2. Plugin drift — load keystone.json + lockfile, run loader.Verify;
-//     drifted plugins get reset and the user is told to re-run
+//  2. Policy drift — load keystone.json + lockfile, run loader.Verify;
+//     drifted policies get reset and the user is told to re-run
 //     `keystone install`.
 //  3. Template drift — diff the user's scaffolded defaults against the
 //     binary's current templates; report which user files have changed
@@ -35,16 +35,12 @@ import (
 //
 // Exit codes:
 //   0 — every check clean (or only template drift, which is informational).
-//   0 — plugin drift was auto-reset; install needed to repopulate.
+//   0 — policy drift was auto-reset; install needed to repopulate.
 //   1 — any path violation or strict-cascade violation.
 func runDoctor(args []string) error {
-	flagValue, args, err := extractHarnessRootFlag(args)
-	if err != nil {
-		return err
-	}
 	dir := "."
 	runAll := true
-	var runPaths, runPluginsCheck, runDriftCheck, runBudget, fix bool
+	var runPaths, runPoliciesCheck, runDriftCheck, runBudget, fix bool
 
 	for i := 0; i < len(args); i++ {
 		a := args[i]
@@ -63,9 +59,9 @@ func runDoctor(args []string) error {
 		case a == "--paths-only":
 			runAll = false
 			runPaths = true
-		case a == "--plugins-only":
+		case a == "--policies-only":
 			runAll = false
-			runPluginsCheck = true
+			runPoliciesCheck = true
 		case a == "--drift-only":
 			runAll = false
 			runDriftCheck = true
@@ -81,17 +77,14 @@ func runDoctor(args []string) error {
 		}
 	}
 	if runAll {
-		runPaths, runPluginsCheck, runDriftCheck = true, true, true
+		runPaths, runPoliciesCheck, runDriftCheck = true, true, true
 	}
 
 	absDir, err := filepath.Abs(dir)
 	if err != nil {
 		return fmt.Errorf("resolve dir: %w", err)
 	}
-	harnessRoot, err := resolveHarnessRoot(absDir, flagValue)
-	if err != nil {
-		return err
-	}
+	harnessRoot := config.DefaultHarnessRoot
 
 	hadErrors := false
 
@@ -113,10 +106,10 @@ func runDoctor(args []string) error {
 		}
 	}
 
-	if runPluginsCheck {
-		errs, err := checkPluginIntegrity(absDir, harnessRoot)
+	if runPoliciesCheck {
+		errs, err := checkPolicyIntegrity(absDir, harnessRoot)
 		if err != nil {
-			return fmt.Errorf("plugin check: %w", err)
+			return fmt.Errorf("policy check: %w", err)
 		}
 		if errs > 0 {
 			hadErrors = true
@@ -200,7 +193,7 @@ func runBudgetReport(projectDir, harnessRoot string) error {
 func walkHarnessBudget(projectDir, harnessRoot string) (*budget.Allocator, error) {
 	alloc := budget.NewAllocator()
 	root := filepath.Join(projectDir, harnessRoot)
-	skip := filepath.Join(harnessRoot, plugins.PluginRoot)
+	skip := filepath.Join(harnessRoot, policies.PolicyRoot)
 
 	err := filepath.WalkDir(root, func(p string, d fs.DirEntry, err error) error {
 		if err != nil {
@@ -253,14 +246,14 @@ func printDoctorUsage(w *os.File) {
 	fmt.Fprint(w, `keystone doctor — audit an existing harness install
 
 Usage:
-  keystone doctor [--dir <path>] [--harness-root <name>] [--paths-only|--plugins-only|--drift-only]
+  keystone doctor [--dir <path>] [--harness-root <name>] [--paths-only|--policies-only|--drift-only]
 
 Runs three independent checks by default:
 
   paths   — every inter-harness link must be harness-root-relative;
             '../' and './' segments are forbidden (see docs/conventions.md
             for the rule). Violations exit non-zero.
-  plugins — walks vendored plugins, detects drift, resets drifted plugins
+  policies — walks vendored plugins, detects drift, resets drifted plugins
             so a follow-up 'keystone install' can repopulate from cache.
   drift   — diffs the user's scaffolded defaults against the binary's
             current templates; reports which user files have changed.
@@ -268,7 +261,7 @@ Runs three independent checks by default:
 
 Flags:
   --paths-only            Run only the path-convention check.
-  --plugins-only          Run only the plugin-integrity check.
+  --policies-only          Run only the plugin-integrity check.
   --drift-only            Run only the template-drift check.
   --budget                Run only the per-port budget report (whitespace-
                           approximate token count vs keystone.json's
@@ -299,7 +292,7 @@ var markdownLink = regexp.MustCompile(`\[[^\]]*\]\(([^)]+)\)`)
 
 func checkPathConventions(projectDir, harnessRoot string) ([]pathViolation, error) {
 	root := filepath.Join(projectDir, harnessRoot)
-	skip := filepath.Join(harnessRoot, plugins.PluginRoot)
+	skip := filepath.Join(harnessRoot, policies.PolicyRoot)
 	var hits []pathViolation
 
 	err := filepath.WalkDir(root, func(path string, d fs.DirEntry, err error) error {
@@ -347,7 +340,7 @@ func checkPathConventions(projectDir, harnessRoot string) ([]pathViolation, erro
 // path.Join normalizes the '..' and '.' segments correctly.
 func fixPathConventions(projectDir, harnessRoot string) (int, error) {
 	root := filepath.Join(projectDir, harnessRoot)
-	skip := filepath.Join(harnessRoot, plugins.PluginRoot)
+	skip := filepath.Join(harnessRoot, policies.PolicyRoot)
 	count := 0
 
 	err := filepath.WalkDir(root, func(p string, d fs.DirEntry, err error) error {
@@ -465,19 +458,19 @@ func printPathReport(hits []pathViolation, harnessRoot string) {
 	fmt.Fprintf(os.Stdout, "  See docs/conventions.md for the rule.\n")
 }
 
-// --- Plugin integrity check ---------------------------------------------
+// --- Policy integrity check ---------------------------------------------
 
-func checkPluginIntegrity(projectDir, harnessRoot string) (int, error) {
+func checkPolicyIntegrity(projectDir, harnessRoot string) (int, error) {
 	cfg, err := config.ReadProjectConfig(projectDir)
 	if err != nil {
 		if os.IsNotExist(err) {
-			fmt.Fprintf(os.Stdout, "  no %s — skipping plugin check\n", config.ProjectConfigFile)
+			fmt.Fprintf(os.Stdout, "  no %s — skipping policy check\n", config.ProjectConfigFile)
 			return 0, nil
 		}
 		return 0, err
 	}
-	if len(cfg.Plugins) == 0 {
-		fmt.Fprintf(os.Stdout, "✓ plugins: keystone.json declares no plugins — nothing to verify\n")
+	if len(cfg.Policies) == 0 {
+		fmt.Fprintf(os.Stdout, "✓ plugins: keystone.json declares no policies — nothing to verify\n")
 		return 0, nil
 	}
 	lf, err := lockfile.Read(projectDir, harnessRoot)
@@ -485,7 +478,7 @@ func checkPluginIntegrity(projectDir, harnessRoot string) (int, error) {
 		return 0, err
 	}
 	expected := map[string]map[string]string{}
-	for name, lock := range lf.Plugins {
+	for name, lock := range lf.Policies {
 		expected[name] = lock.Files
 	}
 	res, err := loader.Verify(projectDir, cfg, expected)
@@ -496,11 +489,11 @@ func checkPluginIntegrity(projectDir, harnessRoot string) (int, error) {
 	if res.HasDrift() {
 		fmt.Fprintf(os.Stdout, "▸ plugins: drift detected — resetting %d plugin(s)\n", len(res.Drift))
 		for _, d := range res.Drift {
-			fmt.Fprintf(os.Stdout, "    • %s: %d drifted file(s)\n", d.Plugin, len(d.Files))
+			fmt.Fprintf(os.Stdout, "    • %s: %d drifted file(s)\n", d.Policy, len(d.Files))
 			for _, f := range d.Files {
 				fmt.Fprintf(os.Stdout, "        - %s (%s)\n", f.Path, f.Kind)
 			}
-			if err := plugins.Reset(d.Plugin, projectDir, harnessRoot); err != nil {
+			if err := policies.Reset(d.Policy, projectDir, harnessRoot); err != nil {
 				return 0, err
 			}
 		}
@@ -514,7 +507,7 @@ func checkPluginIntegrity(projectDir, harnessRoot string) (int, error) {
 		}
 	}
 	if !res.HasDrift() && !res.HasErrors() {
-		fmt.Fprintf(os.Stdout, "✓ plugins: all %d plugin(s) clean (no drift, no strict violations)\n", len(cfg.Plugins))
+		fmt.Fprintf(os.Stdout, "✓ plugins: all %d plugin(s) clean (no drift, no strict violations)\n", len(cfg.Policies))
 	}
 	return errs, nil
 }

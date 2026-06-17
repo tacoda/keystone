@@ -1,0 +1,31 @@
+{{define "primitives.html"}}{{template "layout" .}}{{end}}
+{{define "title"}}primitives{{end}}
+{{define "main"}}
+<section class="card">
+  <h1>primitives</h1>
+  <p class="muted">{{.Total}} total in harness</p>
+
+  <form class="filters"
+        hx-get="/web/fragments/primitives"
+        hx-trigger="input changed delay:200ms, change"
+        hx-target="#primitives-tbody"
+        hx-swap="outerHTML">
+    <label>kind
+      <select name="kind">
+        <option value="">(any)</option>
+        {{range .Kinds}}<option value="{{.}}" {{if eq . $.Filter.kind}}selected{{end}}>{{.}}</option>{{end}}
+      </select>
+    </label>
+    <label>glob
+      <input type="text" name="glob" value="{{.Filter.glob}}" placeholder="src/billing/**">
+    </label>
+  </form>
+
+  <table>
+    <thead>
+      <tr><th>kind</th><th>id</th><th>description</th><th>path</th></tr>
+    </thead>
+    {{template "_primitives_table.html" .}}
+  </table>
+</section>
+{{end}}

@@ -7,7 +7,7 @@ Loaded ambient; enforced by the [drift sensor](../../sensors/drift.md). The corp
 
 **The cost of complexity compounds; the cost of simplicity is paid once.** A complicated design taxes every future change, every new hire, every security review, every incident response. A simple design pays its cost at design time and stays cheap.
 
-## GOLDEN RULES
+## GOLDEN PATH
 
 - **Aim for designs that are obviously correct, not designs that are not obviously incorrect.** The first kind survives change; the second collapses under it.
 - **Aim to remove, not to add.** When a system is hard to work with, the first move is usually to delete something, not to introduce something.

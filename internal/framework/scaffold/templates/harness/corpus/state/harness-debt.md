@@ -1,7 +1,8 @@
 ---
-last_reconciled: <YYYY-MM-DD>
+kind: corpus
+id: corpus/state/harness-debt
+description: 'Paired ledger: [code-debt.'
 ---
-
 # Harness Debt Ledger
 
 > **Template.** The **audit** action's Pruning flywheel populates this from the [harness-debt sensor](sensors/harness-debt.md). Until then, leave as-is or fill in by hand.

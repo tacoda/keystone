@@ -1,0 +1,16 @@
+{{define "graph.html"}}{{template "layout" .}}{{end}}
+{{define "title"}}graph{{end}}
+{{define "main"}}
+<section class="card">
+  <h1>dependency graph</h1>
+  <p class="muted">Every primitive + every edge — <code>deps:</code> and <code>traces:</code>. Each kind colored by accent. Rendered in-browser via Mermaid.</p>
+
+  <pre class="mermaid" style="background: var(--bg-3); padding: 1rem; border-radius: 6px; font-size: 0.78rem;">
+{{.Mermaid}}
+  </pre>
+</section>
+<script type="module">
+  import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs";
+  mermaid.initialize({ startOnLoad: true, theme: "dark" });
+</script>
+{{end}}

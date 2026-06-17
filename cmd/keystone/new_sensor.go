@@ -4,13 +4,11 @@ import (
 	"fmt"
 	"path/filepath"
 	"strings"
+
+	"github.com/tacoda/keystone/internal/framework/config"
 )
 
 func runNewSensor(args []string) error {
-	flagValue, args, err := extractHarnessRootFlag(args)
-	if err != nil {
-		return err
-	}
 	dir := "."
 	kind := "computational"
 	var positional []string
@@ -45,10 +43,7 @@ func runNewSensor(args []string) error {
 	if err != nil {
 		return fmt.Errorf("resolve dir: %w", err)
 	}
-	harnessRoot, err := resolveHarnessRoot(absDir, flagValue)
-	if err != nil {
-		return err
-	}
+	harnessRoot := config.DefaultHarnessRoot
 	path := filepath.Join(absDir, harnessRoot, "sensors", name+".md")
 	body := fmt.Sprintf(`---
 kind: %s

@@ -1,3 +1,8 @@
+---
+kind: action
+id: review
+description: 'Run the four review sensors on the current diff.'
+---
 # review
 
 **Run the four review sensors on the current diff.** Semantic check, post-verify. Read [`harness/guides/process/review.md`](guides/process/review.md).

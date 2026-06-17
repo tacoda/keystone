@@ -1,7 +1,8 @@
 ---
-kind: computational
+kind: sensor
+id: lint
+description: 'Surface-level style and pattern checks.'
 ---
-
 # Sensor: lint
 
 Surface-level style and pattern checks.

@@ -1,3 +1,8 @@
+---
+kind: guide
+id: process/self-validation
+description: 'The discipline of refusing to count the agent''s own claim as evidence.'
+---
 # Self-Validation
 
 The discipline of refusing to count the agent's own claim as evidence. Operationalizes the verification IRON LAW for the specific case where the agent re-reads its own previous statement and treats it as proof.
@@ -9,7 +14,7 @@ The discipline of refusing to count the agent's own claim as evidence. Operation
 - **An agent's reading of its own diff is not a review.** The review phase exists because the writer is not a reliable reviewer of their own work. The agent is the writer; the review agents are separate.
 - **A subagent's "done" report is not evidence.** See [[subagent-trust]].
 
-## GOLDEN RULES
+## GOLDEN PATH
 
 - **Aim to re-run sensors after every edit, not after every claim.** The freshness boundary is the *edit*, not the *statement*.
 - **Aim to cite the tool output, not the tool name.** "Lint passes" is a claim; "`eslint .` exited 0 with 0 errors at HH:MM" is evidence.

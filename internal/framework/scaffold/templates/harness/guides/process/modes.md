@@ -1,3 +1,8 @@
+---
+kind: guide
+id: process/modes
+description: 'Active mode: paired'
+---
 # Pacing Modes
 
 **Active mode: paired**

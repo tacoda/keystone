@@ -1,3 +1,8 @@
+---
+kind: action
+id: bootstrap
+description: 'One-time initial harness scaffold.'
+---
 # bootstrap
 
 **One-time initial harness scaffold.** Detect the project's stack, seed `corpus/state/`, scaffold idiom directories with code-grounded globs, inventory computational guides, classify sensors, and generate the globs index. Run once per project.
@@ -49,3 +54,32 @@ Before claiming bootstrap is done, verify empirically:
 - If `.cursor/rules/` exists in the install, every guide listed in `GLOBS_INDEX.md` has a matching `.cursor/rules/keystone-<topic>-<name>.mdc`. (No orphans either direction.)
 
 If any check fails, the action is not done — return to the corresponding activity.
+
+## Context-only questions
+
+`keystone init` at 2.0 only asks for the agent target. Everything else
+(language, framework, CI, region map, test approach, compliance scope,
+starter packs) is detected by **bootstrap** from the actual codebase.
+
+A small set of questions the codebase **can't** answer should be asked
+of the user during bootstrap:
+
+- **Aspirational patterns** — what code style / architecture is the
+  team moving *toward*, separate from what the code currently does?
+- **Methodology** — TDD, BDD, none? Code-review posture? Pacing
+  preference (paired / solo / autopilot)?
+- **In-flight migrations** — anything mid-port (framework upgrade,
+  monolith → services, language change)? Record in
+  `corpus/state/CODEBASE_STATE.md` so the agent doesn't surprise the
+  user with rules that contradict the migration plan.
+- **Code-state assessment** — known debt, deprecated subsystems,
+  do-not-touch areas. Different from "what exists" — closer to "what
+  do you wish wasn't there."
+- **Compliance scope** — SOX / HIPAA / SOC 2 / etc.? Determines
+  which starter rules apply.
+
+These are the only items worth a prompt. Detect everything else.
+
+## Index refresh
+
+After every state-file write + every idiom-guide / corpus seed, run `keystone index` so `.keystone/INDEX.json` reflects the new primitives. The `keystone:index` skill wraps the CLI invocation. If skills, subagents, or commands were added, also run `keystone project` to regenerate `.claude/` host projections.

@@ -1,8 +1,13 @@
+---
+kind: guide
+id: process/escalation
+description: 'When the agent is stuck, when to stop and ask the user — versus when to keep going.'
+---
 # Escalation
 
 When the agent is stuck, when to stop and ask the user — versus when to keep going. Counterpart to [`modes.md`](modes.md): modes set the *default* pace; escalation is the override that triggers regardless of mode.
 
-## GOLDEN RULES
+## GOLDEN PATH
 
 - **Aim to stop after three failed attempts at the same objective.** Three iterations on the same failing sensor, the same red test, or the same compile error without making it green is a signal that the model of the problem is wrong. Stop, report what was tried, and hand back to the user. Different errors after each attempt count as progress; the same error three times does not.
 - **Aim to escalate early when the cost of being wrong is high.** Security, data integrity, prod state — escalate at the first hint of uncertainty, not after three attempts.

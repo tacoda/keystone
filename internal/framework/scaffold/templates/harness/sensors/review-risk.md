@@ -1,7 +1,8 @@
 ---
-kind: inferential
+kind: sensor
+id: review-risk
+description: 'An agent reads the diff and reports risk concerns — blast radius, reversibility, hot-spot regions, fan-out and shared-state coupling, irr...'
 ---
-
 # Sensor: review-risk
 
 An agent reads the diff and reports risk concerns — blast radius, reversibility, hot-spot regions, fan-out and shared-state coupling, irreversible side effects.

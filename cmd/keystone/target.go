@@ -6,6 +6,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/tacoda/keystone/internal/framework/config"
 )
 
 // runTarget dispatches `keystone target <subcommand> ...`.
@@ -42,10 +44,6 @@ Commands:
 // recorded in the lockfile — the user must explicitly remove it first
 // rather than risk silent overwrites.
 func runTargetAdd(args []string, assets fs.FS) error {
-	flagValue, args, err := extractHarnessRootFlag(args)
-	if err != nil {
-		return err
-	}
 	dir := "."
 	var positional []string
 
@@ -79,10 +77,7 @@ func runTargetAdd(args []string, assets fs.FS) error {
 	if err != nil {
 		return fmt.Errorf("resolve dir: %w", err)
 	}
-	harnessRoot, err := resolveHarnessRoot(absDir, flagValue)
-	if err != nil {
-		return err
-	}
+	harnessRoot := config.DefaultHarnessRoot
 	if _, err := os.Stat(filepath.Join(absDir, harnessRoot)); err != nil {
 		if os.IsNotExist(err) {
 			return fmt.Errorf("no %s/ in %s — run `keystone init` first", harnessRoot, absDir)

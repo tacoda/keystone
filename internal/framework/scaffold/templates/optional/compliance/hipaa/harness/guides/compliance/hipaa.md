@@ -7,7 +7,7 @@ Loaded ambient; enforced by the [drift sensor](../../../sensors/drift.md). The c
 
 **Every access to PHI is authenticated, authorized, and logged.** No exceptions for service accounts, batch jobs, debugging sessions, or "trusted" internal users. An access path that bypasses the audit log is a HIPAA finding waiting to be discovered.
 
-## GOLDEN RULES
+## GOLDEN PATH
 
 - **Aim for the smallest PHI footprint.** De-identify where possible; project to non-PHI fields for downstream uses; redact in logs; expire data on a schedule. Each PHI field is exposure.
 - **Aim for minimum-necessary access.** A clinician needs their patients; a researcher needs the dataset; a developer needs neither — *especially in production*. See [[security]] (least privilege).

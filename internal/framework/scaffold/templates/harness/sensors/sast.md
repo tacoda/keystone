@@ -1,7 +1,8 @@
 ---
-kind: computational
+kind: sensor
+id: sast
+description: 'Static application security testing — pattern-based detection of insecure code in the source tree (SQL injection, command injection, weak...'
 ---
-
 # Sensor: sast
 
 Static application security testing — pattern-based detection of insecure code in the source tree (SQL injection, command injection, weak crypto, unsafe deserialization, etc.).

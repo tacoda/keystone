@@ -36,8 +36,8 @@ func TestDefaultLoader_Resolve(t *testing.T) {
 	})
 
 	cascade := Cascade{
-		Project: Plugin{Name: "project", Root: project},
-		Plugins: []Plugin{
+		Project: Policy{Name: "project", Root: project},
+		Policies: []Policy{
 			{Name: "universal", Root: universal},
 			{Name: "team", Root: team},
 		},
@@ -109,8 +109,8 @@ func TestDefaultLoader_Resolve(t *testing.T) {
 			}
 			defer f.Close()
 
-			if origin.Plugin != tt.wantOrigin {
-				t.Errorf("Resolve(%q, %q) origin = %q, want %q", tt.port, tt.item, origin.Plugin, tt.wantOrigin)
+			if origin.Policy != tt.wantOrigin {
+				t.Errorf("Resolve(%q, %q) origin = %q, want %q", tt.port, tt.item, origin.Policy, tt.wantOrigin)
 			}
 			got, err := io.ReadAll(f)
 			if err != nil {
@@ -129,8 +129,8 @@ func TestDefaultLoader_NilRoot(t *testing.T) {
 		"guides/process/spec.md": "plugin spec",
 	})
 	cascade := Cascade{
-		Project: Plugin{Name: "project", Root: nil},
-		Plugins: []Plugin{{Name: "p1", Root: plugin}},
+		Project: Policy{Name: "project", Root: nil},
+		Policies: []Policy{{Name: "p1", Root: plugin}},
 	}
 	l := New(cascade)
 	f, origin, err := l.Resolve("guides/process", "spec")
@@ -138,8 +138,8 @@ func TestDefaultLoader_NilRoot(t *testing.T) {
 		t.Fatalf("Resolve unexpected error: %v", err)
 	}
 	defer f.Close()
-	if origin.Plugin != "p1" {
-		t.Errorf("origin = %q, want %q", origin.Plugin, "p1")
+	if origin.Policy != "p1" {
+		t.Errorf("origin = %q, want %q", origin.Policy, "p1")
 	}
 }
 

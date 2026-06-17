@@ -1,3 +1,8 @@
+---
+kind: action
+id: mode
+description: 'Switch the harness pacing mode (paired / solo / autopilot).'
+---
 # mode
 
 **Switch the harness pacing mode** (paired / solo / autopilot). Read [`harness/guides/process/modes.md`](guides/process/modes.md).

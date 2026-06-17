@@ -1,0 +1,22 @@
+{{define "investigator.html"}}{{template "layout" .}}{{end}}
+{{define "title"}}policy investigator{{end}}
+{{define "main"}}
+<section class="card">
+  <h1>policy investigator</h1>
+  <p class="muted">Every primitive in play, grouped by cascade layer. <strong>Project wins by default</strong>; <code>strict</code> items from policies lock absolutely; among policies, deeper-nested refines outer.</p>
+
+  <form class="filters"
+        hx-get="/web/fragments/investigator"
+        hx-trigger="input changed delay:150ms, change"
+        hx-target="#investigator-layers"
+        hx-swap="innerHTML">
+    <label>search id / description / path
+      <input type="text" name="q" value="{{.Inventory.Search}}" placeholder="e.g. spec, billing/**, severity">
+    </label>
+  </form>
+
+  <div id="investigator-layers">
+    {{template "_investigator_layers.html" .}}
+  </div>
+</section>
+{{end}}

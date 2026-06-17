@@ -7,7 +7,7 @@ Loaded ambient; enforced by the [drift sensor](../../../sensors/drift.md). The c
 
 **Every event is delivered at least once, never exactly once.** Consumers must be idempotent. A consumer that double-processes a redelivered event has a defect; "exactly once" promised by a broker is at-least-once + idempotent consumers under the hood. There is no third option. See [[idempotency]] and [[distributed-systems-fallacies]].
 
-## GOLDEN RULES
+## GOLDEN PATH
 
 - **Aim for events as facts, commands as requests.** Two different transports if the system mixes both; never one channel called "events" carrying both kinds.
 - **Aim for events that carry enough state to be useful without a callback** when the consumer is in a different team / service. Event-carried-state-transfer reduces cascading failure modes.

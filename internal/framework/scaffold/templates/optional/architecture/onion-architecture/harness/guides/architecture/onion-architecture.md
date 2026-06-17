@@ -7,7 +7,7 @@ Loaded ambient; enforced by the [drift sensor](../../../sensors/drift.md). The c
 
 **The domain model is the center, and it points nowhere.** Domain types must import nothing from any outer ring — not the database, not the framework, not the logger, not the clock. Time, persistence, and side effects enter the domain through interfaces the domain owns.
 
-## GOLDEN RULES
+## GOLDEN PATH
 
 - **Aim for an explicit application-services layer.** Don't collapse it into either the domain or the controllers. The orchestration concern is real; give it a home.
 - **Aim for domain services on operations that span entities.** A "domain service" is not "any service" — it is a domain concept that doesn't belong to one entity. Don't dilute the term.

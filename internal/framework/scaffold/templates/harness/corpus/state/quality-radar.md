@@ -1,7 +1,8 @@
 ---
-last_reconciled: <YYYY-MM-DD>
+kind: corpus
+id: corpus/state/quality-radar
+description: 'Five-dimension scorecard for the codebase (or for the most recent reviewed diff).'
 ---
-
 # Quality Radar
 
 > **Template.** The **audit** or **review** action will populate this from the underlying sensors. Until then, leave as-is or fill in by hand.

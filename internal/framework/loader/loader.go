@@ -18,7 +18,7 @@ type Loader interface {
 }
 
 // New returns the default Loader for the given Cascade. The default loader
-// walks Project first, then each Plugin in slice order; the first layer
+// walks Project first, then each Policy in slice order; the first layer
 // whose Root contains <port>/<name>.md wins. The framework never composes
 // overlapping files.
 func New(c Cascade) Loader {
@@ -34,15 +34,15 @@ func (l *defaultLoader) Resolve(port, name string) (fs.File, Origin, error) {
 
 	if l.cascade.Project.Root != nil {
 		if f, err := l.cascade.Project.Root.Open(rel); err == nil {
-			return f, Origin{Plugin: l.cascade.Project.Name, Path: rel}, nil
+			return f, Origin{Policy: l.cascade.Project.Name, Path: rel}, nil
 		}
 	}
-	for _, p := range l.cascade.Plugins {
+	for _, p := range l.cascade.Policies {
 		if p.Root == nil {
 			continue
 		}
 		if f, err := p.Root.Open(rel); err == nil {
-			return f, Origin{Plugin: p.Name, Path: rel}, nil
+			return f, Origin{Policy: p.Name, Path: rel}, nil
 		}
 	}
 	return nil, Origin{}, fs.ErrNotExist

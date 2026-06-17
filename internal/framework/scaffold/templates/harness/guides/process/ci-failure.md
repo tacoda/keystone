@@ -1,3 +1,8 @@
+---
+kind: guide
+id: process/ci-failure
+description: 'What to do when CI fails — on a PR, after a merge, or post-deploy.'
+---
 # CI Failure Remediation
 
 What to do when CI fails — on a PR, after a merge, or post-deploy. The release phase covers the happy path; this covers everything else.
@@ -56,7 +61,7 @@ If CD ran and a deploy failed:
 - Roll back via the recorded rollback procedure. See [[rollback]].
 - Open a postmortem-tracking artifact only if user impact occurred.
 
-## GOLDEN RULES
+## GOLDEN PATH
 
 - **Aim never to merge around a failing check.** Disabling a check, marking it non-required, or using admin-merge to bypass CI is a [[dangerous-actions|dangerous action]] requiring explicit confirmation. Builds on the existing IRON LAW "no commits with failing sensors" — CI is the same sensors at the pipeline level.
 - **Aim to revert before debugging on `main`.** A reverted main lets the team keep working while the cause is investigated.

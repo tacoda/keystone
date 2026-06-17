@@ -1,7 +1,8 @@
 ---
-kind: inferential
+kind: sensor
+id: review-deployment
+description: 'An agent reads the diff and reports deployment considerations — schema migration safety (expand-contract), feature-flag gating, environme...'
 ---
-
 # Sensor: review-deployment
 
 An agent reads the diff and reports deployment considerations — schema migration safety (expand-contract), feature-flag gating, environment / config drift, backwards compatibility during rolling deploy, the rollback path.

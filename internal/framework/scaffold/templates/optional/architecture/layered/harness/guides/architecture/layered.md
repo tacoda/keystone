@@ -7,7 +7,7 @@ Loaded ambient; enforced by the [drift sensor](../../../sensors/drift.md). The c
 
 **Calls go downward through layers, never upward and never skipping.** A presentation handler that invokes a repository directly has bypassed the application layer; an application service that emits an HTTP response has reached upward. Either is a violation. The whole point of layering is that each layer knows only the one beneath it.
 
-## GOLDEN RULES
+## GOLDEN PATH
 
 - **Aim for one layer per concern, with clear names.** Presentation, application, domain, persistence. Resist new "helper" layers that don't earn their place.
 - **Aim for the application layer to own transactions.** Transactions span multiple repository calls; the application layer is the only place that knows the unit of work.
