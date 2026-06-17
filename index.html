@@ -1168,6 +1168,7 @@
 
       <div class="nav-group">
         <span class="nav-label">Framework primitives</span>
+        <a class="nav-link" href="#plugins">Policies</a>
         <a class="nav-link" href="#guides">Guides</a>
         <a class="nav-link" href="#sensors">Sensors</a>
         <a class="nav-link" href="#actions">Actions</a>
@@ -1207,7 +1208,6 @@
       <div class="nav-group">
         <span class="nav-label">Reference</span>
         <a class="nav-link" href="#agents">Supported agents</a>
-        <a class="nav-link" href="#plugins">Policies</a>
         <a class="nav-link" href="#options">Install-time options</a>
         <a class="nav-link" href="https://github.com/tacoda/keystone/blob/main/CHANGELOG.md" target="_blank" rel="noopener">1.x → 2.0 migration <span class="ext">↗</span></a>
         <a class="nav-link" href="https://github.com/tacoda/keystone/blob/main/docs/compatibility.md" target="_blank" rel="noopener">Compatibility <span class="ext">↗</span></a>
@@ -1815,7 +1815,7 @@ flowchart LR
     </div>
 
     <div class="definition">
-      <p><strong>What policies do.</strong> A policy is a git repo with a <code>keystone-policy.json</code> manifest plus framework primitives (<code>guides/</code>, <code>corpus/</code>, <code>sensors/</code>, <code>actions/</code>, <code>playbooks/</code>, <code>evals/</code>, <code>sources/</code>). Agent primitives (<code>rule</code>, <code>skill</code>, <code>subagent</code>, <code>command</code>, <code>persona</code>) stay project-owned — policies cannot ship them. When you add a policy, its content gets vendored to <code>.keystone/harness/policies/&lt;name&gt;/</code> and merged into the cascade. The project layer always wins by default; deeper-nested policies refine outer ones; <code>strict</code> items lock absolutely.</p>
+      <p><strong>What policies do.</strong> A policy is a git repo with a <code>keystone-policy.json</code> manifest plus framework primitives (<code>guides/</code>, <code>corpus/</code>, <code>sensors/</code>, <code>actions/</code>, <code>playbooks/</code>, <code>personas/</code>, <code>evals/</code>, <code>sources/</code>). Agent escape-hatch primitives (<code>rule</code>, <code>skill</code>, <code>subagent</code>, <code>command</code>) stay project-owned — policies cannot ship them. When you add a policy, its content gets vendored to <code>.keystone/harness/policies/&lt;name&gt;/</code> and merged into the cascade. The project layer always wins by default; deeper-nested policies refine outer ones; <code>strict</code> items lock absolutely.</p>
     </div>
 
     <div class="section-label">3.1 — Add the example policy</div>
@@ -2242,14 +2242,15 @@ For reasoning, see `corpus/domain/refunds.md`.</pre>
   <!-- ===================== PLUGINS ===================== -->
   <section id="plugins" class="page" data-title="Policies">
     <div class="page-head">
-      <div class="crumb">Framework · Policies</div>
-      <h1>Policies — layered governance, vendored read-only.</h1>
-      <p class="tagline"><strong>Policies are entirely optional — the harness works on its own without any.</strong> Policies are how you share <em>layers of governance</em> across projects: org standards, team conventions, compliance regimes, idiom bundles, release gates. Every layer is implemented as a policy; layers nest arbitrarily in your <code>keystone.json</code>, and the JSON structure determines winners and losers. One uniform mechanism, used to compose governance at any granularity from "this team alone" to "the whole org."</p>
+      <div class="crumb">Framework primitive · Standardized governance distribution</div>
+      <h1>Policies — the framework primitive for sharing governance.</h1>
+      <p class="tagline"><strong style="color: var(--accent4);">The standardized way to share harness content across projects, teams, and orgs.</strong> A policy is a versioned, pinned, hash-verified markdown bundle that ships any combination of framework primitives — guides, sensors, actions, playbooks, personas, corpus, evals, sources. Vendored read-only into <code>.keystone/harness/policies/&lt;name&gt;/</code>. Bundler for AI-agent governance: write your org's rules once, every repo pulls the same pin. <strong>Optional</strong> — the harness works on its own without any.</p>
     </div>
 
     <div class="definition">
-      <p><strong>One shape, many uses.</strong> A policy is a folder of markdown organized by framework primitive kind (<code>guides/</code>, <code>corpus/</code>, <code>sensors/</code>, <code>actions/</code>, <code>playbooks/</code>, <code>evals/</code>, <code>sources/</code>) plus a <code>keystone-policy.json</code> manifest. Nothing about the format distinguishes "an org policy bundle" from "a Rust idiom pack" from "a SOC 2 compliance regime" — they all materialize the same way and override the same way.</p>
-      <p><strong>Agent primitives stay project-owned.</strong> Policies cannot ship <code>rule</code>, <code>skill</code>, <code>subagent</code>, <code>command</code>, or <code>persona</code> primitives — those align with host-agent concepts and live with the project. Enforced at install.</p>
+      <p><strong>The framework-level distribution layer.</strong> Every other framework primitive describes <em>what</em> the harness teaches the agent. Policies describe <em>how that teaching travels</em> — between repos, between teams, across an org. No other harness has a package manager; this is the differentiator. One uniform mechanism, used to compose governance at any granularity from "this team alone" to "the whole org."</p>
+      <p><strong>One shape, many uses.</strong> A policy is a folder of markdown organized by framework primitive kind (<code>guides/</code>, <code>corpus/</code>, <code>sensors/</code>, <code>actions/</code>, <code>playbooks/</code>, <code>personas/</code>, <code>evals/</code>, <code>sources/</code>) plus a <code>keystone-policy.json</code> manifest. Nothing about the format distinguishes "an org baseline" from "a Rust idiom pack" from "a SOC 2 compliance regime" — they all materialize the same way and override the same way.</p>
+      <p><strong>Agent primitives stay project-owned.</strong> Policies cannot ship <code>rule</code>, <code>skill</code>, <code>subagent</code>, or <code>command</code> primitives — those are host-native escape hatches that align with the project's chosen agent. <code>persona</code> ships fine because it's the framework wrapper. Enforced at install.</p>
       <p><strong>Policies are read-only.</strong> The vendor directory is regenerable: <code>keystone policy install</code> fetches each pin into a content-addressable cache (<code>~/.cache/keystone/policies/</code>) and copies it into <code>.keystone/harness/policies/&lt;name&gt;/</code>, chmod'd 0o444 on POSIX. The lockfile pins per-file hashes; <code>keystone verify</code> walks each vendored file and resets the directory the moment anything diverges. Edits to vendored content don't stick — the next verify wipes them.</p>
       <p><strong>Override by editing the project layer.</strong> The project's <code>.keystone/harness/&lt;kind&gt;/&lt;name&gt;.md</code> always wins by default. Among policies, policies nested deeper in <code>keystone.json</code> refine the outer policies they're nested in — the more specific layer takes precedence (like CSS or Rails). A policy author can mark an item <code>strict</code> to lock it absolutely — a strict item refuses every other layer, the project included; <code>keystone verify</code> reports violations with path context so you see exactly which node in the tree set the lock.</p>
     </div>
