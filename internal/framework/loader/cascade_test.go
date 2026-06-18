@@ -118,7 +118,7 @@ func TestVerify_NestedPolicyPathContext(t *testing.T) {
 
 func TestVerify_DepthGate_NestedPolicyCannotShipSensors(t *testing.T) {
 	dir := t.TempDir()
-	// Vendored sensor file shipped by the nested plugin.
+	// Vendored sensor file shipped by the nested policy.
 	writeFile(t, dir, ".keystone/harness/policies/acme-platform/sensors/rubocop.md")
 
 	cfg := &config.ProjectConfig{
@@ -193,7 +193,7 @@ func TestVerify_DepthGate_TopLevelPolicyMayShipSensors(t *testing.T) {
 		t.Fatalf("Verify: %v", err)
 	}
 	if len(res.DepthViolations) != 0 {
-		t.Errorf("DepthViolations = %d, want 0 (top-level plugin may ship sensors): %+v", len(res.DepthViolations), res.DepthViolations)
+		t.Errorf("DepthViolations = %d, want 0 (top-level policy may ship sensors): %+v", len(res.DepthViolations), res.DepthViolations)
 	}
 }
 
@@ -201,7 +201,7 @@ func TestVerify_RequiredGap_ProjectSatisfies(t *testing.T) {
 	dir := t.TempDir()
 	// Project ships actions/release-notes.md → satisfies tacoda-org's required claim.
 	writeFile(t, dir, ".keystone/harness/actions/release-notes.md")
-	// Drop a minimal manifest for the installed plugin that declares the required item.
+	// Drop a minimal manifest for the installed policy that declares the required item.
 	writeFile(t, dir, ".keystone/harness/policies/tacoda-org/dummy.md") // ensure dir exists
 	manifest := `{
   "name": "tacoda-org",
@@ -266,7 +266,7 @@ func TestVerify_RequiredGap_Missing(t *testing.T) {
 
 func TestVerify_RequiredGap_OuterPolicySatisfies(t *testing.T) {
 	dir := t.TempDir()
-	// Outer plugin ships the required item; inner declares it as required.
+	// Outer policy ships the required item; inner declares it as required.
 	writeFile(t, dir, ".keystone/harness/policies/outer/actions/release-notes.md")
 	writeFile(t, dir, ".keystone/harness/policies/inner/dummy.md")
 	innerManifest := `{

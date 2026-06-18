@@ -7,13 +7,12 @@
 //	│                actions, playbooks, adapters, learning, archive)
 //	├── targets/   — per-agent menu files (CLAUDE.md, AGENTS.md,
 //	│                .cursor/rules/, etc.) installed at the project root
-//	├── optional/  — opt-in content (architecture/, compliance/, starter/)
-//	│                pulled in by --architecture / --compliance / --starter
-//	└── patches/   — framework patches (currently empty; Phase 1 deleted
-//	                 the 0.x chain — only the README remains)
+//	└── optional/  — opt-in content (architecture/, compliance/, starter/)
+//	                 pulled in by --architecture / --compliance / --starter
 //
 // The Templates fs.FS is rooted at templates/, so callers see "harness",
-// "targets", "optional", and "patches" at its top level.
+// "targets", and "optional" at its top level. (The 0.x patches subsystem
+// was retired in 2.1; `keystone migrate` is the upgrade path.)
 package scaffold
 
 import (
@@ -25,7 +24,7 @@ import (
 var rawTemplates embed.FS
 
 // Templates is the embedded scaffold tree, rooted at the templates directory.
-// Top-level entries: harness/, targets/, optional/, patches/.
+// Top-level entries: harness/, targets/, optional/.
 var Templates fs.FS
 
 func init() {

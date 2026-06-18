@@ -184,7 +184,7 @@ func TestProjectConfig_RejectsDuplicateNames(t *testing.T) {
 		},
 	}
 	err := cfg.validate()
-	if err == nil || !strings.Contains(err.Error(), "duplicate plugin name") {
+	if err == nil || !strings.Contains(err.Error(), "duplicate policy name") {
 		t.Errorf("expected duplicate-name error, got %v", err)
 	}
 }
@@ -202,7 +202,7 @@ func TestProjectConfig_RejectsDuplicateNamesAcrossDepth(t *testing.T) {
 		},
 	}
 	err := cfg.validate()
-	if err == nil || !strings.Contains(err.Error(), "duplicate plugin name") {
+	if err == nil || !strings.Contains(err.Error(), "duplicate policy name") {
 		t.Errorf("expected duplicate-name error across depth, got %v", err)
 	}
 }

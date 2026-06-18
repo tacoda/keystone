@@ -5,7 +5,7 @@ import (
 )
 
 // Loader resolves <port>/<name> against a Cascade. Phase 1 ships the
-// interface and a default project-first / plugins-in-order implementation;
+// interface and a default project-first / policies-in-order implementation;
 // Phase 3 extends it with strict-cascade enforcement and depth limits.
 type Loader interface {
 	// Resolve returns the winning file for a given port and name, or

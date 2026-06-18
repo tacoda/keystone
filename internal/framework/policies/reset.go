@@ -7,9 +7,9 @@ import (
 	"path/filepath"
 )
 
-// Reset removes the installed plugin directory at
-// <projectDir>/<harnessRoot>/plugins/<name>/. Called by the drift-reset
-// path after Verify reports drift, and by `keystone plugin remove`.
+// Reset removes the installed policy directory at
+// <projectDir>/<harnessRoot>/policies/<name>/. Called by the drift-reset
+// path after Verify reports drift, and by `keystone policy remove`.
 //
 // On POSIX the directory's contents are chmodded back to writable before
 // removal so a previous Install's read-only marks don't block rm.
@@ -17,7 +17,7 @@ func Reset(name, projectDir, harnessRoot string) error {
 	if name == "" {
 		return fmt.Errorf("policies.Reset: empty name")
 	}
-	target := pluginDir(projectDir, harnessRoot, name)
+	target := policyDir(projectDir, harnessRoot, name)
 
 	if runtime.GOOS != "windows" {
 		_ = makeWritable(target)

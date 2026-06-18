@@ -11,7 +11,7 @@ import (
 )
 
 // Cached is the result of a successful Fetch. Dir holds the cache entry
-// the plugin was unpacked into; ResolvedSHA is the exact commit checked
+// the policy was unpacked into; ResolvedSHA is the exact commit checked
 // out at fetch time.
 type Cached struct {
 	Dir         string
@@ -96,7 +96,7 @@ func Fetch(gitURL, version string) (*Cached, error) {
 	return &Cached{Dir: cacheDir, ResolvedSHA: sha}, nil
 }
 
-// cachePath returns the absolute directory under the keystone plugin
+// cachePath returns the absolute directory under the keystone policy
 // cache for gitURL@version.
 func cachePath(gitURL, version string) (string, error) {
 	root, err := cacheRoot()
@@ -108,9 +108,13 @@ func cachePath(gitURL, version string) (string, error) {
 }
 
 // cacheRoot returns the directory holding all cache entries for policies.
-// KEYSTONE_PLUGIN_CACHE overrides the default, mainly for tests.
+// KEYSTONE_POLICY_CACHE overrides the default, mainly for tests; the
+// pre-2.1 KEYSTONE_PLUGIN_CACHE is read as a fallback.
 func cacheRoot() (string, error) {
 	if v := os.Getenv(CacheDirEnv); v != "" {
+		return v, nil
+	}
+	if v := os.Getenv(LegacyCacheDirEnv); v != "" {
 		return v, nil
 	}
 	base, err := os.UserCacheDir()

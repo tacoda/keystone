@@ -24,7 +24,7 @@ import (
 // Runs three independent checks against an existing install:
 //
 //  1. Path conformance — scan every markdown file under <harness-root>/
-//     (excluding vendored plugins) and flag any inter-harness link with
+//     (excluding vendored policies) and flag any inter-harness link with
 //     '../' or './' segments. See docs/conventions.md for the rule.
 //  2. Policy drift — load keystone.json + lockfile, run loader.Verify;
 //     drifted policies get reset and the user is told to re-run
@@ -253,7 +253,7 @@ Runs three independent checks by default:
   paths   — every inter-harness link must be harness-root-relative;
             '../' and './' segments are forbidden (see docs/conventions.md
             for the rule). Violations exit non-zero.
-  policies — walks vendored plugins, detects drift, resets drifted plugins
+  policies — walks vendored policies, detects drift, resets drifted policies
             so a follow-up 'keystone install' can repopulate from cache.
   drift   — diffs the user's scaffolded defaults against the binary's
             current templates; reports which user files have changed.
@@ -261,7 +261,7 @@ Runs three independent checks by default:
 
 Flags:
   --paths-only            Run only the path-convention check.
-  --policies-only          Run only the plugin-integrity check.
+  --policies-only          Run only the policy-integrity check.
   --drift-only            Run only the template-drift check.
   --budget                Run only the per-port budget report (whitespace-
                           approximate token count vs keystone.json's
@@ -331,7 +331,7 @@ func checkPathConventions(projectDir, harnessRoot string) ([]pathViolation, erro
 }
 
 // fixPathConventions walks every markdown file under <harness-root>/
-// (excluding vendored plugins) and rewrites markdown links with '../'
+// (excluding vendored policies) and rewrites markdown links with '../'
 // or './' segments to their harness-root-relative form. Returns the
 // total count of rewritten links.
 //
@@ -470,7 +470,7 @@ func checkPolicyIntegrity(projectDir, harnessRoot string) (int, error) {
 		return 0, err
 	}
 	if len(cfg.Policies) == 0 {
-		fmt.Fprintf(os.Stdout, "✓ plugins: keystone.json declares no policies — nothing to verify\n")
+		fmt.Fprintf(os.Stdout, "✓ policies: keystone.json declares no policies — nothing to verify\n")
 		return 0, nil
 	}
 	lf, err := lockfile.Read(projectDir, harnessRoot)
@@ -487,7 +487,7 @@ func checkPolicyIntegrity(projectDir, harnessRoot string) (int, error) {
 	}
 	errs := 0
 	if res.HasDrift() {
-		fmt.Fprintf(os.Stdout, "▸ plugins: drift detected — resetting %d plugin(s)\n", len(res.Drift))
+		fmt.Fprintf(os.Stdout, "▸ policies: drift detected — resetting %d policy(s)\n", len(res.Drift))
 		for _, d := range res.Drift {
 			fmt.Fprintf(os.Stdout, "    • %s: %d drifted file(s)\n", d.Policy, len(d.Files))
 			for _, f := range d.Files {
@@ -501,13 +501,13 @@ func checkPolicyIntegrity(projectDir, harnessRoot string) (int, error) {
 	}
 	if res.HasErrors() {
 		errs += len(res.Violations)
-		fmt.Fprintf(os.Stdout, "✗ plugins: %d strict-cascade violation(s)\n", len(res.Violations))
+		fmt.Fprintf(os.Stdout, "✗ policies: %d strict-cascade violation(s)\n", len(res.Violations))
 		for _, v := range res.Violations {
 			fmt.Fprintln(os.Stdout, "    "+v.String())
 		}
 	}
 	if !res.HasDrift() && !res.HasErrors() {
-		fmt.Fprintf(os.Stdout, "✓ plugins: all %d plugin(s) clean (no drift, no strict violations)\n", len(cfg.Policies))
+		fmt.Fprintf(os.Stdout, "✓ policies: all %d policy(s) clean (no drift, no strict violations)\n", len(cfg.Policies))
 	}
 	return errs, nil
 }

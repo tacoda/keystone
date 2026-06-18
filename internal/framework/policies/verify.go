@@ -26,16 +26,16 @@ type Drift struct {
 	Kind DriftKind
 }
 
-// Verify walks the installed plugin directory and compares per-file hashes
+// Verify walks the installed policy directory and compares per-file hashes
 // to the expected set from the lockfile. Returns the list of drifted files
-// (empty when clean). A nil expected map combined with an existing plugin
+// (empty when clean). A nil expected map combined with an existing policy
 // directory counts the whole directory as Extra; an empty installed
 // directory with a non-empty expected map counts as all Missing.
 //
 // Drift paths are returned in stable (sorted) order so callers can
 // deterministically render them.
 func Verify(name, projectDir, harnessRoot string, expected map[string]string) ([]Drift, error) {
-	target := pluginDir(projectDir, harnessRoot, name)
+	target := policyDir(projectDir, harnessRoot, name)
 
 	current, err := hashFilesUnder(target, harnessRoot, name)
 	if err != nil {
@@ -62,10 +62,10 @@ func Verify(name, projectDir, harnessRoot string, expected map[string]string) ([
 	return drifts, nil
 }
 
-// hashFilesUnder walks the install directory of one plugin and returns a
+// hashFilesUnder walks the install directory of one policy and returns a
 // map of project-relative slash-paths → sha256 hashes. Missing target
 // returns an empty map (not an error) — callers interpret that as "the
-// whole plugin is gone."
+// whole policy is gone."
 func hashFilesUnder(target, harnessRoot, name string) (map[string]string, error) {
 	out := map[string]string{}
 	if _, err := os.Stat(target); os.IsNotExist(err) {

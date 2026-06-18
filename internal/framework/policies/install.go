@@ -14,7 +14,7 @@ import (
 )
 
 // PolicyRoot is the directory under <project>/<harnessRoot>/ where every
-// installed plugin lives. Gitignored at the consumer side; managed by the
+// installed policy lives. Gitignored at the consumer side; managed by the
 // vendor flow, not by users.
 const PolicyRoot = "policies"
 
@@ -25,26 +25,26 @@ const readOnlyMode = 0o444
 
 // Installed describes the result of a successful Install: per-file hashes
 // the lockfile records, plus the manifest's declared name/version (for
-// audit) when the plugin shipped one.
+// audit) when the policy shipped one.
 type Installed struct {
 	Files         map[string]string
 	PolicyVersion string // value from keystone-policy.json's `version`, if present
 	PolicyName    string // value from keystone-policy.json's `name`, if present
 }
 
-// pluginManifestFile is the basename of a plugin's manifest at the root of
-// its content tree. Local to this package so plugins doesn't depend on the
+// policyManifestFile is the basename of a policy's manifest at the root of
+// its content tree. Local to this package so policies doesn't depend on the
 // manifest package.
-const pluginManifestFile = "keystone-policy.json"
+const policyManifestFile = "keystone-policy.json"
 
-// pluginManifest is the minimal subset of keystone-policy.json the
+// policyManifest is the minimal subset of keystone-policy.json the
 // installer reads. The full schema lives in docs/schemas/.
-type pluginManifest struct {
+type policyManifest struct {
 	Name    string `json:"name"`
 	Version string `json:"version"`
 }
 
-// Install copies the cached plugin tree into <projectDir>/<harnessRoot>/plugins/<name>/,
+// Install copies the cached policy tree into <projectDir>/<harnessRoot>/policies/<name>/,
 // computes per-file SHA-256 hashes for the lockfile, and chmods files
 // read-only on POSIX (best-effort).
 //
@@ -65,7 +65,7 @@ func Install(cached *Cached, name, projectDir, harnessRoot string) (*Installed, 
 		return nil, fmt.Errorf("policies.Install: empty harnessRoot")
 	}
 
-	target := pluginDir(projectDir, harnessRoot, name)
+	target := policyDir(projectDir, harnessRoot, name)
 	if err := os.RemoveAll(target); err != nil {
 		return nil, fmt.Errorf("clear target: %w", err)
 	}
@@ -74,7 +74,7 @@ func Install(cached *Cached, name, projectDir, harnessRoot string) (*Installed, 
 	}
 
 	files := map[string]string{}
-	var manifest *pluginManifest
+	var manifest *policyManifest
 
 	err := filepath.WalkDir(cached.Dir, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
@@ -122,10 +122,10 @@ func Install(cached *Cached, name, projectDir, harnessRoot string) (*Installed, 
 		files[relFromProject] = hash
 
 		// Capture the manifest's declared name/version on the way past.
-		if rel == pluginManifestFile {
+		if rel == policyManifestFile {
 			data, err := os.ReadFile(destPath)
 			if err == nil {
-				var m pluginManifest
+				var m policyManifest
 				if err := json.Unmarshal(data, &m); err == nil {
 					manifest = &m
 				}
@@ -138,7 +138,7 @@ func Install(cached *Cached, name, projectDir, harnessRoot string) (*Installed, 
 		return nil
 	})
 	if err != nil {
-		return nil, fmt.Errorf("copy plugin tree: %w", err)
+		return nil, fmt.Errorf("copy policy tree: %w", err)
 	}
 
 	installed := &Installed{Files: files}
@@ -149,9 +149,9 @@ func Install(cached *Cached, name, projectDir, harnessRoot string) (*Installed, 
 	return installed, nil
 }
 
-// pluginDir returns the absolute path of the install directory for a
-// single plugin.
-func pluginDir(projectDir, harnessRoot, name string) string {
+// policyDir returns the absolute path of the install directory for a
+// single policy.
+func policyDir(projectDir, harnessRoot, name string) string {
 	return filepath.Join(projectDir, harnessRoot, PolicyRoot, name)
 }
 

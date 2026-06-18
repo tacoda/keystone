@@ -53,28 +53,28 @@ func TestDefaultLoader_Resolve(t *testing.T) {
 		wantErr     error
 	}{
 		{
-			name:        "project wins over plugin for same item",
+			name:        "project wins over policy for same item",
 			port:        "guides/process",
 			item:        "spec",
 			wantOrigin:  "project",
 			wantContent: "project version of spec",
 		},
 		{
-			name:        "plugin provides item not in project",
+			name:        "policy provides item not in project",
 			port:        "guides/principles",
 			item:        "bdd",
 			wantOrigin:  "universal",
 			wantContent: "universal bdd guide",
 		},
 		{
-			name:        "first plugin wins over later plugins for same item",
+			name:        "first policy wins over later policies for same item",
 			port:        "guides/principles",
 			item:        "bdd",
 			wantOrigin:  "universal",
 			wantContent: "universal bdd guide",
 		},
 		{
-			name:        "later plugin provides item missing from earlier",
+			name:        "later policy provides item missing from earlier",
 			port:        "sensors",
 			item:        "rubocop",
 			wantOrigin:  "team",
@@ -124,13 +124,13 @@ func TestDefaultLoader_Resolve(t *testing.T) {
 }
 
 func TestDefaultLoader_NilRoot(t *testing.T) {
-	// Nil project root with a populated plugin should still resolve.
-	plugin := makeFS(map[string]string{
-		"guides/process/spec.md": "plugin spec",
+	// Nil project root with a populated policy should still resolve.
+	policy := makeFS(map[string]string{
+		"guides/process/spec.md": "policy spec",
 	})
 	cascade := Cascade{
 		Project: Policy{Name: "project", Root: nil},
-		Policies: []Policy{{Name: "p1", Root: plugin}},
+		Policies: []Policy{{Name: "p1", Root: policy}},
 	}
 	l := New(cascade)
 	f, origin, err := l.Resolve("guides/process", "spec")

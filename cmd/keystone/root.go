@@ -43,7 +43,6 @@ func init() {
 	rootCmd.AddCommand(doctorCmd())
 	rootCmd.AddCommand(newCmd())
 	rootCmd.AddCommand(targetCmd())
-	rootCmd.AddCommand(patchCmd())
 	rootCmd.AddCommand(indexCmd())
 	rootCmd.AddCommand(lintCmd())
 	rootCmd.AddCommand(projectCmd())
@@ -149,16 +148,6 @@ func targetCmd() *cobra.Command {
 		Short:              "Manage agent targets installed under .keystone/harness/adapters/",
 		DisableFlagParsing: true,
 		RunE:               runAndForwardAssets(runTarget),
-	}
-	return c
-}
-
-func patchCmd() *cobra.Command {
-	c := &cobra.Command{
-		Use:                "patch [dir]",
-		Short:              "Apply pending framework patches",
-		DisableFlagParsing: true,
-		RunE:               runAndForwardAssets(runPatch),
 	}
 	return c
 }

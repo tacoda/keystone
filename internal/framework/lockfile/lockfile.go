@@ -2,7 +2,7 @@
 // <keystone-dir>/lockfile.json — the `.keystone/` umbrella holds the
 // lockfile alongside the harness tree and generated INDEX.json, so both
 // the CLI and keystone-mcp can locate it under one well-known prefix.
-// Pins every installed plugin by source ref + resolved SHA + per-file
+// Pins every installed policy by source ref + resolved SHA + per-file
 // hashes. JSON format.
 //
 // The harness root is configurable (default `.keystone/harness`,
@@ -40,14 +40,14 @@ type KeystoneInfo struct {
 	Agents    []string `json:"agents,omitempty"`
 }
 
-// PolicyLock describes one installed plugin: where it came from, the exact
+// PolicyLock describes one installed policy: where it came from, the exact
 // commit it resolved to, and per-file content hashes used by the drift
-// detector. Written by `keystone install` / `keystone plugin add|update`,
+// detector. Written by `keystone install` / `keystone policy add|update`,
 // consumed by `keystone verify` and the loader's drift-reset path.
 type PolicyLock struct {
 	SourceRef     string            `json:"source_ref"`     // shorthand string from keystone.json (e.g. "tacoda/tacoda-org")
 	ResolvedSHA   string            `json:"resolved_sha"`   // exact commit hash resolved during fetch
-	PolicyVersion string            `json:"plugin_version"` // value from the plugin's manifest, if available
+	PolicyVersion string            `json:"policy_version"` // value from the policy's manifest, if available
 	Version       string            `json:"version"`        // ref the consumer pinned (tag, branch, SHA)
 	Files         map[string]string `json:"files"`          // path-relative-to-installdir → "sha256:<hex>"
 }

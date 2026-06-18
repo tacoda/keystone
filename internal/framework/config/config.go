@@ -1,6 +1,6 @@
 // Package config holds project-wide settings that are stable across the
 // lifetime of an install: the harness directory name, framework version
-// pin, and (in later phases) the plugin tree declared in keystone.json.
+// pin, and (in later phases) the policy tree declared in keystone.json.
 //
 // At Phase 2 only the harness root is configurable here. Phase 3 will fold
 // the full keystone.json schema into this package.

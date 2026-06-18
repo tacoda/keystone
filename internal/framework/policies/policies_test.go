@@ -9,7 +9,7 @@ import (
 	"testing"
 )
 
-// initBareRepoWithTag creates a minimal plugin source repo at repoDir with
+// initBareRepoWithTag creates a minimal policy source repo at repoDir with
 // the file layout under contents and tags it with `tag`. Returns the
 // file:// URL git can clone from.
 func initBareRepoWithTag(t *testing.T, repoDir, tag string, contents map[string]string) string {
@@ -284,11 +284,11 @@ func TestVerify_CleanAndDirty(t *testing.T) {
 	}
 
 	// Modify a file → DriftModified.
-	pluginA := filepath.Join(project, "harness/policies/example/guides/a.md")
-	if err := os.Chmod(pluginA, 0o644); err != nil {
+	policyA := filepath.Join(project, "harness/policies/example/guides/a.md")
+	if err := os.Chmod(policyA, 0o644); err != nil {
 		t.Fatalf("chmod for edit: %v", err)
 	}
-	if err := os.WriteFile(pluginA, []byte("tampered"), 0o644); err != nil {
+	if err := os.WriteFile(policyA, []byte("tampered"), 0o644); err != nil {
 		t.Fatalf("tamper: %v", err)
 	}
 	drifts, err = Verify("example", project, "harness", installed.Files)
@@ -367,7 +367,7 @@ func TestReset_RemovesEvenReadOnlyTree(t *testing.T) {
 		t.Fatalf("Reset: %v", err)
 	}
 	if _, err := os.Stat(target); !os.IsNotExist(err) {
-		t.Errorf("plugin dir still exists after Reset (or non-NotExist error): %v", err)
+		t.Errorf("policy dir still exists after Reset (or non-NotExist error): %v", err)
 	}
 }
 

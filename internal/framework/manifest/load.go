@@ -7,10 +7,10 @@ import (
 	"path/filepath"
 )
 
-// Load reads and parses the plugin manifest from pluginRoot. Returns a
+// Load reads and parses the policy manifest from policyRoot. Returns a
 // validated *Manifest on success.
-func Load(pluginRoot string) (*Manifest, error) {
-	path := filepath.Join(pluginRoot, PolicyManifestFile)
+func Load(policyRoot string) (*Manifest, error) {
+	path := filepath.Join(policyRoot, PolicyManifestFile)
 	data, err := os.ReadFile(path)
 	if err != nil {
 		return nil, fmt.Errorf("read %s: %w", PolicyManifestFile, err)

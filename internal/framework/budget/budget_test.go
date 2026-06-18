@@ -43,7 +43,7 @@ func TestPortForPath(t *testing.T) {
 		{"harness/learning/inbox/X.md", "harness", ""},
 		{"harness/archive/X.md", "harness", ""},
 		{"harness/README.md", "harness", ""},
-		{"harness/plugins/X/guides/Y.md", "harness", ""}, // plugins/ has its own logic; not a port
+		{"harness/policies/X/guides/Y.md", "harness", ""}, // policies/ has its own logic; not a port
 		{"custom/guides/X.md", "custom", "guides"},
 		{"other/guides/X.md", "harness", ""}, // wrong harness root
 	}
