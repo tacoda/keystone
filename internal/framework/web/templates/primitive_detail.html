@@ -2,7 +2,7 @@
 {{define "title"}}{{.Primitive.Kind}}/{{.Primitive.ID}}{{end}}
 {{define "main"}}
 <section class="card">
-  <p class="muted"><a href="/primitives">← primitives</a></p>
+  <p class="muted"><a href="/harness/primitives">← primitives</a></p>
   <h1><code>{{.Primitive.Kind}}</code> / {{.Primitive.ID}}</h1>
   <p>{{.Primitive.Description}}</p>
   <dl>
@@ -26,7 +26,7 @@
       {{range .Incoming}}
       <tr>
         <td><span class="kind-tag {{.From.Kind}}">{{.From.Kind}}</span></td>
-        <td><a href="/primitives/{{.From.Kind}}/{{.From.ID}}">{{.From.ID}}</a></td>
+        <td><a href="/harness/primitives/{{.From.Kind}}/{{.From.ID}}">{{.From.ID}}</a></td>
         <td class="muted"><code>{{.Via}}</code></td>
       </tr>
       {{end}}

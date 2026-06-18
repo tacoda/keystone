@@ -38,6 +38,133 @@ func TestRouter_HTMLPage(t *testing.T) {
 	}
 }
 
+// TestRouter_NewSectionURLs confirms every consolidated section URL
+// renders 200. Old single-purpose URLs (e.g. /metrics, /primitives)
+// are deliberately retired in 2.1.1 — those are checked separately
+// for 404 by TestRouter_OldURLsRetired.
+func TestRouter_NewSectionURLs(t *testing.T) {
+	_, h := newTestRouter(t)
+	urls := []string{
+		"/",
+		"/observability",
+		"/observability/metrics",
+		"/observability/insights",
+		"/harness",
+		"/harness/primitives",
+		"/harness/primitives/new",
+		"/harness/policies",
+		"/harness/investigator",
+		"/harness/graph",
+		"/sources",
+		"/sources/new",
+		"/flywheels",
+		"/flywheels/inbox",
+		"/flywheels/prune",
+		"/quality",
+		"/quality/verify",
+		"/quality/evals",
+	}
+	for _, u := range urls {
+		rr := httptest.NewRecorder()
+		req := httptest.NewRequest(http.MethodGet, u, nil)
+		h.ServeHTTP(rr, req)
+		if rr.Code != http.StatusOK {
+			t.Errorf("GET %s: status %d, body=%s", u, rr.Code, firstChars(rr.Body.String(), 200))
+		}
+	}
+}
+
+// TestRouter_OldURLsRetired confirms the pre-2.1.1 single-purpose page
+// URLs no longer resolve. Tools or links that still point at them
+// must be migrated to the new section/tab URLs.
+func TestRouter_OldURLsRetired(t *testing.T) {
+	_, h := newTestRouter(t)
+	urls := []string{
+		"/metrics", "/insights",
+		"/primitives", "/primitives/new", "/policies", "/policies/investigate", "/graph",
+		"/verify", "/evals",
+		"/prune", "/inbox",
+	}
+	for _, u := range urls {
+		rr := httptest.NewRecorder()
+		req := httptest.NewRequest(http.MethodGet, u, nil)
+		h.ServeHTTP(rr, req)
+		if rr.Code != http.StatusNotFound {
+			t.Errorf("GET %s: status %d want 404 (URL was retired in 2.1.1)", u, rr.Code)
+		}
+	}
+}
+
+// TestRouter_KPIWidgets confirms each headline KPI endpoint responds
+// 200 and returns an HTML fragment (no full document).
+func TestRouter_KPIWidgets(t *testing.T) {
+	_, h := newTestRouter(t)
+	for _, name := range []string{"primitives", "sources", "inbox", "lint", "index"} {
+		rr := httptest.NewRecorder()
+		req := httptest.NewRequest(http.MethodGet, "/web/widgets/kpi/"+name, nil)
+		h.ServeHTTP(rr, req)
+		if rr.Code != http.StatusOK {
+			t.Errorf("GET /web/widgets/kpi/%s: status %d, body=%q", name, rr.Code, firstChars(rr.Body.String(), 300))
+			continue
+		}
+		body := rr.Body.String()
+		if strings.Contains(body, "<!doctype") || strings.Contains(body, "<html") {
+			t.Errorf("KPI %s: unexpected full document; got %q", name, firstChars(body, 80))
+		}
+		if !strings.Contains(body, "kpi-") {
+			t.Errorf("KPI %s: response missing kpi-* class hook; got %q", name, firstChars(body, 200))
+		}
+	}
+}
+
+// TestRouter_KPIWidgetUnknown — 404 on an unknown KPI name keeps the
+// surface tight; adding a KPI is a deliberate code change, not a
+// path-shape guess.
+func TestRouter_KPIWidgetUnknown(t *testing.T) {
+	_, h := newTestRouter(t)
+	rr := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodGet, "/web/widgets/kpi/nope", nil)
+	h.ServeHTTP(rr, req)
+	if rr.Code != http.StatusNotFound {
+		t.Errorf("unknown KPI: status %d want 404", rr.Code)
+	}
+}
+
+// TestRouter_GraphWidget confirms the lazy graph fragment endpoint
+// returns a mermaid block and nothing else (no <html>).
+func TestRouter_GraphWidget(t *testing.T) {
+	_, h := newTestRouter(t)
+	rr := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodGet, "/web/widgets/graph", nil)
+	h.ServeHTTP(rr, req)
+	if rr.Code != http.StatusOK {
+		t.Fatalf("status: got %d want 200", rr.Code)
+	}
+	body := rr.Body.String()
+	if strings.Contains(body, "<!doctype") || strings.Contains(body, "<html") {
+		t.Errorf("graph widget returned full document; got %q", firstChars(body, 80))
+	}
+	if !strings.Contains(body, "mermaid") {
+		t.Errorf("graph widget missing mermaid block; got %q", firstChars(body, 200))
+	}
+}
+
+// TestRouter_HarnessPrimitiveDetailURL exercises the kind/id prefix
+// dispatch under the new harness section.
+func TestRouter_HarnessPrimitiveDetailURL(t *testing.T) {
+	_, h := newTestRouter(t)
+	rr := httptest.NewRecorder()
+	// No matching primitive — empty tempdir — but the route must
+	// reach the handler (which returns 404 on miss), not the
+	// catch-all NotFound. We accept any non-500 here; the contract
+	// is that the URL pattern is recognized.
+	req := httptest.NewRequest(http.MethodGet, "/harness/primitives/guide/some-id", nil)
+	h.ServeHTTP(rr, req)
+	if rr.Code >= 500 {
+		t.Errorf("GET /harness/primitives/guide/some-id: status %d want < 500", rr.Code)
+	}
+}
+
 func TestRouter_JSONAPI(t *testing.T) {
 	_, h := newTestRouter(t)
 	rr := httptest.NewRecorder()
@@ -74,6 +201,55 @@ func TestRouter_StaticAssets(t *testing.T) {
 	if rr.Code != http.StatusNotFound {
 		t.Errorf("missing asset: got %d want 404", rr.Code)
 	}
+}
+
+// TestRouter_HXRequestReturnsFragment confirms a page handler called
+// with `HX-Request: true` returns just the page's `main` block, not
+// the full layout. Necessary for the SPA shell — htmx swaps must not
+// nest a complete document inside #app.
+func TestRouter_HXRequestReturnsFragment(t *testing.T) {
+	_, h := newTestRouter(t)
+	rr := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	req.Header.Set("HX-Request", "true")
+	h.ServeHTTP(rr, req)
+
+	if rr.Code != http.StatusOK {
+		t.Fatalf("status: got %d want 200", rr.Code)
+	}
+	body := rr.Body.String()
+	if strings.Contains(body, "<!doctype") || strings.Contains(body, "<html") {
+		t.Errorf("fragment response unexpectedly contains full document markers; body starts with %q", firstChars(body, 80))
+	}
+}
+
+// TestRouter_NoHXReturnsFullLayout confirms that a normal browser GET
+// (no HX-Request header) still server-renders the full layout — so
+// deep links, reloads, and shared URLs continue to produce a complete
+// document.
+func TestRouter_NoHXReturnsFullLayout(t *testing.T) {
+	_, h := newTestRouter(t)
+	rr := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	h.ServeHTTP(rr, req)
+
+	if rr.Code != http.StatusOK {
+		t.Fatalf("status: got %d want 200", rr.Code)
+	}
+	body := rr.Body.String()
+	if !strings.Contains(body, "<!doctype") {
+		t.Errorf("full response missing doctype; body starts with %q", firstChars(body, 80))
+	}
+	if !strings.Contains(body, `<main id="app"`) {
+		t.Error("full response missing the SPA shell anchor <main id=\"app\">")
+	}
+}
+
+func firstChars(s string, n int) string {
+	if len(s) <= n {
+		return s
+	}
+	return s[:n]
 }
 
 func TestRouter_SSEEndpoint(t *testing.T) {

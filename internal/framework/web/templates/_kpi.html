@@ -1,0 +1,13 @@
+{{define "_kpi.html"}}
+{{with .KPI}}
+<div class="kpi {{if .Tone}}kpi-{{.Tone}}{{end}}"
+     id="kpi-{{$.Name}}"
+     hx-get="/web/widgets/kpi/{{$.Name}}"
+     hx-trigger="sse:{{.Topic}}"
+     hx-swap="outerHTML">
+  <div class="kpi-label">{{.Label}}</div>
+  <div class="kpi-value">{{.Value}}</div>
+  {{if .Hint}}<div class="kpi-hint">{{.Hint}}</div>{{end}}
+</div>
+{{end}}
+{{end}}

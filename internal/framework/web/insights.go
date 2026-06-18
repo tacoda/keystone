@@ -45,8 +45,8 @@ func (s *server) collectInsights(primitives []primitive.Primitive) []Insight {
 			ID: "lint.errors", Severity: "high",
 			Title:      "lint errors present",
 			Detail:     "Hard schema errors (missing fields, duplicate ids, malformed frontmatter) make primitives invisible to the agent. Fix or prune.",
-			Action:     "review /prune",
-			ActionLink: "/prune",
+			Action:     "review /flywheels/prune",
+			ActionLink: "/flywheels/prune",
 		})
 	}
 
@@ -61,8 +61,8 @@ func (s *server) collectInsights(primitives []primitive.Primitive) []Insight {
 			ID: "inbox.backlog", Severity: sev,
 			Title:      "learning inbox is backed up",
 			Detail:     "Captured candidates haven't been triaged. Long backlogs make the agent stop capturing — promote or reject.",
-			Action:     "walk /inbox",
-			ActionLink: "/inbox",
+			Action:     "walk /flywheels/inbox",
+			ActionLink: "/flywheels/inbox",
 		})
 	}
 
@@ -117,8 +117,8 @@ func (s *server) collectInsights(primitives []primitive.Primitive) []Insight {
 			ID: "corpus.orphan", Severity: "low",
 			Title:      "corpus entries without a referrer",
 			Detail:     "These corpus files aren't reached by any rule's `traces:`. Either link them or prune.",
-			Action:     "review /prune",
-			ActionLink: "/prune",
+			Action:     "review /flywheels/prune",
+			ActionLink: "/flywheels/prune",
 		})
 	}
 
@@ -128,8 +128,8 @@ func (s *server) collectInsights(primitives []primitive.Primitive) []Insight {
 			ID: "skills.zero", Severity: "low",
 			Title:      "no project-authored skills",
 			Detail:     "Skills are host-native agent abstractions Claude Code auto-loads by trigger phrase. Adding even one (`keystone new skill`) makes recurring tasks one-phrase.",
-			Action:     "/primitives/new",
-			ActionLink: "/primitives/new",
+			Action:     "/harness/primitives/new",
+			ActionLink: "/harness/primitives/new",
 		})
 	}
 
@@ -144,16 +144,16 @@ func (s *server) collectInsights(primitives []primitive.Primitive) []Insight {
 				ID: "severity.over-iron", Severity: "low",
 				Title:      "more than 60% of guides are severity: must",
 				Detail:     "When everything is iron-law, nothing is. Demote routine rules to `should` so the agent can tell signal from boilerplate.",
-				Action:     "/primitives?kind=guide",
-				ActionLink: "/primitives?kind=guide",
+				Action:     "/harness/primitives?kind=guide",
+				ActionLink: "/harness/primitives?kind=guide",
 			})
 		case ratio < 0.05 && totalGuides > 10:
 			out = append(out, Insight{
 				ID: "severity.under-iron", Severity: "low",
 				Title:      "<5% of guides are severity: must",
 				Detail:     "If no rules are iron-law, the agent has no clear non-negotiables. Promote a handful (security, data-loss prevention, etc.).",
-				Action:     "/primitives?kind=guide",
-				ActionLink: "/primitives?kind=guide",
+				Action:     "/harness/primitives?kind=guide",
+				ActionLink: "/harness/primitives?kind=guide",
 			})
 		}
 	}
@@ -256,7 +256,7 @@ func (s *server) handleInsights(w http.ResponseWriter, r *http.Request) {
 	for _, in := range insights {
 		counts[in.Severity]++
 	}
-	s.render(w, "insights.html", map[string]any{
+	s.renderPage(w, r, "insights.html", map[string]any{
 		"ProjectDir": s.projectDir,
 		"Insights":   insights,
 		"Counts":     counts,

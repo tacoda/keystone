@@ -9,21 +9,21 @@
     <h2><span class="pill" style="background:rgba(74,222,154,0.13);color:var(--green);">learn</span> — additive</h2>
     <p>Captures a learning candidate into <code>.keystone/harness/learning/inbox/</code> from a surprise, incident, or review finding. Subsequent <code>/keystone:synthesize</code> runs promote accepted candidates to <code>guides/</code> or <code>corpus/</code>.</p>
     <pre class="body" data-copy>/keystone:learn</pre>
-    <p class="muted">After firing, review the inbox at <a href="/inbox">/inbox</a> and mark candidates accepted / rejected.</p>
+    <p class="muted">After firing, review the inbox at <a href="/flywheels/inbox">/flywheels/inbox</a> and mark candidates accepted / rejected.</p>
   </div>
 
   <div class="card" style="background: var(--bg-3); margin-top: 1rem;">
     <h2><span class="pill" style="background:rgba(232,121,160,0.13);color:var(--pink);">synthesize</span> — promote</h2>
     <p>Walks <code>learning/inbox/</code>, promotes <code>status: accepted</code> candidates to the right layer (guide / corpus / sensor), then regenerates <code>INDEX.json</code>.</p>
     <pre class="body" data-copy>/keystone:synthesize</pre>
-    <p class="muted">Inspect promotions afterward via <a href="/primitives">/primitives</a>.</p>
+    <p class="muted">Inspect promotions afterward via <a href="/harness/primitives">/harness/primitives</a>.</p>
   </div>
 
   <div class="card" style="background: var(--bg-3); margin-top: 1rem;">
     <h2><span class="pill" style="background:rgba(232,121,160,0.13);color:var(--pink);">audit</span> — subtractive</h2>
     <p>Periodic dual flywheel: walks the corpus + guides looking for stale or unused content; proposes archive moves with a one-line reason. The Pruning loop is asymmetric — guides churn often; corpus rarely.</p>
     <pre class="body" data-copy>/keystone:audit</pre>
-    <p class="muted">See <a href="/prune">/prune</a> for the deterministic side (lint + heuristic) of the same loop.</p>
+    <p class="muted">See <a href="/flywheels/prune">/flywheels/prune</a> for the deterministic side (lint + heuristic) of the same loop.</p>
   </div>
 </section>
 {{end}}

@@ -136,7 +136,7 @@ func (s *server) handleInvestigator(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	s.render(w, "investigator.html", map[string]any{
+	s.renderPage(w, r, "investigator.html", map[string]any{
 		"ProjectDir": s.projectDir,
 		"Inventory":  inv,
 	})

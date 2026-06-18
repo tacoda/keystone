@@ -22,6 +22,13 @@ import (
 // The watcher debounces — bursts (a save, a chmod, a sync) collapse
 // into one event after debounceWindow. Avoids hammering the
 // dashboard during bulk edits.
+//
+// During each debounce window the watcher records every dirty path
+// it sees. At publish time those paths are classified into the
+// narrowest SSE topic(s) that apply (see topics.go) so widgets only
+// re-fetch when something they care about actually moved. The
+// coarse `harness-changed` topic is always emitted, so widgets that
+// subscribe to it still tick on every burst.
 type fsWatcher struct {
 	projectDir     string
 	hub            *sseHub
@@ -34,8 +41,15 @@ type fsWatcher struct {
 	// Optional — nil is allowed.
 	onChange func()
 
+	// onPublish runs after every successful publish with the dirty
+	// path set + the SSE topics emitted. The server wires this to
+	// the audit log so each burst leaves a JSONL line on disk.
+	// Optional — nil is allowed.
+	onPublish func(paths []string, topics []sseTopic)
+
 	mu    sync.Mutex
 	timer *time.Timer
+	dirty map[string]struct{} // path set accumulated across one debounce
 }
 
 func newFSWatcher(projectDir string, hub *sseHub, onChange func()) (*fsWatcher, error) {
@@ -63,6 +77,7 @@ func newFSWatcher(projectDir string, hub *sseHub, onChange func()) (*fsWatcher, 
 		w:              w,
 		debounceWindow: 250 * time.Millisecond,
 		onChange:       onChange,
+		dirty:          map[string]struct{}{},
 	}, nil
 }
 
@@ -95,6 +110,7 @@ func (fw *fsWatcher) loop(ctx context.Context) {
 					_ = addRecursive(fw.w, ev.Name)
 				}
 			}
+			fw.record(ev.Name)
 			fw.fire()
 		case err, ok := <-fw.w.Errors:
 			if !ok {
@@ -116,14 +132,34 @@ func (fw *fsWatcher) fire() {
 	fw.timer = time.AfterFunc(fw.debounceWindow, fw.publish)
 }
 
-// publish emits an `index-refreshed` SSE event. The body is an HTML
-// fragment that swaps the dashboard's "last updated" marker — the
-// dashboard then issues its own hx-get to pull the fresh data.
+// record stashes a dirty path observed during the current debounce
+// window. The set is drained at publish time. Cheap; bounded by the
+// debounce window, not the watcher's lifetime.
+func (fw *fsWatcher) record(path string) {
+	fw.mu.Lock()
+	fw.dirty[path] = struct{}{}
+	fw.mu.Unlock()
+}
+
+// publish emits one SSE event per topic the debounce burst touched.
+// Topics are derived from the dirty path set via topicsForPath();
+// the coarse `harness-changed` topic always fires so generic
+// subscribers tick on every burst.
 //
 // We deliberately do NOT compute the diff server-side. The dashboard
 // re-fetches from the REST API on signal — keeps the watcher's job
 // trivial and the data path single-sourced.
 func (fw *fsWatcher) publish() {
+	// Drain the dirty set first so the classify-and-publish path
+	// doesn't race a fresh burst.
+	fw.mu.Lock()
+	paths := make([]string, 0, len(fw.dirty))
+	for p := range fw.dirty {
+		paths = append(paths, p)
+	}
+	fw.dirty = map[string]struct{}{}
+	fw.mu.Unlock()
+
 	// Rebuild any registered caches BEFORE notifying the dashboard.
 	// The dashboard re-fetches on the SSE ping; we want the cache
 	// warm by the time the request lands so the fetch doesn't race
@@ -131,11 +167,40 @@ func (fw *fsWatcher) publish() {
 	if fw.onChange != nil {
 		fw.onChange()
 	}
+
+	// Classify. The first burst on a fresh watcher (no recorded
+	// paths — e.g. a direct fire from tests) still emits the coarse
+	// topic so anything listening to harness-changed ticks.
+	perPath := make([][]sseTopic, 0, len(paths))
+	for _, p := range paths {
+		perPath = append(perPath, topicsForPath(fw.projectDir, p))
+	}
+	topics := unionTopics(perPath)
+	if len(topics) == 0 {
+		topics = []sseTopic{topicHarness}
+	}
+
 	now := time.Now().Format(time.RFC3339)
-	fw.hub.Publish(sseEvent{
-		Name: "harness-changed",
-		Data: fmt.Sprintf(`<span id="last-updated" hx-swap-oob="true">updated %s</span>`, now),
-	})
+	for _, t := range topics {
+		var data string
+		switch t {
+		case topicHarness:
+			// The shell's "live" pill — out-of-band swap so it
+			// updates anywhere the layout is mounted.
+			data = fmt.Sprintf(`<span id="last-updated" hx-swap-oob="true" class="updated">updated %s</span>`, now)
+		default:
+			// Narrow topics carry an empty payload. Widgets
+			// subscribe via `hx-trigger="sse:<topic>"` and refetch
+			// themselves — keeps the watcher dumb and widgets
+			// in charge of what "fresh" looks like.
+			data = " "
+		}
+		fw.hub.Publish(sseEvent{Name: string(t), Data: data})
+	}
+
+	if fw.onPublish != nil {
+		fw.onPublish(paths, topics)
+	}
 }
 
 // addRecursive walks `root` and registers every directory with the

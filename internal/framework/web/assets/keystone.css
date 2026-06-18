@@ -1,24 +1,58 @@
-/* keystone dashboard — palette matched to tacoda.dev/keystone:
-   dark base, amber primary, multi-color accent per concept type. */
+/* keystone dashboard — softer dark theme, blue + gray accents.
+   Audience: software engineers using agentic coding. The tone is
+   modern dev-tool: subdued background, high-contrast text, blue as
+   the primary action accent, gray for chrome/dividers. No neon.
+   Single file, no framework. */
+
 :root {
-  --bg:        #0d1018;
-  --bg-2:      #13161d;
-  --bg-3:      #1a1e28;
-  --fg:        #e7e9ee;
-  --fg-2:      #b8bcc8;
-  --muted:     #6b7280;
-  --line:      #2a2f3a;
-  --line-2:    #1f2330;
+  /* Surfaces — slate-ish dark, slightly lighter than near-black so
+     the eye relaxes during long sessions. */
+  --bg:        #11151c;   /* page */
+  --bg-2:      #161b24;   /* card */
+  --bg-3:      #1c222d;   /* card-inset / table-row hover */
+  --bg-4:      #232a36;   /* code blocks, deepest panel */
 
-  --amber:     #f59e0b;  /* binary / primary accent */
-  --green:     #4ade9a;  /* outputs / success */
-  --blue:      #60a5fa;  /* info / bootstrap */
-  --pink:      #e879a0;  /* flywheels */
-  --purple:    #a78bfa;  /* plugins / policies */
+  /* Foreground — soft white, never pure. */
+  --fg:        #e6e9ef;
+  --fg-2:      #b7bdca;
+  --muted:     #7a8194;
+  --muted-2:   #5a6072;
 
-  --ok:        var(--green);
-  --bad:       #f87171;
-  --warn:      var(--amber);
+  /* Dividers + chrome — cool gray that recedes. */
+  --line:      #252b37;
+  --line-2:    #1d222d;
+
+  /* Accents — blue primary, then a teal/cyan, then warm gray.
+     Status colors are muted (no pure red/green). */
+  --blue:        #6aa3ff;   /* primary action accent */
+  --blue-dim:    #4d7ed3;   /* hover / pressed */
+  --blue-faint:  rgba(106,163,255,0.12);
+  --cyan:        #5cc8d7;   /* secondary accent */
+  --gray-accent: #9aa4b8;   /* tertiary, calmer than blue */
+
+  --ok:        #6fcf97;     /* slightly desaturated green */
+  --ok-faint:  rgba(111,207,151,0.13);
+  --bad:       #e57373;     /* warm red, not blood */
+  --bad-faint: rgba(229,115,115,0.13);
+  --warn:      #e0b85b;     /* amber held only for "warn" */
+  --warn-faint: rgba(224,184,91,0.13);
+
+  /* Spacing scale — 4px grid. */
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 24px;
+  --s-6: 32px;
+
+  /* Radius. */
+  --r-1: 4px;
+  --r-2: 6px;
+  --r-3: 10px;
+
+  /* Snappy transitions — keep durations short so swaps feel instant. */
+  --t-fast:   90ms ease-out;
+  --t-medium: 160ms ease-out;
 }
 
 * { box-sizing: border-box; }
@@ -26,198 +60,387 @@ html, body {
   margin: 0;
   background: var(--bg);
   color: var(--fg);
-  font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont,
+               "Inter", "Segoe UI", Roboto, sans-serif;
   font-size: 14.5px;
   line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 code, pre, .mono {
-  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
-  font-size: 0.92em;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo,
+               "JetBrains Mono", Consolas, monospace;
+  font-size: 0.9em;
 }
-
 a { color: var(--blue); text-decoration: none; }
-a:hover { text-decoration: underline; }
+a:hover { color: var(--blue-dim); text-decoration: underline; }
+
+/* ---------- TOPBAR ---------- */
 
 .topbar {
   display: flex;
   align-items: center;
-  gap: 1.25rem;
-  padding: 0.85rem 1.5rem;
-  background: var(--bg-2);
+  gap: var(--s-5);
+  padding: 10px var(--s-5);
+  background: color-mix(in srgb, var(--bg-2) 88%, transparent);
+  backdrop-filter: blur(10px) saturate(140%);
+  -webkit-backdrop-filter: blur(10px) saturate(140%);
   border-bottom: 1px solid var(--line);
   position: sticky;
   top: 0;
-  z-index: 10;
+  z-index: 50;
 }
 .brand {
   display: inline-flex;
   align-items: center;
-  gap: 0.55rem;
+  gap: var(--s-2);
   font-weight: 700;
-  font-size: 1.05rem;
-  color: var(--amber);
-  letter-spacing: 0.01em;
+  font-size: 1.0rem;
+  color: var(--fg);
+  letter-spacing: -0.01em;
 }
-.brand:hover { text-decoration: none; }
+.brand:hover { text-decoration: none; color: var(--fg); }
 .brand-logo {
-  width: 28px;
-  height: 28px;
+  width: 26px;
+  height: 26px;
   display: block;
-  animation: keystone-pulse 4s ease-in-out infinite;
-  filter: drop-shadow(0 0 6px rgba(245,158,11,0.35));
+  opacity: 0.95;
+  filter: drop-shadow(0 0 6px rgba(106,163,255,0.18));
 }
-@keyframes keystone-pulse {
-  0%   { transform: translateY(0)    rotate(0deg);   opacity: 0.95; }
-  50%  { transform: translateY(-2px) rotate(2deg);   opacity: 1;    }
-  100% { transform: translateY(0)    rotate(0deg);   opacity: 0.95; }
+
+.topbar nav {
+  display: flex;
+  gap: var(--s-1);
+  align-items: center;
 }
-.topbar nav { display: flex; gap: 1rem; }
 .topbar nav a {
   color: var(--fg-2);
-  padding: 0.35rem 0.55rem;
-  border-radius: 4px;
-  transition: background 0.12s;
+  padding: 6px 10px;
+  border-radius: var(--r-2);
+  font-size: 0.92rem;
+  transition: background var(--t-fast), color var(--t-fast);
 }
-.topbar nav a:hover { color: var(--fg); background: var(--bg-3); text-decoration: none; }
+.topbar nav a:hover {
+  color: var(--fg);
+  background: var(--bg-3);
+  text-decoration: none;
+}
+
 .updated {
-  margin-left: auto;
-  font-size: 0.78rem;
+  font-size: 0.74rem;
   color: var(--muted);
   font-family: ui-monospace, monospace;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: var(--blue-faint);
+  color: var(--blue);
 }
+
+/* ---------- COMMAND-K SEARCH ---------- */
+
+.search-cmdk {
+  margin-left: auto;
+  position: relative;
+  flex: 0 1 320px;
+}
+.search-cmdk input[type="search"] {
+  width: 100%;
+  background: var(--bg-3);
+  color: var(--fg);
+  border: 1px solid var(--line);
+  border-radius: var(--r-2);
+  padding: 6px 10px;
+  font: inherit;
+  font-size: 0.88rem;
+  outline: none;
+  transition: border-color var(--t-fast), background var(--t-fast);
+}
+.search-cmdk input[type="search"]:focus {
+  border-color: var(--blue);
+  background: var(--bg-4);
+}
+.cmdk-popover {
+  position: absolute;
+  top: calc(100% + var(--s-2));
+  left: 0;
+  right: 0;
+  max-height: 60vh;
+  overflow-y: auto;
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  border-radius: var(--r-3);
+  box-shadow: 0 12px 36px rgba(0,0,0,0.45);
+  z-index: 100;
+}
+.cmdk-popover:empty { display: none; }
+.cmdk-popover table { margin: 0; }
+.cmdk-popover th { background: var(--bg-3); }
+.cmdk-popover p { padding: var(--s-3) var(--s-4); margin: 0; }
+
+/* ---------- LAYOUT ---------- */
 
 main {
   max-width: 1180px;
   margin: 0 auto;
-  padding: 1.5rem;
+  padding: var(--s-5);
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: var(--s-4);
+  view-transition-name: app;
 }
 
 .card {
   background: var(--bg-2);
   border: 1px solid var(--line);
-  border-radius: 8px;
-  padding: 1.4rem 1.6rem;
+  border-radius: var(--r-3);
+  padding: var(--s-5);
+  box-shadow: 0 1px 0 rgba(255,255,255,0.02) inset,
+              0 12px 24px -18px rgba(0,0,0,0.5);
 }
 .card h1, .card h2 {
   margin-top: 0;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.012em;
   font-weight: 600;
 }
-.card h1 { color: var(--fg); font-size: 1.4rem; }
-.card h2 { color: var(--fg-2); font-size: 1.1rem; margin-top: 1rem; }
+.card h1 { color: var(--fg);   font-size: 1.4rem;  margin-bottom: var(--s-3); }
+.card h2 { color: var(--fg-2); font-size: 1.05rem; margin-top: var(--s-4); }
 .muted { color: var(--muted); }
 
-/* Stat grid for metrics/home. */
+/* ---------- KPI STRIP ---------- */
+
+.kpi-strip {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: var(--s-3);
+  margin: 0;
+}
+.kpi {
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  border-radius: var(--r-3);
+  padding: var(--s-4) var(--s-5);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  transition: border-color var(--t-fast), background var(--t-fast);
+}
+.kpi:hover { border-color: color-mix(in srgb, var(--blue) 40%, var(--line)); }
+.kpi-label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+.kpi-value {
+  font-size: 1.7rem;
+  font-weight: 600;
+  color: var(--fg);
+  font-variant-numeric: tabular-nums;
+}
+.kpi-hint {
+  font-size: 0.74rem;
+  color: var(--muted-2);
+  font-family: ui-monospace, monospace;
+}
+.kpi-loading .kpi-value { color: var(--muted-2); }
+.kpi-ok  .kpi-value  { color: var(--ok); }
+.kpi-warn .kpi-value { color: var(--warn); }
+.kpi-bad .kpi-value  { color: var(--bad); }
+
+/* Live-tick animation on SSE-driven swaps. Brief blue border halo
+   to confirm "this updated" without yanking attention. */
+@keyframes kpi-tick {
+  0%   { box-shadow: 0 0 0 0 var(--blue-faint); }
+  60%  { box-shadow: 0 0 0 4px var(--blue-faint); }
+  100% { box-shadow: 0 0 0 0 transparent; }
+}
+.kpi.htmx-settling { animation: kpi-tick 380ms ease-out; }
+
+/* ---------- AUDIT LOG ---------- */
+
+.audit-header {
+  display: flex;
+  align-items: baseline;
+  gap: var(--s-4);
+  margin-bottom: var(--s-3);
+}
+.audit-header h2 { margin: 0; font-size: 1.05rem; }
+.audit-entries {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-1);
+  max-height: 320px;
+  overflow-y: auto;
+}
+.audit-entries li {
+  display: grid;
+  grid-template-columns: 11rem 1fr auto;
+  gap: var(--s-3);
+  padding: 6px var(--s-3);
+  border-radius: var(--r-2);
+  font-size: 0.84rem;
+  transition: background var(--t-fast);
+}
+.audit-entries li:hover { background: var(--bg-3); }
+.audit-entries time {
+  font-family: ui-monospace, monospace;
+  font-size: 0.78rem;
+  color: var(--muted-2);
+}
+.audit-summary  { color: var(--fg-2); font-family: ui-monospace, monospace; font-size: 0.82rem; }
+.audit-topics   { font-size: 0.7rem; }
+.audit-topics .pill { font-size: 0.66rem; padding: 1px 6px; }
+
+/* ---------- LAZY MOUNT (graph etc.) ---------- */
+
+.lazy-mount {
+  background: var(--bg-3);
+  border: 1px dashed var(--line);
+  border-radius: var(--r-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.lazy-mount.htmx-settling { border-style: solid; }
+
+/* ---------- STAT GRID (legacy widgets) ---------- */
+
 .stats {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 0.75rem;
-  margin: 1rem 0;
+  gap: var(--s-3);
+  margin: var(--s-4) 0;
 }
 .stat {
   background: var(--bg-3);
   border: 1px solid var(--line);
-  border-radius: 6px;
-  padding: 0.8rem 1rem;
+  border-radius: var(--r-2);
+  padding: var(--s-3) var(--s-4);
 }
 .stat .label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
-.stat .value { font-size: 1.5rem; font-weight: 600; color: var(--fg); margin-top: 0.15rem; }
-.stat .value.amber  { color: var(--amber); }
-.stat .value.green  { color: var(--green); }
+.stat .value { font-size: 1.5rem; font-weight: 600; color: var(--fg); margin-top: 2px; font-variant-numeric: tabular-nums; }
+.stat .value.amber  { color: var(--warn); }
+.stat .value.green  { color: var(--ok); }
 .stat .value.blue   { color: var(--blue); }
-.stat .value.pink   { color: var(--pink); }
-.stat .value.purple { color: var(--purple); }
+.stat .value.pink   { color: var(--gray-accent); }
+.stat .value.purple { color: var(--cyan); }
 .stat .value.bad    { color: var(--bad); }
+
+/* ---------- TABLES ---------- */
 
 table {
   width: 100%;
   border-collapse: collapse;
-  margin-top: 0.5rem;
+  margin-top: var(--s-2);
 }
 th, td {
   text-align: left;
-  padding: 0.5rem 0.7rem;
+  padding: 8px 12px;
   border-bottom: 1px solid var(--line-2);
 }
-th { font-weight: 600; color: var(--muted); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.05em; }
+tbody tr { transition: background var(--t-fast); }
+tbody tr:hover { background: color-mix(in srgb, var(--bg-3) 70%, transparent); }
+th {
+  font-weight: 600;
+  color: var(--muted);
+  font-size: 0.74rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  border-bottom: 1px solid var(--line);
+}
 td code { font-size: 0.85em; color: var(--fg-2); }
 td .kind-tag {
   display: inline-block;
-  padding: 0.1rem 0.45rem;
-  border-radius: 4px;
-  font-size: 0.78rem;
+  padding: 1px 8px;
+  border-radius: 999px;
+  font-size: 0.72rem;
   font-family: ui-monospace, monospace;
   background: var(--bg-3);
   border: 1px solid var(--line);
   color: var(--fg-2);
 }
-td .kind-tag.guide    { color: var(--green);  border-color: rgba(74,222,154,0.3); }
-td .kind-tag.rule     { color: var(--green);  border-color: rgba(74,222,154,0.3); }
-td .kind-tag.corpus   { color: var(--blue);   border-color: rgba(96,165,250,0.3); }
-td .kind-tag.sensor   { color: var(--amber);  border-color: rgba(245,158,11,0.3); }
-td .kind-tag.action   { color: var(--pink);   border-color: rgba(232,121,160,0.3); }
-td .kind-tag.playbook { color: var(--pink);   border-color: rgba(232,121,160,0.3); }
-td .kind-tag.skill    { color: var(--purple); border-color: rgba(167,139,250,0.3); }
-td .kind-tag.subagent { color: var(--purple); border-color: rgba(167,139,250,0.3); }
-td .kind-tag.command  { color: var(--purple); border-color: rgba(167,139,250,0.3); }
+/* All kinds now use the same blue/gray family. Differentiation by
+   density of accent, not by hue — keeps the table calm. */
+td .kind-tag.guide,
+td .kind-tag.rule     { color: var(--blue);        border-color: color-mix(in srgb, var(--blue) 35%, var(--line)); }
+td .kind-tag.corpus   { color: var(--cyan);        border-color: color-mix(in srgb, var(--cyan) 35%, var(--line)); }
+td .kind-tag.sensor   { color: var(--warn);        border-color: color-mix(in srgb, var(--warn) 35%, var(--line)); }
+td .kind-tag.action,
+td .kind-tag.playbook { color: var(--gray-accent); border-color: color-mix(in srgb, var(--gray-accent) 35%, var(--line)); }
+td .kind-tag.skill,
+td .kind-tag.subagent,
+td .kind-tag.command  { color: var(--ok);          border-color: color-mix(in srgb, var(--ok) 35%, var(--line)); }
 
-.filters {
+/* ---------- FORMS ---------- */
+
+.filters, form .row {
   display: flex;
-  gap: 1rem;
-  margin-bottom: 0.75rem;
+  gap: var(--s-3);
+  align-items: end;
+  margin-bottom: var(--s-3);
   flex-wrap: wrap;
 }
-.filters label {
+.filters label, form label {
   display: flex;
   flex-direction: column;
-  gap: 0.2rem;
+  gap: 2px;
   font-size: 0.78rem;
   color: var(--muted);
 }
-.filters select, .filters input, form select, form input, form textarea {
-  background: var(--bg);
+.filters select, .filters input,
+form select, form input, form textarea {
+  background: var(--bg-3);
   color: var(--fg);
   border: 1px solid var(--line);
-  border-radius: 5px;
-  padding: 0.4rem 0.55rem;
+  border-radius: var(--r-2);
+  padding: 6px 9px;
   font: inherit;
   min-width: 180px;
+  transition: border-color var(--t-fast), background var(--t-fast);
 }
-form .row { display: flex; gap: 0.75rem; align-items: end; margin-bottom: 0.75rem; flex-wrap: wrap; }
-form label { display: flex; flex-direction: column; gap: 0.2rem; font-size: 0.78rem; color: var(--muted); }
+.filters select:focus, .filters input:focus,
+form select:focus, form input:focus, form textarea:focus {
+  border-color: var(--blue);
+  outline: none;
+}
 
 .btn {
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
-  padding: 0.45rem 0.85rem;
-  background: var(--amber);
-  color: var(--bg);
+  gap: 6px;
+  padding: 7px 14px;
+  background: var(--blue);
+  color: #fff;
   border: 0;
-  border-radius: 5px;
+  border-radius: var(--r-2);
   font: inherit;
   font-weight: 600;
+  font-size: 0.88rem;
   cursor: pointer;
+  transition: background var(--t-fast), transform var(--t-fast);
 }
-.btn:hover { filter: brightness(1.08); }
+.btn:hover  { background: var(--blue-dim); }
+.btn:active { transform: translateY(1px); }
 .btn.ghost  { background: transparent; color: var(--fg-2); border: 1px solid var(--line); font-weight: 500; }
-.btn.danger { background: var(--bad); color: var(--bg); }
+.btn.ghost:hover { color: var(--fg); background: var(--bg-3); }
+.btn.danger { background: var(--bad); color: #fff; }
+.btn.danger:hover { background: color-mix(in srgb, var(--bad) 80%, black); }
 
-dl { display: grid; grid-template-columns: 8rem 1fr; gap: 0.3rem 1rem; margin: 0.5rem 0; }
+dl { display: grid; grid-template-columns: 8rem 1fr; gap: 4px var(--s-4); margin: var(--s-3) 0; }
 dt { color: var(--muted); font-size: 0.85rem; }
 
 .body, pre.body, pre {
-  background: var(--bg);
+  background: var(--bg-4);
   border: 1px solid var(--line);
-  border-radius: 5px;
-  padding: 0.85rem 1.05rem;
+  border-radius: var(--r-2);
+  padding: var(--s-3) var(--s-4);
   overflow-x: auto;
   white-space: pre-wrap;
   color: var(--fg-2);
-  font-size: 0.86rem;
+  font-size: 0.84rem;
   line-height: 1.5;
 }
 
@@ -227,69 +450,60 @@ dt { color: var(--muted); font-size: 0.85rem; }
 
 .pill {
   display: inline-block;
-  padding: 0.1rem 0.55rem;
+  padding: 1px 9px;
   border-radius: 999px;
-  font-size: 0.74rem;
+  font-size: 0.72rem;
   font-weight: 600;
   letter-spacing: 0.02em;
+  background: var(--bg-3);
+  color: var(--fg-2);
+  border: 1px solid var(--line);
 }
-.pill.ok   { background: rgba(74,222,154,0.13); color: var(--ok); }
-.pill.bad  { background: rgba(248,113,113,0.13); color: var(--bad); }
-.pill.warn { background: rgba(245,158,11,0.13); color: var(--warn); }
+.pill.ok   { background: var(--ok-faint);   color: var(--ok);   border-color: color-mix(in srgb, var(--ok) 40%, var(--line)); }
+.pill.bad  { background: var(--bad-faint);  color: var(--bad);  border-color: color-mix(in srgb, var(--bad) 40%, var(--line)); }
+.pill.warn { background: var(--warn-faint); color: var(--warn); border-color: color-mix(in srgb, var(--warn) 40%, var(--line)); }
 
 .footer {
   max-width: 1180px;
   margin: 0 auto;
-  padding: 1.25rem 1.6rem 2.5rem;
+  padding: var(--s-5) var(--s-5) var(--s-6);
   color: var(--muted);
   font-size: 0.78rem;
 }
 .footer code { color: var(--fg-2); }
 
-/* ---------- async loading cues (htmx) ---------- */
+/* ---------- HTMX FEEDBACK ---------- */
 
-/* Per-form inline indicator. The htmx-indicator class is hidden by
-   default, fades in once htmx sets .htmx-request on the triggering
-   element. Pairs with `hx-indicator="#some-spinner"` in markup. */
 .htmx-indicator {
   display: inline-block;
   opacity: 0;
   transition: opacity 120ms ease-in;
 }
 .htmx-request .htmx-indicator,
-.htmx-request.htmx-indicator {
-  opacity: 1;
-}
+.htmx-request.htmx-indicator { opacity: 1; }
 
-/* Inline dot-spinner glyph the markup can drop in next to a label:
-   <span class="spinner" aria-hidden="true"></span> running… */
 .spinner {
   display: inline-block;
   width: 0.75em;
   height: 0.75em;
   margin-right: 0.4em;
   border: 2px solid color-mix(in srgb, var(--muted) 60%, transparent);
-  border-top-color: var(--amber);
+  border-top-color: var(--blue);
   border-radius: 50%;
   vertical-align: -0.12em;
   animation: spin 0.7s linear infinite;
 }
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
+@keyframes spin { to { transform: rotate(360deg); } }
 
-/* Disabled-during-request buttons. Paired with
-   `hx-disabled-elt="this"` (or `find button`) — htmx adds the
-   `disabled` attribute for the lifetime of the in-flight request. */
 button:disabled,
 input[type="submit"]:disabled {
   opacity: 0.55;
   cursor: progress;
 }
 
-/* Top-of-page request strip. Visible whenever ANY htmx request is in
-   flight (body gets .htmx-request from hx-ext SSE). Subtle by design
-   — confirms the click registered without yanking focus. */
+/* Top-of-page progress strip — visible only while any in-flight
+   request lasts more than ~150ms (we hide for the first beat so
+   instant swaps don't flash). */
 body.htmx-request::before {
   content: "";
   position: fixed;
@@ -297,9 +511,9 @@ body.htmx-request::before {
   left: 0;
   right: 0;
   height: 2px;
-  background: linear-gradient(90deg, transparent, var(--amber), transparent);
+  background: linear-gradient(90deg, transparent, var(--blue), transparent);
   background-size: 200% 100%;
-  animation: progress-strip 1.2s linear infinite;
+  animation: progress-strip 1.2s linear infinite, fade-in 180ms ease-out;
   z-index: 9999;
   pointer-events: none;
 }
@@ -307,3 +521,19 @@ body.htmx-request::before {
   from { background-position: 200% 0; }
   to   { background-position: -200% 0; }
 }
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* SPA swap fade — only when the browser supports view transitions.
+   Free crossfade; zero JS. */
+@media (prefers-reduced-motion: no-preference) {
+  ::view-transition-old(app),
+  ::view-transition-new(app) {
+    animation-duration: 120ms;
+  }
+}
+
+/* Settling flash on htmx swaps — works across every fragment. */
+.htmx-settling { animation: fade-in 160ms ease-out; }

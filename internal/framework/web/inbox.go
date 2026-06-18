@@ -81,7 +81,7 @@ func (s *server) handleInbox(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	s.render(w, "inbox.html", map[string]any{
+	s.renderPage(w, r, "inbox.html", map[string]any{
 		"ProjectDir": s.projectDir,
 		"Items":      items,
 	})

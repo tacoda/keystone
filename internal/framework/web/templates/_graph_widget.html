@@ -1,0 +1,11 @@
+{{define "_graph_widget.html"}}
+<pre class="mermaid" style="background: var(--bg-3); padding: 1rem; border-radius: 6px; font-size: 0.78rem;">
+{{.Mermaid}}
+</pre>
+<script type="module">
+  import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs";
+  mermaid.initialize({ startOnLoad: false, theme: "dark" });
+  // Swap inserted us after DOMContentLoaded, so run manually.
+  await mermaid.run({ querySelector: "#graph-mount .mermaid" });
+</script>
+{{end}}

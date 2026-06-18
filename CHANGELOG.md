@@ -2,6 +2,112 @@
 
 All notable changes to keystone are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); the project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.1] — 2026-06-18
+
+Patch release. Reshapes the web dashboard into an HTMX SPA with
+narrowed live updates, per-session auditability, and a softer
+dark theme tuned for software engineers using agentic coding.
+No schema changes, no migration required.
+
+### Added
+
+- **SPA shell** in `internal/framework/web/templates/layout.html`.
+  Persistent topbar + footer; `<main id="app">` is the single
+  swap target for in-app navigation. Every nav link uses
+  `hx-get` + `hx-push-url`, so back / forward navigate without
+  reloading the chrome.
+- **HX-Request branching** in `(*server).renderPage`. On
+  `HX-Request: true` the page's `main` block is returned alone
+  (fragment); on a normal GET the full layout is rendered. Deep
+  links and reloads still produce a complete document. Tests:
+  `TestRouter_HXRequestReturnsFragment`,
+  `TestRouter_NoHXReturnsFullLayout`.
+- **Five-section consolidation**: 14 single-purpose nav links
+  collapse to `Observability · Harness · Sources · Flywheels ·
+  Quality`. New URL space lives at `/observability/*`,
+  `/harness/*`, `/sources`, `/flywheels/*`, `/quality/*`. Old
+  page URLs are retired (no aliases, no redirects); REST
+  `/api/*` and form actions `/web/actions/*` stay.
+- **SSE topic narrowing** (`internal/framework/web/topics.go`).
+  The watcher classifies each dirty path into the smallest topic
+  set that applies (`primitives-changed`, `sources-changed`,
+  `inbox-changed`, `prune-changed`) on top of the coarse
+  `harness-changed`. Live widgets subscribe via
+  `hx-trigger="sse:<topic>"` and re-fetch themselves — the
+  watcher stays dumb. Tests: `TestTopicsForPath`,
+  `TestUnionTopics`.
+- **On-demand widget loads** for the heaviest panels:
+  - KPI strip on `/observability/metrics`. Five widgets
+    (`primitives`, `sources`, `inbox`, `lint`, `index`) load
+    independently via `/web/widgets/kpi/<name>` and refresh on
+    their narrow SSE topic.
+  - Dependency graph (`/harness/graph`) renders lazily via
+    `hx-trigger="intersect once"`; the Mermaid module is only
+    fetched when the canvas actually scrolls into view.
+- **Per-session audit log** (`internal/framework/web/audit.go`).
+  One JSONL file per `keystone web serve` process at
+  `.keystone/state/audit/session-<UTC>-<pid>.jsonl`, opened with
+  `O_CREATE|O_EXCL` (never overwritten). Each debounced watcher
+  burst writes a line with timestamp, topics, dirty paths, and a
+  one-line summary. Startup pruner keeps the newest 50 sessions
+  or anything within 30 days — looser of the two. New widget at
+  `/web/widgets/audit` renders the tail with a session selector
+  for history. `.keystone/state/audit/` added to `.gitignore`.
+- **Command-K search popover** in the topbar. `Cmd+K` on macOS,
+  `Ctrl+K` on Windows / Linux — platform-detected client-side so
+  the placeholder shows the right shortcut. Debounced 150ms
+  keyup re-queries `/web/fragments/search`; `Escape` and
+  click-outside dismiss. `/search` page kept as a bookmark
+  fallback. ~25 lines of inline JS, no new asset.
+- **Cache-Control: public, max-age=31536000, immutable** on
+  every `/assets/*` response. Assets ship inside the binary and
+  are version-pinned to the release tag, so repeat hits skip
+  the network entirely. `<link rel="preload">` for the CSS +
+  htmx scripts added to the layout head; htmx scripts marked
+  `defer` so they don't block first paint.
+
+### Changed
+
+- **Theme**: softer dark surface (`#11151c` family) with
+  **blue and gray accents**. Old amber-primary palette retired
+  in favor of a calmer dev-tool aesthetic. Kind tags switched
+  from rainbow to blue/cyan/gray family. Pills, cards, and form
+  inputs all rebuilt on a 4-px spacing scale with explicit
+  CSS variables. Live-update flash animation is a subtle blue
+  halo, not a color swap.
+- **Backdrop-blurred sticky topbar** (`backdrop-filter:
+  blur(10px)`), tabular-numeric KPI digits, and a global
+  HTMX progress strip in the primary blue.
+- **Subtle on-swap fade** via the View Transitions API where
+  the browser supports it; falls back to no animation cost
+  where it doesn't.
+- **Prefix-route dispatch in `NoRoute`** now explicitly sets
+  status `200 OK` before invoking the matched handler. Latent
+  bug: prior `/primitives/<kind>/<id>` and `/sources/<name>`
+  responses silently returned `404` even when the handler
+  served a valid body. New tests catch the contract going
+  forward.
+
+### Removed
+
+- Old page routes `/metrics`, `/insights`, `/primitives`,
+  `/policies`, `/policies/investigate`, `/sources` (kept under
+  new path), `/verify`, `/prune`, `/inbox`, `/flywheels` (kept
+  under new path), `/evals`, `/graph`. Tools or shortcuts that
+  still point at the old URLs need a one-line update — see the
+  new path table in the spec under
+  `docs/specs/2026-06-18-web-dashboard-spa.md`.
+- `handleHome` and `home.html` references retired — the
+  observability landing now owns the entrypoint at `/`.
+
+### Notes
+
+- No migration required for this release. `.keystone/state/audit/`
+  is created on first run of `keystone web serve` after the
+  upgrade. The directory is git-ignored.
+- No new direct dependencies. Stdlib + already-vendored only.
+- govulncheck runs in CI on tag push.
+
 ## [2.1.0] — 2026-06-18
 
 Minor release. Retires the patches subsystem in favor of a versioned

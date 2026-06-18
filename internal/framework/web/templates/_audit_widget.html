@@ -1,0 +1,40 @@
+{{define "_audit_widget.html"}}
+<section class="audit"
+         id="audit-widget"
+         hx-get="/web/widgets/audit{{if .Selected}}?session={{.Selected}}{{end}}"
+         hx-trigger="sse:harness-changed"
+         hx-swap="outerHTML">
+  <header class="audit-header">
+    <h2>audit log</h2>
+    {{if .Sessions}}
+    <form hx-get="/web/widgets/audit"
+          hx-target="#audit-widget"
+          hx-swap="outerHTML"
+          hx-trigger="change">
+      <label class="muted" style="font-size: 0.78rem;">session
+        <select name="session">
+          {{range .Sessions}}
+          <option value="{{.}}" {{if eq . $.Selected}}selected{{end}}>{{.}}{{if eq . $.Current}} (live){{end}}</option>
+          {{end}}
+        </select>
+      </label>
+    </form>
+    {{end}}
+  </header>
+  {{if .Entries}}
+  <ol class="audit-entries">
+    {{range .Entries}}
+    <li>
+      <time class="muted">{{.Timestamp}}</time>
+      <span class="audit-summary">{{.Summary}}</span>
+      <span class="audit-topics">
+        {{range .Topics}}<code class="pill">{{.}}</code> {{end}}
+      </span>
+    </li>
+    {{end}}
+  </ol>
+  {{else}}
+  <p class="muted" style="font-style: italic;">no events yet this session.</p>
+  {{end}}
+</section>
+{{end}}

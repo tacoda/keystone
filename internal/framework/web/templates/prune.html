@@ -24,7 +24,7 @@
           {{else}}<span class="pill" style="background:var(--bg-3);color:var(--muted);">info</span>{{end}}
         </td>
         <td><span class="kind-tag {{.Kind}}">{{.Kind}}</span></td>
-        <td><a href="/primitives/{{.Kind}}/{{.ID}}">{{.ID}}</a></td>
+        <td><a href="/harness/primitives/{{.Kind}}/{{.ID}}">{{.ID}}</a></td>
         <td class="muted">{{.Reason}}</td>
         <td>
           <form hx-post="/web/actions/primitives/delete" hx-confirm="Prune {{.Kind}}/{{.ID}}? Deletes {{.Path}}." hx-disabled-elt="find button">

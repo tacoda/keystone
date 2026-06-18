@@ -5,9 +5,12 @@
   <title>Keystone — {{block "title" .}}dashboard{{end}}</title>
   <link rel="icon" type="image/png" href="/assets/keystone_logo.png">
   <link rel="apple-touch-icon" href="/assets/keystone_logo.png">
+  <link rel="preload" href="/assets/keystone.css" as="style">
+  <link rel="preload" href="/assets/htmx.min.js" as="script">
+  <link rel="preload" href="/assets/htmx-ext-sse.js" as="script">
   <link rel="stylesheet" href="/assets/keystone.css">
-  <script src="/assets/htmx.min.js"></script>
-  <script src="/assets/htmx-ext-sse.js"></script>
+  <script src="/assets/htmx.min.js" defer></script>
+  <script src="/assets/htmx-ext-sse.js" defer></script>
 </head>
 <body hx-ext="sse" sse-connect="/events">
   <header class="topbar">
@@ -16,26 +19,62 @@
       <span>keystone</span>
     </a>
     <nav>
-      <a href="/">home</a>
-      <a href="/metrics">metrics</a>
-      <a href="/insights">insights</a>
-      <a href="/primitives">primitives</a>
-      <a href="/policies">policies</a>
-      <a href="/policies/investigate">investigator</a>
-      <a href="/sources">sources</a>
-      <a href="/verify">verify</a>
-      <a href="/prune">prune</a>
-      <a href="/inbox">inbox</a>
-      <a href="/flywheels">flywheels</a>
-      <a href="/evals">evals</a>
-      <a href="/search">search</a>
-      <a href="/graph">graph</a>
+      <a href="/observability/metrics" hx-get="/observability/metrics" hx-target="#app" hx-push-url="true">observability</a>
+      <a href="/harness/primitives" hx-get="/harness/primitives" hx-target="#app" hx-push-url="true">harness</a>
+      <a href="/sources" hx-get="/sources" hx-target="#app" hx-push-url="true">sources</a>
+      <a href="/flywheels" hx-get="/flywheels" hx-target="#app" hx-push-url="true">flywheels</a>
+      <a href="/quality/verify" hx-get="/quality/verify" hx-target="#app" hx-push-url="true">quality</a>
     </nav>
+    <div class="search-cmdk" role="search">
+      <input type="search"
+             id="cmdk-input"
+             name="q"
+             placeholder="search… (Ctrl+K)"
+             autocomplete="off"
+             hx-get="/web/fragments/search"
+             hx-target="#cmdk-popover"
+             hx-swap="innerHTML"
+             hx-trigger="keyup changed delay:150ms, focus"
+             hx-include="this">
+      <div id="cmdk-popover" class="cmdk-popover" aria-live="polite"></div>
+    </div>
     <span id="last-updated" sse-swap="harness-changed" class="updated">live</span>
   </header>
-  <main>
+  <main id="app">
     {{block "main" .}}{{end}}
   </main>
   <footer class="footer">project: <code>{{.ProjectDir}}</code></footer>
+  <script>
+    // Command-K focuses the topbar search input. Escape closes the
+    // popover by blurring + clearing. Tiny, no library — keep the
+    // payload small (devs are harsh on tooling).
+    (function () {
+      const input = document.getElementById('cmdk-input');
+      const pop   = document.getElementById('cmdk-popover');
+      if (!input || !pop) return;
+      // Platform-aware hint. Mac uses ⌘; everyone else (Windows,
+      // Linux, ChromeOS, BSD) uses Ctrl. The handler still accepts
+      // both, so users can paste muscle memory from either side.
+      const isMac = /Mac|iPhone|iPod|iPad/i.test(
+        (navigator.userAgentData && navigator.userAgentData.platform) || navigator.platform || ''
+      );
+      input.placeholder = isMac ? 'search… (⌘K)' : 'search… (Ctrl+K)';
+      document.addEventListener('keydown', (e) => {
+        const mod = isMac ? e.metaKey : e.ctrlKey;
+        if (mod && !e.altKey && !e.shiftKey && e.key.toLowerCase() === 'k') {
+          e.preventDefault();
+          input.focus();
+          input.select();
+        } else if (e.key === 'Escape' && document.activeElement === input) {
+          input.blur();
+          pop.innerHTML = '';
+        }
+      });
+      // Click outside the search wrapper closes the popover.
+      document.addEventListener('click', (e) => {
+        if (!e.target.closest('.search-cmdk')) pop.innerHTML = '';
+      });
+    })();
+  </script>
 </body>
 </html>{{end}}

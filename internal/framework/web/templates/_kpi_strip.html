@@ -1,0 +1,14 @@
+{{define "_kpi_strip.html"}}
+<section class="kpi-strip" aria-label="harness headline metrics">
+  {{range .KPINames}}
+  <div class="kpi kpi-loading"
+       id="kpi-{{.}}"
+       hx-get="/web/widgets/kpi/{{.}}"
+       hx-trigger="load"
+       hx-swap="outerHTML">
+    <div class="kpi-label">{{.}}</div>
+    <div class="kpi-value">…</div>
+  </div>
+  {{end}}
+</section>
+{{end}}

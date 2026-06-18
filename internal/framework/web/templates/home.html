@@ -9,7 +9,7 @@
     <tbody>
       {{range $k, $ids := .ByKind}}
       <tr>
-        <td><a href="/primitives?kind={{$k}}">{{$k}}</a></td>
+        <td><a href="/harness/primitives?kind={{$k}}">{{$k}}</a></td>
         <td>{{len $ids}}</td>
       </tr>
       {{end}}

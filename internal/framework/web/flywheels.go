@@ -10,7 +10,7 @@ import (
 // surfaces the canonical invocation phrasing the user types into
 // their host of choice.
 func (s *server) handleFlywheels(w http.ResponseWriter, r *http.Request) {
-	s.render(w, "flywheels.html", map[string]any{
+	s.renderPage(w, r, "flywheels.html", map[string]any{
 		"ProjectDir": s.projectDir,
 	})
 }

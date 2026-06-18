@@ -52,27 +52,49 @@ func (s *server) render(w http.ResponseWriter, name string, data any) {
 	}
 }
 
-// -- pages -----------------------------------------------------------
-
-func (s *server) handleHome(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Path != "/" {
-		http.NotFound(w, r)
+// renderPage renders a full page template. When the request is an
+// HTMX swap (`HX-Request: true`), only the page's `main` block is
+// returned so the SPA shell stays put. Otherwise the full layout
+// is rendered so deep-links and reloads still produce a complete
+// document.
+//
+// History-restore swaps (HX-History-Restore-Request) get the
+// fragment too — htmx replaces the swap target, not the whole doc.
+func (s *server) renderPage(w http.ResponseWriter, r *http.Request, name string, data any) {
+	if r != nil && r.Header.Get("HX-Request") == "true" {
+		s.renderFragment(w, name, data)
 		return
 	}
-	idx, err := s.buildIndex()
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	sources, _ := s.sourceList(r.Context())
-	s.render(w, "home.html", map[string]any{
-		"ProjectDir":     s.projectDir,
-		"PrimitiveCount": len(idx.Primitives),
-		"ByKind":         idx.ByKind,
-		"Generated":      idx.Generated,
-		"Sources":        sources,
-	})
+	s.render(w, name, data)
 }
+
+// renderFragment parses the page (without layout.html) and executes
+// its `main` block directly — the body that would normally be
+// injected into the layout's `{{block "main"}}` slot. Used for HTMX
+// in-app navigation.
+func (s *server) renderFragment(w http.ResponseWriter, name string, data any) {
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+
+	t := template.New("").Funcs(s.funcs)
+	files := []string{name}
+	if entries, err := fs.ReadDir(s.tmplFS, "."); err == nil {
+		for _, e := range entries {
+			if !e.IsDir() && strings.HasPrefix(e.Name(), "_") && e.Name() != name {
+				files = append(files, e.Name())
+			}
+		}
+	}
+	t, err := t.ParseFS(s.tmplFS, files...)
+	if err != nil {
+		http.Error(w, "render parse: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	if err := t.ExecuteTemplate(w, "main", data); err != nil {
+		http.Error(w, "render exec: "+err.Error(), http.StatusInternalServerError)
+	}
+}
+
+// -- pages -----------------------------------------------------------
 
 func (s *server) handlePrimitivesList(w http.ResponseWriter, r *http.Request) {
 	primitives, err := s.loadPrimitives()
@@ -83,7 +105,7 @@ func (s *server) handlePrimitivesList(w http.ResponseWriter, r *http.Request) {
 	kind := r.URL.Query().Get("kind")
 	glob := r.URL.Query().Get("glob")
 	filtered := filterPrimitives(primitives, kind, glob)
-	s.render(w, "primitives.html", map[string]any{
+	s.renderPage(w, r, "primitives.html", map[string]any{
 		"ProjectDir": s.projectDir,
 		"Primitives": filtered,
 		"Total":      len(primitives),
@@ -94,7 +116,7 @@ func (s *server) handlePrimitivesList(w http.ResponseWriter, r *http.Request) {
 
 // /primitives/<kind>/<id...>
 func (s *server) handlePrimitivesDetail(w http.ResponseWriter, r *http.Request) {
-	kind, id := splitPrimitivePath(r.URL.Path, "/primitives/")
+	kind, id := splitPrimitivePath(r.URL.Path, "/harness/primitives/")
 	if kind == "" || id == "" {
 		http.NotFound(w, r)
 		return
@@ -112,7 +134,7 @@ func (s *server) handlePrimitivesDetail(w http.ResponseWriter, r *http.Request) 
 				return
 			}
 			incoming := primitive.IncomingRefs(primitives, p)
-			s.render(w, "primitive_detail.html", map[string]any{
+			s.renderPage(w, r, "primitive_detail.html", map[string]any{
 				"ProjectDir": s.projectDir,
 				"Primitive":  p,
 				"Body":       string(body),
@@ -130,7 +152,7 @@ func (s *server) handleSources(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	s.render(w, "sources.html", map[string]any{
+	s.renderPage(w, r, "sources.html", map[string]any{
 		"ProjectDir": s.projectDir,
 		"Sources":    entries,
 	})
@@ -149,7 +171,7 @@ func (s *server) handleSourceDetail(w http.ResponseWriter, r *http.Request) {
 	}
 	for _, e := range entries {
 		if e.Name == name {
-			s.render(w, "source_detail.html", map[string]any{
+			s.renderPage(w, r, "source_detail.html", map[string]any{
 				"ProjectDir": s.projectDir,
 				"Source":     e,
 			})

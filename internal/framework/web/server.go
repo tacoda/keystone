@@ -18,6 +18,7 @@ import (
 	"io"
 	"io/fs"
 	"net/http"
+	"os"
 	"path/filepath"
 	"strings"
 	"time"
@@ -86,6 +87,9 @@ func Serve(ctx context.Context, opts Options) error {
 		shutdown, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 		_ = httpSrv.Shutdown(shutdown)
+		// Close the audit log only after the HTTP server has drained,
+		// so any in-flight publish-driven Append still lands.
+		_ = srv.audit.Close()
 	}()
 
 	srv.startCacheRefreshers(ctx)
@@ -106,6 +110,7 @@ type server struct {
 	funcs      template.FuncMap
 	hub        *sseHub
 	watcher    *fsWatcher
+	audit      *auditLog
 
 	primitiveCache *primitiveCache
 	healthCache    *healthCache
@@ -127,6 +132,16 @@ func newServer(projectDir string) (*server, error) {
 	engine := gin.New()
 	engine.Use(gin.Recovery())
 
+	// Open the per-session audit log. Best-effort: if the audit
+	// directory can't be created (read-only project, permissions),
+	// the dashboard still runs — audit features render an empty
+	// state instead.
+	audit, auditErr := openAuditLog(projectDir)
+	if auditErr != nil {
+		fmt.Fprintf(os.Stderr, "keystone web: audit disabled: %v\n", auditErr)
+		audit = nil
+	}
+
 	s := &server{
 		projectDir: projectDir,
 		engine:     engine,
@@ -135,6 +150,7 @@ func newServer(projectDir string) (*server, error) {
 			"join": strings.Join,
 		},
 		hub:            hub,
+		audit:          audit,
 		primitiveCache: newPrimitiveCache(projectDir),
 		healthCache:    newHealthCache(projectDir),
 	}
@@ -148,6 +164,28 @@ func newServer(projectDir string) (*server, error) {
 	if err != nil {
 		return nil, err
 	}
+	// Audit log lives at the watcher boundary: every published burst
+	// produces one JSONL line. The hook is set after construction so
+	// the watcher type doesn't gain a constructor parameter that's
+	// only ever wired from one call site.
+	if s.audit != nil {
+		watcher.onPublish = func(paths []string, topics []sseTopic) {
+			rels := make([]string, 0, len(paths))
+			for _, p := range paths {
+				rels = append(rels, relPath(projectDir, p))
+			}
+			ts := make([]string, 0, len(topics))
+			for _, t := range topics {
+				ts = append(ts, string(t))
+			}
+			s.audit.Append(auditEntry{
+				Timestamp: time.Now().UTC().Format(time.RFC3339),
+				Topics:    ts,
+				Paths:     rels,
+				Summary:   summarizeAudit(rels, ts),
+			})
+		}
+	}
 	s.watcher = watcher
 
 	s.routes()
@@ -156,7 +194,17 @@ func newServer(projectDir string) (*server, error) {
 
 func (s *server) routes() {
 	// Static assets via gin's StaticFS, wired to the embedded FS sub.
+	// Assets ship inside the binary (embed.FS) and are version-pinned
+	// to the release tag — safe to mark immutable so repeat hits skip
+	// the network entirely. Critical for "snappy" — devs notice every
+	// 30ms of latency on a tool they use all day.
 	if assetFS, err := fs.Sub(embedded, "assets"); err == nil {
+		s.engine.Use(func(c *gin.Context) {
+			if strings.HasPrefix(c.Request.URL.Path, "/assets/") {
+				c.Header("Cache-Control", "public, max-age=31536000, immutable")
+			}
+			c.Next()
+		})
 		s.engine.StaticFS("/assets", http.FS(assetFS))
 	}
 
@@ -167,23 +215,52 @@ func (s *server) routes() {
 
 	// Exact-match routes. Every handler keeps its (w, r) signature;
 	// gin is a routing surface, not a handler-shape rewrite.
+	// Page routes — 5 sections × tabs. Old single-purpose URLs are
+	// retired in 2.1.1; nothing redirects, nothing aliases.
+	//   / + /observability/*  → metrics, insights, audit, live
+	//   /harness/*            → primitives, policies, investigator, graph
+	//   /sources, /sources/new, /sources/<name>
+	//   /flywheels/*          → overview, inbox, prune
+	//   /quality/*            → verify, evals
 	exact := []routeBinding{
-		{"/", s.handleHome},
-		{"/metrics", s.handleMetrics},
-		{"/primitives", s.handlePrimitivesList},
-		{"/primitives/new", s.handlePrimitivesNew},
-		{"/policies", s.handlePolicies},
-		{"/policies/investigate", s.handleInvestigator},
+		// Observability — `/` is the dashboard landing.
+		{"/", s.handleMetrics},
+		{"/observability", s.handleMetrics},
+		{"/observability/metrics", s.handleMetrics},
+		{"/observability/insights", s.handleInsights},
+
+		// Harness.
+		{"/harness", s.handlePrimitivesList},
+		{"/harness/primitives", s.handlePrimitivesList},
+		{"/harness/primitives/new", s.handlePrimitivesNew},
+		{"/harness/policies", s.handlePolicies},
+		{"/harness/investigator", s.handleInvestigator},
+		{"/harness/graph", s.handleGraph},
+
+		// Sources.
 		{"/sources", s.handleSources},
 		{"/sources/new", s.handleSourcesNew},
-		{"/verify", s.handleVerifyPage},
-		{"/prune", s.handlePrune},
-		{"/inbox", s.handleInbox},
+
+		// Flywheels.
 		{"/flywheels", s.handleFlywheels},
-		{"/evals", s.handleEvals},
+		{"/flywheels/inbox", s.handleInbox},
+		{"/flywheels/prune", s.handlePrune},
+
+		// Quality.
+		{"/quality", s.handleVerifyPage},
+		{"/quality/verify", s.handleVerifyPage},
+		{"/quality/evals", s.handleEvals},
+
+		// Topbar search (popover backed by /web/fragments/search; the
+		// page URL kept as a bookmark-friendly fallback).
 		{"/search", s.handleSearch},
-		{"/graph", s.handleGraph},
-		{"/insights", s.handleInsights},
+
+		// On-demand widget fragments. KPI strip lives under
+		// /web/widgets/kpi/<name> via the prefix dispatch below; the
+		// graph fragment is a single exact route because it has no
+		// per-instance variant.
+		{"/web/widgets/graph", s.handleGraphWidget},
+		{"/web/widgets/audit", s.handleAuditWidget},
 
 		// REST API (read-only) exact routes.
 		{"/api/index", s.apiIndex},
@@ -227,15 +304,21 @@ func (s *server) routes() {
 		prefix string
 		h      http.HandlerFunc
 	}{
-		{"/primitives/", s.handlePrimitivesDetail},
+		{"/harness/primitives/", s.handlePrimitivesDetail},
 		{"/sources/", s.handleSourceDetail},
 		{"/api/primitives/", s.apiPrimitiveDetail},
 		{"/api/sources/", s.apiSourceDetail},
+		{"/web/widgets/kpi/", s.handleKPIWidget},
 	}
 	s.engine.NoRoute(func(c *gin.Context) {
 		path := c.Request.URL.Path
 		for _, p := range prefixes {
 			if strings.HasPrefix(path, p.prefix) {
+				// Gin's NoRoute defaults to 404; we matched a real
+				// route via prefix, so flip the default before
+				// handing off. The handler is still free to write a
+				// different status (e.g. 404 on missing resource).
+				c.Status(http.StatusOK)
 				p.h(c.Writer, c.Request)
 				return
 			}

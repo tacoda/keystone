@@ -18,7 +18,7 @@ func (s *server) handleEvals(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	s.render(w, "evals.html", map[string]any{
+	s.renderPage(w, r, "evals.html", map[string]any{
 		"ProjectDir": s.projectDir,
 		"Evals":      specs,
 	})

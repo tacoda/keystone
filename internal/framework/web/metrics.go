@@ -136,9 +136,10 @@ func (s *server) handleMetrics(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	s.render(w, "metrics.html", map[string]any{
+	s.renderPage(w, r, "metrics.html", map[string]any{
 		"ProjectDir": s.projectDir,
 		"Metrics":    snap,
+		"KPINames":   kpiNames(),
 	})
 }
 

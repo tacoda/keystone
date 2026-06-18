@@ -1,6 +1,15 @@
 {{define "metrics.html"}}{{template "layout" .}}{{end}}
-{{define "title"}}metrics{{end}}
+{{define "title"}}observability{{end}}
 {{define "main"}}
+{{template "_kpi_strip.html" .}}
+
+<section class="card audit-mount"
+         hx-get="/web/widgets/audit"
+         hx-trigger="load"
+         hx-swap="outerHTML">
+  <p class="muted">loading audit log…</p>
+</section>
+
 {{with .Metrics}}
 <section class="card">
   <h1>metrics</h1>
@@ -21,7 +30,7 @@
     <tbody>
       {{range $k, $v := .ByKind}}
       <tr>
-        <td><a href="/primitives?kind={{$k}}"><span class="kind-tag {{$k}}">{{$k}}</span></a></td>
+        <td><a href="/harness/primitives?kind={{$k}}"><span class="kind-tag {{$k}}">{{$k}}</span></a></td>
         <td>{{$v}}</td>
       </tr>
       {{end}}
@@ -35,7 +44,7 @@
       {{range .Freshness}}
       <tr>
         <td><span class="kind-tag {{.Kind}}">{{.Kind}}</span></td>
-        <td><a href="/primitives/{{.Kind}}/{{.ID}}">{{.ID}}</a></td>
+        <td><a href="/harness/primitives/{{.Kind}}/{{.ID}}">{{.ID}}</a></td>
         <td class="muted">{{.Modified}}</td>
       </tr>
       {{end}}

@@ -3,14 +3,15 @@
 {{define "main"}}
 <section class="card">
   <h1>dependency graph</h1>
-  <p class="muted">Every primitive + every edge — <code>deps:</code> and <code>traces:</code>. Each kind colored by accent. Rendered in-browser via Mermaid.</p>
+  <p class="muted">Every primitive + every edge — <code>deps:</code> and <code>traces:</code>. Each kind colored by accent. Rendered in-browser via Mermaid. Loads when scrolled into view.</p>
 
-  <pre class="mermaid" style="background: var(--bg-3); padding: 1rem; border-radius: 6px; font-size: 0.78rem;">
-{{.Mermaid}}
-  </pre>
+  <div id="graph-mount"
+       class="lazy-mount"
+       hx-get="/web/widgets/graph"
+       hx-trigger="intersect once"
+       hx-swap="innerHTML"
+       style="min-height: 280px;">
+    <p class="muted" style="text-align:center;padding:6rem 0;">loading graph…</p>
+  </div>
 </section>
-<script type="module">
-  import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs";
-  mermaid.initialize({ startOnLoad: true, theme: "dark" });
-</script>
 {{end}}
