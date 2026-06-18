@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://keystone.tacoda.dev/schemas/keystone.json",
   "title": "Keystone Consumer Config",
-  "description": "Top-level keystone.json at the consumer repo root. Records the harness folder name, the framework version pin, and the nested plugin tree. The project layer (harness root contents) wins by default; among plugins, plugins nested deeper in the tree refine the outer plugins they're nested in; a plugin's `strict` declarations lock items absolutely. See PLAN-1.0.md §3 for full semantics.",
+  "description": "Top-level keystone.json at the consumer repo root. Records the harness folder name, the framework version pin, and the nested policy tree. The project layer (harness root contents) wins by default; among policies, policies nested deeper in the tree refine the outer policies they're nested in; a policy's `strict` declarations lock items absolutely. See PLAN-1.0.md §3 for full semantics.",
   "type": "object",
   "properties": {
     "version": {
@@ -19,10 +19,10 @@
       "description": "Directory name where the harness is installed inside the repo. Defaults to \"harness\" when omitted. Downstream commands read this so users do not have to re-pass --harness-root after init.",
       "pattern": "^[A-Za-z0-9._-]+$"
     },
-    "plugins": {
+    "policies": {
       "type": "array",
-      "description": "Ordered list of plugin nodes. Among plugins, plugins nested deeper refine the outer plugins they're nested in. The project layer always wins by default; a plugin's `strict` declarations are the only thing that locks an item against the project.",
-      "items": { "$ref": "#/$defs/pluginNode" }
+      "description": "Ordered list of policy nodes. Among policies, policies nested deeper refine the outer policies they're nested in. The project layer always wins by default; a policy's `strict` declarations are the only thing that locks an item against the project.",
+      "items": { "$ref": "#/$defs/policyNode" }
     },
     "budgets": {
       "type": "object",
@@ -37,16 +37,16 @@
       }
     }
   },
-  "required": ["version", "plugins"],
+  "required": ["version", "policies"],
   "additionalProperties": false,
   "$defs": {
-    "pluginNode": {
+    "policyNode": {
       "type": "object",
       "properties": {
         "name": {
           "type": "string",
           "pattern": "^[a-z][a-z0-9-]{0,63}$",
-          "description": "Plugin name. Must match the manifest's name. Lowercase, kebab-case, ≤64 chars."
+          "description": "Policy name. Must match the manifest's name. Lowercase, kebab-case, ≤64 chars."
         },
         "source": {
           "type": "string",
@@ -58,7 +58,7 @@
         },
         "strict": {
           "type": "object",
-          "description": "Per-port lock list. A strict item is absolute — nothing else (project, sibling plugins, descendant plugins) can override it. Key is the port name (e.g. \"guides\", \"sensors\"); value is a list of item basenames (no .md extension).",
+          "description": "Per-port lock list. A strict item is absolute — nothing else (project, sibling policies, descendant policies) can override it. Key is the port name (e.g. \"guides\", \"sensors\"); value is a list of item basenames (no .md extension).",
           "additionalProperties": {
             "type": "array",
             "items": { "type": "string" }
@@ -66,8 +66,8 @@
         },
         "children": {
           "type": "array",
-          "description": "Child plugins nested under this one. For non-strict items, the children (deeper-nested) refine this parent; for strict items declared anywhere in the tree, no layer can override.",
-          "items": { "$ref": "#/$defs/pluginNode" }
+          "description": "Child policies nested under this one. For non-strict items, the children (deeper-nested) refine this parent; for strict items declared anywhere in the tree, no layer can override.",
+          "items": { "$ref": "#/$defs/policyNode" }
         }
       },
       "required": ["name", "source", "version"],

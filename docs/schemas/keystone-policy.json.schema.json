@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://keystone.tacoda.dev/schemas/keystone-policy.json",
+  "title": "Keystone Policy Manifest",
+  "description": "Manifest at the root of a keystone policy/policy repo. Filename on disk: keystone-policy.json.",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]{0,63}$",
+      "description": "The policy's unique name. Lowercase, kebab-case, ≤64 chars."
+    },
+    "version": {
+      "type": "string",
+      "description": "Policy version (SemVer recommended)."
+    },
+    "keystone_min": {
+      "type": "string",
+      "description": "Minimum keystone binary version this policy requires (SemVer)."
+    },
+    "description": {
+      "type": "string"
+    },
+    "strict": {
+      "$ref": "#/$defs/strictSpec",
+      "description": "Items this policy ships and locks absolutely. A strict item cannot be overridden by anything — not the consumer's project, not any other policy, regardless of nesting."
+    },
+    "required": {
+      "$ref": "#/$defs/strictSpec",
+      "description": "Items this policy expects to exist somewhere in the cascade but does not ship itself."
+    }
+  },
+  "required": ["name", "version"],
+  "additionalProperties": false,
+  "$defs": {
+    "strictSpec": {
+      "type": "object",
+      "description": "Items by kind. `sensors` may only be shipped by the project layer or by top-level policies in the consumer's keystone.json — policies nested under another policy may not ship or strict-claim sensors.",
+      "properties": {
+        "guides":    { "type": "array", "items": { "type": "string" } },
+        "playbooks": { "type": "array", "items": { "type": "string" } },
+        "actions":   { "type": "array", "items": { "type": "string" } },
+        "sensors":   { "type": "array", "items": { "type": "string" } }
+      },
+      "additionalProperties": false
+    }
+  }
+}
