@@ -1,300 +1,372 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"io"
-	"io/fs"
 	"os"
 	"path/filepath"
 	"strings"
 	"time"
 
 	"github.com/tacoda/keystone/internal/framework/config"
+	"github.com/tacoda/keystone/internal/framework/lockfile"
+	"github.com/tacoda/keystone/internal/framework/migrations"
 	"github.com/tacoda/keystone/internal/framework/primitive"
 )
 
-// runMigrate handles `keystone migrate [--dir <path>] [--dry-run]`.
+// runMigrate dispatches `keystone migrate <subcommand>`:
 //
-// One-shot 1.x → 2.0 transformation. Idempotent: re-running on an
-// already-2.0 install only refreshes INDEX.json + projections.
+//	keystone migrate                   → up to latest
+//	keystone migrate up [<version>]    → up to <version> (default: latest)
+//	keystone migrate down [<version>]  → down to <version> (default: previous)
+//	keystone migrate status            → show applied + pending
 //
-// Steps performed (in order):
+// Common flags: --dir <path>, --dry-run.
 //
-//  1. Move `harness/` (1.x) to `.keystone/harness/` (2.0).
-//  2. Lift the lockfile to `.keystone/lockfile.json`.
-//  3. Rename vendored-policy dir `<harness>/plugins/` → `<harness>/policies/`.
-//  4. Rename manifest files `keystone-plugin.json` → `keystone-policy.json`
-//     inside every vendored policy.
-//  5. Rewrite `keystone.json`: bump `version` to "2", rename `plugins`
-//     field to `policies`, strip the deprecated `harness_root` field.
-//  6. Regenerate `.keystone/INDEX.json`.
-//  7. Regenerate `.claude/` host projections from canonical sources.
-//
-// Frontmatter on user-authored primitive files is NOT touched — the
-// canonical shape ships in 2.0's templates; users mix-and-match as they
-// see fit, and `keystone lint` reports anything still missing required
-// fields.
+// Every direction obeys the iron laws in package migrations: core
+// framework files only, never user-edited content, every change shown,
+// every problem surfaced. On a clean run, the lockfile's
+// migrations_applied slice is updated to reflect the new state.
 func runMigrate(args []string) error {
-	dir := "."
-	dryRun := false
+	if len(args) > 0 {
+		switch args[0] {
+		case "--help", "-h":
+			printMigrateUsage(os.Stdout)
+			return nil
+		case "up":
+			return runMigrateUp(args[1:])
+		case "down":
+			return runMigrateDown(args[1:])
+		case "status":
+			return runMigrateStatus(args[1:])
+		case "-", "--":
+			return fmt.Errorf("unknown subcommand %q", args[0])
+		}
+		if strings.HasPrefix(args[0], "-") {
+			// no subcommand; treat all args as up's args
+			return runMigrateUp(args)
+		}
+		return fmt.Errorf("unknown subcommand %q (expected: up | down | status)", args[0])
+	}
+	return runMigrateUp(nil)
+}
+
+type migrateFlags struct {
+	dir     string
+	dryRun  bool
+	target  string // explicit version, or "" for default
+}
+
+func parseMigrateFlags(args []string) (*migrateFlags, error) {
+	f := &migrateFlags{dir: "."}
 	for i := 0; i < len(args); i++ {
 		a := args[i]
 		switch {
 		case a == "--help" || a == "-h":
-			printMigrateUsage(os.Stdout)
-			return nil
+			return nil, errHelp
 		case a == "--dir":
 			if i+1 >= len(args) {
-				return fmt.Errorf("flag %s requires a value", a)
+				return nil, fmt.Errorf("flag %s requires a value", a)
 			}
-			dir = args[i+1]
+			f.dir = args[i+1]
 			i++
 		case strings.HasPrefix(a, "--dir="):
-			dir = strings.TrimPrefix(a, "--dir=")
+			f.dir = strings.TrimPrefix(a, "--dir=")
 		case a == "--dry-run":
-			dryRun = true
+			f.dryRun = true
 		case strings.HasPrefix(a, "-"):
-			return fmt.Errorf("unknown flag %s", a)
+			return nil, fmt.Errorf("unknown flag %s", a)
 		default:
-			return fmt.Errorf("unexpected positional argument %q", a)
+			if f.target != "" {
+				return nil, fmt.Errorf("unexpected positional argument %q", a)
+			}
+			f.target = a
 		}
 	}
+	return f, nil
+}
 
-	absDir, err := filepath.Abs(dir)
+var errHelp = fmt.Errorf("help requested")
+
+func runMigrateUp(args []string) error {
+	f, err := parseMigrateFlags(args)
 	if err != nil {
-		return fmt.Errorf("resolve dir: %w", err)
+		if err == errHelp {
+			printMigrateUsage(os.Stdout)
+			return nil
+		}
+		return err
 	}
-	if info, err := os.Stat(absDir); err != nil {
-		return fmt.Errorf("dir %s: %w", absDir, err)
-	} else if !info.IsDir() {
-		return fmt.Errorf("dir %s is not a directory", absDir)
-	}
-
-	plan, err := planMigration(absDir)
+	absDir, err := resolveDir(f.dir)
 	if err != nil {
 		return err
 	}
-	plan.print(os.Stdout)
-	if dryRun {
-		fmt.Fprintln(os.Stdout, "\n--dry-run: nothing changed.")
+
+	applied := readAppliedTolerant(absDir)
+	pending := migrations.Pending(applied)
+	if f.target != "" {
+		// Filter pending to those at-or-below the target version.
+		filtered := pending[:0]
+		for _, m := range pending {
+			if migrations.CompareVersion(m.Version, f.target) <= 0 {
+				filtered = append(filtered, m)
+			}
+		}
+		pending = filtered
+	}
+
+	if len(pending) == 0 {
+		fmt.Fprintln(os.Stdout, "✓ keystone migrate up: nothing to do (already at target)")
 		return nil
 	}
-	if err := plan.execute(absDir); err != nil {
-		return err
-	}
 
-	// Regenerate generated artifacts. Ignore errors so the structural
-	// migration is still recorded as successful even if downstream
-	// regeneration fails.
-	harnessRoot := config.DefaultHarnessRoot
-	primitives, _, walkErr := primitive.Walk(absDir, harnessRoot)
-	if walkErr == nil {
-		idx := primitive.Build(primitives, time.Now())
-		outPath := filepath.Join(absDir, config.KeystoneDir(harnessRoot), config.IndexName)
-		if err := primitive.Write(outPath, idx); err != nil {
-			fmt.Fprintf(os.Stderr, "! keystone migrate: index write failed: %v\n", err)
-		} else {
-			fmt.Fprintf(os.Stdout, "  wrote: %s (%d primitive(s))\n", relTo(absDir, outPath), len(primitives))
+	fmt.Fprintf(os.Stdout, "keystone migrate up — %d migration(s) pending:\n", len(pending))
+	for _, m := range pending {
+		fmt.Fprintf(os.Stdout, "  • %s\n", m.Version)
+	}
+	fmt.Fprintln(os.Stdout)
+
+	for _, m := range pending {
+		if err := runMigrationDirection(absDir, m, "up", f.dryRun); err != nil {
+			return fmt.Errorf("up %s: %w", m.Version, err)
 		}
-		if _, err := primitive.Project(absDir, primitives); err != nil {
-			fmt.Fprintf(os.Stderr, "! keystone migrate: projection failed: %v\n", err)
+		if !f.dryRun {
+			applied = append(applied, m.Version)
+			if err := writeApplied(absDir, applied); err != nil {
+				return fmt.Errorf("record %s applied: %w", m.Version, err)
+			}
 		}
 	}
 
-	fmt.Fprintln(os.Stdout, "\n✓ keystone migrate complete")
+	if !f.dryRun {
+		regenerateGenerated(absDir)
+	}
+	fmt.Fprintln(os.Stdout, "\n✓ keystone migrate up complete")
 	return nil
 }
 
-// migrationPlan records every step the migrator will (or did) perform.
-// Each step is idempotent.
-type migrationPlan struct {
-	steps []migrationStep
+func runMigrateDown(args []string) error {
+	f, err := parseMigrateFlags(args)
+	if err != nil {
+		if err == errHelp {
+			printMigrateUsage(os.Stdout)
+			return nil
+		}
+		return err
+	}
+	absDir, err := resolveDir(f.dir)
+	if err != nil {
+		return err
+	}
+
+	applied := readAppliedTolerant(absDir)
+	if len(applied) == 0 {
+		fmt.Fprintln(os.Stdout, "✓ keystone migrate down: nothing to revert (no migrations recorded)")
+		return nil
+	}
+
+	// Determine which migrations to revert. If target is empty, revert one.
+	// Otherwise, revert every migration with version > target.
+	var toRevert []migrations.Migration
+	if f.target == "" {
+		latest := applied[len(applied)-1]
+		m := migrations.Find(latest)
+		if m == nil {
+			return fmt.Errorf("applied migration %s not found in registry — cannot revert without its Down plan", latest)
+		}
+		toRevert = []migrations.Migration{*m}
+	} else {
+		for i := len(applied) - 1; i >= 0; i-- {
+			v := applied[i]
+			if migrations.CompareVersion(v, f.target) <= 0 {
+				break
+			}
+			m := migrations.Find(v)
+			if m == nil {
+				return fmt.Errorf("applied migration %s not found in registry — cannot revert without its Down plan", v)
+			}
+			toRevert = append(toRevert, *m)
+		}
+	}
+	if len(toRevert) == 0 {
+		fmt.Fprintln(os.Stdout, "✓ keystone migrate down: nothing to revert (already at target)")
+		return nil
+	}
+
+	fmt.Fprintf(os.Stdout, "keystone migrate down — %d migration(s) to revert (newest first):\n", len(toRevert))
+	for _, m := range toRevert {
+		fmt.Fprintf(os.Stdout, "  • %s\n", m.Version)
+	}
+	fmt.Fprintln(os.Stdout)
+
+	for _, m := range toRevert {
+		if err := runMigrationDirection(absDir, m, "down", f.dryRun); err != nil {
+			return fmt.Errorf("down %s: %w", m.Version, err)
+		}
+		if !f.dryRun {
+			applied = applied[:len(applied)-1]
+			if err := writeApplied(absDir, applied); err != nil {
+				return fmt.Errorf("record %s reverted: %w", m.Version, err)
+			}
+		}
+	}
+
+	if !f.dryRun {
+		regenerateGenerated(absDir)
+	}
+	fmt.Fprintln(os.Stdout, "\n✓ keystone migrate down complete")
+	return nil
 }
 
-type migrationStep struct {
-	desc string
-	op   func(absDir string) error
+func runMigrateStatus(args []string) error {
+	f, err := parseMigrateFlags(args)
+	if err != nil {
+		if err == errHelp {
+			printMigrateUsage(os.Stdout)
+			return nil
+		}
+		return err
+	}
+	absDir, err := resolveDir(f.dir)
+	if err != nil {
+		return err
+	}
+
+	applied := readAppliedTolerant(absDir)
+	pending := migrations.Pending(applied)
+
+	current := "(none)"
+	if len(applied) > 0 {
+		current = applied[len(applied)-1]
+	}
+	fmt.Fprintf(os.Stdout, "keystone migrate status\n")
+	fmt.Fprintf(os.Stdout, "  current:  %s\n", current)
+	if len(applied) > 0 {
+		fmt.Fprintf(os.Stdout, "  applied:  %s\n", strings.Join(applied, ", "))
+	} else {
+		fmt.Fprintln(os.Stdout, "  applied:  (none)")
+	}
+	if len(pending) == 0 {
+		fmt.Fprintln(os.Stdout, "  pending:  (none — up to date)")
+	} else {
+		var versions []string
+		for _, m := range pending {
+			versions = append(versions, m.Version)
+		}
+		fmt.Fprintf(os.Stdout, "  pending:  %s\n", strings.Join(versions, ", "))
+	}
+	return nil
 }
 
-func (p *migrationPlan) add(desc string, op func(absDir string) error) {
-	p.steps = append(p.steps, migrationStep{desc: desc, op: op})
+func runMigrationDirection(absDir string, m migrations.Migration, dir string, dryRun bool) error {
+	var (
+		plan *migrations.Plan
+		err  error
+	)
+	switch dir {
+	case "up":
+		plan, err = m.Up(absDir)
+	case "down":
+		plan, err = m.Down(absDir)
+	default:
+		return fmt.Errorf("invalid direction %q", dir)
+	}
+	if err != nil {
+		return err
+	}
+	printPlan(os.Stdout, m.Version, dir, plan)
+	if dryRun {
+		fmt.Fprintln(os.Stdout, "  (dry-run: no changes written)")
+		return nil
+	}
+	return plan.Execute(absDir)
 }
 
-func (p *migrationPlan) print(w io.Writer) {
-	if len(p.steps) == 0 {
-		fmt.Fprintln(w, "keystone migrate: already at 2.0 layout — nothing to do (INDEX.json + projections will be regenerated)")
+func printPlan(w io.Writer, version, dir string, p *migrations.Plan) {
+	if len(p.Steps) == 0 {
+		fmt.Fprintf(w, "═══ %s %s ═══  (no-op)\n", version, dir)
 		return
 	}
-	fmt.Fprintf(w, "keystone migrate — %d step(s):\n", len(p.steps))
-	for i, s := range p.steps {
-		fmt.Fprintf(w, "  %d. %s\n", i+1, s.desc)
+	fmt.Fprintf(w, "═══ %s %s ═══\n", version, dir)
+	for i, s := range p.Steps {
+		fmt.Fprintf(w, "  %d. %s\n", i+1, s.Desc)
 	}
 }
 
-func (p *migrationPlan) execute(absDir string) error {
-	for i, s := range p.steps {
-		if err := s.op(absDir); err != nil {
-			return fmt.Errorf("step %d (%s): %w", i+1, s.desc, err)
+// readAppliedTolerant returns the applied-migrations list from the
+// lockfile, tolerating both 2.0-and-later (.keystone/lockfile.json) and
+// pre-2.0 (harness/keystone.lock.json) locations. On any read error the
+// list comes back empty.
+//
+// Filesystem-derived fallback: when no lockfile entry is found, the
+// on-disk layout is consulted. A .keystone/harness/ tree without any
+// recorded migrations is treated as an implicit "2.0 applied" so fresh
+// 2.0+ installs don't show a spurious 2.0-pending warning. A bare
+// harness/ at the project root with no .keystone/ leaves applied empty
+// — that IS a pre-2.0 install that hasn't been migrated yet.
+func readAppliedTolerant(absDir string) []string {
+	candidates := []string{
+		filepath.Join(absDir, ".keystone", "lockfile.json"),
+		filepath.Join(absDir, config.DefaultHarnessRoot, "keystone.lock.json"),
+		filepath.Join(absDir, "harness", "keystone.lock.json"),
+	}
+	for _, path := range candidates {
+		if applied, ok := readAppliedAt(path); ok {
+			if len(applied) > 0 {
+				return applied
+			}
+			break
 		}
+	}
+	if dirExists(filepath.Join(absDir, ".keystone", "harness")) {
+		return []string{"2.0"}
 	}
 	return nil
 }
 
-func planMigration(absDir string) (*migrationPlan, error) {
-	plan := &migrationPlan{}
-
-	legacyHarness := filepath.Join(absDir, "harness")
-	newHarness := filepath.Join(absDir, ".keystone", "harness")
-	keystoneDir := filepath.Join(absDir, ".keystone")
-
-	legacyExists := dirExists(legacyHarness)
-	newExists := dirExists(newHarness)
-
-	if legacyExists && newExists {
-		return nil, fmt.Errorf("both legacy harness/ and .keystone/harness/ exist — resolve by hand before migrating")
+func readAppliedAt(path string) ([]string, bool) {
+	if _, err := os.Stat(path); err != nil {
+		return nil, false
 	}
-
-	if legacyExists {
-		plan.add(fmt.Sprintf("move %s → %s", "harness/", ".keystone/harness/"), func(_ string) error {
-			if err := os.MkdirAll(keystoneDir, 0o755); err != nil {
-				return err
-			}
-			return os.Rename(legacyHarness, newHarness)
-		})
+	lf, err := lockfile.ReadFromPath(path)
+	if err != nil {
+		return nil, false
 	}
-
-	// Lockfile lift: legacy location was <harnessRoot>/keystone.lock.json.
-	// After the harness move, it's already inside .keystone/harness/. Lift
-	// it one level up to .keystone/lockfile.json (2.0 location).
-	plan.add("lift lockfile to .keystone/lockfile.json", func(_ string) error {
-		newLockPath := filepath.Join(keystoneDir, "lockfile.json")
-		// Candidates we might find — try each.
-		for _, cand := range []string{
-			filepath.Join(newHarness, "keystone.lock.json"),
-			filepath.Join(absDir, "keystone.lock.json"), // very early 1.x layouts
-		} {
-			if fileExists(cand) {
-				if err := os.MkdirAll(keystoneDir, 0o755); err != nil {
-					return err
-				}
-				return os.Rename(cand, newLockPath)
-			}
-		}
-		// Already at 2.0 location, or fresh project: nothing to do.
-		return nil
-	})
-
-	// Rename vendored-policies dir.
-	pluginsDir := filepath.Join(newHarness, "plugins")
-	policiesDir := filepath.Join(newHarness, "policies")
-	plan.add("rename .keystone/harness/plugins/ → .keystone/harness/policies/", func(_ string) error {
-		if !dirExists(pluginsDir) {
-			return nil
-		}
-		if dirExists(policiesDir) {
-			return fmt.Errorf("both plugins/ and policies/ exist in .keystone/harness/ — resolve by hand")
-		}
-		return os.Rename(pluginsDir, policiesDir)
-	})
-
-	// Rename manifest files inside each vendored policy.
-	plan.add("rename keystone-plugin.json → keystone-policy.json in vendored policies", func(_ string) error {
-		if !dirExists(policiesDir) {
-			return nil
-		}
-		return filepath.WalkDir(policiesDir, func(path string, d fs.DirEntry, err error) error {
-			if err != nil {
-				return err
-			}
-			if d.IsDir() {
-				return nil
-			}
-			if filepath.Base(path) == "keystone-plugin.json" {
-				dst := filepath.Join(filepath.Dir(path), "keystone-policy.json")
-				if fileExists(dst) {
-					return nil
-				}
-				return os.Rename(path, dst)
-			}
-			return nil
-		})
-	})
-
-	// keystone.json rewrite.
-	cfgPath := filepath.Join(absDir, config.ProjectConfigFile)
-	if fileExists(cfgPath) {
-		plan.add("rewrite keystone.json: version 2, plugins→policies, strip harness_root", func(_ string) error {
-			return rewriteKeystoneJSON(cfgPath)
-		})
-	}
-
-	return plan, nil
+	return lf.MigrationsApplied, true
 }
 
-// rewriteKeystoneJSON reads the project config raw, applies 1.x → 2.0
-// schema transforms, and writes the result back.
-//
-// Transforms applied (each idempotent):
-//   - version: "1" → "2"
-//   - rename top-level field `plugins` to `policies`
-//   - remove deprecated `harness_root`
-//
-// All other keys are preserved as-is.
-func rewriteKeystoneJSON(path string) error {
-	raw, err := os.ReadFile(path)
+func writeApplied(absDir string, applied []string) error {
+	// Always write to the canonical 2.0+ location. The 2.0 Up will have
+	// moved the lockfile here by the time we reach this; for fresh installs
+	// of 2.0+, this is where it always lives.
+	path := filepath.Join(absDir, ".keystone", "lockfile.json")
+	lf, err := lockfile.ReadFromPath(path)
 	if err != nil {
+		// Lockfile may not exist yet (fresh install). Build a minimal one.
+		lf = &lockfile.Lockfile{Version: lockfile.Version}
+	}
+	lf.MigrationsApplied = applied
+	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
 		return err
 	}
-	var doc map[string]any
-	if err := json.Unmarshal(raw, &doc); err != nil {
-		return fmt.Errorf("parse %s: %w", config.ProjectConfigFile, err)
-	}
-	changed := false
-	if v, ok := doc["version"]; ok {
-		if s, _ := v.(string); s != "2" {
-			doc["version"] = "2"
-			changed = true
-		}
-	} else {
-		doc["version"] = "2"
-		changed = true
-	}
-	if _, ok := doc["plugins"]; ok {
-		if _, alreadyPolicies := doc["policies"]; alreadyPolicies {
-			delete(doc, "plugins") // ambiguous — favor the new name
-		} else {
-			doc["policies"] = doc["plugins"]
-			delete(doc, "plugins")
-		}
-		changed = true
-	}
-	if _, ok := doc["harness_root"]; ok {
-		delete(doc, "harness_root")
-		changed = true
-	}
-	if !changed {
-		return nil
-	}
-	// Re-encode with stable field order matching ProjectConfig.
-	ordered := map[string]any{}
-	for _, k := range []string{"version", "framework_version", "policies", "budgets"} {
-		if v, ok := doc[k]; ok {
-			ordered[k] = v
-			delete(doc, k)
-		}
-	}
-	for k, v := range doc {
-		ordered[k] = v
-	}
-	out, err := json.MarshalIndent(ordered, "", "  ")
-	if err != nil {
-		return err
-	}
-	out = append(out, '\n')
-	return os.WriteFile(path, out, 0o644)
+	return lockfile.WriteToPath(path, lf)
 }
 
+func resolveDir(dir string) (string, error) {
+	absDir, err := filepath.Abs(dir)
+	if err != nil {
+		return "", fmt.Errorf("resolve dir: %w", err)
+	}
+	if info, err := os.Stat(absDir); err != nil {
+		return "", fmt.Errorf("dir %s: %w", absDir, err)
+	} else if !info.IsDir() {
+		return "", fmt.Errorf("dir %s is not a directory", absDir)
+	}
+	return absDir, nil
+}
+
+// dirExists / fileExists are also used by other commands in this package
+// (mcp.go); kept here so the migrate refactor doesn't strand them.
 func dirExists(p string) bool {
 	info, err := os.Stat(p)
 	return err == nil && info.IsDir()
@@ -305,6 +377,27 @@ func fileExists(p string) bool {
 	return err == nil && !info.IsDir()
 }
 
+// regenerateGenerated refreshes INDEX.json + .claude/ projections after
+// a successful Up or Down run. Errors are reported but not fatal — the
+// structural migration has already landed and is the load-bearing change.
+func regenerateGenerated(absDir string) {
+	harnessRoot := config.DefaultHarnessRoot
+	primitives, _, walkErr := primitive.Walk(absDir, harnessRoot)
+	if walkErr != nil {
+		return
+	}
+	idx := primitive.Build(primitives, time.Now())
+	outPath := filepath.Join(absDir, config.KeystoneDir(harnessRoot), config.IndexName)
+	if err := primitive.Write(outPath, idx); err != nil {
+		fmt.Fprintf(os.Stderr, "! keystone migrate: index write failed: %v\n", err)
+	} else {
+		fmt.Fprintf(os.Stdout, "  wrote: %s (%d primitive(s))\n", relTo(absDir, outPath), len(primitives))
+	}
+	if _, err := primitive.Project(absDir, primitives); err != nil {
+		fmt.Fprintf(os.Stderr, "! keystone migrate: projection failed: %v\n", err)
+	}
+}
+
 func relTo(base, target string) string {
 	if rel, err := filepath.Rel(base, target); err == nil {
 		return rel
@@ -313,31 +406,39 @@ func relTo(base, target string) string {
 }
 
 func printMigrateUsage(w *os.File) {
-	fmt.Fprint(w, `keystone migrate — one-shot 1.x → 2.0 upgrade
+	fmt.Fprint(w, `keystone migrate — versioned forward + backward transforms
 
 Usage:
-  keystone migrate [--dir <path>] [--dry-run]
+  keystone migrate [up [<version>] | down [<version>] | status]
+                   [--dir <path>] [--dry-run]
 
-Performs every structural change required to lift a 1.x install onto
-the 2.0 layout. Idempotent: safe to re-run; a second run only
-regenerates INDEX.json + .claude/ projections.
+Subcommands:
+  up [<version>]    Apply every pending migration up to <version>
+                    (default: latest). Records applied migrations in
+                    .keystone/lockfile.json.
+  down [<version>]  Revert migrations newer than <version> (default:
+                    one step). Pops entries off the applied list as
+                    each Down plan succeeds.
+  status            Show current version, applied list, and pending
+                    migrations.
 
-Steps:
-  1. Move harness/ → .keystone/harness/
-  2. Lift the lockfile to .keystone/lockfile.json
-  3. Rename .keystone/harness/plugins/ → .keystone/harness/policies/
-  4. Rename keystone-plugin.json → keystone-policy.json in each vendored policy
-  5. Rewrite keystone.json (version 2, plugins→policies, drop harness_root)
-  6. Regenerate .keystone/INDEX.json
-  7. Regenerate .claude/ host projections
+With no subcommand, runs ` + "`up`" + ` to the latest version.
 
-User-authored content (rule body text, action playbooks, etc.) is
-never edited. Frontmatter on legacy files is preserved as-is — run
-`+"`keystone lint`"+` afterward to see what still needs canonical
-frontmatter.
+Iron laws every migration obeys:
+  • Edits framework-owned files only (keystone.json schema fields, the
+    lockfile, vendored policy manifests, generated INDEX.json /
+    .claude projections, scaffolded harness directory layout).
+  • Never edits user-authored primitive content. Frontmatter changes
+    surface through ` + "`keystone lint`" + ` for the user to apply.
+  • Renames folders and files freely; rewrites the contents of
+    framework-owned files only.
+  • Prints every step before execution. --dry-run prints without
+    writing.
+  • Stops and reports any unexpected state (conflict, missing
+    prerequisite, ambiguous schema) for the user to resolve by hand.
 
 Flags:
-  --dir <path>    Project root (defaults to cwd).
-  --dry-run       Print the plan; don't apply it.
+  --dir <path>      Project root (defaults to cwd).
+  --dry-run         Print the plan; don't apply it.
 `)
 }

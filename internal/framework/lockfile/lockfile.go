@@ -52,11 +52,30 @@ type PolicyLock struct {
 	Files         map[string]string `json:"files"`          // path-relative-to-installdir → "sha256:<hex>"
 }
 
+// UnmarshalJSON adds backward-compat for pre-2.1 lockfiles whose
+// PolicyLock entries used `plugin_version` instead of `policy_version`.
+// Writes always emit the new tag; reads accept either.
+func (p *PolicyLock) UnmarshalJSON(data []byte) error {
+	type alias PolicyLock
+	aux := &struct {
+		*alias
+		LegacyPluginVersion string `json:"plugin_version,omitempty"`
+	}{alias: (*alias)(p)}
+	if err := json.Unmarshal(data, aux); err != nil {
+		return err
+	}
+	if p.PolicyVersion == "" {
+		p.PolicyVersion = aux.LegacyPluginVersion
+	}
+	return nil
+}
+
 // Lockfile is the root document.
 type Lockfile struct {
-	Version  int                   `json:"version"`
-	Keystone KeystoneInfo          `json:"keystone"`
-	Policies  map[string]PolicyLock `json:"policies,omitempty"`
+	Version            int                   `json:"version"`
+	Keystone           KeystoneInfo          `json:"keystone"`
+	Policies           map[string]PolicyLock `json:"policies,omitempty"`
+	MigrationsApplied  []string              `json:"migrations_applied,omitempty"`
 }
 
 // Read loads the lockfile at <installDir>/<harnessRoot>/keystone.lock.json,
@@ -64,19 +83,28 @@ type Lockfile struct {
 func Read(installDir, harnessRoot string) (*Lockfile, error) {
 	rel := RelPath(harnessRoot)
 	path := filepath.Join(installDir, rel)
+	return ReadFromPath(path)
+}
+
+// ReadFromPath loads the lockfile at an explicit absolute path. Used by
+// the migrations CLI, which may need to read a lockfile in either the
+// 2.0+ canonical location or a pre-2.0 legacy location during an
+// in-progress migration. Returns an empty Lockfile (not an error) if the
+// file does not exist.
+func ReadFromPath(path string) (*Lockfile, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
 		if os.IsNotExist(err) {
 			return &Lockfile{
-				Version: Version,
+				Version:  Version,
 				Policies: map[string]PolicyLock{},
 			}, nil
 		}
-		return nil, fmt.Errorf("read %s: %w", rel, err)
+		return nil, fmt.Errorf("read %s: %w", path, err)
 	}
 	var lf Lockfile
 	if err := json.Unmarshal(data, &lf); err != nil {
-		return nil, fmt.Errorf("parse %s: %w", rel, err)
+		return nil, fmt.Errorf("parse %s: %w", path, err)
 	}
 	if lf.Policies == nil {
 		lf.Policies = map[string]PolicyLock{}
@@ -88,21 +116,27 @@ func Read(installDir, harnessRoot string) (*Lockfile, error) {
 // <installDir>/<harnessRoot>/keystone.lock.json. Always emits Version =
 // lockfile.Version. Indents for human readability.
 func Write(installDir, harnessRoot string, lf *Lockfile) error {
-	lf.Version = Version
+	rel := RelPath(harnessRoot)
+	path := filepath.Join(installDir, rel)
+	return WriteToPath(path, lf)
+}
 
+// WriteToPath serializes the lockfile to an explicit absolute path. Used
+// by the migrations CLI when it needs to write to a specific location
+// (typically the canonical 2.0+ path) regardless of the harness-root
+// configured for the install. Creates parent directories as needed.
+func WriteToPath(path string, lf *Lockfile) error {
+	lf.Version = Version
 	out, err := json.MarshalIndent(lf, "", "  ")
 	if err != nil {
 		return fmt.Errorf("marshal lockfile: %w", err)
 	}
 	out = append(out, '\n')
-
-	rel := RelPath(harnessRoot)
-	path := filepath.Join(installDir, rel)
 	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
 		return err
 	}
 	if err := os.WriteFile(path, out, 0o644); err != nil {
-		return fmt.Errorf("write %s: %w", rel, err)
+		return fmt.Errorf("write %s: %w", path, err)
 	}
 	return nil
 }

@@ -41,6 +41,26 @@ type ProjectConfig struct {
 	Budgets          map[string]BudgetSpec `json:"budgets,omitempty"`
 }
 
+// UnmarshalJSON adds backward-compat for pre-2.0 configs whose
+// keystone.json carries a `plugins` field instead of `policies`.
+// Writes always emit the new field name; reads tolerate the old one
+// so unmigrated installs degrade gracefully (per the migrations
+// no-breaking-changes invariant).
+func (c *ProjectConfig) UnmarshalJSON(data []byte) error {
+	type alias ProjectConfig
+	aux := &struct {
+		*alias
+		LegacyPlugins []PolicyNode `json:"plugins,omitempty"`
+	}{alias: (*alias)(c)}
+	if err := json.Unmarshal(data, aux); err != nil {
+		return err
+	}
+	if len(c.Policies) == 0 && len(aux.LegacyPlugins) > 0 {
+		c.Policies = aux.LegacyPlugins
+	}
+	return nil
+}
+
 // PolicyNode is one node in the nested policy tree declared in keystone.json.
 // Among policies, policies nested deeper refine the outer policies they're
 // nested in for non-strict items; the project layer always wins by default.

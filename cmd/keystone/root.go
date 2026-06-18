@@ -4,8 +4,11 @@ import (
 	"fmt"
 	"io/fs"
 	"os"
+	"strings"
 
 	"github.com/spf13/cobra"
+
+	"github.com/tacoda/keystone/internal/framework/migrations"
 )
 
 // rootCmd is the keystone CLI's top-level Cobra command. Subcommands
@@ -17,11 +20,44 @@ import (
 // stays inside the run functions for now; a later pass will lift flags
 // to Cobra-native definitions.
 var rootCmd = &cobra.Command{
-	Use:           "keystone",
-	Short:         "Install and operate the project harness",
-	Long:          `keystone — install, audit, and serve the project harness from the CLI or MCP server.`,
-	SilenceUsage:  true,
-	SilenceErrors: true,
+	Use:               "keystone",
+	Short:             "Install and operate the project harness",
+	Long:              `keystone — install, audit, and serve the project harness from the CLI or MCP server.`,
+	SilenceUsage:      true,
+	SilenceErrors:     true,
+	PersistentPreRunE: warnIfPendingMigrations,
+}
+
+// warnIfPendingMigrations prints a one-line stderr warning when the
+// install at the current working directory has migrations the registry
+// knows about but that the lockfile hasn't recorded as applied. Never
+// returns an error — the warning is advisory; commands proceed normally
+// (per the migrations no-breaking-changes invariant).
+//
+// Skips migrate / options / version / help / completion to avoid
+// confusing or duplicate output during the commands that already speak
+// to this state.
+func warnIfPendingMigrations(cmd *cobra.Command, _ []string) error {
+	switch cmd.Name() {
+	case "migrate", "options", "version", "help", "completion", "keystone":
+		return nil
+	}
+	cwd, err := os.Getwd()
+	if err != nil {
+		return nil
+	}
+	applied := readAppliedTolerant(cwd)
+	pending := migrations.Pending(applied)
+	if len(pending) == 0 {
+		return nil
+	}
+	var versions []string
+	for _, m := range pending {
+		versions = append(versions, m.Version)
+	}
+	fmt.Fprintf(os.Stderr, "⚠ %d pending migration(s): %s — run `keystone migrate up` to apply\n",
+		len(pending), strings.Join(versions, ", "))
+	return nil
 }
 
 // assetsFS holds the embedded scaffold templates. Set from main(); kept
@@ -43,6 +79,7 @@ func init() {
 	rootCmd.AddCommand(doctorCmd())
 	rootCmd.AddCommand(newCmd())
 	rootCmd.AddCommand(targetCmd())
+	rootCmd.AddCommand(patchCmd())
 	rootCmd.AddCommand(indexCmd())
 	rootCmd.AddCommand(lintCmd())
 	rootCmd.AddCommand(projectCmd())
@@ -150,6 +187,26 @@ func targetCmd() *cobra.Command {
 		RunE:               runAndForwardAssets(runTarget),
 	}
 	return c
+}
+
+// patchCmd is a hidden stub. The patches subsystem was retired in 2.1
+// and replaced by `keystone migrate`. Kept so users on older muscle
+// memory get a friendly redirect instead of "unknown command".
+func patchCmd() *cobra.Command {
+	return &cobra.Command{
+		Use:                "patch [args...]",
+		Short:              "Retired in 2.1 — use `keystone migrate` instead",
+		Hidden:             true,
+		DisableFlagParsing: true,
+		RunE: func(_ *cobra.Command, _ []string) error {
+			fmt.Fprintln(os.Stdout, "⚠ `keystone patch` was retired in 2.1.")
+			fmt.Fprintln(os.Stdout, "  Use `keystone migrate` for forward and backward version transforms:")
+			fmt.Fprintln(os.Stdout, "    keystone migrate up      apply pending migrations")
+			fmt.Fprintln(os.Stdout, "    keystone migrate down    roll back the most recent migration")
+			fmt.Fprintln(os.Stdout, "    keystone migrate status  show applied + pending")
+			return nil
+		},
+	}
 }
 
 func indexCmd() *cobra.Command {
