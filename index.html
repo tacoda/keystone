@@ -1146,7 +1146,7 @@
         <span class="brand-logo-wrap"><img src="keystone_logo.png" alt="Keystone" class="brand-logo" width="512" height="512"></span>
         <h1>Keystone</h1>
       </div>
-      <p>v2.0.3 · the agent harness framework</p>
+      <p>v2.1.1 · the agent harness framework</p>
     </div>
 
     <nav>
@@ -1234,7 +1234,7 @@
   <!-- ===================== INTRODUCTION (landing) ===================== -->
   <section id="introduction" class="page" data-title="Introduction">
     <div class="page-head">
-      <div class="crumb">Overview · Keystone v2.0.3</div>
+      <div class="crumb">Overview · Keystone v2.1.1</div>
       <h1>The agent harness framework for <em class="hero-any">any</em> project.</h1>
       <p class="tagline">AI agents reinvent your team's rules in every repo. <strong style="color: var(--accent4);">Keystone ships them as vendored policy packages — pinned, hash-verified, and read by every agent.</strong></p>
     </div>
@@ -1247,7 +1247,7 @@
         </div>
         <div class="term-body">
           <span class="pr">$</span> brew install tacoda/tap/keystone<br>
-          <span class="ok">●</span> keystone v2.0.3 installed<br>
+          <span class="ok">●</span> keystone v2.1.1 installed<br>
           <span class="pr">$</span> cd my-project<br>
           <span class="pr">$</span> keystone init<br>
           <span class="dim">?</span> Select your agent <span class="dim">›</span> <span class="ok">claude-code</span><br>
@@ -1265,6 +1265,19 @@
         </div>
       </div>
     </section>
+
+    <div class="definition" style="border-left-color: var(--accent3);">
+      <p style="margin: 0 0 10px;"><strong style="color: var(--accent3); font-size: 1.1em;">What's new in v2.1.1</strong> — patch release, no migration required. Dashboard rebuild focused on observability and snappiness.</p>
+      <ul style="margin: 0; padding-left: 22px; line-height: 1.8; font-size: 0.98rem;">
+        <li><strong>HTMX SPA shell.</strong> 14 nav links collapse to 5 sections — Observability, Harness, Sources, Flywheels, Quality. Persistent topbar; section swaps push history. <code>HX-Request</code> branching returns just the section body on in-app navigation, the full document on first paint or share-link.</li>
+        <li><strong>Narrow SSE topics.</strong> The watcher classifies each dirty path into the smallest topic that fits — <code>primitives-changed</code>, <code>sources-changed</code>, <code>inbox-changed</code>, <code>prune-changed</code> — on top of the coarse <code>harness-changed</code>. Live widgets subscribe to one topic and re-fetch only when they need to.</li>
+        <li><strong>Per-session audit log.</strong> Every <code>keystone web serve</code> writes <code>.keystone/state/audit/session-&lt;UTC&gt;-&lt;pid&gt;.jsonl</code> — append-only, never overwritten, pruned to ≤50 sessions or 30 days at startup. New audit widget on Observability tails the current session with a history selector.</li>
+        <li><strong>KPI strip + lazy graph.</strong> Five headline metrics (primitives, sources OK/total, inbox depth, lint errors, index freshness) load independently via <code>/web/widgets/kpi/&lt;name&gt;</code> and live-refresh on their narrow SSE topic. The Mermaid dependency graph renders lazily on <code>intersect once</code> — opens the tab cheap; renders the heavy diagram only when you scroll to it.</li>
+        <li><strong>Command-K search popover</strong> in the topbar. Platform-detected shortcut hint — <code>⌘K</code> on macOS, <code>Ctrl+K</code> on Windows / Linux.</li>
+        <li><strong>Softer dark theme.</strong> Blue + gray accents tuned for software engineers using agentic coding. 4-px spacing scale, backdrop-blurred sticky topbar, View Transitions on swap, immutable cache headers on every embedded asset. First paint is server-rendered; the JS budget is htmx + a 25-line inline script.</li>
+      </ul>
+      <p style="margin: 12px 0 0; font-size: 0.85rem; color: var(--muted);">Full notes: <a href="https://github.com/tacoda/keystone/blob/main/CHANGELOG.md" target="_blank" rel="noopener">CHANGELOG.md <span class="ext">↗</span></a>. <strong>Breaking:</strong> the old single-purpose page URLs (<code>/metrics</code>, <code>/primitives</code>, <code>/policies</code>, <code>/verify</code>, <code>/prune</code>, <code>/inbox</code>, <code>/evals</code>, <code>/graph</code>, …) are retired. Use the new section paths (<code>/observability/metrics</code>, <code>/harness/primitives</code>, …); the REST <code>/api/*</code> and form <code>/web/actions/*</code> surfaces are unchanged.</p>
+    </div>
 
     <div class="definition">
       <p><strong>AI coding agents are productive — and they go off-rails.</strong> They forget your team's conventions between sessions. Each repo reinvents the same prompt hacks and ad-hoc <code>CLAUDE.md</code> edits. Org-wide coding discipline can't be shared, versioned, or audited — switch agents and you lose all of it. Keystone fixes that by dropping a versioned markdown harness into every repo. The same rules apply across sessions, across repos, across agents. Org discipline ships as <strong style="color:var(--accent4);">policies</strong> — vendored, pinned, hash-verified packages your security and platform teams author once and every repo pulls. Agent output stays in bounds. New repos inherit org discipline on <code>keystone init</code>. Reviews stay consistent across teams. Swap tools, keep the rules. Engineering leadership gets one place to evolve coding discipline and one diff to roll it out org-wide.</p>
@@ -1310,7 +1323,7 @@
       </div>
       <div class="action">
         <h3 style="color: var(--accent5);"><a href="#dashboard" style="color: inherit; border-bottom: none;">Localhost dashboard →</a></h3>
-        <p><code>keystone web serve</code> opens <code>http://localhost:4773</code> (KEYS on a phone keypad). Embedded HTMX + SSE push, fsnotify on <code>.keystone/</code>. <strong>14 pages:</strong> home, metrics, insights, primitives, policies, investigator, sources, verify, prune, inbox, flywheels, evals, search, graph. Read-only REST at <code>/api/*</code>.</p>
+        <p><code>keystone web serve</code> opens <code>http://localhost:4773</code> (KEYS on a phone keypad). HTMX SPA shell + narrow-topic SSE push, fsnotify on <code>.keystone/</code>. <strong>5 sections:</strong> Observability, Harness, Sources, Flywheels, Quality. KPI strip + per-session audit log + command-K search. Read-only REST at <code>/api/*</code>.</p>
       </div>
       <div class="action">
         <h3 style="color: var(--accent2);"><a href="#evals" style="color: inherit; border-bottom: none;">Evals + baseline diffs →</a></h3>
@@ -1636,7 +1649,7 @@ flowchart LR
 <pre class="code"><span class="prompt">$</span> curl -fsSL https://raw.githubusercontent.com/tacoda/keystone/main/install.sh &gt; install.sh
 <span class="prompt">$</span> less install.sh
 <span class="prompt">$</span> sh install.sh</pre>
-      <p>Override the install dir with <code>KEYSTONE_PREFIX=/some/path</code> or pin the release with <code>KEYSTONE_VERSION=v2.0.3</code>. The installer does not run <code>keystone init</code> — open a new shell and run it yourself in a project to scaffold the harness.</p>
+      <p>Override the install dir with <code>KEYSTONE_PREFIX=/some/path</code> or pin the release with <code>KEYSTONE_VERSION=v2.1.1</code>. The installer does not run <code>keystone init</code> — open a new shell and run it yourself in a project to scaffold the harness.</p>
     </div>
 
     <div class="install-method">
@@ -3069,89 +3082,53 @@ skill://{name}/SKILL.md</pre>
     <div class="page-head">
       <div class="crumb">Surfaces · Localhost operator view</div>
       <h1>Localhost dashboard.</h1>
-      <p class="tagline"><code>keystone web serve</code> opens <code>http://localhost:4773</code> (port <strong>4773</strong> = KEYS on a phone keypad). Embedded HTMX + SSE push in the same Go binary. fsnotify watches <code>.keystone/</code> and swaps fragments when files change. 14 pages — same names as the top nav; same data model as the CLI and MCP server.</p>
+      <p class="tagline"><code>keystone web serve</code> opens <code>http://localhost:4773</code> (port <strong>4773</strong> = KEYS on a phone keypad). HTMX SPA shell + narrow-topic SSE push in the same Go binary. fsnotify watches <code>.keystone/</code> and swaps the affected widget — not the whole page — the moment a file changes. <strong>Five sections</strong>, each with its own tabs; same data model as the CLI and MCP server.</p>
     </div>
 
     <div class="definition">
-      <p><strong>Localhost-only.</strong> The dashboard binds to <code>127.0.0.1</code> by default. No auth — your machine is the trust boundary. Read-only REST API under <code>/api/*</code>; SSE push at <code>/events</code>. fsnotify on <code>.keystone/</code> swaps HTMX fragments the moment a file changes — author in your editor, the dashboard reflects it in milliseconds.</p>
+      <p><strong>Localhost-only.</strong> The dashboard binds to <code>127.0.0.1</code> by default. No auth — your machine is the trust boundary. Read-only REST API under <code>/api/*</code>; SSE push at <code>/events</code>; widget fragments at <code>/web/widgets/*</code>. fsnotify on <code>.keystone/</code> emits the narrowest topic that matches the dirty paths (<code>primitives-changed</code>, <code>sources-changed</code>, <code>inbox-changed</code>, <code>prune-changed</code>) plus the coarse <code>harness-changed</code> for generic listeners.</p>
     </div>
 
-    <div class="section-label">14 pages</div>
+    <div class="definition" style="border-left-color: var(--accent3);">
+      <p style="margin: 0 0 8px;"><strong style="color: var(--accent3);">SPA shell, no framework.</strong> Persistent topbar + footer, <code>&lt;main id="app"&gt;</code> as the single swap target. Every nav link is <code>hx-get</code> + <code>hx-push-url</code> — back / forward navigate without reloading the chrome. <code>HX-Request</code> branching returns only the section body on in-app navigation, the full layout on first paint or share-link. Total client JS: <code>htmx.min.js</code> + <code>htmx-ext-sse.js</code> + a 25-line inline script for command-K. Static assets carry <code>Cache-Control: public, max-age=31536000, immutable</code>.</p>
+    </div>
+
+    <div class="section-label">5 sections</div>
     <div class="action-grid">
       <div class="action">
-        <span class="action-tag">home</span>
-        <h3 style="color: var(--accent);">Overview</h3>
-        <p>Counts by kind, source healths, recent activity. A live SSE indicator on the right edge of the nav shows when the server pushes a fragment.</p>
+        <span class="action-tag">/observability</span>
+        <h3 style="color: var(--accent);">Observability</h3>
+        <p><strong>Tabs:</strong> metrics · insights · audit · live. The KPI strip at the top — <strong>primitives</strong>, <strong>sources OK/total</strong>, <strong>inbox depth</strong>, <strong>lint errors</strong>, <strong>index freshness</strong> — loads each card independently via <code>/web/widgets/kpi/&lt;name&gt;</code> and live-refreshes on its narrow SSE topic. Per-session audit log tails the JSONL on disk with a history selector for prior runs.</p>
       </div>
       <div class="action">
-        <span class="action-tag">metrics</span>
-        <h3 style="color: var(--accent2);">Cards + counts</h3>
-        <p>Top-line cards: <strong>Primitives</strong>, <strong>Kinds</strong>, <strong>Lint errors</strong>, <strong>Lint warnings</strong>, <strong>Sources</strong>, <strong>Index freshness</strong>. Then a "counts by kind" table with colored pill tags (green for guide, blue for corpus, orange for sensor, pink for action / playbook, purple for skill). Below it, "recently modified" with kind pill, id, modified-at.</p>
+        <span class="action-tag">/harness</span>
+        <h3 style="color: var(--accent2);">Harness</h3>
+        <p><strong>Tabs:</strong> primitives · policies · investigator · graph. Filterable primitive table with kind + glob filter; detail pages with cross-reference panel; "New" scaffolder for every kind. Policies tab lists installed packages + add/remove forms. Investigator shows the cascade by layer. Graph renders on <code>intersect once</code> — opens cheap, only fetches Mermaid when you scroll to the canvas.</p>
       </div>
       <div class="action">
-        <span class="action-tag">insights</span>
-        <h3 style="color: var(--accent3);">Suggested actions</h3>
-        <p>Heuristics for improving harness performance — orphan corpus, empty bodies, duplicate descriptions, stale guides, unused sensors. One-click navigate to the offending primitive.</p>
+        <span class="action-tag">/sources</span>
+        <h3 style="color: var(--accent4);">Sources</h3>
+        <p>List + per-source detail + add form + health probe + per-source query. The same source adapters the MCP server calls. SSE topic <code>sources-changed</code> fires whenever <code>context.json</code> or a policy tree moves.</p>
       </div>
       <div class="action">
-        <span class="action-tag">primitives</span>
-        <h3 style="color: var(--accent4);">List + new + detail</h3>
-        <p>Filterable table with kind + glob filter. Detail page shows canonical frontmatter, body, and the cross-reference panel (incoming deps + traces). "New" button drops a generator form for every kind.</p>
+        <span class="action-tag">/flywheels</span>
+        <h3 style="color: var(--accent5);">Flywheels</h3>
+        <p><strong>Tabs:</strong> overview · inbox · prune. Overview renders the click-to-copy <code>/keystone:learn</code> / <code>/keystone:synthesize</code> / <code>/keystone:audit</code> commands. Inbox walks learning candidates with accept / reject. Prune surfaces lint + heuristic findings with one-click archive.</p>
       </div>
       <div class="action">
-        <span class="action-tag">policies</span>
-        <h3 style="color: var(--accent5);">Vendored fragments</h3>
-        <p>List of installed policies + add/remove forms. Shows pinned version, source URL, and the per-policy item count.</p>
+        <span class="action-tag">/quality</span>
+        <h3 style="color: var(--accent3);">Quality</h3>
+        <p><strong>Tabs:</strong> verify · evals. Run <code>keystone verify</code> from the browser with a result pane for strict violations + drift findings. Declared evals + a run button + the report fragment; pass a baseline git ref to materialize a worktree and diff regressions.</p>
       </div>
       <div class="action">
-        <span class="action-tag">investigator</span>
-        <h3 style="color: var(--accent);">Cascade layer view</h3>
-        <p>Primitives grouped by cascade layer — project, then each policy by nesting depth. Inline search. Useful for diagnosing "which layer is winning for this rule?"</p>
-      </div>
-      <div class="action">
-        <span class="action-tag">sources</span>
-        <h3 style="color: var(--accent2);">External context</h3>
-        <p>List + add/remove + per-source query + health probe. The same source adapters the MCP server calls.</p>
-      </div>
-      <div class="action">
-        <span class="action-tag">verify</span>
-        <h3 style="color: var(--accent3);">One-click cascade check</h3>
-        <p>Run <code>keystone verify</code> from the browser. Result pane with path-context strict violations and drift findings.</p>
-      </div>
-      <div class="action">
-        <span class="action-tag">prune</span>
-        <h3 style="color: var(--accent4);">Lint + heuristic findings</h3>
-        <p>Orphan corpus, empty bodies, duplicate descriptions, stale guides — per-row prune action moves the primitive to <code>archive/</code>.</p>
-      </div>
-      <div class="action">
-        <span class="action-tag">inbox</span>
-        <h3 style="color: var(--accent5);">Learning candidates</h3>
-        <p>Walk every candidate in <code>.keystone/harness/learning/inbox/</code>; accept (promotes to a guide / corpus body via <code>synthesize</code>) or reject (archives the candidate).</p>
-      </div>
-      <div class="action">
-        <span class="action-tag">flywheels</span>
-        <h3 style="color: var(--accent);">Click-to-copy slash commands</h3>
-        <p>The Learning and Pruning flywheels rendered as copyable invocations — <strong><code>/keystone:learn</code></strong>, <strong><code>/keystone:synthesize</code></strong>, <strong><code>/keystone:audit</code></strong>. Click lands a real, agent-recognizable command on the clipboard. (Changed in 2.0.1 — was natural-language prompts.)</p>
-      </div>
-      <div class="action">
-        <span class="action-tag">evals</span>
-        <h3 style="color: var(--accent2);">Run + diff</h3>
-        <p>Declared evals + a run button + the report fragment. Pass a baseline git ref to materialize a worktree and diff regressions in the browser.</p>
-      </div>
-      <div class="action">
-        <span class="action-tag">search</span>
-        <h3 style="color: var(--accent3);">HTMX-live full-text</h3>
-        <p>The same weighted-substring engine as <code>keystone search</code>, wired through HTMX so each keystroke pushes results.</p>
-      </div>
-      <div class="action">
-        <span class="action-tag">graph</span>
-        <h3 style="color: var(--accent4);">Mermaid-rendered deps</h3>
-        <p>Primitive-relationship graph — deps + traces — rendered via mermaid. Same engine as <code>keystone graph --format mermaid</code>.</p>
+        <span class="action-tag">⌘K / Ctrl+K</span>
+        <h3 style="color: var(--accent);">Topbar search</h3>
+        <p>Debounced 150-ms keyup against <code>/web/fragments/search</code> — same weighted-substring engine as <code>keystone search</code>. Platform-detected shortcut hint. <code>Escape</code> and click-outside dismiss. <code>/search</code> page kept as a bookmark fallback.</p>
       </div>
     </div>
 
-    <div class="section-label">Live metrics page</div>
-    <p style="font-size: 0.85rem; color: var(--muted); line-height: 1.7;">Per-port ambient-load detail lives on the metrics page (SSE-pushed; updates the moment a primitive is added or removed). The <code>keystone doctor --budget</code> command was retired in 2.0 — the dashboard's metrics page is the replacement.</p>
+    <div class="section-label">Per-session audit log</div>
+    <p style="font-size: 0.85rem; color: var(--muted); line-height: 1.7;">Every <code>keystone web serve</code> opens <code>.keystone/state/audit/session-&lt;UTC&gt;-&lt;pid&gt;.jsonl</code> (append-only, <code>O_CREATE|O_EXCL</code>, never overwritten). Each debounced watcher burst writes one line: timestamp, topics emitted, dirty paths, summary. Startup prune trims to ≤50 sessions or 30 days — looser of the two. The Observability audit widget tails the current session with a selector for history. Directory is git-ignored.</p>
   </section>
 
   <!-- ===================== SUPPORTED AGENTS ===================== -->
