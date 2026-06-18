@@ -25,7 +25,7 @@ A full issue tracker is not required. A small project tracked by a todo list is 
 
 Two paths:
 
-**A. Tracker card provided** — fetch the card via whatever tracker integration the agent has available (MCP server, CLI, plugin). Read:
+**A. Tracker card provided** — fetch the card via whatever tracker integration the agent has available (MCP server, CLI, policy). Read:
 - Title (becomes the spec title).
 - Description (becomes the spec body).
 - Acceptance criteria, if present (becomes the AC section).

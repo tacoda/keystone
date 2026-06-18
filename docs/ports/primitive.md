@@ -188,7 +188,7 @@ Projections are *generated*, never hand-edited. `keystone project` regenerates t
 The primitive shape inherits the cascade rules already documented per kind (`guide.md`, `action.md`, `corpus.md`). The shared frontmatter does not change override semantics:
 
 1. Project's file at the canonical path always wins by default.
-2. Among plugins, plugins nested deeper in `keystone.json` refine outer plugins.
+2. Among policies, policies nested deeper in `keystone.json` refine outer policies.
 3. A `strict.<kind>: [<id>]` declaration locks the primitive absolutely.
 
 Exactly one file loads per `(kind, id)`.

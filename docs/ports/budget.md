@@ -12,7 +12,7 @@ block:
 {
   "version": "1",
   "harness_root": "harness",
-  "plugins": [],
+  "policies": [],
   "budgets": {
     "guides":    { "max_tokens": 10000 },
     "corpus":    { "max_tokens": 50000 },
@@ -80,7 +80,7 @@ Markers:
 - `ℹ` closing line — no budgets declared in keystone.json.
 
 Files skipped: README at any depth, `learning/`, `archive/`, anything
-under `<harness-root>/plugins/`.
+under `<harness-root>/policies/`.
 
 ### `keystone init`
 
@@ -118,8 +118,8 @@ Files **excluded** from the count:
 - `README.md` at any depth — orientation, not loaded by the agent.
 - `<harness-root>/learning/...` — flywheel state, not policy.
 - `<harness-root>/archive/...` — same.
-- `<harness-root>/plugins/...` — vendored content; tracked separately in
-  the plugin tree (the cascade picks them up at resolve time).
+- `<harness-root>/policies/...` — vendored content; tracked separately in
+  the policy tree (the cascade picks them up at resolve time).
 
 ## Recommendations
 
@@ -139,9 +139,9 @@ Files **excluded** from the count:
 - **Real tokenizer opt-in** (`--tokenizer=tiktoken` at init) — PLAN §6
   open question 4. The budget package's API stays stable; only the
   estimator implementation swaps.
-- **Per-plugin attribution** — the report currently lumps plugin
+- **Per-policy attribution** — the report currently lumps policy
   content under its port. A future split would let users see how much
-  budget each individual plugin consumes.
+  budget each individual policy consumes.
 - **CI-friendly output mode** — `--format=json` so projects can pipe
   the breakdown into custom enforcement logic.
 

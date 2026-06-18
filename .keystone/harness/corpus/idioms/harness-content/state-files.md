@@ -28,4 +28,4 @@ The **bootstrap** action propose-edits every state file through the agent's edit
 
 ## Index regeneration
 
-`keystone index` reads every file under `harness/` (project layer) and `harness/plugins/*/` (vendored plugins), then writes `.keystone/INDEX.json`. Manual edits to INDEX.json are lost on the next run. The same rule applies to the `## Index` table in `GLOBS_INDEX.md`: it's a derived view, not a hand-authored doc.
+`keystone index` reads every file under `harness/` (project layer) and `harness/policies/*/` (vendored policies), then writes `.keystone/INDEX.json`. Manual edits to INDEX.json are lost on the next run. The same rule applies to the `## Index` table in `GLOBS_INDEX.md`: it's a derived view, not a hand-authored doc.

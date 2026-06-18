@@ -9,7 +9,7 @@
 harness/adapters/<agent>/lifecycle.md                         # project-owned
 harness/adapters/<agent>/sensors.md
 harness/adapters/<agent>/activation.md
-harness/plugins/<plugin>/adapters/<agent>/...                 # plugin-owned (read-only)
+harness/policies/<policy>/adapters/<agent>/...                 # policy-owned (read-only)
 ```
 
 `<agent>` is the agent's canonical short name. New agents land by creating a new `<agent>/` directory and a generator entry.
@@ -36,9 +36,9 @@ Each file:
 
 ## Cascade behavior
 
-Same as other ports: project's `harness/adapters/<agent>/...` always wins by default. Plugins can ship adapters too (e.g., an org-specific Claude Code adapter); among plugins, plugins nested deeper in `keystone.json` refine the outer plugins they're nested in.
+Same as other ports: project's `harness/adapters/<agent>/...` always wins by default. Policies can ship adapters too (e.g., an org-specific Claude Code adapter); among policies, policies nested deeper in `keystone.json` refine the outer policies they're nested in.
 
-`strict.adapters: ["<agent>"]` on any plugin makes that adapter absolute — nothing else (project or any other plugin) can ship a competing adapter for that agent.
+`strict.adapters: ["<agent>"]` on any policy makes that adapter absolute — nothing else (project or any other policy) can ship a competing adapter for that agent.
 
 ## Per-agent menu generation
 

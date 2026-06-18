@@ -34,4 +34,4 @@ The twelve-kind taxonomy enforced by the keystone harness:
 
 - Files are **read by an agent at runtime**, not compiled. Naming, frontmatter, and paths *are* the API.
 - Edits propagate through `keystone index` → `.keystone/INDEX.json`. Manual edits to INDEX.json drift instantly.
-- Project-layer files always win over installed-plugin files unless a policy is marked `strict`. This is the cascade contract — guides must not assume they are absolute.
+- Project-layer files always win over installed-policy files unless a policy is marked `strict`. This is the cascade contract — guides must not assume they are absolute.

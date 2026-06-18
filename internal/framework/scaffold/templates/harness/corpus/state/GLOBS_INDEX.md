@@ -19,7 +19,7 @@ Guides without `globs:` are not listed here — they activate ambient per their 
 
 ## How it's regenerated
 
-1. Walk every guide under `harness/guides/` and `harness/plugins/*/guides/`.
+1. Walk every guide under `harness/guides/` and `harness/policies/*/guides/`.
 2. For each guide, read its frontmatter and collect each entry in `globs:` (if present).
 3. Invert: for each glob pattern, list the guides that claim it.
 4. Sort patterns by path-prefix for stable diffs.

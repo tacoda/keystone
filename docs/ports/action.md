@@ -7,7 +7,7 @@
 
 ```
 harness/actions/<name>.md                                     # project-owned
-harness/plugins/<plugin>/actions/<name>.md                    # plugin-owned (read-only)
+harness/policies/<policy>/actions/<name>.md                    # policy-owned (read-only)
 ```
 
 Flat — no topic directory. Actions are global by name across the cascade.
@@ -37,7 +37,7 @@ Flat — no topic directory. Actions are global by name across the cascade.
 
 ## Cascade behavior
 
-Same as other ports: project wins by default; among plugins, plugins nested deeper in `keystone.json` refine the outer plugins they're nested in; a `strict.actions: [<name>]` declaration locks the item absolutely — nothing else (project or any other plugin) can override it. Exactly one file loads per `<name>`.
+Same as other ports: project wins by default; among policies, policies nested deeper in `keystone.json` refine the outer policies they're nested in; a `strict.actions: [<name>]` declaration locks the item absolutely — nothing else (project or any other policy) can override it. Exactly one file loads per `<name>`.
 
 ## Example
 

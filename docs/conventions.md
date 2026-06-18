@@ -18,13 +18,13 @@ contents at runtime. Both interfaces walk the same tree.
 
 ```
 <repo-root>/
-├── keystone.json                 # plugin manifest (user-authored)
+├── keystone.json                 # policy manifest (user-authored)
 ├── .keystone/
 │   ├── context.yaml              # interface config (MCP topic bindings,
 │   │                             #   projections registry); CLI uses
 │   │                             #   defaults when absent.
 │   ├── INDEX.json                # GENERATED descriptor index
-│   ├── lockfile.json             # plugin lockfile (was keystone.lock)
+│   ├── lockfile.json             # policy lockfile (was keystone.lock)
 │   └── harness/                  # the harness itself
 │       ├── guides/<topic>/<name>.md     # kind: rule
 │       ├── actions/<name>.md            # kind: action
@@ -34,7 +34,7 @@ contents at runtime. Both interfaces walk the same tree.
 │       ├── agents/<name>.md              # kind: subagent (canonical source)
 │       ├── commands/<name>.md           # kind: command (canonical source)
 │       ├── adapters/<host>/             # pointer-style activation docs
-│       └── plugins/<plugin>/...         # vendored plugin trees
+│       └── policies/<policy>/...         # vendored policy trees
 ├── .claude/                      # GENERATED projections
 │   ├── skills/<name>/SKILL.md
 │   ├── agents/<name>.md
@@ -67,65 +67,65 @@ For the canonical descriptor shape every primitive declares, see
 ### Guide
 
 - **Project path:** `<harness-root>/guides/<topic>/<name>.md`
-- **Plugin path:** `<harness-root>/plugins/<plugin>/guides/<topic>/<name>.md`
+- **Policy path:** `<harness-root>/policies/<policy>/guides/<topic>/<name>.md`
 - **Activation:** Topic default — ambient for `domain/` and `principles/`, lazy-by-region for `idioms/<stack>/`, phase-gated for `process/`, tool-driven for `computational/`. Optionally narrowed by per-guide `globs:`.
 - **Frontmatter:** optional. Recognized keys: `globs:` (list of globs; narrows activation, never expands it).
 - **Required shape:** H1 title `# <Name> — rules`, body of rules, optional forward-link to paired corpus.
-- **Cascade:** project wins by default; among plugins, deeper-nested plugins refine outer plugins; `strict` locks absolutely. The winner's `globs:` is the only one consulted.
+- **Cascade:** project wins by default; among policies, deeper-nested policies refine outer policies; `strict` locks absolutely. The winner's `globs:` is the only one consulted.
 - **Strict-able:** yes (per-port `strict.guides: [...]` in keystone.json).
 - **Generator:** `keystone new guide <topic>/<name>` (scaffolds guide + paired corpus stub).
 
 ### Corpus
 
 - **Project path:** `<harness-root>/corpus/<topic>/<name>.md`
-- **Plugin path:** `<harness-root>/plugins/<plugin>/corpus/<topic>/<name>.md`
+- **Policy path:** `<harness-root>/policies/<policy>/corpus/<topic>/<name>.md`
 - **Activation:** On-demand (loaded when a guide forward-links to it).
 - **Frontmatter:** none required.
 - **Required shape:** H1 title `# <Name> — reasoning`, long-form explanation, back-link to paired guide.
-- **Cascade:** project wins by default; among plugins, deeper-nested plugins refine outer plugins.
+- **Cascade:** project wins by default; among policies, deeper-nested policies refine outer policies.
 - **Strict-able:** no (corpus is reference, not policy).
 
 ### Sensor
 
 - **Project path:** `<harness-root>/sensors/<name>.md`
-- **Plugin path:** `<harness-root>/plugins/<plugin>/sensors/<name>.md`
+- **Policy path:** `<harness-root>/policies/<policy>/sensors/<name>.md`
 - **Activation:** Invoked inside an action.
 - **Frontmatter:** `kind: <computational | drift | coverage | ...>` (required).
 - **Required shape:** H1 title `# Sensor: <name>`, sections `## Command`, `## Interpretation`, `## Remediation`.
-- **Cascade:** project wins by default; among plugins, deeper-nested plugins refine outer plugins; `strict` locks absolutely. Sensors are only allowed at the project layer and at top-level plugins — nested plugins that ship sensors fail `keystone verify`.
-- **Strict-able:** yes (only at the project layer or top-level plugins, per the depth limit above).
+- **Cascade:** project wins by default; among policies, deeper-nested policies refine outer policies; `strict` locks absolutely. Sensors are only allowed at the project layer and at top-level policies — nested policies that ship sensors fail `keystone verify`.
+- **Strict-able:** yes (only at the project layer or top-level policies, per the depth limit above).
 - **Generator:** `keystone new sensor <name>`.
 
 ### Action
 
 - **Project path:** `<harness-root>/actions/<name>.md`
-- **Plugin path:** `<harness-root>/plugins/<plugin>/actions/<name>.md`
+- **Policy path:** `<harness-root>/policies/<policy>/actions/<name>.md`
 - **Activation:** Invoked by name (playbook, another action, agent menu, or `keystone <action>`).
 - **Frontmatter:** none required.
 - **Required shape:** H1 title `# Action: <name>`, sections `## Entry condition`, `## Activities`, `## Exit condition`.
-- **Cascade:** project wins by default; among plugins, deeper-nested plugins refine outer plugins; `strict` locks absolutely.
+- **Cascade:** project wins by default; among policies, deeper-nested policies refine outer policies; `strict` locks absolutely.
 - **Strict-able:** yes.
 - **Generator:** `keystone new action <name>`.
 
 ### Playbook
 
 - **Project path:** `<harness-root>/playbooks/<name>.md`
-- **Plugin path:** `<harness-root>/plugins/<plugin>/playbooks/<name>.md`
+- **Policy path:** `<harness-root>/policies/<policy>/playbooks/<name>.md`
 - **Activation:** Invoked by name; runs an ordered sequence of actions.
 - **Frontmatter:** none required.
 - **Required shape:** H1 title `# Playbook: <name>`, sections `## Sequence` (numbered list of action names), `## Halt conditions`.
-- **Cascade:** project wins by default; among plugins, deeper-nested plugins refine outer plugins; `strict` locks absolutely.
+- **Cascade:** project wins by default; among policies, deeper-nested policies refine outer policies; `strict` locks absolutely.
 - **Strict-able:** yes.
 - **Generator:** `keystone new playbook <name>`.
 
 ### Adapter (per-agent)
 
 - **Project path:** `<harness-root>/adapters/<agent>/{lifecycle,sensors,activation}.md`
-- **Plugin path:** `<harness-root>/plugins/<plugin>/adapters/<agent>/...`
+- **Policy path:** `<harness-root>/policies/<policy>/adapters/<agent>/...`
 - **Activation:** Loaded at session start by the agent.
 - **Frontmatter:** none required.
 - **Required shape:** three files per agent — `lifecycle.md` (how the agent invokes playbooks/actions), `sensors.md` (sensor invocation), `activation.md` (the agent's menu file content).
-- **Cascade:** project wins by default; among plugins, deeper-nested plugins refine outer plugins; `strict` locks absolutely.
+- **Cascade:** project wins by default; among policies, deeper-nested policies refine outer policies; `strict` locks absolutely.
 - **Strict-able:** yes (per-agent).
 - **Generator:** `keystone new adapter <agent>`.
 
@@ -142,7 +142,7 @@ For the canonical descriptor shape every primitive declares, see
 - **Activation:** Read at session start; mutated by `bootstrap`, `audit`, `learn` actions.
 - **Required shape:** free-form markdown; section-bounded updates (an action rewrites named sections in place, leaves others alone).
 - **Recognized files:** `CODEBASE_STATE.md`, `INSTALL_PROFILE.md`, `code-debt.md`, `harness-debt.md`, `quality-radar.md`, `risk-fingerprints.md`, `traffic-topology.md`. Project-specific ledgers welcome.
-- **Cascade:** project-only. Plugins do not ship state.
+- **Cascade:** project-only. Policys do not ship state.
 - **Not strict-able.** Full port contract at [`docs/ports/state-ledger.md`](ports/state-ledger.md).
 
 ### Patch
@@ -251,7 +251,7 @@ directory holding `keystone.json`.
 ```markdown
 <!-- inside <harness-root>/actions/release.md -->
 
-See [`keystone.json`](keystone.json) for the plugin pin list.
+See [`keystone.json`](keystone.json) for the policy pin list.
 See [`src/main.go`](src/main.go) for the entrypoint.
 ```
 
@@ -280,7 +280,7 @@ the body.
 ```
 keystone new <kind> <id>             # rule|action|corpus|skill|subagent|command|prompt|sensor
 keystone new adapter <agent>
-keystone new plugin <name>           # scaffolds a new plugin repo
+keystone new policy <name>           # scaffolds a new policy repo
 ```
 
 The 2.0 `keystone new <kind> <id>` dispatch replaces the per-kind
@@ -293,9 +293,9 @@ new files look like without affecting already-scaffolded content.
 
 ## Sensor depth limit
 
-Sensors are only permitted at the project layer and at top-level plugins
-in `keystone.json` (a plugin with no plugin ancestors). Plugins nested
-under another plugin that declare `strict.sensors` or ship vendored
+Sensors are only permitted at the project layer and at top-level policies
+in `keystone.json` (a policy with no policy ancestors). Policies nested
+under another policy that declare `strict.sensors` or ship vendored
 sensor files fail `keystone verify` with a `DepthViolation`.
 
 ## Reference
@@ -304,6 +304,6 @@ sensor files fail `keystone verify` with a `DepthViolation`.
   guide, corpus, sensor, action, playbook, adapter, flywheel-sink,
   state-ledger, patch, budget.
 - JSON Schemas for config files: [`docs/schemas/`](schemas/) —
-  `keystone.json`, `keystone.lock.json`, `keystone-plugin.json`,
+  `keystone.json`, `keystone.lock.json`, `keystone-policy.json`,
   `patch.json`.
 - Architecture decisions: [`docs/adr/`](adr/).

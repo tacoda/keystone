@@ -7,7 +7,7 @@
 
 ```
 harness/sensors/<name>.md                                     # project-owned
-harness/plugins/<plugin>/sensors/<name>.md                    # plugin-owned (read-only)
+harness/policies/<policy>/sensors/<name>.md                    # policy-owned (read-only)
 ```
 
 Flat — no topic directory. Sensors are global by name across the cascade.
@@ -39,9 +39,9 @@ kind: <computational | drift | coverage | ...>
 
 ## Cascade behavior
 
-Same as other ports: project wins by default; among plugins, plugins nested deeper in `keystone.json` refine the outer plugins they're nested in; a plugin may declare `strict.sensors: [<name>]` to lock the item absolutely so nothing else (project or any other plugin) can override it. Exactly one file loads per `<name>`.
+Same as other ports: project wins by default; among policies, policies nested deeper in `keystone.json` refine the outer policies they're nested in; a policy may declare `strict.sensors: [<name>]` to lock the item absolutely so nothing else (project or any other policy) can override it. Exactly one file loads per `<name>`.
 
-**Depth limit.** Sensors are only allowed at the project layer and at top-level plugins in `keystone.json`. Plugins nested under another plugin that declare `strict.sensors` or ship vendored sensor files fail `keystone verify` with a `DepthViolation`.
+**Depth limit.** Sensors are only allowed at the project layer and at top-level policies in `keystone.json`. Policies nested under another policy that declare `strict.sensors` or ship vendored sensor files fail `keystone verify` with a `DepthViolation`.
 
 ## Example
 

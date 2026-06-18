@@ -30,7 +30,7 @@ If the project already had a `CLAUDE.md`, the installer asks before overwriting.
 - `.claude/settings.json` — permissions, MCP servers, hooks (optional, user-owned).
 - `.claude/agents/*.md` — project-local sub-agents (review-functional, review-security, etc.). Optional; only needed if the user wants to customize review sub-agents beyond what `harness/actions/review.md` describes.
 
-The installer does **not** create or populate `.claude/`. Lifecycle actions live in `harness/actions/<action>.md` and are invoked via natural language — no slash commands, no skills, no plugin install required.
+The installer does **not** create or populate `.claude/`. Lifecycle actions live in `harness/actions/<action>.md` and are invoked via natural language — no slash commands, no skills, no policy install required.
 
 ## Ambient loading
 

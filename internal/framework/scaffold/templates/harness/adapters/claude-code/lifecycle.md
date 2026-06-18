@@ -4,7 +4,7 @@ How Claude Code runs the harness's lifecycle actions.
 
 ## Invocation
 
-Every action is invoked via natural language: "run task on TICKET-123," "run verify," "do a review pass." The agent reads `CLAUDE.md` at session start, finds the action in the bulleted list, follows the link to `harness/actions/<action>.md`, and executes the playbook. No slash commands, no skill files, no plugin install — the playbooks are agent-agnostic.
+Every action is invoked via natural language: "run task on TICKET-123," "run verify," "do a review pass." The agent reads `CLAUDE.md` at session start, finds the action in the bulleted list, follows the link to `harness/actions/<action>.md`, and executes the playbook. No slash commands, no skill files, no policy install — the playbooks are agent-agnostic.
 
 The canonical kickoff phrase is **"run task on `<ticket-id>`"** (or "run the task workflow") — `harness/actions/task.md` orchestrates `spec → orient → implementation → check-drift → verify → review`.
 

@@ -11,7 +11,7 @@ State ledgers are how the harness remembers what it knows about the project — 
 <harness-root>/corpus/state/<name>.md
 ```
 
-State lives under `corpus/state/` (a reserved subdirectory of the corpus port). Plugins **do not** ship state ledgers — state is per-project by definition.
+State lives under `corpus/state/` (a reserved subdirectory of the corpus port). Policys **do not** ship state ledgers — state is per-project by definition.
 
 ## Required shape
 
@@ -37,7 +37,7 @@ Project-specific ledgers (e.g. `corpus/state/glossary.md`) follow the same shape
 
 ## Cascade behavior
 
-State ledgers are not part of the strict-cascade resolution. They live at the project layer only — plugins never ship state. The agent reads them by exact filename.
+State ledgers are not part of the strict-cascade resolution. They live at the project layer only — policies never ship state. The agent reads them by exact filename.
 
 ## Example
 

@@ -120,9 +120,9 @@ The set is computed by the harness layer that drives the action, not by each rul
 
 ## 6. Cascade interaction
 
-The cascade (project over plugin, with `strict` / `required` semantics) is unchanged. Globs compose on top:
+The cascade (project over policy, with `strict` / `required` semantics) is unchanged. Globs compose on top:
 
-1. **Resolution wins by path, as today.** `harness/guides/<port>/<name>.md` in the project beats the same path in a plugin. Only the winner's `globs:` is consulted.
+1. **Resolution wins by path, as today.** `harness/guides/<port>/<name>.md` in the project beats the same path in a policy. Only the winner's `globs:` is consulted.
 2. **The winner's globs are the only ones.** An override does not inherit the base's globs. This keeps the resolver pure — one file wins, period.
 3. **Narrow-only is enforced at the file level, not the cascade level.** If a project override drops `globs:` while the policy had one, the override loads *more broadly* than the policy did. That's "expansion" relative to the policy, but it's the user's deliberate choice in their own file — not a cascade operation. Document it; don't block it.
 4. **`strict` does not constrain globs.** `strict` blocks descendants from overriding; it does not freeze the winning file's `globs:` value.
@@ -310,7 +310,7 @@ Inventory of likely edits. Use as a checklist during implementation; not exhaust
 - `internal/framework/scaffold/templates/harness/adapters/{codex,aider,cline,continue,github-copilot,goose,pi}/activation.md`
 - `internal/framework/scaffold/templates/harness/adapters/_generic/activation.md`
 
-**Plugins shipped under `optional/`**
+**Policies shipped under `optional/`**
 - Sample principle / idiom files that benefit from a default `globs:` — handled in Phase F, not now.
 
 **Go runtime**

@@ -2,10 +2,11 @@
 kind: corpus
 id: corpus/state/harness-debt
 description: 'Paired ledger: [code-debt.'
+last_reviewed: 2026-06-18
 ---
 # Harness Debt Ledger
 
-> **Template.** The **audit** action's Pruning flywheel populates this from the [harness-debt sensor](sensors/harness-debt.md). Until then, leave as-is or fill in by hand.
+Populated by the **audit** action's Pruning flywheel from the [harness-debt sensor](../../sensors/harness-debt.md). Hand-edits during audit are OK.
 
 Paired ledger: [`code-debt.md`](code-debt.md) — debt in the codebase. Tracked separately on purpose.
 
@@ -15,11 +16,16 @@ The debt the harness itself is carrying. When the harness gives stale or wrong g
 
 | ID | Location | Category | Severity | Notes |
 |---|---|---|---|---|
-| `<HDEBT-001>` | `<harness/path>` | `<stale-rule\|dead-idiom\|placeholder\|failing-sensor\|empty-shell\|uncited-policy\|unresolved-gap\|drifted-state>` | `<load-bearing\|noisy\|stale>` | `<one line>` |
+| HDEBT-001 | `harness/archive/`, `harness/sources/`, `harness/evals/` | empty-shell | noisy | README-only auxiliary dirs not in the twelve-kind taxonomy. Either drop or mark as auxiliary in each README. |
+| HDEBT-002 | `harness/corpus/state/code-debt.md`, `harness-debt.md` | drifted-state | noisy | Internal links used `sensors/...` (pre-2.0 path); fixed to `../../sensors/...`. Watch for re-introduction in template copies. |
+| HDEBT-003 | `internal/framework/scaffold/templates/harness/corpus/state/INSTALL_PROFILE.md` | placeholder | load-bearing | Was missing from templates; fresh installs wouldn't ship the file. Added 2026-06-18. |
+| HDEBT-004 | `internal/framework/scaffold/templates/patches/1.0.3/`, `1.0.4/` | stale-rule | stale | 1.x patches removed 2026-06-18 (min supported = 2.0). Verify no upgrader still requests them. |
+| HDEBT-005 | `docs/ports/` | placeholder | noisy | Was missing `persona`, `skill`, `subagent`, `command`, `rule`, `computational`. Stubs added 2026-06-18; expand as semantics solidify. |
+| HDEBT-006 | `.github/workflows/` | unresolved-gap | load-bearing | Only `release.yml` wired. PR / push CI added 2026-06-18 (`ci.yml`). Verify on next PR. |
 
 ## Categories
 
-See [`harness/sensors/harness-debt.md`](sensors/harness-debt.md) for category and severity definitions.
+See [`../../sensors/harness-debt.md`](../../sensors/harness-debt.md) for category and severity definitions.
 
 ## How to use it
 

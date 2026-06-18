@@ -13,7 +13,7 @@ One-paragraph statement of the product. What does it do? Who is it for? What pro
 
 ## What it ships
 
-- The deliverable (binary, library, service, plugin, document set, etc.).
+- The deliverable (binary, library, service, policy, document set, etc.).
 - The distribution channel (package manager, container registry, marketplace, etc.).
 - The supported platforms / runtimes / agents.
 
@@ -25,7 +25,7 @@ One-paragraph statement of the product. What does it do? Who is it for? What pro
 ## What survives a release
 
 - Backwards-compatibility commitments.
-- The public interface (API, CLI, file format, plugin contract).
+- The public interface (API, CLI, file format, policy contract).
 - What consumers can rely on between versions.
 
 ## What does NOT survive a release
@@ -40,6 +40,6 @@ Business rules that must always hold. Examples:
 
 - "A user cannot be both an admin and a guest at the same time."
 - "Once an order is shipped, its line items are immutable."
-- "The plugin must not write outside the consumer's project directory."
+- "The policy must not write outside the consumer's project directory."
 
 These are the constraints that agent-generated code must respect, regardless of whether they're enforced by tests.

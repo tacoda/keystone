@@ -46,7 +46,7 @@ Optional, kind-specific:
 - `severity:` — `must` / `should`. Defaults to `should`. Used on guides where deviation triggers a sensor-grade complaint.
 - `triggers:` — list of strings the host matches against user input (skills only).
 - `tools:` — tool allowlist for the persona's subagent (personas only).
-- `provenance:` — set automatically by `keystone index` to `project` or `plugin`; do not hand-edit.
+- `provenance:` — set automatically by `keystone index` to `project` or `policy`; do not hand-edit.
 
 ## Pair convention (corpus ↔ guide)
 

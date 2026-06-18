@@ -12,7 +12,7 @@ Informational reference — what the agent should *know* when the rules aren't e
 | [`domain/`](domain/README.md) | What does the product do, what does it ship, what survives a release? | When following a forward-link from `guides/domain/<file>.md`, or when reasoning about scope and invariants |
 | [`state/`](state/README.md) | What is true about the codebase right now? | At the start of planning (**orient**), and whenever a sensor reads or writes state |
 
-**Engineering principles** (the universal reasoning that used to live under `corpus/principles/`) now ship inside the default policy at [`../policies/universal/corpus/principles/`](policies/universal) — they're a Level-3 plugin, not project-authored content.
+**Engineering principles** (the universal reasoning that used to live under `corpus/principles/`) now ship inside the default policy at [`../policies/universal/corpus/principles/`](policies/universal) — they're a Level-3 policy, not project-authored content.
 
 Process is not represented here — the workflow phases are entirely prescriptive, so they live under [`../guides/process/`](guides/process/README.md).
 

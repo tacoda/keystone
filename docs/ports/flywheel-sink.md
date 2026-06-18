@@ -11,7 +11,7 @@ harness/learning/triage.md
 harness/archive/<date>-<slug>.md
 ```
 
-These directories are **always project-owned**. Plugins cannot ship flywheel sinks — sinks are project state, not policy.
+These directories are **always project-owned**. Policies cannot ship flywheel sinks — sinks are project state, not policy.
 
 ## Required shape
 

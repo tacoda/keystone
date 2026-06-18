@@ -22,7 +22,7 @@ The same constraint applies to software: a system has to be debuggable on a Frid
 
 ## What it asks of you
 
-- When you are about to add a configuration knob, a generic parameter, a plugin point, or a layer of indirection, ask whether the problem actually exists yet. Speculative complexity is the most common kind. See [[simple-design]] (YAGNI).
+- When you are about to add a configuration knob, a generic parameter, a policy point, or a layer of indirection, ask whether the problem actually exists yet. Speculative complexity is the most common kind. See [[simple-design]] (YAGNI).
 - When you find that a change requires editing five files, the design is amplifying the change. Push back on the design, not on the change. See [[pragmatic-principles]] (orthogonality).
 - When a reviewer cannot follow the diff without a tour from the author, the code is not simple — regardless of how elegant it looks to the author. See [[simple-design]]'s second rule (reveals intention).
 - When you cannot explain what a module does in one sentence without "and," cohesion is low and complexity is high. See [[coupling-cohesion]].

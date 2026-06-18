@@ -2,10 +2,11 @@
 kind: corpus
 id: corpus/state/code-debt
 description: 'Paired ledger: [harness-debt.'
+last_reviewed: 2026-06-18
 ---
 # Code Debt Ledger
 
-> **Template.** The **audit** action and **debt-review** action will populate this from the [code-debt sensor](sensors/code-debt.md). Until then, leave as-is or fill in by hand.
+Populated by the **audit** and **debt-review** actions from the [code-debt sensor](../../sensors/code-debt.md). Hand-edits during those actions are OK.
 
 Paired ledger: [`harness-debt.md`](harness-debt.md) — debt in the harness itself. Tracked separately on purpose.
 
@@ -17,9 +18,11 @@ The known debt this codebase carries. One row per item. The point of the ledger 
 |---|---|---|---|---|---|---|
 | `<DEBT-001>` | `<path:line or region>` | `<deliberate|drift|shortcut|discovery>` | `<load-bearing|noisy|stale>` | `<name or team>` | `<event or date>` | `<one line>` |
 
+(No entries yet. The **code-debt** sensor wires up once `grep` over the diff finds debt markers; sweep with **debt-review** to triage.)
+
 ## Categories
 
-See [`harness/sensors/code-debt.md`](sensors/code-debt.md) for category and severity definitions. Keep them consistent — the planning phase reads this table verbatim.
+See [`../../sensors/code-debt.md`](../../sensors/code-debt.md) for category and severity definitions. Keep them consistent — the planning phase reads this table verbatim.
 
 ## How to use it
 

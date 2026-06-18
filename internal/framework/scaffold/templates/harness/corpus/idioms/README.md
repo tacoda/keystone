@@ -16,7 +16,7 @@ idioms/
     └── ...
 ```
 
-Stacks are added by the **bootstrap** action (detects the project's stack and scaffolds the matching folder) or by hand. Common stack names: `php-laravel`, `typescript-react`, `python-django`, `ruby-rails`, `go`, `rust`, `elixir-phoenix`, `claude-code-plugin` (for projects authoring a Claude Code plugin).
+Stacks are added by the **bootstrap** action (detects the project's stack and scaffolds the matching folder) or by hand. Common stack names: `php-laravel`, `typescript-react`, `python-django`, `ruby-rails`, `go`, `rust`, `elixir-phoenix`, `claude-code-policy` (for projects authoring a Claude Code policy).
 
 ## Empty by default
 

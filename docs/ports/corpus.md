@@ -7,7 +7,7 @@
 
 ```
 harness/corpus/<topic>/<name>.md                              # project-owned
-harness/plugins/<plugin>/corpus/<topic>/<name>.md             # plugin-owned (read-only)
+harness/policies/<policy>/corpus/<topic>/<name>.md             # policy-owned (read-only)
 ```
 
 `<topic>` mirrors the topic structure under `guides/`. Each corpus file pairs (by topic + name) with a guide.
@@ -38,7 +38,7 @@ Back to the rules: [`guides/<topic>/<name>.md`](../../guides/<topic>/<name>.md).
 For a given `corpus/<topic>/<name>.md`:
 
 1. The project's `harness/corpus/<topic>/<name>.md` always wins by default.
-2. Otherwise, among plugins, plugins nested deeper in `keystone.json` refine the outer plugins they're nested in.
+2. Otherwise, among policies, policies nested deeper in `keystone.json` refine the outer policies they're nested in.
 3. A `strict.corpus: [<name>]` declaration on any tree node makes that item absolute — nothing else can override it. `keystone verify` reports a violation if any layer attempts to shadow it.
 
 Exactly one file loads per `<topic>/<name>`.

@@ -50,6 +50,6 @@ Each adapter calls out which of these apply.
 5. Add a row to the table above.
 6. Add the matching installable artifacts to `targets/<agent>/` at repo root (separate from the harness — this is what gets dropped into a consumer project).
 
-## The plugin/harness separation invariant still applies
+## The policy/harness separation invariant still applies
 
 `harness/adapters/<agent>/` is documentation about how the agent binds to the harness. The actual artifacts that get installed into a consumer's project live in `targets/<agent>/` at repo root. Do not duplicate content between the two; the adapter doc *describes*, the target *ships*.

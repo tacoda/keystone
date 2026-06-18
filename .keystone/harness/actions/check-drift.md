@@ -10,7 +10,7 @@ description: 'Run the drift sensor on the current diff.'
 ## Activities
 
 1. **Identify the diff** — `git diff`, the staged changes, or the in-progress edits. The list of changed files is the **touched-files set** for this action.
-2. **List which guides apply** — load `harness/guides/idioms/<stack>/*.md` for each touched stack, plus `harness/guides/process/implementation.md` and any guides from installed plugins (`harness/plugins/*/guides/`). For each candidate, if it declares `globs:` in frontmatter, keep it only when at least one touched file matches; guides without `globs:` keep today's loading.
+2. **List which guides apply** — load `harness/guides/idioms/<stack>/*.md` for each touched stack, plus `harness/guides/process/implementation.md` and any guides from installed policys (`harness/policies/*/guides/`). For each candidate, if it declares `globs:` in frontmatter, keep it only when at least one touched file matches; guides without `globs:` keep today's loading.
 3. **Compare diff to guides** — line by line, surface violations or hot drift signals. A guide's findings are reported only against files matching its `globs:` (or all touched files when no `globs:` is set).
 4. **Report findings** — one bullet per drift. Cite the guide that was violated.
 

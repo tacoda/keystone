@@ -2,7 +2,7 @@
 
 A **playbook** is a markdown file that runs an ordered set of [actions](actions/README.md). Actions are single units of work; playbooks chain them.
 
-This directory holds **project playbooks**. Plugins can also distribute playbooks — they live at `harness/plugins/<name>/playbooks/` when vendored.
+This directory holds **project playbooks**. Policies can also distribute playbooks — they live at `harness/policies/<name>/playbooks/` when vendored.
 
 ## Action vs. playbook
 
@@ -23,6 +23,6 @@ The agent reads its menu file (`CLAUDE.md`, `AGENTS.md`, etc.) on session start.
 
 ## Override cascade
 
-For any `<name>.md`, the project's `harness/playbooks/<name>.md` always wins by default. Among plugins, plugins nested deeper in `keystone.json` refine the outer plugins they're nested in. A plugin can mark an item `strict` to make it absolute — nothing else can override a strict item, not the project, not any other plugin. `keystone verify` reports a violation if any layer attempts to shadow a strict item.
+For any `<name>.md`, the project's `harness/playbooks/<name>.md` always wins by default. Among policies, policies nested deeper in `keystone.json` refine the outer policies they're nested in. A policy can mark an item `strict` to make it absolute — nothing else can override a strict item, not the project, not any other policy. `keystone verify` reports a violation if any layer attempts to shadow a strict item.
 
 The same cascade applies to **actions** (`harness/actions/`) and **guides** (`harness/guides/`). **Corpus** is background reference loaded on-demand by forward-link from a guide; it doesn't cascade and is never strict-able.

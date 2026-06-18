@@ -1,6 +1,6 @@
 {
   "version": "2.0",
-  "generated": "2026-06-18T16:08:09Z",
+  "generated": "2026-06-18T16:20:03Z",
   "primitives": [
     {
       "kind": "action",
@@ -660,7 +660,7 @@
     {
       "kind": "sensor",
       "id": "tracker-card-fetcher",
-      "description": "Fetches a tracker card from Jira / Linear / GitHub Issues / Asana via whatever tracker integration the agent has (MCP server, CLI, plugin...",
+      "description": "Fetches a tracker card from Jira / Linear / GitHub Issues / Asana via whatever tracker integration the agent has (MCP server, CLI, policy...",
       "path": ".keystone/harness/sensors/tracker-card-fetcher.md",
       "provenance": "project"
     },
@@ -954,13 +954,13 @@
     {
       "kind": "skill",
       "id": "keystone:verify",
-      "description": "Check vendored plugins for drift and the strict cascade for project-layer violations.",
+      "description": "Check vendored policies for drift and the strict cascade for project-layer violations.",
       "triggers": [
         "keystone verify",
         "keystone:verify",
         "/keystone:verify",
         "verify the harness cascade",
-        "audit plugin drift",
+        "audit policy drift",
         "check strict violations"
       ],
       "path": ".keystone/harness/skills/keystone-verify/SKILL.md",

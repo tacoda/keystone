@@ -7,7 +7,7 @@
 
 ```
 harness/guides/<topic>/<name>.md                              # project-owned
-harness/plugins/<plugin>/guides/<topic>/<name>.md             # plugin-owned (read-only)
+harness/policies/<policy>/guides/<topic>/<name>.md             # policy-owned (read-only)
 ```
 
 `<topic>` groups related guides (`process`, `principles`, `idioms`, `domain`, `computational`). Topic directories are open-ended — adding a new topic is just creating a new directory.
@@ -124,12 +124,12 @@ Globs match against an action-scoped set of paths. Each action computes its own 
 For a given `guides/<topic>/<name>.md`:
 
 1. The project's `harness/guides/<topic>/<name>.md` always wins by default.
-2. Otherwise, among plugins, plugins nested deeper in `keystone.json` refine the outer plugins they're nested in.
-3. A `strict.guides: [<name>]` declaration on any tree node makes that item absolute — nothing else can override it, not the project, not any other plugin. `keystone verify` reports a violation if any layer attempts to shadow a strict item.
+2. Otherwise, among policies, policies nested deeper in `keystone.json` refine the outer policies they're nested in.
+3. A `strict.guides: [<name>]` declaration on any tree node makes that item absolute — nothing else can override it, not the project, not any other policy. `keystone verify` reports a violation if any layer attempts to shadow a strict item.
 
 The framework never composes overlapping guides for the same name. Exactly one file loads.
 
-**Globs under cascade.** The winner's `globs:` is the only one consulted. An override does not inherit the base's globs: if a project guide overrides a plugin guide and only the plugin had `globs:`, the override loads under its own (possibly absent) globs. The resolver is pure — one file wins, its frontmatter is what's read.
+**Globs under cascade.** The winner's `globs:` is the only one consulted. An override does not inherit the base's globs: if a project guide overrides a policy guide and only the policy had `globs:`, the override loads under its own (possibly absent) globs. The resolver is pure — one file wins, its frontmatter is what's read.
 
 ## Drift and corpus pairing
 
