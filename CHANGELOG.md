@@ -2,6 +2,111 @@
 
 All notable changes to keystone are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); the project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.0] — 2026-06-18
+
+Minor release. Retires the patches subsystem in favor of a versioned
+migrations subsystem with paired forward + backward transforms,
+completes the plugin→policy terminology rename across Go source +
+docs + schemas, and adds backward-compat read fallbacks so
+unmigrated installs degrade gracefully (warn-and-continue) instead
+of breaking.
+
+### Added
+
+- **Migrations subsystem** (`internal/framework/migrations/`).
+  Versioned Up/Down transforms, registered per release, executed via
+  `keystone migrate up | down | status [<version>] [--dir <path>]
+  [--dry-run]`. Default (no subcommand) runs `up` to latest. Both
+  directions re-index (`INDEX.json` + `.claude/` projections) on
+  success.
+- **Iron-law contract** on every migration: edits framework-owned
+  files only, never user-authored primitive content, renames folders
+  + files freely, prints every step before execution, surfaces
+  unexpected state for the user to resolve, and guarantees no
+  breaking changes between properly migrated versions.
+- **2.0 migration entry** (`migrations/v2_0.go`). Up ports the prior
+  one-shot 1.x → 2.0 logic; Down reverses each step in reverse order
+  (`harness_root` is not restored — prior value unknown).
+- **2.1 migration entry** (`migrations/v2_1.go`). Up rewrites
+  `.keystone/lockfile.json` so `policies[*].plugin_version` becomes
+  `policy_version` (raw-JSON transform, struct-independent). Down
+  reverses.
+- **Applied-migrations state** persisted in
+  `.keystone/lockfile.json` as `migrations_applied: []string`.
+  Filesystem-derived fallback: fresh 2.0+ installs without an
+  explicit list are inferred to be at `2.0` so they don't show a
+  spurious warning.
+- **Soft-degrade warning** on every non-migrate command run against
+  an unmigrated install: `⚠ N pending migration(s): ... — run
+  `keystone migrate up``. Advisory only; commands proceed.
+- **Backward-compat unmarshal**:
+  - `lockfile.PolicyLock` accepts pre-2.1 `plugin_version` as a
+    fallback for `policy_version` on read; always emits the new tag
+    on write.
+  - `config.ProjectConfig` accepts pre-2.0 `plugins` as a fallback
+    for `policies`.
+- `lockfile.ReadFromPath` / `WriteToPath` — path-explicit helpers so
+  the migrate dispatch can target the canonical 2.0+ lockfile
+  location during in-progress migrations.
+- Tests (`migrations/migrations_test.go`): `CompareVersion`,
+  `Pending`, `Plan.Execute` short-circuit, paired 2.0 and 2.1 Up→Down
+  roundtrips on tempdir fixtures, ambiguous-state refusal,
+  re-run-idempotence.
+- `docs/ports/{persona,skill,subagent,command,rule,computational}.md`
+  — backfilled port docs for the kinds that previously lacked them.
+- `.github/workflows/ci.yml` — PR / push-to-main CI wiring: `go vet`,
+  `go build`, `go test -race`, `govulncheck`.
+- `internal/framework/scaffold/templates/harness/corpus/state/INSTALL_PROFILE.md`
+  template shipped — fresh installs land the file the bootstrap
+  action expects to read.
+
+### Changed
+
+- **`keystone patch` retired.** The subcommand is now a hidden stub
+  that prints a friendly redirect to `keystone migrate`. The patches
+  loader (`internal/framework/patch/`), the embedded `patches/`
+  template tree (including the 1.0.3 / 1.0.4 / 2.0.0 patch files),
+  and the `cmd/keystone/patch.go` dispatch have all been removed.
+- **Plugin → policy terminology rename** completed across Go source:
+  identifiers (`pluginDir`, `pluginManifest{,File}`,
+  `pluginNamePattern`, `pluginRoot`, test variables), comments and
+  docstrings, error messages, user-visible CLI output, and the
+  lockfile JSON tag (`plugin_version` → `policy_version`).
+- Env var `KEYSTONE_PLUGIN_CACHE` renamed to `KEYSTONE_POLICY_CACHE`;
+  the old name remains as a backward-compat fallback
+  (`LegacyCacheDirEnv`) so existing exports keep working.
+- Plugin → policy sweep across the active doc surface
+  (`docs/ports/`, `docs/conventions.md`, `.keystone/harness/`,
+  scaffold templates, `docs/plans/`). ADRs, historical upgrade docs,
+  and the migration content in `cmd/keystone/migrate.go` /
+  `migrations/v2_0.go` left intact.
+- Schema file rename: `docs/schemas/keystone-plugin.json.schema.json`
+  → `docs/schemas/keystone-policy.json.schema.json` (content swept,
+  `$ref` in `keystone.json.schema.json` updated).
+- `cmd/keystone/migrate.go` rewritten as a subcommand dispatcher
+  (`up` / `down` / `status`), backed by the new migrations registry.
+  State is persisted to `.keystone/lockfile.json` after each
+  direction; re-indexing now runs after Down as well as Up.
+
+### Removed
+
+- `cmd/keystone/patch.go`, `internal/framework/patch/` (load, ops,
+  types, tests), `internal/framework/scaffold/templates/patches/`,
+  the 1.0.3 and 1.0.4 patch JSON files. `keystone migrate` is the
+  upgrade path going forward.
+
+### Migration notes
+
+- Existing 2.0.x installs: run `keystone migrate up` to record
+  `2.0` + `2.1` as applied in `.keystone/lockfile.json` and rewrite
+  any `plugin_version` lockfile entries to `policy_version`.
+- Existing 1.x installs: `keystone migrate up` runs the full 2.0 +
+  2.1 chain. Same one-shot effect as the prior `keystone migrate`,
+  but now reversible — `keystone migrate down 1` rolls back to 1.x.
+- The lockfile and project config readers tolerate the pre-2.1 /
+  pre-2.0 schema; commands run with a one-line warning until the
+  user migrates.
+
 ## [2.0.3] — 2026-06-17
 
 Patch release. Aligns the policy install-time guard with the
