@@ -35,16 +35,21 @@ type LayerEntry struct {
 	Primitives []primitive.Primitive `json:"primitives"`
 }
 
-// collectInventory walks every cascade layer and returns the
-// primitives each one ships. Honors the optional `search`
-// substring filter — applied case-insensitively against id +
-// description + path.
-func (s *server) collectInventory(ctx context.Context, search string) (*PolicyInventory, error) {
+// collectInventory returns the primitives every cascade layer ships
+// — project + each declared policy — from the cache. Cold layers
+// walk on first access; subsequent requests are pointer reads.
+// Honors the optional `search` substring filter — applied
+// case-insensitively against id + description + path.
+//
+// ctx is reserved for future cancellation hooks; current
+// implementation is non-blocking on warm cache and bounded by a
+// single-layer walk on cold miss.
+func (s *server) collectInventory(_ context.Context, search string) (*PolicyInventory, error) {
 	inv := &PolicyInventory{ProjectDir: s.projectDir, Search: search}
 	needle := strings.ToLower(strings.TrimSpace(search))
 
 	// Project layer.
-	projectPrimitives, _, err := primitive.Walk(s.projectDir, config.DefaultHarnessRoot)
+	projectPrimitives, _, err := s.primitiveCache.getLayer(config.DefaultHarnessRoot)
 	if err != nil {
 		return nil, err
 	}
@@ -61,13 +66,10 @@ func (s *server) collectInventory(ctx context.Context, search string) (*PolicyIn
 	}
 	for _, p := range flattenPolicies(cfg.Policies) {
 		policyRoot := filepath.Join(config.DefaultHarnessRoot, policies.PolicyRoot, p.Name)
-		policyPrimitives, _, err := primitive.Walk(s.projectDir, policyRoot)
-		if err != nil {
-			// Vendored tree may not be installed — surface as zero
-			// primitives, not an error. `keystone install` is the
-			// path to populate it.
-			policyPrimitives = nil
-		}
+		// getLayer returns nil + err on a missing vendored tree; we
+		// surface that as zero primitives, mirroring the previous
+		// per-call Walk behavior.
+		policyPrimitives, _, _ := s.primitiveCache.getLayer(policyRoot)
 		inv.Layers = append(inv.Layers, LayerEntry{
 			Name:       p.Name,
 			Kind:       "policy",

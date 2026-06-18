@@ -21,16 +21,9 @@ func TestPrimitiveCache_RefreshAndGet(t *testing.T) {
 	}
 
 	c := newPrimitiveCache(root)
-	// Empty before refresh.
-	prims, _, err := c.get()
-	if err != nil {
-		t.Fatalf("get pre-refresh err: %v", err)
-	}
-	if len(prims) != 0 {
-		t.Fatalf("expected empty pre-refresh, got %d", len(prims))
-	}
-
-	c.refresh()
+	// Cold get walks on demand — first call must return populated
+	// data, not an empty slice. (Previously the cache required an
+	// explicit refresh; the layered cache fills on access.)
 	prims, idx, err := c.get()
 	if err != nil {
 		t.Fatalf("get post-refresh err: %v", err)

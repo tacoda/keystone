@@ -4,11 +4,13 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"path/filepath"
 	"sync"
 	"time"
 
 	"github.com/tacoda/keystone/internal/framework/config"
 	"github.com/tacoda/keystone/internal/framework/mcp"
+	"github.com/tacoda/keystone/internal/framework/policies"
 	"github.com/tacoda/keystone/internal/framework/primitive"
 )
 
@@ -28,49 +30,104 @@ const healthProbeTimeout = 8 * time.Second
 // pathological context.json with dozens of entries.
 const healthProbeConcurrency = 8
 
-// primitiveCache holds the most recent walk of the harness — primitive
-// list + derived index. Page handlers read from here instead of
-// re-walking the filesystem on every request. The watcher rebuilds
-// the cache on a debounced file-change event.
+// walkFn is the indirect entry to primitive.Walk so tests can
+// observe and count layer refreshes. Production code must not
+// reassign it outside tests.
+var walkFn = primitive.Walk
+
+// layerSnapshot is one cache entry — the most recent walk of a
+// single harness root.
+type layerSnapshot struct {
+	primitives []primitive.Primitive
+	index      primitive.Index
+	err        error
+}
+
+// primitiveCache holds the most recent walk of every accessed
+// harness layer — project root plus every declared policy root.
+// Page handlers read from here instead of re-walking on every
+// request. The fsWatcher refreshes dirty layers on debounced file
+// changes; other layers stay warm.
 type primitiveCache struct {
 	projectDir string
 
-	mu         sync.RWMutex
-	primitives []primitive.Primitive
-	index      primitive.Index
-	lastError  error
+	mu     sync.RWMutex
+	layers map[string]*layerSnapshot // key: harnessRoot (filepath-relative)
+
+	// coldMu serializes cold-miss walks per harnessRoot key, so two
+	// goroutines that hit getLayer simultaneously do not both walk
+	// the same tree. Warm reads never touch coldMu.
+	coldMu sync.Map
 }
 
 func newPrimitiveCache(projectDir string) *primitiveCache {
-	return &primitiveCache{projectDir: projectDir}
+	return &primitiveCache{
+		projectDir: projectDir,
+		layers:     map[string]*layerSnapshot{},
+	}
 }
 
-// refresh walks the harness and replaces the cached snapshot. Safe
-// to call from any goroutine. Errors are stored on the cache so
-// callers can surface them without re-walking.
-func (c *primitiveCache) refresh() {
-	prims, _, err := primitive.Walk(c.projectDir, config.DefaultHarnessRoot)
+// refreshLayer walks a single harness root and replaces its cached
+// snapshot. Safe to call from any goroutine.
+func (c *primitiveCache) refreshLayer(harnessRoot string) {
+	prims, _, err := walkFn(c.projectDir, harnessRoot)
+	snap := &layerSnapshot{primitives: prims}
 	if err != nil {
-		c.mu.Lock()
-		c.lastError = err
-		c.mu.Unlock()
-		return
+		// Vendored policy trees may not be installed — surface as an
+		// empty layer, not a hard error, mirroring the previous
+		// collectInventory behavior.
+		snap.err = err
+		snap.primitives = nil
+	} else {
+		snap.index = primitive.Build(prims, time.Now())
 	}
-	idx := primitive.Build(prims, time.Now())
 	c.mu.Lock()
-	c.primitives = prims
-	c.index = idx
-	c.lastError = nil
+	c.layers[harnessRoot] = snap
 	c.mu.Unlock()
 }
 
-// get returns a snapshot of the cached primitives + index. The
-// returned slice/maps are NOT defensively copied — callers must
-// treat them as read-only.
-func (c *primitiveCache) get() ([]primitive.Primitive, primitive.Index, error) {
+// getLayer returns a snapshot of the cached primitives + index for a
+// single layer. Cold-miss triggers a synchronous walk so the first
+// request never sees empty data. Concurrent cold-misses on the same
+// layer collapse to a single walk via coldMu.
+func (c *primitiveCache) getLayer(harnessRoot string) ([]primitive.Primitive, primitive.Index, error) {
 	c.mu.RLock()
-	defer c.mu.RUnlock()
-	return c.primitives, c.index, c.lastError
+	snap, ok := c.layers[harnessRoot]
+	c.mu.RUnlock()
+	if !ok {
+		// Per-key serialization: at most one walker per harnessRoot.
+		mIface, _ := c.coldMu.LoadOrStore(harnessRoot, &sync.Mutex{})
+		m := mIface.(*sync.Mutex)
+		m.Lock()
+		// Recheck under per-key lock — a sibling goroutine may have
+		// already filled the cache while we waited.
+		c.mu.RLock()
+		snap, ok = c.layers[harnessRoot]
+		c.mu.RUnlock()
+		if !ok {
+			c.refreshLayer(harnessRoot)
+			c.mu.RLock()
+			snap = c.layers[harnessRoot]
+			c.mu.RUnlock()
+		}
+		m.Unlock()
+	}
+	if snap == nil {
+		return nil, primitive.Index{}, nil
+	}
+	return snap.primitives, snap.index, snap.err
+}
+
+// refresh is the project-default convenience wrapper used by callers
+// that only care about the project layer (loadPrimitives, buildIndex).
+func (c *primitiveCache) refresh() {
+	c.refreshLayer(config.DefaultHarnessRoot)
+}
+
+// get is the project-default convenience wrapper. Same contract as
+// getLayer(DefaultHarnessRoot).
+func (c *primitiveCache) get() ([]primitive.Primitive, primitive.Index, error) {
+	return c.getLayer(config.DefaultHarnessRoot)
 }
 
 // healthCache holds the most recent source-list snapshot with each
@@ -146,6 +203,31 @@ func (c *healthCache) get() ([]sourceEntry, error) {
 	return c.entries, c.lastError
 }
 
+// knownLayerRoots returns the harness roots that should be cached —
+// project + every declared policy. Recomputed per call so policy
+// changes mid-run are picked up.
+func (s *server) knownLayerRoots() []string {
+	roots := []string{config.DefaultHarnessRoot}
+	cfg, _ := config.ReadProjectConfig(s.projectDir)
+	if cfg == nil {
+		return roots
+	}
+	for _, p := range flattenPolicies(cfg.Policies) {
+		roots = append(roots, filepath.Join(config.DefaultHarnessRoot, policies.PolicyRoot, p.Name))
+	}
+	return roots
+}
+
+// refreshAllLayers re-walks every known layer. Used as the
+// fsWatcher's debounced callback so a single rapid save burst
+// re-warms all layers exactly once; request goroutines stay on the
+// cached snapshot.
+func (s *server) refreshAllLayers() {
+	for _, root := range s.knownLayerRoots() {
+		s.primitiveCache.refreshLayer(root)
+	}
+}
+
 // startCacheRefreshers kicks off the background refresh loops:
 //
 //   - primitiveCache rebuilds on every fsWatcher publish (already
@@ -156,7 +238,7 @@ func (c *healthCache) get() ([]sourceEntry, error) {
 // Both caches do one synchronous fill before this returns so the
 // first request never sees an empty snapshot.
 func (s *server) startCacheRefreshers(ctx context.Context) {
-	s.primitiveCache.refresh()
+	s.refreshAllLayers()
 	s.healthCache.refresh(ctx)
 
 	go func() {
@@ -183,7 +265,7 @@ func (s *server) startCacheRefreshers(ctx context.Context) {
 			case <-ctx.Done():
 				return
 			case <-t.C:
-				s.primitiveCache.refresh()
+				s.refreshAllLayers()
 			}
 		}
 	}()
