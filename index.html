@@ -1236,7 +1236,12 @@
     <div class="page-head">
       <div class="crumb">Overview · Keystone v2.1.1</div>
       <h1>The agent harness framework for <em class="hero-any">any</em> project.</h1>
-      <p class="tagline">AI agents reinvent your team's rules in every repo. <strong style="color: var(--accent4);">Keystone ships them as vendored policy packages — pinned, hash-verified, and read by every agent.</strong></p>
+      <p class="tagline">
+        Tired of agents reinventing your rules in every repo?<br>
+        Need every agent on your team to follow the same playbook?<br>
+        Need to share those rules across all your projects?<br>
+        <strong style="color: var(--accent4);">Keystone.</strong>
+      </p>
     </div>
 
     <section class="hero-term">
@@ -3092,6 +3097,11 @@ skill://{name}/SKILL.md</pre>
     <div class="definition" style="border-left-color: var(--accent3);">
       <p style="margin: 0 0 8px;"><strong style="color: var(--accent3);">SPA shell, no framework.</strong> Persistent topbar + footer, <code>&lt;main id="app"&gt;</code> as the single swap target. Every nav link is <code>hx-get</code> + <code>hx-push-url</code> — back / forward navigate without reloading the chrome. <code>HX-Request</code> branching returns only the section body on in-app navigation, the full layout on first paint or share-link. Total client JS: <code>htmx.min.js</code> + <code>htmx-ext-sse.js</code> + a 25-line inline script for command-K. Static assets carry <code>Cache-Control: public, max-age=31536000, immutable</code>.</p>
     </div>
+
+    <figure style="margin: 24px 0; padding: 0;">
+      <img src="dashboard-screenshot.png" alt="Keystone localhost dashboard — observability page with KPI strip (primitives, sources, inbox, lint errors, index freshness), per-session audit log selector, and metrics panel showing counts by kind and recently modified primitives." style="display: block; width: 100%; height: auto; border: 1px solid var(--border); border-radius: 4px;">
+      <figcaption style="font-size: 0.78rem; color: var(--muted); font-family: var(--mono); margin-top: 8px; text-align: center;">Observability page · KPI strip + per-session audit log + metrics snapshot.</figcaption>
+    </figure>
 
     <div class="section-label">5 sections</div>
     <div class="action-grid">
