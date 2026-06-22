@@ -13,8 +13,9 @@ type IncomingRef struct {
 }
 
 // IncomingRefs returns every primitive that references target via
-// `deps:` or `traces:`. Empty result is normal (root-level rules,
-// orphan corpus); never an error.
+// `deps:`, `traces:`, or `includes:`. Empty result is normal
+// (root-level rules, orphan corpus, concerns no one composes); never
+// an error.
 //
 // Reference forms accepted in deps:
 //   <kind>/<id>          (canonical)
@@ -22,6 +23,10 @@ type IncomingRef struct {
 // Reference forms accepted in traces:
 //   corpus/<topic>/<name>     (canonical)
 //   <topic>/<name>            (treated as corpus by default)
+//
+// Reference forms accepted in includes (only meaningful when target
+// is a concern):
+//   <id>                 (bare concern id; canonical)
 func IncomingRefs(primitives []Primitive, target Primitive) []IncomingRef {
 	want := target.Kind + "/" + target.ID
 	wantBare := target.ID
@@ -40,6 +45,17 @@ func IncomingRefs(primitives []Primitive, target Primitive) []IncomingRef {
 				if t == want || t == wantBare ||
 					strings.TrimPrefix(t, "corpus/") == strings.TrimPrefix(wantBare, "corpus/") {
 					out = append(out, IncomingRef{From: p, Via: "traces"})
+					break
+				}
+			}
+		}
+		// Includes are bare concern ids — only the target's id is
+		// meaningful here. Composition is depth-1, so a single pass
+		// over `includes` covers the entire reverse-lookup.
+		if target.Kind == string(KindConcern) {
+			for _, inc := range p.Includes {
+				if inc == wantBare {
+					out = append(out, IncomingRef{From: p, Via: "includes"})
 					break
 				}
 			}

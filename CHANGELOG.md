@@ -2,6 +2,82 @@
 
 All notable changes to keystone are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); the project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.4.0] — 2026-06-22
+
+Minor release. Read-surface parity: the new abstractions shipped in
+2.3 (concerns, includes, tags, severity) now reach both audiences
+through their native surfaces — the **MCP server** for the agent
+inside a session, the **web dashboard** for the human outside it.
+Both surfaces are read-only over the file source of truth at
+`.keystone/harness/*.md`; neither writes.
+
+No schema changes, no data transforms, no migration body. 2.4 is
+exclusively additive at the binary layer.
+
+### Added — MCP server
+
+- **`keystone_show` tool** — single-call descriptor + cross-references
+  for one primitive. Returns the composed view (after `includes:`
+  resolution) plus forward and reverse association lookups:
+  `includes` / `included_by`, `traces` / `traced_by`, host hooks,
+  tags, tools, severity, model, phase, provenance. Saves N follow-up
+  `keystone_get_primitive` calls when the agent needs to understand a
+  primitive's neighborhood.
+- **`tags:` filter on `keystone_list_primitives`** — array parameter,
+  AND semantics (every requested tag must appear). Tag merging
+  through `Compose()` happens at index time, so a concern's tags
+  propagate to the primitives that include it — the filter sees the
+  composed view.
+- **Description updates** on existing tools to call out the new
+  primitive kinds (`concern`, `persona`) and the composed-view
+  guarantee.
+
+### Added — Web dashboard
+
+- **Tag cloud** on `/harness/primitives` — every declared tag in the
+  harness, sorted, clickable. One click filters the list to that tag.
+- **Tag filter dropdown** in the primitives filter form. Single-tag
+  filter via the dropdown; multi-tag via URL params
+  (`?tag=a&tag=b` AND-merges). The fragment loader (`hx-get`) honors
+  the same params for live filtering without a full reload.
+- **Tags column** in the primitives table — declared tags rendered as
+  small chips. Composed tags (contributed by concerns this primitive
+  includes) are indistinguishable from authored tags by design —
+  the dashboard surfaces what the agent actually sees.
+- **Primitive detail page** gains four new sections:
+  - **Tags strip** under the title — each tag links back to the
+    filtered list.
+  - **`model:`** under the descriptor list (when present).
+  - **`includes:`** — each concern this primitive composes in,
+    rendered as a link to the concern's detail page.
+  - **Host hooks table** for sensors — phase / matcher / command /
+    timeout per `host_triggers:` entry.
+- **Reverse-lookup includes `includes:`** — `primitive.IncomingRefs`
+  now walks every primitive's `includes:` list when the target is a
+  concern. The detail page's "referenced by" section shows every
+  primitive that composes this concern in (alongside the existing
+  `deps:` and `traces:` lookups).
+
+### Changed
+
+- **`primitive.IncomingRefs` signature unchanged**, behavior extended:
+  the function now considers the `Includes` field when the target is
+  a concern. Callers (web dashboard's "referenced by" panel; future
+  prune heuristic) get the wider graph automatically.
+- **`filterPrimitives` (web)** signature gains a `tags []string`
+  parameter. Both call sites (page handler + fragment handler)
+  updated; the legacy two-arg shape is no longer exposed.
+- **`.claude/settings.json` marshaller** continues to disable HTML
+  escaping — shell metacharacters in severity-wrapped commands stay
+  inspectable for the human reading settings.json.
+
+### Migration
+
+`keystone migrate --to 2.4` is a no-op record. The Up plan has no
+steps; the lockfile is updated so `keystone index` stops reporting
+2.4 as pending. The new MCP tools and web routes are available as
+soon as a 2.4-or-newer binary is on PATH.
+
 ## [2.3.0] — 2026-06-22
 
 Minor release. Framework abstractions level up. Composition over

@@ -5,16 +5,41 @@
   <p class="muted"><a href="/harness/primitives">← primitives</a></p>
   <h1><code>{{.Primitive.Kind}}</code> / {{.Primitive.ID}}</h1>
   <p>{{.Primitive.Description}}</p>
+  {{if .Primitive.Tags}}
+  <div style="margin: 8px 0 14px;">
+    {{range .Primitive.Tags}}<a href="/harness/primitives?tag={{.}}" style="display: inline-block; font-size: 0.85em; padding: 2px 9px; margin: 0 4px 4px 0; border: 1px solid var(--border, #2f3548); border-radius: 12px; text-decoration: none;">{{.}}</a>{{end}}
+  </div>
+  {{end}}
+
   <dl>
     <dt>path</dt><dd><code>{{.Primitive.Path}}</code></dd>
     {{if .Primitive.Globs}}<dt>globs</dt><dd>{{range .Primitive.Globs}}<code>{{.}}</code> {{end}}</dd>{{end}}
     {{if .Primitive.Provenance}}<dt>provenance</dt><dd><code>{{.Primitive.Provenance}}</code></dd>{{end}}
     {{if .Primitive.Phase}}<dt>phase</dt><dd><code>{{.Primitive.Phase}}</code></dd>{{end}}
     {{if .Primitive.Severity}}<dt>severity</dt><dd><code>{{.Primitive.Severity}}</code></dd>{{end}}
+    {{if .Primitive.Model}}<dt>model</dt><dd><code>{{.Primitive.Model}}</code></dd>{{end}}
     {{if .Primitive.Triggers}}<dt>triggers</dt><dd>{{join .Primitive.Triggers ", "}}</dd>{{end}}
     {{if .Primitive.Tools}}<dt>tools</dt><dd>{{join .Primitive.Tools ", "}}</dd>{{end}}
     {{if .Primitive.Traces}}<dt>traces</dt><dd>{{join .Primitive.Traces ", "}}</dd>{{end}}
+    {{if .Primitive.Includes}}<dt>includes (composes in)</dt><dd>{{range .Primitive.Includes}}<a href="/harness/primitives/concern/{{.}}"><code>{{.}}</code></a> {{end}}</dd>{{end}}
   </dl>
+
+  {{if .Primitive.HostTriggers}}
+  <h3 style="margin-top: 20px;">host hooks</h3>
+  <table>
+    <thead><tr><th>phase</th><th>matcher</th><th>command</th><th>timeout</th></tr></thead>
+    <tbody>
+      {{range .Primitive.HostTriggers}}
+      <tr>
+        <td><code>{{.Phase}}</code></td>
+        <td><code>{{if .Matcher}}{{.Matcher}}{{else}}(any){{end}}</code></td>
+        <td><code>{{.Command}}</code></td>
+        <td class="muted">{{.Timeout}}s</td>
+      </tr>
+      {{end}}
+    </tbody>
+  </table>
+  {{end}}
 </section>
 
 <section class="card">
@@ -33,7 +58,7 @@
     </tbody>
   </table>
   {{else}}
-  <p class="muted">no primitive references this one via <code>deps:</code> or <code>traces:</code>.</p>
+  <p class="muted">no primitive references this one via <code>deps:</code>, <code>traces:</code>, or <code>includes:</code>.</p>
   {{end}}
 </section>
 

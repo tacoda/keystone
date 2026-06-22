@@ -15,6 +15,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 	"time"
 
@@ -164,17 +165,22 @@ func Serve(ctx context.Context, opts Options) error {
 func registerTools(s *server.MCPServer, projectDir string) {
 	s.AddTool(
 		mcp.NewTool("keystone_list_primitives",
-			mcp.WithDescription("List harness primitives, optionally filtered by kind or glob match. Returns descriptors only — open bodies via keystone_get_primitive."),
+			mcp.WithDescription("List harness primitives, optionally filtered by kind, glob, or tag(s). Returns descriptors only — open bodies via keystone_get_primitive. The returned descriptors reflect the COMPOSED view (concern `includes:` already merged into list fields)."),
 			mcp.WithString("kind",
-				mcp.Description("Filter by kind (guide, corpus, sensor, action, playbook, rule, skill, subagent, command). Omit for all."),
+				mcp.Description("Filter by kind (guide, corpus, sensor, action, playbook, persona, concern, rule, skill, subagent, command, eval, source). Omit for all."),
 			),
 			mcp.WithString("glob",
 				mcp.Description("Filter primitives that declare this glob pattern in their `globs:` frontmatter. Exact-string match on the pattern."),
+			),
+			mcp.WithArray("tags",
+				mcp.Description("Filter primitives that declare ALL of these tags (AND). Tags merge across includes — a concern's tags propagate to the primitives that include it."),
+				mcp.WithStringItems(),
 			),
 		),
 		func(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 			kindFilter := req.GetString("kind", "")
 			globFilter := req.GetString("glob", "")
+			tagFilter := req.GetStringSlice("tags", nil)
 
 			idx, err := loadIndex(projectDir)
 			if err != nil {
@@ -187,6 +193,9 @@ func registerTools(s *server.MCPServer, projectDir string) {
 					continue
 				}
 				if globFilter != "" && !contains(p.Globs, globFilter) {
+					continue
+				}
+				if !hasAllStrings(p.Tags, tagFilter) {
 					continue
 				}
 				out = append(out, p)
@@ -301,6 +310,142 @@ func registerTools(s *server.MCPServer, projectDir string) {
 			return mcp.NewToolResultText(string(result)), nil
 		},
 	)
+
+	s.AddTool(
+		mcp.NewTool("keystone_show",
+			mcp.WithDescription("Return one primitive's descriptor PLUS forward + reverse cross-references in a single call. Surfaces: the composed view of the target (tags / tools / globs / host_triggers after `includes:` resolution), `included_by` (when target is a concern), `traces` (forward) and `traced_by` (reverse) for guide↔corpus pairs, severity / model / phase / provenance. Use this when you need to understand a primitive's neighborhood in one shot — saves N follow-up keystone_get_primitive calls."),
+			mcp.WithString("kind",
+				mcp.Required(),
+				mcp.Description("Primitive kind (guide, sensor, persona, playbook, concern, action, corpus, etc.)."),
+			),
+			mcp.WithString("id",
+				mcp.Required(),
+				mcp.Description("Primitive id."),
+			),
+		),
+		func(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+			kind, err := req.RequireString("kind")
+			if err != nil {
+				return mcp.NewToolResultError(err.Error()), nil
+			}
+			id, err := req.RequireString("id")
+			if err != nil {
+				return mcp.NewToolResultError(err.Error()), nil
+			}
+			idx, err := loadIndex(projectDir)
+			if err != nil {
+				return mcp.NewToolResultError(err.Error()), nil
+			}
+			view, found := buildShowView(idx.Primitives, kind, id)
+			if !found {
+				return mcp.NewToolResultError(fmt.Sprintf("no primitive with kind=%s id=%s", kind, id)), nil
+			}
+			out, err := json.MarshalIndent(view, "", "  ")
+			if err != nil {
+				return mcp.NewToolResultError(err.Error()), nil
+			}
+			return mcp.NewToolResultText(string(out)), nil
+		},
+	)
+}
+
+// hasAllStrings reports whether `have` contains every element of
+// `want`. Empty `want` is a vacuous pass. Used by the tag-filter on
+// keystone_list_primitives — AND semantics, not OR.
+func hasAllStrings(have, want []string) bool {
+	if len(want) == 0 {
+		return true
+	}
+	set := make(map[string]struct{}, len(have))
+	for _, h := range have {
+		set[h] = struct{}{}
+	}
+	for _, w := range want {
+		if _, ok := set[w]; !ok {
+			return false
+		}
+	}
+	return true
+}
+
+// showView is the structured snapshot keystone_show returns. Mirrors
+// the CLI's `keystone show` output so MCP clients see the same shape
+// the user sees in their terminal.
+type showView struct {
+	Kind         string                  `json:"kind"`
+	ID           string                  `json:"id"`
+	Description  string                  `json:"description"`
+	Path         string                  `json:"path"`
+	Provenance   string                  `json:"provenance,omitempty"`
+	Severity     string                  `json:"severity,omitempty"`
+	Model        string                  `json:"model,omitempty"`
+	Phase        string                  `json:"phase,omitempty"`
+	Tags         []string                `json:"tags,omitempty"`
+	Tools        []string                `json:"tools,omitempty"`
+	Globs        []string                `json:"globs,omitempty"`
+	Triggers     []string                `json:"triggers,omitempty"`
+	Includes     []string                `json:"includes,omitempty"`
+	IncludedBy   []string                `json:"included_by,omitempty"`
+	Traces       []string                `json:"traces,omitempty"`
+	TracedBy     []string                `json:"traced_by,omitempty"`
+	HostTriggers []primitive.HostTrigger `json:"host_triggers,omitempty"`
+}
+
+// buildShowView assembles the showView for one (kind, id) pair from
+// the INDEX primitive set. The INDEX records the COMPOSED descriptor
+// (Compose has already merged concern contributions), so the returned
+// list fields reflect what the agent actually sees.
+func buildShowView(primitives []primitive.Primitive, kind, id string) (showView, bool) {
+	var target primitive.Primitive
+	found := false
+	for _, p := range primitives {
+		if p.Kind == kind && p.ID == id {
+			target = p
+			found = true
+			break
+		}
+	}
+	if !found {
+		return showView{}, false
+	}
+	v := showView{
+		Kind:         target.Kind,
+		ID:           target.ID,
+		Description:  target.Description,
+		Path:         target.Path,
+		Provenance:   target.Provenance,
+		Severity:     target.Severity,
+		Model:        target.Model,
+		Phase:        target.Phase,
+		Tags:         target.Tags,
+		Tools:        target.Tools,
+		Globs:        target.Globs,
+		Triggers:     target.Triggers,
+		Includes:     target.Includes,
+		Traces:       target.Traces,
+		HostTriggers: target.HostTriggers,
+	}
+	// Reverse-lookup: who includes this primitive (only meaningful
+	// when target is a concern, but unconditional so future kinds
+	// that become include-able just work).
+	for _, p := range primitives {
+		for _, inc := range p.Includes {
+			if inc == target.ID {
+				v.IncludedBy = append(v.IncludedBy, p.Kind+"/"+p.ID)
+			}
+		}
+	}
+	sort.Strings(v.IncludedBy)
+	// Reverse-lookup: who traces to this primitive (guide → corpus).
+	for _, p := range primitives {
+		for _, tr := range p.Traces {
+			if tr == target.ID {
+				v.TracedBy = append(v.TracedBy, p.Kind+"/"+p.ID)
+			}
+		}
+	}
+	sort.Strings(v.TracedBy)
+	return v, true
 }
 
 // -- resources ----------------------------------------------------------

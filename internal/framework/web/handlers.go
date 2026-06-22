@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 
 	"github.com/tacoda/keystone/internal/framework/primitive"
@@ -104,13 +105,15 @@ func (s *server) handlePrimitivesList(w http.ResponseWriter, r *http.Request) {
 	}
 	kind := r.URL.Query().Get("kind")
 	glob := r.URL.Query().Get("glob")
-	filtered := filterPrimitives(primitives, kind, glob)
+	tags := r.URL.Query()["tag"] // multi-value query param: ?tag=a&tag=b
+	filtered := filterPrimitives(primitives, kind, glob, tags)
 	s.renderPage(w, r, "primitives.html", map[string]any{
 		"ProjectDir": s.projectDir,
 		"Primitives": filtered,
 		"Total":      len(primitives),
-		"Filter":     map[string]string{"kind": kind, "glob": glob},
+		"Filter":     map[string]any{"kind": kind, "glob": glob, "tags": tags},
 		"Kinds":      uniqueKinds(primitives),
+		"AllTags":    uniqueTags(primitives),
 	})
 }
 
@@ -193,7 +196,8 @@ func (s *server) handlePrimitivesFragment(w http.ResponseWriter, r *http.Request
 	}
 	kind := r.URL.Query().Get("kind")
 	glob := r.URL.Query().Get("glob")
-	filtered := filterPrimitives(primitives, kind, glob)
+	tags := r.URL.Query()["tag"]
+	filtered := filterPrimitives(primitives, kind, glob, tags)
 	s.render(w, "_primitives_table.html", map[string]any{
 		"Primitives": filtered,
 	})
@@ -201,7 +205,7 @@ func (s *server) handlePrimitivesFragment(w http.ResponseWriter, r *http.Request
 
 // -- helpers ----------------------------------------------------------
 
-func filterPrimitives(in []primitive.Primitive, kind, glob string) []primitive.Primitive {
+func filterPrimitives(in []primitive.Primitive, kind, glob string, tags []string) []primitive.Primitive {
 	out := in[:0:0]
 	for _, p := range in {
 		if kind != "" && p.Kind != kind {
@@ -219,8 +223,47 @@ func filterPrimitives(in []primitive.Primitive, kind, glob string) []primitive.P
 				continue
 			}
 		}
+		if len(tags) > 0 && !hasAllTagsWeb(p.Tags, tags) {
+			continue
+		}
 		out = append(out, p)
 	}
+	return out
+}
+
+// hasAllTagsWeb mirrors the AND semantics used by `keystone list
+// --tag X --tag Y` — every requested tag must appear on the primitive
+// (concern contributions already merged by Compose).
+func hasAllTagsWeb(have, want []string) bool {
+	if len(want) == 0 {
+		return true
+	}
+	set := make(map[string]struct{}, len(have))
+	for _, h := range have {
+		set[h] = struct{}{}
+	}
+	for _, w := range want {
+		if _, ok := set[w]; !ok {
+			return false
+		}
+	}
+	return true
+}
+
+// uniqueTags returns the sorted union of every primitive's Tags. Used
+// by the dashboard's tag-filter chip strip.
+func uniqueTags(in []primitive.Primitive) []string {
+	seen := map[string]struct{}{}
+	for _, p := range in {
+		for _, t := range p.Tags {
+			seen[t] = struct{}{}
+		}
+	}
+	out := make([]string, 0, len(seen))
+	for t := range seen {
+		out = append(out, t)
+	}
+	sort.Strings(out)
 	return out
 }
 
