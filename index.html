@@ -1147,7 +1147,7 @@
         <h1>Keystone</h1>
       </div>
       <p>the agent harness framework</p>
-      <p>v2.2.0</p>
+      <p>v2.4.1</p>
     </div>
 
     <nav>
@@ -1235,7 +1235,7 @@
   <!-- ===================== INTRODUCTION (landing) ===================== -->
   <section id="introduction" class="page" data-title="Introduction">
     <div class="page-head">
-      <div class="crumb">Overview · Keystone v2.2.0</div>
+      <div class="crumb">Overview · Keystone v2.4.1</div>
       <h1>The agent harness framework for <em class="hero-any">any</em> project.</h1>
       <p class="tagline">
         <em style="font-size: 1.25em;">Tired of agents reinventing your rules in every repo?</em><br>
@@ -1253,7 +1253,7 @@
         </div>
         <div class="term-body">
           <span class="pr">$</span> brew install tacoda/tap/keystone<br>
-          <span class="ok">●</span> keystone v2.2.0 installed<br>
+          <span class="ok">●</span> keystone v2.4.1 installed<br>
           <span class="pr">$</span> cd my-project<br>
           <span class="pr">$</span> keystone init<br>
           <span class="dim">?</span> Select your agent <span class="dim">›</span> <span class="ok">claude-code</span><br>
@@ -1273,26 +1273,35 @@
     </section>
 
     <div class="definition" style="border-left-color: var(--accent3);">
-      <p style="margin: 0 0 10px;"><strong style="color: var(--accent3); font-size: 1.1em;">What's new in v2.2.0</strong> — minor release. Lands the host-native projection surface: every keystone primitive now reaches the agent through its host's native loading mechanism (Claude Code rules, Cursor MDC, Aider conventions, Continue rules, hooks via <code>.claude/settings.json</code>), and <code>keystone watch</code> re-projects on every guide / sensor / persona save so edits land in the agent's context within ~300ms. Source of truth stays in <code>.keystone/harness/</code>; everything outside is regenerated. Backward-compatible — <code>keystone migrate</code> runs the new projection pipeline once.</p>
-      <ul style="margin: 0; padding-left: 22px; line-height: 1.8; font-size: 0.98rem;">
-        <li><strong>Guide rule shims</strong> — every guide with non-empty <code>globs:</code> projects to <code>.claude/rules/&lt;slug&gt;.md</code> (and <code>.cursor/rules/&lt;slug&gt;.mdc</code>, <code>.continue/rules/&lt;slug&gt;.md</code> for opt-in hosts). Shim body extracts the high-signal sections (<strong>IRON LAW</strong>, <strong>GOLDEN RULE</strong>, <strong>RULES</strong>, <strong>Anti-patterns</strong>) and points at the source guide for prose context. Frontmatter is keystone-native (<code>kind: rule</code>, <code>id: rules/&lt;slug&gt;</code>, <code>source:</code>, <code>generated_by:</code>) — every keystone-managed file reads through the same schema.</li>
-        <li><strong>Sensor <code>host_triggers:</code> → <code>.claude/settings.json</code></strong>. Computational sensors declare their host hook activation inline:
-          <pre class="code" style="margin: 8px 0 0; padding: 10px 14px; font-size: 0.82rem;"><span class="kw">host_triggers:</span>
-  - <span class="kw">phase:</span> PreToolUse
-    <span class="kw">matcher:</span> <span class="str">"Edit|Write|MultiEdit"</span>
-    <span class="kw">command:</span> keystone verify --sensor secret-scan
-    <span class="kw">timeout:</span> 5</pre>
-          The new <code>internal/framework/adapters/claudecode/</code> package walks sensors, groups by <code>(phase, matcher)</code>, and merges into <code>.claude/settings.json</code> with <code>statusMessage: "keystone:&lt;sensor-id&gt;"</code> markers. <strong>Idempotent + additive</strong> — managed entries are recognized and replaced on every run; user-authored hooks (and every other top-level key — <code>permissions</code>, <code>enabledMcpjsonServers</code>, etc.) are preserved byte-for-byte.</li>
-        <li><strong><code>keystone verify --sensor &lt;id&gt;</code></strong> runs one keystone-owned sensor in isolation. Reads Claude Code's hook protocol payload from stdin (<code>tool_input.file_path</code>, <code>tool_input.content</code>, <code>tool_input.command</code>); exit code <code>0</code> on pass, <code>2</code> on block (Claude Code's block-with-message), <code>1</code> on internal error. Hook entries call this directly — no <code>keystone hook</code> proxy subcommand (host-leak avoided).</li>
-        <li><strong><code>secret-scan</code> sensor</strong> — first keystone-owned sensor with a backing implementation. Blocks edits/writes to sensitive paths (<code>.env*</code>, <code>*.pem</code>, <code>*.key</code>, <code>credentials.json</code>, <code>secrets/</code>, <code>vault/</code>, SSH keys) and content matching credential patterns (AWS keys, GitHub tokens, Stripe keys, Bearer tokens, PEM private keys). <code>.env.example</code> is the documented exception. New <code>internal/framework/sensors/</code> package with a runner registry — other computational sensors wire to external tools directly (<code>go test</code>, <code>gofmt -w</code>, <code>govulncheck</code>) via their <code>host_triggers[].command</code>; keystone doesn't wrap them.</li>
-        <li><strong><code>INDEX.lite.json</code></strong> sibling alongside <code>INDEX.json</code>, holding only <code>{kind, id, description}</code> per primitive. ~6KB vs 36KB. Agents read this for first-pass discovery and open the full INDEX only when a path / glob / trigger is needed. <code>CLAUDE.md</code>'s "Read first:" pointer updates to the lite file.</li>
-        <li><strong>Cross-host adapters.</strong> <code>internal/framework/adapters/</code> gains five packages: <code>claudecode</code> (hooks, always on), <code>cursor</code> (<code>.cursor/rules/*.mdc</code>), <code>aider</code> (<code>CONVENTIONS.md</code> + <code>.aider.conf.yml</code> with a <code>read:</code> pointer to AGENTS.md + <code>INDEX.lite.json</code>), <code>continueide</code> (<code>.continue/rules/*.md</code>), and <code>agnostic</code> (root <code>AGENTS.md</code>). Opt-in via <code>keystone.json</code>'s new <code>adapters:</code> list; AGENTS.md is unconditional so generic readers (OpenCode, Roo, Cline) get the same orientation.</li>
-        <li><strong><code>keystone watch</code> adapter fan-out.</strong> The existing 300ms-debounced watcher now triggers the full projection pipeline on every save under <code>.keystone/harness/</code> — INDEX.json + INDEX.lite.json + every per-host adapter. A user editing a guide / sensor / persona sees the host surface update within the debounce window. <strong>No manual <code>keystone project</code> needed.</strong></li>
-        <li><strong>Model tiers + tool allowlists.</strong> Every skill and persona under <code>.keystone/harness/skills/keystone-*/</code> and <code>personas/*</code> declares <code>model:</code> (<code>sonnet</code> for mechanical scaffold, <code>opus</code> for review/synth) and <code>tools:</code> (allowlist). Read-only personas drop <code>Write</code>. Projector passes them through verbatim into <code>.claude/skills/</code> and <code>.claude/agents/</code>.</li>
-        <li><strong><code>CLAUDE.md</code> preamble.</strong> Adds <code>## Stack</code>, <code>## Layout</code>, <code>## Common commands</code> above the existing keystone-harness block. Total file stays under 150 lines. Agents new to a project get oriented without a repo scan.</li>
-        <li><strong>GOLDEN PATH → GOLDEN RULE</strong> renamed across every guide, corpus, template, and adapter doc. The shim section allowlist (<code>extractGuideSections</code>) recognizes the new heading. Terminology rename only — no content rewrites.</li>
+      <p style="margin: 0 0 10px;"><strong style="color: var(--accent3); font-size: 1.1em;">What's new in v2.4.1</strong> — read-surface parity. The composition primitives shipped in <strong>2.3.0</strong> (concerns, includes, tags, severity) now reach both audiences through their native surfaces: the <strong>MCP server</strong> for the agent inside a session, the <strong>web dashboard</strong> for the human outside it. Both surfaces are read-only over the file source of truth at <code>.keystone/harness/*.md</code>; neither writes. No schema changes, no data transforms — additive at the binary layer only.</p>
+
+      <p style="margin: 12px 0 6px;"><strong style="color: var(--accent2); font-size: 1.02em;">v2.4.1 — read surfaces</strong></p>
+      <ul style="margin: 0 0 14px; padding-left: 22px; line-height: 1.8; font-size: 0.95rem;">
+        <li><strong>MCP: <code>keystone_show</code></strong> — single-call descriptor + cross-references for one primitive. Returns the composed view (post-<code>includes:</code> resolution) plus forward/reverse association lookups (<code>includes</code> / <code>included_by</code>, <code>traces</code> / <code>traced_by</code>, host hooks, tags, model, severity, phase). Saves N follow-up <code>keystone_get_primitive</code> calls when the agent needs to understand a primitive's neighborhood.</li>
+        <li><strong>MCP: <code>tags</code> filter on <code>keystone_list_primitives</code></strong> — array parameter, AND semantics. Concern tags propagate to including primitives (Compose runs at index time, so the filter sees the merged view).</li>
+        <li><strong>Web: tag cloud + tag filter on <code>/harness/primitives</code></strong> — every declared tag rendered as a clickable chip; dropdown filter in the form; <code>?tag=a&tag=b</code> URL params AND-merge.</li>
+        <li><strong>Web: detail page gains</strong> tags strip, <code>model:</code>, linked <code>includes:</code> (jumps to concern), and a host-hooks table for sensors. <strong>"referenced by"</strong> now walks <code>includes:</code> for concerns — clicking a concern shows every primitive that composes it in.</li>
+        <li><strong>Composed view everywhere.</strong> Both surfaces consume the same INDEX, which records what the agent actually sees after <code>Compose()</code>. Concern contributions land identically in MCP responses, web pages, and projected <code>.claude/*</code> files.</li>
       </ul>
-      <p style="margin: 12px 0 0; font-size: 0.85rem; color: var(--muted);">Full notes: <a href="https://github.com/tacoda/keystone/blob/main/CHANGELOG.md" target="_blank" rel="noopener">CHANGELOG.md <span class="ext">↗</span></a>. <strong>Migration:</strong> <code>keystone migrate up</code> runs the additive 2.2 plan — re-walks the harness, rebuilds <code>INDEX*.json</code>, re-projects primitives, emits <code>AGENTS.md</code>, merges sensor <code>host_triggers</code> into <code>.claude/settings.json</code> (never overwrites user-authored hooks), and runs opt-in adapters. Source content is preserved; only generated artifacts are written.</p>
+
+      <p style="margin: 12px 0 6px;"><strong style="color: var(--accent4); font-size: 1.02em;">v2.3.0 — composition + queryable graph</strong></p>
+      <ul style="margin: 0 0 14px; padding-left: 22px; line-height: 1.8; font-size: 0.95rem;">
+        <li><strong>New <code>concern</code> primitive.</strong> Lives at <code>.keystone/harness/concerns/&lt;id&gt;.md</code>. Standard frontmatter plus the fields the concern contributes (<code>tools</code>, <code>tags</code>, <code>host_triggers</code>, <code>triggers</code>). Concerns are leaves — they cannot themselves declare <code>includes:</code> — so the composition graph is depth-1 by construction. <strong>Composition over inheritance.</strong></li>
+        <li><strong><code>includes: [&lt;concern-id&gt;, ...]</code></strong> on every primitive. Walker resolves after parse: <strong>union</strong> list fields (<code>tools</code>, <code>tags</code>, <code>triggers</code>, <code>traces</code>, <code>deps</code>, <code>globs</code>, <code>host_triggers</code>) — dedupe stable, host's values last so a host can demote a concern-contributed entry by re-listing it. <strong>Host-wins scalars</strong> (<code>kind</code>, <code>id</code>, <code>description</code>, <code>severity</code>, <code>model</code>): a concern can never override what the host primitive declares about itself.</li>
+        <li><strong><code>tags:</code> field</strong> on every primitive. Orthogonal taxonomy. Kebab-case enforced by <code>keystone lint</code>. Tags union-merge across <code>includes:</code> exactly like other list fields.</li>
+        <li><strong><code>keystone list [&lt;kind&gt;] [--tag &lt;tag&gt;]...</code></strong> — filtered primitive listing with composed view. Multiple <code>--tag</code> flags AND together.</li>
+        <li><strong><code>keystone show &lt;kind&gt; &lt;id&gt;</code></strong> — single-primitive view with forward + reverse association lookup (<code>includes</code> / <code>included_by</code>, <code>traces</code> / <code>traced_by</code>, host hooks, tags, severity, model, phase). <code>--json</code> for structured output.</li>
+        <li><strong>Severity → host enforcement.</strong> The Claude Code adapter now reads each sensor's <code>severity:</code> and shapes the projected hook command:
+          <ul style="margin: 4px 0 4px; padding-left: 18px;">
+            <li><code>must</code> (default) — command runs as-is. Exit 2 blocks.</li>
+            <li><code>should</code> — wrapper converts non-zero exit to 0 + stderr warning. Surfaces but doesn't block.</li>
+            <li><code>may</code> — wrapper silences non-zero exit. Informational only.</li>
+          </ul>
+          A severity-driven dial for tuning strictness without rewriting the command.</li>
+        <li><strong>Dogfood.</strong> Two concerns shipped: <code>reads-diff</code> (composed into <code>code-reviewer</code>, <code>security-reviewer</code>, <code>drift-reviewer</code>, <code>debt-reviewer</code>) and <code>scaffolds-primitive</code> (composed into every <code>keystone-new-*</code> skill). ~40 primitives gained <code>tags:</code> annotations.</li>
+      </ul>
+
+      <p style="margin: 12px 0 0; font-size: 0.85rem; color: var(--muted);">Full notes: <a href="https://github.com/tacoda/keystone/blob/main/CHANGELOG.md" target="_blank" rel="noopener">CHANGELOG.md <span class="ext">↗</span></a>. <strong>Migration:</strong> <code>keystone migrate up</code> runs the additive 2.3 plan (re-walk + re-compose + re-project; emits AGENTS.md; merges sensor <code>host_triggers</code> into <code>.claude/settings.json</code> with severity wrappers); 2.4 is a no-op record. The 2.3 Down plan re-projects without composition and strips severity wrappers but preserves authored content under <code>.keystone/harness/concerns/</code>.</p>
     </div>
 
     <div class="definition">
@@ -1665,7 +1674,7 @@ flowchart LR
 <pre class="code"><span class="prompt">$</span> curl -fsSL https://raw.githubusercontent.com/tacoda/keystone/main/install.sh &gt; install.sh
 <span class="prompt">$</span> less install.sh
 <span class="prompt">$</span> sh install.sh</pre>
-      <p>Override the install dir with <code>KEYSTONE_PREFIX=/some/path</code> or pin the release with <code>KEYSTONE_VERSION=v2.2.0</code>. The installer does not run <code>keystone init</code> — open a new shell and run it yourself in a project to scaffold the harness.</p>
+      <p>Override the install dir with <code>KEYSTONE_PREFIX=/some/path</code> or pin the release with <code>KEYSTONE_VERSION=v2.4.1</code>. The installer does not run <code>keystone init</code> — open a new shell and run it yourself in a project to scaffold the harness.</p>
     </div>
 
     <div class="install-method">
