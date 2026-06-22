@@ -7,7 +7,7 @@ Loaded ambient; enforced by the [drift sensor](../../../sensors/drift.md). The c
 
 **Dependencies cross the hexagon boundary in one direction only — inward.** A package, file, or class inside the hexagon must not name any class, type, or function defined by an adapter. If you cannot ship the domain as a library that compiles without any adapter present, the architecture is not hexagonal.
 
-## GOLDEN PATH
+## GOLDEN RULE
 
 - **Aim for ports named in domain language.** They are the contract; they should read like the business describing itself.
 - **Aim for one adapter per port per technology.** Adapters are how you swap technology; they are not where domain logic lives.

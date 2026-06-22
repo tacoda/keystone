@@ -7,7 +7,7 @@ Loaded ambient; enforced by the [drift sensor](../../../sensors/drift.md). The c
 
 **FIPS-validated crypto, MFA on every privileged access, comprehensive audit, US-person operations.** These are the four non-negotiables that distinguish FedRAMP from lesser regimes. A system missing any of them does not pass; cosmetic adjustments do not bridge the gap.
 
-## GOLDEN PATH
+## GOLDEN RULE
 
 - **Aim to architect for FedRAMP from the start, or not at all.** Mid-project conversion is the most expensive path. Estimate 9–18 months for first ATO from a non-FedRAMP starting point.
 - **Aim for a separate authorized environment.** Mixing FedRAMP and commercial workloads on shared infrastructure expands the boundary; isolation is cheaper than co-mingling.

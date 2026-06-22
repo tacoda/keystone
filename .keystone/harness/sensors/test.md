@@ -2,6 +2,10 @@
 kind: sensor
 id: test
 description: 'The project''s test suite.'
+host_triggers:
+  - phase: Stop
+    command: go test ./...
+    timeout: 300
 ---
 # Sensor: test
 

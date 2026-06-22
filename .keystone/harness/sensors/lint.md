@@ -2,6 +2,10 @@
 kind: sensor
 id: lint
 description: 'Surface-level style and pattern checks.'
+host_triggers:
+  - phase: Stop
+    command: go vet ./...
+    timeout: 60
 ---
 # Sensor: lint
 

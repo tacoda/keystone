@@ -37,8 +37,33 @@ type ProjectConfig struct {
 	Version          string                `json:"version"`
 	FrameworkVersion string                `json:"framework_version,omitempty"`
 	HarnessRoot      string                `json:"harness_root,omitempty"` // Deprecated: ignored at 2.0; stripped by `keystone migrate`.
-	Policies          []PolicyNode          `json:"policies"`
+	Policies         []PolicyNode          `json:"policies"`
 	Budgets          map[string]BudgetSpec `json:"budgets,omitempty"`
+	Adapters         []string              `json:"adapters,omitempty"`
+}
+
+// Adapter names recognized by `keystone project`. Adding an entry here
+// signals the projector to emit that host's surface alongside the
+// always-on Claude Code projection. Unknown names are reported as
+// warnings (forward-compat for in-development adapters).
+const (
+	AdapterClaudeCode = "claude-code"
+	AdapterCursor     = "cursor"
+	AdapterAider      = "aider"
+	AdapterContinue   = "continue"
+)
+
+// HasAdapter returns true when name appears in c.Adapters. The empty
+// list defaults to claude-code only — projection happens regardless
+// of what's listed, but agent-agnostic surfaces (AGENTS.md) emit
+// unconditionally.
+func (c *ProjectConfig) HasAdapter(name string) bool {
+	for _, a := range c.Adapters {
+		if a == name {
+			return true
+		}
+	}
+	return false
 }
 
 // UnmarshalJSON adds backward-compat for pre-2.0 configs whose

@@ -2,6 +2,10 @@
 kind: sensor
 id: traffic-topology
 description: 'Combines git churn + recency + business criticality into a map of where attention concentrates.'
+host_triggers:
+  - phase: Stop
+    command: true
+    timeout: 30
 ---
 # Sensor: traffic-topology
 

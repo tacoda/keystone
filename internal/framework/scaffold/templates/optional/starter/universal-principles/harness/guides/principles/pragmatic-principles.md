@@ -7,7 +7,7 @@ Loaded ambient; enforced by the [drift sensor](../../sensors/drift.md). The corp
 
 **Knowledge has exactly one home.** If a business rule, a magic number, a configuration value, or an algorithm lives in two places, the system already lies — one of the two copies is wrong, you just don't know which yet.
 
-## GOLDEN PATH
+## GOLDEN RULE
 
 - **Aim for code where a typical change touches one place.** Measure your designs by blast radius, not by line count.
 - **Aim for the *first* fix, not the *complete* fix.** A repaired window beats a planned renovation.

@@ -7,7 +7,7 @@ Loaded ambient; enforced by the [drift sensor](../../../sensors/drift.md). The c
 
 **The server is the source of truth. The client is a cache and a UI.** Any authorization, validation, or business rule enforced only in the SPA is unenforced. A user can pause your JavaScript and edit the request; an attacker can replay it. The SPA is presentation; the API is the gate.
 
-## GOLDEN PATH
+## GOLDEN RULE
 
 - **Aim to make the back button work.** Browser history, scroll position, form state on return. Users do not forgive a back button that surprises them. See [[least-astonishment]].
 - **Aim to measure what users experience.** Time to first byte, time to interactive, largest contentful paint, cumulative layout shift. Real User Monitoring on a representative slice — not just the developer's M1 on fiber. See [[observability]].

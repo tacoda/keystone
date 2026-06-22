@@ -54,18 +54,20 @@ func Parse(fileContents string) (Frontmatter, bool, error) {
 func (f *Frontmatter) UnmarshalYAML(value *yaml.Node) error {
 	// Use a shadow type to avoid recursion through this method.
 	type shadow struct {
-		Kind        string    `yaml:"kind"`
-		ID          string    `yaml:"id"`
-		Description string    `yaml:"description"`
-		Globs       []string  `yaml:"globs"`
-		Phase       string    `yaml:"phase"`
-		Triggers    []string  `yaml:"triggers"`
-		Tools       []string  `yaml:"tools"`
-		Args        yaml.Node `yaml:"args"`
-		Traces      []string  `yaml:"traces"`
-		Deps        []string  `yaml:"deps"`
-		Severity    string    `yaml:"severity"`
-		Tier        string    `yaml:"tier"`
+		Kind         string        `yaml:"kind"`
+		ID           string        `yaml:"id"`
+		Description  string        `yaml:"description"`
+		Globs        []string      `yaml:"globs"`
+		Phase        string        `yaml:"phase"`
+		Triggers     []string      `yaml:"triggers"`
+		Tools        []string      `yaml:"tools"`
+		Model        string        `yaml:"model"`
+		Args         yaml.Node     `yaml:"args"`
+		Traces       []string      `yaml:"traces"`
+		Deps         []string      `yaml:"deps"`
+		Severity     string        `yaml:"severity"`
+		Tier         string        `yaml:"tier"`
+		HostTriggers []HostTrigger `yaml:"host_triggers"`
 	}
 	var s shadow
 	if err := value.Decode(&s); err != nil {
@@ -78,10 +80,12 @@ func (f *Frontmatter) UnmarshalYAML(value *yaml.Node) error {
 	f.Phase = s.Phase
 	f.Triggers = s.Triggers
 	f.Tools = s.Tools
+	f.Model = s.Model
 	f.Traces = s.Traces
 	f.Deps = s.Deps
 	f.Severity = s.Severity
 	f.Tier = s.Tier
+	f.HostTriggers = s.HostTriggers
 
 	if s.Args.Kind == 0 {
 		return nil

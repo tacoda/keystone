@@ -1,6 +1,6 @@
 {
   "version": "2.0",
-  "generated": "2026-06-18T16:41:44Z",
+  "generated": "2026-06-22T21:58:07Z",
   "primitives": [
     {
       "kind": "action",
@@ -382,6 +382,7 @@
         "Glob",
         "Bash"
       ],
+      "model": "opus",
       "path": ".keystone/harness/personas/auditor.md",
       "provenance": "project"
     },
@@ -395,6 +396,7 @@
         "Glob",
         "Bash"
       ],
+      "model": "sonnet",
       "path": ".keystone/harness/personas/bootstrap-scout.md",
       "provenance": "project"
     },
@@ -407,6 +409,7 @@
         "Grep",
         "Bash"
       ],
+      "model": "opus",
       "path": ".keystone/harness/personas/code-reviewer.md",
       "provenance": "project"
     },
@@ -419,6 +422,7 @@
         "Grep",
         "Bash"
       ],
+      "model": "sonnet",
       "path": ".keystone/harness/personas/debt-reviewer.md",
       "provenance": "project"
     },
@@ -431,6 +435,7 @@
         "Grep",
         "Bash"
       ],
+      "model": "sonnet",
       "path": ".keystone/harness/personas/drift-reviewer.md",
       "provenance": "project"
     },
@@ -440,9 +445,9 @@
       "description": "Captures a learning candidate from a surprise, incident, or review finding into harness/learning/inbox/.",
       "tools": [
         "Read",
-        "Grep",
-        "Write"
+        "Grep"
       ],
+      "model": "opus",
       "path": ".keystone/harness/personas/learning-curator.md",
       "provenance": "project"
     },
@@ -454,6 +459,7 @@
         "Read",
         "Write"
       ],
+      "model": "sonnet",
       "path": ".keystone/harness/personas/mode-switcher.md",
       "provenance": "project"
     },
@@ -466,6 +472,7 @@
         "Grep",
         "Glob"
       ],
+      "model": "opus",
       "path": ".keystone/harness/personas/planner.md",
       "provenance": "project"
     },
@@ -478,6 +485,7 @@
         "Grep",
         "Glob"
       ],
+      "model": "opus",
       "path": ".keystone/harness/personas/security-reviewer.md",
       "provenance": "project"
     },
@@ -490,6 +498,7 @@
         "Grep",
         "Write"
       ],
+      "model": "opus",
       "path": ".keystone/harness/personas/spec-author.md",
       "provenance": "project"
     },
@@ -502,6 +511,7 @@
         "Grep",
         "Write"
       ],
+      "model": "opus",
       "path": ".keystone/harness/personas/synthesizer.md",
       "provenance": "project"
     },
@@ -514,6 +524,7 @@
         "Grep",
         "Bash"
       ],
+      "model": "sonnet",
       "path": ".keystone/harness/personas/verifier.md",
       "provenance": "project"
     },
@@ -521,6 +532,7 @@
       "kind": "playbook",
       "id": "task",
       "description": "End-to-end task workflow.",
+      "model": "opus",
       "path": ".keystone/harness/playbooks/task.md",
       "provenance": "project"
     },
@@ -528,6 +540,13 @@
       "kind": "sensor",
       "id": "build",
       "description": "The project's build / compile / package step.",
+      "host_triggers": [
+        {
+          "phase": "Stop",
+          "command": "go build ./...",
+          "timeout": 120
+        }
+      ],
       "path": ".keystone/harness/sensors/build.md",
       "provenance": "project"
     },
@@ -542,6 +561,14 @@
       "kind": "sensor",
       "id": "commit-message",
       "description": "Validates conventional-commit format and absence of AI attribution.",
+      "host_triggers": [
+        {
+          "phase": "PreToolUse",
+          "matcher": "Bash",
+          "command": "keystone verify --sensor commit-message",
+          "timeout": 5
+        }
+      ],
       "path": ".keystone/harness/sensors/commit-message.md",
       "provenance": "project"
     },
@@ -549,6 +576,13 @@
       "kind": "sensor",
       "id": "coverage",
       "description": "Reads test coverage and updates the State layer.",
+      "host_triggers": [
+        {
+          "phase": "Stop",
+          "command": "true",
+          "timeout": 120
+        }
+      ],
       "path": ".keystone/harness/sensors/coverage.md",
       "provenance": "project"
     },
@@ -556,6 +590,14 @@
       "kind": "sensor",
       "id": "drift",
       "description": "Compares the diff (or full codebase, during audit) against loaded guide rules.",
+      "host_triggers": [
+        {
+          "phase": "PostToolUse",
+          "matcher": "Edit|Write|MultiEdit",
+          "command": "keystone verify --sensor drift",
+          "timeout": 5
+        }
+      ],
       "path": ".keystone/harness/sensors/drift.md",
       "provenance": "project"
     },
@@ -570,6 +612,13 @@
       "kind": "sensor",
       "id": "lint",
       "description": "Surface-level style and pattern checks.",
+      "host_triggers": [
+        {
+          "phase": "Stop",
+          "command": "go vet ./...",
+          "timeout": 60
+        }
+      ],
       "path": ".keystone/harness/sensors/lint.md",
       "provenance": "project"
     },
@@ -612,6 +661,13 @@
       "kind": "sensor",
       "id": "risk-fingerprint",
       "description": "Computes complexity + coupling + coverage patterns per region.",
+      "host_triggers": [
+        {
+          "phase": "Stop",
+          "command": "true",
+          "timeout": 30
+        }
+      ],
       "path": ".keystone/harness/sensors/risk-fingerprint.md",
       "provenance": "project"
     },
@@ -619,6 +675,13 @@
       "kind": "sensor",
       "id": "sast",
       "description": "Static application security testing — pattern-based detection of insecure code in the source tree (SQL injection, command injection, weak...",
+      "host_triggers": [
+        {
+          "phase": "Stop",
+          "command": "true",
+          "timeout": 30
+        }
+      ],
       "path": ".keystone/harness/sensors/sast.md",
       "provenance": "project"
     },
@@ -626,6 +689,14 @@
       "kind": "sensor",
       "id": "secret-scan",
       "description": "Scans the diff (or repo, on audit) for committed secrets — API keys, tokens, private keys, credentials.",
+      "host_triggers": [
+        {
+          "phase": "PreToolUse",
+          "matcher": "Edit|Write|MultiEdit",
+          "command": "keystone verify --sensor secret-scan",
+          "timeout": 5
+        }
+      ],
       "path": ".keystone/harness/sensors/secret-scan.md",
       "provenance": "project"
     },
@@ -633,6 +704,13 @@
       "kind": "sensor",
       "id": "spec-adherence",
       "description": "Walks the spec's acceptance criteria against the current diff.",
+      "host_triggers": [
+        {
+          "phase": "Stop",
+          "command": "true",
+          "timeout": 30
+        }
+      ],
       "path": ".keystone/harness/sensors/spec-adherence.md",
       "provenance": "project"
     },
@@ -640,6 +718,13 @@
       "kind": "sensor",
       "id": "stack-drift",
       "description": "Detects when the empirical reality of the repo has diverged from what CODEBASESTATE.",
+      "host_triggers": [
+        {
+          "phase": "Stop",
+          "command": "true",
+          "timeout": 30
+        }
+      ],
       "path": ".keystone/harness/sensors/stack-drift.md",
       "provenance": "project"
     },
@@ -647,6 +732,14 @@
       "kind": "sensor",
       "id": "state-region",
       "description": "Read-only.",
+      "host_triggers": [
+        {
+          "phase": "PostToolUse",
+          "matcher": "Edit|Write",
+          "command": "true",
+          "timeout": 5
+        }
+      ],
       "path": ".keystone/harness/sensors/state-region.md",
       "provenance": "project"
     },
@@ -654,6 +747,13 @@
       "kind": "sensor",
       "id": "test",
       "description": "The project's test suite.",
+      "host_triggers": [
+        {
+          "phase": "Stop",
+          "command": "go test ./...",
+          "timeout": 300
+        }
+      ],
       "path": ".keystone/harness/sensors/test.md",
       "provenance": "project"
     },
@@ -668,6 +768,13 @@
       "kind": "sensor",
       "id": "traffic-topology",
       "description": "Combines git churn + recency + business criticality into a map of where attention concentrates.",
+      "host_triggers": [
+        {
+          "phase": "Stop",
+          "command": "true",
+          "timeout": 30
+        }
+      ],
       "path": ".keystone/harness/sensors/traffic-topology.md",
       "provenance": "project"
     },
@@ -675,6 +782,13 @@
       "kind": "sensor",
       "id": "type-check",
       "description": "Signature and contract consistency.",
+      "host_triggers": [
+        {
+          "phase": "Stop",
+          "command": "go vet ./...",
+          "timeout": 60
+        }
+      ],
       "path": ".keystone/harness/sensors/type-check.md",
       "provenance": "project"
     },
@@ -682,6 +796,13 @@
       "kind": "sensor",
       "id": "vuln-scan",
       "description": "Scans declared dependencies for known vulnerabilities (CVEs, advisories).",
+      "host_triggers": [
+        {
+          "phase": "Stop",
+          "command": "true",
+          "timeout": 120
+        }
+      ],
       "path": ".keystone/harness/sensors/vuln-scan.md",
       "provenance": "project"
     },
@@ -697,6 +818,14 @@
         "audit the harness",
         "dual flywheel audit"
       ],
+      "tools": [
+        "Read",
+        "Grep",
+        "Glob",
+        "Bash",
+        "Task"
+      ],
+      "model": "opus",
       "path": ".keystone/harness/skills/keystone-audit/SKILL.md",
       "provenance": "project"
     },
@@ -713,6 +842,16 @@
         "bootstrap the keystone harness",
         "first-time setup"
       ],
+      "tools": [
+        "Read",
+        "Grep",
+        "Glob",
+        "Bash",
+        "Write",
+        "Edit",
+        "Task"
+      ],
+      "model": "opus",
       "path": ".keystone/harness/skills/keystone-bootstrap/SKILL.md",
       "provenance": "project"
     },
@@ -728,6 +867,13 @@
         "run drift sensor",
         "drift check"
       ],
+      "tools": [
+        "Read",
+        "Bash",
+        "Grep",
+        "Glob"
+      ],
+      "model": "sonnet",
       "path": ".keystone/harness/skills/keystone-check-drift/SKILL.md",
       "provenance": "project"
     },
@@ -743,6 +889,15 @@
         "triage debt ledger",
         "debt review"
       ],
+      "tools": [
+        "Read",
+        "Grep",
+        "Glob",
+        "Bash",
+        "Write",
+        "Edit"
+      ],
+      "model": "opus",
       "path": ".keystone/harness/skills/keystone-debt-review/SKILL.md",
       "provenance": "project"
     },
@@ -758,6 +913,10 @@
         "regenerate INDEX.json",
         "reindex primitives"
       ],
+      "tools": [
+        "Bash"
+      ],
+      "model": "sonnet",
       "path": ".keystone/harness/skills/keystone-index/SKILL.md",
       "provenance": "project"
     },
@@ -773,6 +932,14 @@
         "capture a learning candidate",
         "log a surprise"
       ],
+      "tools": [
+        "Read",
+        "Write",
+        "Edit",
+        "Grep",
+        "Glob"
+      ],
+      "model": "opus",
       "path": ".keystone/harness/skills/keystone-learn/SKILL.md",
       "provenance": "project"
     },
@@ -789,6 +956,12 @@
         "go solo",
         "go paired"
       ],
+      "tools": [
+        "Read",
+        "Write",
+        "Edit"
+      ],
+      "model": "sonnet",
       "path": ".keystone/harness/skills/keystone-mode/SKILL.md",
       "provenance": "project"
     },
@@ -803,6 +976,14 @@
         "add a new action",
         "scaffold a lifecycle action"
       ],
+      "tools": [
+        "Read",
+        "Write",
+        "Edit",
+        "Glob",
+        "Bash"
+      ],
+      "model": "sonnet",
       "path": ".keystone/harness/skills/keystone-new-action/SKILL.md",
       "provenance": "project"
     },
@@ -817,6 +998,14 @@
         "add a host adapter",
         "scaffold a new agent target"
       ],
+      "tools": [
+        "Read",
+        "Write",
+        "Edit",
+        "Glob",
+        "Bash"
+      ],
+      "model": "sonnet",
       "path": ".keystone/harness/skills/keystone-new-adapter/SKILL.md",
       "provenance": "project"
     },
@@ -831,6 +1020,14 @@
         "add corpus reasoning",
         "scaffold a corpus entry"
       ],
+      "tools": [
+        "Read",
+        "Write",
+        "Edit",
+        "Glob",
+        "Bash"
+      ],
+      "model": "sonnet",
       "path": ".keystone/harness/skills/keystone-new-corpus/SKILL.md",
       "provenance": "project"
     },
@@ -846,6 +1043,14 @@
         "scaffold a rule guide",
         "new keystone rule"
       ],
+      "tools": [
+        "Read",
+        "Write",
+        "Edit",
+        "Glob",
+        "Bash"
+      ],
+      "model": "sonnet",
       "path": ".keystone/harness/skills/keystone-new-guide/SKILL.md",
       "provenance": "project"
     },
@@ -860,6 +1065,14 @@
         "add a new playbook",
         "scaffold a workflow"
       ],
+      "tools": [
+        "Read",
+        "Write",
+        "Edit",
+        "Glob",
+        "Bash"
+      ],
+      "model": "sonnet",
       "path": ".keystone/harness/skills/keystone-new-playbook/SKILL.md",
       "provenance": "project"
     },
@@ -874,6 +1087,14 @@
         "bootstrap a policy repo",
         "scaffold a keystone policy"
       ],
+      "tools": [
+        "Read",
+        "Write",
+        "Edit",
+        "Glob",
+        "Bash"
+      ],
+      "model": "sonnet",
       "path": ".keystone/harness/skills/keystone-new-policy/SKILL.md",
       "provenance": "project"
     },
@@ -888,6 +1109,14 @@
         "add a sensor",
         "scaffold a new check"
       ],
+      "tools": [
+        "Read",
+        "Write",
+        "Edit",
+        "Glob",
+        "Bash"
+      ],
+      "model": "sonnet",
       "path": ".keystone/harness/skills/keystone-new-sensor/SKILL.md",
       "provenance": "project"
     },
@@ -903,6 +1132,14 @@
         "orient on this task",
         "load idioms for the touched region"
       ],
+      "tools": [
+        "Read",
+        "Grep",
+        "Glob",
+        "Bash",
+        "Task"
+      ],
+      "model": "opus",
       "path": ".keystone/harness/skills/keystone-orient/SKILL.md",
       "provenance": "project"
     },
@@ -918,6 +1155,14 @@
         "run review sensors",
         "semantic review"
       ],
+      "tools": [
+        "Read",
+        "Grep",
+        "Glob",
+        "Bash",
+        "Task"
+      ],
+      "model": "opus",
       "path": ".keystone/harness/skills/keystone-review/SKILL.md",
       "provenance": "project"
     },
@@ -933,6 +1178,14 @@
         "spec this task",
         "what are we building"
       ],
+      "tools": [
+        "Read",
+        "Write",
+        "Edit",
+        "Grep",
+        "Glob"
+      ],
+      "model": "opus",
       "path": ".keystone/harness/skills/keystone-spec/SKILL.md",
       "provenance": "project"
     },
@@ -948,6 +1201,15 @@
         "promote learning candidates",
         "promote inbox to guides"
       ],
+      "tools": [
+        "Read",
+        "Write",
+        "Edit",
+        "Grep",
+        "Glob",
+        "Bash"
+      ],
+      "model": "opus",
       "path": ".keystone/harness/skills/keystone-synthesize/SKILL.md",
       "provenance": "project"
     },
@@ -963,6 +1225,13 @@
         "audit policy drift",
         "check strict violations"
       ],
+      "tools": [
+        "Read",
+        "Bash",
+        "Grep",
+        "Glob"
+      ],
+      "model": "opus",
       "path": ".keystone/harness/skills/keystone-verify/SKILL.md",
       "provenance": "project"
     }

@@ -7,7 +7,7 @@ Loaded ambient; enforced by the [drift sensor](../../../sensors/drift.md). The c
 
 **A control without evidence is not a control.** The auditor cannot accept "we do this" as proof of doing it; they need the artifacts — logs, tickets, screenshots, signed reviews. Build operational practices that produce evidence as a by-product; do not build them in parallel to a separate "compliance ceremony."
 
-## GOLDEN PATH
+## GOLDEN RULE
 
 - **Aim for evidence that exists *because* of the work, not in addition to it.** If your access reviews are quarterly tickets that take an afternoon, the rest of the team is doing it because of the ticket — not because the review is meaningful. The audit will accept it; the underlying control is weak.
 - **Aim for one identity provider, one access management surface.** Federated SSO with SCIM for provisioning/deprovisioning eliminates a class of findings before they arrive.

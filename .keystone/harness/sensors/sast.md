@@ -2,6 +2,10 @@
 kind: sensor
 id: sast
 description: 'Static application security testing — pattern-based detection of insecure code in the source tree (SQL injection, command injection, weak...'
+host_triggers:
+  - phase: Stop
+    command: true
+    timeout: 30
 ---
 # Sensor: sast
 

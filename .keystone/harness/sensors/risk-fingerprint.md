@@ -2,6 +2,10 @@
 kind: sensor
 id: risk-fingerprint
 description: 'Computes complexity + coupling + coverage patterns per region.'
+host_triggers:
+  - phase: Stop
+    command: true
+    timeout: 30
 ---
 # Sensor: risk-fingerprint
 

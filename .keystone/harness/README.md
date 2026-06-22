@@ -51,7 +51,7 @@ Policies are markdown, vendored, gitignored, hash-verified, and drift-reset by `
 
 The core distinction in the harness:
 
-- **Guides are rules.** Three tiers: regular **RULES** (the default), **GOLDEN PATH** (aspirational but explicit; stronger than regular), and **IRON LAWS** (non-negotiable; rare by design). **Always loaded** so the agent is always under their constraint. Adapters lift these into the agent's rules surface; the drift sensor checks for violations.
+- **Guides are rules.** Three tiers: regular **RULES** (the default), **GOLDEN RULE** (aspirational but explicit; stronger than regular), and **IRON LAWS** (non-negotiable; rare by design). **Always loaded** so the agent is always under their constraint. Adapters lift these into the agent's rules surface; the drift sensor checks for violations.
 - **Corpus is information.** The full reasoning, the literature, the anti-patterns, the references. **Loaded on demand** — only when the agent needs to look up *why* a rule exists, or when the rules don't cover the situation and the agent needs background to reason from.
 
 For each principle, idiom, or domain concern, the corpus file and the guide file are paired — the corpus explains, the guide commands. Process is mostly rules, so it lives entirely under `guides/process/`. State is mostly information, so it lives entirely under `corpus/state/`.
@@ -140,7 +140,7 @@ Agents without a notion of autonomy levels collapse to a single mode; the phases
 Carried across every layer:
 
 - **RULES** — regular rules. The default tier; most directives land here. `## RULES` heading. Lives in a `guides/` file.
-- **GOLDEN PATH** — strong, explicit standards. Stronger than regular rules; deviation requires reasoning. May be concrete ("inject dependencies via the constructor; do not new them up inside other classes") or aspirational ("controllers should be thin; delegate to services"). `## GOLDEN PATH` heading. Lives in a `guides/` file.
+- **GOLDEN RULE** — strong, explicit standards. Stronger than regular rules; deviation requires reasoning. May be concrete ("inject dependencies via the constructor; do not new them up inside other classes") or aspirational ("controllers should be thin; delegate to services"). `## GOLDEN RULE` heading. Lives in a `guides/` file.
 - **IRON LAW** — non-negotiable. Violation causes real damage (incidents, security, lost work). Rare by design. `## IRON LAW` heading. Lives in a `guides/` file.
 - The special tiers (IRON LAW, GOLDEN RULE) are opt-in during **synthesize** — confirmed by the user, not auto-applied. Default new rules to `## RULES`; keeping the special labels rare is what keeps them load-bearing.
 - Corpus files end with a forward-link to the paired guide file (when one exists).

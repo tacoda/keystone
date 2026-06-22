@@ -95,6 +95,7 @@ type Frontmatter struct {
 	Phase    string   `yaml:"phase,omitempty"    json:"phase,omitempty"`
 	Triggers []string `yaml:"triggers,omitempty" json:"triggers,omitempty"`
 	Tools    []string `yaml:"tools,omitempty"    json:"tools,omitempty"`
+	Model    string   `yaml:"model,omitempty"    json:"model,omitempty"`
 	Args     []Arg    `yaml:"args,omitempty"     json:"args,omitempty"`
 
 	Traces []string `yaml:"traces,omitempty" json:"traces,omitempty"`
@@ -102,6 +103,30 @@ type Frontmatter struct {
 
 	Severity string `yaml:"severity,omitempty" json:"severity,omitempty"`
 	Tier     string `yaml:"tier,omitempty"     json:"tier,omitempty"`
+
+	// HostTriggers is the per-host activation surface for computational
+	// sensors. Same pattern as other primitive frontmatter — declared
+	// inline in the sensor's `.keystone/harness/sensors/<id>.md` rather
+	// than in a separate config file. Each entry projects to one host
+	// hook entry (Claude Code: .claude/settings.json; Cursor: equivalent
+	// hook config; etc.) via per-host adapters. Empty for LLM-judgment
+	// sensors (review-*, code-debt) — those activate via actions, not
+	// ambient hook fire.
+	HostTriggers []HostTrigger `yaml:"host_triggers,omitempty" json:"host_triggers,omitempty"`
+}
+
+// HostTrigger is one host-native hook declaration in a sensor's
+// frontmatter. Field names use snake_case for YAML consistency with
+// the rest of keystone's primitive schema.
+//
+// Phase values: PreToolUse | PostToolUse | Stop | UserPromptSubmit
+// (Claude Code's vocabulary; other host adapters translate at their
+// projection layer).
+type HostTrigger struct {
+	Phase   string `yaml:"phase"             json:"phase"`
+	Matcher string `yaml:"matcher,omitempty" json:"matcher,omitempty"`
+	Command string `yaml:"command"           json:"command"`
+	Timeout int    `yaml:"timeout,omitempty" json:"timeout,omitempty"`
 }
 
 // Arg is a parameter for command and prompt primitives. Free-form on

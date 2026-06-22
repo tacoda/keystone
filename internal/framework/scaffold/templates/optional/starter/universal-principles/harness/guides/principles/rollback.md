@@ -2,7 +2,7 @@
 
 The non-negotiable and strongly-preferred rules from [`corpus/principles/rollback.md`](../../corpus/principles/rollback.md). Loaded ambient; enforced at planning and release.
 
-## GOLDEN PATH
+## GOLDEN RULE
 
 - **Aim for every change to have a written rollback path before it merges.** "Revert the PR" is a valid rollback for pure-code changes — write it down anyway. For changes involving migrations, infrastructure, external services, or data, "revert the PR" is **not** sufficient. The rollback path must name the exact steps and the expected blast radius.
 - **Aim to ship behind a flag** for risky changes. A change behind an off-by-default flag is a change that is not yet live. See [[modern-software-engineering]] on decoupling deployment from release.

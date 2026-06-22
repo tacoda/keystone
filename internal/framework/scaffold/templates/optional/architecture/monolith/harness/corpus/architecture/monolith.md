@@ -19,7 +19,7 @@ When these are honored, the monolith *splits cleanly* later if scale demands. Wh
 
 ## When the monolith is the right answer
 
-- The team is small enough that one deploy serves everyone (roughly: under 50 engineers shipping to the same codebase). See [[microservices]] golden path — service count should be staffed.
+- The team is small enough that one deploy serves everyone (roughly: under 50 engineers shipping to the same codebase). See [[microservices]] golden rule — service count should be staffed.
 - The product is still finding fit. Boundaries chosen too early ossify in the wrong places.
 - Operational maturity (observability, paging, runbooks) is not in place yet. A distributed system pre-mature for the team that runs it produces incident frequency the team cannot keep up with.
 - Local-call latency matters. A monolith does in microseconds what a distributed call does in milliseconds; multiply by request fanout. See [[distributed-systems-fallacies]] (latency is zero).

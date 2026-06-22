@@ -1,11 +1,17 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
 
+	"github.com/tacoda/keystone/internal/framework/adapters/agnostic"
+	"github.com/tacoda/keystone/internal/framework/adapters/aider"
+	"github.com/tacoda/keystone/internal/framework/adapters/claudecode"
+	"github.com/tacoda/keystone/internal/framework/adapters/continueide"
+	"github.com/tacoda/keystone/internal/framework/adapters/cursor"
 	"github.com/tacoda/keystone/internal/framework/config"
 	"github.com/tacoda/keystone/internal/framework/primitive"
 )
@@ -66,6 +72,73 @@ func runProject(args []string) error {
 		}
 	}
 	fmt.Fprintf(os.Stdout, "✓ keystone project — projected %d primitive(s)\n", wrote)
+
+	// Run host adapters. Each adapter projects the host-specific
+	// surface (hooks → .claude/settings.json, .cursor/rules/, etc.).
+	// Source of truth for hooks lives in sensor frontmatter under
+	// `.keystone/harness/sensors/` — the adapter reads the already-walked
+	// primitive slice rather than walking again.
+	cfg, cfgErr := config.ReadProjectConfig(absDir)
+	if cfgErr != nil && !errors.Is(cfgErr, os.ErrNotExist) {
+		fmt.Fprintf(os.Stderr, "keystone project: read keystone.json: %v\n", cfgErr)
+	}
+
+	// Agnostic surface: AGENTS.md is always projected so every coding
+	// agent (Aider, Cline, Cursor, OpenCode, Roo, generic readers) gets
+	// the same orientation Claude Code does.
+	ares, err := agnostic.ProjectAgentsMD(absDir, agnostic.DefaultBody())
+	if err != nil {
+		return fmt.Errorf("agnostic AGENTS.md: %w", err)
+	}
+	if ares.Wrote {
+		fmt.Fprintf(os.Stdout, "  wrote: %s\n", ares.Path)
+	}
+
+	// Claude Code adapter: hooks region in .claude/settings.json.
+	hres, err := claudecode.ProjectHooks(absDir, primitives)
+	if err != nil {
+		return fmt.Errorf("claudecode hooks: %w", err)
+	}
+	if hres.Wrote {
+		fmt.Fprintf(os.Stdout, "  wrote: %s (+%d managed hook(s), -%d stale)\n",
+			hres.Path, hres.Added, hres.Removed)
+	} else if hres.Added > 0 {
+		fmt.Fprintf(os.Stdout, "  unchanged: %s (%d managed hook(s))\n",
+			hres.Path, hres.Added)
+	}
+
+	// Opt-in cross-host adapters. Selection via keystone.json
+	// `adapters:` list. Each adapter writes its host's surface and
+	// reports the count of files emitted.
+	if cfg != nil {
+		if cfg.HasAdapter(config.AdapterCursor) {
+			cres, err := cursor.ProjectRules(absDir, primitives)
+			if err != nil {
+				return fmt.Errorf("cursor rules: %w", err)
+			}
+			fmt.Fprintf(os.Stdout, "  cursor: %d rule(s) written, %d unchanged\n",
+				cres.Wrote, cres.Unchanged)
+		}
+		if cfg.HasAdapter(config.AdapterAider) {
+			ares, err := aider.ProjectAider(absDir, agnostic.DefaultBody())
+			if err != nil {
+				return fmt.Errorf("aider: %w", err)
+			}
+			if len(ares.Wrote) > 0 {
+				fmt.Fprintf(os.Stdout, "  aider: wrote %s\n", strings.Join(ares.Wrote, ", "))
+			} else {
+				fmt.Fprintf(os.Stdout, "  aider: unchanged\n")
+			}
+		}
+		if cfg.HasAdapter(config.AdapterContinue) {
+			cnres, err := continueide.ProjectRules(absDir, primitives)
+			if err != nil {
+				return fmt.Errorf("continue rules: %w", err)
+			}
+			fmt.Fprintf(os.Stdout, "  continue: %d rule(s) written, %d unchanged\n",
+				cnres.Wrote, cnres.Unchanged)
+		}
+	}
 	return nil
 }
 

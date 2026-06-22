@@ -7,7 +7,7 @@ Loaded ambient; enforced by the [drift sensor](../../sensors/drift.md). The corp
 
 **Names are part of the contract.** A function, class, or module that does more or less than its name implies has lied — and a reader who acted on the lie will be wrong. If the name no longer fits the behavior, change one of them. See [[least-astonishment]] (names as promises) and [[hyrums-law]] (callers depend on observable properties; the name is one of them).
 
-## GOLDEN PATH
+## GOLDEN RULE
 
 - **Aim for names that survive review without a glossary.** A reviewer who has never seen the code should be able to guess what each name means.
 - **Aim for the most specific accurate name.** Not the shortest, not the longest — the most *informative*. `fetchActiveUsers` beats `fetch` and beats `getActiveUsersFromDatabaseAndCacheThem`.

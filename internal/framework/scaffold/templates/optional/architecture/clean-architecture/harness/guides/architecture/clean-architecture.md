@@ -7,7 +7,7 @@ Loaded ambient; enforced by the [drift sensor](../../../sensors/drift.md). The c
 
 **No imports go outward.** A grep of every inner-ring file for an outer-ring identifier must return zero results. The rule is not "minimize" — it is **zero**. If you cannot enforce it with directory structure, package visibility, or a linter, the architecture is decorative.
 
-## GOLDEN PATH
+## GOLDEN RULE
 
 - **Aim for inner rings that compile and test without any outer ring.** The entities and use cases should build into a library with no framework or database dependencies.
 - **Aim for interfaces owned by the consumer.** The use case owns the `UserRepository` interface; the database adapter implements it. The interface lives in the inner ring.

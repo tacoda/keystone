@@ -2,6 +2,10 @@
 kind: sensor
 id: coverage
 description: 'Reads test coverage and updates the State layer.'
+host_triggers:
+  - phase: Stop
+    command: true
+    timeout: 120
 ---
 # Sensor: coverage
 

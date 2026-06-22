@@ -15,7 +15,7 @@ The rules from [`corpus/idioms/harness-content/state-files.md`](../../../corpus/
 - **No silent overwrites.** Every state-file write goes through the agent's edit primitive so the user sees the diff. Sensors that update state must surface their diff for review.
 - **Do not hand-edit derived sections.** The `## Index` table in `GLOBS_INDEX.md` is regenerated. `quality-radar.md`, `risk-fingerprints.md`, `traffic-topology.md` are sensor snapshots — replace whole-file via the sensor, never patch.
 
-## GOLDEN PATH
+## GOLDEN RULE
 
 - `CODEBASE_STATE.md`: hand-edits OK, but keep section anchors (`## Tool commands`, `## Sensors`, `## Stacks`, `## Frameworks & libraries`, `## Regions`, `## CI`). `last_reconciled` in frontmatter bumps on every meaningful change.
 - `code-debt.md` / `harness-debt.md`: edit during `debt-review` / `audit`. Each entry names the trigger, the impact, and the next step.

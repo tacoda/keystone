@@ -2,6 +2,11 @@
 kind: sensor
 id: secret-scan
 description: 'Scans the diff (or repo, on audit) for committed secrets — API keys, tokens, private keys, credentials.'
+host_triggers:
+  - phase: PreToolUse
+    matcher: "Edit|Write|MultiEdit"
+    command: keystone verify --sensor secret-scan
+    timeout: 5
 ---
 # Sensor: secret-scan
 

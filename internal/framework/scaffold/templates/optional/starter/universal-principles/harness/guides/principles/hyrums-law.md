@@ -7,7 +7,7 @@ Loaded ambient; enforced by the [drift sensor](../../sensors/drift.md). The corp
 
 **The contract is what callers can observe, not what you intended.** The honest version of "this is an implementation detail" is "no caller has noticed this yet" — which is true until it isn't. Plan changes against the observable surface, not against the documented one. The documented one is a subset.
 
-## GOLDEN PATH
+## GOLDEN RULE
 
 - **Aim to shrink the observable surface.** Hide what you can; the smaller the surface, the smaller the contract that emerges. See [[information-hiding]] — Parnas's principle is Hyrum's defense.
 - **Aim for versioning at every public interface.** Versioning gives you a way to evolve; the only alternative is freezing the behavior forever.

@@ -67,6 +67,20 @@ func runIndex(args []string) error {
 	}
 	fmt.Fprintf(os.Stdout, "✓ keystone index — wrote %s (%d primitive(s) across %d kind(s))\n",
 		rel, len(idx.Primitives), len(idx.ByKind))
+
+	// INDEX.lite.json — the cheap discovery surface. CLAUDE.md points
+	// agents here for first-pass browsing; the full INDEX is opened
+	// only when a path/glob/trigger is needed to activate a primitive.
+	lite := primitive.BuildLite(idx)
+	liteOutPath := filepath.Join(absDir, config.KeystoneDir(harnessRoot), config.IndexLiteName)
+	if err := primitive.WriteLite(liteOutPath, lite); err != nil {
+		return err
+	}
+	liteRel, _ := filepath.Rel(absDir, liteOutPath)
+	if liteRel == "" {
+		liteRel = liteOutPath
+	}
+	fmt.Fprintf(os.Stdout, "✓ keystone index — wrote %s (lite descriptor)\n", liteRel)
 	return nil
 }
 

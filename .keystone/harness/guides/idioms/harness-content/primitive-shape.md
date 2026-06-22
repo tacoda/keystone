@@ -17,7 +17,7 @@ The rules from [`corpus/idioms/harness-content/primitive-shape.md`](../../../cor
 - **`globs:` narrows, never broadens.** A guide with globs activates only when its ambient rule already said yes AND a touched file matches. Globs cannot force a guide to fire outside its topic.
 - **No hand-edits to generated files.** `INDEX.json` and the `## Index` table in `GLOBS_INDEX.md` are regenerated; manual edits are overwritten.
 
-## GOLDEN PATH
+## GOLDEN RULE
 
 - New guide → write the paired corpus entry in the same change. Either side alone is a smell the **harness-debt** sensor flags.
 - After any primitive add / move / delete → run `keystone index` so `INDEX.json` reflects the new shape. If the primitive is a skill / subagent / command, also run `keystone project` so `.claude/` regenerates.

@@ -7,7 +7,7 @@ Loaded ambient; enforced by the [drift sensor](../../sensors/drift.md). The corp
 
 **Ambiguous input is invalid input.** If two reasonable readings of a payload exist, you do not get to pick one. Reject the input and surface the ambiguity. Silent interpretation of ambiguous input is how request smuggling, JSON parser confusion, and header-injection vulnerabilities get into production.
 
-## GOLDEN PATH
+## GOLDEN RULE
 
 - **Aim to send the strictest, most canonical form your spec allows.** It is the most interoperable.
 - **Aim to accept only what is unambiguously valid.** Reject everything else with a useful, structured error.

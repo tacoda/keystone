@@ -2,6 +2,10 @@
 kind: sensor
 id: stack-drift
 description: 'Detects when the empirical reality of the repo has diverged from what CODEBASESTATE.'
+host_triggers:
+  - phase: Stop
+    command: true
+    timeout: 30
 ---
 # Sensor: stack-drift
 

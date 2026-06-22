@@ -321,3 +321,61 @@ func readLockfileRaw(t *testing.T, p string) map[string]any {
 	}
 	return out
 }
+
+func TestV2_2_Up_OnEmptyProject(t *testing.T) {
+	// No .keystone/harness/ → migration is a no-op.
+	tmp := t.TempDir()
+	plan, err := planUp_2_2(tmp)
+	if err != nil {
+		t.Fatalf("planUp_2_2: %v", err)
+	}
+	if len(plan.Steps) != 0 {
+		t.Errorf("expected 0 steps on empty project, got %d", len(plan.Steps))
+	}
+}
+
+func TestV2_2_Up_Idempotent(t *testing.T) {
+	tmp := t.TempDir()
+
+	// Seed a minimal harness: one sensor with host_triggers, one guide
+	// with globs, plus keystone.json.
+	mustMkdir(t, filepath.Join(tmp, ".keystone/harness/sensors"))
+	mustMkdir(t, filepath.Join(tmp, ".keystone/harness/guides/idioms/go"))
+	mustWrite(t, filepath.Join(tmp, ".keystone/harness/sensors/build.md"),
+		"---\nkind: sensor\nid: build\ndescription: x\nhost_triggers:\n  - phase: Stop\n    command: go build ./...\n    timeout: 60\n---\nbody\n")
+	mustWrite(t, filepath.Join(tmp, ".keystone/harness/guides/idioms/go/stdlib-first.md"),
+		"---\nkind: guide\nid: guides/idioms/go/stdlib-first\ndescription: x\nglobs:\n  - \"cmd/**/*.go\"\n---\n# Stdlib first\n\n## IRON LAW\n\n- One.\n")
+	mustWrite(t, filepath.Join(tmp, "keystone.json"),
+		"{\"version\":\"2\",\"policies\":[]}\n")
+
+	// First Up run.
+	plan, err := planUp_2_2(tmp)
+	if err != nil {
+		t.Fatalf("planUp_2_2: %v", err)
+	}
+	if err := plan.Execute(tmp); err != nil {
+		t.Fatalf("plan.Execute first run: %v", err)
+	}
+	// Confirm expected artifacts landed.
+	for _, want := range []string{
+		".keystone/INDEX.json",
+		".keystone/INDEX.lite.json",
+		".claude/rules/go-stdlib-first.md",
+		".claude/settings.json",
+		"AGENTS.md",
+	} {
+		if _, err := os.Stat(filepath.Join(tmp, want)); err != nil {
+			t.Errorf("expected %s after migration: %v", want, err)
+		}
+	}
+
+	// Second run on already-migrated tree — should still complete cleanly.
+	plan2, err := planUp_2_2(tmp)
+	if err != nil {
+		t.Fatalf("planUp_2_2 second: %v", err)
+	}
+	if err := plan2.Execute(tmp); err != nil {
+		t.Fatalf("plan.Execute second run: %v", err)
+	}
+}
+

@@ -16,7 +16,7 @@ The rules from [`corpus/idioms/go/stdlib-first.md`](../../../corpus/idioms/go/st
 
 - **No new direct dep added without naming the stdlib (or already-vendored lib) it replaces and why that option is insufficient.** Recorded in the commit message body.
 
-## GOLDEN PATH
+## GOLDEN RULE
 
 - Filesystem / path → `io/fs`, `path/filepath`, `os`.
 - Strings / bytes / parsing → `strings`, `bytes`, `bufio`, `regexp`.

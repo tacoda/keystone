@@ -2,6 +2,11 @@
 kind: sensor
 id: state-region
 description: 'Read-only.'
+host_triggers:
+  - phase: PostToolUse
+    matcher: "Edit|Write"
+    command: true
+    timeout: 5
 ---
 # Sensor: state-region
 

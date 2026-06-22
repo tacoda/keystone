@@ -7,7 +7,7 @@ Loaded ambient; enforced by the [drift sensor](../../../sensors/drift.md). The c
 
 **The model is not a row.** The model is the place where domain behavior lives. A codebase whose "models" only have fields and accessors has implemented persistence-with-controllers, not MVC. The pattern's value comes from the model being substantial.
 
-## GOLDEN PATH
+## GOLDEN RULE
 
 - **Aim for fat models, skinny controllers, dumb views.** The phrase is decades old and still right. Most "MVC done badly" inverts the proportions.
 - **Aim for controllers under ~10 actions.** A controller with 50 methods is hiding several smaller controllers.

@@ -7,7 +7,7 @@ Loaded ambient; enforced by the [drift sensor](../../sensors/drift.md). The corp
 
 **Never continue past a violated invariant.** If your code detects that something it required to be true is false, it has two correct responses: refuse the operation, or terminate the process. Continuing is not one of them, regardless of how disruptive the alternative seems. The disruption is real; the silent corruption is worse.
 
-## GOLDEN PATH
+## GOLDEN RULE
 
 - **Aim to crash at startup, not at runtime.** Configuration errors, missing dependencies, unreachable services discovered at boot should prevent the process from accepting traffic. Failing under load is failing at the worst possible time.
 - **Aim for diagnostics at the source.** A failure message should answer *what failed, where, and what was expected* — not just "operation failed."

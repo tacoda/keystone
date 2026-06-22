@@ -45,6 +45,64 @@ func Write(outPath string, idx Index) error {
 		return fmt.Errorf("marshal index: %w", err)
 	}
 	data = append(data, '\n')
+	return atomicWriteJSON(outPath, data)
+}
+
+// LiteEntry is the minimal descriptor written to INDEX.lite.json. Cheap
+// discovery surface — kind/id/description per primitive, nothing else.
+// The agent reads this on session start to pick which primitives to
+// open; the full INDEX.json (with paths, globs, triggers, traces) is
+// read only when the agent needs to activate a primitive.
+type LiteEntry struct {
+	Kind        string `json:"kind"`
+	ID          string `json:"id"`
+	Description string `json:"description"`
+}
+
+// LiteIndex is the serialized shape of INDEX.lite.json. Sorted by kind
+// then id so diffs stay readable across runs.
+type LiteIndex struct {
+	Version    string      `json:"version"`
+	Generated  string      `json:"generated"`
+	Primitives []LiteEntry `json:"primitives"`
+}
+
+// BuildLite extracts the lite descriptor set from a full index. The
+// only field that varies between runs is the generated timestamp; the
+// content order is stable.
+func BuildLite(idx Index) LiteIndex {
+	out := LiteIndex{
+		Version:    idx.Version,
+		Generated:  idx.Generated,
+		Primitives: make([]LiteEntry, 0, len(idx.Primitives)),
+	}
+	for _, p := range idx.Primitives {
+		out.Primitives = append(out.Primitives, LiteEntry{
+			Kind: p.Kind, ID: p.ID, Description: p.Description,
+		})
+	}
+	sort.SliceStable(out.Primitives, func(i, j int) bool {
+		if out.Primitives[i].Kind != out.Primitives[j].Kind {
+			return out.Primitives[i].Kind < out.Primitives[j].Kind
+		}
+		return out.Primitives[i].ID < out.Primitives[j].ID
+	})
+	return out
+}
+
+// WriteLite serializes the lite index to outPath, atomic-rename style.
+func WriteLite(outPath string, lite LiteIndex) error {
+	data, err := json.MarshalIndent(lite, "", "  ")
+	if err != nil {
+		return fmt.Errorf("marshal lite index: %w", err)
+	}
+	data = append(data, '\n')
+	return atomicWriteJSON(outPath, data)
+}
+
+// atomicWriteJSON centralizes the temp+rename shape both Write and
+// WriteLite use. Single helper, two callers, no behavior split.
+func atomicWriteJSON(outPath string, data []byte) error {
 	if err := os.MkdirAll(filepath.Dir(outPath), 0o755); err != nil {
 		return fmt.Errorf("mkdir %s: %w", filepath.Dir(outPath), err)
 	}

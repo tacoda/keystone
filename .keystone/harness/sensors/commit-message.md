@@ -2,6 +2,11 @@
 kind: sensor
 id: commit-message
 description: 'Validates conventional-commit format and absence of AI attribution.'
+host_triggers:
+  - phase: PreToolUse
+    matcher: "Bash"
+    command: keystone verify --sensor commit-message
+    timeout: 5
 ---
 # Sensor: commit-message
 

@@ -21,7 +21,7 @@ Process is not represented here — the workflow phases are entirely prescriptiv
 For each principle, idiom, or domain concern that has rules:
 
 - The **corpus** file holds the full explanation, citations, anti-patterns, and references.
-- The **guide** file at the parallel path holds the rule sections (IRON LAW / GOLDEN PATH) and a `Traces to:` footer pointing back.
+- The **guide** file at the parallel path holds the rule sections (IRON LAW / GOLDEN RULE) and a `Traces to:` footer pointing back.
 
 Corpus files include a forward-link to the paired guide when one exists:
 
@@ -51,7 +51,7 @@ Each layer documents its file format in its own README. Common convention:
 - One-paragraph intro under the H1.
 - Forward-link to the paired guide (when one exists), as a blockquote near the top.
 - Body sections describe the topic in depth.
-- No `## IRON LAW` or `## GOLDEN PATH` sections — those live in the paired guide.
+- No `## IRON LAW` or `## GOLDEN RULE` sections — those live in the paired guide.
 
 ## Changes when
 

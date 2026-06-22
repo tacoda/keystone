@@ -2,6 +2,171 @@
 
 All notable changes to keystone are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); the project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.0] — 2026-06-22
+
+Minor release. Lands the host-native projection surface — every
+keystone primitive now reaches the agent through the host's native
+loading mechanism (Claude Code rules, Cursor MDC, Aider conventions,
+Continue rules, hooks via `.claude/settings.json`), with `keystone
+watch` re-projecting on every guide / sensor / persona save so edits
+land in the agent's context within ~300ms. Source of truth stays in
+`.keystone/harness/`; everything outside is regenerated.
+
+Backward-compatible. Migration is purely additive: `keystone migrate`
+runs the new projection pipeline once. No primitive content moves; no
+field renames; no manifest changes.
+
+### Added
+
+- **Guide rule shims** (`.claude/rules/<slug>.md`, `.cursor/rules/<slug>.mdc`,
+  `.continue/rules/<slug>.md`). `keystone project` now emits a
+  host-native rule file for every guide that declares non-empty
+  `globs:`. Body extracts the high-signal sections (IRON LAW /
+  GOLDEN RULE / RULES / Anti-patterns) plus a `source:` pointer to
+  the full guide. Each shim's `paths:` / `globs:` mirror the source
+  guide's `globs:` — the host's native auto-loader fires when a
+  touched file matches.
+- **Sensor `host_triggers:` frontmatter**. Computational sensors
+  declare their host hook activation inline:
+  ```yaml
+  host_triggers:
+    - phase: PreToolUse
+      matcher: "Edit|Write|MultiEdit"
+      command: keystone verify --sensor secret-scan
+      timeout: 5
+  ```
+  Source of truth lives in the sensor primitive — the agent-agnostic
+  shape — and projects to host hook configs.
+- **`.claude/settings.json` projection** via the new
+  `internal/framework/adapters/claudecode/` package. Walks sensor
+  primitives, groups by `(phase, matcher)`, merges into the user's
+  settings file with `statusMessage: "keystone:<sensor-id>"` markers.
+  Idempotent + additive: keystone-managed entries are recognized and
+  replaced on each run; user-authored hook entries (and every other
+  top-level key — `permissions`, `enabledMcpjsonServers`, etc.) are
+  preserved byte-for-byte.
+- **`keystone verify --sensor <id>` flag**. Runs one keystone-owned
+  sensor in isolation. Reads Claude Code's hook protocol payload
+  from stdin (`tool_input.file_path`, `tool_input.content`,
+  `tool_input.command`); exit code 0 on pass, 2 on block (Claude
+  Code's block-with-message code), 1 on internal error or unknown
+  sensor. Hook entries call this directly — no `keystone hook`
+  proxy subcommand (that'd leak host shape into the CLI surface).
+- **`secret-scan` sensor**. First keystone-owned sensor with a
+  backing implementation. Blocks edits/writes to sensitive paths
+  (`.env*`, `*.pem`, `*.key`, `credentials.json`, `secrets/`,
+  `vault/`, SSH keys) and edits whose content matches credential
+  patterns (AWS keys, GitHub tokens, Stripe keys, Bearer tokens,
+  PEM-format private keys). `.env.example` is the documented
+  exception.
+- **`internal/framework/sensors/` package** with a runner registry.
+  Sensors register themselves via `init()`; the verify command
+  dispatches by id. Other computational sensors wire to external
+  tools directly via their `host_triggers[].command` (e.g.
+  `go test ./...`, `gofmt -w`, `govulncheck ./...`) — keystone
+  doesn't wrap them.
+- **`INDEX.lite.json`**. Sibling file alongside `INDEX.json`, holding
+  only `{kind, id, description}` per primitive. ~6KB vs 36KB —
+  agents read this for first-pass discovery, then open the full
+  INDEX when a path / glob / trigger is needed. CLAUDE.md's
+  "Read first:" pointer updates to the lite file.
+- **`host_triggers` + `model` + `tools` fields on `Frontmatter`**.
+  Sensor frontmatter gains host_triggers (above); skill and persona
+  frontmatter gain `model:` (host model tier — sonnet for mechanical
+  scaffold, opus for review/synth) and `tools:` (allowlist).
+  Projector passes them through verbatim into `.claude/skills/`
+  and `.claude/agents/` so Claude Code reads them directly.
+- **Per-host adapter packages**:
+  `internal/framework/adapters/claudecode/`,
+  `internal/framework/adapters/cursor/`,
+  `internal/framework/adapters/aider/`,
+  `internal/framework/adapters/continueide/`,
+  `internal/framework/adapters/agnostic/`. Each owns the projection
+  for one host. `keystone project` fans out to every adapter in the
+  configured `adapters:` list; the agnostic one (AGENTS.md at
+  repo root) always runs.
+- **AGENTS.md projection**. Unconditional root file emitted by the
+  agnostic adapter. Mirrors the keystone-harness section of
+  CLAUDE.md so generic agents (Aider, Cline, OpenCode, Roo, Cursor
+  fallback, generic readers) get the same orientation Claude Code
+  agents do.
+- **Aider projection**. `CONVENTIONS.md` (same body as AGENTS.md) +
+  `.aider.conf.yml` with a `read:` block pointing at
+  CONVENTIONS.md, AGENTS.md, and `.keystone/INDEX.lite.json`.
+  Aider sessions auto-load all three.
+- **Cursor projection**. `.cursor/rules/<slug>.mdc` per idiom guide
+  with `description`, `globs`, `alwaysApply: false` frontmatter
+  matching Cursor's expected schema.
+- **Continue projection**. `.continue/rules/<slug>.md` per idiom
+  guide for Continue's newer rules layout.
+- **`adapters:` list in `keystone.json`**. Opt-in cross-host
+  projection. `claude-code` is always projected; `cursor`, `aider`,
+  `continue` are emitted when their adapter name appears in the
+  list. Default = `[]` for back-compat.
+- **`keystone watch` adapter fan-out**. The existing 300ms-debounced
+  watcher now triggers the full projection pipeline on every save
+  under `.keystone/harness/` — INDEX.json + INDEX.lite.json + every
+  per-host adapter. A user editing or saving a guide / sensor /
+  persona sees the host surface update within the debounce window;
+  no manual `keystone project` invocation.
+- **CLAUDE.md preamble**: `## Stack`, `## Layout`, `## Common
+  commands` sections above the existing keystone-harness block.
+  Total file stays under 150 lines. Agents new to the project get
+  oriented without a repo scan.
+
+### Changed
+
+- **Guide shim frontmatter** now uses keystone-native primitive
+  shape (`kind: rule`, `id: rules/<slug>`, `description`, `globs`,
+  `source`, `generated_by`) instead of a host-specific convention.
+  Every keystone-managed file reads through the same frontmatter
+  schema.
+- **`GOLDEN PATH` → `GOLDEN RULE`** across every guide, corpus,
+  template, and adapter doc. The shim section allowlist
+  (`extractGuideSections`) recognizes the new heading. No content
+  rewrites — terminology rename only.
+- **Computational sensors annotated with `host_triggers:`** —
+  `secret-scan`, `commit-message`, `drift`, `build`, `test`,
+  `lint`, `type-check`, `sast`, `vuln-scan`, `stack-drift`,
+  `coverage`, `risk-fingerprint`, `traffic-topology`,
+  `state-region`, `spec-adherence`. LLM-judgment sensors
+  (`review-*`, `code-debt`, `harness-debt`, `quality-radar`,
+  `tracker-card-fetcher`) stay without host_triggers — they
+  activate via actions, not by ambient hook fire.
+- **Skills and personas annotated with `model:` + `tools:`**. Every
+  `.keystone/harness/skills/keystone-*/SKILL.md` and `personas/*.md`
+  declares its host model tier and tool allowlist. Read-only
+  personas no longer carry `Write` in their tool list.
+- **`Project()` orchestrator extends to guides**. The
+  `ProjectionRelPath` switch routes `kind: guide` with non-empty
+  `globs:` to `.claude/rules/<slug>.md` (rule shim) instead of
+  the historical "no projection" outcome. Globless guides — process
+  guides like `spec`, `verification`, `surgical-edits` — stay
+  unprojected; their iron laws are distilled into CLAUDE.md and
+  the full bodies open on demand.
+- **`keystone project` runs adapter fan-out** in addition to the
+  primitive copy step. Hook merge into `.claude/settings.json`,
+  AGENTS.md write, and opt-in cross-host adapters all run in one
+  command. Re-runs are idempotent.
+
+### Migration
+
+`keystone migrate --to 2.2` runs an additive plan:
+
+1. Re-walk `.keystone/harness/` and rebuild `INDEX.json` +
+   `INDEX.lite.json`.
+2. Re-project primitives → `.claude/{agents,commands,skills,rules}`.
+3. Emit AGENTS.md at repo root.
+4. Merge sensor `host_triggers` into `.claude/settings.json`
+   (additive, never overwrites user-authored hooks).
+5. Run opt-in adapters (cursor / aider / continue) for any present
+   in `keystone.json`'s `adapters:` list.
+
+The 2.2 Down plan deletes only generated artifacts — `INDEX.lite.json`,
+`.claude/rules/`, AGENTS.md / CONVENTIONS.md / `.aider.conf.yml`,
+`.cursor/rules/`, `.continue/rules/` — and strips `keystone:*`
+hook entries from `.claude/settings.json`. Source content is preserved.
+
 ## [2.1.1] — 2026-06-18
 
 Patch release. Reshapes the web dashboard into an HTMX SPA with
@@ -525,7 +690,7 @@ inside their native tooling.
   becomes `kind: sensor` + `sensor_kind: computational | inferential`
   (preserved by the migrator).
 - H2-tier parsing on guides is gone in favor of `severity:`. Guides
-  keep the `## IRON LAW(S)` / `## GOLDEN PATH` / `## RULES`
+  keep the `## IRON LAW(S)` / `## GOLDEN RULE` / `## RULES`
   sections for human reading; the parser no longer derives severity
   from them.
 
@@ -668,7 +833,7 @@ Plugin model cleanup. Tier labels (`org` / `team`) were the last carryover from 
 - **State ledger port** — `<harness-root>/corpus/state/<name>.md` is its own port (mutable; written by `bootstrap`/`audit`/`learn`). Full contract at [`docs/ports/state-ledger.md`](docs/ports/state-ledger.md).
 - **Patch port** — the framework-patch runner abstraction. Contract at [`docs/ports/patch.md`](docs/ports/patch.md).
 - **Budget port** — per-port context-token caps in `keystone.json`'s `budgets` block; whitespace-approximate estimator. Contract at [`docs/ports/budget.md`](docs/ports/budget.md).
-- **Rules tiers in guides** — `## IRON LAW(S)` / `## GOLDEN PATH` / `## RULES` strength gradient. Documented in [`docs/ports/guide.md`](docs/ports/guide.md) and [`docs/conventions.md`](docs/conventions.md).
+- **Rules tiers in guides** — `## IRON LAW(S)` / `## GOLDEN RULE` / `## RULES` strength gradient. Documented in [`docs/ports/guide.md`](docs/ports/guide.md) and [`docs/conventions.md`](docs/conventions.md).
 - **Pacing modes** (`paired` / `solo` / `autopilot`) — runtime feature switched via the `mode` action. Documented in `<harness-root>/guides/process/modes.md` and [`docs/conventions.md`](docs/conventions.md).
 
 ### Removed
@@ -1100,7 +1265,7 @@ Introduces a third rule tier — regular **RULES** — as the default for any di
 
 ### Added
 
-- **`## RULES` section** in the guide file format. The default tier; most directives land here. `## IRON LAW(S)` and `## GOLDEN PATH` remain available but are now optional sections, omitted when nothing in a file qualifies.
+- **`## RULES` section** in the guide file format. The default tier; most directives land here. `## IRON LAW(S)` and `## GOLDEN RULE` remain available but are now optional sections, omitted when nothing in a file qualifies.
 - **Rule-tier table in `harness/learning/README.md`** documenting the three tiers, when each is appropriate, and the synthesize prompt flow that requires user confirmation before a candidate lands under a special heading.
 
 ### Changed
@@ -1111,7 +1276,7 @@ Introduces a third rule tier — regular **RULES** — as the default for any di
 
 ### Migration from 0.4.0
 
-- **Existing principle guides are unchanged.** The 29 shipped `harness/guides/principles/*.md` files keep their `## IRON LAW` / `## GOLDEN PATH` sections as authored — those designations were deliberate.
+- **Existing principle guides are unchanged.** The 29 shipped `harness/guides/principles/*.md` files keep their `## IRON LAW` / `## GOLDEN RULE` sections as authored — those designations were deliberate.
 - **Newly synthesized rules** going forward default to a `## RULES` section. Add the section to a guide file the first time a regular rule lands there; existing files with only the special tiers stay as-is until a regular rule joins them.
 - **Custom drift sensor integrations** that previously only inspected IRON LAW headings should be widened to read `## RULES` and treat its findings as warnings.
 
@@ -1174,7 +1339,7 @@ The split is the point: rules are short and high-value-per-token; corpus is long
 - **`harness/corpus/`** — informational layer. Houses `principles/`, `idioms/`, `domain/`, `state/`. Read on-demand via forward-links from paired guides, or when process explicitly references a file.
 - **`harness/guides/`** — rule layer. Houses `principles/`, `idioms/`, `domain/`, `process/`. Always loaded. Enforced by the drift sensor.
 - **`harness/sensors/`** — promoted from `harness/process/sensors.md` (one file) into one file per sensor: `lint`, `type-check`, `test`, `build`, `drift`, `coverage`, `risk-fingerprint`, `traffic-topology`, `state-region`, `commit-message`, `tracker-card-fetcher`, `spec-adherence`, plus a README index.
-- **Paired guide files for every principle** that previously carried `## IRON LAW` / `## GOLDEN PATH` sections. The rule sections moved into `harness/guides/principles/<name>.md`; the original corpus file keeps the reasoning, anti-patterns, and references, plus a forward-link.
+- **Paired guide files for every principle** that previously carried `## IRON LAW` / `## GOLDEN RULE` sections. The rule sections moved into `harness/guides/principles/<name>.md`; the original corpus file keeps the reasoning, anti-patterns, and references, plus a forward-link.
 - **Concern-specific MVC idioms** seeded when `--architecture mvc` is selected: `corpus/idioms/mvc/{models,controllers,views}.md` with paired `guides/idioms/mvc/{models,controllers,views}.md` covering "the model is not a row," "controllers translate, they do not decide," and "views render, they do not compute."
 - **Learning flywheel classification.** The **synthesize** action now explicitly routes each inbox candidate as **rule** (lands in `guides/`) or **information** (lands in `corpus/`). The inbox frontmatter carries a `candidate_kind` hint; synthesize confirms or overrides.
 - **Pruning flywheel asymmetry.** **audit** runs in two passes — a regular pass over guides (rules churn with the codebase) and a rare pass over corpus (only when design / strategy / ideals have moved on).
@@ -1208,7 +1373,7 @@ Path moves for hand-references inside any project that has installed an earlier 
 | `harness/process/sensors.md` | `harness/sensors/<sensor-name>.md` (one file per sensor) + `harness/sensors/README.md` |
 | `harness/state/INSTALL_PROFILE.md` | `harness/corpus/state/INSTALL_PROFILE.md` |
 
-Each principle file previously containing `## IRON LAW` / `## GOLDEN PATH` sections has had those sections moved into a paired `harness/guides/principles/<name>.md`. The corpus file now ends with a forward-link to the guide. If a project has extended a principle file in-place with custom rule sections, hand-port those sections to the matching guide file.
+Each principle file previously containing `## IRON LAW` / `## GOLDEN RULE` sections has had those sections moved into a paired `harness/guides/principles/<name>.md`. The corpus file now ends with a forward-link to the guide. If a project has extended a principle file in-place with custom rule sections, hand-port those sections to the matching guide file.
 
 The internal classification convention is: **rules go in `guides/`, reasoning goes in `corpus/`.** When in doubt during Learning flywheel reviews, default to corpus — adding a guide narrows the agent's behavior across the whole project, so the bar should be higher than adding context.
 

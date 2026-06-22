@@ -7,7 +7,7 @@ Loaded ambient; enforced by the [drift sensor](../../../sensors/drift.md). The c
 
 **No shared database.** Two services that read or write each other's tables are not two services; they are one service with two deployment artifacts. The single biggest predictor of microservice-architecture failure is shared state in a shared schema. Each service owns its data; cross-service data exchange goes through APIs or events.
 
-## GOLDEN PATH
+## GOLDEN RULE
 
 - **Aim for service boundaries that match team boundaries.** Conway's law is descriptive — the architecture *will* mirror the org chart eventually. Pick boundaries the org can actually staff and own.
 - **Aim for synchronous calls minimized; asynchronous events preferred** at service boundaries. Synchronous fan-out cascades tail latency; events isolate. See [[event-driven]].

@@ -2,6 +2,10 @@
 kind: sensor
 id: build
 description: 'The project''s build / compile / package step.'
+host_triggers:
+  - phase: Stop
+    command: go build ./...
+    timeout: 120
 ---
 # Sensor: build
 

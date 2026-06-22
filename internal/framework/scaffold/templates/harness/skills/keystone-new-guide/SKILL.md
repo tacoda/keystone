@@ -52,7 +52,7 @@ full guide port contract.
 
 1. Fill in the rule body — short, declarative bullets under
    `## RULES` (the default tier). Use `## IRON LAW(S)` or
-   `## GOLDEN PATH` only when warranted.
+   `## GOLDEN RULE` only when warranted.
 2. Fill in the paired corpus body — long-form reasoning, anti-patterns,
    references.
 3. Optionally add a `globs:` frontmatter list to narrow activation to

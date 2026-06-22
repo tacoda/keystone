@@ -1,4 +1,10 @@
 {
   "version": "2",
-  "policies": []
+  "policies": [],
+  "adapters": [
+    "claude-code",
+    "cursor",
+    "aider",
+    "continue"
+  ]
 }

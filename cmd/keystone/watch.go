@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"os/signal"
@@ -14,6 +15,11 @@ import (
 	"github.com/fsnotify/fsnotify"
 	"github.com/spf13/cobra"
 
+	"github.com/tacoda/keystone/internal/framework/adapters/agnostic"
+	"github.com/tacoda/keystone/internal/framework/adapters/aider"
+	"github.com/tacoda/keystone/internal/framework/adapters/claudecode"
+	"github.com/tacoda/keystone/internal/framework/adapters/continueide"
+	"github.com/tacoda/keystone/internal/framework/adapters/cursor"
 	"github.com/tacoda/keystone/internal/framework/config"
 	"github.com/tacoda/keystone/internal/framework/primitive"
 )
@@ -146,6 +152,19 @@ func watchRecursive(w *fsnotify.Watcher, root string) error {
 // runPipeline does what each cycle of the watcher runs. Inline —
 // avoids shelling out so the watcher stays responsive on bursty
 // edits.
+//
+// Pipeline order:
+//   1. Walk primitives (one disk scan for the whole cycle)
+//   2. Write INDEX.json + INDEX.lite.json
+//   3. (if doProject) project primitives → .claude/* via primitive.Project
+//   4. (if doProject) project agnostic AGENTS.md
+//   5. (if doProject) project claudecode hooks → .claude/settings.json
+//   6. (if doProject) per-host adapters from keystone.json `adapters:` list
+//   7. (if doLint) run primitive.Lint and report
+//
+// Every adapter is wired here so a user editing or saving a guide /
+// sensor / persona sees the projection update in one debounce window
+// — no manual `keystone project` invocation needed.
 func runPipeline(ctx context.Context, projectDir string, doLint, doProject bool) {
 	t0 := time.Now()
 	primitives, _, err := primitive.Walk(projectDir, config.DefaultHarnessRoot)
@@ -154,9 +173,14 @@ func runPipeline(ctx context.Context, projectDir string, doLint, doProject bool)
 		return
 	}
 	idx := primitive.Build(primitives, time.Now())
-	outPath := filepath.Join(projectDir, config.KeystoneDir(config.DefaultHarnessRoot), config.IndexName)
+	keystoneDir := filepath.Join(projectDir, config.KeystoneDir(config.DefaultHarnessRoot))
+	outPath := filepath.Join(keystoneDir, config.IndexName)
 	if err := primitive.Write(outPath, idx); err != nil {
 		fmt.Fprintf(os.Stderr, "✗ write index: %v\n", err)
+		return
+	}
+	if err := primitive.WriteLite(filepath.Join(keystoneDir, config.IndexLiteName), primitive.BuildLite(idx)); err != nil {
+		fmt.Fprintf(os.Stderr, "✗ write index.lite: %v\n", err)
 		return
 	}
 	rel, _ := filepath.Rel(projectDir, outPath)
@@ -168,6 +192,7 @@ func runPipeline(ctx context.Context, projectDir string, doLint, doProject bool)
 		} else {
 			fmt.Fprint(os.Stdout, ", projections refreshed")
 		}
+		runWatchAdapters(projectDir, primitives)
 	}
 	if doLint {
 		findings := primitive.Lint(primitives)
@@ -184,4 +209,43 @@ func runPipeline(ctx context.Context, projectDir string, doLint, doProject bool)
 		}
 	}
 	fmt.Fprintf(os.Stdout, ") in %s\n", time.Since(t0).Round(time.Millisecond))
+}
+
+// runWatchAdapters mirrors the adapter fan-out in `keystone project`.
+// Failures from any single adapter log a warning but don't abort the
+// watch loop — a half-finished cross-host projection is better than
+// the watcher dying on a transient I/O error.
+func runWatchAdapters(projectDir string, primitives []primitive.Primitive) {
+	// Agnostic AGENTS.md — always emitted.
+	if _, err := agnostic.ProjectAgentsMD(projectDir, agnostic.DefaultBody()); err != nil {
+		fmt.Fprintf(os.Stderr, "; ✗ agnostic AGENTS.md: %v", err)
+	}
+	// Claude Code hooks — always emitted (claude-code is the default host).
+	if _, err := claudecode.ProjectHooks(projectDir, primitives); err != nil {
+		fmt.Fprintf(os.Stderr, "; ✗ claudecode hooks: %v", err)
+	}
+	// Opt-in adapters from keystone.json.
+	cfg, cfgErr := config.ReadProjectConfig(projectDir)
+	if cfgErr != nil && !errors.Is(cfgErr, os.ErrNotExist) {
+		fmt.Fprintf(os.Stderr, "; ✗ read keystone.json: %v", cfgErr)
+		return
+	}
+	if cfg == nil {
+		return
+	}
+	if cfg.HasAdapter(config.AdapterCursor) {
+		if _, err := cursor.ProjectRules(projectDir, primitives); err != nil {
+			fmt.Fprintf(os.Stderr, "; ✗ cursor: %v", err)
+		}
+	}
+	if cfg.HasAdapter(config.AdapterAider) {
+		if _, err := aider.ProjectAider(projectDir, agnostic.DefaultBody()); err != nil {
+			fmt.Fprintf(os.Stderr, "; ✗ aider: %v", err)
+		}
+	}
+	if cfg.HasAdapter(config.AdapterContinue) {
+		if _, err := continueide.ProjectRules(projectDir, primitives); err != nil {
+			fmt.Fprintf(os.Stderr, "; ✗ continue: %v", err)
+		}
+	}
 }

@@ -103,7 +103,7 @@ These fields are how the indexer (and the agent) builds a sparse graph across pr
 
 Rules only.
 
-- **`severity`** — `must` | `should` | `may`. Replaces the H2-tier parsing (`## IRON LAW(S)` / `## GOLDEN PATH` / `## RULES`). Frontmatter wins; the H2 sections remain as human-readable rendering but the parser no longer reads them. `keystone migrate-frontmatter` lifts the tier into severity for existing 1.0.x installs.
+- **`severity`** — `must` | `should` | `may`. Replaces the H2-tier parsing (`## IRON LAW(S)` / `## GOLDEN RULE` / `## RULES`). Frontmatter wins; the H2 sections remain as human-readable rendering but the parser no longer reads them. `keystone migrate-frontmatter` lifts the tier into severity for existing 1.0.x installs.
 - **`tier`** — optional human label. `iron` ↔ `must`, `golden` ↔ `should`, `regular` ↔ `may`. The indexer ignores it; authors keep it for readability.
 
 ## Required by kind

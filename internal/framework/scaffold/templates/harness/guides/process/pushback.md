@@ -7,7 +7,7 @@ description: 'The discipline of disagreeing with the user when the user is wrong
 
 The discipline of disagreeing with the user when the user is wrong. Counterpart to [`modes.md`](modes.md): modes set the conversational pace; pushback governs *what to say* when the agent's analysis differs from the user's.
 
-## GOLDEN PATH
+## GOLDEN RULE
 
 - **Aim to disagree explicitly when the user's premise is wrong.** A wrong premise leads to wrong work. Naming the disagreement is more useful than agreeing and producing something the user did not actually want.
 - **Aim to surface trade-offs the user did not consider.** If the user picked option A and option B is materially better for the goal they stated, say so before doing A.

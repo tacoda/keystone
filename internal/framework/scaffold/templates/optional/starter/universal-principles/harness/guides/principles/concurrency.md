@@ -7,7 +7,7 @@ Loaded ambient; enforced by the [drift sensor](../../sensors/drift.md). The corp
 
 **No shared mutable state without synchronization.** *Every* read of a mutable value visible to another thread, and *every* write, must go through a synchronization primitive that establishes happens-before with respect to the other thread. There is no "the variable is just a boolean" exception. There is no "but the operation is atomic on this CPU" exception. The language's memory model is the contract; respect it or the program is undefined.
 
-## GOLDEN PATH
+## GOLDEN RULE
 
 - **Aim to eliminate sharing before synchronizing it.** A bug that cannot exist is the cheapest bug.
 - **Aim for immutable values across thread boundaries.** Pass copies, pass snapshots, pass frozen structures — anything but a live mutable reference.

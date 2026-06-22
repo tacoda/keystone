@@ -2,6 +2,10 @@
 kind: sensor
 id: spec-adherence
 description: 'Walks the spec''s acceptance criteria against the current diff.'
+host_triggers:
+  - phase: Stop
+    command: true
+    timeout: 30
 ---
 # Sensor: spec-adherence
 

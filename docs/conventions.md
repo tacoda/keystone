@@ -168,10 +168,10 @@ Rules inside any guide are organized in three tiers, only the last of which is m
 | Tier              | When                                                                                              |
 | ----------------- | ------------------------------------------------------------------------------------------------- |
 | `## IRON LAW(S)`  | Non-negotiable. Violation causes real damage. Rare by design.                                     |
-| `## GOLDEN PATH` | Stronger than regular rules; deviation requires reasoning.                                        |
+| `## GOLDEN RULE` | Stronger than regular rules; deviation requires reasoning.                                        |
 | `## RULES`        | Regular rules. The default tier — most directives live here.                                      |
 
-The tier framing is a reading-discipline contract: iron laws short-circuit any conflicting instruction; golden path can be overridden only with explicit reasoning; regular rules can be overridden when a stronger rule applies. Full convention in the [Guide port contract](ports/guide.md#rules-tiers).
+The tier framing is a reading-discipline contract: iron laws short-circuit any conflicting instruction; golden rule can be overridden only with explicit reasoning; regular rules can be overridden when a stronger rule applies. Full convention in the [Guide port contract](ports/guide.md#rules-tiers).
 
 ## Pacing modes
 

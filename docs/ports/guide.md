@@ -28,7 +28,7 @@ globs:               # optional; see "Globs" below
 
 <non-negotiable rules; omit this section when nothing here qualifies>
 
-## GOLDEN PATH
+## GOLDEN RULE
 
 <strong, explicit standards; omit when nothing here qualifies>
 
@@ -51,10 +51,10 @@ Rules in a guide are organized by strength. Only `## RULES` is mandatory — omi
 | Tier              | When to use it                                                                                                         |
 | ----------------- | ---------------------------------------------------------------------------------------------------------------------- |
 | `## IRON LAW(S)`  | Non-negotiable. Violation causes real damage (data loss, security breach, contract break). Rare by design.             |
-| `## GOLDEN PATH` | Stronger than regular rules; **deviation requires reasoning**. May be concrete prescriptions or aspirational ideals.   |
+| `## GOLDEN RULE` | Stronger than regular rules; **deviation requires reasoning**. May be concrete prescriptions or aspirational ideals.   |
 | `## RULES`        | Regular rules. The default tier — most directives live here.                                                           |
 
-The tier framing is part of the agent's reading discipline: iron laws short-circuit any conflicting instruction; golden path can be overridden only with explicit reasoning; regular rules can be overridden when a stronger rule applies.
+The tier framing is part of the agent's reading discipline: iron laws short-circuit any conflicting instruction; golden rule can be overridden only with explicit reasoning; regular rules can be overridden when a stronger rule applies.
 
 ## Default activation by topic
 

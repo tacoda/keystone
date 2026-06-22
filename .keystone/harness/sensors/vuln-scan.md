@@ -2,6 +2,10 @@
 kind: sensor
 id: vuln-scan
 description: 'Scans declared dependencies for known vulnerabilities (CVEs, advisories).'
+host_triggers:
+  - phase: Stop
+    command: true
+    timeout: 120
 ---
 # Sensor: vuln-scan
 

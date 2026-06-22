@@ -7,7 +7,7 @@ description: 'The discipline of verifying that what the agent references — fun
 
 The discipline of verifying that what the agent references — functions, APIs, packages, files, flags — actually exists before invoking it.
 
-## GOLDEN PATH
+## GOLDEN RULE
 
 - **Aim to grep before invoking.** Before calling a function or method, confirm it exists at the expected path with the expected signature. The agent's training data is not the codebase.
 - **Aim to read the manifest before importing.** Before importing a package, confirm it is in the project's dependency list. If it is not, that is a [[dependencies|new-dependency decision]], not a paper-over.

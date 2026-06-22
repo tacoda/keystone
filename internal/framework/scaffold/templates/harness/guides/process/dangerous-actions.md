@@ -35,7 +35,7 @@ The **bootstrap** action specializes this list: it records which integrations ar
 - **Refuse to chain dangerous actions.** One confirmation, one action. Compound commands hide the dangerous step.
 - **Investigate unfamiliar state before deleting it.** An unexpected file or branch may be the user's in-progress work.
 
-## GOLDEN PATH
+## GOLDEN RULE
 
 - **Aim to keep a recovery path open.** Before any destructive op, ask "if this is wrong, how do I undo it in the next minute?" If the answer is "I can't" — stop and confirm.
 - **Aim to never act on shared state without a written audit trail.** A Slack message is a side effect on the team; treat it like a deploy.

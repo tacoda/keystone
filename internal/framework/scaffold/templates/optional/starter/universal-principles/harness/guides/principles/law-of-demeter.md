@@ -7,7 +7,7 @@ Loaded ambient; enforced by the [drift sensor](../../sensors/drift.md). The corp
 
 **A method's coupling is the union of every type it names.** Every chained call adds a type to that union. Demeter is the discipline of keeping the union small enough that you can hold it in your head while you reason about change.
 
-## GOLDEN PATH
+## GOLDEN RULE
 
 - **Aim for methods that operate on what they were given.** Parameters, fields, locals — not the transitive object graph reachable from them.
 - **Aim for behavior at the right level.** If the caller is computing something *about* an object's internals, the computation probably belongs inside the object.

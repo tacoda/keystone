@@ -39,7 +39,7 @@ enough information.
   authority. Ask the user to resolve, then record the resolution in
   the appropriate layer.
 
-## GOLDEN PATH
+## GOLDEN RULE
 
 - **Read the index before reading bodies.** Open
   `.keystone/INDEX.json` first; load primitive bodies only on

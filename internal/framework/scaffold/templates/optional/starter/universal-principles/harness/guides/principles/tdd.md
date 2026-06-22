@@ -7,7 +7,7 @@ Loaded ambient; enforced by the [drift sensor](../../sensors/drift.md). The corp
 
 **Never write production code without a failing test for it.** The exceptions are rare and identifiable: prototypes you will throw away, exploratory spikes meant to learn (which are then thrown away or rewritten under tests), and trivial declarative changes (renames, comments, formatting). Everything else moves through Red-Green-Refactor or it is not under the discipline.
 
-## GOLDEN PATH
+## GOLDEN RULE
 
 - **Aim for cycles measured in minutes, not hours.** A long red phase is a hint that the step is too big — split it.
 - **Aim to watch the test fail before making it pass.** The watching is what proves the test is wired to the code. Skip it and you will eventually ship a test that passes whether the code works or not.

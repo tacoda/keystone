@@ -28,6 +28,13 @@ const LockfileName = "lockfile.json"
 // inside the harness tree.
 const IndexName = "INDEX.json"
 
+// IndexLiteName is the basename of the cheap-discovery sibling index
+// (kind/id/description only). Written alongside INDEX.json by every
+// `keystone index` run. Agents reference this for first-pass browsing;
+// INDEX.json is opened only when a path, glob, or trigger is needed to
+// activate a specific primitive.
+const IndexLiteName = "INDEX.lite.json"
+
 // KeystoneDir returns the parent directory of the configured harness
 // root — the `.keystone/` umbrella that holds the lockfile, the
 // INDEX.json, and the harness/ subtree. For the default

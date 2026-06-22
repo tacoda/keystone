@@ -2,6 +2,10 @@
 kind: sensor
 id: type-check
 description: 'Signature and contract consistency.'
+host_triggers:
+  - phase: Stop
+    command: go vet ./...
+    timeout: 60
 ---
 # Sensor: type-check
 
