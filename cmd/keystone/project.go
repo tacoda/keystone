@@ -59,6 +59,12 @@ func runProject(args []string) error {
 		fmt.Fprintf(os.Stderr, "keystone project: %s: %s\n", w.Path, w.Message)
 	}
 
+	composed, composeErrs := primitive.Compose(primitives)
+	for _, e := range composeErrs {
+		fmt.Fprintf(os.Stderr, "keystone project: %s\n", e.Error())
+	}
+	primitives = composed
+
 	results, err := primitive.Project(absDir, primitives)
 	if err != nil {
 		return err

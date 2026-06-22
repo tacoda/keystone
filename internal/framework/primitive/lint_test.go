@@ -148,3 +148,25 @@ func TestLint_Clean(t *testing.T) {
 		t.Errorf("expected clean lint, got errors: %v", fs)
 	}
 }
+
+func TestLint_TagsKebabCase(t *testing.T) {
+	prims := []Primitive{
+		{
+			Frontmatter: Frontmatter{
+				Kind: "guide", ID: "g1", Description: "x", Globs: []string{"x"},
+				Tags: []string{"valid-tag", "Bad_Tag", "ALSO-BAD"},
+			},
+			Path: ".keystone/harness/guides/g1.md",
+		},
+	}
+	findings := Lint(prims)
+	errs := 0
+	for _, f := range findings {
+		if f.Severity == FindingError && strings.Contains(f.Message, "kebab-case") {
+			errs++
+		}
+	}
+	if errs != 2 {
+		t.Errorf("expected 2 kebab-case errors, got %d (all findings: %+v)", errs, findings)
+	}
+}

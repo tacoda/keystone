@@ -6,6 +6,10 @@ tools:
   - Read
   - Grep
 model: opus
+tags:
+  - audit
+  - flywheel
+  - learning
 ---
 
 # Learning curator

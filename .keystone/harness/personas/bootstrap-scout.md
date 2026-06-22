@@ -8,6 +8,9 @@ tools:
   - Glob
   - Bash
 model: sonnet
+tags:
+  - scaffold
+  - bootstrap
 ---
 
 # Bootstrap scout

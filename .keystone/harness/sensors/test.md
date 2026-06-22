@@ -6,6 +6,8 @@ host_triggers:
   - phase: Stop
     command: go test ./...
     timeout: 300
+tags:
+  - computational
 ---
 # Sensor: test
 

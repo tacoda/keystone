@@ -2,9 +2,14 @@ package primitive
 
 import (
 	"fmt"
+	"regexp"
 	"sort"
 	"strings"
 )
+
+// tagPattern enforces kebab-case for tag values — lowercase letters,
+// digits, and hyphens; must start with a letter; max 64 chars.
+var tagPattern = regexp.MustCompile(`^[a-z][a-z0-9-]{0,63}$`)
 
 // Severity classifies a Finding. Errors fail the lint; warnings are
 // reported but do not.
@@ -87,6 +92,19 @@ func Lint(primitives []Primitive) []Finding {
 
 	findings = append(findings, lintProjectionCollisions(primitives)...)
 
+	// Compose-time violations (unknown concern id, leaf violation,
+	// duplicate include) are lint errors — they break the indexer's
+	// ability to produce a deterministic merged descriptor.
+	_, composeErrs := Compose(primitives)
+	for _, e := range composeErrs {
+		findings = append(findings, Finding{
+			Severity: FindingError,
+			Path:     e.Path,
+			ID:       e.ID,
+			Message:  e.Message,
+		})
+	}
+
 	sort.SliceStable(findings, func(i, j int) bool {
 		if findings[i].Severity != findings[j].Severity {
 			return findings[i].Severity == FindingError && findings[j].Severity == FindingWarning
@@ -136,6 +154,16 @@ func lintOne(p Primitive, known map[Kind]bool, exists map[string]bool) []Finding
 	case KindPersona:
 		if len(p.Tools) == 0 {
 			add(FindingError, "persona missing `tools:` — persona wraps subagent; declare the tool allow-list explicitly")
+		}
+	}
+
+	// tags: kebab-case enforcement. Tags are an orthogonal taxonomy
+	// surfaced by `keystone list --tag X` — keeping the shape
+	// predictable makes them grep-friendly and prevents the slow
+	// drift to a free-form catch-all field.
+	for _, t := range p.Tags {
+		if !tagPattern.MatchString(t) {
+			add(FindingError, fmt.Sprintf("tag %q is not kebab-case (lowercase letters, digits, hyphens; must start with a letter)", t))
 		}
 	}
 

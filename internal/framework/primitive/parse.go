@@ -67,6 +67,8 @@ func (f *Frontmatter) UnmarshalYAML(value *yaml.Node) error {
 		Deps         []string      `yaml:"deps"`
 		Severity     string        `yaml:"severity"`
 		Tier         string        `yaml:"tier"`
+		Tags         []string      `yaml:"tags"`
+		Includes     []string      `yaml:"includes"`
 		HostTriggers []HostTrigger `yaml:"host_triggers"`
 	}
 	var s shadow
@@ -85,6 +87,8 @@ func (f *Frontmatter) UnmarshalYAML(value *yaml.Node) error {
 	f.Deps = s.Deps
 	f.Severity = s.Severity
 	f.Tier = s.Tier
+	f.Tags = s.Tags
+	f.Includes = s.Includes
 	f.HostTriggers = s.HostTriggers
 
 	if s.Args.Kind == 0 {

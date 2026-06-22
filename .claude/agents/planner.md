@@ -7,6 +7,8 @@ tools:
   - Grep
   - Glob
 model: opus
+tags:
+  - planning
 ---
 
 # Planner

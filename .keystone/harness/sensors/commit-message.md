@@ -7,6 +7,8 @@ host_triggers:
     matcher: "Bash"
     command: keystone verify --sensor commit-message
     timeout: 5
+tags:
+  - computational
 ---
 # Sensor: commit-message
 

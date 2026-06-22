@@ -6,6 +6,8 @@ host_triggers:
   - phase: Stop
     command: go vet ./...
     timeout: 60
+tags:
+  - computational
 ---
 # Sensor: type-check
 

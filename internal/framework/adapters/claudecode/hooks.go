@@ -43,10 +43,12 @@ type HookProjectionResult struct {
 }
 
 // hookEntryFromSensor is the in-adapter shape: a flattened view of one
-// sensor's HostTrigger plus the owning sensor's id (used for the
-// statusMessage marker).
+// sensor's HostTrigger plus the owning sensor's id (statusMessage
+// marker) and severity (decides how the command's non-zero exit is
+// surfaced to Claude Code — see hookEntry).
 type hookEntryFromSensor struct {
 	SensorID string
+	Severity string
 	primitive.HostTrigger
 }
 
@@ -105,7 +107,11 @@ func collectSensorTriggers(primitives []primitive.Primitive) []hookEntryFromSens
 			continue
 		}
 		for _, t := range p.HostTriggers {
-			out = append(out, hookEntryFromSensor{SensorID: p.ID, HostTrigger: t})
+			out = append(out, hookEntryFromSensor{
+				SensorID:    p.ID,
+				Severity:    p.Severity,
+				HostTrigger: t,
+			})
 		}
 	}
 	return out
@@ -269,32 +275,71 @@ func findOrCreateMatcherGroup(groups *[]any, matcher string) map[string]any {
 	return g
 }
 
-// hookEntry builds the per-hook map Claude Code expects.
+// hookEntry builds the per-hook map Claude Code expects. The command
+// is wrapped according to the sensor's `severity:` so non-zero exits
+// surface differently:
+//
+//   - `must` (default): command runs unwrapped. Exit 2 blocks the
+//     host tool call (Claude Code's hook protocol); exit 0 passes.
+//   - `should`: non-zero exit is converted to 0 with a warning line
+//     on stderr (Claude Code surfaces the message but does not block).
+//   - `may`: non-zero exit is silently swallowed (informational only;
+//     no message surfaces).
+//
+// Severity is the keystone-level lever for tuning how strict a sensor
+// is at the host's enforcement surface. A future host adapter (Cursor,
+// Continue) does the equivalent mapping in its own package.
 func hookEntry(e hookEntryFromSensor) map[string]any {
 	timeout := e.Timeout
 	if timeout <= 0 {
 		timeout = 5
 	}
+	cmd := wrapForSeverity(e.SensorID, e.Severity, e.Command)
 	entry := map[string]any{
 		"type":          "command",
 		"shell":         "bash",
-		"command":       e.Command,
+		"command":       cmd,
 		"timeout":       timeout,
 		"statusMessage": HookEntryStatusPrefix + e.SensorID,
 	}
 	return entry
 }
 
+// wrapForSeverity returns the bash command string Claude Code runs.
+// The wrapper is a small shell-level transform — keeps the projection
+// declarative (no per-sensor scripts on disk) and inspectable (the
+// settings.json reader sees exactly what fires).
+//
+// `must` / unset / unknown → no wrap.
+// `should` → `( <cmd> ) || { echo "[keystone:<id>] non-blocking (exit $?)" >&2; true; }`
+// `may`    → `( <cmd> ) >/dev/null 2>&1 || true`
+func wrapForSeverity(sensorID, severity, cmd string) string {
+	switch severity {
+	case string(primitive.SeverityShould):
+		return fmt.Sprintf(`( %s ) || { echo "[keystone:%s] non-blocking warning (exit $?)" >&2; true; }`, cmd, sensorID)
+	case string(primitive.SeverityMay):
+		return fmt.Sprintf(`( %s ) >/dev/null 2>&1 || true`, cmd)
+	default:
+		return cmd
+	}
+}
+
 // marshalSettings serializes the map with 2-space indent + trailing
-// newline. Matches the shape `keystone init` writes for keystone.json
-// (and the shape Claude Code's own tooling tends to write), so the diff
-// from a user's manual edit is minimal on first projection.
+// newline, with HTML escaping disabled so shell metacharacters
+// (`>`, `<`, `&`) round-trip cleanly inside hook command strings.
+// Matches the shape `keystone init` writes for keystone.json (and the
+// shape Claude Code's own tooling tends to write), so the diff from a
+// user's manual edit is minimal on first projection.
 func marshalSettings(settings map[string]any) ([]byte, error) {
-	out, err := json.MarshalIndent(settings, "", "  ")
-	if err != nil {
+	var buf bytes.Buffer
+	enc := json.NewEncoder(&buf)
+	enc.SetIndent("", "  ")
+	enc.SetEscapeHTML(false)
+	if err := enc.Encode(settings); err != nil {
 		return nil, err
 	}
-	return append(out, '\n'), nil
+	// Encoder appends a trailing newline already.
+	return buf.Bytes(), nil
 }
 
 // atomicWrite is the same temp+rename shape primitive.copyOne uses;

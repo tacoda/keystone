@@ -15,6 +15,10 @@ tools:
   - Edit
   - Glob
   - Bash
+includes:
+  - scaffolds-primitive
+tags:
+  - scaffold
 ---
 
 # keystone:new-adapter — scaffold a host adapter

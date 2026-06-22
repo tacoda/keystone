@@ -2,6 +2,9 @@
 kind: guide
 id: process/subagent-trust
 description: 'The discipline of treating subagent reports as claims to verify, not as evidence to accept.'
+tags:
+  - discipline
+  - verification
 ---
 # Subagent Trust
 

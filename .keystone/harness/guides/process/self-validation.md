@@ -2,6 +2,9 @@
 kind: guide
 id: process/self-validation
 description: 'The discipline of refusing to count the agent''s own claim as evidence.'
+tags:
+  - discipline
+  - verification
 ---
 # Self-Validation
 

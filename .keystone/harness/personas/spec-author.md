@@ -7,6 +7,9 @@ tools:
   - Grep
   - Write
 model: opus
+tags:
+  - planning
+  - spec
 ---
 
 # Spec author

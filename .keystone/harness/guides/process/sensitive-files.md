@@ -2,6 +2,9 @@
 kind: guide
 id: process/sensitive-files
 description: 'Files the agent must never read into context, write to, or commit.'
+tags:
+  - security
+  - discipline
 ---
 # Sensitive Files
 

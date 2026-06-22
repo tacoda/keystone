@@ -8,6 +8,9 @@ tools:
   - Glob
   - Bash
 model: opus
+tags:
+  - audit
+  - flywheel
 ---
 
 # Auditor

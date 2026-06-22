@@ -22,6 +22,14 @@ func sensorWith(id string, triggers ...primitive.HostTrigger) primitive.Primitiv
 	}
 }
 
+// sensorWithSeverity is sensorWith plus a severity tier — used by the
+// severity-wrap tests.
+func sensorWithSeverity(id, severity string, triggers ...primitive.HostTrigger) primitive.Primitive {
+	p := sensorWith(id, triggers...)
+	p.Severity = severity
+	return p
+}
+
 func TestProjectHooks_FirstRunCreatesFile(t *testing.T) {
 	root := t.TempDir()
 	p := []primitive.Primitive{
@@ -235,5 +243,73 @@ func TestProjectHooks_IgnoresNonSensorPrimitives(t *testing.T) {
 	}
 	if res.Added != 1 {
 		t.Errorf("expected 1 hook (only the sensor trigger), got %d", res.Added)
+	}
+}
+
+func TestProjectHooks_SeverityMust_Unwrapped(t *testing.T) {
+	root := t.TempDir()
+	p := []primitive.Primitive{
+		sensorWithSeverity("strict", "must",
+			primitive.HostTrigger{Phase: "PreToolUse", Matcher: "Edit", Command: "keystone verify --sensor strict", Timeout: 5}),
+	}
+	if _, err := ProjectHooks(root, p); err != nil {
+		t.Fatal(err)
+	}
+	data, _ := os.ReadFile(filepath.Join(root, SettingsRelPath))
+	s := string(data)
+	// `must` (or default) leaves the command intact — no wrapper.
+	if !strings.Contains(s, `"command": "keystone verify --sensor strict"`) {
+		t.Errorf("must severity should leave command unwrapped, got:\n%s", s)
+	}
+}
+
+func TestProjectHooks_SeverityShould_WrapsWarning(t *testing.T) {
+	root := t.TempDir()
+	p := []primitive.Primitive{
+		sensorWithSeverity("soft", "should",
+			primitive.HostTrigger{Phase: "Stop", Command: "go vet ./...", Timeout: 60}),
+	}
+	if _, err := ProjectHooks(root, p); err != nil {
+		t.Fatal(err)
+	}
+	data, _ := os.ReadFile(filepath.Join(root, SettingsRelPath))
+	s := string(data)
+	if !strings.Contains(s, `( go vet ./... )`) || !strings.Contains(s, `non-blocking warning`) {
+		t.Errorf("should severity didn't wrap with warning fallback:\n%s", s)
+	}
+	if !strings.Contains(s, "keystone:soft") {
+		t.Errorf("statusMessage missing:\n%s", s)
+	}
+}
+
+func TestProjectHooks_SeverityMay_WrapsSilent(t *testing.T) {
+	root := t.TempDir()
+	p := []primitive.Primitive{
+		sensorWithSeverity("info", "may",
+			primitive.HostTrigger{Phase: "Stop", Command: "go test -short ./...", Timeout: 60}),
+	}
+	if _, err := ProjectHooks(root, p); err != nil {
+		t.Fatal(err)
+	}
+	data, _ := os.ReadFile(filepath.Join(root, SettingsRelPath))
+	s := string(data)
+	if !strings.Contains(s, `( go test -short ./... ) >/dev/null 2>&1 || true`) {
+		t.Errorf("may severity didn't wrap silently:\n%s", s)
+	}
+}
+
+func TestProjectHooks_SeverityDefaultsToMust(t *testing.T) {
+	root := t.TempDir()
+	p := []primitive.Primitive{
+		sensorWithSeverity("unset", "",
+			primitive.HostTrigger{Phase: "PreToolUse", Matcher: "Edit", Command: "cmd", Timeout: 5}),
+	}
+	if _, err := ProjectHooks(root, p); err != nil {
+		t.Fatal(err)
+	}
+	data, _ := os.ReadFile(filepath.Join(root, SettingsRelPath))
+	s := string(data)
+	if !strings.Contains(s, `"command": "cmd"`) {
+		t.Errorf("empty severity should behave as must (unwrapped), got:\n%s", s)
 	}
 }

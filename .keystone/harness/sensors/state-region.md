@@ -7,6 +7,8 @@ host_triggers:
     matcher: "Edit|Write"
     command: true
     timeout: 5
+tags:
+  - computational
 ---
 # Sensor: state-region
 

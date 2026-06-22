@@ -6,6 +6,8 @@ host_triggers:
   - phase: Stop
     command: go build ./...
     timeout: 120
+tags:
+  - computational
 ---
 # Sensor: build
 

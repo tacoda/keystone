@@ -49,6 +49,8 @@ func scanRoots(harnessRoot string) []scanRoot {
 		{filepath.Join(harnessRoot, "playbooks"), md},
 		{filepath.Join(harnessRoot, "evals"), evalFile},
 		{filepath.Join(harnessRoot, "sources"), md},
+		// Composition primitive — reusable mixin fragments.
+		{filepath.Join(harnessRoot, "concerns"), md},
 		// Agent abstractions.
 		{filepath.Join(harnessRoot, "rules"), md},
 		{filepath.Join(harnessRoot, "skills"), skillFile},

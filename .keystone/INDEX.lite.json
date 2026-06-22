@@ -1,6 +1,6 @@
 {
   "version": "2.0",
-  "generated": "2026-06-22T21:58:07Z",
+  "generated": "2026-06-22T22:28:39Z",
   "primitives": [
     {
       "kind": "action",
@@ -71,6 +71,16 @@
       "kind": "computational",
       "id": "guides/computational/gopls",
       "description": "gopls — Go LSP for in-editor signal."
+    },
+    {
+      "kind": "concern",
+      "id": "reads-diff",
+      "description": "Reusable concern for review personas — declares the tools needed to read a git diff and the section that documents the protocol."
+    },
+    {
+      "kind": "concern",
+      "id": "scaffolds-primitive",
+      "description": "Reusable concern for keystone-new-* skills — declares the tools needed to scaffold a new primitive at its canonical path and the idempotency invariants every scaffold respects."
     },
     {
       "kind": "corpus",

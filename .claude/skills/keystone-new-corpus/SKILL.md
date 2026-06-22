@@ -15,6 +15,10 @@ tools:
   - Edit
   - Glob
   - Bash
+includes:
+  - scaffolds-primitive
+tags:
+  - scaffold
 ---
 
 # keystone:new-corpus — scaffold a corpus entry

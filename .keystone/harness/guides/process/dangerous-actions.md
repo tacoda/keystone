@@ -2,6 +2,9 @@
 kind: guide
 id: process/dangerous-actions
 description: 'Operations the agent must confirm with the user before executing — irreversible, broadly-visible, or outside the local workspace.'
+tags:
+  - security
+  - discipline
 ---
 # Dangerous Actions
 

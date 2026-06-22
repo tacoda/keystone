@@ -7,6 +7,9 @@ globs:
   - "internal/**/*.go"
   - "go.mod"
   - "go.sum"
+tags:
+  - go
+  - dependencies
 ---
 # Stdlib first — rules
 

@@ -55,6 +55,14 @@ func runIndex(args []string) error {
 		fmt.Fprintf(os.Stderr, "keystone index: %s: %s\n", w.Path, w.Message)
 	}
 
+	// Resolve concern `includes:` before indexing so the descriptor
+	// records the merged shape the agent actually sees.
+	composed, composeErrs := primitive.Compose(primitives)
+	for _, e := range composeErrs {
+		fmt.Fprintf(os.Stderr, "keystone index: %s\n", e.Error())
+	}
+	primitives = composed
+
 	idx := primitive.Build(primitives, time.Now())
 	outPath := filepath.Join(absDir, config.KeystoneDir(harnessRoot), config.IndexName)
 	if err := primitive.Write(outPath, idx); err != nil {

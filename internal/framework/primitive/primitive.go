@@ -60,6 +60,13 @@ const (
 	KindEval   Kind = "eval"
 	KindSource Kind = "source"
 
+	// Composition primitive. A concern is a reusable fragment of
+	// frontmatter + body that other primitives pull in via the
+	// `includes:` field. Composition over inheritance — concerns are
+	// leaves (cannot include other concerns) and the host primitive
+	// always wins on scalar fields. See `primitive/compose.go`.
+	KindConcern Kind = "concern"
+
 	// Agent abstractions — escape hatches.
 	KindRule     Kind = "rule"
 	KindSkill    Kind = "skill"
@@ -71,6 +78,7 @@ const (
 var KnownKinds = []Kind{
 	KindGuide, KindSensor, KindAction, KindPlaybook, KindPersona,
 	KindCorpus, KindEval, KindSource,
+	KindConcern,
 	KindRule, KindSkill, KindSubagent, KindCommand,
 }
 
@@ -103,6 +111,18 @@ type Frontmatter struct {
 
 	Severity string `yaml:"severity,omitempty" json:"severity,omitempty"`
 	Tier     string `yaml:"tier,omitempty"     json:"tier,omitempty"`
+
+	// Tags is an orthogonal taxonomy used by `keystone list --tag`.
+	// Kebab-case strings; the linter enforces the shape. Tags are
+	// union-merged across includes (a concern can contribute tags).
+	Tags []string `yaml:"tags,omitempty" json:"tags,omitempty"`
+
+	// Includes lists concerns this primitive composes in. Each id
+	// must resolve to a `kind: concern` primitive. Walker resolves
+	// at parse time — list fields union (deduped, host's values
+	// last), scalar fields are host-wins. Concerns are leaves:
+	// a concern cannot itself declare `includes:`. See compose.go.
+	Includes []string `yaml:"includes,omitempty" json:"includes,omitempty"`
 
 	// HostTriggers is the per-host activation surface for computational
 	// sensors. Same pattern as other primitive frontmatter — declared

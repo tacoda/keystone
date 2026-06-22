@@ -7,6 +7,8 @@ host_triggers:
     matcher: "Edit|Write|MultiEdit"
     command: keystone verify --sensor secret-scan
     timeout: 5
+tags:
+  - computational
 ---
 # Sensor: secret-scan
 

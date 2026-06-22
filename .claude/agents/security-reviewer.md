@@ -7,6 +7,10 @@ tools:
   - Grep
   - Glob
 model: opus
+includes:
+  - reads-diff
+tags:
+  - review
 ---
 
 # Security reviewer

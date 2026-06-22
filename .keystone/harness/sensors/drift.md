@@ -7,6 +7,8 @@ host_triggers:
     matcher: "Edit|Write|MultiEdit"
     command: keystone verify --sensor drift
     timeout: 5
+tags:
+  - computational
 ---
 # Sensor: drift
 

@@ -16,6 +16,10 @@ tools:
   - Edit
   - Glob
   - Bash
+includes:
+  - scaffolds-primitive
+tags:
+  - scaffold
 ---
 
 # keystone:new-guide — scaffold a guide + paired corpus

@@ -172,6 +172,11 @@ func runPipeline(ctx context.Context, projectDir string, doLint, doProject bool)
 		fmt.Fprintf(os.Stderr, "✗ walk: %v\n", err)
 		return
 	}
+	composed, composeErrs := primitive.Compose(primitives)
+	for _, e := range composeErrs {
+		fmt.Fprintf(os.Stderr, "  ⚠ %s\n", e.Error())
+	}
+	primitives = composed
 	idx := primitive.Build(primitives, time.Now())
 	keystoneDir := filepath.Join(projectDir, config.KeystoneDir(config.DefaultHarnessRoot))
 	outPath := filepath.Join(keystoneDir, config.IndexName)

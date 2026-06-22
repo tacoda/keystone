@@ -5,6 +5,9 @@ description: 'Frontmatter, canonical paths, corpus/guide pairing, narrow-only gl
 globs:
   - ".keystone/harness/**/*.md"
   - "internal/framework/templates/**/*.md"
+tags:
+  - harness
+  - authoring
 ---
 # Primitive shape — rules
 

@@ -7,6 +7,10 @@ tools:
   - Grep
   - Write
 model: opus
+tags:
+  - audit
+  - flywheel
+  - synthesis
 ---
 
 # Synthesizer

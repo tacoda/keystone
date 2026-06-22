@@ -7,6 +7,10 @@ tools:
   - Grep
   - Bash
 model: sonnet
+includes:
+  - reads-diff
+tags:
+  - review
 ---
 
 # Drift reviewer

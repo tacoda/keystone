@@ -6,6 +6,8 @@ host_triggers:
   - phase: Stop
     command: true
     timeout: 120
+tags:
+  - computational
 ---
 # Sensor: coverage
 

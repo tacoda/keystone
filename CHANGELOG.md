@@ -2,6 +2,114 @@
 
 All notable changes to keystone are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); the project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.0] — 2026-06-22
+
+Minor release. Framework abstractions level up. Composition over
+inheritance — a new `concern` primitive plus `includes:` on every
+other kind lets reusable frontmatter + body fragments be pulled into
+guides, sensors, personas, playbooks, etc. without subclassing.
+Severity now wires through to the host's hook surface. Two new
+read-only CLI commands — `keystone list` and `keystone show` —
+expose the primitive graph as queryable + reverse-lookup-able.
+
+Backward-compatible. The 2.3 migration is purely additive: new
+optional fields, a new primitive kind directory, no schema renames,
+no data transforms. Existing 2.2 content remains valid.
+
+### Added
+
+- **`concern` primitive kind.** Lives at
+  `.keystone/harness/concerns/<id>.md`. Standard frontmatter (kind,
+  id, description) plus the fields the concern contributes
+  (typically `tools`, `tags`, `host_triggers`, `triggers`). Concerns
+  are leaves — they cannot themselves declare `includes:` — so the
+  composition graph is depth-1 by construction. No inheritance
+  trees; pure mixin composition.
+- **`includes: [<concern-id>, ...]` on every primitive.** Walker
+  resolves after parse:
+  - **Union list fields**: `tools`, `tags`, `triggers`, `traces`,
+    `deps`, `globs`, `host_triggers` (dedupe stable, host's values
+    last so a host can demote a concern-contributed entry by
+    re-listing it).
+  - **Host-wins scalars**: `kind`, `id`, `description`, `severity`,
+    `model`, `phase`, `tier`. A concern can never override what the
+    host primitive declares about itself.
+  - **Body**: concern body is appended below the host's body under
+    an `## Includes` heading.
+  - Raw `includes:` list preserved on the indexed primitive so
+    `keystone show` can render the composition graph.
+- **`tags: [<tag>, ...]` field on every primitive.** Orthogonal
+  taxonomy. Kebab-case enforced by `keystone lint` (lowercase
+  letters, digits, hyphens; must start with a letter; max 64 chars).
+  Tags merge across `includes:` exactly like other list fields.
+- **`keystone list [<kind>] [--tag <tag>]... [--dir <path>]`** —
+  filtered primitive listing. Multiple `--tag` flags AND together
+  (a primitive must declare every requested tag). Output is sorted
+  (kind, id) for diff-friendly eyeballing.
+- **`keystone show <kind> <id> [--json] [--dir <path>]`** — single-
+  primitive view with forward and reverse association lookup:
+  - `includes:` — concerns the target composes in.
+  - `included by:` — primitives that include this concern.
+  - `traces:` — corpus links the guide forward-references.
+  - `traced by:` — guides whose `traces:` mention this corpus entry.
+  - Host hooks for sensors, tags, tool allowlists, model tier,
+    severity, globs, triggers, phase, provenance. Pure read; never
+    writes.
+- **Severity → host enforcement.** The claudecode adapter now reads
+  each sensor's `severity:` and shapes the projected hook command:
+  - `must` (default) → command runs as-is. Exit 2 blocks the host
+    tool call.
+  - `should` → wrapper `( <cmd> ) || { echo "[keystone:<id>]
+    non-blocking warning (exit $?)" >&2; true; }` — Claude Code
+    surfaces the warning on stderr but does not block.
+  - `may` → wrapper `( <cmd> ) >/dev/null 2>&1 || true` — silent
+    informational only.
+  A severity-driven dial for tuning strictness without rewriting
+  the command. Other host adapters will mirror at their own layer.
+- **`Includes []string` and `Tags []string` on `primitive.Frontmatter`.**
+  Parse shadow picks both up; INDEX surfaces them alongside the
+  existing fields.
+- **`KindConcern` registered as known.** Walker scans
+  `<harness-root>/concerns/<id>.md`. Linter recognizes it.
+- **Lint coverage**: kebab-case tag enforcement, unknown concern in
+  `includes:`, concerns declaring their own `includes:` (leaf
+  violation), duplicate concern in `includes:` array.
+- **JSON marshaller fix on `.claude/settings.json`.** Disables HTML
+  escaping so shell metacharacters (`>`, `<`, `&`) round-trip
+  cleanly inside the severity wrapper's `>/dev/null 2>&1` body.
+
+### Changed
+
+- **Dogfood: two concerns shipped.** `.keystone/harness/concerns/`
+  now ships `reads-diff` (composed into the four review personas —
+  code-reviewer, security-reviewer, drift-reviewer, debt-reviewer)
+  and `scaffolds-primitive` (composed into every `keystone-new-*`
+  skill). Demonstrates the composition pattern end-to-end.
+- **Personas, skills, sensors, and guides annotated with `tags:`.**
+  ~40 primitives gain a 1–3 tag taxonomy spanning `review`,
+  `scaffold`, `audit`, `flywheel`, `computational`, `llm-judgment`,
+  `security`, `discipline`, `planning`, `bootstrap`, etc.
+- **`Project()`, `Walk()`, and `keystone watch` pipeline integrate
+  `Compose()`.** Every projection sees the composed view — concern
+  contributions land in the projected `.claude/agents/*.md`,
+  `.claude/skills/*/SKILL.md`, `.claude/rules/*.md`, etc.
+
+### Migration
+
+`keystone migrate --to 2.3` runs an additive plan:
+
+1. Ensure `.keystone/harness/concerns/` exists.
+2. Re-walk + re-compose + rebuild `INDEX.json` + `INDEX.lite.json`.
+3. Re-project primitives → `.claude/{agents,commands,skills,rules}`.
+4. Emit AGENTS.md.
+5. Merge sensor `host_triggers` into `.claude/settings.json` with
+   severity wrappers applied.
+6. Run opt-in adapters (cursor / aider / continue).
+
+The 2.3 Down plan is best-effort — it re-projects without composition
+and strips severity wrappers from `.claude/settings.json`, but
+preserves authored content under `.keystone/harness/concerns/`.
+
 ## [2.2.0] — 2026-06-22
 
 Minor release. Lands the host-native projection surface — every

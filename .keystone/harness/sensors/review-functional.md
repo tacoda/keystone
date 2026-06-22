@@ -2,6 +2,8 @@
 kind: sensor
 id: review-functional
 description: 'An agent reads the diff and reports logic, correctness, and behavior issues.'
+tags:
+  - llm-judgment
 ---
 # Sensor: review-functional
 

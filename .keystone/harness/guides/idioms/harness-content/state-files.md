@@ -5,6 +5,9 @@ description: 'Authoring rules for harness/corpus/state/.'
 globs:
   - ".keystone/harness/corpus/state/**/*.md"
   - "internal/framework/templates/**/corpus/state/**/*.md"
+tags:
+  - harness
+  - state
 ---
 # State files — rules
 

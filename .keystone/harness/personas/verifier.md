@@ -7,6 +7,8 @@ tools:
   - Grep
   - Bash
 model: sonnet
+tags:
+  - verification
 ---
 
 # Verifier

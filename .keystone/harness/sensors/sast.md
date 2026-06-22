@@ -6,6 +6,8 @@ host_triggers:
   - phase: Stop
     command: true
     timeout: 30
+tags:
+  - computational
 ---
 # Sensor: sast
 

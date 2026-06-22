@@ -6,6 +6,8 @@ tools:
   - Read
   - Write
 model: sonnet
+tags:
+  - mode
 ---
 
 # Mode switcher

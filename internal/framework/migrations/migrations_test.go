@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -379,3 +380,80 @@ func TestV2_2_Up_Idempotent(t *testing.T) {
 	}
 }
 
+
+func TestV2_3_Up_OnEmptyProject(t *testing.T) {
+	tmp := t.TempDir()
+	plan, err := planUp_2_3(tmp)
+	if err != nil {
+		t.Fatalf("planUp_2_3: %v", err)
+	}
+	if len(plan.Steps) != 0 {
+		t.Errorf("expected 0 steps on empty project, got %d", len(plan.Steps))
+	}
+}
+
+func TestV2_3_Up_CreatesConcernsDir(t *testing.T) {
+	tmp := t.TempDir()
+
+	mustMkdir(t, filepath.Join(tmp, ".keystone/harness/sensors"))
+	mustWrite(t, filepath.Join(tmp, ".keystone/harness/sensors/build.md"),
+		"---\nkind: sensor\nid: build\ndescription: x\n---\nbody\n")
+	mustWrite(t, filepath.Join(tmp, "keystone.json"),
+		"{\"version\":\"2\",\"policies\":[]}\n")
+
+	plan, err := planUp_2_3(tmp)
+	if err != nil {
+		t.Fatalf("planUp_2_3: %v", err)
+	}
+	if err := plan.Execute(tmp); err != nil {
+		t.Fatalf("plan.Execute: %v", err)
+	}
+	if info, err := os.Stat(filepath.Join(tmp, ".keystone/harness/concerns")); err != nil || !info.IsDir() {
+		t.Errorf("expected .keystone/harness/concerns/ to exist: err=%v info=%v", err, info)
+	}
+}
+
+func TestV2_3_Up_Idempotent(t *testing.T) {
+	tmp := t.TempDir()
+
+	// Seed: one sensor with host_triggers + severity, one concern,
+	// one persona that includes the concern.
+	mustMkdir(t, filepath.Join(tmp, ".keystone/harness/sensors"))
+	mustMkdir(t, filepath.Join(tmp, ".keystone/harness/concerns"))
+	mustMkdir(t, filepath.Join(tmp, ".keystone/harness/personas"))
+	mustWrite(t, filepath.Join(tmp, ".keystone/harness/sensors/build.md"),
+		"---\nkind: sensor\nid: build\ndescription: x\nseverity: should\nhost_triggers:\n  - phase: Stop\n    command: go build ./...\n    timeout: 60\n---\nbody\n")
+	mustWrite(t, filepath.Join(tmp, ".keystone/harness/concerns/shared-tools.md"),
+		"---\nkind: concern\nid: shared-tools\ndescription: x\ntools:\n  - Read\n  - Grep\ntags:\n  - composition\n---\nbody\n")
+	mustWrite(t, filepath.Join(tmp, ".keystone/harness/personas/reviewer.md"),
+		"---\nkind: persona\nid: reviewer\ndescription: x\ntools:\n  - Bash\nincludes:\n  - shared-tools\ntags:\n  - review\n---\nbody\n")
+	mustWrite(t, filepath.Join(tmp, "keystone.json"),
+		"{\"version\":\"2\",\"policies\":[]}\n")
+
+	// First Up.
+	plan, err := planUp_2_3(tmp)
+	if err != nil {
+		t.Fatalf("planUp_2_3: %v", err)
+	}
+	if err := plan.Execute(tmp); err != nil {
+		t.Fatalf("first Execute: %v", err)
+	}
+
+	// Second Up — must complete cleanly.
+	plan2, err := planUp_2_3(tmp)
+	if err != nil {
+		t.Fatalf("planUp_2_3 second: %v", err)
+	}
+	if err := plan2.Execute(tmp); err != nil {
+		t.Fatalf("second Execute: %v", err)
+	}
+
+	// Verify the settings.json carries the should-wrap.
+	data, err := os.ReadFile(filepath.Join(tmp, ".claude/settings.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(data), "non-blocking warning") {
+		t.Errorf(".claude/settings.json missing should-severity wrapper:\n%s", data)
+	}
+}

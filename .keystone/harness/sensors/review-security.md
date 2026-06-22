@@ -2,6 +2,8 @@
 kind: sensor
 id: review-security
 description: 'An agent reads the diff and reports security concerns — injection, auth, secrets, unsafe deserialization, weak crypto, missing authorizat...'
+tags:
+  - llm-judgment
 ---
 # Sensor: review-security
 

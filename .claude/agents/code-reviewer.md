@@ -7,6 +7,10 @@ tools:
   - Grep
   - Bash
 model: opus
+includes:
+  - reads-diff
+tags:
+  - review
 ---
 
 # Code reviewer

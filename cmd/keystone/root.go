@@ -82,6 +82,8 @@ func init() {
 	rootCmd.AddCommand(patchCmd())
 	rootCmd.AddCommand(indexCmd())
 	rootCmd.AddCommand(lintCmd())
+	rootCmd.AddCommand(listCmd())
+	rootCmd.AddCommand(showCmd())
 	rootCmd.AddCommand(projectCmd())
 	rootCmd.AddCommand(migrateCmd())
 	rootCmd.AddCommand(mcpCmd())
@@ -225,6 +227,26 @@ func lintCmd() *cobra.Command {
 		Short:              "Validate primitive frontmatter (required fields, unique ids, deps)",
 		DisableFlagParsing: true,
 		RunE:               runAndForward(runLint),
+	}
+	return c
+}
+
+func listCmd() *cobra.Command {
+	c := &cobra.Command{
+		Use:                "list [<kind>] [--tag <tag>]...",
+		Short:              "List primitives, filtered by kind and / or tag",
+		DisableFlagParsing: true,
+		RunE:               runAndForward(runList),
+	}
+	return c
+}
+
+func showCmd() *cobra.Command {
+	c := &cobra.Command{
+		Use:                "show <kind> <id>",
+		Short:              "Show one primitive's descriptor + cross-references",
+		DisableFlagParsing: true,
+		RunE:               runAndForward(runShow),
 	}
 	return c
 }

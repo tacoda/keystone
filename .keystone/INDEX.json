@@ -1,6 +1,6 @@
 {
   "version": "2.0",
-  "generated": "2026-06-22T21:58:07Z",
+  "generated": "2026-06-22T22:28:39Z",
   "primitives": [
     {
       "kind": "action",
@@ -113,6 +113,40 @@
       "provenance": "project"
     },
     {
+      "kind": "concern",
+      "id": "reads-diff",
+      "description": "Reusable concern for review personas — declares the tools needed to read a git diff and the section that documents the protocol.",
+      "tools": [
+        "Read",
+        "Grep",
+        "Bash"
+      ],
+      "tags": [
+        "review",
+        "composition"
+      ],
+      "path": ".keystone/harness/concerns/reads-diff.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "concern",
+      "id": "scaffolds-primitive",
+      "description": "Reusable concern for keystone-new-* skills — declares the tools needed to scaffold a new primitive at its canonical path and the idempotency invariants every scaffold respects.",
+      "tools": [
+        "Read",
+        "Write",
+        "Edit",
+        "Glob",
+        "Bash"
+      ],
+      "tags": [
+        "scaffold",
+        "composition"
+      ],
+      "path": ".keystone/harness/concerns/scaffolds-primitive.md",
+      "provenance": "project"
+    },
+    {
       "kind": "corpus",
       "id": "corpus/domain/product-shape",
       "description": "One-paragraph statement of the product.",
@@ -213,6 +247,10 @@
         "go.mod",
         "go.sum"
       ],
+      "tags": [
+        "go",
+        "dependencies"
+      ],
       "path": ".keystone/harness/guides/idioms/go/stdlib-first.md",
       "provenance": "project"
     },
@@ -224,6 +262,10 @@
         ".keystone/harness/**/*.md",
         "internal/framework/templates/**/*.md"
       ],
+      "tags": [
+        "harness",
+        "authoring"
+      ],
       "path": ".keystone/harness/guides/idioms/harness-content/primitive-shape.md",
       "provenance": "project"
     },
@@ -234,6 +276,10 @@
       "globs": [
         ".keystone/harness/corpus/state/**/*.md",
         "internal/framework/templates/**/corpus/state/**/*.md"
+      ],
+      "tags": [
+        "harness",
+        "state"
       ],
       "path": ".keystone/harness/guides/idioms/harness-content/state-files.md",
       "provenance": "project"
@@ -256,6 +302,10 @@
       "kind": "guide",
       "id": "process/dangerous-actions",
       "description": "Operations the agent must confirm with the user before executing — irreversible, broadly-visible, or outside the local workspace.",
+      "tags": [
+        "security",
+        "discipline"
+      ],
       "path": ".keystone/harness/guides/process/dangerous-actions.md",
       "provenance": "project"
     },
@@ -270,6 +320,9 @@
       "kind": "guide",
       "id": "process/grounding",
       "description": "The discipline of verifying that what the agent references — functions, APIs, packages, files, flags — actually exists before invoking it.",
+      "tags": [
+        "discipline"
+      ],
       "path": ".keystone/harness/guides/process/grounding.md",
       "provenance": "project"
     },
@@ -327,6 +380,10 @@
       "kind": "guide",
       "id": "process/scoping",
       "description": "How big any single commit, PR, or implementation pass is allowed to get before it must split.",
+      "tags": [
+        "discipline",
+        "workflow"
+      ],
       "path": ".keystone/harness/guides/process/scoping.md",
       "provenance": "project"
     },
@@ -334,6 +391,10 @@
       "kind": "guide",
       "id": "process/self-validation",
       "description": "The discipline of refusing to count the agent's own claim as evidence.",
+      "tags": [
+        "discipline",
+        "verification"
+      ],
       "path": ".keystone/harness/guides/process/self-validation.md",
       "provenance": "project"
     },
@@ -341,6 +402,10 @@
       "kind": "guide",
       "id": "process/sensitive-files",
       "description": "Files the agent must never read into context, write to, or commit.",
+      "tags": [
+        "security",
+        "discipline"
+      ],
       "path": ".keystone/harness/guides/process/sensitive-files.md",
       "provenance": "project"
     },
@@ -355,6 +420,10 @@
       "kind": "guide",
       "id": "process/subagent-trust",
       "description": "The discipline of treating subagent reports as claims to verify, not as evidence to accept.",
+      "tags": [
+        "discipline",
+        "verification"
+      ],
       "path": ".keystone/harness/guides/process/subagent-trust.md",
       "provenance": "project"
     },
@@ -362,6 +431,9 @@
       "kind": "guide",
       "id": "process/surgical-edits",
       "description": "Touch only what serves the task.",
+      "tags": [
+        "discipline"
+      ],
       "path": ".keystone/harness/guides/process/surgical-edits.md",
       "provenance": "project"
     },
@@ -383,6 +455,10 @@
         "Bash"
       ],
       "model": "opus",
+      "tags": [
+        "audit",
+        "flywheel"
+      ],
       "path": ".keystone/harness/personas/auditor.md",
       "provenance": "project"
     },
@@ -397,6 +473,10 @@
         "Bash"
       ],
       "model": "sonnet",
+      "tags": [
+        "scaffold",
+        "bootstrap"
+      ],
       "path": ".keystone/harness/personas/bootstrap-scout.md",
       "provenance": "project"
     },
@@ -410,6 +490,12 @@
         "Bash"
       ],
       "model": "opus",
+      "tags": [
+        "review"
+      ],
+      "includes": [
+        "reads-diff"
+      ],
       "path": ".keystone/harness/personas/code-reviewer.md",
       "provenance": "project"
     },
@@ -423,6 +509,12 @@
         "Bash"
       ],
       "model": "sonnet",
+      "tags": [
+        "review"
+      ],
+      "includes": [
+        "reads-diff"
+      ],
       "path": ".keystone/harness/personas/debt-reviewer.md",
       "provenance": "project"
     },
@@ -436,6 +528,12 @@
         "Bash"
       ],
       "model": "sonnet",
+      "tags": [
+        "review"
+      ],
+      "includes": [
+        "reads-diff"
+      ],
       "path": ".keystone/harness/personas/drift-reviewer.md",
       "provenance": "project"
     },
@@ -448,6 +546,11 @@
         "Grep"
       ],
       "model": "opus",
+      "tags": [
+        "audit",
+        "flywheel",
+        "learning"
+      ],
       "path": ".keystone/harness/personas/learning-curator.md",
       "provenance": "project"
     },
@@ -460,6 +563,9 @@
         "Write"
       ],
       "model": "sonnet",
+      "tags": [
+        "mode"
+      ],
       "path": ".keystone/harness/personas/mode-switcher.md",
       "provenance": "project"
     },
@@ -473,6 +579,9 @@
         "Glob"
       ],
       "model": "opus",
+      "tags": [
+        "planning"
+      ],
       "path": ".keystone/harness/personas/planner.md",
       "provenance": "project"
     },
@@ -486,6 +595,12 @@
         "Glob"
       ],
       "model": "opus",
+      "tags": [
+        "review"
+      ],
+      "includes": [
+        "reads-diff"
+      ],
       "path": ".keystone/harness/personas/security-reviewer.md",
       "provenance": "project"
     },
@@ -499,6 +614,10 @@
         "Write"
       ],
       "model": "opus",
+      "tags": [
+        "planning",
+        "spec"
+      ],
       "path": ".keystone/harness/personas/spec-author.md",
       "provenance": "project"
     },
@@ -512,6 +631,11 @@
         "Write"
       ],
       "model": "opus",
+      "tags": [
+        "audit",
+        "flywheel",
+        "synthesis"
+      ],
       "path": ".keystone/harness/personas/synthesizer.md",
       "provenance": "project"
     },
@@ -525,6 +649,9 @@
         "Bash"
       ],
       "model": "sonnet",
+      "tags": [
+        "verification"
+      ],
       "path": ".keystone/harness/personas/verifier.md",
       "provenance": "project"
     },
@@ -540,6 +667,9 @@
       "kind": "sensor",
       "id": "build",
       "description": "The project's build / compile / package step.",
+      "tags": [
+        "computational"
+      ],
       "host_triggers": [
         {
           "phase": "Stop",
@@ -554,6 +684,9 @@
       "kind": "sensor",
       "id": "code-debt",
       "description": "Surfaces and categorizes debt in the codebase — the known-suboptimal code the team has chosen to live with, plus the shape of any new deb...",
+      "tags": [
+        "llm-judgment"
+      ],
       "path": ".keystone/harness/sensors/code-debt.md",
       "provenance": "project"
     },
@@ -561,6 +694,9 @@
       "kind": "sensor",
       "id": "commit-message",
       "description": "Validates conventional-commit format and absence of AI attribution.",
+      "tags": [
+        "computational"
+      ],
       "host_triggers": [
         {
           "phase": "PreToolUse",
@@ -576,6 +712,9 @@
       "kind": "sensor",
       "id": "coverage",
       "description": "Reads test coverage and updates the State layer.",
+      "tags": [
+        "computational"
+      ],
       "host_triggers": [
         {
           "phase": "Stop",
@@ -590,6 +729,9 @@
       "kind": "sensor",
       "id": "drift",
       "description": "Compares the diff (or full codebase, during audit) against loaded guide rules.",
+      "tags": [
+        "computational"
+      ],
       "host_triggers": [
         {
           "phase": "PostToolUse",
@@ -605,6 +747,9 @@
       "kind": "sensor",
       "id": "harness-debt",
       "description": "Surfaces debt in the harness itself — content that exists but isn't earning its keep.",
+      "tags": [
+        "llm-judgment"
+      ],
       "path": ".keystone/harness/sensors/harness-debt.md",
       "provenance": "project"
     },
@@ -612,6 +757,9 @@
       "kind": "sensor",
       "id": "lint",
       "description": "Surface-level style and pattern checks.",
+      "tags": [
+        "computational"
+      ],
       "host_triggers": [
         {
           "phase": "Stop",
@@ -626,6 +774,9 @@
       "kind": "sensor",
       "id": "quality-radar",
       "description": "Aggregates verification and review sensors into a five-dimension scorecard for the current diff (or the whole codebase, on audit).",
+      "tags": [
+        "llm-judgment"
+      ],
       "path": ".keystone/harness/sensors/quality-radar.md",
       "provenance": "project"
     },
@@ -633,6 +784,9 @@
       "kind": "sensor",
       "id": "review-deployment",
       "description": "An agent reads the diff and reports deployment considerations — schema migration safety (expand-contract), feature-flag gating, environme...",
+      "tags": [
+        "llm-judgment"
+      ],
       "path": ".keystone/harness/sensors/review-deployment.md",
       "provenance": "project"
     },
@@ -640,6 +794,9 @@
       "kind": "sensor",
       "id": "review-functional",
       "description": "An agent reads the diff and reports logic, correctness, and behavior issues.",
+      "tags": [
+        "llm-judgment"
+      ],
       "path": ".keystone/harness/sensors/review-functional.md",
       "provenance": "project"
     },
@@ -647,6 +804,9 @@
       "kind": "sensor",
       "id": "review-risk",
       "description": "An agent reads the diff and reports risk concerns — blast radius, reversibility, hot-spot regions, fan-out and shared-state coupling, irr...",
+      "tags": [
+        "llm-judgment"
+      ],
       "path": ".keystone/harness/sensors/review-risk.md",
       "provenance": "project"
     },
@@ -654,6 +814,9 @@
       "kind": "sensor",
       "id": "review-security",
       "description": "An agent reads the diff and reports security concerns — injection, auth, secrets, unsafe deserialization, weak crypto, missing authorizat...",
+      "tags": [
+        "llm-judgment"
+      ],
       "path": ".keystone/harness/sensors/review-security.md",
       "provenance": "project"
     },
@@ -661,6 +824,9 @@
       "kind": "sensor",
       "id": "risk-fingerprint",
       "description": "Computes complexity + coupling + coverage patterns per region.",
+      "tags": [
+        "computational"
+      ],
       "host_triggers": [
         {
           "phase": "Stop",
@@ -675,6 +841,9 @@
       "kind": "sensor",
       "id": "sast",
       "description": "Static application security testing — pattern-based detection of insecure code in the source tree (SQL injection, command injection, weak...",
+      "tags": [
+        "computational"
+      ],
       "host_triggers": [
         {
           "phase": "Stop",
@@ -689,6 +858,9 @@
       "kind": "sensor",
       "id": "secret-scan",
       "description": "Scans the diff (or repo, on audit) for committed secrets — API keys, tokens, private keys, credentials.",
+      "tags": [
+        "computational"
+      ],
       "host_triggers": [
         {
           "phase": "PreToolUse",
@@ -704,6 +876,9 @@
       "kind": "sensor",
       "id": "spec-adherence",
       "description": "Walks the spec's acceptance criteria against the current diff.",
+      "tags": [
+        "computational"
+      ],
       "host_triggers": [
         {
           "phase": "Stop",
@@ -718,6 +893,9 @@
       "kind": "sensor",
       "id": "stack-drift",
       "description": "Detects when the empirical reality of the repo has diverged from what CODEBASESTATE.",
+      "tags": [
+        "computational"
+      ],
       "host_triggers": [
         {
           "phase": "Stop",
@@ -732,6 +910,9 @@
       "kind": "sensor",
       "id": "state-region",
       "description": "Read-only.",
+      "tags": [
+        "computational"
+      ],
       "host_triggers": [
         {
           "phase": "PostToolUse",
@@ -747,6 +928,9 @@
       "kind": "sensor",
       "id": "test",
       "description": "The project's test suite.",
+      "tags": [
+        "computational"
+      ],
       "host_triggers": [
         {
           "phase": "Stop",
@@ -761,6 +945,9 @@
       "kind": "sensor",
       "id": "tracker-card-fetcher",
       "description": "Fetches a tracker card from Jira / Linear / GitHub Issues / Asana via whatever tracker integration the agent has (MCP server, CLI, policy...",
+      "tags": [
+        "llm-judgment"
+      ],
       "path": ".keystone/harness/sensors/tracker-card-fetcher.md",
       "provenance": "project"
     },
@@ -768,6 +955,9 @@
       "kind": "sensor",
       "id": "traffic-topology",
       "description": "Combines git churn + recency + business criticality into a map of where attention concentrates.",
+      "tags": [
+        "computational"
+      ],
       "host_triggers": [
         {
           "phase": "Stop",
@@ -782,6 +972,9 @@
       "kind": "sensor",
       "id": "type-check",
       "description": "Signature and contract consistency.",
+      "tags": [
+        "computational"
+      ],
       "host_triggers": [
         {
           "phase": "Stop",
@@ -796,6 +989,9 @@
       "kind": "sensor",
       "id": "vuln-scan",
       "description": "Scans declared dependencies for known vulnerabilities (CVEs, advisories).",
+      "tags": [
+        "computational"
+      ],
       "host_triggers": [
         {
           "phase": "Stop",
@@ -984,6 +1180,12 @@
         "Bash"
       ],
       "model": "sonnet",
+      "tags": [
+        "scaffold"
+      ],
+      "includes": [
+        "scaffolds-primitive"
+      ],
       "path": ".keystone/harness/skills/keystone-new-action/SKILL.md",
       "provenance": "project"
     },
@@ -1006,6 +1208,12 @@
         "Bash"
       ],
       "model": "sonnet",
+      "tags": [
+        "scaffold"
+      ],
+      "includes": [
+        "scaffolds-primitive"
+      ],
       "path": ".keystone/harness/skills/keystone-new-adapter/SKILL.md",
       "provenance": "project"
     },
@@ -1028,6 +1236,12 @@
         "Bash"
       ],
       "model": "sonnet",
+      "tags": [
+        "scaffold"
+      ],
+      "includes": [
+        "scaffolds-primitive"
+      ],
       "path": ".keystone/harness/skills/keystone-new-corpus/SKILL.md",
       "provenance": "project"
     },
@@ -1051,6 +1265,12 @@
         "Bash"
       ],
       "model": "sonnet",
+      "tags": [
+        "scaffold"
+      ],
+      "includes": [
+        "scaffolds-primitive"
+      ],
       "path": ".keystone/harness/skills/keystone-new-guide/SKILL.md",
       "provenance": "project"
     },
@@ -1073,6 +1293,12 @@
         "Bash"
       ],
       "model": "sonnet",
+      "tags": [
+        "scaffold"
+      ],
+      "includes": [
+        "scaffolds-primitive"
+      ],
       "path": ".keystone/harness/skills/keystone-new-playbook/SKILL.md",
       "provenance": "project"
     },
@@ -1095,6 +1321,12 @@
         "Bash"
       ],
       "model": "sonnet",
+      "tags": [
+        "scaffold"
+      ],
+      "includes": [
+        "scaffolds-primitive"
+      ],
       "path": ".keystone/harness/skills/keystone-new-policy/SKILL.md",
       "provenance": "project"
     },
@@ -1117,6 +1349,12 @@
         "Bash"
       ],
       "model": "sonnet",
+      "tags": [
+        "scaffold"
+      ],
+      "includes": [
+        "scaffolds-primitive"
+      ],
       "path": ".keystone/harness/skills/keystone-new-sensor/SKILL.md",
       "provenance": "project"
     },
@@ -1254,6 +1492,10 @@
       "guides/computational/go-vet",
       "guides/computational/gofmt",
       "guides/computational/gopls"
+    ],
+    "concern": [
+      "reads-diff",
+      "scaffolds-primitive"
     ],
     "corpus": [
       "corpus/domain/product-shape",
