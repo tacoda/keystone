@@ -194,9 +194,15 @@ func runOneSensor(projectDir, sensorID string) error {
 	if err != nil {
 		var unknown sensors.ErrUnknownSensor
 		if errors.As(err, &unknown) {
-			fmt.Fprintf(os.Stderr, "keystone verify --sensor: no runner for %q. Registered: %s\n",
+			// Unknown sensor is a SOFT skip, not a hook failure.
+			// Many sensors declare host_triggers without keystone-owned
+			// backing logic — they're meant to wire to external tools
+			// directly (go test, gofmt, govulncheck) or are LLM-judgment
+			// sensors invoked through an action. The hook should pass
+			// quietly so the user isn't spammed with non-blocking warnings.
+			fmt.Fprintf(os.Stderr, "keystone verify --sensor %q: no keystone-owned runner (registered: %s). Skipping.\n",
 				sensorID, strings.Join(sensors.IDs(), ", "))
-			os.Exit(1)
+			return nil
 		}
 		return fmt.Errorf("sensor %s: %w", sensorID, err)
 	}

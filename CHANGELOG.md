@@ -2,6 +2,30 @@
 
 All notable changes to keystone are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); the project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.4.1] — 2026-06-22
+
+Patch release. Quiets a noisy false-failure path that surfaced once
+multiple sensors had `host_triggers:` declared but only a subset had
+backing keystone-owned runners.
+
+### Fixed
+
+- **`keystone verify --sensor <id>` on an unregistered sensor now soft-skips**
+  (exit 0 with a single advisory line on stderr) instead of erroring
+  out. Many sensors intentionally declare `host_triggers:` without
+  keystone-owned backing — they wire to external tools directly
+  (`go test`, `gofmt`, `govulncheck`) or are LLM-judgment sensors
+  invoked through an action. The previous exit-1 behavior, combined
+  with the `severity: should` wrapper from 2.3, produced "Failed
+  with non-blocking status code" warnings on every hook fire for
+  sensors like `drift`, `commit-message`, `state-region`, etc.
+  No more spam.
+
+### Migration
+
+None. Pure binary fix. `go install ./cmd/keystone` or pick up the
+release artifact.
+
 ## [2.4.0] — 2026-06-22
 
 Minor release. Read-surface parity: the new abstractions shipped in
