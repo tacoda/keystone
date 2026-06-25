@@ -24,7 +24,7 @@ So `command`/`skill`/`agent` take the host names (identical concepts);
 | `command` | command | host name — identical concept (a unit of work / lifecycle step) |
 | `skill` | skill | host name — identical concept (a single capability) |
 | `agent` | subagent | a role spawned as a subagent (was `persona`/`subagent`); dir `agents/` |
-| `playbook` *(alias **workflow**)* | skill (orchestrator) | keystone name — a composed sequence of commands with human `gates:` |
+| `playbook` *(alias **workflow**)* | skill (orchestrator) | keystone name — a composed sequence of commands with human `gates:`. Subagent spawning / parallelism is prose in its SKILL.md (the host agent executes it); deterministic parallel fan-out lives in the hook layer, not a playbook field |
 | `pattern` | keystone generator (CLI) | a Rails-style **generator** — template(s) + arg schema + output-path rules; `keystone generate <pattern> [args]` (alias `g`) stamps the files. Deterministic, computational. The `keystone new` mechanism, but for *your app code* |
 | `corpus` | — | keystone-native prose — the *reasoning / why*; on-demand |
 | `document` | — | keystone artifact — governed output with `gates:` (plan/review/adr/retro/feature) |
