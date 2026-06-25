@@ -83,6 +83,9 @@ func (f *Frontmatter) UnmarshalYAML(value *yaml.Node) error {
 		Run          string        `yaml:"run"`
 		Agent        string        `yaml:"agent"`
 		Returns      string        `yaml:"returns"`
+		Allow        []string      `yaml:"allow"`
+		Ask          []string      `yaml:"ask"`
+		Deny         []string      `yaml:"deny"`
 	}
 	var s shadow
 	if err := value.Decode(&s); err != nil {
@@ -116,6 +119,9 @@ func (f *Frontmatter) UnmarshalYAML(value *yaml.Node) error {
 	f.Run = s.Run
 	f.Agent = s.Agent
 	f.Returns = s.Returns
+	f.Allow = s.Allow
+	f.Ask = s.Ask
+	f.Deny = s.Deny
 
 	args, err := decodeArgsNode(s.Args)
 	if err != nil {

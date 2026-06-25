@@ -208,6 +208,26 @@ body
 	eqStr(t, "Returns", inf.Returns, "review-findings")
 }
 
+// TestParse_PostureFields — a posture declares allow/ask/deny permission lists.
+func TestParse_PostureFields(t *testing.T) {
+	fm := mustParse(t, `---
+kind: posture
+id: default
+description: Baseline tool posture.
+allow:
+  - "Bash(go test:*)"
+ask:
+  - "Bash(git push:*)"
+deny:
+  - "Read(.env)"
+---
+body
+`)
+	wantSlice(t, "Allow", fm.Allow, []string{"Bash(go test:*)"})
+	wantSlice(t, "Ask", fm.Ask, []string{"Bash(git push:*)"})
+	wantSlice(t, "Deny", fm.Deny, []string{"Read(.env)"})
+}
+
 func TestParse_ArgsStringForm(t *testing.T) {
 	in := `---
 kind: command

@@ -100,17 +100,9 @@ func runProject(args []string) error {
 		fmt.Fprintf(os.Stdout, "  wrote: %s\n", ares.Path)
 	}
 
-	// Claude Code adapter: hooks region in .claude/settings.json.
-	hres, err := claudecode.ProjectHooks(absDir, primitives)
-	if err != nil {
-		return fmt.Errorf("claudecode hooks: %w", err)
-	}
-	if hres.Wrote {
-		fmt.Fprintf(os.Stdout, "  wrote: %s (+%d managed hook(s), -%d stale)\n",
-			hres.Path, hres.Added, hres.Removed)
-	} else if hres.Added > 0 {
-		fmt.Fprintf(os.Stdout, "  unchanged: %s (%d managed hook(s))\n",
-			hres.Path, hres.Added)
+	// Claude Code adapter: hooks + posture regions in .claude/settings.json.
+	if err := projectClaudeCode(absDir, primitives); err != nil {
+		return err
 	}
 
 	// Opt-in cross-host adapters. Selection via keystone.json
@@ -144,6 +136,30 @@ func runProject(args []string) error {
 			fmt.Fprintf(os.Stdout, "  continue: %d rule(s) written, %d unchanged\n",
 				cnres.Wrote, cnres.Unchanged)
 		}
+	}
+	return nil
+}
+
+// projectClaudeCode emits the two Claude Code settings.json regions: the
+// managed hooks block and the posture-derived permissions block.
+func projectClaudeCode(absDir string, primitives []primitive.Primitive) error {
+	hres, err := claudecode.ProjectHooks(absDir, primitives)
+	if err != nil {
+		return fmt.Errorf("claudecode hooks: %w", err)
+	}
+	if hres.Wrote {
+		fmt.Fprintf(os.Stdout, "  wrote: %s (+%d managed hook(s), -%d stale)\n",
+			hres.Path, hres.Added, hres.Removed)
+	} else if hres.Added > 0 {
+		fmt.Fprintf(os.Stdout, "  unchanged: %s (%d managed hook(s))\n", hres.Path, hres.Added)
+	}
+
+	pres, err := claudecode.ProjectPosture(absDir, primitives)
+	if err != nil {
+		return fmt.Errorf("claudecode posture: %w", err)
+	}
+	if pres.Wrote {
+		fmt.Fprintf(os.Stdout, "  wrote: %s (+%d permission(s))\n", pres.Path, pres.Added)
 	}
 	return nil
 }

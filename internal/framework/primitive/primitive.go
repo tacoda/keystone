@@ -197,6 +197,13 @@ type Frontmatter struct {
 	Agent   string `yaml:"agent,omitempty"   json:"agent,omitempty"`
 	Returns string `yaml:"returns,omitempty" json:"returns,omitempty"`
 
+	// Allow / Ask / Deny are a posture's tool-permission lists. They
+	// project to the host's permissions block (Claude Code:
+	// .claude/settings.json `permissions`).
+	Allow []string `yaml:"allow,omitempty" json:"allow,omitempty"`
+	Ask   []string `yaml:"ask,omitempty"   json:"ask,omitempty"`
+	Deny  []string `yaml:"deny,omitempty"  json:"deny,omitempty"`
+
 	// Corpus cites the reasoning behind this primitive (renamed from
 	// `traces:` in 3.0 — plain over jargon). Loaded on-demand: the agent
 	// opens the corpus body only when it needs the why.
