@@ -38,7 +38,7 @@ type ProjectionResult struct {
 func ProjectRules(projectDir string, primitives []primitive.Primitive) (ProjectionResult, error) {
 	var out ProjectionResult
 	for _, p := range primitives {
-		if primitive.Kind(p.Kind) != primitive.KindRule || len(p.Globs) == 0 {
+		if primitive.Kind(p.Kind) != primitive.KindGuide || len(p.Globs) == 0 {
 			continue
 		}
 		slug := ruleSlug(p.ID)

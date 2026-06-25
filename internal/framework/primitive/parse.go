@@ -78,6 +78,11 @@ func (f *Frontmatter) UnmarshalYAML(value *yaml.Node) error {
 		Type         string        `yaml:"type"`
 		ProducedBy   string        `yaml:"produced_by"`
 		Supersedes   []string      `yaml:"supersedes"`
+		Mode         string        `yaml:"mode"`
+		Event        string        `yaml:"event"`
+		Run          string        `yaml:"run"`
+		Agent        string        `yaml:"agent"`
+		Returns      string        `yaml:"returns"`
 	}
 	var s shadow
 	if err := value.Decode(&s); err != nil {
@@ -106,27 +111,44 @@ func (f *Frontmatter) UnmarshalYAML(value *yaml.Node) error {
 	f.Type = s.Type
 	f.ProducedBy = s.ProducedBy
 	f.Supersedes = s.Supersedes
+	f.Mode = s.Mode
+	f.Event = s.Event
+	f.Run = s.Run
+	f.Agent = s.Agent
+	f.Returns = s.Returns
 
-	if s.Args.Kind == 0 {
-		return nil
+	args, err := decodeArgsNode(s.Args)
+	if err != nil {
+		return err
 	}
-	// args: [a, b, c]  or  args: ["a"]
-	if s.Args.Kind == yaml.SequenceNode {
-		for _, child := range s.Args.Content {
-			switch child.Kind {
-			case yaml.ScalarNode:
-				f.Args = append(f.Args, Arg{Name: child.Value})
-			case yaml.MappingNode:
-				var a Arg
-				if err := child.Decode(&a); err != nil {
-					return fmt.Errorf("args entry: %w", err)
-				}
-				f.Args = append(f.Args, a)
-			default:
-				return fmt.Errorf("args entry: unsupported yaml kind %d", child.Kind)
+	f.Args = args
+	return nil
+}
+
+// decodeArgsNode lifts the flexible `args:` form into []Arg. Each entry may be
+// a scalar (sugar for Arg{Name}) or a full {name,type,required,description}
+// mapping. A zero/absent node yields nil; anything but a list is an error.
+func decodeArgsNode(node yaml.Node) ([]Arg, error) {
+	if node.Kind == 0 {
+		return nil, nil
+	}
+	if node.Kind != yaml.SequenceNode {
+		return nil, fmt.Errorf("args must be a list")
+	}
+	var args []Arg
+	for _, child := range node.Content {
+		switch child.Kind {
+		case yaml.ScalarNode:
+			args = append(args, Arg{Name: child.Value})
+		case yaml.MappingNode:
+			var a Arg
+			if err := child.Decode(&a); err != nil {
+				return nil, fmt.Errorf("args entry: %w", err)
 			}
+			args = append(args, a)
+		default:
+			return nil, fmt.Errorf("args entry: unsupported yaml kind %d", child.Kind)
 		}
-		return nil
 	}
-	return fmt.Errorf("args must be a list")
+	return args, nil
 }

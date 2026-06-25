@@ -13,7 +13,7 @@ func TestProjectRules_WritesMDCPerGuide(t *testing.T) {
 	root := t.TempDir()
 	guide := primitive.Primitive{
 		Frontmatter: primitive.Frontmatter{
-			Kind:        "rule",
+			Kind:        "guide",
 			ID:          "guides/idioms/go/stdlib-first",
 			Description: "Prefer Go stdlib over new deps.",
 			Globs:       []string{"cmd/**/*.go", "go.mod"},
@@ -49,7 +49,7 @@ func TestProjectRules_SkipsNonGuides(t *testing.T) {
 	root := t.TempDir()
 	prims := []primitive.Primitive{
 		{Frontmatter: primitive.Frontmatter{Kind: "sensor", ID: "build"}},
-		{Frontmatter: primitive.Frontmatter{Kind: "rule", ID: "g", Globs: nil}}, // no globs → skip
+		{Frontmatter: primitive.Frontmatter{Kind: "guide", ID: "g", Globs: nil}}, // no globs → skip
 	}
 	res, err := ProjectRules(root, prims)
 	if err != nil {
@@ -64,7 +64,7 @@ func TestProjectRules_IsIdempotent(t *testing.T) {
 	root := t.TempDir()
 	p := primitive.Primitive{
 		Frontmatter: primitive.Frontmatter{
-			Kind: "rule", ID: "guides/idioms/go/stdlib-first",
+			Kind: "guide", ID: "guides/idioms/go/stdlib-first",
 			Description: "x", Globs: []string{"cmd/**/*.go"},
 		},
 		Path: ".keystone/harness/guides/idioms/go/stdlib-first.md",

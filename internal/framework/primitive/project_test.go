@@ -19,11 +19,11 @@ func TestProjectionRelPath(t *testing.T) {
 		{"agent", "security-reviewer", nil, filepath.Join(".claude", "agents", "security-reviewer.md")},
 		{"command", "verify", nil, filepath.Join(".claude", "commands", "verify.md")},
 		{"skill", "task", nil, filepath.Join(".claude", "skills", "task", "SKILL.md")},
-		// Glob-scoped rule → rule shim.
-		{"rule", "rules/idioms/go/stdlib-first", []string{"cmd/**/*.go"}, filepath.Join(".claude", "rules", "go-stdlib-first.md")},
-		{"rule", "rules/idioms/harness-content/state-files", []string{"x/**"}, filepath.Join(".claude", "rules", "harness-content-state-files.md")},
-		// Rule without globs → no projection.
-		{"rule", "process/spec", nil, ""},
+		// Glob-scoped inferential guide → rule shim.
+		{"guide", "guides/idioms/go/stdlib-first", []string{"cmd/**/*.go"}, filepath.Join(".claude", "rules", "go-stdlib-first.md")},
+		{"guide", "guides/idioms/harness-content/state-files", []string{"x/**"}, filepath.Join(".claude", "rules", "harness-content-state-files.md")},
+		// Guide without globs → no projection.
+		{"guide", "guides/process/spec", nil, ""},
 		// Other no-projection kinds.
 		{"corpus", "corpus/process/spec", nil, ""},
 		{"hook", "build", nil, ""},
@@ -42,13 +42,13 @@ func TestProjectionRelPath(t *testing.T) {
 
 func TestProject_RuleShim(t *testing.T) {
 	root := t.TempDir()
-	src := filepath.Join(root, ".keystone/harness/rules/idioms/go/stdlib-first.md")
+	src := filepath.Join(root, ".keystone/harness/guides/idioms/go/stdlib-first.md")
 	if err := os.MkdirAll(filepath.Dir(src), 0o755); err != nil {
 		t.Fatal(err)
 	}
 	body := `---
-kind: rule
-id: rules/idioms/go/stdlib-first
+kind: guide
+id: guides/idioms/go/stdlib-first
 description: Prefer Go stdlib over new deps.
 globs:
   - "cmd/**/*.go"
@@ -112,7 +112,7 @@ This prose section must be excluded from the shim.
 		`globs:`,
 		`  - "cmd/**/*.go"`,
 		`  - "go.mod"`,
-		`source: .keystone/harness/rules/idioms/go/stdlib-first.md`,
+		`source: .keystone/harness/guides/idioms/go/stdlib-first.md`,
 		`generated_by: keystone-project`,
 		`# Stdlib first`,
 		`## IRON LAW`,
@@ -138,11 +138,11 @@ This prose section must be excluded from the shim.
 
 func TestProject_RuleWithoutGlobsSkipped(t *testing.T) {
 	root := t.TempDir()
-	src := filepath.Join(root, ".keystone/harness/rules/process/spec.md")
+	src := filepath.Join(root, ".keystone/harness/guides/process/spec.md")
 	if err := os.MkdirAll(filepath.Dir(src), 0o755); err != nil {
 		t.Fatal(err)
 	}
-	body := "---\nkind: rule\nid: rules/process/spec\ndescription: x\n---\n# Spec\n\n## IRON LAW\n\n- One.\n"
+	body := "---\nkind: guide\nid: guides/process/spec\ndescription: x\n---\n# Spec\n\n## IRON LAW\n\n- One.\n"
 	if err := os.WriteFile(src, []byte(body), 0o644); err != nil {
 		t.Fatal(err)
 	}
@@ -152,12 +152,12 @@ func TestProject_RuleWithoutGlobsSkipped(t *testing.T) {
 		t.Fatal(err)
 	}
 	for _, r := range results {
-		if r.Kind == "rule" && r.Action == "wrote" {
-			t.Errorf("expected globless rule to be skipped, got dest=%q", r.Dest)
+		if r.Kind == "guide" && r.Action == "wrote" {
+			t.Errorf("expected globless guide to be skipped, got dest=%q", r.Dest)
 		}
 	}
 	if _, err := os.Stat(filepath.Join(root, ".claude/rules")); !os.IsNotExist(err) {
-		t.Errorf(".claude/rules created for globless rule: err=%v", err)
+		t.Errorf(".claude/rules created for globless guide: err=%v", err)
 	}
 }
 
@@ -173,7 +173,7 @@ func TestProject_CopiesSkillAgentCommand(t *testing.T) {
 		".keystone/harness/commands/ship.md":              "---\nkind: command\nid: ship\ndescription: x\n---\nbody\n",
 		".keystone/harness/skills/onboard/SKILL.md":       "---\nkind: skill\nid: onboard\ndescription: x\ntriggers: [onboard]\n---\nbody\n",
 		// Source that has no projection target — should be ignored without error.
-		".keystone/harness/rules/process/spec.md": "---\nkind: rule\nid: rules/process/spec\ndescription: x\n---\nbody\n",
+		".keystone/harness/guides/process/spec.md": "---\nkind: guide\nid: guides/process/spec\ndescription: x\n---\nbody\n",
 	}
 	for rel, body := range files {
 		abs := filepath.Join(root, rel)

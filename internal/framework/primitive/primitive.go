@@ -50,15 +50,22 @@ import "strings"
 type Kind string
 
 const (
-	// 3.0 canonical vocabulary — the community names. A keystone
-	// primitive is to an agent primitive as an ActiveRecord model is to
-	// a DB table: same name, same concept, plus validations /
-	// associations / conveniences the bare host file lacks.
-	KindRule     Kind = "rule"     // glob-scoped directive (was guide)
-	KindHook     Kind = "hook"     // automated check (was sensor, computational)
+	// 3.0 canonical vocabulary. A keystone primitive is to an agent
+	// primitive as an ActiveRecord model is to a DB table: same concept,
+	// plus validations / associations / conveniences the bare host file
+	// lacks. The keystone names (guide/sensor/playbook) stay where the
+	// abstraction maps 1-to-many to host mechanisms by `mode:`; the host
+	// names (command/skill/agent) stay where the concept is identical.
+	KindGuide    Kind = "guide"    // ambient, glob-scoped directive → rule (inferential) | hook (computational)
+	KindSensor   Kind = "sensor"   // phase-gated check → hook (computational) | agent (inferential)
+	KindHook     Kind = "hook"     // framework hook layer: event (host phase | framework event) → run:/agent:
 	KindCommand  Kind = "command"  // a unit of work / lifecycle step (was action)
-	KindSkill    Kind = "skill"    // composed capability (was playbook)
+	KindSkill    Kind = "skill"    // composed capability
+	KindPlaybook Kind = "playbook" // composed sequence of commands with gates
 	KindAgent    Kind = "agent"    // a role spawned as a subagent (was persona/subagent)
+	KindPattern  Kind = "pattern"  // a recurring recipe, in prose; on-demand
+	KindPosture  Kind = "posture"  // tool/permission posture → settings.json permissions
+	KindTool     Kind = "tool"     // author-defined callable → keystone MCP server registration
 	KindDocument Kind = "document" // governed output doc; `type:` carries the subtype (e.g. feature)
 
 	// Standalone primitives.
@@ -75,21 +82,29 @@ const (
 )
 
 // KnownKinds is the closed set the indexer and linter validate against.
+// `rule` is intentionally absent — it is a projection-target name, not an
+// authorable kind (author a `guide`).
 var KnownKinds = []Kind{
-	KindRule, KindHook, KindCommand, KindSkill, KindAgent, KindDocument,
-	KindCorpus, KindEval, KindSource,
-	KindConcern,
+	KindGuide, KindSensor, KindHook, KindCommand, KindSkill, KindPlaybook,
+	KindAgent, KindPattern, KindPosture, KindTool, KindDocument,
+	KindCorpus, KindEval, KindSource, KindConcern,
 }
 
 // canonicalDirKind maps a canonical harness subdirectory to the kind it
 // holds. Convention over configuration: a file's directory is its kind
 // declaration, so `kind:` may be omitted from frontmatter and inferred.
+// No `rules/` entry — `rule` is not a kind.
 var canonicalDirKind = map[string]Kind{
-	"rules":     KindRule,
+	"guides":    KindGuide,
+	"sensors":   KindSensor,
 	"hooks":     KindHook,
 	"commands":  KindCommand,
 	"skills":    KindSkill,
+	"playbooks": KindPlaybook,
 	"agents":    KindAgent,
+	"patterns":  KindPattern,
+	"posture":   KindPosture,
+	"tools":     KindTool,
 	"documents": KindDocument,
 	"corpus":    KindCorpus,
 	"concerns":  KindConcern,
@@ -134,6 +149,17 @@ const (
 	SeverityMay    Severity = "may"
 )
 
+// GuideTier is the authority level of an inferential guide — the rule it
+// projects to. `preference` is the default; `iron-law` and `golden-rule`
+// are reserved for the rare directives that warrant them.
+type GuideTier string
+
+const (
+	TierIronLaw    GuideTier = "iron-law"
+	TierGoldenRule GuideTier = "golden-rule"
+	TierPreference GuideTier = "preference"
+)
+
 // Frontmatter is what each harness file declares between the `---` fences.
 // Fields not relevant to a given kind are simply omitted; the indexer
 // records what's present and the linter checks what's required.
@@ -148,6 +174,28 @@ type Frontmatter struct {
 	Tools    []string `yaml:"tools,omitempty"    json:"tools,omitempty"`
 	Model    string   `yaml:"model,omitempty"    json:"model,omitempty"`
 	Args     []Arg    `yaml:"args,omitempty"     json:"args,omitempty"`
+
+	// Mode picks the computational vs inferential nature of a guide /
+	// sensor / hook. computational → runs a `run:` shell command/script;
+	// inferential → dispatches an `agent:` whose output conforms to a
+	// `returns:` schema. Default: guide → inferential, sensor →
+	// computational.
+	Mode string `yaml:"mode,omitempty" json:"mode,omitempty"`
+
+	// Event binds a `hook` to a host phase (PreToolUse…) or a keystone
+	// framework event (pre-command, on-gate, pre-verify…).
+	Event string `yaml:"event,omitempty" json:"event,omitempty"`
+
+	// Run is the shell command/script a computational hook/sensor/tool
+	// executes. NOT the `command` kind — that is an agent-driven unit of
+	// work; `run:` is a plain shell string.
+	Run string `yaml:"run,omitempty" json:"run,omitempty"`
+
+	// Agent is the agent an inferential hook/sensor dispatches; Returns is
+	// the structured-result schema that agent must emit (the dispatcher
+	// validates against it and surfaces it as feedback).
+	Agent   string `yaml:"agent,omitempty"   json:"agent,omitempty"`
+	Returns string `yaml:"returns,omitempty" json:"returns,omitempty"`
 
 	// Corpus cites the reasoning behind this primitive (renamed from
 	// `traces:` in 3.0 — plain over jargon). Loaded on-demand: the agent

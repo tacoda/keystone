@@ -94,7 +94,7 @@ func mustParse(t *testing.T, in string) Frontmatter {
 
 func TestParse_RuleFull(t *testing.T) {
 	fm := mustParse(t, `---
-kind: rule
+kind: guide
 id: idioms/rails/migrations
 description: Migrations are reversible and small.
 severity: must
@@ -108,7 +108,7 @@ supersedes:
 ---
 # body unchanged
 `)
-	eqStr(t, "Kind", fm.Kind, "rule")
+	eqStr(t, "Kind", fm.Kind, "guide")
 	eqStr(t, "ID", fm.ID, "idioms/rails/migrations")
 	eqStr(t, "Severity", fm.Severity, "must")
 	wantSlice(t, "Globs", fm.Globs, []string{"db/migrate/**", "!db/migrate/legacy/**"})
@@ -153,7 +153,7 @@ stop: Acceptance criteria are all checkable and the plan is approved.
 // the 3.0 fields parses clean with zero values.
 func TestParse_NoNewFields(t *testing.T) {
 	fm := mustParse(t, `---
-kind: rule
+kind: guide
 id: process/spec
 description: Capture intent first.
 ---
@@ -167,6 +167,45 @@ body
 	eqStr(t, "Stop", fm.Stop, "")
 	eqStr(t, "ProducedBy", fm.ProducedBy, "")
 	eqStr(t, "Type", fm.Type, "")
+	eqStr(t, "Mode", fm.Mode, "")
+	eqStr(t, "Event", fm.Event, "")
+	eqStr(t, "Run", fm.Run, "")
+	eqStr(t, "Agent", fm.Agent, "")
+	eqStr(t, "Returns", fm.Returns, "")
+}
+
+// TestParse_HookFields — the 3.0 hook/sensor action fields decode:
+// computational binds an event to a `run:` script; inferential dispatches an
+// `agent:` that must emit a `returns:`-schema'd result.
+func TestParse_HookFields(t *testing.T) {
+	comp := mustParse(t, `---
+kind: hook
+id: gofmt-on-save
+description: Format Go files after every edit.
+mode: computational
+event: PostToolUse
+run: gofmt -w "$KEYSTONE_FILE"
+---
+body
+`)
+	eqStr(t, "Kind", comp.Kind, "hook")
+	eqStr(t, "Mode", comp.Mode, "computational")
+	eqStr(t, "Event", comp.Event, "PostToolUse")
+	eqStr(t, "Run", comp.Run, `gofmt -w "$KEYSTONE_FILE"`)
+
+	inf := mustParse(t, `---
+kind: sensor
+id: security-review
+description: Review the diff for OWASP issues.
+mode: inferential
+agent: security-reviewer
+returns: review-findings
+---
+body
+`)
+	eqStr(t, "Mode", inf.Mode, "inferential")
+	eqStr(t, "Agent", inf.Agent, "security-reviewer")
+	eqStr(t, "Returns", inf.Returns, "review-findings")
 }
 
 func TestParse_ArgsStringForm(t *testing.T) {

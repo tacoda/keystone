@@ -70,7 +70,7 @@ func Project(projectDir string, primitives []Primitive) ([]ProjectionResult, err
 		src := filepath.Join(projectDir, p.Path)
 		dest := filepath.Join(projectDir, rel)
 		var writeErr error
-		if Kind(p.Kind) == KindRule {
+		if Kind(p.Kind) == KindGuide {
 			writeErr = writeRuleShim(src, dest, p)
 		} else {
 			writeErr = copyOne(src, dest)
@@ -103,10 +103,11 @@ func ProjectionRelPath(p Primitive) string {
 		return filepath.Join(".claude", "agents", diskID+".md")
 	case KindCommand:
 		return filepath.Join(".claude", "commands", diskID+".md")
-	// Glob-scoped rules → ambient rule shims for path-triggered auto-load.
-	// A rule without globs is global-process content with no ambient
+	// Glob-scoped inferential guides → ambient rule shims for
+	// path-triggered auto-load (`rule` is the projection-target name). A
+	// guide without globs is global-process content with no ambient
 	// channel, so it has no projection.
-	case KindRule:
+	case KindGuide:
 		if len(p.Globs) == 0 {
 			return ""
 		}
@@ -125,9 +126,9 @@ func ProjectionRelPath(p Primitive) string {
 //   guides/idioms/go/stdlib-first              → go-stdlib-first
 //   guides/idioms/harness-content/state-files  → harness-content-state-files
 //   guides/process/foo                         → process-foo (fallback)
-func ruleShimDiskID(ruleID string) string {
-	trimmed := strings.TrimPrefix(ruleID, "rules/idioms/")
-	trimmed = strings.TrimPrefix(trimmed, "rules/")
+func ruleShimDiskID(guideID string) string {
+	trimmed := strings.TrimPrefix(guideID, "guides/idioms/")
+	trimmed = strings.TrimPrefix(trimmed, "guides/")
 	return strings.ReplaceAll(trimmed, "/", "-")
 }
 

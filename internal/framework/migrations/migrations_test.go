@@ -345,7 +345,7 @@ func TestV2_2_Up_Idempotent(t *testing.T) {
 	mustWrite(t, filepath.Join(tmp, ".keystone/harness/sensors/build.md"),
 		"---\nkind: hook\nid: build\ndescription: x\nhost_triggers:\n  - phase: Stop\n    command: go build ./...\n    timeout: 60\n---\nbody\n")
 	mustWrite(t, filepath.Join(tmp, ".keystone/harness/guides/idioms/go/stdlib-first.md"),
-		"---\nkind: rule\nid: rules/idioms/go/stdlib-first\ndescription: x\nglobs:\n  - \"cmd/**/*.go\"\n---\n# Stdlib first\n\n## IRON LAW\n\n- One.\n")
+		"---\nkind: guide\nid: guides/idioms/go/stdlib-first\ndescription: x\nglobs:\n  - \"cmd/**/*.go\"\n---\n# Stdlib first\n\n## IRON LAW\n\n- One.\n")
 	mustWrite(t, filepath.Join(tmp, "keystone.json"),
 		"{\"version\":\"2\",\"policies\":[]}\n")
 
