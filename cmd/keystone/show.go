@@ -132,7 +132,7 @@ func buildShowView(target primitive.Primitive, all []primitive.Primitive) showVi
 		Globs:        target.Globs,
 		Triggers:     target.Triggers,
 		Includes:     target.Includes,
-		Traces:       target.Traces,
+		Traces:       target.Corpus,
 		HostTriggers: target.HostTriggers,
 	}
 
@@ -151,7 +151,7 @@ func buildShowView(target primitive.Primitive, all []primitive.Primitive) showVi
 	// Reverse-lookup: who traces to this primitive (typically corpus
 	// targets — find every guide whose `traces:` mentions this id).
 	for _, p := range all {
-		for _, tr := range p.Traces {
+		for _, tr := range p.Corpus {
 			if tr == target.ID {
 				v.TracedBy = append(v.TracedBy, p.Kind+"/"+p.ID)
 			}

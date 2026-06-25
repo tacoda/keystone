@@ -6,41 +6,41 @@ import (
 	"strings"
 )
 
-// runNewGuide handles `keystone new guide <topic>/<name>`. Scaffolds a
-// guide (declarative markdown — the framework's term for what hosts
-// call a "rule") and a paired corpus stub.
-func runNewGuide(args []string) error {
+// runNewRule handles `keystone new rule <topic>/<name>`. Scaffolds a
+// rule (a glob-scoped directive) and a paired corpus stub the rule
+// cites via `corpus:`.
+func runNewRule(args []string) error {
 	projectDir, harnessRoot, remaining, err := parseDirAndHarnessRoot(args)
 	if err != nil {
 		return err
 	}
 	if len(remaining) != 1 {
-		return fmt.Errorf("`keystone new guide` requires exactly one argument: <topic>/<name>")
+		return fmt.Errorf("`keystone new rule` requires exactly one argument: <topic>/<name>")
 	}
 	topic, name, err := splitTopicName(remaining[0])
 	if err != nil {
 		return err
 	}
 
-	guideRel := filepath.Join("guides", topic, name+".md")
+	ruleRel := filepath.Join("rules", topic, name+".md")
 	corpusRel := filepath.Join("corpus", topic, name+".md")
-	guidePath := filepath.Join(projectDir, harnessRoot, guideRel)
+	rulePath := filepath.Join(projectDir, harnessRoot, ruleRel)
 	corpusPath := filepath.Join(projectDir, harnessRoot, corpusRel)
 
 	title := titleize(name)
-	id := topic + "/" + name
-	guideBody := fmt.Sprintf(`---
-kind: guide
+	id := "rules/" + topic + "/" + name
+	ruleBody := fmt.Sprintf(`---
+kind: rule
 id: %s
-description: TODO — one-line description of what this guide governs.
+description: TODO — one-line description of what this rule governs.
 severity: must
-traces:
+corpus:
   - %s
 ---
 
 # %s — rules
 
-One-sentence framing of what this guide governs.
+One-sentence framing of what this rule governs.
 
 ## RULES
 
@@ -48,7 +48,7 @@ One-sentence framing of what this guide governs.
 - Directive two.
 
 For reasoning, see [`+"`%s`"+`](%s).
-`, id, "corpus/"+id, title, filepath.ToSlash(corpusRel), filepath.ToSlash(corpusRel))
+`, id, "corpus/"+topic+"/"+name, title, filepath.ToSlash(corpusRel), filepath.ToSlash(corpusRel))
 
 	corpusBody := fmt.Sprintf(`---
 kind: corpus
@@ -69,9 +69,9 @@ Failure modes the rules guard against.
 Source material — papers, books, posts.
 
 Back to the rules: [`+"`%s`"+`](%s).
-`, id, title, filepath.ToSlash(guideRel), filepath.ToSlash(guideRel))
+`, id, title, filepath.ToSlash(ruleRel), filepath.ToSlash(ruleRel))
 
-	if err := writeSkeleton(guidePath, guideBody); err != nil {
+	if err := writeSkeleton(rulePath, ruleBody); err != nil {
 		return err
 	}
 	if err := writeSkeleton(corpusPath, corpusBody); err != nil {
@@ -96,7 +96,7 @@ func runNewCorpus(args []string) error {
 		return err
 	}
 	corpusRel := filepath.Join("corpus", topic, name+".md")
-	guideRel := filepath.Join("guides", topic, name+".md")
+	ruleRel := filepath.Join("rules", topic, name+".md")
 	corpusPath := filepath.Join(projectDir, harnessRoot, corpusRel)
 	title := titleize(name)
 	body := fmt.Sprintf(`# %s — reasoning
@@ -112,7 +112,7 @@ Failure modes.
 Source material.
 
 Back to the rules: [`+"`%s`"+`](%s).
-`, title, filepath.ToSlash(guideRel), filepath.ToSlash(guideRel))
+`, title, filepath.ToSlash(ruleRel), filepath.ToSlash(ruleRel))
 	return writeSkeleton(corpusPath, body)
 }
 

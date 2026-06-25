@@ -34,61 +34,46 @@ func registerWriteTools(s *server.MCPServer, projectDir string) {
 
 	gens := []gen{
 		{
-			tool:  "keystone_new_guide",
-			verb:  "guide",
-			idArg: "<topic>/<name>",
-			desc:  "Scaffold a framework guide + paired corpus stub. id form: '<topic>/<name>' (e.g. 'process/release').",
-		},
-		{
-			tool:  "keystone_new_corpus",
-			verb:  "corpus",
-			idArg: "<topic>/<name>",
-			desc:  "Scaffold a corpus reasoning entry. id form: '<topic>/<name>'.",
-		},
-		{
-			tool:  "keystone_new_sensor",
-			verb:  "sensor",
-			idArg: "<name>",
-			desc:  "Scaffold a sensor (automated check). id form: '<name>'.",
-			extras: []generatorFlag{
-				{name: "kind", flag: "--kind", desc: "Sensor kind: computational | inferential. Default: computational."},
-			},
-		},
-		{
-			tool:  "keystone_new_action",
-			verb:  "action",
-			idArg: "<name>",
-			desc:  "Scaffold a lifecycle action.",
-		},
-		{
-			tool:  "keystone_new_playbook",
-			verb:  "playbook",
-			idArg: "<name>",
-			desc:  "Scaffold a playbook (ordered sequence of actions).",
-		},
-		{
 			tool:  "keystone_new_rule",
 			verb:  "rule",
-			idArg: "<id>",
-			desc:  "Scaffold an agent-side rule (host-native flavor; framework default is `guide`).",
+			idArg: "<topic>/<name>",
+			desc:  "Scaffold a rule — a glob-scoped directive. id form: '<topic>/<name>' (e.g. 'process/release').",
 		},
 		{
-			tool:  "keystone_new_skill",
-			verb:  "skill",
-			idArg: "<id>",
-			desc:  "Scaffold a Claude Code skill. id may use the colon-namespaced form (e.g. 'keystone:demo').",
-		},
-		{
-			tool:  "keystone_new_subagent",
-			verb:  "subagent",
-			idArg: "<id>",
-			desc:  "Scaffold a subagent definition.",
+			tool:  "keystone_new_hook",
+			verb:  "hook",
+			idArg: "<name>",
+			desc:  "Scaffold a hook (automated check that projects to a host hook). id form: '<name>'.",
 		},
 		{
 			tool:  "keystone_new_command",
 			verb:  "command",
 			idArg: "<id>",
-			desc:  "Scaffold a slash command.",
+			desc:  "Scaffold a command — a unit of work / lifecycle step.",
+		},
+		{
+			tool:  "keystone_new_skill",
+			verb:  "skill",
+			idArg: "<id>",
+			desc:  "Scaffold a skill — a composed capability. id may use the colon-namespaced form (e.g. 'keystone:demo').",
+		},
+		{
+			tool:  "keystone_new_agent",
+			verb:  "agent",
+			idArg: "<id>",
+			desc:  "Scaffold an agent — a role spawned as a subagent.",
+		},
+		{
+			tool:  "keystone_new_document",
+			verb:  "document",
+			idArg: "<id>",
+			desc:  "Scaffold a document template (governed output: plan, review, adr, retro, feature). Instances land in .keystone/work/.",
+		},
+		{
+			tool:  "keystone_new_corpus",
+			verb:  "corpus",
+			idArg: "<topic>/<name>",
+			desc:  "Scaffold a corpus reasoning entry (the on-demand why). id form: '<topic>/<name>'.",
 		},
 		{
 			tool:  "keystone_new_adapter",

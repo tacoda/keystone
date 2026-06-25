@@ -7,6 +7,8 @@
 // (via the Path field) on activation.
 package primitive
 
+import "strings"
+
 // Kind names every primitive that can appear in the harness. The set is
 // closed; unknown kinds are a lint error.
 //
@@ -48,38 +50,79 @@ package primitive
 type Kind string
 
 const (
-	// Framework abstractions — wrappers.
-	KindGuide    Kind = "guide"    // wraps rule (conceptual)
-	KindSensor   Kind = "sensor"   // wraps rule (conceptual)
-	KindAction   Kind = "action"   // wraps command (projection)
-	KindPlaybook Kind = "playbook" // wraps skill   (projection)
-	KindPersona  Kind = "persona"  // wraps subagent (projection)
+	// 3.0 canonical vocabulary — the community names. A keystone
+	// primitive is to an agent primitive as an ActiveRecord model is to
+	// a DB table: same name, same concept, plus validations /
+	// associations / conveniences the bare host file lacks.
+	KindRule     Kind = "rule"     // glob-scoped directive (was guide)
+	KindHook     Kind = "hook"     // automated check (was sensor, computational)
+	KindCommand  Kind = "command"  // a unit of work / lifecycle step (was action)
+	KindSkill    Kind = "skill"    // composed capability (was playbook)
+	KindAgent    Kind = "agent"    // a role spawned as a subagent (was persona/subagent)
+	KindDocument Kind = "document" // governed output doc; `type:` carries the subtype (e.g. feature)
 
-	// Framework abstractions — standalone.
-	KindCorpus Kind = "corpus"
+	// Standalone primitives.
+	KindCorpus Kind = "corpus" // deep reasoning, loaded on-demand
 	KindEval   Kind = "eval"
 	KindSource Kind = "source"
 
 	// Composition primitive. A concern is a reusable fragment of
 	// frontmatter + body that other primitives pull in via the
-	// `includes:` field. Composition over inheritance — concerns are
-	// leaves (cannot include other concerns) and the host primitive
-	// always wins on scalar fields. See `primitive/compose.go`.
+	// `includes:` field. It also routes to corpus (carries `corpus:`
+	// refs) without inlining the reasoning. Concerns are leaves and the
+	// host primitive always wins on scalar fields. See compose.go.
 	KindConcern Kind = "concern"
-
-	// Agent abstractions — escape hatches.
-	KindRule     Kind = "rule"
-	KindSkill    Kind = "skill"
-	KindSubagent Kind = "subagent"
-	KindCommand  Kind = "command"
 )
 
 // KnownKinds is the closed set the indexer and linter validate against.
 var KnownKinds = []Kind{
-	KindGuide, KindSensor, KindAction, KindPlaybook, KindPersona,
+	KindRule, KindHook, KindCommand, KindSkill, KindAgent, KindDocument,
 	KindCorpus, KindEval, KindSource,
 	KindConcern,
-	KindRule, KindSkill, KindSubagent, KindCommand,
+}
+
+// canonicalDirKind maps a canonical harness subdirectory to the kind it
+// holds. Convention over configuration: a file's directory is its kind
+// declaration, so `kind:` may be omitted from frontmatter and inferred.
+var canonicalDirKind = map[string]Kind{
+	"rules":     KindRule,
+	"hooks":     KindHook,
+	"commands":  KindCommand,
+	"skills":    KindSkill,
+	"agents":    KindAgent,
+	"documents": KindDocument,
+	"corpus":    KindCorpus,
+	"concerns":  KindConcern,
+	"evals":     KindEval,
+	"sources":   KindSource,
+}
+
+// resolveKind returns the explicit kind when set, else the kind inferred
+// from the path. Convention over configuration with an explicit override.
+func resolveKind(explicit, relPath string) string {
+	if strings.TrimSpace(explicit) != "" {
+		return explicit
+	}
+	return string(InferKind(relPath))
+}
+
+// InferKind returns the kind implied by a primitive's canonical
+// directory — the path segment immediately under "harness/" — or "" when
+// the path is off-convention. relPath is project-relative POSIX. This is
+// the convention-over-configuration entry point: Walk fills an empty
+// `kind:` from the directory, so authors need not declare it.
+func InferKind(relPath string) Kind {
+	const marker = "harness/"
+	i := strings.Index(relPath, marker)
+	if i < 0 {
+		return ""
+	}
+	rest := relPath[i+len(marker):]
+	seg := rest
+	if j := strings.Index(rest, "/"); j >= 0 {
+		seg = rest[:j]
+	}
+	return canonicalDirKind[seg]
 }
 
 // Severity is the rule authority level. Replaces H2-tier parsing.
@@ -106,8 +149,33 @@ type Frontmatter struct {
 	Model    string   `yaml:"model,omitempty"    json:"model,omitempty"`
 	Args     []Arg    `yaml:"args,omitempty"     json:"args,omitempty"`
 
-	Traces []string `yaml:"traces,omitempty" json:"traces,omitempty"`
-	Deps   []string `yaml:"deps,omitempty"   json:"deps,omitempty"`
+	// Corpus cites the reasoning behind this primitive (renamed from
+	// `traces:` in 3.0 — plain over jargon). Loaded on-demand: the agent
+	// opens the corpus body only when it needs the why.
+	Corpus []string `yaml:"corpus,omitempty" json:"corpus,omitempty"`
+
+	// Deps is retired from the authoring surface in 3.0 (nothing loaded
+	// it). Kept on the descriptor for back-compat reads; not scaffolded,
+	// not documented. "See also" is a prose [[link]] in the corpus body.
+	Deps []string `yaml:"deps,omitempty" json:"deps,omitempty"`
+
+	// Document graph (3.0). A command `produces:` / `consumes:` document
+	// ids; `stop:` is its explicit done-condition. A document declares
+	// its own `gates:` lifecycle, a `type:` subtype (e.g. feature), and
+	// `produced_by:` the command that writes it. `supersedes:` lets a new
+	// rule or document flag the older one it replaces.
+	Produces   []string `yaml:"produces,omitempty"    json:"produces,omitempty"`
+	Consumes   []string `yaml:"consumes,omitempty"    json:"consumes,omitempty"`
+	Stop       string   `yaml:"stop,omitempty"        json:"stop,omitempty"`
+	Gates      []string `yaml:"gates,omitempty"       json:"gates,omitempty"`
+	// Gate is the current lifecycle state of a document *instance* (under
+	// .keystone/work/). Templates declare `gates:` (the ordered set);
+	// instances carry `gate:` (where they are now). `keystone document
+	// promote` advances it.
+	Gate       string   `yaml:"gate,omitempty"        json:"gate,omitempty"`
+	Type       string   `yaml:"type,omitempty"        json:"type,omitempty"`
+	ProducedBy string   `yaml:"produced_by,omitempty" json:"produced_by,omitempty"`
+	Supersedes []string `yaml:"supersedes,omitempty"  json:"supersedes,omitempty"`
 
 	Severity string `yaml:"severity,omitempty" json:"severity,omitempty"`
 	Tier     string `yaml:"tier,omitempty"     json:"tier,omitempty"`

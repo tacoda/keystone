@@ -103,7 +103,7 @@ func ProjectHooks(projectDir string, primitives []primitive.Primitive) (HookProj
 func collectSensorTriggers(primitives []primitive.Primitive) []hookEntryFromSensor {
 	var out []hookEntryFromSensor
 	for _, p := range primitives {
-		if primitive.Kind(p.Kind) != primitive.KindSensor {
+		if primitive.Kind(p.Kind) != primitive.KindHook {
 			continue
 		}
 		for _, t := range p.HostTriggers {

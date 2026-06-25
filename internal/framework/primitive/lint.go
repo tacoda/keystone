@@ -147,13 +147,9 @@ func lintOne(p Primitive, known map[Kind]bool, exists map[string]bool) []Finding
 		if len(p.Triggers) == 0 {
 			add(FindingError, "skill missing `triggers:` — a skill with no triggers cannot fire")
 		}
-	case KindSubagent:
+	case KindAgent:
 		if len(p.Tools) == 0 {
-			add(FindingError, "subagent missing `tools:` — declare the tool allow-list explicitly")
-		}
-	case KindPersona:
-		if len(p.Tools) == 0 {
-			add(FindingError, "persona missing `tools:` — persona wraps subagent; declare the tool allow-list explicitly")
+			add(FindingError, "agent missing `tools:` — declare the tool allow-list explicitly")
 		}
 	}
 
@@ -176,36 +172,53 @@ func lintOne(p Primitive, known map[Kind]bool, exists map[string]bool) []Finding
 		}
 	}
 
-	// deps / traces referential integrity (warnings — cross-policy refs
-	// may resolve only after install).
-	for _, d := range p.Deps {
-		if d == "" {
-			continue
-		}
-		if !strings.Contains(d, "/") {
-			add(FindingWarning, fmt.Sprintf("deps entry %q lacks <kind>/<id> form", d))
-			continue
-		}
-		if !exists[d] {
-			add(FindingWarning, fmt.Sprintf("deps entry %q does not resolve", d))
-		}
-	}
-	for _, t := range p.Traces {
-		if t == "" {
-			continue
-		}
-		// traces are corpus refs; default kind is "corpus" if unqualified.
-		key := t
-		if !strings.Contains(t, "/") {
-			key = "corpus/" + t
-		}
-		// Try both raw form and corpus-prefixed form.
-		if !exists[key] && !exists["corpus/"+t] {
-			add(FindingWarning, fmt.Sprintf("traces entry %q does not resolve", t))
-		}
-	}
-
+	out = append(out, lintRefs(p, exists)...)
 	return out
+}
+
+// lintRefs validates a primitive's association fields — the frontmatter
+// links that wire concepts together. Dangling targets are warnings:
+// cross-policy refs may resolve only after install. Split out of lintOne
+// to keep each function's complexity in check.
+func lintRefs(p Primitive, exists map[string]bool) []Finding {
+	// Each association field resolves a ref against a set of candidate
+	// key-prefixes ("" = the raw ref). corpus defaults to the corpus/
+	// kind; produces/consumes target documents; supersedes targets a
+	// same-kind id. Data-driven so the function stays flat.
+	checks := []struct {
+		field    string
+		refs     []string
+		prefixes []string
+	}{
+		{"corpus", p.Corpus, []string{"", "corpus/"}},
+		{"produces", p.Produces, []string{"document/", ""}},
+		{"consumes", p.Consumes, []string{"document/", ""}},
+		{"supersedes", p.Supersedes, []string{p.Kind + "/", ""}},
+	}
+	var out []Finding
+	for _, c := range checks {
+		for _, ref := range c.refs {
+			if ref == "" || refResolves(exists, ref, c.prefixes) {
+				continue
+			}
+			out = append(out, Finding{
+				Severity: FindingWarning, Path: p.Path, Kind: p.Kind, ID: p.ID,
+				Message: fmt.Sprintf("%s entry %q does not resolve", c.field, ref),
+			})
+		}
+	}
+	return out
+}
+
+// refResolves reports whether ref exists under any of the candidate
+// prefixes (prefix+ref) in the (kind/id) set.
+func refResolves(exists map[string]bool, ref string, prefixes []string) bool {
+	for _, pre := range prefixes {
+		if exists[pre+ref] {
+			return true
+		}
+	}
+	return false
 }
 
 func knownKindList() string {

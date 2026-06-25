@@ -57,7 +57,7 @@ func Search(projectDir string, primitives []Primitive, query string, limit int) 
 				break
 			}
 		}
-		for _, t := range p.Traces {
+		for _, t := range p.Corpus {
 			if strings.Contains(strings.ToLower(t), q) {
 				score += 3
 				if where == "" {

@@ -202,7 +202,7 @@ func inboxStats(projectDir string) (oldest time.Duration, count int) {
 func orphanCorpus(primitives []primitive.Primitive) []string {
 	referenced := map[string]bool{}
 	for _, p := range primitives {
-		for _, t := range p.Traces {
+		for _, t := range p.Corpus {
 			referenced[t] = true
 			if !strings.HasPrefix(t, "corpus/") {
 				referenced["corpus/"+t] = true

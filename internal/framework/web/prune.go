@@ -60,7 +60,7 @@ func findPruneCandidates(projectDir string, primitives []primitive.Primitive) []
 		for _, dep := range p.Deps {
 			referenced[dep] = true
 		}
-		for _, tr := range p.Traces {
+		for _, tr := range p.Corpus {
 			if !strings.Contains(tr, "/") {
 				tr = "corpus/" + tr
 			}

@@ -143,7 +143,7 @@ func composeOne(host Primitive, concerns map[string]Primitive) (Primitive, []Com
 		triggers = append(triggers, c.Triggers...)
 		tools = append(tools, c.Tools...)
 		tags = append(tags, c.Tags...)
-		traces = append(traces, c.Traces...)
+		traces = append(traces, c.Corpus...)
 		deps = append(deps, c.Deps...)
 		hostTriggers = append(hostTriggers, c.HostTriggers...)
 	}
@@ -155,7 +155,7 @@ func composeOne(host Primitive, concerns map[string]Primitive) (Primitive, []Com
 	merged.Triggers = dedupeStable(append(triggers, host.Triggers...))
 	merged.Tools = dedupeStable(append(tools, host.Tools...))
 	merged.Tags = dedupeStable(append(tags, host.Tags...))
-	merged.Traces = dedupeStable(append(traces, host.Traces...))
+	merged.Corpus = dedupeStable(append(traces, host.Corpus...))
 	merged.Deps = dedupeStable(append(deps, host.Deps...))
 	merged.HostTriggers = dedupeHostTriggers(append(hostTriggers, host.HostTriggers...))
 

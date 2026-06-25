@@ -15,7 +15,7 @@ import (
 func sensorWith(id string, triggers ...primitive.HostTrigger) primitive.Primitive {
 	return primitive.Primitive{
 		Frontmatter: primitive.Frontmatter{
-			Kind:         "sensor",
+			Kind:         "hook",
 			ID:           id,
 			HostTriggers: triggers,
 		},
@@ -230,7 +230,7 @@ func TestProjectHooks_IgnoresNonSensorPrimitives(t *testing.T) {
 	root := t.TempDir()
 	p := []primitive.Primitive{
 		// A guide with HostTriggers set (somehow) should be ignored.
-		{Frontmatter: primitive.Frontmatter{Kind: "guide", ID: "g1",
+		{Frontmatter: primitive.Frontmatter{Kind: "rule", ID: "g1",
 			HostTriggers: []primitive.HostTrigger{{Phase: "Stop", Command: "x"}}}},
 		// A sensor with no triggers contributes nothing.
 		sensorWith("idle"),

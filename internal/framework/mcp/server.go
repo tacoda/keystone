@@ -234,7 +234,7 @@ func registerTools(s *server.MCPServer, projectDir string) {
 			if err != nil {
 				return mcp.NewToolResultError(err.Error()), nil
 			}
-			if len(source.Traces) == 0 {
+			if len(source.Corpus) == 0 {
 				body, _ := json.MarshalIndent(map[string]any{
 					"source_kind":  source.Kind,
 					"source_id":    source.ID,
@@ -246,7 +246,7 @@ func registerTools(s *server.MCPServer, projectDir string) {
 			}
 
 			corpus := []map[string]any{}
-			for _, ref := range source.Traces {
+			for _, ref := range source.Corpus {
 				cKind, cID := parseTraceRef(ref)
 				p, body, err := loadPrimitiveBody(projectDir, cKind, cID)
 				if err != nil {
@@ -268,7 +268,7 @@ func registerTools(s *server.MCPServer, projectDir string) {
 			out, _ := json.MarshalIndent(map[string]any{
 				"source_kind": source.Kind,
 				"source_id":   source.ID,
-				"traces":      source.Traces,
+				"traces":      source.Corpus,
 				"corpus":      corpus,
 			}, "", "  ")
 			return mcp.NewToolResultText(string(out)), nil
@@ -422,7 +422,7 @@ func buildShowView(primitives []primitive.Primitive, kind, id string) (showView,
 		Globs:        target.Globs,
 		Triggers:     target.Triggers,
 		Includes:     target.Includes,
-		Traces:       target.Traces,
+		Traces:       target.Corpus,
 		HostTriggers: target.HostTriggers,
 	}
 	// Reverse-lookup: who includes this primitive (only meaningful
@@ -438,7 +438,7 @@ func buildShowView(primitives []primitive.Primitive, kind, id string) (showView,
 	sort.Strings(v.IncludedBy)
 	// Reverse-lookup: who traces to this primitive (guide → corpus).
 	for _, p := range primitives {
-		for _, tr := range p.Traces {
+		for _, tr := range p.Corpus {
 			if tr == target.ID {
 				v.TracedBy = append(v.TracedBy, p.Kind+"/"+p.ID)
 			}

@@ -70,7 +70,7 @@ func Project(projectDir string, primitives []Primitive) ([]ProjectionResult, err
 		src := filepath.Join(projectDir, p.Path)
 		dest := filepath.Join(projectDir, rel)
 		var writeErr error
-		if Kind(p.Kind) == KindGuide {
+		if Kind(p.Kind) == KindRule {
 			writeErr = writeRuleShim(src, dest, p)
 		} else {
 			writeErr = copyOne(src, dest)
@@ -97,28 +97,23 @@ func Project(projectDir string, primitives []Primitive) ([]ProjectionResult, err
 func ProjectionRelPath(p Primitive) string {
 	diskID := strings.ReplaceAll(p.ID, ":", "-")
 	switch Kind(p.Kind) {
-	// Agent escape hatches.
 	case KindSkill:
 		return filepath.Join(".claude", "skills", diskID, "SKILL.md")
-	case KindSubagent:
+	case KindAgent:
 		return filepath.Join(".claude", "agents", diskID+".md")
 	case KindCommand:
 		return filepath.Join(".claude", "commands", diskID+".md")
-	// Framework wrappers (project to the same host paths as their
-	// agent counterparts; collisions on same id are a lint error).
-	case KindPlaybook:
-		return filepath.Join(".claude", "skills", diskID, "SKILL.md")
-	case KindPersona:
-		return filepath.Join(".claude", "agents", diskID+".md")
-	case KindAction:
-		return filepath.Join(".claude", "commands", diskID+".md")
-	// Idiom guides → ambient rule shims for path-triggered auto-load.
-	case KindGuide:
+	// Glob-scoped rules → ambient rule shims for path-triggered auto-load.
+	// A rule without globs is global-process content with no ambient
+	// channel, so it has no projection.
+	case KindRule:
 		if len(p.Globs) == 0 {
 			return ""
 		}
 		return filepath.Join(".claude", "rules", ruleShimDiskID(p.ID)+".md")
 	}
+	// hook, document, corpus, eval, source: no file projection here.
+	// Hooks project to host hook config via claudecode.ProjectHooks.
 	return ""
 }
 
@@ -130,9 +125,9 @@ func ProjectionRelPath(p Primitive) string {
 //   guides/idioms/go/stdlib-first              → go-stdlib-first
 //   guides/idioms/harness-content/state-files  → harness-content-state-files
 //   guides/process/foo                         → process-foo (fallback)
-func ruleShimDiskID(guideID string) string {
-	trimmed := strings.TrimPrefix(guideID, "guides/idioms/")
-	trimmed = strings.TrimPrefix(trimmed, "guides/")
+func ruleShimDiskID(ruleID string) string {
+	trimmed := strings.TrimPrefix(ruleID, "rules/idioms/")
+	trimmed = strings.TrimPrefix(trimmed, "rules/")
 	return strings.ReplaceAll(trimmed, "/", "-")
 }
 

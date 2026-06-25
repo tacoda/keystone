@@ -84,6 +84,7 @@ func init() {
 	rootCmd.AddCommand(lintCmd())
 	rootCmd.AddCommand(listCmd())
 	rootCmd.AddCommand(showCmd())
+	rootCmd.AddCommand(documentCmd())
 	rootCmd.AddCommand(projectCmd())
 	rootCmd.AddCommand(migrateCmd())
 	rootCmd.AddCommand(mcpCmd())
@@ -247,6 +248,16 @@ func showCmd() *cobra.Command {
 		Short:              "Show one primitive's descriptor + cross-references",
 		DisableFlagParsing: true,
 		RunE:               runAndForward(runShow),
+	}
+	return c
+}
+
+func documentCmd() *cobra.Command {
+	c := &cobra.Command{
+		Use:                "document",
+		Short:              "List document instances and advance them through gates",
+		DisableFlagParsing: true,
+		RunE:               runAndForward(runDocument),
 	}
 	return c
 }

@@ -343,9 +343,9 @@ func TestV2_2_Up_Idempotent(t *testing.T) {
 	mustMkdir(t, filepath.Join(tmp, ".keystone/harness/sensors"))
 	mustMkdir(t, filepath.Join(tmp, ".keystone/harness/guides/idioms/go"))
 	mustWrite(t, filepath.Join(tmp, ".keystone/harness/sensors/build.md"),
-		"---\nkind: sensor\nid: build\ndescription: x\nhost_triggers:\n  - phase: Stop\n    command: go build ./...\n    timeout: 60\n---\nbody\n")
+		"---\nkind: hook\nid: build\ndescription: x\nhost_triggers:\n  - phase: Stop\n    command: go build ./...\n    timeout: 60\n---\nbody\n")
 	mustWrite(t, filepath.Join(tmp, ".keystone/harness/guides/idioms/go/stdlib-first.md"),
-		"---\nkind: guide\nid: guides/idioms/go/stdlib-first\ndescription: x\nglobs:\n  - \"cmd/**/*.go\"\n---\n# Stdlib first\n\n## IRON LAW\n\n- One.\n")
+		"---\nkind: rule\nid: rules/idioms/go/stdlib-first\ndescription: x\nglobs:\n  - \"cmd/**/*.go\"\n---\n# Stdlib first\n\n## IRON LAW\n\n- One.\n")
 	mustWrite(t, filepath.Join(tmp, "keystone.json"),
 		"{\"version\":\"2\",\"policies\":[]}\n")
 
@@ -397,7 +397,7 @@ func TestV2_3_Up_CreatesConcernsDir(t *testing.T) {
 
 	mustMkdir(t, filepath.Join(tmp, ".keystone/harness/sensors"))
 	mustWrite(t, filepath.Join(tmp, ".keystone/harness/sensors/build.md"),
-		"---\nkind: sensor\nid: build\ndescription: x\n---\nbody\n")
+		"---\nkind: hook\nid: build\ndescription: x\n---\nbody\n")
 	mustWrite(t, filepath.Join(tmp, "keystone.json"),
 		"{\"version\":\"2\",\"policies\":[]}\n")
 
@@ -422,11 +422,11 @@ func TestV2_3_Up_Idempotent(t *testing.T) {
 	mustMkdir(t, filepath.Join(tmp, ".keystone/harness/concerns"))
 	mustMkdir(t, filepath.Join(tmp, ".keystone/harness/personas"))
 	mustWrite(t, filepath.Join(tmp, ".keystone/harness/sensors/build.md"),
-		"---\nkind: sensor\nid: build\ndescription: x\nseverity: should\nhost_triggers:\n  - phase: Stop\n    command: go build ./...\n    timeout: 60\n---\nbody\n")
+		"---\nkind: hook\nid: build\ndescription: x\nseverity: should\nhost_triggers:\n  - phase: Stop\n    command: go build ./...\n    timeout: 60\n---\nbody\n")
 	mustWrite(t, filepath.Join(tmp, ".keystone/harness/concerns/shared-tools.md"),
 		"---\nkind: concern\nid: shared-tools\ndescription: x\ntools:\n  - Read\n  - Grep\ntags:\n  - composition\n---\nbody\n")
 	mustWrite(t, filepath.Join(tmp, ".keystone/harness/personas/reviewer.md"),
-		"---\nkind: persona\nid: reviewer\ndescription: x\ntools:\n  - Bash\nincludes:\n  - shared-tools\ntags:\n  - review\n---\nbody\n")
+		"---\nkind: agent\nid: reviewer\ndescription: x\ntools:\n  - Bash\nincludes:\n  - shared-tools\ntags:\n  - review\n---\nbody\n")
 	mustWrite(t, filepath.Join(tmp, "keystone.json"),
 		"{\"version\":\"2\",\"policies\":[]}\n")
 

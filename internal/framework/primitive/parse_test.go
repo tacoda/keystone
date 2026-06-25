@@ -50,21 +50,38 @@ func TestSplitFrontmatter(t *testing.T) {
 	}
 }
 
-func TestParse_GuideFull(t *testing.T) {
-	in := `---
-kind: guide
-id: idioms/rails/migrations
-description: Migrations are reversible and small.
-severity: must
-tier: iron
-globs:
-  - "db/migrate/**"
-  - "!db/migrate/legacy/**"
-traces:
-  - corpus/idioms/rails/migrations
----
-# body unchanged
-`
+// eqStr / eqSlice / nilSlice keep the field-assertion branching out of the
+// parse tests so each test body stays flat.
+func eqStr(t *testing.T, name, got, want string) {
+	t.Helper()
+	if got != want {
+		t.Errorf("%s = %q, want %q", name, got, want)
+	}
+}
+
+func wantSlice(t *testing.T, name string, got, want []string) {
+	t.Helper()
+	if len(got) != len(want) {
+		t.Errorf("%s = %v, want %v", name, got, want)
+		return
+	}
+	for i := range want {
+		if got[i] != want[i] {
+			t.Errorf("%s = %v, want %v", name, got, want)
+			return
+		}
+	}
+}
+
+func nilSlice(t *testing.T, name string, got []string) {
+	t.Helper()
+	if got != nil {
+		t.Errorf("%s = %v, want nil", name, got)
+	}
+}
+
+func mustParse(t *testing.T, in string) Frontmatter {
+	t.Helper()
 	fm, ok, err := Parse(in)
 	if err != nil {
 		t.Fatalf("Parse err: %v", err)
@@ -72,21 +89,84 @@ traces:
 	if !ok {
 		t.Fatal("ok = false; want true")
 	}
-	if fm.Kind != "guide" {
-		t.Errorf("Kind = %q", fm.Kind)
+	return fm
+}
+
+func TestParse_RuleFull(t *testing.T) {
+	fm := mustParse(t, `---
+kind: rule
+id: idioms/rails/migrations
+description: Migrations are reversible and small.
+severity: must
+globs:
+  - "db/migrate/**"
+  - "!db/migrate/legacy/**"
+corpus:
+  - corpus/idioms/rails/migrations
+supersedes:
+  - idioms/rails/old-migrations
+---
+# body unchanged
+`)
+	eqStr(t, "Kind", fm.Kind, "rule")
+	eqStr(t, "ID", fm.ID, "idioms/rails/migrations")
+	eqStr(t, "Severity", fm.Severity, "must")
+	wantSlice(t, "Globs", fm.Globs, []string{"db/migrate/**", "!db/migrate/legacy/**"})
+	// `corpus:` is the renamed `traces:` — cite the reasoning behind this rule.
+	wantSlice(t, "Corpus", fm.Corpus, []string{"corpus/idioms/rails/migrations"})
+	wantSlice(t, "Supersedes", fm.Supersedes, []string{"idioms/rails/old-migrations"})
+}
+
+func TestParse_DocumentFields(t *testing.T) {
+	fm := mustParse(t, `---
+kind: document
+id: implementation-plan
+description: The central planning artifact.
+type: feature
+produced_by: orient
+consumes:
+  - explore-findings
+produces:
+  - review
+gates:
+  - draft
+  - in-review
+  - approved
+  - executed
+  - done
+stop: Acceptance criteria are all checkable and the plan is approved.
+---
+# body
+`)
+	eqStr(t, "Kind", fm.Kind, "document")
+	eqStr(t, "Type", fm.Type, "feature")
+	eqStr(t, "ProducedBy", fm.ProducedBy, "orient")
+	wantSlice(t, "Consumes", fm.Consumes, []string{"explore-findings"})
+	wantSlice(t, "Produces", fm.Produces, []string{"review"})
+	wantSlice(t, "Gates", fm.Gates, []string{"draft", "in-review", "approved", "executed", "done"})
+	if fm.Stop == "" {
+		t.Errorf("Stop = %q, want non-empty", fm.Stop)
 	}
-	if fm.ID != "idioms/rails/migrations" {
-		t.Errorf("ID = %q", fm.ID)
-	}
-	if fm.Severity != "must" {
-		t.Errorf("Severity = %q", fm.Severity)
-	}
-	if len(fm.Globs) != 2 || fm.Globs[0] != "db/migrate/**" {
-		t.Errorf("Globs = %v", fm.Globs)
-	}
-	if len(fm.Traces) != 1 || fm.Traces[0] != "corpus/idioms/rails/migrations" {
-		t.Errorf("Traces = %v", fm.Traces)
-	}
+}
+
+// TestParse_NoNewFields guards back-compat: a descriptor that declares none of
+// the 3.0 fields parses clean with zero values.
+func TestParse_NoNewFields(t *testing.T) {
+	fm := mustParse(t, `---
+kind: rule
+id: process/spec
+description: Capture intent first.
+---
+body
+`)
+	nilSlice(t, "Produces", fm.Produces)
+	nilSlice(t, "Consumes", fm.Consumes)
+	nilSlice(t, "Gates", fm.Gates)
+	nilSlice(t, "Supersedes", fm.Supersedes)
+	nilSlice(t, "Corpus", fm.Corpus)
+	eqStr(t, "Stop", fm.Stop, "")
+	eqStr(t, "ProducedBy", fm.ProducedBy, "")
+	eqStr(t, "Type", fm.Type, "")
 }
 
 func TestParse_ArgsStringForm(t *testing.T) {

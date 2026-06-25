@@ -60,50 +60,6 @@ the run will check.
 	return nil
 }
 
-// runNewPersona handles `keystone new persona <id>`. Scaffolds
-// <harness>/personas/<id>.md with canonical primitive frontmatter.
-//
-// Persona is the framework wrapper for subagent: it projects to
-// .claude/agents/<id>.md via `keystone project`. Same id as a
-// hand-written subagent under harness/agents/ is a lint error
-// (projection collision).
-func runNewPersona(args []string) error {
-	projectDir, harnessRoot, remaining, err := parseDirAndHarnessRoot(args)
-	if err != nil {
-		return err
-	}
-	if len(remaining) != 1 {
-		return fmt.Errorf("`keystone new persona` requires exactly one argument: <id>")
-	}
-	id := remaining[0]
-	if err := validatePrimitiveID(id); err != nil {
-		return fmt.Errorf("persona id: %w", err)
-	}
-	diskName := strings.ReplaceAll(id, ":", "-")
-	path := filepath.Join(projectDir, harnessRoot, "personas", diskName+".md")
-	body := fmt.Sprintf(`---
-kind: persona
-id: %s
-description: TODO — one-line description of what this persona reviews / does.
-tools:
-  - Read
-  - Grep
----
-
-# %s
-
-System prompt this persona runs under as a delegated subagent. Describe
-posture, what it prioritizes, what it ignores, and what it returns.
-Keep it focused — one job per persona.
-
-## Output
-
-What the persona returns to its caller. Be explicit about format
-(JSON, markdown table, plain text) and length expectations.
-`, id, id)
-	return writeSkeleton(path, body)
-}
-
 // runNewSource handles `keystone new source <id>`. Scaffolds
 // <harness>/sources/<id>.md declaring an external source for the
 // stage-3 resolution flow.
@@ -134,46 +90,6 @@ settings:
 Prose describing ownership, auth, and the kinds of queries this source
 answers well. Stage 3 of the runtime resolution flow reaches sources
 when in-harness rules + corpus aren't enough.
-`, id, id)
-	return writeSkeleton(path, body)
-}
-
-// runNewRule handles `keystone new rule <id>`. Scaffolds
-// <harness-root>/rules/<id>.md with canonical primitive frontmatter for
-// an agent-side rule — the host-native flavor (Cursor-style, plain
-// CLAUDE.md directive) that lives alongside, not instead of, framework
-// guides.
-//
-// Reach for `keystone new rule` only when extending what the host
-// already understands. The default authoring path is `keystone new
-// guide`, which produces a framework guide with tiers, paired corpus,
-// and severity.
-func runNewRule(args []string) error {
-	projectDir, harnessRoot, remaining, err := parseDirAndHarnessRoot(args)
-	if err != nil {
-		return err
-	}
-	if len(remaining) != 1 {
-		return fmt.Errorf("`keystone new rule` requires exactly one argument: <id>")
-	}
-	id := remaining[0]
-	if err := validatePrimitiveID(id); err != nil {
-		return fmt.Errorf("rule id: %w", err)
-	}
-	diskName := strings.ReplaceAll(id, ":", "-")
-	path := filepath.Join(projectDir, harnessRoot, "rules", diskName+".md")
-	body := fmt.Sprintf(`---
-kind: rule
-id: %s
-description: TODO — one-line description of what this rule directs.
----
-
-# %s
-
-Plain-rule body. One-paragraph framing followed by directives.
-
-- Do this.
-- Don't do that.
 `, id, id)
 	return writeSkeleton(path, body)
 }
@@ -231,22 +147,22 @@ If the skill wraps a shell command, show the exact invocation:
 
 // runNewSubagent handles `keystone new subagent <id>`. Scaffolds
 // <harness-root>/agents/<id>.md with canonical primitive frontmatter.
-func runNewSubagent(args []string) error {
+func runNewAgent(args []string) error {
 	projectDir, harnessRoot, remaining, err := parseDirAndHarnessRoot(args)
 	if err != nil {
 		return err
 	}
 	if len(remaining) != 1 {
-		return fmt.Errorf("`keystone new subagent` requires exactly one argument: <id>")
+		return fmt.Errorf("`keystone new agent` requires exactly one argument: <id>")
 	}
 	id := remaining[0]
 	if err := validatePrimitiveID(id); err != nil {
-		return fmt.Errorf("subagent id: %w", err)
+		return fmt.Errorf("agent id: %w", err)
 	}
 	diskName := strings.ReplaceAll(id, ":", "-")
 	path := filepath.Join(projectDir, harnessRoot, "agents", diskName+".md")
 	body := fmt.Sprintf(`---
-kind: subagent
+kind: agent
 id: %s
 description: TODO — one-line description of what this subagent does.
 tools:

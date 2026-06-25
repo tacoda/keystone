@@ -111,6 +111,12 @@ func Walk(projectDir, harnessRoot string) (primitives []Primitive, warnings []Wa
 				return nil
 			}
 			relPath := filepath.ToSlash(relProject(projectDir, path))
+			// Convention over configuration: an omitted `kind:` is
+			// inferred from the canonical directory. Explicit `kind:`
+			// wins (escape hatch).
+			// Convention over configuration: an omitted kind is inferred
+			// from the canonical directory; an explicit kind wins.
+			fm.Kind = resolveKind(fm.Kind, relPath)
 			primitives = append(primitives, Primitive{
 				Frontmatter: fm,
 				Path:        relPath,
