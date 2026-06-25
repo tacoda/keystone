@@ -59,7 +59,7 @@ func init() {
 func planUp_2_3(absDir string) (*Plan, error) {
 	p := &Plan{}
 
-	harnessRoot := config.DefaultHarnessRoot
+	harnessRoot := legacyHarnessRoot
 	harnessAbs := filepath.Join(absDir, harnessRoot)
 	if !dirExists(harnessAbs) {
 		// Fresh install — `keystone init` scaffolds from 2.3 templates.
@@ -75,7 +75,7 @@ func planUp_2_3(absDir string) (*Plan, error) {
 	})
 
 	p.Add("re-walk + re-compose + rebuild INDEX.json + INDEX.lite.json", func(absDir string) error {
-		return rebuildIndexComposed(absDir, harnessRoot)
+		return rebuildIndexComposed(absDir, harnessRoot, legacyKeystoneDir)
 	})
 
 	p.Add("re-project primitives → .claude/{agents,commands,skills,rules}", func(absDir string) error {
@@ -119,12 +119,12 @@ func planDown_2_3(absDir string) (*Plan, error) {
 	// severity-wrap behavior. 2.2's projection rewrites every
 	// keystone-managed entry with unwrapped commands.
 	p.Add("re-walk WITHOUT compose, rebuild INDEX (drops merged tags / includes effects)", func(absDir string) error {
-		primitives, _, err := primitive.Walk(absDir, config.DefaultHarnessRoot)
+		primitives, _, err := primitive.Walk(absDir, legacyHarnessRoot)
 		if err != nil {
 			return err
 		}
 		idx := primitive.Build(primitives, time.Now())
-		keystoneDir := filepath.Join(absDir, config.KeystoneDir(config.DefaultHarnessRoot))
+		keystoneDir := filepath.Join(absDir, legacyKeystoneDir)
 		if err := primitive.Write(filepath.Join(keystoneDir, config.IndexName), idx); err != nil {
 			return err
 		}
@@ -132,7 +132,7 @@ func planDown_2_3(absDir string) (*Plan, error) {
 	})
 
 	p.Add("re-project hooks without severity wrappers (uncomposed primitives)", func(absDir string) error {
-		primitives, _, err := primitive.Walk(absDir, config.DefaultHarnessRoot)
+		primitives, _, err := primitive.Walk(absDir, legacyHarnessRoot)
 		if err != nil {
 			return err
 		}
@@ -149,14 +149,14 @@ func planDown_2_3(absDir string) (*Plan, error) {
 // rebuildIndexComposed mirrors v2_2's rebuildIndex but routes the
 // primitive slice through Compose before indexing, so the descriptor
 // records what the agent actually sees after `includes:` resolution.
-func rebuildIndexComposed(absDir, harnessRoot string) error {
+func rebuildIndexComposed(absDir, harnessRoot, indexDir string) error {
 	primitives, _, err := primitive.Walk(absDir, harnessRoot)
 	if err != nil {
 		return err
 	}
 	composed, _ := primitive.Compose(primitives)
 	idx := primitive.Build(composed, time.Now())
-	keystoneDir := filepath.Join(absDir, config.KeystoneDir(harnessRoot))
+	keystoneDir := filepath.Join(absDir, indexDir)
 	if err := primitive.Write(filepath.Join(keystoneDir, config.IndexName), idx); err != nil {
 		return err
 	}

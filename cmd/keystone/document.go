@@ -8,12 +8,15 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/tacoda/keystone/internal/framework/config"
 	"github.com/tacoda/keystone/internal/framework/primitive"
 )
 
 // workDirRel is where document instances live — tracked in git as
-// durable team memory (filled plans, reviews, ADRs, retros).
-const workDirRel = ".keystone/work"
+// durable team memory (filled plans, reviews, ADRs, retros). Routed
+// through config so the standardized harness root is the only place to
+// change the location.
+var workDirRel = filepath.Join(config.KeystoneDir(config.DefaultHarnessRoot), "work")
 
 var gateLineRE = regexp.MustCompile(`(?m)^gate:.*$`)
 

@@ -11,7 +11,7 @@ import (
 func TestPrimitiveCache_RefreshAndGet(t *testing.T) {
 	root := t.TempDir()
 	// Seed one guide so the walker has something to find.
-	src := filepath.Join(root, ".keystone/harness/guides/process/spec.md")
+	src := filepath.Join(root, ".harness/guides/process/spec.md")
 	if err := os.MkdirAll(filepath.Dir(src), 0o755); err != nil {
 		t.Fatal(err)
 	}

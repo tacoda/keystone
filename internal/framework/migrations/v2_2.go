@@ -43,6 +43,14 @@ import (
 // Down: deletes the new generated artifacts the user can safely
 // regenerate from 2.1 sources. Preserves source content.
 
+// Legacy 2.x layout, pinned so the pre-3.0 migrations keep operating on
+// `.keystone/` no matter where DefaultHarnessRoot points now. The 3.0
+// migration (v3_0) moves this tree to `.harness/`.
+const (
+	legacyHarnessRoot = ".keystone/harness"
+	legacyKeystoneDir = ".keystone"
+)
+
 func init() {
 	Register(Migration{
 		Version: "2.2",
@@ -54,7 +62,10 @@ func init() {
 func planUp_2_2(absDir string) (*Plan, error) {
 	p := &Plan{}
 
-	harnessRoot := config.DefaultHarnessRoot
+	// 2.2 predates the 3.0 `.harness` move — pin to the legacy layout so
+	// this migration keeps operating on `.keystone/` regardless of the
+	// current DefaultHarnessRoot.
+	harnessRoot := legacyHarnessRoot
 	harnessAbs := filepath.Join(absDir, harnessRoot)
 	if !dirExists(harnessAbs) {
 		// Fresh install — `keystone init` will scaffold from the 2.2
@@ -63,7 +74,7 @@ func planUp_2_2(absDir string) (*Plan, error) {
 	}
 
 	p.Add("re-walk .keystone/harness/ and rebuild INDEX.json + INDEX.lite.json", func(absDir string) error {
-		return rebuildIndex(absDir, harnessRoot)
+		return rebuildIndex(absDir, harnessRoot, legacyKeystoneDir)
 	})
 
 	p.Add("re-project primitives → .claude/{agents,commands,skills,rules}", func(absDir string) error {
@@ -100,7 +111,7 @@ func planDown_2_2(absDir string) (*Plan, error) {
 	p := &Plan{}
 
 	p.Add("remove .keystone/INDEX.lite.json", func(absDir string) error {
-		return removeIfExists(filepath.Join(absDir, config.KeystoneDir(config.DefaultHarnessRoot), config.IndexLiteName))
+		return removeIfExists(filepath.Join(absDir, legacyKeystoneDir, config.IndexLiteName))
 	})
 
 	p.Add("remove generated .claude/rules/ (guide shims)", func(absDir string) error {
@@ -137,13 +148,13 @@ func planDown_2_2(absDir string) (*Plan, error) {
 // of the harness tree. Mirrors what `keystone index` does at the
 // command layer — duplicated here so the migration is self-contained
 // and replayable without spawning the binary.
-func rebuildIndex(absDir, harnessRoot string) error {
+func rebuildIndex(absDir, harnessRoot, indexDir string) error {
 	primitives, _, err := primitive.Walk(absDir, harnessRoot)
 	if err != nil {
 		return err
 	}
 	idx := primitive.Build(primitives, time.Now())
-	keystoneDir := filepath.Join(absDir, config.KeystoneDir(harnessRoot))
+	keystoneDir := filepath.Join(absDir, indexDir)
 	if err := primitive.Write(filepath.Join(keystoneDir, config.IndexName), idx); err != nil {
 		return err
 	}

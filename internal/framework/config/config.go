@@ -6,26 +6,24 @@
 // the full keystone.json schema into this package.
 package config
 
-// DefaultHarnessRoot is the relative path where keystone installs the
-// harness inside a consumer's repo. At 2.0 this is `.keystone/harness` —
-// the harness lives under a `.keystone/` parent dir that also holds the
-// lockfile and generated INDEX.json, so both the CLI and keystone-mcp
-// can discover the harness with one well-known prefix.
+// DefaultHarnessRoot is the single standardized directory that holds the
+// harness inside a consumer's repo and feeds every agent. At 3.0 this is
+// `.harness` — one agent-neutral location (the name describes the thing,
+// not the tool). The primitives, the generated INDEX.json, the lockfile,
+// and the document workspace all live under it; projection reads it and
+// writes each host surface (.claude/, .cursor/, AGENTS.md, …).
 //
-// Configurable per-install via the --harness-root flag at
-// `keystone init`; downstream commands accept the same flag or pick it
-// up from keystone.json. The parent directory of harnessRoot is the
-// "keystone dir" — see KeystoneDir.
-const DefaultHarnessRoot = ".keystone/harness"
+// This is the one place to change the harness location. `keystone.json`
+// stays at the repo root as the entry-point config.
+const DefaultHarnessRoot = ".harness"
 
 // LockfileName is the basename of the per-install state record, written
-// at <keystone-dir>/lockfile.json (i.e. one level above the harness
-// root). At 2.0 this resolves to `.keystone/lockfile.json`.
+// at <harness-root>/lockfile.json. At 3.0 this resolves to
+// `.harness/lockfile.json`.
 const LockfileName = "lockfile.json"
 
 // IndexName is the basename of the generated primitive descriptor index,
-// written at <keystone-dir>/INDEX.json — alongside the lockfile, not
-// inside the harness tree.
+// written at <harness-root>/INDEX.json.
 const IndexName = "INDEX.json"
 
 // IndexLiteName is the basename of the cheap-discovery sibling index
@@ -35,32 +33,18 @@ const IndexName = "INDEX.json"
 // activate a specific primitive.
 const IndexLiteName = "INDEX.lite.json"
 
-// KeystoneDir returns the parent directory of the configured harness
-// root — the `.keystone/` umbrella that holds the lockfile, the
-// INDEX.json, and the harness/ subtree. For the default
-// (`.keystone/harness`) it returns `.keystone`. When the user has
-// configured a flat harness root (no separator), it returns the
-// project-root sentinel `.`.
+// KeystoneDir returns the directory that holds the lockfile, INDEX.json,
+// and document workspace. At 3.0 the harness root IS that umbrella — they
+// live directly under `.harness/` — so this returns the harness root
+// itself.
+//
+// Pre-3.0 installs nested the harness under `.keystone/` (the umbrella
+// was the parent of the harness root). Those paths are pinned inside the
+// v2.x migrations and the `keystone migrate` legacy-layout detection, not
+// derived here, so this function need not special-case them.
 func KeystoneDir(harnessRoot string) string {
 	if harnessRoot == "" {
 		harnessRoot = DefaultHarnessRoot
 	}
-	parent := pathDir(harnessRoot)
-	if parent == "" {
-		return "."
-	}
-	return parent
-}
-
-// pathDir is filepath.Dir-equivalent for forward-slash POSIX paths only
-// (the harness root is always declared in POSIX form in keystone.json).
-// Imported inline to avoid pulling filepath into the config package's
-// no-os surface.
-func pathDir(p string) string {
-	for i := len(p) - 1; i >= 0; i-- {
-		if p[i] == '/' {
-			return p[:i]
-		}
-	}
-	return ""
+	return harnessRoot
 }

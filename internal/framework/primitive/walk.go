@@ -85,6 +85,9 @@ func Walk(projectDir, harnessRoot string) (primitives []Primitive, warnings []Wa
 				return walkErr
 			}
 			if d.IsDir() {
+				if isWorkspaceDir(abs, path) {
+					return fs.SkipDir
+				}
 				return nil
 			}
 			rel, relErr := filepath.Rel(abs, path)
@@ -135,6 +138,15 @@ func Walk(projectDir, harnessRoot string) (primitives []Primitive, warnings []Wa
 		return primitives[i].ID < primitives[j].ID
 	})
 	return primitives, warnings, nil
+}
+
+// isWorkspaceDir reports whether path is the top-level `work/` directory
+// under the scan root. The document workspace holds filled document
+// *instances* (gate state), not primitive templates, so the walker skips
+// it — instances are tracked by `keystone document`, not the index.
+func isWorkspaceDir(scanRootAbs, path string) bool {
+	r, err := filepath.Rel(scanRootAbs, path)
+	return err == nil && filepath.ToSlash(r) == "work"
 }
 
 // Warning is a non-fatal indexer finding — e.g. malformed frontmatter
