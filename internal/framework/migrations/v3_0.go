@@ -234,12 +234,24 @@ func rewriteForV3(oldKind string, fm primitive.Frontmatter) *kindRewrite {
 	case "persona":
 		return &kindRewrite{"agent", "agents"}
 	case "sensor":
-		if len(fm.HostTriggers) > 0 {
-			return &kindRewrite{"hook", "hooks"}
+		// Inferential review sensors (LLM judgment) become agents;
+		// everything else is a computational check → hook. host_triggers,
+		// when present, is a definitive computational signal.
+		if isInferentialSensor(fm.ID) {
+			return &kindRewrite{"agent", "agents"}
 		}
-		return &kindRewrite{"agent", "agents"}
+		return &kindRewrite{"hook", "hooks"}
 	}
 	return nil
+}
+
+// isInferentialSensor reports whether a 2.x sensor was LLM-judgment rather
+// than a deterministic check — these become agents in 3.0. Keystone's
+// inferential sensors are the review-* family and the debt assessors.
+func isInferentialSensor(id string) bool {
+	return strings.HasPrefix(id, "review-") ||
+		strings.HasSuffix(id, "-debt") ||
+		id == "spec-adherence"
 }
 
 var (
