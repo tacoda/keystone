@@ -81,6 +81,7 @@ func (f *Frontmatter) UnmarshalYAML(value *yaml.Node) error {
 		Mode         string        `yaml:"mode"`
 		Event        string        `yaml:"event"`
 		Run          string        `yaml:"run"`
+		Transport    string        `yaml:"transport"`
 		Agent        string        `yaml:"agent"`
 		Returns      string        `yaml:"returns"`
 		Allow        []string      `yaml:"allow"`
@@ -117,6 +118,7 @@ func (f *Frontmatter) UnmarshalYAML(value *yaml.Node) error {
 	f.Mode = s.Mode
 	f.Event = s.Event
 	f.Run = s.Run
+	f.Transport = s.Transport
 	f.Agent = s.Agent
 	f.Returns = s.Returns
 	f.Allow = s.Allow

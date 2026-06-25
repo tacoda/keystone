@@ -14,6 +14,24 @@ import (
 // convention (harness-root-relative inter-harness links, no ../) and the
 // port contract (frontmatter, required sections). The author fills in
 // the body.
+// newDispatch maps each `keystone new <verb>` to its scaffold generator.
+var newDispatch = map[string]func([]string) error{
+	"rule":     runNewRule,
+	"hook":     runNewHook,
+	"command":  runNewCommand,
+	"skill":    runNewSkill,
+	"agent":    runNewAgent,
+	"pattern":  runNewPattern,
+	"posture":  runNewPosture,
+	"tool":     runNewTool,
+	"document": runNewDocument,
+	"corpus":   runNewCorpus,
+	"eval":     runNewEval,
+	"source":   runNewSource,
+	"adapter":  runNewAdapter,
+	"policy":   runNewPolicy,
+}
+
 func runNew(args []string) error {
 	if len(args) == 0 {
 		printNewUsage(os.Stderr)
@@ -23,32 +41,12 @@ func runNew(args []string) error {
 	case "help", "--help", "-h":
 		printNewUsage(os.Stdout)
 		return nil
-	// 3.0 canonical vocabulary — the community names.
-	case "rule":
-		return runNewRule(args[1:])
-	case "hook":
-		return runNewHook(args[1:])
-	case "command":
-		return runNewCommand(args[1:])
-	case "skill":
-		return runNewSkill(args[1:])
-	case "agent":
-		return runNewAgent(args[1:])
-	case "document":
-		return runNewDocument(args[1:])
-	case "corpus":
-		return runNewCorpus(args[1:])
-	case "eval":
-		return runNewEval(args[1:])
-	case "source":
-		return runNewSource(args[1:])
-	case "adapter":
-		return runNewAdapter(args[1:])
-	case "policy":
-		return runNewPolicy(args[1:])
-	default:
-		return fmt.Errorf("unknown kind %q (use: rule, hook, command, skill, agent, document, corpus, eval, source, adapter, policy)", args[0])
 	}
+	gen, ok := newDispatch[args[0]]
+	if !ok {
+		return fmt.Errorf("unknown kind %q (use: rule, hook, command, skill, agent, pattern, posture, tool, document, corpus, eval, source, adapter, policy)", args[0])
+	}
+	return gen(args[1:])
 }
 
 func printNewUsage(w *os.File) {
@@ -61,6 +59,9 @@ Usage:
     keystone new command <id>             [--dir <path>]   # a unit of work / lifecycle step
     keystone new skill <id>               [--dir <path>]   # a composed capability
     keystone new agent <id>               [--dir <path>]   # a role spawned as a subagent
+    keystone new pattern <id>             [--dir <path>]   # prose documentation pattern (tutorial, how-to, reference, explanation)
+    keystone new posture <id>             [--dir <path>]   # tool/permission posture (allow/ask/deny)
+    keystone new tool <id>                [--dir <path>]   # author-defined callable (transport: cli | mcp | plugin)
     keystone new document <id>            [--dir <path>]   # governed output template (plan/review/adr/...)
     keystone new corpus <topic>/<name>    [--dir <path>]   # on-demand reasoning
     keystone new eval <id>                [--dir <path>]

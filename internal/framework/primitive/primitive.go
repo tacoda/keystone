@@ -191,6 +191,10 @@ type Frontmatter struct {
 	// work; `run:` is a plain shell string.
 	Run string `yaml:"run,omitempty" json:"run,omitempty"`
 
+	// Transport is how a `tool` callable reaches the agent: cli | mcp |
+	// plugin. keystone's generic sense of "tool" — not MCP-only.
+	Transport string `yaml:"transport,omitempty" json:"transport,omitempty"`
+
 	// Agent is the agent an inferential hook/sensor dispatches; Returns is
 	// the structured-result schema that agent must emit (the dispatcher
 	// validates against it and surfaces it as feedback).

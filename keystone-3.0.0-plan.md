@@ -110,10 +110,10 @@ Each slice ends green (`go test ./...` + `go vet ./...`) and is one commit.
 - `posture` primitive frontmatter → permissions (allow/ask/deny) merged into `.claude/settings.json` (same merge path hooks use).
 - → verify: posture fixture projects to settings permissions block; idempotent re-merge.
 
-**Slice 4 — `pattern` generator + `posture` authoring** (scaffold, `keystone new`, `keystone generate`, MCP)
-- `keystone new pattern|posture`; MCP `keystone_new_pattern|posture`; INDEX picks them up.
-- `pattern` = a Rails-style generator: frontmatter declares template(s) + `args:` schema + output-path rules. New `keystone generate <pattern> [args]` (alias `g`) renders the templates with arg substitution and writes the files (deterministic, computational). Reuse the existing scaffold/template engine.
-- → verify: `keystone new pattern` scaffolds at canonical path; `keystone generate <fixture> name=Foo` stamps the expected file with substitution; index lists the new kinds.
+**Slice 4 — `pattern` + `posture` + `tool` authoring** (scaffold, `keystone new`, MCP)
+- `keystone new pattern|posture|tool`; MCP `keystone_new_pattern|posture|tool`; INDEX + `keystone new` usage text pick them up.
+- `pattern` is prose (a reusable software-design pattern) — scaffold a frontmatter + body stub at the canonical path; no generator, no projection.
+- → verify: each `keystone new <kind>` scaffolds at the canonical path with valid frontmatter; index lists the new kinds; lint clean.
 
 **Slice 5 — framework-hook layer** (`hook` kind, event registry, fire)
 - `hook` frontmatter: `event:` (host phase | framework event) + matcher + action — `run:` (shell command/script, computational) **or** `agent:` (dispatch an agent, inferential). `run:` is a shell script, not the `command` kind.
@@ -124,12 +124,11 @@ Each slice ends green (`go test ./...` + `go vet ./...`) and is one commit.
 - **Inferential guides + sensors are framework-fired here**: the hook layer dispatches an inferential sensor's agent at its event (e.g. `pre-verify`/`on-review`) and surfaces an inferential guide's directive at its event (e.g. `pre-command`/post-edit) on a glob match. This is keystone-controlled activation, replacing reliance on host-ambient loading. The slice-2 `agents/`/`rules/` projections are the artifacts dispatched.
 - → verify: a fixture framework-event hook fires on `keystone verify`; non-zero exit blocks; a host-phase hook fires through the bridge; `project` writes the bridge entries but no per-hook entries; an inferential sensor dispatches at `pre-verify`.
 
-**Slice 5b — `tool` kind + MCP registration** (`primitive.go` done in 1; `mcp/`)
-- `tool` frontmatter: `run:` (shell handler script) + input schema (`args:` reuse) + `tools:`-style scoping.
-- keystone MCP server reads `kind: tool` from INDEX at startup, registers each as an MCP tool; handler shells out to `run:` with validated args.
-- `keystone new tool`; MCP `keystone_new_tool`.
+**Slice 5b — `tool` transports + `source` tightening** (`mcp/`, `loader`/`config`)
+- `tool` frontmatter (scaffold landed in slice 4): `transport:` (cli | mcp | plugin) + `run:` (handler) + `args:` schema + `tools:`-style scoping.
+- Bind per transport: `mcp` → keystone MCP server reads `kind: tool`/`transport: mcp` from INDEX at startup and registers each (handler shells out to `run:` with validated args); `cli` → the `run:` script is the callable, surfaced for direct invocation; `plugin` → host plugin descriptor. Lint: `transport` ∈ {cli, mcp, plugin, ""}.
 - Tighten `source`: external-system config only (Slack/Jira/Linear/Confluence) — drop local-folder sources from `context.json` schema + lint; URL endpoints to external systems stay.
-- → verify: fixture `tool` registers + invokes via the MCP server; bad args rejected by schema; `source` lint rejects a file/folder source.
+- → verify: an `mcp` tool registers + invokes via the MCP server; bad args rejected by schema; `transport` lint rejects an unknown value; `source` lint rejects a file/folder source.
 
 **Slice 6 — migration v3_0 rewrite** (`v3_0.go`, `v3_0_test.go`)
 - Source is always a **2.4 install** (`.keystone/`, old vocab). Fix the target map: `guide→guide` (stays), `sensor→sensor` (stays), `action→command`, `playbook→playbook` (stays), `persona→agent` + `subagent→agent`. Migrate 2.4 `kind: rule` → `guide` (`mode: inferential`); 2.4 sensor `host_triggers:` → `hook` primitives (the framework hook layer). Keep `.keystone→.harness` relocation, `traces→corpus`, seed documents, `.harness/work/`.

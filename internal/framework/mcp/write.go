@@ -23,16 +23,25 @@ import (
 // The running binary path comes from os.Executable() so the spawned
 // child is the *same* keystone the host launched (not whatever
 // happens to be first on PATH).
-func registerWriteTools(s *server.MCPServer, projectDir string) {
-	// Generator tools (one per kind). Each takes a string `id` and
-	// optionally `kind` (for sensors). The handler synthesizes the
-	// equivalent CLI arg slice and execs the keystone binary.
-	type gen struct {
-		tool, verb, idArg, desc string
-		extras                  []generatorFlag
-	}
+// writeGen describes one `keystone_new_*` MCP generator: the tool name, the
+// CLI verb it execs, its id-argument hint, a description, and any extra flags.
+type writeGen struct {
+	tool, verb, idArg, desc string
+	extras                  []generatorFlag
+}
 
-	gens := []gen{
+func registerWriteTools(s *server.MCPServer, projectDir string) {
+	for _, g := range writeGenerators() {
+		registerGenerator(s, projectDir, g.tool, g.verb, g.idArg, g.desc, g.extras)
+	}
+	registerHarnessTools(s, projectDir)
+}
+
+// writeGenerators is the catalog of scaffold generators exposed over MCP — one
+// per authorable kind. The handler for each synthesizes the equivalent CLI arg
+// slice and execs the keystone binary.
+func writeGenerators() []writeGen {
+	return []writeGen{
 		{
 			tool:  "keystone_new_rule",
 			verb:  "rule",
@@ -64,6 +73,24 @@ func registerWriteTools(s *server.MCPServer, projectDir string) {
 			desc:  "Scaffold an agent — a role spawned as a subagent.",
 		},
 		{
+			tool:  "keystone_new_pattern",
+			verb:  "pattern",
+			idArg: "<id>",
+			desc:  "Scaffold a pattern — a reusable documentation pattern in prose (the Diátaxis modes: tutorial, how-to, reference, explanation). Prose only; no projection.",
+		},
+		{
+			tool:  "keystone_new_posture",
+			verb:  "posture",
+			idArg: "<id>",
+			desc:  "Scaffold a posture — tool/permission lists (allow/ask/deny) that project to the host permissions block.",
+		},
+		{
+			tool:  "keystone_new_tool",
+			verb:  "tool",
+			idArg: "<id>",
+			desc:  "Scaffold a tool — an author-defined callable the agent invokes (transport: cli | mcp | plugin).",
+		},
+		{
 			tool:  "keystone_new_document",
 			verb:  "document",
 			idArg: "<id>",
@@ -88,11 +115,11 @@ func registerWriteTools(s *server.MCPServer, projectDir string) {
 			desc:  "Scaffold a new policy repo skeleton (separate dir; publish to git afterward).",
 		},
 	}
+}
 
-	for _, g := range gens {
-		registerGenerator(s, projectDir, g.tool, g.verb, g.idArg, g.desc, g.extras)
-	}
-
+// registerHarnessTools registers the harness-lifecycle MCP tools (bootstrap,
+// target add) and the index/project maintenance tools.
+func registerHarnessTools(s *server.MCPServer, projectDir string) {
 	s.AddTool(
 		mcp.NewTool("keystone_harness_bootstrap",
 			mcp.WithDescription("Scaffold the harness into the project directory (non-interactive equivalent of `keystone init`). Use this when the project has no `.keystone/` yet."),

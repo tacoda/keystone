@@ -25,19 +25,20 @@ So `command`/`skill`/`agent` take the host names (identical concepts);
 | `skill` | skill | host name — identical concept (a single capability) |
 | `agent` | subagent | a role spawned as a subagent (was `persona`/`subagent`); dir `agents/` |
 | `playbook` *(alias **workflow**)* | skill (orchestrator) | keystone name — a composed sequence of commands with human `gates:`. Subagent spawning / parallelism is prose in its SKILL.md (the host agent executes it); deterministic parallel fan-out lives in the hook layer, not a playbook field |
-| `pattern` | keystone generator (CLI) | a Rails-style **generator** — template(s) + arg schema + output-path rules; `keystone generate <pattern> [args]` (alias `g`) stamps the files. Deterministic, computational. The `keystone new` mechanism, but for *your app code* |
+| `pattern` | — | keystone-native **prose** — a reusable **documentation pattern** (the Diátaxis modes: tutorial, how-to, reference, explanation). On-demand, glob-scoped for discovery; prescribes how to structure a kind of doc. Referenced by guides/authors as "write this as pattern X" |
 | `corpus` | — | keystone-native prose — the *reasoning / why*; on-demand |
 | `document` | — | keystone artifact — governed output with `gates:` (plan/review/adr/retro/feature) |
 | `concern` | — | composition mixin (inlined frontmatter + corpus routing) |
 | `posture` | settings.json permissions | tool/permission posture (allow/ask/deny) — governs *tool access* |
-| `tool` | keystone MCP server registration | author-defined callable — a script the agent invokes on demand with a typed input |
+| `tool` | MCP server \| plugin \| CLI | author-defined callable the agent invokes on demand (Claude's generic "tool") — `transport:` picks how it reaches the agent; `run:` + typed `args:` |
 | `eval` | — | keystone-native eval harness |
-| `source` | — | an **external system** queried for context (Slack, Jira, Linear, Confluence, GitHub). Read-side. Not files, not MCP (a transport), not tools (callables) |
+| `source` | — | an **external system** referenced for context via a fetch (curl / HTTP, or a connector) — Slack, Jira, Linear, Confluence, GitHub. Read-side. Not files, not a tool (an invocable callable) |
 
-**corpus vs pattern:** corpus = *why* (reasoning, prose, on-demand); pattern =
-a *generator* (templates that stamp files), the Rails-`g` analogue. The
-recurring-shape-in-prose role belongs to corpus or a guide — not a separate
-kind.
+**corpus vs pattern:** corpus = the *why* behind a specific primitive
+(reasoning, tied via `corpus:`); pattern = a reusable *documentation pattern*
+in prose (a Diátaxis doc shape — tutorial / how-to / reference / explanation).
+Both prose, on-demand; corpus is primitive-specific reasoning, pattern is a
+standalone doc-structure prescription.
 
 **No escape hatches; no raw passthroughs.** The keystone kinds + `mode:` cover
 every host primitive — `command`/`skill`/`agent` *are* the host primitive.
@@ -96,23 +97,27 @@ primitive; the fourth earns a kind.
 - permissions (allow/ask/deny) → `posture` (cross-cutting)
 - per-role scoping → `tools:` frontmatter on `agent` (cross-cutting)
 - built-in / MCP-server tools → host/server-provided; referenced, never defined
-- **author-defined callable → `tool` kind.** A script the agent invokes *on
-  demand* with a typed input. Distinct from a `sensor` (fires automatically at
-  a gate) and a `skill` (prose the agent reads): a tool is a programmatic,
-  schema'd callable. keystone registers it on its own MCP server. Model over
-  row: the row is one MCP tool registration; keystone adds input schema,
-  agent scoping, posture integration, INDEX discovery.
+- **author-defined callable → `tool` kind.** A callable the agent invokes *on
+  demand* with a typed input — keystone's generic sense of "tool" (as Claude
+  uses the word). Its `transport:` is one of **cli | mcp | plugin**: a plain
+  CLI, an MCP-server registration, or a plugin. Distinct from a `sensor` (fires
+  automatically at a gate) and a `skill` (prose the agent reads): a tool is a
+  programmatic, schema'd callable. Model over row: keystone adds the input
+  schema, agent scoping, posture integration, INDEX discovery, and the
+  transport binding the bare callable lacks.
 
 **`source` vs `tool` vs MCP** — easy to conflate, kept distinct:
-- `source` — an **external system queried for context** (Slack, Jira, Linear,
-  Confluence). Read-side; the EXTERNAL escalation layer of the resolution flow
-  (rules → corpus → source). Configured in `context.json`; reached via
-  `keystone source query`. Explicitly **not** local files, **not** MCP, **not**
-  a tool.
-- `tool` — an **agent-invoked callable** (an action with a typed input),
-  registered on keystone's MCP server.
-- **MCP** — a **transport**, never a kind. A `source` *or* a `tool` may ride on
-  MCP under the hood; the transport is config, not the abstraction.
+- `source` — an **external system referenced for context via a fetch**
+  (curl / HTTP, or the configured connector). Read-side; the EXTERNAL
+  escalation layer of the resolution flow (rules → corpus → source). Configured
+  in `context.json`; reached via `keystone source query`. Explicitly **not**
+  local files, **not** a tool.
+- `tool` — **wraps an invocable callable**: an `mcp` server, a `cli`, or a
+  `plugin` (`transport:`). Action-side, with a typed input.
+- **MCP** — one possible tool **transport**, never a kind. The same external
+  system can appear two ways: as a `source` (fetched read-side, e.g. curl its
+  API for context) **and** as a `tool` wrapping its MCP/CLI (invoked to act).
+  Two separate primitives, different intent — read context vs invoke action.
 
 ## Type-aware projection (the compiler)
 
@@ -123,10 +128,9 @@ Projection reads a primitive's nature, not just its kind:
 - `guide` + `mode: computational` → host **hook** (LSP / formatter command, e.g. gofmt PostToolUse)
 - `hook` + host-phase event → settings.json entry; `hook` + framework event → no projection (keystone-fired via `keystone hook fire`)
 - `command`/`skill`/`agent` → their host files
-- `tool` → registered on keystone's MCP server at startup (handler shells out to its `run:` script); no host file
+- `tool` → bound per `transport:` — `cli` (the `run:` script is the callable), `mcp` (registered on keystone's MCP server at startup), or `plugin`; no host file
 - `posture` → settings.json permissions block
-- `pattern` → no host file; a generator invoked via `keystone generate <pattern>` (templates stamp app-code files)
-- `corpus`/`document`/`concern`/`eval`/`source` → no projection (read via INDEX / on-demand)
+- `pattern`/`corpus`/`document`/`concern`/`eval`/`source` → no projection (prose / read via INDEX / on-demand)
 
 **Projected naming.** Every projected host artifact is **kebab-case and
 `keystone-`-prefixed** — `command review` → `.claude/commands/keystone-review.md`,
@@ -161,7 +165,9 @@ hook/sensor/tool; **not** the `command` kind) · `agent:` (new — the agent an
 inferential hook/sensor dispatches) · `returns:` (new — the structured-result
 schema an inferential sensor/hook's agent must emit; the dispatcher validates
 and surfaces it as feedback) · `tier:` (inferential guide authority —
-iron-law | golden-rule | preference, default preference).
+iron-law | golden-rule | preference, default preference) · `transport:` (new —
+a `tool`'s binding: cli | mcp | plugin) · `allow:`/`ask:`/`deny:` (a `posture`'s
+permission lists).
 
 ## What this means for the in-flight rewrite
 
