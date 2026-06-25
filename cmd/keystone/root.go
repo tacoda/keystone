@@ -85,6 +85,7 @@ func init() {
 	rootCmd.AddCommand(listCmd())
 	rootCmd.AddCommand(showCmd())
 	rootCmd.AddCommand(documentCmd())
+	rootCmd.AddCommand(hookCmd())
 	rootCmd.AddCommand(projectCmd())
 	rootCmd.AddCommand(migrateCmd())
 	rootCmd.AddCommand(mcpCmd())
@@ -258,6 +259,16 @@ func documentCmd() *cobra.Command {
 		Short:              "List document instances and advance them through gates",
 		DisableFlagParsing: true,
 		RunE:               runAndForward(runDocument),
+	}
+	return c
+}
+
+func hookCmd() *cobra.Command {
+	c := &cobra.Command{
+		Use:                "hook",
+		Short:              "Fire framework hooks bound to a workflow event",
+		DisableFlagParsing: true,
+		RunE:               runAndForward(runHook),
 	}
 	return c
 }

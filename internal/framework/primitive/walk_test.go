@@ -19,25 +19,15 @@ func fixtureTree(t *testing.T) string {
 kind: guide
 id: idioms/rails/migrations
 description: Migrations are reversible and small.
-severity: must
+tier: golden-rule
 globs:
   - "db/migrate/**"
-traces:
+corpus:
   - corpus/idioms/rails/migrations
 ---
 # body
 `,
 		"harness/guides/README.md": "# README skipped\n",
-		"harness/actions/verify.md": `---
-kind: action
-id: verify
-description: Run pre-commit and review.
-phase: verify
-deps:
-  - sensor/lint
----
-# body
-`,
 		"harness/corpus/idioms/rails/migrations.md": `---
 kind: corpus
 id: corpus/idioms/rails/migrations
@@ -53,6 +43,16 @@ phase: verify
 ---
 # body
 `,
+		"harness/hooks/build.md": `---
+kind: hook
+id: build
+description: Build at the verify gate.
+mode: computational
+event: pre-verify
+run: go build ./...
+---
+# body
+`,
 		"harness/skills/review-code/SKILL.md": `---
 kind: skill
 id: review-code
@@ -65,7 +65,7 @@ triggers:
 # body
 `,
 		"harness/agents/cavecrew-reviewer.md": `---
-kind: subagent
+kind: agent
 id: cavecrew-reviewer
 description: Compressed diff reviewer.
 tools:
@@ -78,14 +78,14 @@ tools:
 		"harness/commands/verify.md": `---
 kind: command
 id: verify
-description: Slash command for verify action.
+description: Slash command for the verify lifecycle step.
 args:
   - target
 ---
 # body
 `,
 		// File w/ no frontmatter — must be silently skipped.
-		"harness/actions/stub.md": "# no frontmatter\n",
+		"harness/guides/stub.md": "# no frontmatter\n",
 	}
 	for rel, body := range files {
 		abs := filepath.Join(root, rel)
@@ -114,11 +114,11 @@ func TestWalk_FindsAllKindsSkipsReadmesAndNonFM(t *testing.T) {
 	}
 	wantIDs := []string{
 		"guide/idioms/rails/migrations",
-		"action/verify",
 		"corpus/corpus/idioms/rails/migrations",
 		"sensor/drift",
+		"hook/build",
 		"skill/review-code",
-		"subagent/cavecrew-reviewer",
+		"agent/cavecrew-reviewer",
 		"command/verify",
 	}
 	for _, id := range wantIDs {
