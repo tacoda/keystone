@@ -80,6 +80,23 @@ func TestLint_GuideTier(t *testing.T) {
 	}
 }
 
+// TestLint_ToolContract — a tool needs a `run:` handler and a valid
+// `transport:` (cli | mcp | plugin | "").
+func TestLint_ToolContract(t *testing.T) {
+	missingRun := Lint([]Primitive{{Frontmatter: Frontmatter{Kind: "tool", ID: "grep", Description: "d", Transport: "cli"}}})
+	if !find(t, missingRun, FindingError, "run") {
+		t.Errorf("expected tool-missing-run error, got %v", missingRun)
+	}
+	badTransport := Lint([]Primitive{{Frontmatter: Frontmatter{Kind: "tool", ID: "grep", Description: "d", Run: "./x.sh", Transport: "carrier-pigeon"}}})
+	if !find(t, badTransport, FindingError, "transport") {
+		t.Errorf("expected invalid-transport error, got %v", badTransport)
+	}
+	clean := Lint([]Primitive{{Frontmatter: Frontmatter{Kind: "tool", ID: "grep", Description: "d", Run: "./x.sh", Transport: "mcp"}}})
+	if HasErrors(clean) {
+		t.Errorf("expected clean tool, got %v", clean)
+	}
+}
+
 // TestLint_ModeValue — `mode:` must be computational, inferential, or empty.
 func TestLint_ModeValue(t *testing.T) {
 	fs := Lint([]Primitive{{Frontmatter: Frontmatter{Kind: "guide", ID: "p/x", Description: "d", Mode: "bogus"}}})

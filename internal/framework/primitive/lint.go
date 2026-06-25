@@ -165,13 +165,7 @@ func lintIDAndDescription(p Primitive, add func(FindingSeverity, string)) {
 func lintKindFields(p Primitive, add func(FindingSeverity, string)) {
 	switch Kind(p.Kind) {
 	case KindGuide:
-		// An inferential guide carries a tier: iron-law | golden-rule |
-		// preference (the default). Empty = preference.
-		switch p.Tier {
-		case "", string(TierIronLaw), string(TierGoldenRule), string(TierPreference):
-		default:
-			add(FindingError, fmt.Sprintf("guide tier %q invalid (iron-law | golden-rule | preference)", p.Tier))
-		}
+		lintGuideTier(p, add)
 	case KindSkill:
 		if len(p.Triggers) == 0 {
 			add(FindingError, "skill missing `triggers:` — a skill with no triggers cannot fire")
@@ -182,6 +176,32 @@ func lintKindFields(p Primitive, add func(FindingSeverity, string)) {
 		}
 	case KindSensor, KindHook:
 		lintActionContract(p, add)
+	case KindTool:
+		lintToolContract(p, add)
+	}
+}
+
+// lintGuideTier validates an inferential guide's `tier:` — iron-law |
+// golden-rule | preference (the default; empty = preference).
+func lintGuideTier(p Primitive, add func(FindingSeverity, string)) {
+	switch p.Tier {
+	case "", string(TierIronLaw), string(TierGoldenRule), string(TierPreference):
+	default:
+		add(FindingError, fmt.Sprintf("guide tier %q invalid (iron-law | golden-rule | preference)", p.Tier))
+	}
+}
+
+// lintToolContract enforces a tool's handler + transport. A tool is an
+// author-defined callable: it needs a `run:` handler and a `transport:` of
+// cli | mcp | plugin (empty defaults to cli).
+func lintToolContract(p Primitive, add func(FindingSeverity, string)) {
+	switch p.Transport {
+	case "", "cli", "mcp", "plugin":
+	default:
+		add(FindingError, fmt.Sprintf("tool transport %q invalid (cli | mcp | plugin)", p.Transport))
+	}
+	if strings.TrimSpace(p.Run) == "" {
+		add(FindingError, "tool missing `run:` — the handler the agent invokes")
 	}
 }
 

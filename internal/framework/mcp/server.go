@@ -146,6 +146,7 @@ func New(opts Options) (*server.MCPServer, error) {
 	registerPrompts(s, abs)
 	registerEvalTools(s, abs)
 	registerSearchTool(s, abs)
+	registerToolPrimitives(s, abs)
 
 	return s, nil
 }
