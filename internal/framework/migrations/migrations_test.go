@@ -361,7 +361,7 @@ func TestV2_2_Up_Idempotent(t *testing.T) {
 	for _, want := range []string{
 		".keystone/INDEX.json",
 		".keystone/INDEX.lite.json",
-		".claude/rules/go-stdlib-first.md",
+		".claude/rules/keystone-go-stdlib-first.md",
 		".claude/settings.json",
 		"AGENTS.md",
 	} {

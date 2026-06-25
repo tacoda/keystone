@@ -95,41 +95,86 @@ func Project(projectDir string, primitives []Primitive) ([]ProjectionResult, err
 // guides are global-process content with no path-triggered ambient
 // channel.
 func ProjectionRelPath(p Primitive) string {
-	diskID := strings.ReplaceAll(p.ID, ":", "-")
+	name := projectedDiskName(p.ID)
 	switch Kind(p.Kind) {
-	case KindSkill:
-		return filepath.Join(".claude", "skills", diskID, "SKILL.md")
+	// A playbook is a composed orchestrator — it projects to a SKILL.md
+	// like a skill.
+	case KindSkill, KindPlaybook:
+		return filepath.Join(".claude", "skills", name, "SKILL.md")
 	case KindAgent:
-		return filepath.Join(".claude", "agents", diskID+".md")
+		return filepath.Join(".claude", "agents", name+".md")
 	case KindCommand:
-		return filepath.Join(".claude", "commands", diskID+".md")
-	// Glob-scoped inferential guides → ambient rule shims for
-	// path-triggered auto-load (`rule` is the projection-target name). A
-	// guide without globs is global-process content with no ambient
-	// channel, so it has no projection.
+		return filepath.Join(".claude", "commands", name+".md")
 	case KindGuide:
-		if len(p.Globs) == 0 {
-			return ""
-		}
-		return filepath.Join(".claude", "rules", ruleShimDiskID(p.ID)+".md")
+		return guideProjection(p)
+	case KindSensor:
+		return sensorProjection(p, name)
 	}
-	// hook, document, corpus, eval, source: no file projection here.
-	// Hooks project to host hook config via claudecode.ProjectHooks.
+	// hook, pattern, posture, tool, document, corpus, concern, eval,
+	// source: no host file projection here.
 	return ""
 }
 
-// ruleShimDiskID flattens a guide id into a single-segment filename
-// safe for `.claude/rules/`. The `guides/idioms/` prefix (the only
-// guide subtree with declared globs in 2.0) is stripped so the
-// resulting filenames stay short:
+// guideProjection returns the rule-shim path for a glob-scoped inferential
+// guide (`rule` is the projection-target name). A computational guide is
+// carried by a hook (no shim); a guide without globs is global-process
+// content with no ambient channel.
+func guideProjection(p Primitive) string {
+	if p.Mode == string(modeComputational) || len(p.Globs) == 0 {
+		return ""
+	}
+	return filepath.Join(".claude", "rules", ruleShimDiskID(p.ID)+".md")
+}
+
+// sensorProjection returns the subagent path for an inferential sensor (a
+// review check dispatched as a subagent). A computational sensor runs via the
+// hook layer and has no host file.
+func sensorProjection(p Primitive, name string) string {
+	if p.Mode == string(modeInferential) {
+		return filepath.Join(".claude", "agents", name+".md")
+	}
+	return ""
+}
+
+// modeComputational / modeInferential mirror the `mode:` values without
+// importing the validation constants into projection logic.
+const (
+	modeComputational = "computational"
+	modeInferential   = "inferential"
+)
+
+// keystoneProjectionPrefix is prepended to every projected host artifact so
+// the harness owns a clear namespace (`/keystone-<name>` for commands, etc.).
+const keystoneProjectionPrefix = "keystone-"
+
+// projectedDiskName renders a primitive id as a kebab-case, keystone-prefixed
+// filesystem name for its host projection. Namespace (`:`) and hierarchy (`/`)
+// separators flatten to `-`; runs collapse; an id already in the keystone
+// namespace is not double-prefixed.
+func projectedDiskName(id string) string {
+	s := strings.ToLower(id)
+	s = strings.NewReplacer(":", "-", "/", "-").Replace(s)
+	for strings.Contains(s, "--") {
+		s = strings.ReplaceAll(s, "--", "-")
+	}
+	s = strings.Trim(s, "-")
+	if s == "keystone" || strings.HasPrefix(s, keystoneProjectionPrefix) {
+		return s
+	}
+	return keystoneProjectionPrefix + s
+}
+
+// ruleShimDiskID flattens a guide id into a single-segment, keystone-prefixed
+// filename safe for `.claude/rules/`. The `guides/idioms/` prefix is stripped
+// so the resulting filenames stay short:
 //
-//   guides/idioms/go/stdlib-first              → go-stdlib-first
-//   guides/idioms/harness-content/state-files  → harness-content-state-files
-//   guides/process/foo                         → process-foo (fallback)
+//   guides/idioms/go/stdlib-first              → keystone-go-stdlib-first
+//   guides/idioms/harness-content/state-files  → keystone-harness-content-state-files
+//   guides/process/foo                         → keystone-process-foo (fallback)
 func ruleShimDiskID(guideID string) string {
 	trimmed := strings.TrimPrefix(guideID, "guides/idioms/")
 	trimmed = strings.TrimPrefix(trimmed, "guides/")
-	return strings.ReplaceAll(trimmed, "/", "-")
+	return projectedDiskName(trimmed)
 }
 
 func copyOne(srcAbs, destAbs string) error {

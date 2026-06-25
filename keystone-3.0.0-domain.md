@@ -128,6 +128,20 @@ Projection reads a primitive's nature, not just its kind:
 - `pattern` → no host file; a generator invoked via `keystone generate <pattern>` (templates stamp app-code files)
 - `corpus`/`document`/`concern`/`eval`/`source` → no projection (read via INDEX / on-demand)
 
+**Projected naming.** Every projected host artifact is **kebab-case and
+`keystone-`-prefixed** — `command review` → `.claude/commands/keystone-review.md`,
+invoked `/keystone-review`; skills/agents/rule-shims likewise. The harness owns
+a clear namespace; ids already in the keystone namespace are not
+double-prefixed (`keystone:index` → `keystone-index`).
+
+**Inferential activation is framework-fired.** Inferential guides and
+inferential sensors fire via the **framework hook layer**, not host-ambient
+loading — keystone controls *when* they activate (host-agnostic). The
+projections above are the artifacts the hook layer fires: an inferential
+sensor's `agents/` file is the subagent a `pre-verify`/`on-review` hook
+dispatches; an inferential guide's rule shim is the directive a
+`pre-command`/post-edit hook surfaces on a glob match.
+
 ## Canonical directories (under `.harness/`)
 
 ```

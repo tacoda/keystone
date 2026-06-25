@@ -64,7 +64,11 @@ func ProjectRules(projectDir string, primitives []primitive.Primitive) (Projecti
 func ruleSlug(guideID string) string {
 	trimmed := strings.TrimPrefix(guideID, "guides/idioms/")
 	trimmed = strings.TrimPrefix(trimmed, "guides/")
-	return strings.ReplaceAll(trimmed, "/", "-")
+	slug := strings.ReplaceAll(trimmed, "/", "-")
+	if !strings.HasPrefix(slug, "keystone-") {
+		slug = "keystone-" + slug
+	}
+	return slug
 }
 
 // buildMDC composes a Cursor MDC file from a guide primitive. Cursor's

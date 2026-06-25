@@ -103,8 +103,8 @@ Each slice ends green (`go test ./...` + `go vet ./...`) and is one commit.
   - `sensor` + computational → **no adapter projection** (`run:` script executed via the hook layer / `keystone verify`).
   - `agent` → `.claude/agents/`; `command` → `.claude/commands/`; `skill`/`playbook` → `.claude/skills/<id>/SKILL.md`.
   - `hook`/`pattern`/`corpus`/`document`/`concern`/`posture`/`eval`/`source` → no adapter file projection (posture handled in slice 3; hooks in slice 5).
-- Retire the existing per-sensor `ProjectHooks` adapter mapping + `host_triggers` field — superseded by the hook layer.
-- → verify: projection table test — one primitive per (kind,mode) lands at expected path; no settings.json hook entries written by `project`.
+- The existing per-sensor `ProjectHooks` mapping + `host_triggers` stay untouched here (still keyed on `KindHook`) — the hook layer replaces them in slice 5. Slice 2 is projection-path correctness only.
+- → verify: projection table test — one primitive per (kind,mode) lands at the expected path.
 
 **Slice 3 — `posture` → settings.json** (`posture` projection)
 - `posture` primitive frontmatter → permissions (allow/ask/deny) merged into `.claude/settings.json` (same merge path hooks use).
@@ -120,7 +120,8 @@ Each slice ends green (`go test ./...` + `go vet ./...`) and is one commit.
 - Framework-event enum + `keystone hook fire <event> [--phase|--command|--type|--task]` — the single dispatcher (reads INDEX, runs `run:` / dispatches `agent:`, non-zero blocks). Inferential dispatch validates the agent's output against `returns:`; non-conforming output is an error, not silent passthrough.
 - Single host bridge: `keystone project` installs one generic `.claude/settings.json` entry per host phase → `keystone hook fire <phase>`. Not per-hook.
 - Auto-fire wiring: `keystone document promote` → `on-gate`; `keystone verify` → `pre-verify`/`post-verify`.
-- → verify: a fixture framework-event hook fires on `keystone verify`; non-zero exit blocks; a host-phase hook fires through the bridge; `project` writes the bridge entries but no per-hook entries.
+- **Inferential guides + sensors are framework-fired here**: the hook layer dispatches an inferential sensor's agent at its event (e.g. `pre-verify`/`on-review`) and surfaces an inferential guide's directive at its event (e.g. `pre-command`/post-edit) on a glob match. This is keystone-controlled activation, replacing reliance on host-ambient loading. The slice-2 `agents/`/`rules/` projections are the artifacts dispatched.
+- → verify: a fixture framework-event hook fires on `keystone verify`; non-zero exit blocks; a host-phase hook fires through the bridge; `project` writes the bridge entries but no per-hook entries; an inferential sensor dispatches at `pre-verify`.
 
 **Slice 5b — `tool` kind + MCP registration** (`primitive.go` done in 1; `mcp/`)
 - `tool` frontmatter: `run:` (shell handler script) + input schema (`args:` reuse) + `tools:`-style scoping.
