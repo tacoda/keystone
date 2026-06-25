@@ -129,6 +129,13 @@ func runDocumentPromote(args []string) error {
 		return fmt.Errorf("write %s: %w", path, err)
 	}
 	fmt.Fprintf(os.Stdout, "  %s: %s → %s\n", fm.ID, current, target)
+
+	// Framework hook: the document crossed a gate. Fired after the
+	// transition is committed, so a hook failure is logged, not fatal —
+	// the gate has already advanced.
+	if err := runHookFire([]string{"on-gate", "--type", fm.Type, "--command", target}); err != nil {
+		fmt.Fprintf(os.Stderr, "on-gate hooks: %v\n", err)
+	}
 	return nil
 }
 

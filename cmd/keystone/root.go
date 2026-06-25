@@ -158,7 +158,7 @@ func verifyCmd() *cobra.Command {
 		Use:                "verify",
 		Short:              "Check vendored policies for drift and the strict cascade for violations",
 		DisableFlagParsing: true,
-		RunE:               runAndForward(runVerify),
+		RunE:               runAndForward(verifyWithHooks),
 	}
 	return c
 }
