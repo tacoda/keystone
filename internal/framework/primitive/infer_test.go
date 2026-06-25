@@ -22,10 +22,11 @@ func TestInferKind(t *testing.T) {
 		".harness/corpus/process/spec.md":           KindCorpus,
 		".harness/concerns/reads-diff.md":           KindConcern,
 		".harness/evals/regression.md":              KindEval,
-		".harness/sources/jira.md":                  KindSource,
-		// `rule` is not a kind in 3.0 — author a guide. A rules/ dir is
-		// off-convention and infers nothing.
+		// `rule` is not a kind in 3.0 — author a guide. `source` is no longer
+		// a kind either (external access is a tool). Both dirs are
+		// off-convention and infer nothing.
 		".harness/rules/x.md":      "",
+		".harness/sources/jira.md": "",
 		".harness/whatever/x.md":   "", // off-convention
 		"README.md":               "", // no harness/
 	}

@@ -56,7 +56,6 @@ func TestProjectionRelPath(t *testing.T) {
 		{"tool", "grep-symbols", "", nil, ""},
 		{"document", "implementation-plan", "", nil, ""},
 		{"eval", "demo", "", nil, ""},
-		{"source", "jira", "", nil, ""},
 	}
 	for _, c := range cases {
 		p := Primitive{Frontmatter: Frontmatter{Kind: c.kind, ID: c.id, Mode: c.mode, Globs: c.globs}}

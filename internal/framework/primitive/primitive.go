@@ -71,7 +71,9 @@ const (
 	// Standalone primitives.
 	KindCorpus Kind = "corpus" // deep reasoning, loaded on-demand
 	KindEval   Kind = "eval"
-	KindSource Kind = "source"
+	// `source` is no longer an authorable kind: external-system access is a
+	// `tool` (transport: cli=curl / mcp). The live external-source config
+	// remains in context.json (subsystem removal is a later slice).
 
 	// Composition primitive. A concern is a reusable fragment of
 	// frontmatter + body that other primitives pull in via the
@@ -87,7 +89,7 @@ const (
 var KnownKinds = []Kind{
 	KindGuide, KindSensor, KindHook, KindCommand, KindSkill, KindPlaybook,
 	KindAgent, KindPattern, KindPosture, KindTool, KindDocument,
-	KindCorpus, KindEval, KindSource, KindConcern,
+	KindCorpus, KindEval, KindConcern,
 }
 
 // canonicalDirKind maps a canonical harness subdirectory to the kind it
@@ -109,7 +111,6 @@ var canonicalDirKind = map[string]Kind{
 	"corpus":    KindCorpus,
 	"concerns":  KindConcern,
 	"evals":     KindEval,
-	"sources":   KindSource,
 }
 
 // resolveKind returns the explicit kind when set, else the kind inferred

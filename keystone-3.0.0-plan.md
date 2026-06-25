@@ -19,16 +19,17 @@ keystone vocabulary and add the missing kinds.
 | — (folded into skill) | **`playbook`** | keystone kind; projects skill orchestrator + `gates:` |
 | `command` | `command` | keep (was action+command) |
 | `skill` | `skill` | keep |
-| `document` `corpus` `concern` `eval` `source` | unchanged | keep |
+| `document` `corpus` `concern` `eval` | unchanged | keep |
+| `source` | **dropped as a kind** | external-system access is a `tool` (cli=curl / mcp). The context.json query subsystem stays transitionally; removed in a later slice |
 | `rule` | **dropped as a kind** | projection-target name only; author a `guide` (`mode: inferential`) |
 | `hook` | **kept — as a framework abstraction** | keystone's hook *layer*: binds host phase \| framework event → action. Earns its kind (framework events + fire dispatcher); raw passthrough still banned |
 | — (new) | **`pattern`** | keystone prose recipe |
 | — (new) | **`posture`** | → settings.json permissions |
-| — (new) | **`tool`** | author-defined callable → keystone MCP server |
+| — (new) | **`tool`** | author-defined callable; `transport:` cli \| mcp \| plugin. Absorbs external-system access (former `source`) |
 
 **3.0 `KnownKinds`:** `guide, sensor, hook, agent, command, skill, playbook,
-pattern, corpus, document, concern, posture, tool, eval, source`. **No escape
-hatches / no raw passthroughs** — the kinds + `mode:` produce every host
+pattern, corpus, document, concern, posture, tool, eval`. (`source` dropped —
+external-system access is a `tool`.) **No escape hatches / no raw passthroughs** — the kinds + `mode:` produce every host
 primitive. **`rule` is not a kind** — it's a projection-target name; author a
 `guide`. **`hook` IS a kind** — keystone's framework hook layer (host phase or
 framework event → action), not a raw host passthrough. **New field:** `mode:
@@ -124,11 +125,14 @@ Each slice ends green (`go test ./...` + `go vet ./...`) and is one commit.
 - **Inferential guides + sensors are framework-fired here**: the hook layer dispatches an inferential sensor's agent at its event (e.g. `pre-verify`/`on-review`) and surfaces an inferential guide's directive at its event (e.g. `pre-command`/post-edit) on a glob match. This is keystone-controlled activation, replacing reliance on host-ambient loading. The slice-2 `agents/`/`rules/` projections are the artifacts dispatched.
 - → verify: a fixture framework-event hook fires on `keystone verify`; non-zero exit blocks; a host-phase hook fires through the bridge; `project` writes the bridge entries but no per-hook entries; an inferential sensor dispatches at `pre-verify`.
 
-**Slice 5b — `tool` transports + `source` tightening** (`mcp/`, `loader`/`config`)
+**Slice 5b — `tool` transports** (`mcp/`)
 - `tool` frontmatter (scaffold landed in slice 4): `transport:` (cli | mcp | plugin) + `run:` (handler) + `args:` schema + `tools:`-style scoping.
 - Bind per transport: `mcp` → keystone MCP server reads `kind: tool`/`transport: mcp` from INDEX at startup and registers each (handler shells out to `run:` with validated args); `cli` → the `run:` script is the callable, surfaced for direct invocation; `plugin` → host plugin descriptor. Lint: `transport` ∈ {cli, mcp, plugin, ""}.
-- Tighten `source`: external-system config only (Slack/Jira/Linear/Confluence) — drop local-folder sources from `context.json` schema + lint; URL endpoints to external systems stay.
-- → verify: an `mcp` tool registers + invokes via the MCP server; bad args rejected by schema; `transport` lint rejects an unknown value; `source` lint rejects a file/folder source.
+- → verify: an `mcp` tool registers + invokes via the MCP server; bad args rejected by schema; `transport` lint rejects an unknown value.
+
+**Slice 5c — remove the `source` subsystem** (`mcp/source.go`, `web/`, `context.json`)
+- The `source` *kind* is already dropped (done — KnownKinds/dir/new/MCP-new). This slice removes the read-side subsystem that backed it: `mcp/source.go` (`keystone_source_list|query|health` + resources), `web/sources_actions.go` + the 5 `source*`/`_sources_*` templates and their refs in `web/cache.go`/`topics.go`/`insights.go`, and the `context.json` document (read loosely as `map[string]any`; nothing else uses it — verify, then kill the file + its handling). Drop the `context.json` relocation line from `migrations/v3_0.go`. Resolution flow collapses to rules → corpus (external context now via a `tool`).
+- → verify: `go build ./...` + `go test ./...` green with the source packages gone; no dangling `context.json` / `keystone_source_*` refs; web dashboard renders without the sources pages.
 
 **Slice 6 — migration v3_0 rewrite** (`v3_0.go`, `v3_0_test.go`)
 - Source is always a **2.4 install** (`.keystone/`, old vocab). Fix the target map: `guide→guide` (stays), `sensor→sensor` (stays), `action→command`, `playbook→playbook` (stays), `persona→agent` + `subagent→agent`. Migrate 2.4 `kind: rule` → `guide` (`mode: inferential`); 2.4 sensor `host_triggers:` → `hook` primitives (the framework hook layer). Keep `.keystone→.harness` relocation, `traces→corpus`, seed documents, `.harness/work/`.

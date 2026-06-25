@@ -108,6 +108,9 @@ func writeGenerators() []writeGen {
 			idArg: "<agent>",
 			desc:  "Scaffold the per-agent adapter triple (activation, lifecycle, sensors) for a new host.",
 		},
+		// Note: `source` is no longer an authorable kind — external-system
+		// access is a `tool`. The context.json source-query subsystem
+		// (keystone_source_*) remains until its dedicated removal slice.
 		{
 			tool:  "keystone_new_policy",
 			verb:  "policy",

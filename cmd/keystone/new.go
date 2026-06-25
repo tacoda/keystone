@@ -27,7 +27,6 @@ var newDispatch = map[string]func([]string) error{
 	"document": runNewDocument,
 	"corpus":   runNewCorpus,
 	"eval":     runNewEval,
-	"source":   runNewSource,
 	"adapter":  runNewAdapter,
 	"policy":   runNewPolicy,
 }
@@ -44,7 +43,7 @@ func runNew(args []string) error {
 	}
 	gen, ok := newDispatch[args[0]]
 	if !ok {
-		return fmt.Errorf("unknown kind %q (use: rule, hook, command, skill, agent, pattern, posture, tool, document, corpus, eval, source, adapter, policy)", args[0])
+		return fmt.Errorf("unknown kind %q (use: rule, hook, command, skill, agent, pattern, posture, tool, document, corpus, eval, adapter, policy)", args[0])
 	}
 	return gen(args[1:])
 }
@@ -65,7 +64,6 @@ Usage:
     keystone new document <id>            [--dir <path>]   # governed output template (plan/review/adr/...)
     keystone new corpus <topic>/<name>    [--dir <path>]   # on-demand reasoning
     keystone new eval <id>                [--dir <path>]
-    keystone new source <id>              [--dir <path>]
     keystone new adapter <agent>          [--dir <path>]
     keystone new policy <name>            [--dir <path>]
 

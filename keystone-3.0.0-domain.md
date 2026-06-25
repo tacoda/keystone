@@ -30,9 +30,8 @@ So `command`/`skill`/`agent` take the host names (identical concepts);
 | `document` | — | keystone artifact — governed output with `gates:` (plan/review/adr/retro/feature) |
 | `concern` | — | composition mixin (inlined frontmatter + corpus routing) |
 | `posture` | settings.json permissions | tool/permission posture (allow/ask/deny) — governs *tool access* |
-| `tool` | MCP server \| plugin \| CLI | author-defined callable the agent invokes on demand (Claude's generic "tool") — `transport:` picks how it reaches the agent; `run:` + typed `args:` |
+| `tool` | MCP server \| plugin \| CLI | author-defined callable the agent invokes on demand (Claude's generic "tool") — `transport:` picks how it reaches the agent; `run:` + typed `args:`. **External-system access lives here** (a `cli`=curl or `mcp` tool), replacing the former `source` kind |
 | `eval` | — | keystone-native eval harness |
-| `source` | — | an **external system** referenced for context via a fetch (curl / HTTP, or a connector) — Slack, Jira, Linear, Confluence, GitHub. Read-side. Not files, not a tool (an invocable callable) |
 
 **corpus vs pattern:** corpus = the *why* behind a specific primitive
 (reasoning, tied via `corpus:`); pattern = a reusable *documentation pattern*
@@ -106,18 +105,19 @@ primitive; the fourth earns a kind.
   schema, agent scoping, posture integration, INDEX discovery, and the
   transport binding the bare callable lacks.
 
-**`source` vs `tool` vs MCP** — easy to conflate, kept distinct:
-- `source` — an **external system referenced for context via a fetch**
-  (curl / HTTP, or the configured connector). Read-side; the EXTERNAL
-  escalation layer of the resolution flow (rules → corpus → source). Configured
-  in `context.json`; reached via `keystone source query`. Explicitly **not**
-  local files, **not** a tool.
+**`tool` vs MCP — and the former `source`.** `source` is **no longer a kind.**
+External-system access — Jira, Slack, an API fetched for context — is now a
+`tool`: a `cli` tool that curls the endpoint, or an `mcp` tool wrapping the
+server. Read-context and invoke-action both go through the one `tool`
+abstraction; the transport (cli / mcp / plugin) is config, not a separate kind.
 - `tool` — **wraps an invocable callable**: an `mcp` server, a `cli`, or a
-  `plugin` (`transport:`). Action-side, with a typed input.
-- **MCP** — one possible tool **transport**, never a kind. The same external
-  system can appear two ways: as a `source` (fetched read-side, e.g. curl its
-  API for context) **and** as a `tool` wrapping its MCP/CLI (invoked to act).
-  Two separate primitives, different intent — read context vs invoke action.
+  `plugin` (`transport:`). Typed input; the harness's single external-access
+  surface.
+- **MCP** — one possible tool **transport**, never a kind.
+
+(Transitional: the `context.json` external-source query subsystem
+[`keystone_source_*`] still exists; its removal — folding into tools — is a
+dedicated later slice.)
 
 ## Type-aware projection (the compiler)
 
@@ -130,7 +130,7 @@ Projection reads a primitive's nature, not just its kind:
 - `command`/`skill`/`agent` → their host files
 - `tool` → bound per `transport:` — `cli` (the `run:` script is the callable), `mcp` (registered on keystone's MCP server at startup), or `plugin`; no host file
 - `posture` → settings.json permissions block
-- `pattern`/`corpus`/`document`/`concern`/`eval`/`source` → no projection (prose / read via INDEX / on-demand)
+- `pattern`/`corpus`/`document`/`concern`/`eval` → no projection (prose / read via INDEX / on-demand)
 
 **Projected naming.** Every projected host artifact is **kebab-case and
 `keystone-`-prefixed** — `command review` → `.claude/commands/keystone-review.md`,
@@ -150,7 +150,7 @@ dispatches; an inferential guide's rule shim is the directive a
 
 ```
 guides/  sensors/  hooks/  commands/  skills/  agents/  playbooks/
-patterns/  corpus/  documents/  concerns/  posture/  tools/  evals/  sources/
+patterns/  corpus/  documents/  concerns/  posture/  tools/  evals/
 adapters/  policies/(vendored)
 ```
 
@@ -188,6 +188,6 @@ name); `skill` stays. **Drop `rule` as a kind** (projection target only).
 first-class **framework hook layer** (host phase | framework event → `run:`
 shell script or `agent:` dispatch; all hooks framework-layer, no per-hook
 adapter mapping, single host bridge) · `pattern` (prose kind) · `posture` (+
-settings.json projection) · `tool` (callable → keystone MCP server) · tightened
-`source` (external systems only) · playbook `gates:` · workflow-retro document
-type · `policy`/`playbook` aliases in docs.
+settings.json projection) · `tool` (callable → cli | mcp | plugin; absorbs
+external-system access) · **drop `source` as a kind** (→ a tool) · playbook
+`gates:` · workflow-retro document type · `policy`/`playbook` aliases in docs.

@@ -60,40 +60,6 @@ the run will check.
 	return nil
 }
 
-// runNewSource handles `keystone new source <id>`. Scaffolds
-// <harness>/sources/<id>.md declaring an external source for the
-// stage-3 resolution flow.
-func runNewSource(args []string) error {
-	projectDir, harnessRoot, remaining, err := parseDirAndHarnessRoot(args)
-	if err != nil {
-		return err
-	}
-	if len(remaining) != 1 {
-		return fmt.Errorf("`keystone new source` requires exactly one argument: <id>")
-	}
-	id := remaining[0]
-	if err := validatePrimitiveID(id); err != nil {
-		return fmt.Errorf("source id: %w", err)
-	}
-	path := filepath.Join(projectDir, harnessRoot, "sources", id+".md")
-	body := fmt.Sprintf(`---
-kind: source
-id: %s
-description: TODO — what's behind this source and when to query it.
-type: folder
-settings:
-  path: ./docs
----
-
-# %s
-
-Prose describing ownership, auth, and the kinds of queries this source
-answers well. Stage 3 of the runtime resolution flow reaches sources
-when in-harness rules + corpus aren't enough.
-`, id, id)
-	return writeSkeleton(path, body)
-}
-
 // runNewSkill handles `keystone new skill <id>`. Scaffolds
 // <harness-root>/skills/<dir>/SKILL.md with canonical primitive
 // frontmatter.
