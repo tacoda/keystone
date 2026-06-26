@@ -57,31 +57,37 @@ func TestV3_Up_RenamesAndMoves(t *testing.T) {
 	runV3Up(t, tmp)
 
 	h := filepath.Join(tmp, ".harness")
-	// guide → rule (rules/), kind rewritten, traces → corpus.
-	rule := readFile(t, filepath.Join(h, "rules/idioms/go/stdlib-first.md"))
-	if !contains(rule, "kind: rule") || contains(rule, "kind: guide") {
-		t.Errorf("guide not converted to rule:\n%s", rule)
+	// guide stays a guide (guides/), traces → corpus.
+	guide := readFile(t, filepath.Join(h, "guides/idioms/go/stdlib-first.md"))
+	if !contains(guide, "kind: guide") {
+		t.Errorf("guide should stay a guide:\n%s", guide)
 	}
-	if !contains(rule, "corpus:") || contains(rule, "traces:") {
-		t.Errorf("traces not renamed to corpus:\n%s", rule)
+	if !contains(guide, "corpus:") || contains(guide, "traces:") {
+		t.Errorf("traces not renamed to corpus:\n%s", guide)
+	}
+	// computational sensor → hook (event/run from host_triggers).
+	hook := readFile(t, filepath.Join(h, "hooks/build.md"))
+	assertAllContain(t, hook, "kind: hook", "mode: computational", "event: Stop", "run: go build ./...")
+	if contains(hook, "host_triggers:") {
+		t.Errorf("host_triggers not stripped:\n%s", hook)
 	}
 	// Each retired primitive landed at its 3.0 canonical path:
 	// computational sensor → hook; inferential sensor → agent;
-	// action → command; persona → agent; playbook → skills/<id>/SKILL.md.
+	// action → command; persona → agent; playbook stays a playbook.
 	for _, rel := range []string{
 		"hooks/build.md",
 		"agents/review-functional.md",
 		"commands/verify.md",
 		"agents/code-reviewer.md",
-		"skills/task/SKILL.md",
+		"playbooks/task.md",
 		"work/roadmaps/.gitkeep",
 	} {
 		if _, err := os.Stat(filepath.Join(h, rel)); err != nil {
 			t.Errorf("expected migrated path %s: %v", rel, err)
 		}
 	}
-	// old dirs drained.
-	for _, old := range []string{"guides", "sensors", "actions", "playbooks", "personas"} {
+	// Retired dirs drained (guides + playbooks stay — those kinds survive).
+	for _, old := range []string{"sensors", "actions", "personas"} {
 		if len(leafFiles(h, old)) != 0 {
 			t.Errorf("old dir %s still has primitive files", old)
 		}
@@ -89,7 +95,6 @@ func TestV3_Up_RenamesAndMoves(t *testing.T) {
 }
 
 func TestV3_Up_PostMigrationLintClean(t *testing.T) {
-	t.Skip("v3_0 migration still emits collapse vocab (guide→rule, sensor split); the corrected mapping + mode inference land in slice 6 of the 3.0 plan")
 	tmp := seed24Install(t)
 	runV3Up(t, tmp)
 	prims, _, err := primitive.Walk(tmp, ".harness")
@@ -108,8 +113,17 @@ func TestV3_Up_Idempotent(t *testing.T) {
 	runV3Up(t, tmp)
 	// Second run must be a no-op (no old dirs left to convert).
 	runV3Up(t, tmp)
-	if _, err := os.Stat(filepath.Join(tmp, ".harness/rules/idioms/go/stdlib-first.md")); err != nil {
-		t.Errorf("rule missing after second Up: %v", err)
+	if _, err := os.Stat(filepath.Join(tmp, ".harness/guides/idioms/go/stdlib-first.md")); err != nil {
+		t.Errorf("guide missing after second Up: %v", err)
+	}
+}
+
+func assertAllContain(t *testing.T, s string, subs ...string) {
+	t.Helper()
+	for _, sub := range subs {
+		if !contains(s, sub) {
+			t.Errorf("missing %q in:\n%s", sub, s)
+		}
 	}
 }
 

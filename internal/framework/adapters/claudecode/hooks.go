@@ -80,23 +80,21 @@ func ProjectHooks(projectDir string, primitives []primitive.Primitive) (HookProj
 	return HookProjectionResult{Path: rel, Wrote: true, Added: added, Removed: removed}, nil
 }
 
-// hostPhases returns the distinct host-phase events that `kind: hook`
-// primitives bind to (sorted, deduped). A framework event (pre-verify,
-// on-gate, …) is keystone-fired and never reaches the host, so it is not
-// bridged. A hook with no event contributes nothing.
+// hostPhases returns the distinct host-phase events any deterministically-
+// firing primitive binds to (sorted, deduped) — a `hook`, a computational
+// `guide` (LSP), or a computational `sensor` (gate check), unified via
+// primitive.HookFire. A framework event (pre-verify, on-gate, …) is
+// keystone-fired and never reaches the host, so it is not bridged.
 func hostPhases(primitives []primitive.Primitive) []string {
 	seen := map[string]bool{}
 	var out []string
 	for _, p := range primitives {
-		if primitive.Kind(p.Kind) != primitive.KindHook {
+		event, _, ok := primitive.HookFire(p)
+		if !ok || primitive.IsFrameworkEvent(event) || seen[event] {
 			continue
 		}
-		e := strings.TrimSpace(p.Event)
-		if e == "" || primitive.IsFrameworkEvent(e) || seen[e] {
-			continue
-		}
-		seen[e] = true
-		out = append(out, e)
+		seen[event] = true
+		out = append(out, event)
 	}
 	sort.Strings(out)
 	return out

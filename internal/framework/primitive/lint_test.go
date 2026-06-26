@@ -109,27 +109,28 @@ func TestLint_ModeValue(t *testing.T) {
 	}
 }
 
-// TestLint_SensorActionContract — a computational sensor needs `run:`; an
-// inferential sensor needs `agent:` + `returns:`; declaring both is an error.
-func TestLint_SensorActionContract(t *testing.T) {
-	// inferential, missing agent + returns
+// TestLint_SensorContract — a sensor is mode-driven: computational fires a
+// `run:` check; inferential is a review needing a `returns:` verdict schema.
+func TestLint_SensorContract(t *testing.T) {
 	infMissing := Lint([]Primitive{{Frontmatter: Frontmatter{
 		Kind: "sensor", ID: "review", Description: "d", Mode: "inferential"}}})
-	if !find(t, infMissing, FindingError, "agent") || !find(t, infMissing, FindingError, "returns") {
-		t.Errorf("expected inferential sensor to require agent+returns, got %v", infMissing)
+	if !find(t, infMissing, FindingError, "returns") {
+		t.Errorf("expected inferential sensor to require returns, got %v", infMissing)
 	}
-	// computational, missing run
 	compMissing := Lint([]Primitive{{Frontmatter: Frontmatter{
 		Kind: "sensor", ID: "build", Description: "d", Mode: "computational"}}})
 	if !find(t, compMissing, FindingError, "run") {
 		t.Errorf("expected computational sensor to require run, got %v", compMissing)
 	}
-	// both run and agent — mutually exclusive
-	both := Lint([]Primitive{{Frontmatter: Frontmatter{
-		Kind: "sensor", ID: "x", Description: "d", Mode: "computational",
-		Run: "go test ./...", Agent: "reviewer", Returns: "verdict"}}})
-	if !find(t, both, FindingError, "mutually exclusive") {
-		t.Errorf("expected run/agent mutually-exclusive error, got %v", both)
+	cleanInf := Lint([]Primitive{{Frontmatter: Frontmatter{
+		Kind: "sensor", ID: "ok", Description: "d", Mode: "inferential", Returns: "findings"}}})
+	if HasErrors(cleanInf) {
+		t.Errorf("expected clean inferential sensor, got %v", cleanInf)
+	}
+	cleanComp := Lint([]Primitive{{Frontmatter: Frontmatter{
+		Kind: "sensor", ID: "build2", Description: "d", Mode: "computational", Run: "go test ./...", Event: "pre-verify"}}})
+	if HasErrors(cleanComp) {
+		t.Errorf("expected clean computational sensor, got %v", cleanComp)
 	}
 }
 
@@ -230,7 +231,7 @@ func TestLint_HasErrors(t *testing.T) {
 func TestLint_Clean(t *testing.T) {
 	ps := []Primitive{
 		{Frontmatter: Frontmatter{Kind: "guide", ID: "p/x", Description: "Real description."}},
-		{Frontmatter: Frontmatter{Kind: "sensor", ID: "build", Description: "Real description.", Mode: "computational", Run: "go test ./..."}},
+		{Frontmatter: Frontmatter{Kind: "sensor", ID: "review", Description: "Real description.", Mode: "inferential", Agent: "reviewer", Returns: "findings"}},
 		{Frontmatter: Frontmatter{Kind: "hook", ID: "on-gate", Description: "Real description.", Mode: "inferential", Event: "on-gate", Agent: "reviewer", Returns: "verdict"}},
 		{Frontmatter: Frontmatter{Kind: "skill", ID: "demo", Description: "Real description.", Triggers: []string{"demo"}}},
 		{Frontmatter: Frontmatter{Kind: "agent", ID: "demo", Description: "Real description.", Tools: []string{"Read"}}},

@@ -191,7 +191,7 @@ func planV3Move(harnessAbs, path string) (*v3move, error) {
 	return &v3move{
 		oldPath: path,
 		newPath: filepath.Join(harnessAbs, filepath.FromSlash(newRel)),
-		newText: applyV3Rewrites(string(data), oldKind, rw.newKind, fm.ID),
+		newText: applyV3Rewrites(string(data), oldKind, rw.newKind, fm),
 	}, nil
 }
 
@@ -226,43 +226,41 @@ func mustRel(base, path string) string {
 func rewriteForV3(oldKind string, fm primitive.Frontmatter) *kindRewrite {
 	switch oldKind {
 	case "guide":
-		return &kindRewrite{"rule", "rules"}
+		// guide stays a guide — it projects to a rule shim. Returned so
+		// traces:→corpus: still runs and the file is rewritten in place.
+		return &kindRewrite{"guide", "guides"}
+	case "playbook":
+		// playbook stays a playbook — it projects to a SKILL.md orchestrator.
+		return &kindRewrite{"playbook", "playbooks"}
 	case "action":
 		return &kindRewrite{"command", "commands"}
-	case "playbook":
-		return &kindRewrite{"skill", "skills"}
 	case "persona":
 		return &kindRewrite{"agent", "agents"}
 	case "sensor":
-		// Inferential review sensors (LLM judgment) become agents;
-		// everything else is a computational check → hook. host_triggers,
-		// when present, is a definitive computational signal.
-		if isInferentialSensor(fm.ID) {
-			return &kindRewrite{"agent", "agents"}
+		// A 2.x computational check (had host_triggers) → a `hook` (the
+		// deterministic event→run fire). An inferential review → an `agent`
+		// (the review fleet is agents). 3.0 keeps `sensor` as a kind for
+		// freshly-authored checks, but the faithful migration of these two
+		// shapes is hook / agent.
+		if len(fm.HostTriggers) > 0 {
+			return &kindRewrite{"hook", "hooks"}
 		}
-		return &kindRewrite{"hook", "hooks"}
+		return &kindRewrite{"agent", "agents"}
 	}
 	return nil
 }
 
-// isInferentialSensor reports whether a 2.x sensor was LLM-judgment rather
-// than a deterministic check — these become agents in 3.0. Keystone's
-// inferential sensors are the review-* family and the debt assessors.
-func isInferentialSensor(id string) bool {
-	return strings.HasPrefix(id, "review-") ||
-		strings.HasSuffix(id, "-debt") ||
-		id == "spec-adherence"
-}
-
 var (
-	reToolsKey    = regexp.MustCompile(`(?m)^tools:`)
-	reTriggersKey = regexp.MustCompile(`(?m)^triggers:`)
+	reToolsKey         = regexp.MustCompile(`(?m)^tools:`)
+	reTriggersKey      = regexp.MustCompile(`(?m)^triggers:`)
+	reHostTriggersBlock = regexp.MustCompile(`(?m)^host_triggers:\n(?:[ \t]+.*\n)*`)
 )
 
 // applyV3Rewrites rewrites the frontmatter kind line, renames traces: →
 // corpus:, and supplies the fields the new kind requires but the old one
-// lacked: an agent needs tools:, a skill needs triggers:. Body untouched.
-func applyV3Rewrites(text, oldKind, newKind, id string) string {
+// lacked: an agent needs tools:, a computational hook (from a 2.x sensor's
+// host_triggers) needs event:/run:/mode:. Body untouched.
+func applyV3Rewrites(text, oldKind, newKind string, fm primitive.Frontmatter) string {
 	reKind := regexp.MustCompile(`(?m)^kind:[ \t]*` + regexp.QuoteMeta(oldKind) + `[ \t]*$`)
 	text = reKind.ReplaceAllString(text, "kind: "+newKind)
 	text = reTracesKey.ReplaceAllString(text, "corpus:")
@@ -270,10 +268,22 @@ func applyV3Rewrites(text, oldKind, newKind, id string) string {
 	if newKind == "agent" && !reToolsKey.MatchString(text) {
 		text = appendFrontmatterLines(text, "tools:\n  - Read\n  - Grep")
 	}
-	if newKind == "skill" && !reTriggersKey.MatchString(text) {
-		text = appendFrontmatterLines(text, "triggers:\n  - "+id)
+	if newKind == "hook" {
+		text = convertHostTriggers(text, fm)
 	}
 	return text
+}
+
+// convertHostTriggers lowers a 2.x sensor's `host_triggers:` block into the
+// 3.0 hook shape: `mode: computational` + `event:` (the trigger phase) +
+// `run:` (the command). Takes the first trigger — the common case is one.
+func convertHostTriggers(text string, fm primitive.Frontmatter) string {
+	if len(fm.HostTriggers) == 0 {
+		return text
+	}
+	t := fm.HostTriggers[0]
+	text = reHostTriggersBlock.ReplaceAllString(text, "")
+	return appendFrontmatterLines(text, fmt.Sprintf("mode: computational\nevent: %s\nrun: %s", t.Phase, t.Command))
 }
 
 // appendFrontmatterLines inserts lines at the end of the frontmatter

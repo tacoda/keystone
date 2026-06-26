@@ -101,17 +101,20 @@ func parseHookFire(args []string) (hookFireOpts, error) {
 	return opts, nil
 }
 
-// selectHooks splits the hooks bound to the fired event into computational
-// (have a `run:` script) and inferential (dispatch an `agent:`).
+// selectHooks splits the primitives that deterministically fire on the given
+// event into computational (run a `run:` script) and inferential (dispatch an
+// agent). Any kind that fires — a hook, a computational guide/sensor, an
+// inferential sensor — is selected via primitive.HookFire.
 func selectHooks(primitives []primitive.Primitive, opts hookFireOpts) (comp, inf []primitive.Primitive) {
 	for _, p := range primitives {
-		if primitive.Kind(p.Kind) != primitive.KindHook || p.Event != opts.event {
+		event, computational, ok := primitive.HookFire(p)
+		if !ok || event != opts.event {
 			continue
 		}
-		if strings.TrimSpace(p.Agent) != "" {
-			inf = append(inf, p)
-		} else if strings.TrimSpace(p.Run) != "" {
+		if computational {
 			comp = append(comp, p)
+		} else {
+			inf = append(inf, p)
 		}
 	}
 	return comp, inf
@@ -170,7 +173,14 @@ func emitInferentialManifest(hooks []primitive.Primitive, opts hookFireOpts) {
 	}
 	fmt.Fprintf(os.Stdout, "dispatch (%s) — spawn these agents in parallel:\n", opts.event)
 	for _, h := range hooks {
-		fmt.Fprintf(os.Stdout, "  - agent: %s  (hook %s, returns: %s)\n", h.Agent, h.ID, h.Returns)
+		// A hook names its agent via `agent:`; an inferential sensor IS the
+		// agent (its body projects to .claude/agents/<id>), so it dispatches
+		// itself by id.
+		agent := h.Agent
+		if agent == "" {
+			agent = h.ID
+		}
+		fmt.Fprintf(os.Stdout, "  - agent: %s  (%s %s, returns: %s)\n", agent, h.Kind, h.ID, h.Returns)
 	}
 }
 

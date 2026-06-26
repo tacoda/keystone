@@ -11,9 +11,10 @@ import (
 )
 
 // hookOn wraps a single kind:hook bound to a host-phase (or framework) event.
+// A hook fires deterministically via run: — required for it to bridge.
 func hookOn(id, event string) primitive.Primitive {
 	return primitive.Primitive{
-		Frontmatter: primitive.Frontmatter{Kind: "hook", ID: id, Event: event},
+		Frontmatter: primitive.Frontmatter{Kind: "hook", ID: id, Event: event, Run: "true"},
 	}
 }
 

@@ -165,7 +165,7 @@ func lintIDAndDescription(p Primitive, add func(FindingSeverity, string)) {
 func lintKindFields(p Primitive, add func(FindingSeverity, string)) {
 	switch Kind(p.Kind) {
 	case KindGuide:
-		lintGuideTier(p, add)
+		lintGuideKind(p, add)
 	case KindSkill:
 		if len(p.Triggers) == 0 {
 			add(FindingError, "skill missing `triggers:` — a skill with no triggers cannot fire")
@@ -174,10 +174,47 @@ func lintKindFields(p Primitive, add func(FindingSeverity, string)) {
 		if len(p.Tools) == 0 {
 			add(FindingError, "agent missing `tools:` — declare the tool allow-list explicitly")
 		}
-	case KindSensor, KindHook:
+	default:
+		lintActionKinds(p, add)
+	}
+}
+
+// lintActionKinds validates the firing kinds (hook/sensor/tool); split from
+// the dispatch switch to keep lintKindFields a flat router.
+func lintActionKinds(p Primitive, add func(FindingSeverity, string)) {
+	switch Kind(p.Kind) {
+	case KindHook:
 		lintActionContract(p, add)
+	case KindSensor:
+		lintSensorContract(p, add)
 	case KindTool:
 		lintToolContract(p, add)
+	}
+}
+
+// lintSensorContract enforces a sensor's mode contract. A computational
+// sensor fires a `run:` check at its gate; an inferential sensor is a review
+// dispatched as an agent and must declare a `returns:` verdict schema (its
+// body is the review prompt — no separate `agent:` needed).
+func lintSensorContract(p Primitive, add func(FindingSeverity, string)) {
+	if p.Mode == "computational" {
+		if strings.TrimSpace(p.Run) == "" {
+			add(FindingError, "computational sensor missing `run:` — the check command to fire at the gate")
+		}
+		return
+	}
+	if strings.TrimSpace(p.Returns) == "" {
+		add(FindingError, "inferential sensor missing `returns:` — declare the structured-result verdict schema")
+	}
+}
+
+// lintGuideKind validates a guide: its `tier:`, plus the computational
+// contract — a computational guide (LSP/formatter) fires a command and needs
+// `run:`; an inferential guide is prose (the rule shim), nothing extra.
+func lintGuideKind(p Primitive, add func(FindingSeverity, string)) {
+	lintGuideTier(p, add)
+	if p.Mode == "computational" && strings.TrimSpace(p.Run) == "" {
+		add(FindingError, "computational guide missing `run:` — the LSP/formatter command to fire")
 	}
 }
 

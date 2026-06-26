@@ -19,7 +19,7 @@ So `command`/`skill`/`agent` take the host names (identical concepts);
 | keystone kind | projects to (host) | why the name / notes |
 | --- | --- | --- |
 | `guide` | **rule** *(inferential)* \| **hook** *(computational, e.g. LSP/formatter)* | keystone name — **1-to-many** by `mode:`; richer than a bare rule (paired `corpus`, `tier`). An inferential guide carries a `tier:` — **iron-law \| golden-rule \| preference** (default) |
-| `sensor` | **hook** *(computational)* \| **agent** *(inferential)* | keystone name — **1-to-many** by `mode:` |
+| `sensor` | **hook** *(computational)* \| **agent** *(inferential review)* | keystone name — **1-to-many** by `mode:`. computational → fires a `run:` check at its `event:`; inferential → a review dispatched as an agent with a `returns:` verdict |
 | `hook` | settings.json *(host phase)* \| keystone-fired *(framework event)* | keystone's **framework hook layer** — binds an event to an action. Earns its kind via framework events + the fire dispatcher the bare host hook lacks (not a raw passthrough) |
 | `command` | command | host name — identical concept (a unit of work / lifecycle step) |
 | `skill` | skill | host name — identical concept (a single capability) |
@@ -60,7 +60,16 @@ not sensor-only. It picks the host mechanism; the kind picks intent/activation:
 |              | `mode: computational` (`run:` a shell command/script) | `mode: inferential` (LLM / prose / dispatch an `agent`) |
 | ------------ | --- | --- |
 | **`guide`** (ambient standard, glob-activated) | **hook** — LSP / formatter (gofmt, gopls), e.g. PostToolUse | **rule** — prose directive shim |
-| **`sensor`** (phase-gated check) | **hook** — script at a gate (test, build, lint) | **agent** — review, returns structured results |
+| **`sensor`** (phase-gated check) | **hook** — `run:` a check at the gate (test, build, lint) | **agent** — review, returns a structured verdict |
+| **`hook`** (event → action) | **run:** a shell command/script | dispatch an **agent** (`agent:` + `returns:`) |
+
+**The deterministic-fire rule.** Anything that catches an `event:` and fires
+deterministically *is* a hook — a `hook`, a computational `guide` (LSP on
+PostToolUse), or a computational `sensor` (check at a gate). `event:` + `run:`
+= computational fire; `event:` + agent = inferential dispatch. The kind is the
+authoring intent; the (event, run/agent) pair is the firing. That determinism
+is what makes hooks a reliable layer to build on. An inferential `guide` is the
+exception — it's a `rule` shim, glob-activated ambiently, not event-fired.
 
 So `mode` chooses computational→**hook** vs inferential→**rule** (guide) /
 **agent** (sensor). Default: `guide` → inferential, `sensor` → computational.
@@ -122,8 +131,8 @@ dedicated later slice.)
 ## Type-aware projection (the compiler)
 
 Projection reads a primitive's nature, not just its kind:
-- `sensor` + `mode: computational` → runs its `run:` script; verdict from exit code + stdout
-- `sensor` + `mode: inferential` → **agent** dispatch; the agent **must** return a **structured result** (a `returns:`-schema'd object — findings + verdict), never free prose. The dispatcher validates against the schema, rejects non-conforming output, and surfaces it as feedback
+- `sensor` + `mode: computational` → fires its `run:` check at its `event:` (a hook); verdict from exit code
+- `sensor` + `mode: inferential` → **agent** dispatch (`.claude/agents/`); the review **must** return a **structured result** (`returns:`-schema'd findings + verdict), never free prose. The dispatcher validates and surfaces it as feedback
 - `guide` + `mode: inferential` (with globs) → `.claude/rules/` shim
 - `guide` + `mode: computational` → host **hook** (LSP / formatter command, e.g. gofmt PostToolUse)
 - `hook` + host-phase event → settings.json entry; `hook` + framework event → no projection (keystone-fired via `keystone hook fire`)

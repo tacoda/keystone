@@ -44,9 +44,10 @@ func TestProjectionRelPath(t *testing.T) {
 		{"guide", "guides/idioms/go/fmt", "computational", []string{"**/*.go"}, ""},
 		// Guide without globs → no projection.
 		{"guide", "guides/process/spec", "", nil, ""},
-		// Inferential sensor → agent dispatch (review fleet).
+		// Inferential sensor (review) → subagent; computational sensor fires
+		// via the hook layer (no adapter file).
 		{"sensor", "review-functional", "inferential", nil, filepath.Join(".claude", "agents", "keystone-review-functional.md")},
-		// Computational sensor → no adapter projection (runs via hook layer / verify).
+		{"sensor", "review-security", "", nil, filepath.Join(".claude", "agents", "keystone-review-security.md")},
 		{"sensor", "build", "computational", nil, ""},
 		// Other no-projection kinds.
 		{"corpus", "corpus/process/spec", "", nil, ""},

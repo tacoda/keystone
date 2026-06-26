@@ -127,13 +127,13 @@ func guideProjection(p Primitive) string {
 }
 
 // sensorProjection returns the subagent path for an inferential sensor (a
-// review check dispatched as a subagent). A computational sensor runs via the
-// hook layer and has no host file.
+// review dispatched as a subagent). A computational sensor fires a `run:`
+// check at its event and is carried by the hook layer — no adapter file.
 func sensorProjection(p Primitive, name string) string {
-	if p.Mode == string(modeInferential) {
-		return filepath.Join(".claude", "agents", name+".md")
+	if p.Mode == string(modeComputational) {
+		return ""
 	}
-	return ""
+	return filepath.Join(".claude", "agents", name+".md")
 }
 
 // modeComputational / modeInferential mirror the `mode:` values without
