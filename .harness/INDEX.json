@@ -1,6 +1,6 @@
 {
   "version": "2.0",
-  "generated": "2026-06-26T21:05:58Z",
+  "generated": "2026-06-26T21:12:24Z",
   "primitives": [
     {
       "kind": "agent",
@@ -63,8 +63,7 @@
       ],
       "model": "opus",
       "tags": [
-        "review",
-        "composition"
+        "review"
       ],
       "includes": [
         "reads-diff"
@@ -83,8 +82,7 @@
       ],
       "model": "sonnet",
       "tags": [
-        "review",
-        "composition"
+        "review"
       ],
       "includes": [
         "reads-diff"
@@ -103,8 +101,7 @@
       ],
       "model": "sonnet",
       "tags": [
-        "review",
-        "composition"
+        "review"
       ],
       "includes": [
         "reads-diff"
@@ -251,13 +248,11 @@
       "tools": [
         "Read",
         "Grep",
-        "Bash",
         "Glob"
       ],
       "model": "opus",
       "tags": [
-        "review",
-        "composition"
+        "review"
       ],
       "includes": [
         "reads-diff"
@@ -1163,8 +1158,7 @@
       ],
       "model": "sonnet",
       "tags": [
-        "scaffold",
-        "composition"
+        "scaffold"
       ],
       "includes": [
         "scaffolds-primitive"
@@ -1192,8 +1186,7 @@
       ],
       "model": "sonnet",
       "tags": [
-        "scaffold",
-        "composition"
+        "scaffold"
       ],
       "includes": [
         "scaffolds-primitive"
@@ -1221,8 +1214,7 @@
       ],
       "model": "sonnet",
       "tags": [
-        "scaffold",
-        "composition"
+        "scaffold"
       ],
       "includes": [
         "scaffolds-primitive"
@@ -1251,8 +1243,7 @@
       ],
       "model": "sonnet",
       "tags": [
-        "scaffold",
-        "composition"
+        "scaffold"
       ],
       "includes": [
         "scaffolds-primitive"
@@ -1280,8 +1271,7 @@
       ],
       "model": "sonnet",
       "tags": [
-        "scaffold",
-        "composition"
+        "scaffold"
       ],
       "includes": [
         "scaffolds-primitive"
@@ -1309,8 +1299,7 @@
       ],
       "model": "sonnet",
       "tags": [
-        "scaffold",
-        "composition"
+        "scaffold"
       ],
       "includes": [
         "scaffolds-primitive"
@@ -1338,8 +1327,7 @@
       ],
       "model": "sonnet",
       "tags": [
-        "scaffold",
-        "composition"
+        "scaffold"
       ],
       "includes": [
         "scaffolds-primitive"
