@@ -130,7 +130,7 @@ Each slice ends green (`go test ./...` + `go vet ./...`) and is one commit.
 - Bind per transport: `mcp` → keystone MCP server reads `kind: tool`/`transport: mcp` from INDEX at startup and registers each (handler shells out to `run:` with validated args); `cli` → the `run:` script is the callable, surfaced for direct invocation; `plugin` → host plugin descriptor. Lint: `transport` ∈ {cli, mcp, plugin, ""}.
 - → verify: an `mcp` tool registers + invokes via the MCP server; bad args rejected by schema; `transport` lint rejects an unknown value.
 
-**Slice 5c — remove the `source` subsystem** (`mcp/source.go`, `web/`, `context.json`)
+**Slice 5c — remove the `source` subsystem** (`mcp/source.go`, `web/`, `context.json`) — DONE
 - The `source` *kind* is already dropped (done — KnownKinds/dir/new/MCP-new). This slice removes the read-side subsystem that backed it: `mcp/source.go` (`keystone_source_list|query|health` + resources), `web/sources_actions.go` + the 5 `source*`/`_sources_*` templates and their refs in `web/cache.go`/`topics.go`/`insights.go`, and the `context.json` document (read loosely as `map[string]any`; nothing else uses it — verify, then kill the file + its handling). Drop the `context.json` relocation line from `migrations/v3_0.go`. Resolution flow collapses to rules → corpus (external context now via a `tool`).
 - → verify: `go build ./...` + `go test ./...` green with the source packages gone; no dangling `context.json` / `keystone_source_*` refs; web dashboard renders without the sources pages.
 

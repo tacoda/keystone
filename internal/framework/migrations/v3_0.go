@@ -111,7 +111,7 @@ func relocateToHarness(absDir, newRoot string) error {
 	}
 	// Lift the umbrella files from .keystone/ into the new root.
 	legacyUmbrella := filepath.Join(absDir, legacyKeystoneDir)
-	for _, name := range []string{config.IndexName, config.IndexLiteName, config.LockfileName, "context.json", "state"} {
+	for _, name := range []string{config.IndexName, config.IndexLiteName, config.LockfileName, "state"} {
 		src := filepath.Join(legacyUmbrella, name)
 		if _, err := os.Stat(src); err != nil {
 			continue

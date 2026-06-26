@@ -24,7 +24,6 @@ type MetricsSnapshot struct {
 	LintErrors     int                `json:"lint_errors"`
 	LintWarnings   int                `json:"lint_warnings"`
 	Freshness      []FreshnessEntry   `json:"freshness"`
-	SourceHealths  []sourceEntry      `json:"source_healths"`
 	IndexFresh     bool               `json:"index_fresh"`
 	IndexFile      string             `json:"index_file"`
 	IndexAge       string             `json:"index_age,omitempty"`
@@ -112,8 +111,6 @@ func (s *server) collectMetrics(ctx context.Context) (*MetricsSnapshot, error) {
 		}
 	}
 
-	sources, _ := s.sourceList(ctx)
-
 	return &MetricsSnapshot{
 		ProjectDir:     s.projectDir,
 		Generated:      time.Now().UTC().Format(time.RFC3339),
@@ -122,7 +119,6 @@ func (s *server) collectMetrics(ctx context.Context) (*MetricsSnapshot, error) {
 		LintErrors:     errs,
 		LintWarnings:   warns,
 		Freshness:      freshness,
-		SourceHealths:  sources,
 		IndexFresh:     indexFresh,
 		IndexFile:      indexPath,
 		IndexAge:       indexAge,

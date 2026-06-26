@@ -149,41 +149,6 @@ func (s *server) handlePrimitivesDetail(w http.ResponseWriter, r *http.Request) 
 	http.NotFound(w, r)
 }
 
-func (s *server) handleSources(w http.ResponseWriter, r *http.Request) {
-	entries, err := s.sourceList(r.Context())
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	s.renderPage(w, r, "sources.html", map[string]any{
-		"ProjectDir": s.projectDir,
-		"Sources":    entries,
-	})
-}
-
-func (s *server) handleSourceDetail(w http.ResponseWriter, r *http.Request) {
-	name := strings.TrimPrefix(r.URL.Path, "/sources/")
-	if name == "" {
-		http.NotFound(w, r)
-		return
-	}
-	entries, err := s.sourceList(r.Context())
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	for _, e := range entries {
-		if e.Name == name {
-			s.renderPage(w, r, "source_detail.html", map[string]any{
-				"ProjectDir": s.projectDir,
-				"Source":     e,
-			})
-			return
-		}
-	}
-	http.NotFound(w, r)
-}
-
 // -- HTMX fragments ---------------------------------------------------
 
 // handlePrimitivesFragment returns just the table-body partial.

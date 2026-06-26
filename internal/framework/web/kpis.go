@@ -17,7 +17,7 @@ import (
 // handleKPIWidget below; the template loops on this list so the
 // addition shows up automatically.
 func kpiNames() []string {
-	return []string{"primitives", "sources", "inbox", "lint", "index"}
+	return []string{"primitives", "inbox", "lint", "index"}
 }
 
 // kpi is one of the headline numbers on the Observability landing
@@ -42,37 +42,6 @@ func (s *server) kpiPrimitives() kpi {
 		Label: "primitives",
 		Value: fmt.Sprintf("%d", len(primitives)),
 		Topic: topicPrimitives,
-	}
-}
-
-// kpiSources returns "<healthy>/<total>" with tone driven by the
-// ratio. Zero sources is "—" (informational, not a failure).
-func (s *server) kpiSources(ctx context.Context) kpi {
-	entries, err := s.sourceList(ctx)
-	if err != nil {
-		return kpi{Label: "sources", Value: "—", Tone: "bad", Hint: err.Error(), Topic: topicSources}
-	}
-	if len(entries) == 0 {
-		return kpi{Label: "sources", Value: "0", Tone: "", Hint: "none configured", Topic: topicSources}
-	}
-	ok := 0
-	for _, e := range entries {
-		if e.Health.OK {
-			ok++
-		}
-	}
-	tone := "ok"
-	switch {
-	case ok == 0:
-		tone = "bad"
-	case ok < len(entries):
-		tone = "warn"
-	}
-	return kpi{
-		Label: "sources",
-		Value: fmt.Sprintf("%d / %d", ok, len(entries)),
-		Tone:  tone,
-		Topic: topicSources,
 	}
 }
 
@@ -157,8 +126,6 @@ func (s *server) handleKPIWidget(w http.ResponseWriter, r *http.Request) {
 	switch name {
 	case "primitives":
 		k = s.kpiPrimitives()
-	case "sources":
-		k = s.kpiSources(r.Context())
 	case "inbox":
 		k = s.kpiInbox()
 	case "lint":

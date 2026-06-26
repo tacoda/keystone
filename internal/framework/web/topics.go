@@ -14,7 +14,6 @@ type sseTopic string
 const (
 	topicHarness     sseTopic = "harness-changed"
 	topicPrimitives  sseTopic = "primitives-changed"
-	topicSources     sseTopic = "sources-changed"
 	topicInbox       sseTopic = "inbox-changed"
 	topicPrune       sseTopic = "prune-changed"
 )
@@ -23,9 +22,8 @@ const (
 // it should emit. The coarse `harness-changed` topic is always
 // present, so widgets that don't care which subsystem moved still
 // fire. Multiple narrow topics may also apply — e.g. a touch to
-// `policies/<x>/.keystone/...` is both `sources-changed` (the
-// policy list moved) and `primitives-changed` (the primitives a
-// policy ships moved).
+// `policies/<x>/.keystone/...` is `primitives-changed` (the
+// primitives a policy ships moved).
 //
 // Paths are matched on forward-slash form so the classification is
 // platform-independent.
@@ -38,10 +36,8 @@ func topicsForPath(projectDir, path string) []sseTopic {
 	switch {
 	case strings.Contains(rel, "/learning/inbox/") || strings.HasSuffix(rel, "/learning/inbox"):
 		out = append(out, topicInbox, topicPrimitives)
-	case strings.HasSuffix(rel, "/context.json") || strings.HasSuffix(rel, "context.json"):
-		out = append(out, topicSources)
 	case strings.Contains(rel, "/.keystone/policies/") || strings.Contains(rel, "/policies/"):
-		out = append(out, topicSources, topicPrimitives)
+		out = append(out, topicPrimitives)
 	case strings.HasSuffix(rel, "/INDEX.json") || strings.HasSuffix(rel, "INDEX.json"):
 		out = append(out, topicPrimitives)
 	case strings.Contains(rel, "/.keystone/harness/") || strings.HasPrefix(rel, ".keystone/harness/"):

@@ -139,9 +139,7 @@ func New(opts Options) (*server.MCPServer, error) {
 
 	registerTools(s, abs)
 	registerWriteTools(s, abs)
-	registerSourceTools(s, abs)
 	registerResources(s, abs)
-	registerSourceResources(s, abs)
 	registerSkillResources(s, abs)
 	registerPrompts(s, abs)
 	registerEvalTools(s, abs)
@@ -168,7 +166,7 @@ func registerTools(s *server.MCPServer, projectDir string) {
 		mcp.NewTool("keystone_list_primitives",
 			mcp.WithDescription("List harness primitives, optionally filtered by kind, glob, or tag(s). Returns descriptors only — open bodies via keystone_get_primitive. The returned descriptors reflect the COMPOSED view (concern `includes:` already merged into list fields)."),
 			mcp.WithString("kind",
-				mcp.Description("Filter by kind (guide, corpus, sensor, action, playbook, persona, concern, rule, skill, subagent, command, eval, source). Omit for all."),
+				mcp.Description("Filter by kind (guide, sensor, hook, agent, command, skill, playbook, pattern, corpus, document, concern, posture, tool, eval). Omit for all."),
 			),
 			mcp.WithString("glob",
 				mcp.Description("Filter primitives that declare this glob pattern in their `globs:` frontmatter. Exact-string match on the pattern."),

@@ -33,8 +33,8 @@ func webServeCmd() *cobra.Command {
 		Long: `Run the keystone dashboard on localhost. Single port; same
 origin for HTML, REST API, and SSE.
 
-The dashboard at http://127.0.0.1:<port>/ shows the harness inventory,
-configured external sources, and primitive detail pages. The REST API
+The dashboard at http://127.0.0.1:<port>/ shows the harness inventory
+and primitive detail pages. The REST API
 under /api/ is read-only. Server-Sent Events at /events push HTMX
 fragments whenever a file in .keystone/ changes — the dashboard
 updates without polling.

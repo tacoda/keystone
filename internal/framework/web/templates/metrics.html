@@ -20,7 +20,6 @@
     <div class="stat"><div class="label">kinds</div><div class="value blue">{{len .ByKind}}</div></div>
     <div class="stat"><div class="label">lint errors</div><div class="value {{if .LintErrors}}bad{{else}}green{{end}}">{{.LintErrors}}</div></div>
     <div class="stat"><div class="label">lint warnings</div><div class="value">{{.LintWarnings}}</div></div>
-    <div class="stat"><div class="label">sources</div><div class="value purple">{{len .SourceHealths}}</div></div>
     <div class="stat"><div class="label">index</div><div class="value">{{if .IndexFresh}}<span class="ok">fresh</span>{{else}}<span class="warn">stale</span>{{end}}</div></div>
   </div>
 

@@ -23,14 +23,9 @@ func TestTopicsForPath(t *testing.T) {
 			want: []sseTopic{topicHarness, topicInbox, topicPrimitives},
 		},
 		{
-			name: "context.json triggers sources",
-			path: filepath.FromSlash("/proj/.keystone/context.json"),
-			want: []sseTopic{topicHarness, topicSources},
-		},
-		{
-			name: "policies tree triggers sources + primitives",
+			name: "policies tree triggers primitives",
 			path: filepath.FromSlash("/proj/.keystone/policies/tacoda-org/harness/guides/x.md"),
-			want: []sseTopic{topicHarness, topicSources, topicPrimitives},
+			want: []sseTopic{topicHarness, topicPrimitives},
 		},
 		{
 			name: "INDEX.json triggers primitives",
@@ -72,7 +67,7 @@ func TestTopicsForPath(t *testing.T) {
 func TestUnionTopics(t *testing.T) {
 	in := [][]sseTopic{
 		{topicHarness, topicPrimitives},
-		{topicHarness, topicSources},
+		{topicHarness, topicPrune},
 		{topicHarness, topicInbox, topicPrimitives},
 	}
 	got := unionTopics(in)
@@ -80,7 +75,7 @@ func TestUnionTopics(t *testing.T) {
 		t.Fatalf("harness-changed must lead the union, got %v", got)
 	}
 	if len(got) != 4 {
-		t.Errorf("union should contain harness + primitives + sources + inbox; got %v", got)
+		t.Errorf("union should contain harness + primitives + prune + inbox; got %v", got)
 	}
 }
 
