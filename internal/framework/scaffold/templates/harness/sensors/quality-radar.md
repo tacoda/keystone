@@ -1,5 +1,7 @@
 ---
 kind: sensor
+mode: inferential
+returns: review-findings
 id: quality-radar
 description: 'Aggregates verification and review sensors into a five-dimension scorecard for the current diff (or the whole codebase, on audit).'
 ---

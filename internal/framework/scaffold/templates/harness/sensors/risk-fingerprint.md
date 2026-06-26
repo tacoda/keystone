@@ -1,5 +1,7 @@
 ---
 kind: sensor
+mode: inferential
+returns: review-findings
 id: risk-fingerprint
 description: 'Computes complexity + coupling + coverage patterns per region.'
 ---

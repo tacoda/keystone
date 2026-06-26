@@ -142,7 +142,8 @@ Each slice ends green (`go test ./...` + `go vet ./...`) and is one commit.
 - Down: reverse to 2.4 kinds/paths (best-effort).
 - → verify: full 2.4-install fixture upgrades; every primitive at corrected path/kind + `mode` set; re-indexes clean.
 
-**Slice 7 — embedded scaffold templates → corrected vocab** (`scaffold/templates/`)
+**Slice 7 — embedded scaffold templates → corrected vocab** (`scaffold/templates/`) — DONE
+- actions→commands, personas→agents, traces→corpus; dropped sources/ + rules/ source dirs. Sensors classified: computational dev-checks (build/test/lint/coverage/type-check/sast/secret-scan/vuln-scan/stack-drift/commit-message) → `hooks/` (mode:computational, event, placeholder run); inferential reviews/snapshots → `sensors/` (mode:inferential, returns). `keystone-new-action` skill → `keystone-new-command`. Fresh `keystone init` is lint-clean; golden test updated + green.
 - Restore `guides/ sensors/ playbooks/ agents/` template dirs + `command/`; add `mode:`; one `pattern/` + `posture/` + `tool/` seed each + one framework-event `sensor/` seed.
 - → verify: `TestInit_FreshScaffoldGoldenFiles` green against `.harness/` + corrected vocab.
 

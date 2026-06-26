@@ -1,5 +1,7 @@
 ---
 kind: sensor
+mode: inferential
+returns: review-findings
 id: review-functional
 description: 'An agent reads the diff and reports logic, correctness, and behavior issues.'
 ---
