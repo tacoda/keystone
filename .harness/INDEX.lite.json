@@ -1,0 +1,536 @@
+{
+  "version": "2.0",
+  "generated": "2026-06-26T21:05:58Z",
+  "primitives": [
+    {
+      "kind": "agent",
+      "id": "auditor",
+      "description": "Dual-flywheel auditor — captures learning candidates and prunes dead rules from the harness."
+    },
+    {
+      "kind": "agent",
+      "id": "bootstrap-scout",
+      "description": "Stack detector that seeds the initial harness state from a fresh repo."
+    },
+    {
+      "kind": "agent",
+      "id": "code-debt",
+      "description": "Surfaces and categorizes debt in the codebase — the known-suboptimal code the team has chosen to live with, plus the shape of any new deb..."
+    },
+    {
+      "kind": "agent",
+      "id": "code-reviewer",
+      "description": "General code reviewer that runs the four review sensors on the current diff and surfaces findings."
+    },
+    {
+      "kind": "agent",
+      "id": "debt-reviewer",
+      "description": "Triages the code-debt ledger and recommends which entries to action this cycle."
+    },
+    {
+      "kind": "agent",
+      "id": "drift-reviewer",
+      "description": "Drift reviewer — flags places the current diff drifts from loaded harness rules."
+    },
+    {
+      "kind": "agent",
+      "id": "harness-debt",
+      "description": "Surfaces debt in the harness itself — content that exists but isn't earning its keep."
+    },
+    {
+      "kind": "agent",
+      "id": "learning-curator",
+      "description": "Captures a learning candidate from a surprise, incident, or review finding into harness/learning/inbox/."
+    },
+    {
+      "kind": "agent",
+      "id": "mode-switcher",
+      "description": "Pacing-mode coordinator — switches the harness between paired, solo, and autopilot."
+    },
+    {
+      "kind": "agent",
+      "id": "planner",
+      "description": "Planning scout — loads codebase state and matching idioms for the touched region, then sketches a plan."
+    },
+    {
+      "kind": "agent",
+      "id": "quality-radar",
+      "description": "Aggregates verification and review sensors into a five-dimension scorecard for the current diff (or the whole codebase, on audit)."
+    },
+    {
+      "kind": "agent",
+      "id": "review-deployment",
+      "description": "An agent reads the diff and reports deployment considerations — schema migration safety (expand-contract), feature-flag gating, environme..."
+    },
+    {
+      "kind": "agent",
+      "id": "review-functional",
+      "description": "An agent reads the diff and reports logic, correctness, and behavior issues."
+    },
+    {
+      "kind": "agent",
+      "id": "review-risk",
+      "description": "An agent reads the diff and reports risk concerns — blast radius, reversibility, hot-spot regions, fan-out and shared-state coupling, irr..."
+    },
+    {
+      "kind": "agent",
+      "id": "review-security",
+      "description": "An agent reads the diff and reports security concerns — injection, auth, secrets, unsafe deserialization, weak crypto, missing authorizat..."
+    },
+    {
+      "kind": "agent",
+      "id": "security-reviewer",
+      "description": "Security-focused PR reviewer that hunts OWASP-top-10 patterns and unsafe defaults."
+    },
+    {
+      "kind": "agent",
+      "id": "spec-author",
+      "description": "Captures intent and acceptance criteria for a unit of work — first step on any task."
+    },
+    {
+      "kind": "agent",
+      "id": "synthesizer",
+      "description": "Promotes learning-inbox candidates into the right corpus or guide layer."
+    },
+    {
+      "kind": "agent",
+      "id": "tracker-card-fetcher",
+      "description": "Fetches a tracker card from Jira / Linear / GitHub Issues / Asana via whatever tracker integration the agent has (MCP server, CLI, policy..."
+    },
+    {
+      "kind": "agent",
+      "id": "verifier",
+      "description": "Runs the verification sensors — lint, type-check, test, build, drift, commit-message — and reports the gate."
+    },
+    {
+      "kind": "command",
+      "id": "audit",
+      "description": "Full dual-flywheel audit."
+    },
+    {
+      "kind": "command",
+      "id": "bootstrap",
+      "description": "One-time initial harness scaffold."
+    },
+    {
+      "kind": "command",
+      "id": "check-drift",
+      "description": "Run the drift sensor on the current diff."
+    },
+    {
+      "kind": "command",
+      "id": "debt-review",
+      "description": "Triage the code-debt ledger."
+    },
+    {
+      "kind": "command",
+      "id": "learn",
+      "description": "Capture a learning candidate from a surprise, an incident, or a review finding."
+    },
+    {
+      "kind": "command",
+      "id": "mode",
+      "description": "Switch the harness pacing mode (paired / solo / autopilot)."
+    },
+    {
+      "kind": "command",
+      "id": "orient",
+      "description": "Enter the planning phase."
+    },
+    {
+      "kind": "command",
+      "id": "review",
+      "description": "Run the four review sensors on the current diff."
+    },
+    {
+      "kind": "command",
+      "id": "spec",
+      "description": "Capture intent and acceptance criteria for a unit of work."
+    },
+    {
+      "kind": "command",
+      "id": "synthesize",
+      "description": "Promote learning-inbox candidates into the right corpus or guide layer."
+    },
+    {
+      "kind": "command",
+      "id": "verify",
+      "description": "Run the verification sensors — lint, type-check, test, build, drift, commit-message."
+    },
+    {
+      "kind": "concern",
+      "id": "reads-diff",
+      "description": "Reusable concern for review personas — declares the tools needed to read a git diff and the section that documents the protocol."
+    },
+    {
+      "kind": "concern",
+      "id": "scaffolds-primitive",
+      "description": "Reusable concern for keystone-new-* skills — declares the tools needed to scaffold a new primitive at its canonical path and the idempotency invariants every scaffold respects."
+    },
+    {
+      "kind": "corpus",
+      "id": "corpus/domain/product-shape",
+      "description": "One-paragraph statement of the product."
+    },
+    {
+      "kind": "corpus",
+      "id": "corpus/idioms/go/stdlib-first",
+      "description": "Prefer Go stdlib for primitives that exist there."
+    },
+    {
+      "kind": "corpus",
+      "id": "corpus/idioms/harness-content/primitive-shape",
+      "description": "Frontmatter, paths, and corpus/guide pairing for harness primitives."
+    },
+    {
+      "kind": "corpus",
+      "id": "corpus/idioms/harness-content/state-files",
+      "description": "How state files are written and what must not be hand-edited."
+    },
+    {
+      "kind": "corpus",
+      "id": "corpus/process/runtime-resolution",
+      "description": "Why the runtime resolution flow escalates instead of fanning out — staged lookup costs less and keeps decisions auditable."
+    },
+    {
+      "kind": "corpus",
+      "id": "corpus/state/CODEBASE_STATE",
+      "description": "Empirical map of this codebase."
+    },
+    {
+      "kind": "corpus",
+      "id": "corpus/state/GLOBS_INDEX",
+      "description": "Reverse-index of every guide that declares globs: in its frontmatter."
+    },
+    {
+      "kind": "corpus",
+      "id": "corpus/state/INSTALL_PROFILE",
+      "description": "Selections captured by `keystone init`; read by the bootstrap action."
+    },
+    {
+      "kind": "corpus",
+      "id": "corpus/state/code-debt",
+      "description": "Paired ledger: [harness-debt."
+    },
+    {
+      "kind": "corpus",
+      "id": "corpus/state/harness-debt",
+      "description": "Paired ledger: [code-debt."
+    },
+    {
+      "kind": "corpus",
+      "id": "corpus/state/quality-radar",
+      "description": "Five-dimension scorecard for the codebase (or for the most recent reviewed diff)."
+    },
+    {
+      "kind": "corpus",
+      "id": "corpus/state/risk-fingerprints",
+      "description": "Per-region risk score based on complexity + coupling + coverage."
+    },
+    {
+      "kind": "corpus",
+      "id": "corpus/state/traffic-topology",
+      "description": "Where attention concentrates in the codebase."
+    },
+    {
+      "kind": "guide",
+      "id": "guides/computational/go-vet",
+      "description": "go vet — suspicious-construct check."
+    },
+    {
+      "kind": "guide",
+      "id": "guides/computational/gofmt",
+      "description": "gofmt — canonical Go formatting."
+    },
+    {
+      "kind": "guide",
+      "id": "guides/computational/gopls",
+      "description": "gopls — Go LSP for in-editor signal."
+    },
+    {
+      "kind": "guide",
+      "id": "guides/idioms/go/stdlib-first",
+      "description": "Prefer Go stdlib over new third-party deps."
+    },
+    {
+      "kind": "guide",
+      "id": "guides/idioms/harness-content/primitive-shape",
+      "description": "Frontmatter, canonical paths, corpus/guide pairing, narrow-only globs."
+    },
+    {
+      "kind": "guide",
+      "id": "guides/idioms/harness-content/state-files",
+      "description": "Authoring rules for harness/corpus/state/."
+    },
+    {
+      "kind": "guide",
+      "id": "process/ci-failure",
+      "description": "What to do when CI fails — on a PR, after a merge, or post-deploy."
+    },
+    {
+      "kind": "guide",
+      "id": "process/context-budget",
+      "description": "How much the agent reads, runs, or spawns before making a change."
+    },
+    {
+      "kind": "guide",
+      "id": "process/dangerous-actions",
+      "description": "Operations the agent must confirm with the user before executing — irreversible, broadly-visible, or outside the local workspace."
+    },
+    {
+      "kind": "guide",
+      "id": "process/escalation",
+      "description": "When the agent is stuck, when to stop and ask the user — versus when to keep going."
+    },
+    {
+      "kind": "guide",
+      "id": "process/grounding",
+      "description": "The discipline of verifying that what the agent references — functions, APIs, packages, files, flags — actually exists before invoking it."
+    },
+    {
+      "kind": "guide",
+      "id": "process/implementation",
+      "description": "The phase where code gets written, test-first."
+    },
+    {
+      "kind": "guide",
+      "id": "process/modes",
+      "description": "Active mode: paired"
+    },
+    {
+      "kind": "guide",
+      "id": "process/planning",
+      "description": "The phase that turns an approved spec into an approved plan, before code is written."
+    },
+    {
+      "kind": "guide",
+      "id": "process/pushback",
+      "description": "The discipline of disagreeing with the user when the user is wrong."
+    },
+    {
+      "kind": "guide",
+      "id": "process/release",
+      "description": "The phase where the change lands and is announced."
+    },
+    {
+      "kind": "guide",
+      "id": "process/review",
+      "description": "The phase that confirms a mechanically-correct change is also the right change."
+    },
+    {
+      "kind": "guide",
+      "id": "process/runtime-resolution",
+      "description": "How the agent resolves a scenario — staged escalation from rules to corpus to external sources, asking before applying."
+    },
+    {
+      "kind": "guide",
+      "id": "process/scoping",
+      "description": "How big any single commit, PR, or implementation pass is allowed to get before it must split."
+    },
+    {
+      "kind": "guide",
+      "id": "process/self-validation",
+      "description": "The discipline of refusing to count the agent's own claim as evidence."
+    },
+    {
+      "kind": "guide",
+      "id": "process/sensitive-files",
+      "description": "Files the agent must never read into context, write to, or commit."
+    },
+    {
+      "kind": "guide",
+      "id": "process/spec",
+      "description": "The phase that captures what needs to happen, before deciding how."
+    },
+    {
+      "kind": "guide",
+      "id": "process/subagent-trust",
+      "description": "The discipline of treating subagent reports as claims to verify, not as evidence to accept."
+    },
+    {
+      "kind": "guide",
+      "id": "process/surgical-edits",
+      "description": "Touch only what serves the task."
+    },
+    {
+      "kind": "guide",
+      "id": "process/verification",
+      "description": "The phase where claims are paired with evidence before commit."
+    },
+    {
+      "kind": "hook",
+      "id": "build",
+      "description": "The project's build / compile / package step."
+    },
+    {
+      "kind": "hook",
+      "id": "commit-message",
+      "description": "Validates conventional-commit format and absence of AI attribution."
+    },
+    {
+      "kind": "hook",
+      "id": "coverage",
+      "description": "Reads test coverage and updates the State layer."
+    },
+    {
+      "kind": "hook",
+      "id": "drift",
+      "description": "Compares the diff (or full codebase, during audit) against loaded guide rules."
+    },
+    {
+      "kind": "hook",
+      "id": "lint",
+      "description": "Surface-level style and pattern checks."
+    },
+    {
+      "kind": "hook",
+      "id": "risk-fingerprint",
+      "description": "Computes complexity + coupling + coverage patterns per region."
+    },
+    {
+      "kind": "hook",
+      "id": "sast",
+      "description": "Static application security testing — pattern-based detection of insecure code in the source tree (SQL injection, command injection, weak..."
+    },
+    {
+      "kind": "hook",
+      "id": "secret-scan",
+      "description": "Scans the diff (or repo, on audit) for committed secrets — API keys, tokens, private keys, credentials."
+    },
+    {
+      "kind": "hook",
+      "id": "spec-adherence",
+      "description": "Walks the spec's acceptance criteria against the current diff."
+    },
+    {
+      "kind": "hook",
+      "id": "stack-drift",
+      "description": "Detects when the empirical reality of the repo has diverged from what CODEBASESTATE."
+    },
+    {
+      "kind": "hook",
+      "id": "state-region",
+      "description": "Read-only."
+    },
+    {
+      "kind": "hook",
+      "id": "test",
+      "description": "The project's test suite."
+    },
+    {
+      "kind": "hook",
+      "id": "traffic-topology",
+      "description": "Combines git churn + recency + business criticality into a map of where attention concentrates."
+    },
+    {
+      "kind": "hook",
+      "id": "type-check",
+      "description": "Signature and contract consistency."
+    },
+    {
+      "kind": "hook",
+      "id": "vuln-scan",
+      "description": "Scans declared dependencies for known vulnerabilities (CVEs, advisories)."
+    },
+    {
+      "kind": "playbook",
+      "id": "task",
+      "description": "End-to-end task workflow."
+    },
+    {
+      "kind": "skill",
+      "id": "keystone:audit",
+      "description": "Full dual-flywheel audit — Learning (capture from review) + Pruning (remove dead rules). Periodic harness hygiene."
+    },
+    {
+      "kind": "skill",
+      "id": "keystone:bootstrap",
+      "description": "One-time initial harness scaffold — detect stack, seed state, scaffold idioms, classify sensors, build the globs index."
+    },
+    {
+      "kind": "skill",
+      "id": "keystone:check-drift",
+      "description": "Run the drift sensor on the current diff — fast pre-verify check that loaded harness rules still match what the code is doing."
+    },
+    {
+      "kind": "skill",
+      "id": "keystone:debt-review",
+      "description": "Triage the code-debt ledger — review the debt sensor's findings and update corpus/state/code-debt.md."
+    },
+    {
+      "kind": "skill",
+      "id": "keystone:index",
+      "description": "Regenerate .keystone/INDEX.json — the primitive descriptor index every agent reads at session start."
+    },
+    {
+      "kind": "skill",
+      "id": "keystone:learn",
+      "description": "Capture a learning candidate (surprise, incident, review finding) into .keystone/harness/learning/inbox/ for later synthesis."
+    },
+    {
+      "kind": "skill",
+      "id": "keystone:mode",
+      "description": "Switch the harness pacing mode (paired / solo / autopilot)."
+    },
+    {
+      "kind": "skill",
+      "id": "keystone:new-action",
+      "description": "Scaffold a new lifecycle action (atomic unit of work) at the canonical path."
+    },
+    {
+      "kind": "skill",
+      "id": "keystone:new-adapter",
+      "description": "Scaffold the per-agent adapter triple (lifecycle, sensors, activation) for a new host."
+    },
+    {
+      "kind": "skill",
+      "id": "keystone:new-corpus",
+      "description": "Scaffold a corpus reasoning entry (the *why*) at the canonical path."
+    },
+    {
+      "kind": "skill",
+      "id": "keystone:new-guide",
+      "description": "Scaffold a new rule guide + paired corpus stub at the canonical path."
+    },
+    {
+      "kind": "skill",
+      "id": "keystone:new-playbook",
+      "description": "Scaffold a new playbook (ordered sequence of actions) at the canonical path."
+    },
+    {
+      "kind": "skill",
+      "id": "keystone:new-policy",
+      "description": "Scaffold a new policy repo skeleton outside the current project."
+    },
+    {
+      "kind": "skill",
+      "id": "keystone:new-sensor",
+      "description": "Scaffold a new sensor (automated check) at the canonical path."
+    },
+    {
+      "kind": "skill",
+      "id": "keystone:orient",
+      "description": "Enter the planning phase — load codebase state + matching idioms for the touched region, then sketch a plan."
+    },
+    {
+      "kind": "skill",
+      "id": "keystone:review",
+      "description": "Run the four review sensors on the current diff (functional, security, risk, deployment)."
+    },
+    {
+      "kind": "skill",
+      "id": "keystone:spec",
+      "description": "Capture intent + acceptance criteria for a unit of work. First action on any task."
+    },
+    {
+      "kind": "skill",
+      "id": "keystone:synthesize",
+      "description": "Promote accepted learning-inbox candidates into the right corpus / guide / sensor layer, then refresh INDEX.json."
+    },
+    {
+      "kind": "skill",
+      "id": "keystone:verify",
+      "description": "Check vendored policies for drift and the strict cascade for project-layer violations."
+    }
+  ]
+}
