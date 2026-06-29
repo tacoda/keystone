@@ -1,7 +1,5 @@
 ---
-kind: command
-id: orient
-description: 'Enter the planning phase.'
+description: Enter the planning phase.
 ---
 # orient
 

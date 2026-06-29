@@ -1,7 +1,5 @@
 ---
-kind: command
-id: spec
-description: 'Capture intent and acceptance criteria for a unit of work.'
+description: Capture intent and acceptance criteria for a unit of work.
 ---
 # spec
 

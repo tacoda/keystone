@@ -1,16 +1,12 @@
 ---
-kind: agent
-id: security-reviewer
+name: keystone-security-reviewer
 description: Security-focused PR reviewer that hunts OWASP-top-10 patterns and unsafe defaults.
 tools:
   - Read
   - Grep
+  - Bash
   - Glob
 model: opus
-includes:
-  - reads-diff
-tags:
-  - review
 ---
 
 # Security reviewer

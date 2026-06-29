@@ -1,16 +1,11 @@
 ---
-kind: agent
-id: drift-reviewer
+name: keystone-drift-reviewer
 description: Drift reviewer — flags places the current diff drifts from loaded harness rules.
 tools:
   - Read
   - Grep
   - Bash
 model: sonnet
-includes:
-  - reads-diff
-tags:
-  - review
 ---
 
 # Drift reviewer

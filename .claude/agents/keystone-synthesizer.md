@@ -1,16 +1,11 @@
 ---
-kind: agent
-id: synthesizer
+name: keystone-synthesizer
 description: Promotes learning-inbox candidates into the right corpus or guide layer.
 tools:
   - Read
   - Grep
   - Write
 model: opus
-tags:
-  - audit
-  - flywheel
-  - synthesis
 ---
 
 # Synthesizer

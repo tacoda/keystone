@@ -1,9 +1,6 @@
 ---
-kind: agent
-id: review-functional
-description: 'An agent reads the diff and reports logic, correctness, and behavior issues.'
-tags:
-  - llm-judgment
+name: keystone-review-functional
+description: An agent reads the diff and reports logic, correctness, and behavior issues.
 tools:
   - Read
   - Grep

@@ -1,14 +1,11 @@
 ---
-kind: agent
-id: verifier
+name: keystone-verifier
 description: Runs the verification sensors — lint, type-check, test, build, drift, commit-message — and reports the gate.
 tools:
   - Read
   - Grep
   - Bash
 model: sonnet
-tags:
-  - verification
 ---
 
 # Verifier

@@ -1,7 +1,5 @@
 ---
-kind: command
-id: mode
-description: 'Switch the harness pacing mode (paired / solo / autopilot).'
+description: Switch the harness pacing mode (paired / solo / autopilot).
 ---
 # mode
 

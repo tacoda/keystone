@@ -1,9 +1,6 @@
 ---
-kind: agent
-id: review-security
-description: 'An agent reads the diff and reports security concerns — injection, auth, secrets, unsafe deserialization, weak crypto, missing authorizat...'
-tags:
-  - llm-judgment
+name: keystone-review-security
+description: An agent reads the diff and reports security concerns — injection, auth, secrets, unsafe deserialization, weak crypto, missing authorizat...
 tools:
   - Read
   - Grep

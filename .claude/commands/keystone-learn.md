@@ -1,7 +1,5 @@
 ---
-kind: command
-id: learn
-description: 'Capture a learning candidate from a surprise, an incident, or a review finding.'
+description: Capture a learning candidate from a surprise, an incident, or a review finding.
 ---
 # learn
 

@@ -1,6 +1,5 @@
 ---
-kind: agent
-id: auditor
+name: keystone-auditor
 description: Dual-flywheel auditor — captures learning candidates and prunes dead rules from the harness.
 tools:
   - Read
@@ -8,9 +7,6 @@ tools:
   - Glob
   - Bash
 model: opus
-tags:
-  - audit
-  - flywheel
 ---
 
 # Auditor

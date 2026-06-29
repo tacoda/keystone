@@ -1,7 +1,5 @@
 ---
-kind: command
-id: bootstrap
-description: 'One-time initial harness scaffold.'
+description: One-time initial harness scaffold.
 ---
 # bootstrap
 

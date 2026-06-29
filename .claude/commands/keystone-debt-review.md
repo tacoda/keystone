@@ -1,7 +1,5 @@
 ---
-kind: command
-id: debt-review
-description: 'Triage the code-debt ledger.'
+description: Triage the code-debt ledger.
 ---
 # debt-review
 

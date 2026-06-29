@@ -1,6 +1,5 @@
 ---
-kind: agent
-id: bootstrap-scout
+name: keystone-bootstrap-scout
 description: Stack detector that seeds the initial harness state from a fresh repo.
 tools:
   - Read
@@ -8,9 +7,6 @@ tools:
   - Glob
   - Bash
 model: sonnet
-tags:
-  - scaffold
-  - bootstrap
 ---
 
 # Bootstrap scout

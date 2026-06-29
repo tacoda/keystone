@@ -1,16 +1,11 @@
 ---
-kind: agent
-id: code-reviewer
+name: keystone-code-reviewer
 description: General code reviewer that runs the four review sensors on the current diff and surfaces findings.
 tools:
   - Read
   - Grep
   - Bash
 model: opus
-includes:
-  - reads-diff
-tags:
-  - review
 ---
 
 # Code reviewer

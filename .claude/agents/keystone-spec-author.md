@@ -1,15 +1,11 @@
 ---
-kind: agent
-id: spec-author
+name: keystone-spec-author
 description: Captures intent and acceptance criteria for a unit of work — first step on any task.
 tools:
   - Read
   - Grep
   - Write
 model: opus
-tags:
-  - planning
-  - spec
 ---
 
 # Spec author

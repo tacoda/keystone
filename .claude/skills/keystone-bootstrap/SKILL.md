@@ -1,16 +1,6 @@
 ---
-kind: skill
-id: keystone:bootstrap
+name: keystone-bootstrap
 description: One-time initial harness scaffold — detect stack, seed state, scaffold idioms, classify sensors, build the globs index.
-triggers:
-  - keystone bootstrap
-  - keystone:bootstrap
-  - /keystone:bootstrap
-  - run bootstrap
-  - bootstrap the harness
-  - bootstrap the keystone harness
-  - first-time setup
-model: opus
 tools:
   - Read
   - Grep
@@ -19,6 +9,7 @@ tools:
   - Write
   - Edit
   - Task
+model: opus
 ---
 
 # keystone:bootstrap — make the harness specific to your codebase

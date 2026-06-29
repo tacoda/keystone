@@ -1,21 +1,13 @@
 ---
-kind: skill
-id: keystone:orient
+name: keystone-orient
 description: Enter the planning phase — load codebase state + matching idioms for the touched region, then sketch a plan.
-triggers:
-  - keystone orient
-  - keystone:orient
-  - /keystone:orient
-  - enter planning phase
-  - orient on this task
-  - load idioms for the touched region
-model: opus
 tools:
   - Read
   - Grep
   - Glob
   - Bash
   - Task
+model: opus
 ---
 
 # keystone:orient — planning phase

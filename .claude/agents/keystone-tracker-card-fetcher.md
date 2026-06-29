@@ -1,9 +1,6 @@
 ---
-kind: agent
-id: tracker-card-fetcher
-description: 'Fetches a tracker card from Jira / Linear / GitHub Issues / Asana via whatever tracker integration the agent has (MCP server, CLI, policy...'
-tags:
-  - llm-judgment
+name: keystone-tracker-card-fetcher
+description: Fetches a tracker card from Jira / Linear / GitHub Issues / Asana via whatever tracker integration the agent has (MCP server, CLI, policy...
 tools:
   - Read
   - Grep

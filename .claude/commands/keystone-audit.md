@@ -1,7 +1,5 @@
 ---
-kind: command
-id: audit
-description: 'Full dual-flywheel audit.'
+description: Full dual-flywheel audit.
 ---
 # audit
 

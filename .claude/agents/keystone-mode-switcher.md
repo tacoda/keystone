@@ -1,13 +1,10 @@
 ---
-kind: agent
-id: mode-switcher
+name: keystone-mode-switcher
 description: Pacing-mode coordinator — switches the harness between paired, solo, and autopilot.
 tools:
   - Read
   - Write
 model: sonnet
-tags:
-  - mode
 ---
 
 # Mode switcher

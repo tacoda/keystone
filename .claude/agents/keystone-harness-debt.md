@@ -1,9 +1,6 @@
 ---
-kind: agent
-id: harness-debt
-description: 'Surfaces debt in the harness itself — content that exists but isn''t earning its keep.'
-tags:
-  - llm-judgment
+name: keystone-harness-debt
+description: "Surfaces debt in the harness itself — content that exists but isn't earning its keep."
 tools:
   - Read
   - Grep

@@ -1,21 +1,13 @@
 ---
-kind: skill
-id: keystone:learn
+name: keystone-learn
 description: Capture a learning candidate (surprise, incident, review finding) into .keystone/harness/learning/inbox/ for later synthesis.
-triggers:
-  - keystone learn
-  - keystone:learn
-  - /keystone:learn
-  - run the learn action
-  - capture a learning candidate
-  - log a surprise
-model: opus
 tools:
   - Read
   - Write
   - Edit
   - Grep
   - Glob
+model: opus
 ---
 
 # keystone:learn — capture a learning candidate

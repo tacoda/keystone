@@ -1,7 +1,5 @@
 ---
-kind: command
-id: synthesize
-description: 'Promote learning-inbox candidates into the right corpus or guide layer.'
+description: Promote learning-inbox candidates into the right corpus or guide layer.
 ---
 # synthesize
 

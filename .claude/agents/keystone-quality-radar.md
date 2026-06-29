@@ -1,9 +1,6 @@
 ---
-kind: agent
-id: quality-radar
-description: 'Aggregates verification and review sensors into a five-dimension scorecard for the current diff (or the whole codebase, on audit).'
-tags:
-  - llm-judgment
+name: keystone-quality-radar
+description: Aggregates verification and review sensors into a five-dimension scorecard for the current diff (or the whole codebase, on audit).
 tools:
   - Read
   - Grep

@@ -1,15 +1,10 @@
 ---
-kind: agent
-id: learning-curator
+name: keystone-learning-curator
 description: Captures a learning candidate from a surprise, incident, or review finding into harness/learning/inbox/.
 tools:
   - Read
   - Grep
 model: opus
-tags:
-  - audit
-  - flywheel
-  - learning
 ---
 
 # Learning curator

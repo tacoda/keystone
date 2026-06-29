@@ -1,16 +1,11 @@
 ---
-kind: agent
-id: debt-reviewer
+name: keystone-debt-reviewer
 description: Triages the code-debt ledger and recommends which entries to action this cycle.
 tools:
   - Read
   - Grep
   - Bash
 model: sonnet
-includes:
-  - reads-diff
-tags:
-  - review
 ---
 
 # Debt reviewer

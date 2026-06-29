@@ -1,9 +1,6 @@
 ---
-kind: agent
-id: review-deployment
-description: 'An agent reads the diff and reports deployment considerations — schema migration safety (expand-contract), feature-flag gating, environme...'
-tags:
-  - llm-judgment
+name: keystone-review-deployment
+description: An agent reads the diff and reports deployment considerations — schema migration safety (expand-contract), feature-flag gating, environme...
 tools:
   - Read
   - Grep

@@ -1,7 +1,5 @@
 ---
-kind: command
-id: verify
-description: 'Run the verification sensors — lint, type-check, test, build, drift, commit-message.'
+description: Run the verification sensors — lint, type-check, test, build, drift, commit-message.
 ---
 # verify
 

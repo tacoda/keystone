@@ -1,7 +1,5 @@
 ---
-kind: command
-id: review
-description: 'Run the four review sensors on the current diff.'
+description: Run the four review sensors on the current diff.
 ---
 # review
 

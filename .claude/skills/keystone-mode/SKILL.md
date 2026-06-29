@@ -1,20 +1,11 @@
 ---
-kind: skill
-id: keystone:mode
+name: keystone-mode
 description: Switch the harness pacing mode (paired / solo / autopilot).
-triggers:
-  - keystone mode
-  - keystone:mode
-  - /keystone:mode
-  - switch pacing mode
-  - go autopilot
-  - go solo
-  - go paired
-model: sonnet
 tools:
   - Read
   - Write
   - Edit
+model: sonnet
 ---
 
 # keystone:mode — switch pacing mode

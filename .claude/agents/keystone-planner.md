@@ -1,14 +1,11 @@
 ---
-kind: agent
-id: planner
+name: keystone-planner
 description: Planning scout — loads codebase state and matching idioms for the touched region, then sketches a plan.
 tools:
   - Read
   - Grep
   - Glob
 model: opus
-tags:
-  - planning
 ---
 
 # Planner

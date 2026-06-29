@@ -1,9 +1,6 @@
 ---
-kind: agent
-id: code-debt
-description: 'Surfaces and categorizes debt in the codebase — the known-suboptimal code the team has chosen to live with, plus the shape of any new deb...'
-tags:
-  - llm-judgment
+name: keystone-code-debt
+description: Surfaces and categorizes debt in the codebase — the known-suboptimal code the team has chosen to live with, plus the shape of any new deb...
 tools:
   - Read
   - Grep

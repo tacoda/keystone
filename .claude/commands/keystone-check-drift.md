@@ -1,7 +1,5 @@
 ---
-kind: command
-id: check-drift
-description: 'Run the drift sensor on the current diff.'
+description: Run the drift sensor on the current diff.
 ---
 # check-drift
 
