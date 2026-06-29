@@ -46,6 +46,8 @@ func detectAgent(dir string) string {
 		return "pi"
 	case exists(".github/copilot-instructions.md"):
 		return "github-copilot"
+	case exists(".opencode") || exists("opencode.json"):
+		return "opencode"
 	case exists(".cursor"):
 		return "cursor"
 	case exists(".aider.conf.yml") || exists("CONVENTIONS.md"):

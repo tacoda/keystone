@@ -79,6 +79,7 @@ func promptAgentOptions() []agentOption {
 		"continue":       "Continue (VS Code / JetBrains)",
 		"goose":          "Block's Goose",
 		"github-copilot": "GitHub Copilot (chat + workspace)",
+		"opencode":       "opencode (open source CLI)",
 		"pi":             "pi.dev",
 		"generic":        "no specific host — generic AGENTS.md",
 	}
