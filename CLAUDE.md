@@ -26,8 +26,8 @@ internal/framework/   — agent-agnostic core
   adapters/           — per-host projection (claudecode, cursor, …)
   mcp/                — MCP server
   web/                — local dashboard
-.keystone/harness/    — this project's own harness (dogfood)
-.claude/              — projected from .keystone/harness/ — do not hand-edit
+.harness/    — this project's own harness (dogfood)
+.claude/              — projected from .harness/ — do not hand-edit
 ```
 
 ## Common commands
@@ -37,30 +37,31 @@ go build ./cmd/keystone        # build the CLI
 go install ./cmd/keystone      # install on PATH (refresh after every Frontmatter or CLI change — hooks call the installed binary)
 go test ./...                  # all tests
 go vet ./...                   # static check (must pass before commit)
-keystone index                 # regenerate .keystone/INDEX*.json
+keystone index                 # regenerate .harness/INDEX*.json
 keystone project               # regenerate .claude/* + merge hooks into settings
-keystone watch                 # long-running: re-project on every guide/sensor/persona save (300ms debounce)
-keystone verify                # policy + cascade check
-keystone verify --sensor <id>  # run one keystone-owned sensor (hook entry point)
+keystone watch                 # long-running: re-project on every guide/sensor/agent save (300ms debounce)
+keystone verify                # policy + cascade check (auto-fires pre/post-verify hooks)
+keystone hook fire <event>     # dispatch framework hooks bound to an event
 ```
 
 > **Instant projection.** Run `keystone watch` in a side terminal while
-> editing primitives. Any save under `.keystone/harness/` regenerates
+> editing primitives. Any save under `.harness/` regenerates
 > `INDEX.json` + `INDEX.lite.json` + `.claude/*` + `AGENTS.md` +
 > `.cursor/rules/*` + `.aider.conf.yml` + `.continue/rules/*` within
 > the debounce window. The next agent invocation sees the updated
 > surface immediately — no manual `keystone project` needed.
 
-> Hooks under `.claude/settings.json` invoke `keystone verify --sensor X`.
-> If you see `unknown flag --sensor`, the installed binary is stale —
-> `go install ./cmd/keystone` to refresh.
+> Hooks under `.claude/settings.json` are a single bridge per host phase
+> (`keystone hook fire <phase>`) that dispatches the matching framework
+> hooks. Refresh the installed binary (`go install ./cmd/keystone`) after
+> any frontmatter/CLI change — the hooks call it.
 
 ## Where things go
 
-- **New rule / convention** → `.keystone/harness/guides/idioms/<topic>.md` + paired corpus
-- **New automated check (computational)** → `.keystone/harness/sensors/<id>.md` + add a `hooks:` entry in `keystone.json`
-- **New workflow** → `.keystone/harness/playbooks/<id>.md`
-- **New review persona** → `.keystone/harness/personas/<id>.md`
+- **New rule / convention** → `.harness/guides/idioms/<topic>.md` + paired corpus
+- **New computational check** → `.harness/hooks/<id>.md` (`event:` + `run:`)
+- **New review** → `.harness/sensors/<id>.md` (`mode: inferential`, `returns:`) or a reviewer `.harness/agents/<id>.md`
+- **New workflow** → `.harness/playbooks/<id>.md`
 - **New keystone subcommand** → `cmd/keystone/<name>.go` + wire in `root.go`
 
 After any primitive add / move / delete: run `keystone index && keystone project`.
@@ -68,17 +69,17 @@ After any primitive add / move / delete: run `keystone index && keystone project
 <!-- keystone:start -->
 ## Keystone harness
 
-This project uses a **keystone harness**. The framework's primitives —
-guides, corpus, sensors, actions, playbooks — plus host-native ones
-(skills, subagents, commands, rules) all live under
-[`.keystone/harness/`](.keystone/harness/). Discover what's available
-through the index; open primitive bodies on demand.
+This project uses a **keystone harness**. Its primitives — guides,
+sensors, hooks, agents, commands, skills, playbooks, patterns, corpus,
+documents, concerns, posture, tools — all live under
+[`.harness/`](.harness/). Discover what's available through the index;
+open primitive bodies on demand.
 
 **Read first:**
-[`.keystone/INDEX.lite.json`](.keystone/INDEX.lite.json) — the cheap
+[`.harness/INDEX.lite.json`](.harness/INDEX.lite.json) — the cheap
 discovery surface (kind + id + description only). Browse this to pick
 which primitive you need. Then open the full
-[`.keystone/INDEX.json`](.keystone/INDEX.json) for that primitive's
+[`.harness/INDEX.json`](.harness/INDEX.json) for that primitive's
 `path` / `globs` / `triggers`, and only open the body itself when you
 decide to activate it.
 
@@ -86,53 +87,53 @@ decide to activate it.
 
 | Kind         | When to open                                                            |
 | ------------ | ----------------------------------------------------------------------- |
-| **guide**    | Touched files match the entry's `globs:` (or no globs declared).        |
-| **rule**     | Same as guide — host-native flavor (Cursor-style, plain directive).      |
-| **corpus**   | A guide's `traces:` (or a prose forward-link) points at it.             |
-| **action**   | User's intent matches `description` + `phase`. Open the playbook body. |
-| **playbook** | Same as action — composed sequence of actions.                          |
-| **sensor**   | Inside an action, per-phase, narrowed by `globs:`.                      |
+| **guide**    | Touched files match the entry's `globs:`. Inferential → a directive; computational → a host hook (LSP). |
+| **corpus**   | A guide's `corpus:` (or a prose forward-link) points at it — the *why*. |
+| **command**  | User's intent matches `description` + `phase`; a unit of work. Host slash: `/keystone-<id>`. |
+| **playbook** | A composed sequence of commands with human `gates:`.                    |
+| **sensor**   | An inferential review at a gate — dispatched as an agent, returns a `returns:` verdict. |
+| **hook**     | Fires deterministically on an `event:` (host phase or framework event) → `run:` shell or `agent:` dispatch. |
 | **skill**    | Claude Code auto-activates by `triggers:` match.                        |
-| **subagent** | Spawn via the Task tool by `id`. The system prompt is the body.         |
-| **command**  | Host slash mechanism: user types `/<id>`.                                |
+| **agent**    | Spawn via the Task tool by `id`. The system prompt is the body.         |
+| **pattern**  | A reusable documentation pattern (Diátaxis) — apply when writing docs.  |
 
 **Lifecycle** — to kick off a unit of work, say "**run task on
-`<ticket-id>`**" (runs the **task** playbook). For any single action,
+`<ticket-id>`**" (runs the **task** playbook). For any single command,
 ask in natural language ("run verify", "do a review pass") — the
-action's body lives at its INDEX `path`.
+command's body lives at its INDEX `path`.
 
 **Iron laws** — non-negotiable across every phase. Distilled from
 `guides/process/`; open the linked guide only when the rule is contested
 or ambiguous.
 
-- No proceeding without explicit acceptance criteria. ([`spec`](.keystone/harness/guides/process/spec.md))
-- No completion claims without fresh verification — sensors must have
+- No proceeding without explicit acceptance criteria. ([`spec`](.harness/guides/process/spec.md))
+- No completion claims without fresh verification — checks must have
   run this turn, against the post-edit state, with cited tool output.
-  ([`verification`](.keystone/harness/guides/process/verification.md),
-  [`self-validation`](.keystone/harness/guides/process/self-validation.md))
-- No commits with failing sensors. Never `--no-verify`.
+  ([`verification`](.harness/guides/process/verification.md),
+  [`self-validation`](.harness/guides/process/self-validation.md))
+- No commits with failing checks. Never `--no-verify`.
 - No AI attribution in commits, PRs, or tracker comments.
 - No silent overwrites of state files.
 - No reading or writing **sensitive files** — `.env*`, `*.pem`, `*.key`,
   `id_rsa`, `credentials.json`, `secrets/`, anything matching
   `*secret*`/`*credential*`/`*password*`. Ask the user out-of-band.
-  ([`sensitive-files`](.keystone/harness/guides/process/sensitive-files.md))
+  ([`sensitive-files`](.harness/guides/process/sensitive-files.md))
 - No **dangerous action** without explicit in-turn confirmation —
   `rm -rf`, `git push --force`, `git reset --hard`, prod DB writes,
   external comms (Slack/email), system installs, secret rotation. One
   confirmation, one action. Mode never loosens this.
-  ([`dangerous-actions`](.keystone/harness/guides/process/dangerous-actions.md))
+  ([`dangerous-actions`](.harness/guides/process/dangerous-actions.md))
 - No invented imports, methods, config keys, or CLI flags. Grep / read
   the manifest / check `--help` before referencing.
-  ([`grounding`](.keystone/harness/guides/process/grounding.md))
+  ([`grounding`](.harness/guides/process/grounding.md))
 - No "while I'm here" cleanups. Every changed line traces to the
   request. Style, formatting, renames, file moves get their own commit.
-  ([`surgical-edits`](.keystone/harness/guides/process/surgical-edits.md))
+  ([`surgical-edits`](.harness/guides/process/surgical-edits.md))
 - No accepting a subagent's "done" report as evidence. Read the diff;
-  re-run sensors in the parent's turn.
-  ([`subagent-trust`](.keystone/harness/guides/process/subagent-trust.md))
+  re-run checks in the parent's turn.
+  ([`subagent-trust`](.harness/guides/process/subagent-trust.md))
 
-**Override** — your project files at `.keystone/harness/<kind>/<id>.md`
+**Override** — your project files at `.harness/<kind>/<id>.md`
 always win by default. Among installed policies, policies nested deeper
 in `keystone.json` refine outer policies. A policy can mark an item
 `strict` to make it absolute — nothing else can override a strict

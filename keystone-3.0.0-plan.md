@@ -151,7 +151,7 @@ Each slice ends green (`go test ./...` + `go vet ./...`) and is one commit.
 - `go build`, run `keystone migrate up` on this repo's `.keystone/` → `.harness/` corrected vocab. `keystone index && keystone project`. Then `go install ./cmd/keystone` (hooks repoint).
 - → verify: no `actions/playbooks/personas` dirs left under `.harness/`; `keystone verify` clean; hooks fire with new binary.
 
-**Slice 9 — docs** (CLAUDE.md, MCP help, README, `new` usage)
+**Slice 9 — docs** (CLAUDE.md, MCP help, README, menu template) — DONE
 - Speak corrected vocab + `mode`/`pattern`/`posture`/framework hooks. Reconcile aliases (workflow=playbook, plugin=policy).
 - → verify: no stale `rule`-as-guide / `agent`-as-subagent language; MCP help matches `KnownKinds`.
 
