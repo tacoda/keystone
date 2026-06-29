@@ -155,7 +155,7 @@ Each slice ends green (`go test ./...` + `go vet ./...`) and is one commit.
 - Speak corrected vocab + `mode`/`pattern`/`posture`/framework hooks. Reconcile aliases (workflow=playbook, plugin=policy).
 - → verify: no stale `rule`-as-guide / `agent`-as-subagent language; MCP help matches `KnownKinds`.
 
-**Slice 10 — frontmatter lowering** (folded in)
+**Slice 10 — frontmatter lowering** — DONE
 - Projection emits ONLY host-native keys (name/description/allowed-tools/model/globs/alwaysApply); strips framework fields.
 - → verify: projected host files carry no keystone-only frontmatter (`corpus`/`includes`/`event`/`mode`/`gates`…).
 

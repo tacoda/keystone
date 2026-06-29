@@ -217,12 +217,14 @@ func TestProject_CopiesSkillAgentCommand(t *testing.T) {
 	if skipped == 0 {
 		t.Error("expected at least one skipped (the globless guide)")
 	}
-	// Projection is byte-identical to source.
-	assertBodiesMatch(t, root, map[string]string{
-		".keystone/harness/skills/keystone-demo/SKILL.md": ".claude/skills/keystone-demo/SKILL.md",
-		".keystone/harness/agents/reviewer.md":            ".claude/agents/keystone-reviewer.md",
-		".keystone/harness/commands/check.md":             ".claude/commands/keystone-check.md",
-	})
+	// Frontmatter is lowered to host-native keys; the body is preserved.
+	// Skills/agents carry name+description; keystone-only fields are stripped.
+	skill, _ := os.ReadFile(filepath.Join(root, ".claude/skills/keystone-demo/SKILL.md"))
+	assertContainsAll(t, string(skill), []string{"name: keystone-demo", "description: x", "body"})
+	assertContainsNone(t, string(skill), []string{"kind:", "id:", "triggers:"})
+	cmd, _ := os.ReadFile(filepath.Join(root, ".claude/commands/keystone-check.md"))
+	assertContainsAll(t, string(cmd), []string{"description: x", "body"})
+	assertContainsNone(t, string(cmd), []string{"kind:", "id:"})
 }
 
 // tallyProjections splits results into a wrote-set and a skipped count.
@@ -267,21 +269,6 @@ func assertContainsNone(t *testing.T, s string, banned []string) {
 	}
 }
 
-func assertBodiesMatch(t *testing.T, root string, srcDest map[string]string) {
-	t.Helper()
-	for src, dest := range srcDest {
-		a, _ := os.ReadFile(filepath.Join(root, src))
-		b, err := os.ReadFile(filepath.Join(root, dest))
-		if err != nil {
-			t.Errorf("read projection %s: %v", dest, err)
-			continue
-		}
-		if string(a) != string(b) {
-			t.Errorf("projection %s differs from source %s", dest, src)
-		}
-	}
-}
-
 // TestProject_TypeAware — slice 2: an inferential sensor projects to a
 // subagent file, a playbook projects to a SKILL.md, and a computational guide
 // is NOT shimmed (a hook would carry it instead).
@@ -315,29 +302,15 @@ func TestProject_TypeAware(t *testing.T) {
 
 func TestProject_OverwritesHandEdits(t *testing.T) {
 	root := t.TempDir()
-	src := filepath.Join(root, ".keystone/harness/skills/x/SKILL.md")
-	if err := os.MkdirAll(filepath.Dir(src), 0o755); err != nil {
-		t.Fatal(err)
-	}
-	body := "---\nkind: skill\nid: x\ndescription: x\ntriggers: [x]\n---\nfresh body\n"
-	if err := os.WriteFile(src, []byte(body), 0o644); err != nil {
-		t.Fatal(err)
-	}
-	// Hand-edit the projection target before running Project.
-	dest := filepath.Join(root, ".claude/skills/keystone-x/SKILL.md")
-	if err := os.MkdirAll(filepath.Dir(dest), 0o755); err != nil {
-		t.Fatal(err)
-	}
-	if err := os.WriteFile(dest, []byte("STALE HAND EDIT"), 0o644); err != nil {
-		t.Fatal(err)
-	}
-
+	seedFiles(t, root, map[string]string{
+		".keystone/harness/skills/x/SKILL.md": "---\nkind: skill\nid: x\ndescription: x\ntriggers: [x]\n---\nfresh body\n",
+		".claude/skills/keystone-x/SKILL.md":  "STALE HAND EDIT", // pre-existing hand-edit
+	})
 	primitives, _, _ := Walk(root, ".keystone/harness")
 	if _, err := Project(root, primitives); err != nil {
 		t.Fatalf("Project: %v", err)
 	}
-	got, _ := os.ReadFile(dest)
-	if string(got) != body {
-		t.Errorf("projection not overwritten; got %q", string(got))
-	}
+	got, _ := os.ReadFile(filepath.Join(root, ".claude/skills/keystone-x/SKILL.md"))
+	assertContainsNone(t, string(got), []string{"STALE HAND EDIT"})
+	assertContainsAll(t, string(got), []string{"name: keystone-x", "fresh body"})
 }
