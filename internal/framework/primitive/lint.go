@@ -119,17 +119,36 @@ func Lint(primitives []Primitive) []Finding {
 
 func lintOne(p Primitive, known map[Kind]bool, exists map[string]bool) []Finding {
 	var out []Finding
-
 	add := func(sev FindingSeverity, msg string) {
 		out = append(out, Finding{Severity: sev, Path: p.Path, Kind: p.Kind, ID: p.ID, Message: msg})
 	}
+	lintKindAndMode(p, known, add)
+	lintIDAndDescription(p, add)
+	lintKindFields(p, add)
+	lintTagsAndGlobs(p, add)
+	out = append(out, lintRefs(p, exists)...)
+	return out
+}
 
-	// Identity.
+// lintKindAndMode validates the `kind:` value (closed set; `rule` is rejected
+// with a guide-pointing hint) and the cross-cutting `mode:` value.
+func lintKindAndMode(p Primitive, known map[Kind]bool, add func(FindingSeverity, string)) {
 	if strings.TrimSpace(p.Kind) == "" {
 		add(FindingError, "missing required field `kind`")
+	} else if p.Kind == "rule" {
+		add(FindingError, "rule is not a kind — author a guide (rule is a projection-target name)")
 	} else if !known[Kind(p.Kind)] {
 		add(FindingError, fmt.Sprintf("unknown kind %q (allowed: %s)", p.Kind, knownKindList()))
 	}
+	switch p.Mode {
+	case "", "computational", "inferential":
+	default:
+		add(FindingError, fmt.Sprintf("mode %q invalid (computational | inferential)", p.Mode))
+	}
+}
+
+// lintIDAndDescription validates the two remaining identity fields.
+func lintIDAndDescription(p Primitive, add func(FindingSeverity, string)) {
 	if strings.TrimSpace(p.ID) == "" {
 		add(FindingError, "missing required field `id`")
 	} else if bad := badIDChars(p.ID); bad != "" {
@@ -140,72 +159,172 @@ func lintOne(p Primitive, known map[Kind]bool, exists map[string]bool) []Finding
 	} else if strings.HasPrefix(strings.TrimSpace(p.Description), "TODO") {
 		add(FindingWarning, "description still says TODO — fill it in")
 	}
+}
 
-	// Per-kind required fields.
+// lintKindFields validates the per-kind required fields and contracts.
+func lintKindFields(p Primitive, add func(FindingSeverity, string)) {
 	switch Kind(p.Kind) {
+	case KindGuide:
+		lintGuideKind(p, add)
 	case KindSkill:
 		if len(p.Triggers) == 0 {
 			add(FindingError, "skill missing `triggers:` — a skill with no triggers cannot fire")
 		}
-	case KindSubagent:
+	case KindAgent:
 		if len(p.Tools) == 0 {
-			add(FindingError, "subagent missing `tools:` — declare the tool allow-list explicitly")
+			add(FindingError, "agent missing `tools:` — declare the tool allow-list explicitly")
 		}
-	case KindPersona:
-		if len(p.Tools) == 0 {
-			add(FindingError, "persona missing `tools:` — persona wraps subagent; declare the tool allow-list explicitly")
-		}
+	default:
+		lintActionKinds(p, add)
 	}
+}
 
-	// tags: kebab-case enforcement. Tags are an orthogonal taxonomy
-	// surfaced by `keystone list --tag X` — keeping the shape
-	// predictable makes them grep-friendly and prevents the slow
-	// drift to a free-form catch-all field.
+// lintActionKinds validates the firing kinds (hook/sensor/tool); split from
+// the dispatch switch to keep lintKindFields a flat router.
+func lintActionKinds(p Primitive, add func(FindingSeverity, string)) {
+	switch Kind(p.Kind) {
+	case KindHook:
+		lintActionContract(p, add)
+	case KindSensor:
+		lintSensorContract(p, add)
+	case KindTool:
+		lintToolContract(p, add)
+	}
+}
+
+// lintSensorContract enforces a sensor's mode contract. A computational
+// sensor fires a `run:` check at its gate; an inferential sensor is a review
+// dispatched as an agent and must declare a `returns:` verdict schema (its
+// body is the review prompt — no separate `agent:` needed).
+func lintSensorContract(p Primitive, add func(FindingSeverity, string)) {
+	if p.Mode == "computational" {
+		if strings.TrimSpace(p.Run) == "" {
+			add(FindingError, "computational sensor missing `run:` — the check command to fire at the gate")
+		}
+		return
+	}
+	if strings.TrimSpace(p.Returns) == "" {
+		add(FindingError, "inferential sensor missing `returns:` — declare the structured-result verdict schema")
+	}
+}
+
+// lintGuideKind validates a guide: its `tier:`, plus the computational
+// contract — a computational guide (LSP/formatter) fires a command and needs
+// `run:`; an inferential guide is prose (the rule shim), nothing extra.
+func lintGuideKind(p Primitive, add func(FindingSeverity, string)) {
+	lintGuideTier(p, add)
+	if p.Mode == "computational" && strings.TrimSpace(p.Run) == "" {
+		add(FindingError, "computational guide missing `run:` — the LSP/formatter command to fire")
+	}
+}
+
+// lintGuideTier validates an inferential guide's `tier:` — iron-law |
+// golden-rule | preference (the default; empty = preference).
+func lintGuideTier(p Primitive, add func(FindingSeverity, string)) {
+	switch p.Tier {
+	case "", string(TierIronLaw), string(TierGoldenRule), string(TierPreference):
+	default:
+		add(FindingError, fmt.Sprintf("guide tier %q invalid (iron-law | golden-rule | preference)", p.Tier))
+	}
+}
+
+// lintToolContract enforces a tool's handler + transport. A tool is an
+// author-defined callable: it needs a `run:` handler and a `transport:` of
+// cli | mcp | plugin (empty defaults to cli).
+func lintToolContract(p Primitive, add func(FindingSeverity, string)) {
+	switch p.Transport {
+	case "", "cli", "mcp", "plugin":
+	default:
+		add(FindingError, fmt.Sprintf("tool transport %q invalid (cli | mcp | plugin)", p.Transport))
+	}
+	if strings.TrimSpace(p.Run) == "" {
+		add(FindingError, "tool missing `run:` — the handler the agent invokes")
+	}
+}
+
+// lintTagsAndGlobs enforces kebab-case tags and rejects whitespace-only globs.
+// Tags are an orthogonal taxonomy surfaced by `keystone list --tag X`; keeping
+// the shape predictable keeps them grep-friendly. A `globs: []` empty list is
+// a parse-time error; here we flag entries that are whitespace-only.
+func lintTagsAndGlobs(p Primitive, add func(FindingSeverity, string)) {
 	for _, t := range p.Tags {
 		if !tagPattern.MatchString(t) {
 			add(FindingError, fmt.Sprintf("tag %q is not kebab-case (lowercase letters, digits, hyphens; must start with a letter)", t))
 		}
 	}
-
-	// globs: empty list is a parse-time error (per docs/ports/primitive.md).
-	// We can't detect `globs: []` after decoding (becomes nil-equivalent),
-	// but we can flag entries with whitespace-only patterns.
 	for _, g := range p.Globs {
 		if strings.TrimSpace(g) == "" {
 			add(FindingError, "globs entry is empty — remove or fix")
 		}
 	}
+}
 
-	// deps / traces referential integrity (warnings — cross-policy refs
-	// may resolve only after install).
-	for _, d := range p.Deps {
-		if d == "" {
-			continue
+// lintActionContract enforces the computational/inferential action shape on
+// a sensor or hook. Computational → a `run:` shell command/script.
+// Inferential → an `agent:` to dispatch plus a `returns:` structured-result
+// schema. The two are mutually exclusive. Default mode for both kinds is
+// computational. `add` is the caller's finding accumulator.
+func lintActionContract(p Primitive, add func(FindingSeverity, string)) {
+	if strings.TrimSpace(p.Run) != "" && strings.TrimSpace(p.Agent) != "" {
+		add(FindingError, "`run:` and `agent:` are mutually exclusive — a sensor/hook is computational (run) or inferential (agent), not both")
+	}
+	if p.Mode == "inferential" {
+		if strings.TrimSpace(p.Agent) == "" {
+			add(FindingError, "inferential sensor/hook missing `agent:` — name the agent to dispatch")
 		}
-		if !strings.Contains(d, "/") {
-			add(FindingWarning, fmt.Sprintf("deps entry %q lacks <kind>/<id> form", d))
-			continue
+		if strings.TrimSpace(p.Returns) == "" {
+			add(FindingError, "inferential sensor/hook missing `returns:` — declare the structured-result schema")
 		}
-		if !exists[d] {
-			add(FindingWarning, fmt.Sprintf("deps entry %q does not resolve", d))
+		return
+	}
+	if strings.TrimSpace(p.Run) == "" {
+		add(FindingError, "computational sensor/hook missing `run:` — the shell command/script to execute")
+	}
+}
+
+// lintRefs validates a primitive's association fields — the frontmatter
+// links that wire concepts together. Dangling targets are warnings:
+// cross-policy refs may resolve only after install. Split out of lintOne
+// to keep each function's complexity in check.
+func lintRefs(p Primitive, exists map[string]bool) []Finding {
+	// Each association field resolves a ref against a set of candidate
+	// key-prefixes ("" = the raw ref). corpus defaults to the corpus/
+	// kind; produces/consumes target documents; supersedes targets a
+	// same-kind id. Data-driven so the function stays flat.
+	checks := []struct {
+		field    string
+		refs     []string
+		prefixes []string
+	}{
+		{"corpus", p.Corpus, []string{"", "corpus/"}},
+		{"produces", p.Produces, []string{"document/", ""}},
+		{"consumes", p.Consumes, []string{"document/", ""}},
+		{"supersedes", p.Supersedes, []string{p.Kind + "/", ""}},
+	}
+	var out []Finding
+	for _, c := range checks {
+		for _, ref := range c.refs {
+			if ref == "" || refResolves(exists, ref, c.prefixes) {
+				continue
+			}
+			out = append(out, Finding{
+				Severity: FindingWarning, Path: p.Path, Kind: p.Kind, ID: p.ID,
+				Message: fmt.Sprintf("%s entry %q does not resolve", c.field, ref),
+			})
 		}
 	}
-	for _, t := range p.Traces {
-		if t == "" {
-			continue
-		}
-		// traces are corpus refs; default kind is "corpus" if unqualified.
-		key := t
-		if !strings.Contains(t, "/") {
-			key = "corpus/" + t
-		}
-		// Try both raw form and corpus-prefixed form.
-		if !exists[key] && !exists["corpus/"+t] {
-			add(FindingWarning, fmt.Sprintf("traces entry %q does not resolve", t))
-		}
-	}
-
 	return out
+}
+
+// refResolves reports whether ref exists under any of the candidate
+// prefixes (prefix+ref) in the (kind/id) set.
+func refResolves(exists map[string]bool, ref string, prefixes []string) bool {
+	for _, pre := range prefixes {
+		if exists[pre+ref] {
+			return true
+		}
+	}
+	return false
 }
 
 func knownKindList() string {

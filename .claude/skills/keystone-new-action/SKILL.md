@@ -1,24 +1,13 @@
 ---
-kind: skill
-id: keystone:new-action
+name: keystone-new-action
 description: Scaffold a new lifecycle action (atomic unit of work) at the canonical path.
-triggers:
-  - keystone new action
-  - keystone:new-action
-  - /keystone:new-action
-  - add a new action
-  - scaffold a lifecycle action
-model: sonnet
 tools:
   - Read
   - Write
   - Edit
   - Glob
   - Bash
-includes:
-  - scaffolds-primitive
-tags:
-  - scaffold
+model: sonnet
 ---
 
 # keystone:new-action — scaffold an action

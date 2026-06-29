@@ -25,10 +25,8 @@ func runInit(args []string, assets fs.FS) error {
 	if err != nil {
 		return fmt.Errorf("resolve dir: %w", err)
 	}
-	if info, err := os.Stat(absDir); err != nil {
-		return fmt.Errorf("dir %s: %w", absDir, err)
-	} else if !info.IsDir() {
-		return fmt.Errorf("dir %s is not a directory", absDir)
+	if err := ensureProjectDir(absDir); err != nil {
+		return err
 	}
 
 	if err := resolveAgent(flags, absDir); err != nil {
@@ -280,6 +278,22 @@ func installAgentTarget(assets fs.FS, agent, destDir string) error {
 // resolveAgent fills flags.selections["agent"] when it is not already set,
 // using existing marker-file detection. It does NOT prompt — that is left
 // to promptMissing, which runs after this step.
+// ensureProjectDir creates the target directory if absent (init scaffolds
+// into a fresh dir the same as an existing one) and rejects a non-dir path.
+func ensureProjectDir(absDir string) error {
+	info, err := os.Stat(absDir)
+	if os.IsNotExist(err) {
+		return os.MkdirAll(absDir, 0o755)
+	}
+	if err != nil {
+		return fmt.Errorf("dir %s: %w", absDir, err)
+	}
+	if !info.IsDir() {
+		return fmt.Errorf("dir %s is not a directory", absDir)
+	}
+	return nil
+}
+
 func resolveAgent(flags *initFlags, dir string) error {
 	if _, set := flags.selections["agent"]; set {
 		return nil

@@ -35,32 +35,28 @@ const Version = "2.0.0"
 // detailed contracts live in `docs/ports/primitive.md`.
 const instructions = `keystone MCP — the harness, served.
 
-The harness lives at .keystone/harness/ and is indexed at
-.keystone/INDEX.json. Both this server and the keystone CLI read the
-same files; they never disagree.
+The harness lives at .harness/ and is indexed at .harness/INDEX.json.
+Both this server and the keystone CLI read the same files; they never
+disagree.
 
 ## Runtime resolution flow
 
 When a scenario arises, work the harness in stages. Only escalate when
 the previous stage doesn't carry enough information:
 
-  1. RULES.   Call keystone_list_primitives kind=guide (and kind=sensor)
-              to find applicable rules for the touched files / phase.
+  1. RULES.   Call keystone_list_primitives kind=guide to find the
+              applicable directives for the touched files / phase.
               Cascade: project wins by default; policies refine via
               nesting in keystone.json; strict items lock absolutely.
-  2. CORPUS.  If a rule's body is too terse, call keystone_get_corpus
-              id=<rule-id> to open the linked reasoning. Corpus is
-              opt-in — never auto-loaded.
-  3. EXTERNAL. If corpus is still insufficient, call
-              keystone_source_query source=<name> query=<...> to reach
-              configured external sources (Linear, Confluence, folders,
-              URLs). Configured in .keystone/context.json.
-  4. APPLY.   NEVER apply an external-source result silently. Surface
-              it to the user and ask: "apply this? at what level —
-              project, team policy, org policy?"
-  5. CONFLICTS. Any contradiction between rules, corpus, and external
-              answers triggers a question to the user. The server
-              returns data; the agent reasons about contradictions.
+  2. CORPUS.  If a guide's body is too terse, call keystone_get_corpus
+              id=<guide-id> to open the linked reasoning (its corpus:
+              field). Corpus is opt-in — never auto-loaded.
+  3. CONFLICTS. Any contradiction between rules and corpus triggers a
+              question to the user. The server returns data; the agent
+              reasons about contradictions.
+
+(External-system access is a tool — author a kind: tool with
+transport: cli | mcp — not a server-side resolution stage.)
 
 ## Read tools
 
@@ -68,41 +64,34 @@ the previous stage doesn't carry enough information:
       Filter the index. Returns descriptors only.
   keystone_get_primitive kind=<k> id=<i>
       Returns one primitive's full body.
-  keystone_get_corpus id=<rule-id>
-      Follow a rule's traces: field; return the linked corpus body.
-      Use this when a rule's body is not enough to act.
+  keystone_get_corpus id=<guide-id>
+      Follow a guide's corpus: field; return the linked corpus body.
+      Use this when a guide's body is not enough to act.
 
 ## Write tools (each shells out to the keystone binary)
 
   keystone_new_<kind>          Scaffold a new primitive.
-                               <kind> ∈ {guide, corpus, sensor, action,
-                                         playbook, rule, skill, subagent,
-                                         command, adapter, policy}.
+                               <kind> ∈ {guide, sensor, hook, agent,
+                                         command, skill, playbook, pattern,
+                                         posture, tool, corpus, document,
+                                         adapter, policy}.
   keystone_harness_bootstrap   Scaffold the harness (init equivalent).
   keystone_target_add          Add another agent target.
-  keystone_index_refresh       Rebuild .keystone/INDEX.json.
+  keystone_index_refresh       Rebuild .harness/INDEX.json.
   keystone_project_refresh     Regenerate .claude/ host projections.
-
-## External-source tools
-
-  keystone_source_list                       Names + healths of configured sources.
-  keystone_source_query   source=<n> query=<q>   Adapter-routed query.
-  keystone_source_health  source=<n>             Reachability + auth state.
 
 ## Resources
 
   keystone://index                     — the full INDEX.json
   keystone://primitive/{kind}/{id}     — one primitive body
   keystone://harness/status            — install audit (layout + counts)
-  keystone://source/list               — all configured external sources
-  keystone://source/{name}/health      — adapter reachability
 
 Activate by reading the index first, then opening primitive bodies on
-demand. Never read every guide/action/sensor file blindly — let the
+demand. Never read every guide/sensor/command file blindly — let the
 agent's matching machinery (globs, triggers, phase) decide what fires.
 
 After any write tool, call keystone_index_refresh so INDEX.json stays
-current. If the change touched skill/subagent/command, also call
+current. If the change touched skill/agent/command/playbook, also call
 keystone_project_refresh so .claude/ host projections regenerate.
 `
 
@@ -110,7 +99,7 @@ keystone_project_refresh so .claude/ host projections regenerate.
 // else is derived from the harness on disk.
 type Options struct {
 	// ProjectDir is the consumer project root (the dir holding
-	// keystone.json + .keystone/). Defaults to cwd at server start.
+	// keystone.json + .harness/). Defaults to cwd at server start.
 	ProjectDir string
 }
 
@@ -139,13 +128,12 @@ func New(opts Options) (*server.MCPServer, error) {
 
 	registerTools(s, abs)
 	registerWriteTools(s, abs)
-	registerSourceTools(s, abs)
 	registerResources(s, abs)
-	registerSourceResources(s, abs)
 	registerSkillResources(s, abs)
 	registerPrompts(s, abs)
 	registerEvalTools(s, abs)
 	registerSearchTool(s, abs)
+	registerToolPrimitives(s, abs)
 
 	return s, nil
 }
@@ -167,7 +155,7 @@ func registerTools(s *server.MCPServer, projectDir string) {
 		mcp.NewTool("keystone_list_primitives",
 			mcp.WithDescription("List harness primitives, optionally filtered by kind, glob, or tag(s). Returns descriptors only — open bodies via keystone_get_primitive. The returned descriptors reflect the COMPOSED view (concern `includes:` already merged into list fields)."),
 			mcp.WithString("kind",
-				mcp.Description("Filter by kind (guide, corpus, sensor, action, playbook, persona, concern, rule, skill, subagent, command, eval, source). Omit for all."),
+				mcp.Description("Filter by kind (guide, sensor, hook, agent, command, skill, playbook, pattern, corpus, document, concern, posture, tool, eval). Omit for all."),
 			),
 			mcp.WithString("glob",
 				mcp.Description("Filter primitives that declare this glob pattern in their `globs:` frontmatter. Exact-string match on the pattern."),
@@ -234,7 +222,7 @@ func registerTools(s *server.MCPServer, projectDir string) {
 			if err != nil {
 				return mcp.NewToolResultError(err.Error()), nil
 			}
-			if len(source.Traces) == 0 {
+			if len(source.Corpus) == 0 {
 				body, _ := json.MarshalIndent(map[string]any{
 					"source_kind":  source.Kind,
 					"source_id":    source.ID,
@@ -246,7 +234,7 @@ func registerTools(s *server.MCPServer, projectDir string) {
 			}
 
 			corpus := []map[string]any{}
-			for _, ref := range source.Traces {
+			for _, ref := range source.Corpus {
 				cKind, cID := parseTraceRef(ref)
 				p, body, err := loadPrimitiveBody(projectDir, cKind, cID)
 				if err != nil {
@@ -268,7 +256,7 @@ func registerTools(s *server.MCPServer, projectDir string) {
 			out, _ := json.MarshalIndent(map[string]any{
 				"source_kind": source.Kind,
 				"source_id":   source.ID,
-				"traces":      source.Traces,
+				"traces":      source.Corpus,
 				"corpus":      corpus,
 			}, "", "  ")
 			return mcp.NewToolResultText(string(out)), nil
@@ -280,7 +268,7 @@ func registerTools(s *server.MCPServer, projectDir string) {
 			mcp.WithDescription("Return the full body of a single primitive given its kind and id. The body includes the frontmatter and the markdown that follows."),
 			mcp.WithString("kind",
 				mcp.Required(),
-				mcp.Description("Primitive kind (guide, corpus, sensor, action, playbook, rule, skill, subagent, command)."),
+				mcp.Description("Primitive kind (guide, sensor, hook, agent, command, skill, playbook, pattern, corpus, document, concern, posture, tool, eval)."),
 			),
 			mcp.WithString("id",
 				mcp.Required(),
@@ -316,7 +304,7 @@ func registerTools(s *server.MCPServer, projectDir string) {
 			mcp.WithDescription("Return one primitive's descriptor PLUS forward + reverse cross-references in a single call. Surfaces: the composed view of the target (tags / tools / globs / host_triggers after `includes:` resolution), `included_by` (when target is a concern), `traces` (forward) and `traced_by` (reverse) for guide↔corpus pairs, severity / model / phase / provenance. Use this when you need to understand a primitive's neighborhood in one shot — saves N follow-up keystone_get_primitive calls."),
 			mcp.WithString("kind",
 				mcp.Required(),
-				mcp.Description("Primitive kind (guide, sensor, persona, playbook, concern, action, corpus, etc.)."),
+				mcp.Description("Primitive kind (guide, sensor, agent, playbook, concern, command, corpus, etc.)."),
 			),
 			mcp.WithString("id",
 				mcp.Required(),
@@ -422,7 +410,7 @@ func buildShowView(primitives []primitive.Primitive, kind, id string) (showView,
 		Globs:        target.Globs,
 		Triggers:     target.Triggers,
 		Includes:     target.Includes,
-		Traces:       target.Traces,
+		Traces:       target.Corpus,
 		HostTriggers: target.HostTriggers,
 	}
 	// Reverse-lookup: who includes this primitive (only meaningful
@@ -438,7 +426,7 @@ func buildShowView(primitives []primitive.Primitive, kind, id string) (showView,
 	sort.Strings(v.IncludedBy)
 	// Reverse-lookup: who traces to this primitive (guide → corpus).
 	for _, p := range primitives {
-		for _, tr := range p.Traces {
+		for _, tr := range p.Corpus {
 			if tr == target.ID {
 				v.TracedBy = append(v.TracedBy, p.Kind+"/"+p.ID)
 			}

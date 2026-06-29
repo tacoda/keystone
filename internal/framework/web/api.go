@@ -1,14 +1,11 @@
 package web
 
 import (
-	"context"
 	"encoding/json"
 	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
-
-	"github.com/tacoda/keystone/internal/framework/mcp"
 )
 
 // writeJSON serializes v as indented JSON and writes it with
@@ -104,43 +101,6 @@ func (s *server) apiPrimitiveDetail(w http.ResponseWriter, r *http.Request) {
 	writeError(w, http.StatusNotFound, "no primitive with kind="+kind+" id="+id)
 }
 
-// -- /api/sources ------------------------------------------------------
-
-func (s *server) apiSources(w http.ResponseWriter, r *http.Request) {
-	entries, err := s.sourceList(r.Context())
-	if err != nil {
-		writeError(w, http.StatusInternalServerError, err.Error())
-		return
-	}
-	writeJSON(w, http.StatusOK, map[string]any{
-		"count":   len(entries),
-		"sources": entries,
-	})
-}
-
-// /api/sources/{name}/health
-func (s *server) apiSourceDetail(w http.ResponseWriter, r *http.Request) {
-	rest := strings.TrimPrefix(r.URL.Path, "/api/sources/")
-	rest = strings.TrimSuffix(rest, "/health")
-	rest = strings.TrimSuffix(rest, "/")
-	if rest == "" {
-		writeError(w, http.StatusBadRequest, "URL must be /api/sources/<name>/health")
-		return
-	}
-	entries, err := s.sourceList(r.Context())
-	if err != nil {
-		writeError(w, http.StatusInternalServerError, err.Error())
-		return
-	}
-	for _, e := range entries {
-		if e.Name == rest {
-			writeJSON(w, http.StatusOK, e)
-			return
-		}
-	}
-	writeError(w, http.StatusNotFound, "no source named "+rest)
-}
-
 // -- /api/harness/status -----------------------------------------------
 
 func (s *server) apiHarnessStatus(w http.ResponseWriter, r *http.Request) {
@@ -172,19 +132,3 @@ func splitPrimitivePath(urlPath, prefix string) (kind, id string) {
 	return rest[:slash], rest[slash+1:]
 }
 
-// sourceEntry is the small shape the API + dashboard share for a
-// single external source.
-type sourceEntry struct {
-	Name   string     `json:"name"`
-	Type   string     `json:"type"`
-	Health mcp.Health `json:"health"`
-}
-
-// sourceList returns the most recent snapshot of configured sources
-// + their probed health from the server's healthCache. The cache is
-// refreshed in the background by a 30s ticker and on demand after
-// source-mutating actions — no handler should ever block on a
-// network probe.
-func (s *server) sourceList(ctx context.Context) ([]sourceEntry, error) {
-	return s.healthCache.get()
-}

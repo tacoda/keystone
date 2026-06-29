@@ -84,11 +84,11 @@ adapters/<agent>/      # per-agent bindings (optional)
 Edit this README to describe what the policy ships and how consumers
 should use it. Then commit, tag a version, and publish.
 `, name, name, name),
-		"guides/.gitkeep":   "",
+		"rules/.gitkeep":    "",
 		"corpus/.gitkeep":   "",
-		"sensors/.gitkeep":  "",
-		"actions/.gitkeep":  "",
-		"playbooks/.gitkeep": "",
+		"hooks/.gitkeep":    "",
+		"commands/.gitkeep": "",
+		"skills/.gitkeep":   "",
 	}
 
 	for rel, body := range files {
@@ -98,6 +98,6 @@ should use it. Then commit, tag a version, and publish.
 		}
 	}
 
-	fmt.Fprintf(os.Stdout, "\n▶ Next: `cd %s`, edit the README + keystone-policy.json, drop content into guides/corpus/sensors/..., then `git init && git tag v0.1.0` and publish.\n", name)
+	fmt.Fprintf(os.Stdout, "\n▶ Next: `cd %s`, edit the README + keystone-policy.json, drop content into rules/corpus/hooks/..., then `git init && git tag v0.1.0` and publish.\n", name)
 	return nil
 }

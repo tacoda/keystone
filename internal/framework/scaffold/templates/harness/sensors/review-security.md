@@ -1,5 +1,7 @@
 ---
 kind: sensor
+mode: inferential
+returns: review-findings
 id: review-security
 description: 'An agent reads the diff and reports security concerns — injection, auth, secrets, unsafe deserialization, weak crypto, missing authorizat...'
 ---

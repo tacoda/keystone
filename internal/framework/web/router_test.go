@@ -55,8 +55,6 @@ func TestRouter_NewSectionURLs(t *testing.T) {
 		"/harness/policies",
 		"/harness/investigator",
 		"/harness/graph",
-		"/sources",
-		"/sources/new",
 		"/flywheels",
 		"/flywheels/inbox",
 		"/flywheels/prune",
@@ -99,7 +97,7 @@ func TestRouter_OldURLsRetired(t *testing.T) {
 // 200 and returns an HTML fragment (no full document).
 func TestRouter_KPIWidgets(t *testing.T) {
 	_, h := newTestRouter(t)
-	for _, name := range []string{"primitives", "sources", "inbox", "lint", "index"} {
+	for _, name := range []string{"primitives", "inbox", "lint", "index"} {
 		rr := httptest.NewRecorder()
 		req := httptest.NewRequest(http.MethodGet, "/web/widgets/kpi/"+name, nil)
 		h.ServeHTTP(rr, req)

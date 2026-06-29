@@ -32,32 +32,32 @@ func scanRoots(harnessRoot string) []scanRoot {
 		}
 		return strings.HasSuffix(rel, ".md")
 	}
-	skillFile := func(rel string) bool {
-		// Skills live at <harness-root>/skills/<id>/SKILL.md
-		return filepath.Base(rel) == "SKILL.md"
+	// Skills live at <harness-root>/skills/<id>/SKILL.md; evals at
+	// <harness-root>/evals/<id>/EVAL.md. Everything else is a flat .md.
+	matchFor := func(dir string) func(string) bool {
+		switch dir {
+		case "skills":
+			return func(rel string) bool { return filepath.Base(rel) == "SKILL.md" }
+		case "evals":
+			return func(rel string) bool { return filepath.Base(rel) == "EVAL.md" }
+		default:
+			return md
+		}
 	}
-	evalFile := func(rel string) bool {
-		// Evals live at <harness-root>/evals/<id>/EVAL.md
-		return filepath.Base(rel) == "EVAL.md"
+	// Derive the scan set from canonicalDirKind so the walker and the
+	// kind taxonomy can never drift (the bug that hid hooks/patterns/
+	// posture/tools/documents from the index). Sorted for deterministic
+	// walk order.
+	dirs := make([]string, 0, len(canonicalDirKind))
+	for dir := range canonicalDirKind {
+		dirs = append(dirs, dir)
 	}
-	return []scanRoot{
-		// Framework abstractions.
-		{filepath.Join(harnessRoot, "guides"), md},
-		{filepath.Join(harnessRoot, "corpus"), md},
-		{filepath.Join(harnessRoot, "sensors"), md},
-		{filepath.Join(harnessRoot, "actions"), md},
-		{filepath.Join(harnessRoot, "playbooks"), md},
-		{filepath.Join(harnessRoot, "evals"), evalFile},
-		{filepath.Join(harnessRoot, "sources"), md},
-		// Composition primitive — reusable mixin fragments.
-		{filepath.Join(harnessRoot, "concerns"), md},
-		// Agent abstractions.
-		{filepath.Join(harnessRoot, "rules"), md},
-		{filepath.Join(harnessRoot, "skills"), skillFile},
-		{filepath.Join(harnessRoot, "agents"), md},
-		{filepath.Join(harnessRoot, "commands"), md},
-		{filepath.Join(harnessRoot, "personas"), md},
+	sort.Strings(dirs)
+	roots := make([]scanRoot, 0, len(dirs))
+	for _, dir := range dirs {
+		roots = append(roots, scanRoot{filepath.Join(harnessRoot, dir), matchFor(dir)})
 	}
+	return roots
 }
 
 // Walk scans every configured root under projectDir, parses each
@@ -85,6 +85,9 @@ func Walk(projectDir, harnessRoot string) (primitives []Primitive, warnings []Wa
 				return walkErr
 			}
 			if d.IsDir() {
+				if isWorkspaceDir(abs, path) {
+					return fs.SkipDir
+				}
 				return nil
 			}
 			rel, relErr := filepath.Rel(abs, path)
@@ -111,6 +114,12 @@ func Walk(projectDir, harnessRoot string) (primitives []Primitive, warnings []Wa
 				return nil
 			}
 			relPath := filepath.ToSlash(relProject(projectDir, path))
+			// Convention over configuration: an omitted `kind:` is
+			// inferred from the canonical directory. Explicit `kind:`
+			// wins (escape hatch).
+			// Convention over configuration: an omitted kind is inferred
+			// from the canonical directory; an explicit kind wins.
+			fm.Kind = resolveKind(fm.Kind, relPath)
 			primitives = append(primitives, Primitive{
 				Frontmatter: fm,
 				Path:        relPath,
@@ -129,6 +138,15 @@ func Walk(projectDir, harnessRoot string) (primitives []Primitive, warnings []Wa
 		return primitives[i].ID < primitives[j].ID
 	})
 	return primitives, warnings, nil
+}
+
+// isWorkspaceDir reports whether path is the top-level `work/` directory
+// under the scan root. The document workspace holds filled document
+// *instances* (gate state), not primitive templates, so the walker skips
+// it — instances are tracked by `keystone document`, not the index.
+func isWorkspaceDir(scanRootAbs, path string) bool {
+	r, err := filepath.Rel(scanRootAbs, path)
+	return err == nil && filepath.ToSlash(r) == "work"
 }
 
 // Warning is a non-fatal indexer finding — e.g. malformed frontmatter

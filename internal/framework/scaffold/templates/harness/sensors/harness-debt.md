@@ -1,5 +1,7 @@
 ---
 kind: sensor
+mode: inferential
+returns: review-findings
 id: harness-debt
 description: 'Surfaces debt in the harness itself — content that exists but isn''t earning its keep.'
 ---

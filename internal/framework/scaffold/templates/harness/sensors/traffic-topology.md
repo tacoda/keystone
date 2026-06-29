@@ -1,5 +1,7 @@
 ---
 kind: sensor
+mode: inferential
+returns: review-findings
 id: traffic-topology
 description: 'Combines git churn + recency + business criticality into a map of where attention concentrates.'
 ---

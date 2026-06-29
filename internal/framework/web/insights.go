@@ -97,19 +97,6 @@ func (s *server) collectInsights(primitives []primitive.Primitive) []Insight {
 		}
 	}
 
-	// 4. No sources configured → low (informational).
-	if cfg, _ := readContextDoc(s.projectDir); cfg != nil {
-		if arr, _ := cfg["sources"].([]any); len(arr) == 0 {
-			out = append(out, Insight{
-				ID: "sources.none", Severity: "low",
-				Title:      "no external sources configured",
-				Detail:     "Stage 3 of the resolution flow is unavailable. Configure folder / url adapters in .keystone/context.json when in-harness rules + corpus aren't enough.",
-				Action:     "/sources/new",
-				ActionLink: "/sources/new",
-			})
-		}
-	}
-
 	// 5. Corpus without a referencing guide → low.
 	orphans := orphanCorpus(primitives)
 	if len(orphans) > 0 {
@@ -202,7 +189,7 @@ func inboxStats(projectDir string) (oldest time.Duration, count int) {
 func orphanCorpus(primitives []primitive.Primitive) []string {
 	referenced := map[string]bool{}
 	for _, p := range primitives {
-		for _, t := range p.Traces {
+		for _, t := range p.Corpus {
 			referenced[t] = true
 			if !strings.HasPrefix(t, "corpus/") {
 				referenced["corpus/"+t] = true

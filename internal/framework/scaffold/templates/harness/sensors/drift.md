@@ -1,5 +1,7 @@
 ---
 kind: sensor
+mode: inferential
+returns: review-findings
 id: drift
 description: 'Compares the diff (or full codebase, during audit) against loaded guide rules.'
 ---

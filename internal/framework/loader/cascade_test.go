@@ -22,7 +22,7 @@ func writeFile(t *testing.T, dir, rel string) {
 
 func TestVerify_CleanCascade(t *testing.T) {
 	dir := t.TempDir()
-	writeFile(t, dir, ".keystone/harness/guides/spec.md") // project file, unrelated
+	writeFile(t, dir, ".harness/guides/spec.md") // project file, unrelated
 
 	cfg := &config.ProjectConfig{
 		Version:     config.SchemaVersion,
@@ -46,7 +46,7 @@ func TestVerify_CleanCascade(t *testing.T) {
 
 func TestVerify_ProjectShadowsStrict(t *testing.T) {
 	dir := t.TempDir()
-	writeFile(t, dir, ".keystone/harness/guides/data-handling.md") // project shadow
+	writeFile(t, dir, ".harness/guides/data-handling.md") // project shadow
 
 	cfg := &config.ProjectConfig{
 		Version:     config.SchemaVersion,
@@ -76,14 +76,14 @@ func TestVerify_ProjectShadowsStrict(t *testing.T) {
 	if v.PathContext != "acme" {
 		t.Errorf("PathContext = %q, want %q", v.PathContext, "acme")
 	}
-	if len(v.ShadowPaths) != 1 || v.ShadowPaths[0] != ".keystone/harness/guides/data-handling.md" {
+	if len(v.ShadowPaths) != 1 || v.ShadowPaths[0] != ".harness/guides/data-handling.md" {
 		t.Errorf("unexpected shadow paths: %+v", v.ShadowPaths)
 	}
 }
 
 func TestVerify_NestedPolicyPathContext(t *testing.T) {
 	dir := t.TempDir()
-	writeFile(t, dir, ".keystone/harness/sensors/rubocop.md")
+	writeFile(t, dir, ".harness/sensors/rubocop.md")
 
 	cfg := &config.ProjectConfig{
 		Version:     config.SchemaVersion,
@@ -119,7 +119,7 @@ func TestVerify_NestedPolicyPathContext(t *testing.T) {
 func TestVerify_DepthGate_NestedPolicyCannotShipSensors(t *testing.T) {
 	dir := t.TempDir()
 	// Vendored sensor file shipped by the nested policy.
-	writeFile(t, dir, ".keystone/harness/policies/acme-platform/sensors/rubocop.md")
+	writeFile(t, dir, ".harness/policies/acme-platform/sensors/rubocop.md")
 
 	cfg := &config.ProjectConfig{
 		Version:     config.SchemaVersion,
@@ -140,7 +140,7 @@ func TestVerify_DepthGate_NestedPolicyCannotShipSensors(t *testing.T) {
 		},
 	}
 	expected := map[string]map[string]string{
-		"acme-platform": {".keystone/harness/policies/acme-platform/sensors/rubocop.md": "sha256:deadbeef"},
+		"acme-platform": {".harness/policies/acme-platform/sensors/rubocop.md": "sha256:deadbeef"},
 	}
 	res, err := Verify(dir, cfg, expected)
 	if err != nil {
@@ -165,14 +165,14 @@ func TestVerify_DepthGate_NestedPolicyCannotShipSensors(t *testing.T) {
 	if len(dv.StrictSensors) != 1 || dv.StrictSensors[0] != "rubocop" {
 		t.Errorf("StrictSensors = %v, want [rubocop]", dv.StrictSensors)
 	}
-	if len(dv.VendoredSensors) != 1 || dv.VendoredSensors[0] != ".keystone/harness/policies/acme-platform/sensors/rubocop.md" {
+	if len(dv.VendoredSensors) != 1 || dv.VendoredSensors[0] != ".harness/policies/acme-platform/sensors/rubocop.md" {
 		t.Errorf("VendoredSensors = %v, want [harness/policies/acme-platform/sensors/rubocop.md]", dv.VendoredSensors)
 	}
 }
 
 func TestVerify_DepthGate_TopLevelPolicyMayShipSensors(t *testing.T) {
 	dir := t.TempDir()
-	writeFile(t, dir, ".keystone/harness/policies/acme-org/sensors/rubocop.md")
+	writeFile(t, dir, ".harness/policies/acme-org/sensors/rubocop.md")
 
 	cfg := &config.ProjectConfig{
 		Version: config.SchemaVersion,
@@ -186,7 +186,7 @@ func TestVerify_DepthGate_TopLevelPolicyMayShipSensors(t *testing.T) {
 		},
 	}
 	expected := map[string]map[string]string{
-		"acme-org": {".keystone/harness/policies/acme-org/sensors/rubocop.md": "sha256:deadbeef"},
+		"acme-org": {".harness/policies/acme-org/sensors/rubocop.md": "sha256:deadbeef"},
 	}
 	res, err := Verify(dir, cfg, expected)
 	if err != nil {
@@ -200,15 +200,15 @@ func TestVerify_DepthGate_TopLevelPolicyMayShipSensors(t *testing.T) {
 func TestVerify_RequiredGap_ProjectSatisfies(t *testing.T) {
 	dir := t.TempDir()
 	// Project ships actions/release-notes.md → satisfies tacoda-org's required claim.
-	writeFile(t, dir, ".keystone/harness/actions/release-notes.md")
+	writeFile(t, dir, ".harness/actions/release-notes.md")
 	// Drop a minimal manifest for the installed policy that declares the required item.
-	writeFile(t, dir, ".keystone/harness/policies/tacoda-org/dummy.md") // ensure dir exists
+	writeFile(t, dir, ".harness/policies/tacoda-org/dummy.md") // ensure dir exists
 	manifest := `{
   "name": "tacoda-org",
   "version": "1.0.0",
   "required": {"actions": ["release-notes"]}
 }`
-	if err := os.WriteFile(filepath.Join(dir, ".keystone/harness/policies/tacoda-org/keystone-policy.json"), []byte(manifest), 0o644); err != nil {
+	if err := os.WriteFile(filepath.Join(dir, ".harness/policies/tacoda-org/keystone-policy.json"), []byte(manifest), 0o644); err != nil {
 		t.Fatalf("write manifest: %v", err)
 	}
 
@@ -229,13 +229,13 @@ func TestVerify_RequiredGap_ProjectSatisfies(t *testing.T) {
 
 func TestVerify_RequiredGap_Missing(t *testing.T) {
 	dir := t.TempDir()
-	writeFile(t, dir, ".keystone/harness/policies/tacoda-org/dummy.md")
+	writeFile(t, dir, ".harness/policies/tacoda-org/dummy.md")
 	manifest := `{
   "name": "tacoda-org",
   "version": "1.0.0",
   "required": {"actions": ["release-notes"]}
 }`
-	if err := os.WriteFile(filepath.Join(dir, ".keystone/harness/policies/tacoda-org/keystone-policy.json"), []byte(manifest), 0o644); err != nil {
+	if err := os.WriteFile(filepath.Join(dir, ".harness/policies/tacoda-org/keystone-policy.json"), []byte(manifest), 0o644); err != nil {
 		t.Fatalf("write manifest: %v", err)
 	}
 
@@ -267,14 +267,14 @@ func TestVerify_RequiredGap_Missing(t *testing.T) {
 func TestVerify_RequiredGap_OuterPolicySatisfies(t *testing.T) {
 	dir := t.TempDir()
 	// Outer policy ships the required item; inner declares it as required.
-	writeFile(t, dir, ".keystone/harness/policies/outer/actions/release-notes.md")
-	writeFile(t, dir, ".keystone/harness/policies/inner/dummy.md")
+	writeFile(t, dir, ".harness/policies/outer/actions/release-notes.md")
+	writeFile(t, dir, ".harness/policies/inner/dummy.md")
 	innerManifest := `{
   "name": "inner",
   "version": "1.0.0",
   "required": {"actions": ["release-notes"]}
 }`
-	if err := os.WriteFile(filepath.Join(dir, ".keystone/harness/policies/inner/keystone-policy.json"), []byte(innerManifest), 0o644); err != nil {
+	if err := os.WriteFile(filepath.Join(dir, ".harness/policies/inner/keystone-policy.json"), []byte(innerManifest), 0o644); err != nil {
 		t.Fatalf("write manifest: %v", err)
 	}
 

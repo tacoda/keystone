@@ -51,7 +51,7 @@ func buildEdges(primitives []Primitive) ([]Primitive, []graphEdge) {
 		for _, d := range p.Deps {
 			edges = append(edges, graphEdge{from: src, to: d, via: "deps"})
 		}
-		for _, t := range p.Traces {
+		for _, t := range p.Corpus {
 			target := t
 			if !strings.Contains(t, "/") {
 				target = "corpus/" + t

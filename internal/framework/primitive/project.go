@@ -3,7 +3,6 @@ package primitive
 import (
 	"bufio"
 	"fmt"
-	"io"
 	"os"
 	"path/filepath"
 	"strings"
@@ -73,7 +72,7 @@ func Project(projectDir string, primitives []Primitive) ([]ProjectionResult, err
 		if Kind(p.Kind) == KindGuide {
 			writeErr = writeRuleShim(src, dest, p)
 		} else {
-			writeErr = copyOne(src, dest)
+			writeErr = writeLowered(src, dest, p)
 		}
 		if writeErr != nil {
 			return results, fmt.Errorf("project %s/%s: %w", p.Kind, p.ID, writeErr)
@@ -95,75 +94,144 @@ func Project(projectDir string, primitives []Primitive) ([]ProjectionResult, err
 // guides are global-process content with no path-triggered ambient
 // channel.
 func ProjectionRelPath(p Primitive) string {
-	diskID := strings.ReplaceAll(p.ID, ":", "-")
+	name := projectedDiskName(p.ID)
 	switch Kind(p.Kind) {
-	// Agent escape hatches.
-	case KindSkill:
-		return filepath.Join(".claude", "skills", diskID, "SKILL.md")
-	case KindSubagent:
-		return filepath.Join(".claude", "agents", diskID+".md")
+	// A playbook is a composed orchestrator — it projects to a SKILL.md
+	// like a skill.
+	case KindSkill, KindPlaybook:
+		return filepath.Join(".claude", "skills", name, "SKILL.md")
+	case KindAgent:
+		return filepath.Join(".claude", "agents", name+".md")
 	case KindCommand:
-		return filepath.Join(".claude", "commands", diskID+".md")
-	// Framework wrappers (project to the same host paths as their
-	// agent counterparts; collisions on same id are a lint error).
-	case KindPlaybook:
-		return filepath.Join(".claude", "skills", diskID, "SKILL.md")
-	case KindPersona:
-		return filepath.Join(".claude", "agents", diskID+".md")
-	case KindAction:
-		return filepath.Join(".claude", "commands", diskID+".md")
-	// Idiom guides → ambient rule shims for path-triggered auto-load.
+		return filepath.Join(".claude", "commands", name+".md")
 	case KindGuide:
-		if len(p.Globs) == 0 {
-			return ""
-		}
-		return filepath.Join(".claude", "rules", ruleShimDiskID(p.ID)+".md")
+		return guideProjection(p)
+	case KindSensor:
+		return sensorProjection(p, name)
 	}
+	// hook, pattern, posture, tool, document, corpus, concern, eval,
+	// source: no host file projection here.
 	return ""
 }
 
-// ruleShimDiskID flattens a guide id into a single-segment filename
-// safe for `.claude/rules/`. The `guides/idioms/` prefix (the only
-// guide subtree with declared globs in 2.0) is stripped so the
-// resulting filenames stay short:
+// guideProjection returns the rule-shim path for a glob-scoped inferential
+// guide (`rule` is the projection-target name). A computational guide is
+// carried by a hook (no shim); a guide without globs is global-process
+// content with no ambient channel.
+func guideProjection(p Primitive) string {
+	if p.Mode == string(modeComputational) || len(p.Globs) == 0 {
+		return ""
+	}
+	return filepath.Join(".claude", "rules", ruleShimDiskID(p.ID)+".md")
+}
+
+// sensorProjection returns the subagent path for an inferential sensor (a
+// review dispatched as a subagent). A computational sensor fires a `run:`
+// check at its event and is carried by the hook layer — no adapter file.
+func sensorProjection(p Primitive, name string) string {
+	if p.Mode == string(modeComputational) {
+		return ""
+	}
+	return filepath.Join(".claude", "agents", name+".md")
+}
+
+// modeComputational / modeInferential mirror the `mode:` values without
+// importing the validation constants into projection logic.
+const (
+	modeComputational = "computational"
+	modeInferential   = "inferential"
+)
+
+// keystoneProjectionPrefix is prepended to every projected host artifact so
+// the harness owns a clear namespace (`/keystone-<name>` for commands, etc.).
+const keystoneProjectionPrefix = "keystone-"
+
+// projectedDiskName renders a primitive id as a kebab-case, keystone-prefixed
+// filesystem name for its host projection. Namespace (`:`) and hierarchy (`/`)
+// separators flatten to `-`; runs collapse; an id already in the keystone
+// namespace is not double-prefixed.
+func projectedDiskName(id string) string {
+	s := strings.ToLower(id)
+	s = strings.NewReplacer(":", "-", "/", "-").Replace(s)
+	for strings.Contains(s, "--") {
+		s = strings.ReplaceAll(s, "--", "-")
+	}
+	s = strings.Trim(s, "-")
+	if s == "keystone" || strings.HasPrefix(s, keystoneProjectionPrefix) {
+		return s
+	}
+	return keystoneProjectionPrefix + s
+}
+
+// ruleShimDiskID flattens a guide id into a single-segment, keystone-prefixed
+// filename safe for `.claude/rules/`. The `guides/idioms/` prefix is stripped
+// so the resulting filenames stay short:
 //
-//   guides/idioms/go/stdlib-first              → go-stdlib-first
-//   guides/idioms/harness-content/state-files  → harness-content-state-files
-//   guides/process/foo                         → process-foo (fallback)
+//   guides/idioms/go/stdlib-first              → keystone-go-stdlib-first
+//   guides/idioms/harness-content/state-files  → keystone-harness-content-state-files
+//   guides/process/foo                         → keystone-process-foo (fallback)
 func ruleShimDiskID(guideID string) string {
 	trimmed := strings.TrimPrefix(guideID, "guides/idioms/")
 	trimmed = strings.TrimPrefix(trimmed, "guides/")
-	return strings.ReplaceAll(trimmed, "/", "-")
+	return projectedDiskName(trimmed)
 }
 
-func copyOne(srcAbs, destAbs string) error {
-	if err := os.MkdirAll(filepath.Dir(destAbs), 0o755); err != nil {
-		return fmt.Errorf("mkdir %s: %w", filepath.Dir(destAbs), err)
-	}
-	src, err := os.Open(srcAbs)
+// writeLowered projects a primitive to its host file with frontmatter lowered
+// to the host-native subset, stripping keystone-only fields (kind, id, corpus,
+// includes, mode, event, returns, gates, tier, …). The body is preserved.
+func writeLowered(srcAbs, destAbs string, p Primitive) error {
+	data, err := os.ReadFile(srcAbs)
 	if err != nil {
-		return fmt.Errorf("open %s: %w", srcAbs, err)
+		return fmt.Errorf("read %s: %w", srcAbs, err)
 	}
-	defer src.Close()
-	tmp, err := os.CreateTemp(filepath.Dir(destAbs), ".keystone-project.*")
-	if err != nil {
-		return fmt.Errorf("create temp: %w", err)
+	body := stripFrontmatter(string(data))
+	return atomicWriteFile(destAbs, []byte(lowerFrontmatter(p)+body))
+}
+
+// lowerFrontmatter returns the host-native (Claude Code) YAML frontmatter,
+// fenced, for a projected primitive. Skills/agents carry name+description
+// (agents add tools/model); commands carry description + argument-hint /
+// allowed-tools / model.
+func lowerFrontmatter(p Primitive) string {
+	var b strings.Builder
+	b.WriteString("---\n")
+	if Kind(p.Kind) == KindCommand {
+		fmt.Fprintf(&b, "description: %s\n", yamlSafe(p.Description))
+		if len(p.Args) > 0 {
+			fmt.Fprintf(&b, "argument-hint: %s\n", argumentHint(p.Args))
+		}
+		writeListKey(&b, "allowed-tools", p.Tools)
+	} else {
+		// skill, playbook, agent, inferential sensor → name + description.
+		fmt.Fprintf(&b, "name: %s\n", projectedDiskName(p.ID))
+		fmt.Fprintf(&b, "description: %s\n", yamlSafe(p.Description))
+		writeListKey(&b, "tools", p.Tools)
 	}
-	tmpName := tmp.Name()
-	if _, err := io.Copy(tmp, src); err != nil {
-		tmp.Close()
-		os.Remove(tmpName)
-		return fmt.Errorf("copy body: %w", err)
+	if p.Model != "" {
+		fmt.Fprintf(&b, "model: %s\n", p.Model)
 	}
-	if err := tmp.Close(); err != nil {
-		os.Remove(tmpName)
-		return fmt.Errorf("close temp: %w", err)
+	b.WriteString("---\n")
+	return b.String()
+}
+
+// argumentHint renders a command's args as a Claude `argument-hint` string.
+func argumentHint(args []Arg) string {
+	parts := make([]string, len(args))
+	for i, a := range args {
+		parts[i] = "<" + a.Name + ">"
 	}
-	if err := os.Rename(tmpName, destAbs); err != nil {
-		os.Remove(tmpName)
-		return fmt.Errorf("rename %s -> %s: %w", tmpName, destAbs, err)
+	return strings.Join(parts, " ")
+}
+
+// writeListKey emits a YAML list under key, or nothing when the list is empty.
+func writeListKey(b *strings.Builder, key string, items []string) {
+	if len(items) == 0 {
+		return
 	}
-	return nil
+	fmt.Fprintf(b, "%s:\n", key)
+	for _, it := range items {
+		fmt.Fprintf(b, "  - %s\n", it)
+	}
 }
 
 // writeRuleShim synthesizes a `.claude/rules/<slug>.md` file from an

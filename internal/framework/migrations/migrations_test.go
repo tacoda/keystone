@@ -343,7 +343,7 @@ func TestV2_2_Up_Idempotent(t *testing.T) {
 	mustMkdir(t, filepath.Join(tmp, ".keystone/harness/sensors"))
 	mustMkdir(t, filepath.Join(tmp, ".keystone/harness/guides/idioms/go"))
 	mustWrite(t, filepath.Join(tmp, ".keystone/harness/sensors/build.md"),
-		"---\nkind: sensor\nid: build\ndescription: x\nhost_triggers:\n  - phase: Stop\n    command: go build ./...\n    timeout: 60\n---\nbody\n")
+		"---\nkind: hook\nid: build\ndescription: x\nhost_triggers:\n  - phase: Stop\n    command: go build ./...\n    timeout: 60\n---\nbody\n")
 	mustWrite(t, filepath.Join(tmp, ".keystone/harness/guides/idioms/go/stdlib-first.md"),
 		"---\nkind: guide\nid: guides/idioms/go/stdlib-first\ndescription: x\nglobs:\n  - \"cmd/**/*.go\"\n---\n# Stdlib first\n\n## IRON LAW\n\n- One.\n")
 	mustWrite(t, filepath.Join(tmp, "keystone.json"),
@@ -361,7 +361,7 @@ func TestV2_2_Up_Idempotent(t *testing.T) {
 	for _, want := range []string{
 		".keystone/INDEX.json",
 		".keystone/INDEX.lite.json",
-		".claude/rules/go-stdlib-first.md",
+		".claude/rules/keystone-go-stdlib-first.md",
 		".claude/settings.json",
 		"AGENTS.md",
 	} {
@@ -397,7 +397,7 @@ func TestV2_3_Up_CreatesConcernsDir(t *testing.T) {
 
 	mustMkdir(t, filepath.Join(tmp, ".keystone/harness/sensors"))
 	mustWrite(t, filepath.Join(tmp, ".keystone/harness/sensors/build.md"),
-		"---\nkind: sensor\nid: build\ndescription: x\n---\nbody\n")
+		"---\nkind: hook\nid: build\ndescription: x\n---\nbody\n")
 	mustWrite(t, filepath.Join(tmp, "keystone.json"),
 		"{\"version\":\"2\",\"policies\":[]}\n")
 
@@ -421,12 +421,13 @@ func TestV2_3_Up_Idempotent(t *testing.T) {
 	mustMkdir(t, filepath.Join(tmp, ".keystone/harness/sensors"))
 	mustMkdir(t, filepath.Join(tmp, ".keystone/harness/concerns"))
 	mustMkdir(t, filepath.Join(tmp, ".keystone/harness/personas"))
-	mustWrite(t, filepath.Join(tmp, ".keystone/harness/sensors/build.md"),
-		"---\nkind: sensor\nid: build\ndescription: x\nseverity: should\nhost_triggers:\n  - phase: Stop\n    command: go build ./...\n    timeout: 60\n---\nbody\n")
+	mustMkdir(t, filepath.Join(tmp, ".keystone/harness/hooks"))
+	mustWrite(t, filepath.Join(tmp, ".keystone/harness/hooks/build.md"),
+		"---\nkind: hook\nid: build\ndescription: x\nmode: computational\nevent: Stop\nrun: go build ./...\n---\nbody\n")
 	mustWrite(t, filepath.Join(tmp, ".keystone/harness/concerns/shared-tools.md"),
 		"---\nkind: concern\nid: shared-tools\ndescription: x\ntools:\n  - Read\n  - Grep\ntags:\n  - composition\n---\nbody\n")
 	mustWrite(t, filepath.Join(tmp, ".keystone/harness/personas/reviewer.md"),
-		"---\nkind: persona\nid: reviewer\ndescription: x\ntools:\n  - Bash\nincludes:\n  - shared-tools\ntags:\n  - review\n---\nbody\n")
+		"---\nkind: agent\nid: reviewer\ndescription: x\ntools:\n  - Bash\nincludes:\n  - shared-tools\ntags:\n  - review\n---\nbody\n")
 	mustWrite(t, filepath.Join(tmp, "keystone.json"),
 		"{\"version\":\"2\",\"policies\":[]}\n")
 
@@ -448,12 +449,13 @@ func TestV2_3_Up_Idempotent(t *testing.T) {
 		t.Fatalf("second Execute: %v", err)
 	}
 
-	// Verify the settings.json carries the should-wrap.
+	// Verify the settings.json carries the host→keystone bridge for the
+	// hook's host phase.
 	data, err := os.ReadFile(filepath.Join(tmp, ".claude/settings.json"))
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(string(data), "non-blocking warning") {
-		t.Errorf(".claude/settings.json missing should-severity wrapper:\n%s", data)
+	if !strings.Contains(string(data), "keystone hook fire Stop") {
+		t.Errorf(".claude/settings.json missing Stop bridge:\n%s", data)
 	}
 }

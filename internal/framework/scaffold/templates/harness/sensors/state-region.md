@@ -1,5 +1,7 @@
 ---
 kind: sensor
+mode: inferential
+returns: review-findings
 id: state-region
 description: 'Read-only.'
 ---

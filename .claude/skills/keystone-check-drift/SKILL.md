@@ -1,20 +1,12 @@
 ---
-kind: skill
-id: keystone:check-drift
+name: keystone-check-drift
 description: Run the drift sensor on the current diff — fast pre-verify check that loaded harness rules still match what the code is doing.
-triggers:
-  - keystone check-drift
-  - keystone:check-drift
-  - /keystone:check-drift
-  - check drift
-  - run drift sensor
-  - drift check
-model: sonnet
 tools:
   - Read
   - Bash
   - Grep
   - Glob
+model: sonnet
 ---
 
 # keystone:check-drift — fast pre-verify drift check

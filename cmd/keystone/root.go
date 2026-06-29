@@ -84,6 +84,8 @@ func init() {
 	rootCmd.AddCommand(lintCmd())
 	rootCmd.AddCommand(listCmd())
 	rootCmd.AddCommand(showCmd())
+	rootCmd.AddCommand(documentCmd())
+	rootCmd.AddCommand(hookCmd())
 	rootCmd.AddCommand(projectCmd())
 	rootCmd.AddCommand(migrateCmd())
 	rootCmd.AddCommand(mcpCmd())
@@ -156,7 +158,7 @@ func verifyCmd() *cobra.Command {
 		Use:                "verify",
 		Short:              "Check vendored policies for drift and the strict cascade for violations",
 		DisableFlagParsing: true,
-		RunE:               runAndForward(runVerify),
+		RunE:               runAndForward(verifyWithHooks),
 	}
 	return c
 }
@@ -247,6 +249,26 @@ func showCmd() *cobra.Command {
 		Short:              "Show one primitive's descriptor + cross-references",
 		DisableFlagParsing: true,
 		RunE:               runAndForward(runShow),
+	}
+	return c
+}
+
+func documentCmd() *cobra.Command {
+	c := &cobra.Command{
+		Use:                "document",
+		Short:              "List document instances and advance them through gates",
+		DisableFlagParsing: true,
+		RunE:               runAndForward(runDocument),
+	}
+	return c
+}
+
+func hookCmd() *cobra.Command {
+	c := &cobra.Command{
+		Use:                "hook",
+		Short:              "Fire framework hooks bound to a workflow event",
+		DisableFlagParsing: true,
+		RunE:               runAndForward(runHook),
 	}
 	return c
 }

@@ -1,21 +1,13 @@
 ---
-kind: skill
-id: keystone:audit
+name: keystone-audit
 description: Full dual-flywheel audit — Learning (capture from review) + Pruning (remove dead rules). Periodic harness hygiene.
-triggers:
-  - keystone audit
-  - keystone:audit
-  - /keystone:audit
-  - run audit
-  - audit the harness
-  - dual flywheel audit
-model: opus
 tools:
   - Read
   - Grep
   - Glob
   - Bash
   - Task
+model: opus
 ---
 
 # keystone:audit — periodic dual-flywheel review

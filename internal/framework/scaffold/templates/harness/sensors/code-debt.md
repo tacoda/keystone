@@ -1,5 +1,7 @@
 ---
 kind: sensor
+mode: inferential
+returns: review-findings
 id: code-debt
 description: 'Surfaces and categorizes debt in the codebase — the known-suboptimal code the team has chosen to live with, plus the shape of any new deb...'
 ---

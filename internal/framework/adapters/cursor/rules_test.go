@@ -27,7 +27,7 @@ func TestProjectRules_WritesMDCPerGuide(t *testing.T) {
 	if res.Wrote != 1 {
 		t.Errorf("expected 1 written, got %d", res.Wrote)
 	}
-	data, err := os.ReadFile(filepath.Join(root, RulesDir, "go-stdlib-first.mdc"))
+	data, err := os.ReadFile(filepath.Join(root, RulesDir, "keystone-go-stdlib-first.mdc"))
 	if err != nil {
 		t.Fatal(err)
 	}

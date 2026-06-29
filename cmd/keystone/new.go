@@ -14,6 +14,23 @@ import (
 // convention (harness-root-relative inter-harness links, no ../) and the
 // port contract (frontmatter, required sections). The author fills in
 // the body.
+// newDispatch maps each `keystone new <verb>` to its scaffold generator.
+var newDispatch = map[string]func([]string) error{
+	"rule":     runNewRule,
+	"hook":     runNewHook,
+	"command":  runNewCommand,
+	"skill":    runNewSkill,
+	"agent":    runNewAgent,
+	"pattern":  runNewPattern,
+	"posture":  runNewPosture,
+	"tool":     runNewTool,
+	"document": runNewDocument,
+	"corpus":   runNewCorpus,
+	"eval":     runNewEval,
+	"adapter":  runNewAdapter,
+	"policy":   runNewPolicy,
+}
+
 func runNew(args []string) error {
 	if len(args) == 0 {
 		printNewUsage(os.Stderr)
@@ -23,42 +40,12 @@ func runNew(args []string) error {
 	case "help", "--help", "-h":
 		printNewUsage(os.Stdout)
 		return nil
-	// Framework abstractions (default — use these first).
-	case "guide":
-		return runNewGuide(args[1:])
-	case "corpus":
-		return runNewCorpus(args[1:])
-	case "sensor":
-		return runNewSensor(args[1:])
-	case "action":
-		return runNewAction(args[1:])
-	case "playbook":
-		return runNewPlaybook(args[1:])
-	case "persona":
-		return runNewPersona(args[1:])
-	case "eval":
-		return runNewEval(args[1:])
-	case "source":
-		return runNewSource(args[1:])
-	// Agent abstractions (escape hatches — raw host-native primitives).
-	case "rule":
-		return runNewRule(args[1:])
-	case "skill":
-		return runNewSkill(args[1:])
-	case "subagent":
-		return runNewSubagent(args[1:])
-	case "command":
-		return runNewCommand(args[1:])
-	// Higher-level concepts.
-	case "adapter":
-		return runNewAdapter(args[1:])
-	case "policy":
-		return runNewPolicy(args[1:])
-	case "plugin":
-		return fmt.Errorf("`keystone new plugin` was renamed to `keystone new policy` in 2.0")
-	default:
-		return fmt.Errorf("unknown kind %q (framework: guide, corpus, sensor, action, playbook, persona, eval, source; agent: rule, skill, subagent, command; other: adapter, policy)", args[0])
 	}
+	gen, ok := newDispatch[args[0]]
+	if !ok {
+		return fmt.Errorf("unknown kind %q (use: rule, hook, command, skill, agent, pattern, posture, tool, document, corpus, eval, adapter, policy)", args[0])
+	}
+	return gen(args[1:])
 }
 
 func printNewUsage(w *os.File) {
@@ -66,45 +53,36 @@ func printNewUsage(w *os.File) {
 
 Usage:
 
-  Framework abstractions (encouraged by default):
-    keystone new guide <topic>/<name>     [--dir <path>]   # wraps rule
-    keystone new corpus <topic>/<name>    [--dir <path>]
-    keystone new sensor <name>            [--dir <path>] [--kind <k>]   # wraps rule
-    keystone new action <name>            [--dir <path>]   # wraps command
-    keystone new playbook <name>          [--dir <path>]   # wraps skill
-    keystone new persona <id>             [--dir <path>]   # wraps subagent
+    keystone new rule <topic>/<name>      [--dir <path>]   # glob-scoped directive + paired corpus
+    keystone new hook <name>              [--dir <path>]   # automated check (projects to host hook)
+    keystone new command <id>             [--dir <path>]   # a unit of work / lifecycle step
+    keystone new skill <id>               [--dir <path>]   # a composed capability
+    keystone new agent <id>               [--dir <path>]   # a role spawned as a subagent
+    keystone new pattern <id>             [--dir <path>]   # prose documentation pattern (tutorial, how-to, reference, explanation)
+    keystone new posture <id>             [--dir <path>]   # tool/permission posture (allow/ask/deny)
+    keystone new tool <id>                [--dir <path>]   # author-defined callable (transport: cli | mcp | plugin)
+    keystone new document <id>            [--dir <path>]   # governed output template (plan/review/adr/...)
+    keystone new corpus <topic>/<name>    [--dir <path>]   # on-demand reasoning
     keystone new eval <id>                [--dir <path>]
-    keystone new source <id>              [--dir <path>]
-
-  Agent abstractions (escape hatches — raw host-native primitives):
-    keystone new rule <id>                [--dir <path>]
-    keystone new skill <id>               [--dir <path>]
-    keystone new subagent <id>            [--dir <path>]
-    keystone new command <id>             [--dir <path>]
-
-  Other:
     keystone new adapter <agent>          [--dir <path>]
     keystone new policy <name>            [--dir <path>]
 
 Each generator drops a skeleton at the conventional path with the right
 frontmatter, sections, and harness-root-relative cross-references. The
-harness root is fixed at .keystone/harness/ in 2.0.
+harness root is .keystone/harness/.
 
-Rule/skill/subagent/command ids may use the colon-namespaced form
-(e.g. keystone:index); the disk filename normalizes : to -.
+Ids may use the colon-namespaced form (e.g. keystone:index); the disk
+filename normalizes : to -.
 
 Examples:
-  keystone new guide process/release       # .keystone/harness/guides/process/release.md
+  keystone new rule process/release        # .keystone/harness/rules/process/release.md
                                            # + paired .keystone/harness/corpus/process/release.md
-  keystone new sensor lint --kind computational
-  keystone new playbook ship
-  keystone new persona security-reviewer   # .keystone/harness/personas/security-reviewer.md
-                                           # projects to .claude/agents/security-reviewer.md
-  keystone new rule no-secrets             # agent-side rule at .keystone/harness/rules/no-secrets.md
-  keystone new skill keystone:index        # .keystone/harness/skills/keystone-index/SKILL.md
-  keystone new subagent cavecrew-reviewer  # .keystone/harness/agents/cavecrew-reviewer.md
-  keystone new command review              # .keystone/harness/commands/review.md
-  keystone new policy acme-policies        # ./acme-policies/ (policy repo skeleton)
+  keystone new hook lint                    # .keystone/harness/hooks/lint.md
+  keystone new skill keystone:index         # .keystone/harness/skills/keystone-index/SKILL.md
+  keystone new agent security-reviewer      # .keystone/harness/agents/security-reviewer.md
+  keystone new command review               # .keystone/harness/commands/review.md
+  keystone new document adr                 # .keystone/harness/documents/adr.md
+  keystone new policy acme-policies         # ./acme-policies/ (policy repo skeleton)
 `)
 }
 

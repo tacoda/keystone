@@ -50,16 +50,16 @@ func TestBuildShowView_TracedByReverseLookup(t *testing.T) {
 	primitives := []primitive.Primitive{
 		{Frontmatter: primitive.Frontmatter{Kind: "corpus", ID: "corpus/security/owasp-top-10"}},
 		{Frontmatter: primitive.Frontmatter{
-			Kind: "guide", ID: "guides/process/security-review",
-			Traces: []string{"corpus/security/owasp-top-10"},
+			Kind: "rule", ID: "rules/process/security-review",
+			Corpus: []string{"corpus/security/owasp-top-10"},
 		}},
 	}
 	view, found := buildShowView(primitives, "corpus", "corpus/security/owasp-top-10")
 	if !found {
 		t.Fatal("expected corpus to be found")
 	}
-	if len(view.TracedBy) != 1 || view.TracedBy[0] != "guide/guides/process/security-review" {
-		t.Errorf("TracedBy = %v, want one guide reference", view.TracedBy)
+	if len(view.TracedBy) != 1 || view.TracedBy[0] != "rule/rules/process/security-review" {
+		t.Errorf("TracedBy = %v, want one rule reference", view.TracedBy)
 	}
 }
 

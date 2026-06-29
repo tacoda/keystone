@@ -57,7 +57,11 @@ func ProjectRules(projectDir string, primitives []primitive.Primitive) (Projecti
 func ruleSlug(guideID string) string {
 	trimmed := strings.TrimPrefix(guideID, "guides/idioms/")
 	trimmed = strings.TrimPrefix(trimmed, "guides/")
-	return strings.ReplaceAll(trimmed, "/", "-")
+	slug := strings.ReplaceAll(trimmed, "/", "-")
+	if !strings.HasPrefix(slug, "keystone-") {
+		slug = "keystone-" + slug
+	}
+	return slug
 }
 
 func buildContinueRule(p primitive.Primitive) []byte {

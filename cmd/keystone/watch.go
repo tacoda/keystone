@@ -225,10 +225,9 @@ func runWatchAdapters(projectDir string, primitives []primitive.Primitive) {
 	if _, err := agnostic.ProjectAgentsMD(projectDir, agnostic.DefaultBody()); err != nil {
 		fmt.Fprintf(os.Stderr, "; ✗ agnostic AGENTS.md: %v", err)
 	}
-	// Claude Code hooks — always emitted (claude-code is the default host).
-	if _, err := claudecode.ProjectHooks(projectDir, primitives); err != nil {
-		fmt.Fprintf(os.Stderr, "; ✗ claudecode hooks: %v", err)
-	}
+	// Claude Code settings.json — hooks + posture, always emitted
+	// (claude-code is the default host).
+	watchClaudeCode(projectDir, primitives)
 	// Opt-in adapters from keystone.json.
 	cfg, cfgErr := config.ReadProjectConfig(projectDir)
 	if cfgErr != nil && !errors.Is(cfgErr, os.ErrNotExist) {
@@ -252,5 +251,16 @@ func runWatchAdapters(projectDir string, primitives []primitive.Primitive) {
 		if _, err := continueide.ProjectRules(projectDir, primitives); err != nil {
 			fmt.Fprintf(os.Stderr, "; ✗ continue: %v", err)
 		}
+	}
+}
+
+// watchClaudeCode re-projects the Claude Code settings.json regions (hooks +
+// posture) during a watch cycle, logging failures to stderr without aborting.
+func watchClaudeCode(projectDir string, primitives []primitive.Primitive) {
+	if _, err := claudecode.ProjectHooks(projectDir, primitives); err != nil {
+		fmt.Fprintf(os.Stderr, "; ✗ claudecode hooks: %v", err)
+	}
+	if _, err := claudecode.ProjectPosture(projectDir, primitives); err != nil {
+		fmt.Fprintf(os.Stderr, "; ✗ claudecode posture: %v", err)
 	}
 }

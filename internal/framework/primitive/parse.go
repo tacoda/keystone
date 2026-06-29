@@ -63,13 +63,30 @@ func (f *Frontmatter) UnmarshalYAML(value *yaml.Node) error {
 		Tools        []string      `yaml:"tools"`
 		Model        string        `yaml:"model"`
 		Args         yaml.Node     `yaml:"args"`
-		Traces       []string      `yaml:"traces"`
+		Corpus       []string      `yaml:"corpus"`
 		Deps         []string      `yaml:"deps"`
 		Severity     string        `yaml:"severity"`
 		Tier         string        `yaml:"tier"`
 		Tags         []string      `yaml:"tags"`
 		Includes     []string      `yaml:"includes"`
 		HostTriggers []HostTrigger `yaml:"host_triggers"`
+		Produces     []string      `yaml:"produces"`
+		Consumes     []string      `yaml:"consumes"`
+		Stop         string        `yaml:"stop"`
+		Gates        []string      `yaml:"gates"`
+		Gate         string        `yaml:"gate"`
+		Type         string        `yaml:"type"`
+		ProducedBy   string        `yaml:"produced_by"`
+		Supersedes   []string      `yaml:"supersedes"`
+		Mode         string        `yaml:"mode"`
+		Event        string        `yaml:"event"`
+		Run          string        `yaml:"run"`
+		Transport    string        `yaml:"transport"`
+		Agent        string        `yaml:"agent"`
+		Returns      string        `yaml:"returns"`
+		Allow        []string      `yaml:"allow"`
+		Ask          []string      `yaml:"ask"`
+		Deny         []string      `yaml:"deny"`
 	}
 	var s shadow
 	if err := value.Decode(&s); err != nil {
@@ -83,34 +100,63 @@ func (f *Frontmatter) UnmarshalYAML(value *yaml.Node) error {
 	f.Triggers = s.Triggers
 	f.Tools = s.Tools
 	f.Model = s.Model
-	f.Traces = s.Traces
+	f.Corpus = s.Corpus
 	f.Deps = s.Deps
 	f.Severity = s.Severity
 	f.Tier = s.Tier
 	f.Tags = s.Tags
 	f.Includes = s.Includes
 	f.HostTriggers = s.HostTriggers
+	f.Produces = s.Produces
+	f.Consumes = s.Consumes
+	f.Stop = s.Stop
+	f.Gates = s.Gates
+	f.Gate = s.Gate
+	f.Type = s.Type
+	f.ProducedBy = s.ProducedBy
+	f.Supersedes = s.Supersedes
+	f.Mode = s.Mode
+	f.Event = s.Event
+	f.Run = s.Run
+	f.Transport = s.Transport
+	f.Agent = s.Agent
+	f.Returns = s.Returns
+	f.Allow = s.Allow
+	f.Ask = s.Ask
+	f.Deny = s.Deny
 
-	if s.Args.Kind == 0 {
-		return nil
+	args, err := decodeArgsNode(s.Args)
+	if err != nil {
+		return err
 	}
-	// args: [a, b, c]  or  args: ["a"]
-	if s.Args.Kind == yaml.SequenceNode {
-		for _, child := range s.Args.Content {
-			switch child.Kind {
-			case yaml.ScalarNode:
-				f.Args = append(f.Args, Arg{Name: child.Value})
-			case yaml.MappingNode:
-				var a Arg
-				if err := child.Decode(&a); err != nil {
-					return fmt.Errorf("args entry: %w", err)
-				}
-				f.Args = append(f.Args, a)
-			default:
-				return fmt.Errorf("args entry: unsupported yaml kind %d", child.Kind)
+	f.Args = args
+	return nil
+}
+
+// decodeArgsNode lifts the flexible `args:` form into []Arg. Each entry may be
+// a scalar (sugar for Arg{Name}) or a full {name,type,required,description}
+// mapping. A zero/absent node yields nil; anything but a list is an error.
+func decodeArgsNode(node yaml.Node) ([]Arg, error) {
+	if node.Kind == 0 {
+		return nil, nil
+	}
+	if node.Kind != yaml.SequenceNode {
+		return nil, fmt.Errorf("args must be a list")
+	}
+	var args []Arg
+	for _, child := range node.Content {
+		switch child.Kind {
+		case yaml.ScalarNode:
+			args = append(args, Arg{Name: child.Value})
+		case yaml.MappingNode:
+			var a Arg
+			if err := child.Decode(&a); err != nil {
+				return nil, fmt.Errorf("args entry: %w", err)
 			}
+			args = append(args, a)
+		default:
+			return nil, fmt.Errorf("args entry: unsupported yaml kind %d", child.Kind)
 		}
-		return nil
 	}
-	return fmt.Errorf("args must be a list")
+	return args, nil
 }

@@ -4,132 +4,35 @@
       {
         "hooks": [
           {
-            "command": "true",
+            "command": "keystone hook fire PostToolUse",
             "shell": "bash",
-            "statusMessage": "keystone:state-region",
-            "timeout": 5,
+            "statusMessage": "keystone:bridge:PostToolUse",
             "type": "command"
           }
         ],
-        "matcher": "Edit|Write"
-      },
-      {
-        "hooks": [
-          {
-            "command": "keystone verify --sensor drift",
-            "shell": "bash",
-            "statusMessage": "keystone:drift",
-            "timeout": 5,
-            "type": "command"
-          }
-        ],
-        "matcher": "Edit|Write|MultiEdit"
+        "matcher": ""
       }
     ],
     "PreToolUse": [
       {
         "hooks": [
           {
-            "command": "keystone verify --sensor commit-message",
+            "command": "keystone hook fire PreToolUse",
             "shell": "bash",
-            "statusMessage": "keystone:commit-message",
-            "timeout": 5,
+            "statusMessage": "keystone:bridge:PreToolUse",
             "type": "command"
           }
         ],
-        "matcher": "Bash"
-      },
-      {
-        "hooks": [
-          {
-            "command": "keystone verify --sensor secret-scan",
-            "shell": "bash",
-            "statusMessage": "keystone:secret-scan",
-            "timeout": 5,
-            "type": "command"
-          }
-        ],
-        "matcher": "Edit|Write|MultiEdit"
+        "matcher": ""
       }
     ],
     "Stop": [
       {
         "hooks": [
           {
-            "command": "go build ./...",
+            "command": "keystone hook fire Stop",
             "shell": "bash",
-            "statusMessage": "keystone:build",
-            "timeout": 120,
-            "type": "command"
-          },
-          {
-            "command": "true",
-            "shell": "bash",
-            "statusMessage": "keystone:coverage",
-            "timeout": 120,
-            "type": "command"
-          },
-          {
-            "command": "go vet ./...",
-            "shell": "bash",
-            "statusMessage": "keystone:lint",
-            "timeout": 60,
-            "type": "command"
-          },
-          {
-            "command": "true",
-            "shell": "bash",
-            "statusMessage": "keystone:risk-fingerprint",
-            "timeout": 30,
-            "type": "command"
-          },
-          {
-            "command": "true",
-            "shell": "bash",
-            "statusMessage": "keystone:sast",
-            "timeout": 30,
-            "type": "command"
-          },
-          {
-            "command": "true",
-            "shell": "bash",
-            "statusMessage": "keystone:spec-adherence",
-            "timeout": 30,
-            "type": "command"
-          },
-          {
-            "command": "true",
-            "shell": "bash",
-            "statusMessage": "keystone:stack-drift",
-            "timeout": 30,
-            "type": "command"
-          },
-          {
-            "command": "go test ./...",
-            "shell": "bash",
-            "statusMessage": "keystone:test",
-            "timeout": 300,
-            "type": "command"
-          },
-          {
-            "command": "true",
-            "shell": "bash",
-            "statusMessage": "keystone:traffic-topology",
-            "timeout": 30,
-            "type": "command"
-          },
-          {
-            "command": "go vet ./...",
-            "shell": "bash",
-            "statusMessage": "keystone:type-check",
-            "timeout": 60,
-            "type": "command"
-          },
-          {
-            "command": "true",
-            "shell": "bash",
-            "statusMessage": "keystone:vuln-scan",
-            "timeout": 120,
+            "statusMessage": "keystone:bridge:Stop",
             "type": "command"
           }
         ],

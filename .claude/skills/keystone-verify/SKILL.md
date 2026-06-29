@@ -1,20 +1,12 @@
 ---
-kind: skill
-id: keystone:verify
+name: keystone-verify
 description: Check vendored policies for drift and the strict cascade for project-layer violations.
-triggers:
-  - keystone verify
-  - keystone:verify
-  - /keystone:verify
-  - verify the harness cascade
-  - audit policy drift
-  - check strict violations
-model: opus
 tools:
   - Read
   - Bash
   - Grep
   - Glob
+model: opus
 ---
 
 # keystone:verify — cascade + drift check

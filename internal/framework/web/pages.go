@@ -32,15 +32,6 @@ func (s *server) handlePolicies(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-// handleSourcesNew renders the new-source form.
-func (s *server) handleSourcesNew(w http.ResponseWriter, r *http.Request) {
-	s.renderPage(w, r, "source_new.html", map[string]any{
-		"ProjectDir": s.projectDir,
-		// Types the built-in registry knows about.
-		"Types": []string{"folder", "url"},
-	})
-}
-
 // handleVerifyPage renders the verify dashboard. The "run" button
 // posts to /web/actions/verify which swaps the result into #result.
 func (s *server) handleVerifyPage(w http.ResponseWriter, r *http.Request) {

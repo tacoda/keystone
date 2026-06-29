@@ -306,7 +306,11 @@ func printPlan(w io.Writer, version, dir string, p *migrations.Plan) {
 // — that IS a pre-2.0 install that hasn't been migrated yet.
 func readAppliedTolerant(absDir string) []string {
 	candidates := []string{
+		// 3.0+ canonical: the lockfile lives at <root>/lockfile.json.
+		filepath.Join(absDir, config.DefaultHarnessRoot, config.LockfileName),
+		// 2.0–2.4 legacy: under .keystone/.
 		filepath.Join(absDir, ".keystone", "lockfile.json"),
+		// pre-2.0.
 		filepath.Join(absDir, config.DefaultHarnessRoot, "keystone.lock.json"),
 		filepath.Join(absDir, "harness", "keystone.lock.json"),
 	}
@@ -336,10 +340,13 @@ func readAppliedAt(path string) ([]string, bool) {
 }
 
 func writeApplied(absDir string, applied []string) error {
-	// Always write to the canonical 2.0+ location. The 2.0 Up will have
-	// moved the lockfile here by the time we reach this; for fresh installs
-	// of 2.0+, this is where it always lives.
-	path := filepath.Join(absDir, ".keystone", "lockfile.json")
+	// Write to the lockfile at its current location. Post-3.0 the harness
+	// (and its lockfile) lives at <root>/.harness/; a pre-3.0 install still
+	// has it under .keystone/. The 3.0 Up relocates it before this runs.
+	path := filepath.Join(absDir, config.DefaultHarnessRoot, config.LockfileName)
+	if !dirExists(filepath.Join(absDir, config.DefaultHarnessRoot)) {
+		path = filepath.Join(absDir, ".keystone", "lockfile.json")
+	}
 	lf, err := lockfile.ReadFromPath(path)
 	if err != nil {
 		// Lockfile may not exist yet (fresh install). Build a minimal one.

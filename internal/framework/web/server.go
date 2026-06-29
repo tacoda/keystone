@@ -113,7 +113,6 @@ type server struct {
 	audit      *auditLog
 
 	primitiveCache *primitiveCache
-	healthCache    *healthCache
 }
 
 func newServer(projectDir string) (*server, error) {
@@ -152,7 +151,6 @@ func newServer(projectDir string) (*server, error) {
 		hub:            hub,
 		audit:          audit,
 		primitiveCache: newPrimitiveCache(projectDir),
-		healthCache:    newHealthCache(projectDir),
 	}
 
 	// Watcher rebuilds every cached harness layer on each debounced
@@ -219,7 +217,6 @@ func (s *server) routes() {
 	// retired in 2.1.1; nothing redirects, nothing aliases.
 	//   / + /observability/*  → metrics, insights, audit, live
 	//   /harness/*            → primitives, policies, investigator, graph
-	//   /sources, /sources/new, /sources/<name>
 	//   /flywheels/*          → overview, inbox, prune
 	//   /quality/*            → verify, evals
 	exact := []routeBinding{
@@ -236,10 +233,6 @@ func (s *server) routes() {
 		{"/harness/policies", s.handlePolicies},
 		{"/harness/investigator", s.handleInvestigator},
 		{"/harness/graph", s.handleGraph},
-
-		// Sources.
-		{"/sources", s.handleSources},
-		{"/sources/new", s.handleSourcesNew},
 
 		// Flywheels.
 		{"/flywheels", s.handleFlywheels},
@@ -265,7 +258,6 @@ func (s *server) routes() {
 		// REST API (read-only) exact routes.
 		{"/api/index", s.apiIndex},
 		{"/api/primitives", s.apiPrimitives},
-		{"/api/sources", s.apiSources},
 		{"/api/harness/status", s.apiHarnessStatus},
 		{"/api/metrics", s.apiMetrics},
 		{"/api/search", s.apiSearch},
@@ -283,11 +275,6 @@ func (s *server) routes() {
 		{"/web/actions/policy/add", s.handleActionPolicyAdd},
 		{"/web/actions/policy/remove", s.handleActionPolicyRemove},
 		{"/web/actions/verify", s.handleActionVerify},
-		{"/web/actions/sources/add", s.handleActionSourceAdd},
-		{"/web/actions/sources/remove", s.handleActionSourceRemove},
-		{"/web/actions/sources/query", s.handleActionSourceQuery},
-		{"/web/actions/sources/health", s.handleActionSourceHealth},
-		{"/web/actions/sources/verify-all", s.handleActionSourceVerifyAll},
 		{"/web/actions/inbox/accept", s.handleActionInboxAccept},
 		{"/web/actions/inbox/reject", s.handleActionInboxReject},
 	}
@@ -305,9 +292,7 @@ func (s *server) routes() {
 		h      http.HandlerFunc
 	}{
 		{"/harness/primitives/", s.handlePrimitivesDetail},
-		{"/sources/", s.handleSourceDetail},
 		{"/api/primitives/", s.apiPrimitiveDetail},
-		{"/api/sources/", s.apiSourceDetail},
 		{"/web/widgets/kpi/", s.handleKPIWidget},
 	}
 	s.engine.NoRoute(func(c *gin.Context) {
