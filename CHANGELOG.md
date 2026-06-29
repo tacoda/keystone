@@ -2,6 +2,169 @@
 
 All notable changes to keystone are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); the project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.0.0] — 2026-06-28
+
+Major release. Two structural moves anchor 3.0: the harness root
+standardizes to **`.harness/`** (one agent-neutral source of truth that
+feeds every host), and the deterministic firing layer is unified under a
+**framework hook dispatcher** so a hook, a computational guide, and a
+computational sensor all fire the same way. The primitive taxonomy is
+finalized at fourteen kinds — `agent` absorbs the old persona/subagent
+split, `action` becomes `command`, and `hook`, `pattern`, `posture`,
+`tool`, and `document` join as first-class kinds. `source` is gone: an
+external system is reached through a `tool`, not a bespoke kind.
+
+Breaking. A `keystone migrate up` carries a 2.x install to 3.0 — it
+relocates `.keystone/ → .harness/`, renames every primitive to the 3.0
+vocabulary, splits sensors by nature, and rebuilds the index. Properly
+migrated installs see no behavior loss; the move is mechanical and
+reversible.
+
+### Added
+
+- **`.harness/` as the single harness root.** `DefaultHarnessRoot =
+  ".harness"` is the one source of truth for the location. `INDEX.json`,
+  `INDEX.lite.json`, `lockfile.json`, the `work/` document workspace, and
+  every primitive live under `.harness/`; `keystone.json` stays at repo
+  root. One agent-neutral root feeds Claude Code, Cursor, Aider,
+  Continue, and opencode alike.
+- **Framework hook dispatcher.** `keystone hook fire <event>` selects the
+  `kind: hook` primitives bound to a framework event and runs them.
+  Computational hooks (`run:`) execute in parallel — any non-zero exit
+  blocks; inferential hooks (`agent:`) emit a dispatch manifest the host
+  spawns (keystone cannot invoke an LLM itself). Fire context
+  (`--phase` / `--command` / `--type`) reaches `run:` scripts as env.
+  Framework events: `pre-command`, `post-command`, `pre-playbook`,
+  `post-playbook`, `on-gate`, `pre-verify`, `post-verify`,
+  `on-phase-enter`, `on-phase-exit`.
+- **Auto-fired lifecycle hooks.** `keystone verify` fires `pre-verify`
+  (a blocking gate) before the policy check and `post-verify` after;
+  `keystone document promote` fires `on-gate` after a gate advances
+  (non-fatal — the transition is already committed). `--sensor` mode
+  skips the lifecycle hooks.
+- **Symmetric sensor / hook model.** A `hook`, a computational guide
+  (LSP-style check), and a computational sensor (gate check) all fire
+  via `event:` + `run:` through one path. An inferential guide is a
+  glob-activated rule shim; an inferential sensor is a review dispatched
+  as an agent with a `returns:` verdict. Closes the "computational
+  sensor fires nowhere" gap.
+- **`document` kind + `keystone document` subcommand.** Lists work
+  documents and promotes them through gate-validated transitions.
+  Document instances live under `.harness/work/` and are tracked by the
+  subcommand, not indexed as primitives (`Walk` skips `work/`).
+- **`pattern`, `posture`, and `tool` primitives** with
+  `keystone new pattern|posture|tool` and matching MCP scaffolders:
+  - **`pattern`** — a prose documentation pattern (Diátaxis modes:
+    tutorial, how-to, reference, explanation); scaffolds a doc skeleton,
+    no projection.
+  - **`posture`** — `allow` / `ask` / `deny` tool-permission lists that
+    project into `.claude/settings.json` permissions (additive, deduped,
+    sorted, idempotent, user entries preserved).
+  - **`tool`** — an author-defined callable with `transport: cli | mcp |
+    plugin`, a `run:` handler, and an args schema.
+- **Tool transports.** `transport: mcp` tools are registered on
+  keystone's own MCP server at startup — the handler shells out to
+  `run:`, passing declared args as `KEYSTONE_ARG_<NAME>`. `cli` and
+  `plugin` tools reach the agent through their own transports. Lint
+  enforces the contract (`run:` required, transport in the allowed set).
+- **Guide `tier`** — `iron-law` | `golden-rule` | `preference`
+  (default `preference`) — plus `mode`, `event`, `run`, `agent`, and
+  `returns` frontmatter. Lint validates the action contract:
+  computational → `run:`; inferential → `agent:` + `returns:`, mutually
+  exclusive.
+- **opencode as a host target** (closes #5). `keystone init` registers
+  opencode (marker detection on `.opencode/` / `opencode.json`), and the
+  opt-in `opencode` adapter mirrors skills / agents / commands and
+  globbed guide rule-shims into `.opencode/`, registering them in
+  `opencode.json`'s `instructions` array. `keystone mcp install --agent
+  opencode` writes the server into `opencode.json`'s `mcp` key.
+  opencode instructions are always-on (no per-file gating), so projected
+  rules load every turn.
+
+### Changed
+
+- **Finalized fourteen-kind taxonomy.** `guide`, `sensor`, `hook`,
+  `agent`, `command`, `skill`, `playbook`, `pattern`, `corpus`,
+  `document`, `concern`, `posture`, `tool`, `eval`. `agent` absorbs the
+  former persona + subagent layers; `action` is renamed `command`. The
+  one-keystone-kind-to-many-host-mechanisms mapping (resolved by `mode`)
+  is the framework's value, not a 1:1 rename — an early 3.0 collapse into
+  community names was reverted. `rule` is a projection-target name, not
+  an authorable kind; lint rejects `kind: rule` with a guide-pointing
+  hint.
+- **Host bridge replaces per-sensor hook projection.** The claudecode
+  adapter installs ONE generic bridge entry per host phase any
+  `kind: hook` binds to — `keystone hook fire <phase>` — instead of
+  mapping each sensor's `host_triggers` into `settings.json`. keystone
+  dispatches the matching hooks itself and owns blocking; the adapter
+  writes no per-hook entries. Per-sensor severity-wrapping is retired.
+- **Type-aware projection.** `ProjectionRelPath` is keyed on
+  `(kind, mode)`: a playbook projects like a skill
+  (`.claude/skills/<name>/SKILL.md`); an inferential sensor projects to
+  `.claude/agents/<name>.md` (the subagent a review hook dispatches); a
+  computational sensor or guide projects to no host file (it runs through
+  the hook layer); an inferential guide with `globs:` projects to a
+  `.claude/rules/` shim. Every projected host artifact is kebab-case and
+  `keystone-`prefixed (`command review` → `/keystone-review`), without
+  double-prefixing ids already in the namespace.
+- **Projected frontmatter lowered to host-native keys.** Projection no
+  longer copies primitive bodies verbatim — it strips keystone-only
+  fields (`kind`, `id`, `corpus`, `includes`, `mode`, `event`,
+  `returns`, `gates`, `tier`, …) and emits only what the host expects:
+  skills/agents get `name` + `description` (agents add `tools` / `model`);
+  commands get `description` + `argument-hint` / `allowed-tools` /
+  `model`. Bodies are preserved; rule shims keep their synthesized
+  format.
+- **`kind:` inferred from the canonical directory** (convention over
+  configuration); an explicit `kind:` still overrides. `scanRoots` is
+  derived from `canonicalDirKind` so the walker and the taxonomy cannot
+  drift.
+- **Computational guides skip cleanly when their tool is absent.** The
+  migrated gofmt / gopls / go-vet guides guard each `run:` with
+  `command -v <tool>`, so a missing tool (e.g. gopls) is a clean no-op on
+  `PostToolUse` instead of exit-127 noise on every edit.
+- **Authoritative docs brought to 3.0 vocab** — README (fourteen-kind
+  table, rules → corpus → ask resolution flow), MCP server instructions,
+  CLAUDE.md (project + claude-code menu template): `.keystone` →
+  `.harness`, actions → commands, personas → agents, the hook-bridge
+  note, and a 3.0 activation table.
+
+### Removed
+
+- **The `source` kind and its entire subsystem.** External-system access
+  (Jira, an API curled for context) is now a `tool` (`transport: cli`
+  with curl, or `mcp`). Removed: `KindSource`, `keystone new source`,
+  `keystone_new_source`, the read-side `mcp/source.go` tools + resources,
+  the folder/url adapters and `context.json` loader, the web `/sources`
+  and `/api/sources` routes, the sources KPI, the source health cache,
+  and the SSE sources topic.
+- **Per-sensor `host_triggers` projection.** Superseded by the host
+  bridge; the field is vestigial and the v3_0 migration sets `event:` on
+  migrated hooks.
+
+### Migration
+
+`keystone migrate up` runs the `v3_0` plan:
+
+1. Relocate `.keystone/ → .harness/` (v2.x migrations stay pinned to the
+   legacy `.keystone` root; each era writes to its own layout).
+2. Rename every primitive to 3.0 vocabulary — actions → commands,
+   personas → agents, `traces:` → `corpus:`.
+3. Split sensors by nature: `review-*`, `*-debt`, and `spec-adherence`
+   are inferential (→ agent); the rest are computational (→ hook with
+   `event` / `run` / `mode`).
+4. Move playbooks to `skills/<id>/SKILL.md`; inject required `tools:` /
+   `triggers:` when converting.
+5. Seed the `.harness/work/` document workspace and rebuild `INDEX.json`
+   + `INDEX.lite.json`.
+6. Re-project every host surface.
+
+The lockfile resolves at `<root>/.harness/lockfile.json` (legacy
+`.keystone` as a read fallback) for both read and write, so `migrate
+status` reports 3.0 applied and a re-run of `migrate up` is a clean
+no-op. Refresh the binary afterward (`go install ./cmd/keystone`) — the
+host hooks call the installed `keystone`.
+
 ## [2.4.1] — 2026-06-22
 
 Patch release. Quiets a noisy false-failure path that surfaced once
