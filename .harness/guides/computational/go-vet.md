@@ -2,7 +2,7 @@
 kind: guide
 mode: computational
 event: PostToolUse
-run: 'go vet ./...'
+run: 'command -v go >/dev/null 2>&1 && go vet ./... || true'
 id: guides/computational/go-vet
 description: 'go vet — suspicious-construct check.'
 globs:

@@ -2,7 +2,7 @@
 kind: guide
 mode: computational
 event: PostToolUse
-run: 'gofmt -l cmd internal'
+run: 'command -v gofmt >/dev/null 2>&1 && test -z "$(gofmt -l cmd internal)" || true'
 id: guides/computational/gofmt
 description: 'gofmt — canonical Go formatting.'
 globs:

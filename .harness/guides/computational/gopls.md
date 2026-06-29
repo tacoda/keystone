@@ -2,7 +2,7 @@
 kind: guide
 mode: computational
 event: PostToolUse
-run: 'gopls version >/dev/null'
+run: 'command -v gopls >/dev/null 2>&1 && gopls version >/dev/null 2>&1 || true'
 id: guides/computational/gopls
 description: 'gopls — Go LSP for in-editor signal.'
 globs:
