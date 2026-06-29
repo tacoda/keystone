@@ -12,6 +12,7 @@ import (
 	"github.com/tacoda/keystone/internal/framework/adapters/claudecode"
 	"github.com/tacoda/keystone/internal/framework/adapters/continueide"
 	"github.com/tacoda/keystone/internal/framework/adapters/cursor"
+	"github.com/tacoda/keystone/internal/framework/adapters/opencode"
 	"github.com/tacoda/keystone/internal/framework/config"
 	"github.com/tacoda/keystone/internal/framework/primitive"
 )
@@ -135,6 +136,14 @@ func runProject(args []string) error {
 			}
 			fmt.Fprintf(os.Stdout, "  continue: %d rule(s) written, %d unchanged\n",
 				cnres.Wrote, cnres.Unchanged)
+		}
+		if cfg.HasAdapter(config.AdapterOpenCode) {
+			ores, err := opencode.ProjectAgents(absDir, primitives)
+			if err != nil {
+				return fmt.Errorf("opencode: %w", err)
+			}
+			fmt.Fprintf(os.Stdout, "  opencode: %d file(s) written, %d unchanged (%d rule(s))\n",
+				ores.Wrote, ores.Unchanged, ores.Rules)
 		}
 	}
 	return nil

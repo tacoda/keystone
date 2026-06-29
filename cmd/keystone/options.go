@@ -36,6 +36,7 @@ var categories = []Category{
 			{"continue", "Continue.dev"},
 			{"cline", "Cline (VS Code)"},
 			{"goose", "Block Goose"},
+			{"opencode", "opencode (open source CLI)"},
 			{"pi", "Pi"},
 			{"generic", "No specific agent — install the corpus only"},
 		},

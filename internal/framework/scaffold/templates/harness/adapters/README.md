@@ -29,6 +29,7 @@ Every adapter uses the same invocation model: the agent reads its menu file at s
 | Continue | [`continue/`](continue/) | `.continuerules` + optional `config.yaml` |
 | Cline / Roo Code | [`cline/`](cline/) | Custom instructions field + `.clinerules` / `.roorules` |
 | Goose | [`goose/`](goose/) | `.goosehints` |
+| opencode | [`opencode/`](opencode/) | `AGENTS.md` at repo root + `.opencode/` projections |
 | (any other) | [`_generic/`](_generic/) | the floor: agent reads markdown on demand |
 
 ## How adapters degrade

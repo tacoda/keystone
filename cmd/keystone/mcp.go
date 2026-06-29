@@ -85,6 +85,7 @@ Supported agents:
   cursor        → <dir>/.cursor/mcp.json
   vscode        → <dir>/.vscode/mcp.json
   codex         → <dir>/.codex/mcp.json
+  opencode      → <dir>/opencode.json (mcp key, type: local)
 
 Pass --stdout to print the config JSON instead of writing it; useful
 for piping into another tool or pasting into an agent's session.
@@ -93,7 +94,7 @@ The server entry runs ` + "`keystone mcp serve`" + ` against the project's
 .keystone/harness/. Re-installing is idempotent.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if agent == "" {
-				return fmt.Errorf("--agent is required (try: claude-code, cursor, vscode, codex)")
+				return fmt.Errorf("--agent is required (try: claude-code, cursor, vscode, codex, opencode)")
 			}
 			absDir, err := filepath.Abs(dirOr(dir, "."))
 			if err != nil {
@@ -119,7 +120,7 @@ The server entry runs ` + "`keystone mcp serve`" + ` against the project's
 			return nil
 		},
 	}
-	c.Flags().StringVar(&agent, "agent", "", "Target agent (claude-code | cursor | vscode | codex).")
+	c.Flags().StringVar(&agent, "agent", "", "Target agent (claude-code | cursor | vscode | codex | opencode).")
 	c.Flags().StringVar(&dir, "dir", ".", "Project root (defaults to cwd).")
 	c.Flags().BoolVar(&stdout, "stdout", false, "Print the config JSON to stdout instead of writing the file.")
 	c.Flags().StringVar(&serverNm, "name", "keystone", "Server name to record in the agent's config.")
@@ -208,8 +209,10 @@ func agentMCPConfigPath(agent, projectDir string, entry map[string]any) (string,
 		rel = filepath.Join(".vscode", "mcp.json")
 	case "codex":
 		rel = filepath.Join(".codex", "mcp.json")
+	case "opencode":
+		return opencodeMCPConfig(projectDir)
 	default:
-		return "", nil, fmt.Errorf("unsupported --agent %q (try: claude-code | cursor | vscode | codex)", agent)
+		return "", nil, fmt.Errorf("unsupported --agent %q (try: claude-code | cursor | vscode | codex | opencode)", agent)
 	}
 	path := filepath.Join(projectDir, rel)
 
@@ -226,6 +229,41 @@ func agentMCPConfigPath(agent, projectDir string, entry map[string]any) (string,
 		doc["mcpServers"] = servers
 	}
 	servers["keystone"] = entry
+
+	body, err := json.MarshalIndent(doc, "", "  ")
+	if err != nil {
+		return "", nil, err
+	}
+	body = append(body, '\n')
+	return path, body, nil
+}
+
+// opencodeMCPConfig writes the keystone server into opencode.json's `mcp`
+// key as a `local` (stdio) server. opencode's schema differs from the
+// Claude Code envelope: a top-level `mcp` object (not `mcpServers`), and
+// each server records `type: "local"`, a `command` array (binary + args
+// in one list), and `enabled`. Other top-level keys (`$schema`, `model`,
+// existing `mcp` entries) are preserved.
+func opencodeMCPConfig(projectDir string) (string, []byte, error) {
+	path := filepath.Join(projectDir, "opencode.json")
+
+	doc := map[string]any{}
+	if raw, err := os.ReadFile(path); err == nil {
+		_ = json.Unmarshal(raw, &doc) // best-effort; overwrite on parse failure
+	}
+	if _, ok := doc["$schema"]; !ok {
+		doc["$schema"] = "https://opencode.ai/config.json"
+	}
+	servers, ok := doc["mcp"].(map[string]any)
+	if !ok {
+		servers = map[string]any{}
+		doc["mcp"] = servers
+	}
+	servers["keystone"] = map[string]any{
+		"type":    "local",
+		"command": []string{"keystone", "mcp", "serve", "--dir", projectDir},
+		"enabled": true,
+	}
 
 	body, err := json.MarshalIndent(doc, "", "  ")
 	if err != nil {

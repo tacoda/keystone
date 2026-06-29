@@ -51,6 +51,7 @@ const (
 	AdapterCursor     = "cursor"
 	AdapterAider      = "aider"
 	AdapterContinue   = "continue"
+	AdapterOpenCode   = "opencode"
 )
 
 // HasAdapter returns true when name appears in c.Adapters. The empty
@@ -128,7 +129,7 @@ func (c *ProjectConfig) ResolvedHarnessRoot() string {
 // with existing call sites but is dropped from the emitted config.
 func DefaultProjectConfig(_ string) *ProjectConfig {
 	return &ProjectConfig{
-		Version: SchemaVersion,
+		Version:  SchemaVersion,
 		Policies: []PolicyNode{},
 	}
 }

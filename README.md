@@ -8,7 +8,7 @@ that reads `.harness/INDEX.json` and the bodies it points at can operate
 the project.
 
 The CLI authors and maintains the harness. The MCP server dispatches the
-same harness to host agents (Claude Code, Cursor, Codex, …) over the
+same harness to host agents (Claude Code, Cursor, Codex, opencode, …) over the
 model-context-protocol. The dashboard at `http://localhost:4773` gives a
 local operator view — metrics, insights, prune, eval runs.
 All three are convenience. The harness alone is enough.
@@ -96,6 +96,8 @@ autocomplete.
 
 Same binary, separate verb. `keystone mcp install --agent claude-code`
 writes `.mcp.json`; the host launches the server on session start.
+`keystone mcp install --agent opencode` writes the server into
+`opencode.json`'s `mcp` key as a `local` (stdio) server.
 
 Tool surface:
 

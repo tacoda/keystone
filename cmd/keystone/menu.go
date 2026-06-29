@@ -23,6 +23,7 @@ var agentMenuFile = map[string]string{
 	"continue":       ".continuerules",
 	"github-copilot": ".github/copilot-instructions.md",
 	"goose":          ".goosehints",
+	"opencode":       "AGENTS.md",
 	"pi":             "AGENTS.md",
 }
 

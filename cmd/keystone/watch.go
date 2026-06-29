@@ -20,6 +20,7 @@ import (
 	"github.com/tacoda/keystone/internal/framework/adapters/claudecode"
 	"github.com/tacoda/keystone/internal/framework/adapters/continueide"
 	"github.com/tacoda/keystone/internal/framework/adapters/cursor"
+	"github.com/tacoda/keystone/internal/framework/adapters/opencode"
 	"github.com/tacoda/keystone/internal/framework/config"
 	"github.com/tacoda/keystone/internal/framework/primitive"
 )
@@ -250,6 +251,11 @@ func runWatchAdapters(projectDir string, primitives []primitive.Primitive) {
 	if cfg.HasAdapter(config.AdapterContinue) {
 		if _, err := continueide.ProjectRules(projectDir, primitives); err != nil {
 			fmt.Fprintf(os.Stderr, "; ✗ continue: %v", err)
+		}
+	}
+	if cfg.HasAdapter(config.AdapterOpenCode) {
+		if _, err := opencode.ProjectAgents(projectDir, primitives); err != nil {
+			fmt.Fprintf(os.Stderr, "; ✗ opencode: %v", err)
 		}
 	}
 }

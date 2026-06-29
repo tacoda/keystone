@@ -24,18 +24,18 @@ type ProjectionResult struct {
 //
 // Projection targets at 2.0:
 //
-//   Framework wrappers (encouraged authoring path):
-//     kind: persona  → .claude/agents/<id>.md
-//     kind: action   → .claude/commands/<id>.md
-//     kind: playbook → .claude/skills/<id>/SKILL.md
-//     kind: guide    → .claude/rules/<slug>.md  (only when globs:
-//                       declared; a synthesized shim, not a verbatim
-//                       copy — see writeRuleShim)
+//	Framework wrappers (encouraged authoring path):
+//	  kind: persona  → .claude/agents/<id>.md
+//	  kind: action   → .claude/commands/<id>.md
+//	  kind: playbook → .claude/skills/<id>/SKILL.md
+//	  kind: guide    → .claude/rules/<slug>.md  (only when globs:
+//	                    declared; a synthesized shim, not a verbatim
+//	                    copy — see writeRuleShim)
 //
-//   Agent escape hatches (raw host-native, same targets):
-//     kind: subagent → .claude/agents/<id>.md
-//     kind: command  → .claude/commands/<id>.md
-//     kind: skill    → .claude/skills/<id>/SKILL.md
+//	Agent escape hatches (raw host-native, same targets):
+//	  kind: subagent → .claude/agents/<id>.md
+//	  kind: command  → .claude/commands/<id>.md
+//	  kind: skill    → .claude/skills/<id>/SKILL.md
 //
 // A framework wrapper and its agent counterpart project to the same
 // host path. Collisions on the same id are caught by the linter — the
@@ -167,25 +167,56 @@ func projectedDiskName(id string) string {
 // filename safe for `.claude/rules/`. The `guides/idioms/` prefix is stripped
 // so the resulting filenames stay short:
 //
-//   guides/idioms/go/stdlib-first              → keystone-go-stdlib-first
-//   guides/idioms/harness-content/state-files  → keystone-harness-content-state-files
-//   guides/process/foo                         → keystone-process-foo (fallback)
+//	guides/idioms/go/stdlib-first              → keystone-go-stdlib-first
+//	guides/idioms/harness-content/state-files  → keystone-harness-content-state-files
+//	guides/process/foo                         → keystone-process-foo (fallback)
 func ruleShimDiskID(guideID string) string {
 	trimmed := strings.TrimPrefix(guideID, "guides/idioms/")
 	trimmed = strings.TrimPrefix(trimmed, "guides/")
 	return projectedDiskName(trimmed)
 }
 
+// RenderForHost returns the host-native content a primitive projects to
+// — the same bytes Project writes under .claude. Guides render as a rule
+// shim; every other projecting kind renders as a frontmatter-lowered
+// copy. ok is false (with nil content) for kinds that have no host file.
+// Cross-host adapters (e.g. opencode) reuse this so every host surface
+// stays byte-identical to the Claude Code projection.
+func RenderForHost(projectDir string, p Primitive) (content []byte, ok bool, err error) {
+	if ProjectionRelPath(p) == "" {
+		return nil, false, nil
+	}
+	src := filepath.Join(projectDir, p.Path)
+	if Kind(p.Kind) == KindGuide {
+		content, err = ruleShimContent(src, p)
+	} else {
+		content, err = loweredContent(src, p)
+	}
+	if err != nil {
+		return nil, false, err
+	}
+	return content, true, nil
+}
+
 // writeLowered projects a primitive to its host file with frontmatter lowered
 // to the host-native subset, stripping keystone-only fields (kind, id, corpus,
 // includes, mode, event, returns, gates, tier, …). The body is preserved.
 func writeLowered(srcAbs, destAbs string, p Primitive) error {
+	content, err := loweredContent(srcAbs, p)
+	if err != nil {
+		return err
+	}
+	return atomicWriteFile(destAbs, content)
+}
+
+// loweredContent builds the frontmatter-lowered host file bytes for p.
+func loweredContent(srcAbs string, p Primitive) ([]byte, error) {
 	data, err := os.ReadFile(srcAbs)
 	if err != nil {
-		return fmt.Errorf("read %s: %w", srcAbs, err)
+		return nil, fmt.Errorf("read %s: %w", srcAbs, err)
 	}
 	body := stripFrontmatter(string(data))
-	return atomicWriteFile(destAbs, []byte(lowerFrontmatter(p)+body))
+	return []byte(lowerFrontmatter(p) + body), nil
 }
 
 // lowerFrontmatter returns the host-native (Claude Code) YAML frontmatter,
@@ -245,9 +276,18 @@ func writeListKey(b *strings.Builder, key string, items []string) {
 // Hand-edits to the shim are overwritten on the next `keystone
 // project` run. Treat the keystone guide as the source of truth.
 func writeRuleShim(srcAbs, destAbs string, p Primitive) error {
+	content, err := ruleShimContent(srcAbs, p)
+	if err != nil {
+		return err
+	}
+	return atomicWriteFile(destAbs, content)
+}
+
+// ruleShimContent builds the rule-shim bytes for guide p (see writeRuleShim).
+func ruleShimContent(srcAbs string, p Primitive) ([]byte, error) {
 	data, err := os.ReadFile(srcAbs)
 	if err != nil {
-		return fmt.Errorf("read %s: %w", srcAbs, err)
+		return nil, fmt.Errorf("read %s: %w", srcAbs, err)
 	}
 	body := stripFrontmatter(string(data))
 	title := extractH1(body)
@@ -287,7 +327,7 @@ func writeRuleShim(srcAbs, destAbs string, p Primitive) error {
 			b.WriteString("\n")
 		}
 	}
-	return atomicWriteFile(destAbs, []byte(b.String()))
+	return []byte(b.String()), nil
 }
 
 // stripFrontmatter returns the body of a markdown document with the
