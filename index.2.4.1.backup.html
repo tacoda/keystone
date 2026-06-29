@@ -1147,7 +1147,7 @@
         <h1>Keystone</h1>
       </div>
       <p>the agent harness framework</p>
-      <p>v3.0.0</p>
+      <p>v2.4.1</p>
     </div>
 
     <nav>
@@ -1168,21 +1168,24 @@
       </div>
 
       <div class="nav-group">
-        <span class="nav-label">Primitives</span>
+        <span class="nav-label">Framework primitives</span>
         <a class="nav-link" href="#plugins">Policies</a>
         <a class="nav-link" href="#guides">Guides</a>
-        <a class="nav-link" href="#corpus">Corpus</a>
         <a class="nav-link" href="#sensors">Sensors</a>
-        <a class="nav-link" href="#hooks">Hooks</a>
-        <a class="nav-link" href="#commands">Commands</a>
+        <a class="nav-link" href="#actions">Actions</a>
         <a class="nav-link" href="#playbooks">Playbooks</a>
-        <a class="nav-link" href="#agent-skills">Skills</a>
-        <a class="nav-link" href="#agent">Agents</a>
-        <a class="nav-link" href="#tool">Tools</a>
-        <a class="nav-link" href="#posture">Posture</a>
-        <a class="nav-link" href="#pattern">Pattern</a>
-        <a class="nav-link" href="#document">Documents</a>
+        <a class="nav-link" href="#personas">Personas</a>
+        <a class="nav-link" href="#corpus">Corpus</a>
         <a class="nav-link" href="#evals">Evals</a>
+        <a class="nav-link" href="#sources">Sources</a>
+      </div>
+
+      <div class="nav-group">
+        <span class="nav-label">Agent primitives</span>
+        <a class="nav-link" href="#rules">Rules</a>
+        <a class="nav-link" href="#agent-skills">Skills</a>
+        <a class="nav-link" href="#subagents">Subagents</a>
+        <a class="nav-link" href="#commands">Commands</a>
       </div>
 
       <div class="nav-group">
@@ -1200,15 +1203,14 @@
         <a class="nav-link" href="#modes">Pacing modes</a>
         <a class="nav-link" href="#budget">Context budgeting</a>
         <a class="nav-link" href="#failure-modes">Failure modes</a>
-        <a class="nav-link" href="#rules">Tiers &amp; iron laws</a>
-        <a class="nav-link" href="#patterns">Authoring patterns</a>
+        <a class="nav-link" href="#patterns">Iron laws</a>
       </div>
 
       <div class="nav-group">
         <span class="nav-label">Reference</span>
         <a class="nav-link" href="#agents">Supported agents</a>
         <a class="nav-link" href="#options">Install-time options</a>
-        <a class="nav-link" href="https://github.com/tacoda/keystone/blob/main/CHANGELOG.md" target="_blank" rel="noopener">2.x → 3.0 migration <span class="ext">↗</span></a>
+        <a class="nav-link" href="https://github.com/tacoda/keystone/blob/main/CHANGELOG.md" target="_blank" rel="noopener">1.x → 2.0 migration <span class="ext">↗</span></a>
         <a class="nav-link" href="https://github.com/tacoda/keystone/blob/main/docs/compatibility.md" target="_blank" rel="noopener">Compatibility <span class="ext">↗</span></a>
         <a class="nav-link" href="https://github.com/tacoda/keystone/blob/main/CHANGELOG.md" target="_blank" rel="noopener">Changelog <span class="ext">↗</span></a>
       </div>
@@ -1233,7 +1235,7 @@
   <!-- ===================== INTRODUCTION (landing) ===================== -->
   <section id="introduction" class="page" data-title="Introduction">
     <div class="page-head">
-      <div class="crumb">Overview · Keystone v3.0.0</div>
+      <div class="crumb">Overview · Keystone v2.4.1</div>
       <h1>The agent harness framework for <em class="hero-any">any</em> project.</h1>
       <p class="tagline">
         <em style="font-size: 1.25em;">Tired of agents reinventing your rules in every repo?</em><br>
@@ -1251,94 +1253,110 @@
         </div>
         <div class="term-body">
           <span class="pr">$</span> brew install tacoda/tap/keystone<br>
-          <span class="ok">●</span> keystone v3.0.0 installed<br>
+          <span class="ok">●</span> keystone v2.4.1 installed<br>
           <span class="pr">$</span> cd my-project<br>
           <span class="pr">$</span> keystone init<br>
           <span class="dim">?</span> Select your agent <span class="dim">›</span> <span class="ok">claude-code</span><br>
-          <span class="ar">▸</span> installing harness to .harness/<br>
+          <span class="ar">▸</span> installing harness to .keystone/harness/<br>
           <span class="ar">▸</span> installing claude-code target <span class="dim">→</span> CLAUDE.md<br>
-          <span class="ar">▸</span> wrote: .harness/INDEX.json (19 primitive(s))<br>
+          <span class="ar">▸</span> wrote: .keystone/INDEX.json (19 primitive(s))<br>
           <span class="ar">▸</span> projected 13 skill(s) <span class="dim">→</span> .claude/skills/keystone-*<br>
-          <span class="ar">▸</span> wrote: .harness/lockfile.json<br>
+          <span class="ar">▸</span> wrote: .keystone/lockfile.json<br>
           <span class="ar">▸</span> ambient load: 23,547 tokens across 6 port(s)<br>
           <span class="ok">✓</span> harness installed for claude-code.<br>
-          <span class="ar">▶</span> <span class="dim">Next:</span> run the <span class="ok">/keystone-bootstrap</span> skill in claude-code.<br>
+          <span class="ar">▶</span> <span class="dim">Next:</span> run the <span class="ok">/keystone:bootstrap</span> skill in claude-code.<br>
           <span class="pr">$</span> claude<br>
-          <span class="dim">&gt;</span> <span class="ok">/keystone-bootstrap</span><br>
+          <span class="dim">&gt;</span> <span class="ok">/keystone:bootstrap</span><br>
           <span class="ar" id="spark">✶</span> <span class="dim">Thinking… (<span id="elapsed">3</span>s · esc to interrupt)</span><span class="cursor"></span>
         </div>
       </div>
     </section>
 
     <div class="definition" style="border-left-color: var(--accent3);">
-      <p style="margin: 0 0 10px;"><strong style="color: var(--accent3); font-size: 1.1em;">What's new in v3.0.0</strong> — a major release. Two structural moves anchor 3.0: the harness root standardizes to <strong><code>.harness/</code></strong> — one agent-neutral source of truth that feeds every host — and the deterministic firing layer is unified under a <strong>framework hook dispatcher</strong>, so a hook, a computational guide, and a computational sensor all fire the same way. The primitive taxonomy is finalized at <strong>fourteen kinds</strong>: <code>agent</code> absorbs the old persona/subagent split, <code>action</code> becomes <code>command</code>, and <code>hook</code>, <code>pattern</code>, <code>posture</code>, <code>tool</code>, and <code>document</code> join as first-class kinds. <code>source</code> is gone — an external system is reached through a <code>tool</code>, not a bespoke kind.</p>
+      <p style="margin: 0 0 10px;"><strong style="color: var(--accent3); font-size: 1.1em;">What's new in v2.4.1</strong> — read-surface parity. The composition primitives shipped in <strong>2.3.0</strong> (concerns, includes, tags, severity) now reach both audiences through their native surfaces: the <strong>MCP server</strong> for the agent inside a session, the <strong>web dashboard</strong> for the human outside it. Both surfaces are read-only over the file source of truth at <code>.keystone/harness/*.md</code>; neither writes. No schema changes, no data transforms — additive at the binary layer only.</p>
 
-      <p style="margin: 12px 0 6px;"><strong style="color: var(--accent2); font-size: 1.02em;">v3.0.0 — highlights</strong></p>
+      <p style="margin: 12px 0 6px;"><strong style="color: var(--accent2); font-size: 1.02em;">v2.4.1 — read surfaces</strong></p>
       <ul style="margin: 0 0 14px; padding-left: 22px; line-height: 1.8; font-size: 0.95rem;">
-        <li><strong>One harness root: <code>.harness/</code>.</strong> <code>INDEX.json</code>, <code>INDEX.lite.json</code>, <code>lockfile.json</code>, the <code>work/</code> document workspace, and every primitive live under <code>.harness/</code>; <code>keystone.json</code> stays at repo root. One neutral root feeds Claude Code, Cursor, Aider, Continue, and opencode alike.</li>
-        <li><strong>Framework hook dispatcher.</strong> <code>keystone hook fire &lt;event&gt;</code> selects the <code>kind: hook</code> primitives bound to an event. Computational hooks (<code>run:</code>) execute in parallel — any non-zero exit blocks; inferential hooks (<code>agent:</code>) emit a dispatch manifest the host spawns. Events: <code>pre/post-command</code>, <code>pre/post-playbook</code>, <code>on-gate</code>, <code>pre/post-verify</code>, <code>on-phase-enter/exit</code>.</li>
-        <li><strong>Host bridge replaces per-sensor hook projection.</strong> The adapter installs ONE generic bridge entry per host phase any <code>kind: hook</code> binds to — <code>keystone hook fire &lt;phase&gt;</code> — instead of mapping each sensor into <code>settings.json</code>. Keystone dispatches and owns blocking itself.</li>
-        <li><strong>New primitives.</strong> <code>hook</code> (the framework hook layer), <code>pattern</code> (Diátaxis doc patterns), <code>posture</code> (allow/ask/deny permissions → <code>.claude/settings.json</code>), <code>tool</code> (an author-defined callable, <code>transport: cli | mcp | plugin</code>; <code>mcp</code> tools auto-register on keystone's MCP server), and <code>document</code> (gate-validated work docs under <code>.harness/work/</code>, driven by <code>keystone document</code>).</li>
-        <li><strong>Type-aware projection, lowered frontmatter.</strong> <code>ProjectionRelPath</code> is keyed on <code>(kind, mode)</code>; projected host files carry only host-native keys (keystone-only fields stripped). Every host artifact is kebab-case and <code>keystone-</code>prefixed (<code>command review</code> → <code>/keystone-review</code>).</li>
-        <li><strong>opencode</strong> joins Claude Code, Cursor, Aider, and Continue as a supported host.</li>
+        <li><strong>MCP: <code>keystone_show</code></strong> — single-call descriptor + cross-references for one primitive. Returns the composed view (post-<code>includes:</code> resolution) plus forward/reverse association lookups (<code>includes</code> / <code>included_by</code>, <code>traces</code> / <code>traced_by</code>, host hooks, tags, model, severity, phase). Saves N follow-up <code>keystone_get_primitive</code> calls when the agent needs to understand a primitive's neighborhood.</li>
+        <li><strong>MCP: <code>tags</code> filter on <code>keystone_list_primitives</code></strong> — array parameter, AND semantics. Concern tags propagate to including primitives (Compose runs at index time, so the filter sees the merged view).</li>
+        <li><strong>Web: tag cloud + tag filter on <code>/harness/primitives</code></strong> — every declared tag rendered as a clickable chip; dropdown filter in the form; <code>?tag=a&tag=b</code> URL params AND-merge.</li>
+        <li><strong>Web: detail page gains</strong> tags strip, <code>model:</code>, linked <code>includes:</code> (jumps to concern), and a host-hooks table for sensors. <strong>"referenced by"</strong> now walks <code>includes:</code> for concerns — clicking a concern shows every primitive that composes it in.</li>
+        <li><strong>Composed view everywhere.</strong> Both surfaces consume the same INDEX, which records what the agent actually sees after <code>Compose()</code>. Concern contributions land identically in MCP responses, web pages, and projected <code>.claude/*</code> files.</li>
       </ul>
 
-      <p style="margin: 12px 0 0; font-size: 0.85rem; color: var(--muted);">Full notes: <a href="https://github.com/tacoda/keystone/blob/main/CHANGELOG.md" target="_blank" rel="noopener">CHANGELOG.md <span class="ext">↗</span></a>. <strong>Migration:</strong> <code>keystone migrate up</code> runs the <code>v3_0</code> plan — relocate <code>.keystone/ → .harness/</code>, rename every primitive to the 3.0 vocabulary, split sensors by nature (review/debt → agent, the rest → hook), move playbooks to <code>skills/&lt;id&gt;/SKILL.md</code>, seed <code>.harness/work/</code>, rebuild the index, re-project. Refresh the binary afterward (the host hooks call the installed <code>keystone</code>).</p>
+      <p style="margin: 12px 0 6px;"><strong style="color: var(--accent4); font-size: 1.02em;">v2.3.0 — composition + queryable graph</strong></p>
+      <ul style="margin: 0 0 14px; padding-left: 22px; line-height: 1.8; font-size: 0.95rem;">
+        <li><strong>New <code>concern</code> primitive.</strong> Lives at <code>.keystone/harness/concerns/&lt;id&gt;.md</code>. Standard frontmatter plus the fields the concern contributes (<code>tools</code>, <code>tags</code>, <code>host_triggers</code>, <code>triggers</code>). Concerns are leaves — they cannot themselves declare <code>includes:</code> — so the composition graph is depth-1 by construction. <strong>Composition over inheritance.</strong></li>
+        <li><strong><code>includes: [&lt;concern-id&gt;, ...]</code></strong> on every primitive. Walker resolves after parse: <strong>union</strong> list fields (<code>tools</code>, <code>tags</code>, <code>triggers</code>, <code>traces</code>, <code>deps</code>, <code>globs</code>, <code>host_triggers</code>) — dedupe stable, host's values last so a host can demote a concern-contributed entry by re-listing it. <strong>Host-wins scalars</strong> (<code>kind</code>, <code>id</code>, <code>description</code>, <code>severity</code>, <code>model</code>): a concern can never override what the host primitive declares about itself.</li>
+        <li><strong><code>tags:</code> field</strong> on every primitive. Orthogonal taxonomy. Kebab-case enforced by <code>keystone lint</code>. Tags union-merge across <code>includes:</code> exactly like other list fields.</li>
+        <li><strong><code>keystone list [&lt;kind&gt;] [--tag &lt;tag&gt;]...</code></strong> — filtered primitive listing with composed view. Multiple <code>--tag</code> flags AND together.</li>
+        <li><strong><code>keystone show &lt;kind&gt; &lt;id&gt;</code></strong> — single-primitive view with forward + reverse association lookup (<code>includes</code> / <code>included_by</code>, <code>traces</code> / <code>traced_by</code>, host hooks, tags, severity, model, phase). <code>--json</code> for structured output.</li>
+        <li><strong>Severity → host enforcement.</strong> The Claude Code adapter now reads each sensor's <code>severity:</code> and shapes the projected hook command:
+          <ul style="margin: 4px 0 4px; padding-left: 18px;">
+            <li><code>must</code> (default) — command runs as-is. Exit 2 blocks.</li>
+            <li><code>should</code> — wrapper converts non-zero exit to 0 + stderr warning. Surfaces but doesn't block.</li>
+            <li><code>may</code> — wrapper silences non-zero exit. Informational only.</li>
+          </ul>
+          A severity-driven dial for tuning strictness without rewriting the command.</li>
+        <li><strong>Dogfood.</strong> Two concerns shipped: <code>reads-diff</code> (composed into <code>code-reviewer</code>, <code>security-reviewer</code>, <code>drift-reviewer</code>, <code>debt-reviewer</code>) and <code>scaffolds-primitive</code> (composed into every <code>keystone-new-*</code> skill). ~40 primitives gained <code>tags:</code> annotations.</li>
+      </ul>
+
+      <p style="margin: 12px 0 0; font-size: 0.85rem; color: var(--muted);">Full notes: <a href="https://github.com/tacoda/keystone/blob/main/CHANGELOG.md" target="_blank" rel="noopener">CHANGELOG.md <span class="ext">↗</span></a>. <strong>Migration:</strong> <code>keystone migrate up</code> runs the additive 2.3 plan (re-walk + re-compose + re-project; emits AGENTS.md; merges sensor <code>host_triggers</code> into <code>.claude/settings.json</code> with severity wrappers); 2.4 is a no-op record. The 2.3 Down plan re-projects without composition and strips severity wrappers but preserves authored content under <code>.keystone/harness/concerns/</code>.</p>
     </div>
 
     <div class="definition">
       <p><strong>AI coding agents are productive — and they go off-rails.</strong> They forget your team's conventions between sessions. Each repo reinvents the same prompt hacks and ad-hoc <code>CLAUDE.md</code> edits. Org-wide coding discipline can't be shared, versioned, or audited — switch agents and you lose all of it. Keystone fixes that by dropping a versioned markdown harness into every repo. The same rules apply across sessions, across repos, across agents. Org discipline ships as <strong style="color:var(--accent4);">policies</strong> — vendored, pinned, hash-verified packages your security and platform teams author once and every repo pulls. Agent output stays in bounds. New repos inherit org discipline on <code>keystone init</code>. Reviews stay consistent across teams. Swap tools, keep the rules. Engineering leadership gets one place to evolve coding discipline and one diff to roll it out org-wide.</p>
-      <p><strong style="color:var(--accent);">It's a framework, not a folder of markdown.</strong> A single Go binary: the CLI authors the harness at <code>.harness/</code>, a built-in MCP server dispatches it to host agents (Claude Code, Cursor, Codex), and a localhost dashboard at <code>:4773</code> observes. None of those tools are required at runtime — the harness is plain files; any agent that reads <code>.harness/INDEX.json</code> and the bodies it points at can operate the project. Generators for every primitive (<code>keystone new &lt;kind&gt;</code>), a typed primitive index, a lockfile that pins what loads, and convention over configuration. The framework absorbs the boring parts — walking, indexing, projection, lint, drift, eval — so your team writes only the rules that matter. <strong>Fourteen primitive kinds</strong> (<code>guide</code>, <code>sensor</code>, <code>hook</code>, <code>agent</code>, <code>command</code>, <code>skill</code>, <code>playbook</code>, <code>pattern</code>, <code>corpus</code>, <code>document</code>, <code>concern</code>, <code>posture</code>, <code>tool</code>, <code>eval</code>) — one keystone kind maps to a host mechanism by <code>mode</code> (one-to-many is the framework's value, not a 1:1 rename). You author once; Keystone projects to host-native paths under <code>.claude/</code> and friends.</p>
+      <p><strong style="color:var(--accent);">It's a framework, not a folder of markdown.</strong> A single Go binary: the CLI authors the harness at <code>.keystone/harness/</code>, a built-in MCP server dispatches it to host agents (Claude Code, Cursor, Codex), and a localhost dashboard at <code>:4773</code> observes. None of those tools are required at runtime — the harness is plain files; any agent that reads <code>.keystone/INDEX.json</code> and the bodies it points at can operate the project. Generators for every primitive (<code>keystone new &lt;kind&gt;</code>), a typed primitive index, a lockfile that pins what loads, and convention over configuration. The framework absorbs the boring parts — walking, indexing, projection, lint, drift, eval — so your team writes only the rules that matter. Two-layer primitive taxonomy: framework primitives (<code>guide</code>, <code>corpus</code>, <code>sensor</code>, <code>action</code>, <code>playbook</code>, <code>persona</code>, <code>eval</code>, <code>source</code>) wrap their agent counterparts (<code>rule</code>, <code>skill</code>, <code>subagent</code>, <code>command</code>) — ORM-over-SQL. You author at the framework layer; Keystone projects to host-native paths under <code>.claude/</code>.</p>
     </div>
 
     <div class="definition" style="border-color: var(--accent4);">
       <p style="margin: 0 0 10px;"><strong style="color:var(--accent4); font-size: 1.15em;">Why Keystone vs. other harnesses?</strong> Other harnesses are a folder of markdown for one agent. Keystone is a framework for many.</p>
       <ul style="margin: 0; padding-left: 22px; line-height: 1.85; font-size: 1.05rem;">
         <li style="margin-bottom: 8px;"><strong style="font-weight: 700; font-size: 1.08em;">Agent-agnostic.</strong> Other harnesses are Claude-only or Cursor-only. Keystone projects to multiple host formats — swap your agent, keep your rules.</li>
-        <li style="margin-bottom: 8px;"><strong style="font-weight: 700; font-size: 1.08em;">Typed primitives, not a folder of markdown.</strong> 14 primitive kinds with canonical frontmatter plus <code>INDEX.json</code> — the agent reads one descriptor file instead of crawling the tree.</li>
-        <li style="margin-bottom: 8px;"><strong style="font-weight: 700; font-size: 1.08em;">One kind, many host mechanisms.</strong> Author once at the keystone layer; projection lowers each primitive to the host-native surface by <code>mode</code> — rule shim, hook bridge, slash command, subagent. The 1-to-many mapping is the framework's value.</li>
+        <li style="margin-bottom: 8px;"><strong style="font-weight: 700; font-size: 1.08em;">Typed primitives, not a folder of markdown.</strong> 12 primitive kinds with canonical frontmatter plus <code>INDEX.json</code> — the agent reads one descriptor file instead of crawling the tree.</li>
+        <li style="margin-bottom: 8px;"><strong style="font-weight: 700; font-size: 1.08em;">Framework wraps agent.</strong> Author higher-level primitives; Keystone compiles to host-native paths. ORM-over-SQL.</li>
         <li style="margin-bottom: 8px;"><strong style="font-weight: 700; font-size: 1.08em; color: var(--accent4);">Policies = distribution layer.</strong> Other harnesses have no package manager — vendored, pinned, hash-verified packages give orgs one diff to ship rules to every repo.</li>
         <li style="margin-bottom: 8px;"><strong style="font-weight: 700; font-size: 1.08em;">Batteries included.</strong> Single Go binary — CLI, MCP server, localhost dashboard, lint, drift, eval, and audit in one tool.</li>
         <li style="margin-bottom: 8px;"><strong style="font-weight: 700; font-size: 1.08em;">Discipline + verify.</strong> Sensors, drift, lint, eval, and audit watch the harness itself — prose alone rots; Keystone checks itself.</li>
-        <li style="margin-bottom: 8px;"><strong style="font-weight: 700; font-size: 1.08em;">Convention over configuration.</strong> Fixed <code>.harness/</code> layout — no path bikeshedding.</li>
+        <li style="margin-bottom: 8px;"><strong style="font-weight: 700; font-size: 1.08em;">Convention over configuration.</strong> Fixed <code>.keystone/harness/</code> layout — no path bikeshedding.</li>
       </ul>
     </div>
 
     <div class="definition" style="border-color: var(--accent2);">
-      <p style="margin: 0;"><strong style="color:var(--accent2);">If you've used a web framework</strong> (Rails, Django, Phoenix, Laravel), the posture is familiar. <code>keystone init</code> is <code>rails new</code> — one command drops a conventional layout. <code>keystone new &lt;kind&gt; &lt;id&gt;</code> is <code>rails generate</code> — generators for any of the 14 primitive kinds plus <code>adapter</code> and <code>policy</code>, every one emitting canonical frontmatter and the right sections. <code>keystone.json</code> is the <code>Gemfile</code>; <code>.harness/lockfile.json</code> is the matching lock. <code>keystone policy add</code> is bundle add — vendored, pinned, hash-verified read-only packages.</p>
-      <p style="margin: 10px 0 0;"><strong>Convention over configuration.</strong> Opinionated defaults you can edit; generators emit conformant files; the layout is fixed at <code>.harness/</code> in 2.0 (no <code>--harness-root</code> flag). The framework is for agent harnesses, not web apps — same posture, different domain.</p>
+      <p style="margin: 0;"><strong style="color:var(--accent2);">If you've used a web framework</strong> (Rails, Django, Phoenix, Laravel), the posture is familiar. <code>keystone init</code> is <code>rails new</code> — one command drops a conventional layout. <code>keystone new &lt;kind&gt; &lt;id&gt;</code> is <code>rails generate</code> — generators for any of the 11 primitive kinds plus <code>adapter</code> and <code>policy</code>, every one emitting canonical frontmatter and the right sections. <code>keystone.json</code> is the <code>Gemfile</code>; <code>.keystone/lockfile.json</code> is the matching lock. <code>keystone policy add</code> is bundle add — vendored, pinned, hash-verified read-only packages.</p>
+      <p style="margin: 10px 0 0;"><strong>Convention over configuration.</strong> Opinionated defaults you can edit; generators emit conformant files; the layout is fixed at <code>.keystone/harness/</code> in 2.0 (no <code>--harness-root</code> flag). The framework is for agent harnesses, not web apps — same posture, different domain.</p>
     </div>
 
     <div class="section-label">It's all just markdown — override by editing a file</div>
     <div class="definition">
-      <p><strong>Every layer of the harness is markdown the agent reads and you edit.</strong> Rules, reasoning, sensor contracts, hook scripts, command playbooks, evals, tools, ledgers, adapter docs — all of it. No DSL, no compiled config, no runtime service. If something doesn't match your team, change the markdown. The agent stops applying a rule the moment its file is gone; starts applying a new one the moment its file lands.</p>
-      <p><strong>Defaults are <em>seeds</em>, not the shape.</strong> The harness ships with a default set of guides, sensors, commands, and a six-phase workflow because most teams want <em>something</em> to start from. They're also the worked examples for how to author your own — copy any file, edit, rename, ship. Policy content lives at <code>.harness/policies/&lt;name&gt;/</code> as read-only vendored markdown; if you want to override a policy file, drop your version at the project layer and it wins.</p>
+      <p><strong>Every layer of the harness is markdown the agent reads and you edit.</strong> Rules, reasoning, sensor contracts, action playbooks, evals, sources, ledgers, adapter docs — all of it. No DSL, no compiled config, no runtime service. If something doesn't match your team, change the markdown. The agent stops applying a rule the moment its file is gone; starts applying a new one the moment its file lands.</p>
+      <p><strong>Defaults are <em>seeds</em>, not the shape.</strong> The harness ships with a default set of guides, sensors, actions, and a six-phase workflow because most teams want <em>something</em> to start from. They're also the worked examples for how to author your own — copy any file, edit, rename, ship. Policy content lives at <code>.keystone/harness/policies/&lt;name&gt;/</code> as read-only vendored markdown; if you want to override a policy file, drop your version at the project layer and it wins.</p>
     </div>
 
     <div class="action-grid">
       <div class="action">
         <h3 style="color: var(--accent4);"><a href="#first-plugin" style="color: inherit; border-bottom: none;">Policies — vendored governance →</a></h3>
-        <p>Ship org rules as pinned, hash-verified markdown packages. One diff to roll out org-wide. The distribution layer no other harness has. <code>keystone policy add</code> vendors a policy into <code>.harness/policies/&lt;name&gt;/</code> read-only; <code>strict</code> items lock absolutely. Cascade: project layer wins by default; deeper-nested policies refine outer ones.</p>
+        <p>Ship org rules as pinned, hash-verified markdown packages. One diff to roll out org-wide. The distribution layer no other harness has. <code>keystone policy add</code> vendors a policy into <code>.keystone/harness/policies/&lt;name&gt;/</code> read-only; <code>strict</code> items lock absolutely. Cascade: project layer wins by default; deeper-nested policies refine outer ones.</p>
       </div>
       <div class="action">
-        <h3 style="color: var(--accent);"><a href="#guides" style="color: inherit; border-bottom: none;">14 primitive kinds →</a></h3>
-        <p>One canonical set: <code>guide</code>, <code>sensor</code>, <code>hook</code>, <code>agent</code>, <code>command</code>, <code>skill</code>, <code>playbook</code>, <code>pattern</code>, <code>corpus</code>, <code>document</code>, <code>concern</code>, <code>posture</code>, <code>tool</code>, <code>eval</code>. Every primitive carries canonical frontmatter — <code>kind</code>, <code>id</code>, <code>description</code> + per-kind required fields. The walker emits one <code>.harness/INDEX.json</code>; agents read the index first.</p>
+        <h3 style="color: var(--accent);"><a href="#guides" style="color: inherit; border-bottom: none;">11 primitive kinds →</a></h3>
+        <p>Two layers — <strong>Framework</strong> (7): <code>guide</code>, <code>corpus</code>, <code>sensor</code>, <code>action</code>, <code>playbook</code>, <code>eval</code>, <code>source</code>. <strong>Agent</strong> (5): <code>rule</code>, <code>skill</code>, <code>subagent</code>, <code>command</code>, <code>persona</code>. Every primitive carries canonical frontmatter — <code>kind</code>, <code>id</code>, <code>description</code> + per-kind required fields. The walker emits one <code>.keystone/INDEX.json</code>; agents read the index first.</p>
       </div>
       <div class="action">
         <h3 style="color: var(--accent3);"><a href="#mcp" style="color: inherit; border-bottom: none;">Built-in MCP server →</a></h3>
-        <p>Same binary, separate verb. <code>keystone mcp install --agent claude-code</code> writes <code>.mcp.json</code>; the host launches the stdio server on session start. Read / write / search tools across the primitive graph, plus generators (<code>keystone_new_*</code>) and eval run / report / baseline. <code>transport: mcp</code> tools you author register themselves on the same server at startup.</p>
+        <p>Same binary, separate verb. <code>keystone mcp install --agent claude-code</code> writes <code>.mcp.json</code>; the host launches the stdio server on session start. <strong>21 tools</strong> across read / write / sources / evals / search; <strong>4 prompts</strong> (<code>keystone_bootstrap</code>, <code>keystone_task</code>, <code>keystone_audit</code>, <code>keystone_learn</code>); resources for the index, primitive bodies, source health, and skills.</p>
       </div>
       <div class="action">
         <h3 style="color: var(--accent5);"><a href="#dashboard" style="color: inherit; border-bottom: none;">Localhost dashboard →</a></h3>
-        <p><code>keystone web serve</code> opens <code>http://localhost:4773</code> (KEYS on a phone keypad). HTMX SPA shell + narrow-topic SSE push, fsnotify on <code>.harness/</code>. <strong>4 sections:</strong> Observability, Harness, Flywheels, Quality. KPI strip + per-session audit log + command-K search. Read-only REST at <code>/api/*</code>.</p>
+        <p><code>keystone web serve</code> opens <code>http://localhost:4773</code> (KEYS on a phone keypad). HTMX SPA shell + narrow-topic SSE push, fsnotify on <code>.keystone/</code>. <strong>5 sections:</strong> Observability, Harness, Sources, Flywheels, Quality. KPI strip + per-session audit log + command-K search. Read-only REST at <code>/api/*</code>.</p>
       </div>
       <div class="action">
         <h3 style="color: var(--accent2);"><a href="#evals" style="color: inherit; border-bottom: none;">Evals + baseline diffs →</a></h3>
-        <p><code>.harness/evals/&lt;id&gt;/EVAL.md</code> + <code>expected.json</code> + optional <code>fixture/</code>. Static + sensor levels. <code>keystone eval run --baseline &lt;git-ref&gt;</code> materializes the ref in a git worktree, runs both sides, and diffs results into a regression report.</p>
+        <p><code>.keystone/harness/evals/&lt;id&gt;/EVAL.md</code> + <code>expected.json</code> + optional <code>fixture/</code>. Static + sensor levels. <code>keystone eval run --baseline &lt;git-ref&gt;</code> materializes the ref in a git worktree, runs both sides, and diffs results into a regression report.</p>
       </div>
       <div class="action">
         <h3 style="color: var(--accent3);"><a href="#cli" style="color: inherit; border-bottom: none;">Snapshots for safe experiments →</a></h3>
-        <p><code>keystone snapshot save --label pre-2.0</code>, <code>list</code>, <code>restore</code>. Local tar.gz snapshots of the entire <code>.harness/</code> tree. Pair with <code>keystone migrate</code>, or use before any aggressive learn/prune sweep. Insurance for experiments that touch many primitives at once.</p>
+        <p><code>keystone snapshot save --label pre-2.0</code>, <code>list</code>, <code>restore</code>. Local tar.gz snapshots of the entire <code>.keystone/</code> tree. Pair with <code>keystone migrate</code>, or use before any aggressive learn/prune sweep. Insurance for experiments that touch many primitives at once.</p>
       </div>
       <div class="action">
         <h3 style="color: var(--accent);"><a href="#cli" style="color: inherit; border-bottom: none;">Search + graph →</a></h3>
@@ -1384,15 +1402,15 @@
     <div class="definition">
       <p><strong>Agents are productive but undisciplined.</strong> The model will plausibly suggest a method that exists in five popular libraries and does not exist here. It will skip a sensor it doesn't think matters. It will refactor adjacent code on a one-line fix. Left to its own posture, the agent's defaults pull against the team's defaults — every project pays the cost of writing rules, hooking checks, capturing what it learned, and pruning what's stale, from scratch.</p>
       <p><strong>A web framework gave us the same leverage 20 years ago.</strong> Rails, Django, Phoenix, Laravel didn't make web apps possible — they made them <em>conventional</em>. The harness framework is the same shift for agent-driven engineering: opinionated layout, typed primitives, generators, a runtime contract, and a maintenance loop, so every project starts from the same shape and the same vocabulary.</p>
-      <p><strong>Keystone provides the shape.</strong> A fixed layout at <code>.harness/</code>, 14 typed primitive kinds, a six-phase task lifecycle (spec → plan → implement → verify → review → release), two flywheels (Learning adds, Pruning removes), a localhost dashboard for observability, and a built-in MCP server that carries the runtime contract directly into the host agent.</p>
+      <p><strong>Keystone provides the shape.</strong> A fixed layout at <code>.keystone/harness/</code>, 11 typed primitive kinds in two layers, a six-phase task lifecycle (spec → plan → implement → verify → review → release), two flywheels (Learning adds, Pruning removes), a localhost dashboard for observability, and a built-in MCP server that carries the runtime contract directly into the host agent.</p>
     </div>
 
     <div class="definition" style="border-color: var(--accent2);">
       <p style="margin: 0;"><strong style="color:var(--accent2);">What you get out of the framework posture:</strong></p>
       <ul class="iron-list" style="margin: 10px 0 0;">
         <li><strong>Convention over configuration.</strong> The layout is fixed in 2.0 — no <code>--harness-root</code> flag, no per-project bikeshed. Primitives have canonical frontmatter; generators emit conformant files; the index walker reads everything the same way.</li>
-        <li><strong>One source of truth across three surfaces.</strong> CLI, MCP server, and dashboard all read the same <code>.harness/</code> tree. Author once; every surface picks it up.</li>
-        <li><strong>Runtime contract, not just author-time discipline.</strong> The MCP server's <code>instructions</code> block encodes the resolution flow (rules → corpus → tool → ask). The agent inherits the discipline at session start.</li>
+        <li><strong>One source of truth across three surfaces.</strong> CLI, MCP server, and dashboard all read the same <code>.keystone/harness/</code> tree. Author once; every surface picks it up.</li>
+        <li><strong>Runtime contract, not just author-time discipline.</strong> The MCP server's <code>instructions</code> block encodes the five-stage resolution flow (rules → corpus → external → ask → resolve contradictions). The agent inherits the discipline at session start.</li>
       </ul>
     </div>
   </section>
@@ -1401,31 +1419,35 @@
   <section id="contract" class="page" data-title="Resolution contract">
     <div class="page-head">
       <div class="crumb">Overview · The runtime contract</div>
-      <h1>Resolution contract: rules → corpus → tool → ask.</h1>
-      <p class="tagline">Four stages, encoded in the MCP server's <code>instructions</code> block and in <code>.harness/guides/process/runtime-resolution.md</code>. The agent walks them in order on every meaningful question. Stage 3 is where an external system enters — through a <code>tool</code>, not a bespoke kind. The last stage is the safety net — disagreements between the rules, the corpus, and tool results are surfaced to the human, never silently flattened.</p>
+      <h1>Resolution contract: rules → corpus → external → ask.</h1>
+      <p class="tagline">Five stages, encoded in the MCP server's <code>instructions</code> block and in <code>.keystone/harness/guides/process/runtime-resolution.md</code>. The agent walks them in order on every meaningful question. Stage 5 is the safety net — disagreements between the rules, the corpus, and external sources are surfaced to the human, never silently flattened.</p>
     </div>
 
     <ol class="steps">
       <li>
         <strong>Rules.</strong>
-        <p>Find applicable guides + sensors via <code>.harness/INDEX.json</code>, filtered by the touched-files glob set and the current task phase. <strong>Project wins by default;</strong> policies refine via nesting depth in <code>keystone.json</code>; <code>strict</code> items lock absolutely. Output: the ambient rule set the agent operates under for this turn.</p>
+        <p>Find applicable guides + sensors via <code>.keystone/INDEX.json</code>, filtered by the touched-files glob set and the current task phase. <strong>Project wins by default;</strong> policies refine via nesting depth in <code>keystone.json</code>; <code>strict</code> items lock absolutely. Output: the ambient rule set the agent operates under for this turn.</p>
       </li>
       <li>
         <strong>Corpus.</strong>
         <p>When a rule's body isn't enough, follow its <code>traces:</code> to the linked corpus reasoning. Corpus is on-demand: most turns load zero corpus files; deep-reasoning turns load two or three. Cite specifics — RFC numbers, ticket IDs, paper references — so the next reader can verify rather than trust.</p>
       </li>
       <li>
-        <strong>Tool.</strong>
-        <p>Rules + corpus still not enough, and the answer lives in an external system? The agent calls a <a href="#tool"><code>tool</code></a> — transport <code>cli</code> (e.g. curl) or <code>mcp</code> (an MCP server or connector wired to Jira, an internal API, a database). The tool retrieves the answer; its result is <strong>evidence, not authority</strong>. Tools are declared primitives, so what the agent may reach is versioned and reviewable, not ad-hoc.</p>
+        <strong>External.</strong>
+        <p>Insufficient still? Query configured external sources — folder, URL, Linear, Confluence, service adapters in Phase B. Only when the MCP server is running and a source primitive (or <code>.keystone/context.json</code> for backwards-compat) declares the source. External results are evidence, not authority.</p>
       </li>
       <li>
         <strong>Ask.</strong>
-        <p>Still insufficient, or the rules, corpus, and tool results disagree? The agent asks the user rather than guessing — and where the answer should land: <strong>project</strong> (write a new primitive), <strong>team policy</strong> (open a policy PR), <strong>org policy</strong> (escalate), or <strong>session</strong> (use it once, don't persist). Silent flattening of contradictions is how harnesses go bad over time; the contract forbids it. Resolutions become candidates in <code>.harness/learning/inbox/</code> so the next <code>synthesize</code> pass can promote the answer to a real rule or corpus entry.</p>
+        <p>External results are never applied silently. The agent asks the user where the answer should land: <strong>project</strong> (write a new primitive), <strong>team policy</strong> (open a policy PR), <strong>org policy</strong> (escalate), or <strong>session</strong> (use it once, don't persist). The framework gives the agent the place to put each kind of answer.</p>
+      </li>
+      <li>
+        <strong>Contradictions.</strong>
+        <p>Conflicts between the rules, the corpus, and external sources trigger the agent to ask the user to resolve. Silent flattening of contradictions is how harnesses go bad over time; the contract forbids it. Resolutions become candidates in <code>.keystone/harness/learning/inbox/</code> so the next <code>synthesize</code> pass can promote the answer to a real rule or corpus entry.</p>
       </li>
     </ol>
 
     <div class="definition" style="margin-top: 24px; border-left-color: var(--accent3);">
-      <p><strong style="color: var(--accent3);">The contract is markdown.</strong> Edit <code>.harness/guides/process/runtime-resolution.md</code> to refine how your team walks the stages. The MCP server's <code>instructions</code> block reads from the same source — author once, every host session picks up the new contract.</p>
+      <p><strong style="color: var(--accent3);">The contract is markdown.</strong> Edit <code>.keystone/harness/guides/process/runtime-resolution.md</code> to refine how your team walks the five stages. The MCP server's <code>instructions</code> block reads from the same source — author once, every host session picks up the new contract.</p>
     </div>
   </section>
 
@@ -1434,7 +1456,7 @@
     <div class="page-head">
       <div class="crumb">Overview · Architecture and flow</div>
       <h1>How it works.</h1>
-      <p class="tagline">Five diagrams. <code>keystone init</code> drops the harness into your repo at <code>.harness/</code>, emits <code>.harness/INDEX.json</code>, and projects host-agent files; bootstrap makes the harness specific to your codebase; the agent drives a six-phase workflow with sensors firing at the gates; two flywheels keep the harness current; and the CLI, MCP server, and dashboard all read the same tree.</p>
+      <p class="tagline">Five diagrams. <code>keystone init</code> drops the harness into your repo at <code>.keystone/harness/</code>, emits <code>.keystone/INDEX.json</code>, and projects host-agent files; bootstrap makes the harness specific to your codebase; the agent drives a six-phase workflow with sensors firing at the gates; two flywheels keep the harness current; and the CLI, MCP server, and dashboard all read the same tree.</p>
     </div>
 
     <div class="section-label">Install &amp; bootstrap flow</div>
@@ -1443,12 +1465,12 @@
       <div class="mermaid">
 flowchart LR
   binary["keystone binary<br/><i>embedded templates +<br/>built-in MCP server +<br/>dashboard</i>"] -->|init| repo["your repo"]
-  repo --> hr[".harness/<br/>(14 primitive kinds)"]
+  repo --> hr[".keystone/harness/<br/>(11 primitive kinds)"]
   repo --> mcp[".mcp.json<br/><i>(wires MCP server<br/>into agent)</i>"]
   repo --> kj["keystone.json<br/>(policy pins)"]
-  hr --> idx[".harness/INDEX.json<br/>(descriptor index)"]
-  hr --> lock[".harness/lockfile.json<br/>(per-file policy hashes)"]
-  hr --> ctx[".harness/work/<br/>(document workspace)"]
+  hr --> idx[".keystone/INDEX.json<br/>(descriptor index)"]
+  hr --> lock[".keystone/lockfile.json<br/>(per-file policy hashes)"]
+  hr --> ctx[".keystone/context.json<br/>(sources config)"]
   hr --> bs["bootstrap skill<br/><i>(agent-driven)</i>"]
   bs --> state["corpus/state/<br/>CODEBASE_STATE.md"]
   bs --> idioms["corpus/idioms/&lt;stack&gt;/<br/>+ guides/idioms/&lt;stack&gt;/"]
@@ -1464,29 +1486,28 @@ flowchart LR
 
     <div class="section-label">Project harness + nested policies</div>
     <div class="mermaid-wrap">
-      <p class="mermaid-caption">Project primitives under <code>.harness/</code>; policies are vendored read-only and nest arbitrarily; the project layer always wins by default; <code>strict</code> locks absolutely.</p>
+      <p class="mermaid-caption">Project primitives under <code>.keystone/harness/</code>; policies are vendored read-only and nest arbitrarily; the project layer always wins by default; <code>strict</code> locks absolutely.</p>
       <div class="mermaid">
 flowchart TB
   subgraph projectHarness ["project layer (project-owned · edit freely)"]
     direction LR
     guides["guides/<br/><i>ambient · rules</i>"]
     corpus["corpus/<br/><i>on-demand ·<br/>reasoning</i>"]
-    playbooks["playbooks/<br/><i>ordered command<br/>chains</i>"]
-    commands["commands/<br/><i>single units</i>"]
-    sensors["sensors/<br/><i>inferential reviews</i>"]
-    hooks["hooks/<br/><i>deterministic checks</i>"]
+    playbooks["playbooks/<br/><i>ordered action<br/>chains</i>"]
+    actions["actions/<br/><i>single units</i>"]
+    sensors["sensors/<br/><i>invoked · checks</i>"]
     evals["evals/<br/><i>fixture-based<br/>regression tests</i>"]
-    tools["tools/<br/><i>external access</i>"]
-    agents["agents/ · skills/ ·<br/>patterns/ · posture/ ·<br/>documents/ · concerns/"]
+    sources["sources/<br/><i>external context<br/>providers</i>"]
+    agent["rules · skills · subagents ·<br/>commands · personas<br/><i>(agent layer)</i>"]
     state["corpus/state/<br/><i>state ledgers</i>"]
   end
   subgraph policies ["policies (vendored · read-only · pinned)"]
-    pluginA[".harness/policies/acme-org/<br/><i>org-wide baseline</i>"]
-    pluginB[".harness/policies/acme-platform/<br/><i>(child of acme-org)</i>"]
-    pluginC[".harness/policies/acme-team/<br/><i>(child of acme-platform)</i>"]
+    pluginA[".keystone/harness/policies/acme-org/<br/><i>org-wide baseline</i>"]
+    pluginB[".keystone/harness/policies/acme-platform/<br/><i>(child of acme-org)</i>"]
+    pluginC[".keystone/harness/policies/acme-team/<br/><i>(child of acme-platform)</i>"]
   end
   guides <-->|paired forward-link| corpus
-  playbooks --> commands
+  playbooks --> actions
   guides --> drift["drift sensor enforces"]
   pluginA --> guides
   pluginB --> guides
@@ -1500,9 +1521,9 @@ flowchart TB
   classDef orange fill:#13161d,stroke:#f59e0b,color:#f59e0b
   classDef pink fill:#13161d,stroke:#e879a0,color:#e879a0
   classDef purple fill:#13161d,stroke:#a78bfa,color:#a78bfa
-  class guides,commands,agents green
-  class corpus,state,tools blue
-  class sensors,hooks,drift,evals orange
+  class guides,actions,agent green
+  class corpus,state,sources blue
+  class sensors,drift,evals orange
   class playbooks pink
   class pluginA,pluginB,pluginC purple
       </div>
@@ -1518,8 +1539,8 @@ flowchart LR
   impl --> verify["4 · verify<br/><i>sensors fire</i>"]
   verify --> review["5 · review<br/><i>4 reviewers</i>"]
   review --> release["6 · release<br/><i>PR up</i>"]
-  verify -.->|lint · type · test ·<br/>build · drift · commit-message| Vs[(computational<br/>hooks)]
-  review -.->|review-functional ·<br/>review-security ·<br/>review-risk ·<br/>review-deployment| Rs[(inferential<br/>agents)]
+  verify -.->|lint · type · test ·<br/>build · drift · commit-message| Vs[(computational<br/>sensors)]
+  review -.->|review-functional ·<br/>review-security ·<br/>review-risk ·<br/>review-deployment| Rs[(inferential<br/>sensors)]
   classDef phase fill:#13161d,stroke:#4ade9a,color:#e2e8f0
   classDef sense fill:#1a1e28,stroke:#f59e0b,color:#f59e0b
   class spec,plan,impl,verify,review,release phase
@@ -1556,12 +1577,12 @@ flowchart LR
 
     <div class="section-label">Three surfaces, one tree</div>
     <div class="mermaid-wrap">
-      <p class="mermaid-caption">The CLI, the built-in MCP server, and the localhost dashboard all read the same <code>.harness/</code> primitives — same source of truth for the author surface and the runtime surface.</p>
+      <p class="mermaid-caption">The CLI, the built-in MCP server, and the localhost dashboard all read the same <code>.keystone/harness/</code> primitives — same source of truth for the author surface and the runtime surface.</p>
       <div class="mermaid">
 flowchart LR
-  tree[".harness/<br/><i>14 primitive kinds<br/>+ INDEX.json + lockfile</i>"]
-  cli["keystone CLI<br/><i>init · new · lint ·<br/>verify · index · search ·<br/>graph · watch · eval ·<br/>document · migrate</i>"]
-  mcp["keystone mcp serve<br/><i>stdio MCP server<br/>read · write · search ·<br/>generators · evals</i>"]
+  tree[".keystone/harness/<br/><i>11 primitive kinds<br/>+ INDEX.json + lockfile</i>"]
+  cli["keystone CLI<br/><i>init · new · lint ·<br/>verify · index · search ·<br/>graph · watch · eval ·<br/>snapshot · migrate</i>"]
+  mcp["keystone mcp serve<br/><i>stdio MCP server<br/>21 tools · 4 prompts ·<br/>resources</i>"]
   web["keystone web serve<br/><i>localhost HTMX dashboard<br/>port 4773 · SSE push</i>"]
   agent["host agent<br/><i>(claude-code,<br/>cursor, codex, …)</i>"]
   browser["your browser"]
@@ -1585,12 +1606,12 @@ flowchart LR
     <div class="page-head">
       <div class="crumb">Overview · The whole bargain</div>
       <h1>Every layer is markdown. Override by editing a file.</h1>
-      <p class="tagline">No DSL, no compiled config, no runtime service. Rules, reasoning, sensor contracts, hook scripts, command playbooks, evals, tools, ledgers, adapter docs — all markdown the agent reads and you edit. The harness bends to your project, not the other way around.</p>
+      <p class="tagline">No DSL, no compiled config, no runtime service. Rules, reasoning, sensor contracts, action playbooks, evals, sources, ledgers, adapter docs — all markdown the agent reads and you edit. The harness bends to your project, not the other way around.</p>
     </div>
 
     <div class="definition">
-      <p><strong>Defaults are seeds, not the shape.</strong> Keystone ships with a default set of guides, sensors, commands, and a six-phase workflow because most teams want <em>something</em> to start from. They're also the worked examples for how to author your own — copy any file, edit, rename, ship.</p>
-      <p><strong>The agent stops applying a rule the moment its file is gone</strong> — and starts applying a new one the moment its file lands. No reindex, no rebuild, no service restart. Add a file under <code>.harness/guides/</code> and the next turn picks it up.</p>
+      <p><strong>Defaults are seeds, not the shape.</strong> Keystone ships with a default set of guides, sensors, actions, and a six-phase workflow because most teams want <em>something</em> to start from. They're also the worked examples for how to author your own — copy any file, edit, rename, ship.</p>
+      <p><strong>The agent stops applying a rule the moment its file is gone</strong> — and starts applying a new one the moment its file lands. No reindex, no rebuild, no service restart. Add a file under <code>.keystone/harness/guides/</code> and the next turn picks it up.</p>
     </div>
 
     <div class="section-label">What you can change, and how</div>
@@ -1598,32 +1619,32 @@ flowchart LR
       <div class="action">
         <span class="action-tag">Workflow</span>
         <h3 style="color: var(--accent);">Don't like six phases?</h3>
-        <p>The pipeline is just <code>.harness/playbooks/task.md</code> orchestrating <code>spec.md</code>, <code>orient.md</code>, <code>verify.md</code>, etc. Edit <code>task.md</code> to change the order; replace any phase by editing its action; add a phase by dropping in <code>.harness/commands/&lt;new-phase&gt;.md</code> and referencing it from the playbook. Remove one by deleting the file.</p>
+        <p>The pipeline is just <code>.keystone/harness/playbooks/task.md</code> orchestrating <code>spec.md</code>, <code>orient.md</code>, <code>verify.md</code>, etc. Edit <code>task.md</code> to change the order; replace any phase by editing its action; add a phase by dropping in <code>.keystone/harness/actions/&lt;new-phase&gt;.md</code> and referencing it from the playbook. Remove one by deleting the file.</p>
       </div>
       <div class="action">
         <span class="action-tag">Rules</span>
         <h3 style="color: var(--accent2);">Guide doesn't fit?</h3>
-        <p>Open the markdown under <code>.harness/guides/</code>, edit it, soften it, strengthen it, or delete the file. The drift sensor enforces what's there — nothing else. Authoring a new rule is one new file in the right subdirectory.</p>
+        <p>Open the markdown under <code>.keystone/harness/guides/</code>, edit it, soften it, strengthen it, or delete the file. The drift sensor enforces what's there — nothing else. Authoring a new rule is one new file in the right subdirectory.</p>
       </div>
       <div class="action">
         <span class="action-tag">Sensors</span>
         <h3 style="color: var(--accent3);">Need a new check?</h3>
-        <p>Sensors are markdown contracts — kind, trigger, inputs, exit condition, output. Add <code>.harness/sensors/&lt;name&gt;.md</code> with that shape; the action that should invoke it picks it up next pass. The shipped sensors (lint, type-check, the four reviewers, the security trio) are the worked examples.</p>
+        <p>Sensors are markdown contracts — kind, trigger, inputs, exit condition, output. Add <code>.keystone/harness/sensors/&lt;name&gt;.md</code> with that shape; the action that should invoke it picks it up next pass. The shipped sensors (lint, type-check, the four reviewers, the security trio) are the worked examples.</p>
       </div>
       <div class="action">
         <span class="action-tag">Reasoning</span>
         <h3 style="color: var(--accent5);">Stack idiom is wrong?</h3>
-        <p><code>.harness/corpus/idioms/&lt;stack&gt;/*.md</code> is the empirical map of how your stack is used here. Edit when patterns shift; add files when new patterns emerge. State ledgers (<code>code-debt.md</code>, <code>harness-debt.md</code>, <code>quality-radar.md</code>) are markdown too — read during planning, written by sensors, edited by humans.</p>
+        <p><code>.keystone/harness/corpus/idioms/&lt;stack&gt;/*.md</code> is the empirical map of how your stack is used here. Edit when patterns shift; add files when new patterns emerge. State ledgers (<code>code-debt.md</code>, <code>harness-debt.md</code>, <code>quality-radar.md</code>) are markdown too — read during planning, written by sensors, edited by humans.</p>
       </div>
       <div class="action">
         <span class="action-tag">Policies</span>
         <h3 style="color: var(--accent4);">Policy doesn't fit?</h3>
-        <p>Drop a file with the same path at the matching project location — <code>.harness/&lt;kind&gt;/&lt;name&gt;.md</code> — and the project layer beats every policy. Policies are read-only at the vendor location; editing there is reverted on the next <code>keystone verify</code>. Policy authors can mark items <code>strict</code> to block override; verify reports violations with path context.</p>
+        <p>Drop a file with the same path at the matching project location — <code>.keystone/harness/&lt;kind&gt;/&lt;name&gt;.md</code> — and the project layer beats every policy. Policies are read-only at the vendor location; editing there is reverted on the next <code>keystone verify</code>. Policy authors can mark items <code>strict</code> to block override; verify reports violations with path context.</p>
       </div>
       <div class="action">
         <span class="action-tag">Adapters &amp; modes</span>
         <h3 style="color: var(--accent);">Agent-specific friction?</h3>
-        <p><code>.harness/adapters/&lt;agent&gt;/lifecycle.md</code> and <code>activation.md</code> document how that agent runs the harness — edit to capture how your team actually uses it. Pacing modes live in <code>.harness/guides/process/modes.md</code> (paired / solo / autopilot); switch via the <code>mode</code> action or redefine the modes themselves.</p>
+        <p><code>.keystone/harness/adapters/&lt;agent&gt;/lifecycle.md</code> and <code>activation.md</code> document how that agent runs the harness — edit to capture how your team actually uses it. Pacing modes live in <code>.keystone/harness/guides/process/modes.md</code> (paired / solo / autopilot); switch via the <code>mode</code> action or redefine the modes themselves.</p>
       </div>
     </div>
 
@@ -1653,7 +1674,7 @@ flowchart LR
 <pre class="code"><span class="prompt">$</span> curl -fsSL https://raw.githubusercontent.com/tacoda/keystone/main/install.sh &gt; install.sh
 <span class="prompt">$</span> less install.sh
 <span class="prompt">$</span> sh install.sh</pre>
-      <p>Override the install dir with <code>KEYSTONE_PREFIX=/some/path</code> or pin the release with <code>KEYSTONE_VERSION=v3.0.0</code>. The installer does not run <code>keystone init</code> — open a new shell and run it yourself in a project to scaffold the harness.</p>
+      <p>Override the install dir with <code>KEYSTONE_PREFIX=/some/path</code> or pin the release with <code>KEYSTONE_VERSION=v2.4.1</code>. The installer does not run <code>keystone init</code> — open a new shell and run it yourself in a project to scaffold the harness.</p>
     </div>
 
     <div class="install-method">
@@ -1669,7 +1690,7 @@ flowchart LR
 
     <div class="install-method">
       <h3>Coming from 1.x?</h3>
-      <p>Run the one-shot migrator after upgrading the binary. It moves <code>harness/</code> → <code>.harness/</code>, lifts the lockfile to <code>.harness/lockfile.json</code>, renames manifests, and rewrites <code>keystone.json</code> to the v2 schema. Idempotent.</p>
+      <p>Run the one-shot migrator after upgrading the binary. It moves <code>harness/</code> → <code>.keystone/harness/</code>, lifts the lockfile to <code>.keystone/lockfile.json</code>, renames manifests, and rewrites <code>keystone.json</code> to the v2 schema. Idempotent.</p>
 <pre class="code"><span class="prompt">$</span> keystone snapshot save --label pre-2.0   <span class="comment"># insurance</span>
 <span class="prompt">$</span> keystone migrate                          <span class="comment"># one-shot</span>
 <span class="prompt">$</span> keystone lint --verbose                   <span class="comment"># verify</span></pre>
@@ -1687,20 +1708,20 @@ flowchart LR
 
     <ol class="steps">
       <li>
-        <strong>Read <code>.harness/README.md</code></strong>
-        <p>Orientation to the 14 primitive kinds (guide, sensor, hook, agent, command, skill, playbook, pattern, corpus, document, concern, posture, tool, eval), the two flywheels, and the iron laws.</p>
+        <strong>Read <code>.keystone/harness/README.md</code></strong>
+        <p>Orientation to the 11 primitive kinds (framework: guide, corpus, sensor, action, playbook, eval, source; agent: rule, skill, subagent, command, persona), the two flywheels, and the iron laws.</p>
       </li>
       <li>
         <strong>Wire the MCP server (optional but recommended)</strong>
         <p><code>keystone mcp install --agent claude-code</code> writes <code>.mcp.json</code> so your host agent launches the keystone MCP server on session start. Same flag for <code>cursor</code>, <code>vscode</code>, <code>codex</code>.</p>
       </li>
       <li>
-        <strong>Run <code>/keystone-bootstrap</code> inside your agent</strong>
-        <p>In Claude Code, type <code>/keystone-bootstrap</code>. The bootstrap skill (a real slash command) seeds <code>corpus/state/CODEBASE_STATE.md</code>, paired <code>corpus/idioms/&lt;stack&gt;/</code> + <code>guides/idioms/&lt;stack&gt;/</code>, populates <code>guides/computational/</code> with the language servers your stack supports, and confirms sensor commands. The action playbook lives at <code>.harness/commands/bootstrap.md</code> — the skill is a thin slash-command projection of it.</p>
+        <strong>Run <code>/keystone:bootstrap</code> inside your agent</strong>
+        <p>In Claude Code, type <code>/keystone:bootstrap</code>. The bootstrap skill (a real slash command in 2.0.1) seeds <code>corpus/state/CODEBASE_STATE.md</code>, paired <code>corpus/idioms/&lt;stack&gt;/</code> + <code>guides/idioms/&lt;stack&gt;/</code>, populates <code>guides/computational/</code> with the language servers your stack supports, and confirms sensor commands. The action playbook lives at <code>.keystone/harness/actions/bootstrap/ACTION.md</code> — the skill is a thin slash-command projection of it.</p>
       </li>
       <li>
-        <strong>Commit <code>keystone.json</code>, <code>.harness/</code>, and any agent files</strong>
-        <p>The harness lives in your repo from here. <code>keystone</code> is not a runtime dependency — the agent reads markdown directly. The vendored <code>.harness/policies/</code> directory is gitignored; <code>keystone policy install</code> repopulates it on fresh clones.</p>
+        <strong>Commit <code>keystone.json</code>, <code>.keystone/</code>, and any agent files</strong>
+        <p>The harness lives in your repo from here. <code>keystone</code> is not a runtime dependency — the agent reads markdown directly. The vendored <code>.keystone/harness/policies/</code> directory is gitignored; <code>keystone policy install</code> repopulates it on fresh clones.</p>
       </li>
     </ol>
   </section>
@@ -1721,59 +1742,54 @@ flowchart LR
     <p style="font-size: 0.9rem; color: var(--text-dim); line-height: 1.7;">In 2.0, <code>keystone init</code> asks one question (agent target). Pass <code>--agent</code> to skip even that. Architecture, compliance, and starter packs are opt-in flags — see <a href="#options">Install-time options</a>.</p>
 <pre class="code"><span class="prompt">$</span> cd ~/my-project        <span class="comment"># a git-tracked project, fresh or existing</span>
 <span class="prompt">$</span> keystone init --agent claude-code
-<span class="ok">▸</span> installing harness to .harness/
-  wrote: .harness/README.md
+<span class="ok">▸</span> installing harness to .keystone/harness/
+  wrote: .keystone/harness/README.md
   ... (canonical primitives)
 <span class="ok">▸</span> installing claude-code target  <span class="dim">→</span> CLAUDE.md
-<span class="ok">▸</span> wrote: .harness/INDEX.json (19 primitive(s))
+<span class="ok">▸</span> wrote: .keystone/INDEX.json (19 primitive(s))
 <span class="ok">▸</span> projected 13 skill(s)  <span class="dim">→</span> .claude/skills/keystone-*
-<span class="ok">▸</span> wrote: .harness/lockfile.json
+<span class="ok">▸</span> wrote: .keystone/lockfile.json
 <span class="ok">▸</span> ambient load: 23,547 tokens across 6 port(s)
 <span class="ok">✓</span> harness installed for claude-code.
-<span class="ar">▶</span> Next: run /keystone-bootstrap in claude-code.</pre>
+<span class="ar">▶</span> Next: run /keystone:bootstrap in claude-code.</pre>
 
     <div class="section-label">1.2 — Tour the layout</div>
-    <p style="font-size: 0.9rem; color: var(--text-dim); line-height: 1.7;">Run <code>tree -L 1 .harness</code> to see what landed. The layout is fixed — one agent-neutral root every Keystone install follows; primitives live directly under <code>.harness/</code>.</p>
-<pre class="code"><span class="prompt">$</span> tree -L 1 .harness
-.harness
+    <p style="font-size: 0.9rem; color: var(--text-dim); line-height: 1.7;">Run <code>tree -L 2 .keystone</code> to see what landed. The layout is fixed at 2.0 — same convention every Keystone install follows.</p>
+<pre class="code"><span class="prompt">$</span> tree -L 2 .keystone
+.keystone
 ├── INDEX.json          <span class="comment"># primitive descriptor index (regenerated by `keystone index`)</span>
-├── INDEX.lite.json     <span class="comment"># cheap discovery surface (kind + id + description)</span>
 ├── lockfile.json       <span class="comment"># per-file policy hashes</span>
-├── README.md           <span class="comment"># start here</span>
-├── guides/             <span class="comment"># rules · always loaded</span>
-├── corpus/             <span class="comment"># reasoning · on-demand</span>
-├── sensors/            <span class="comment"># inferential reviews (returns: a verdict)</span>
-├── hooks/              <span class="comment"># deterministic checks (event + run)</span>
-├── commands/           <span class="comment"># lifecycle units (spec, orient, verify, review, ...)</span>
-├── skills/             <span class="comment"># agent slash commands</span>
-├── playbooks/          <span class="comment"># ordered command chains</span>
-├── agents/             <span class="comment"># delegated agent sessions</span>
-├── patterns/           <span class="comment"># Diátaxis doc patterns</span>
-├── posture/            <span class="comment"># tool-permission lists → settings.json</span>
-├── tools/              <span class="comment"># author-defined callables (cli · mcp · plugin)</span>
-├── documents/          <span class="comment"># gate-validated doc kinds</span>
-├── concerns/           <span class="comment"># composable frontmatter fragments</span>
-├── evals/              <span class="comment"># fixture-based regression tests</span>
-├── adapters/           <span class="comment"># per-host bindings</span>
-├── policies/           <span class="comment"># vendored read-only governance</span>
-├── learning/           <span class="comment"># Learning flywheel intake</span>
-├── archive/            <span class="comment"># Pruning flywheel destination</span>
-└── work/               <span class="comment"># document instances (tracked by `keystone document`)</span></pre>
+├── context.json        <span class="comment"># external source declarations (backwards-compat)</span>
+└── harness/
+    ├── README.md       <span class="comment"># start here</span>
+    ├── actions/        <span class="comment"># lifecycle units (spec, orient, verify, review, ...)</span>
+    ├── adapters/       <span class="comment"># per-agent bindings</span>
+    ├── archive/        <span class="comment"># Pruning flywheel destination</span>
+    ├── corpus/         <span class="comment"># reasoning · on-demand</span>
+    ├── evals/          <span class="comment"># fixture-based regression tests</span>
+    ├── guides/         <span class="comment"># rules · always loaded</span>
+    ├── learning/       <span class="comment"># Learning flywheel intake</span>
+    ├── playbooks/      <span class="comment"># ordered action chains</span>
+    ├── policies/       <span class="comment"># vendored read-only fragments</span>
+    ├── sensors/        <span class="comment"># automated checks</span>
+    ├── sources/        <span class="comment"># external context providers</span>
+    ├── rules/ · skills/ · subagents/ · commands/ · personas/   <span class="comment"># agent primitives</span>
+    └── ...</pre>
 
     <div class="definition" style="border-color: var(--accent2);">
-      <p style="margin: 0;"><strong style="color:var(--accent2);">One file lives outside <code>.harness/</code>:</strong> <code>keystone.json</code> at the project root — the policy pin manifest (no <code>harness_root</code> field, the path is fixed at <code>.harness/</code>). Everything else is under <code>.harness/</code>. The layout is a framework convention, not a per-project setting.</p>
+      <p style="margin: 0;"><strong style="color:var(--accent2);">One file lives outside <code>.keystone/</code>:</strong> <code>keystone.json</code> at the project root — the policy pin manifest (v2 schema; no <code>harness_root</code> field, the path is fixed). Everything else is under <code>.keystone/</code>. The layout is a framework convention, not a per-project setting.</p>
     </div>
 
     <div class="section-label">1.3 — Commit the harness</div>
     <p style="font-size: 0.9rem; color: var(--text-dim); line-height: 1.7;">The harness lives in your git from here. After init, the binary is not a runtime dependency — your agent reads markdown directly.</p>
-<pre class="code"><span class="prompt">$</span> git add .harness/ keystone.json .gitignore CLAUDE.md .claude/skills/
+<pre class="code"><span class="prompt">$</span> git add .keystone/ keystone.json .gitignore CLAUDE.md .claude/skills/
 <span class="prompt">$</span> git commit -m "add keystone harness"</pre>
 
     <div class="section-label">1.4 — Bootstrap the harness against your codebase</div>
-    <p style="font-size: 0.9rem; color: var(--text-dim); line-height: 1.7;">Bootstrap is a real slash command in the host agent. Type <code>/keystone-bootstrap</code> in Claude Code — it reads your codebase and seeds <code>.harness/corpus/state/CODEBASE_STATE.md</code> (language, frameworks, libraries, database, CI), plus paired <code>corpus/idioms/&lt;your-stack&gt;/</code> + <code>guides/idioms/&lt;your-stack&gt;/</code>, and confirms the sensor commands.</p>
+    <p style="font-size: 0.9rem; color: var(--text-dim); line-height: 1.7;">In 2.0.1, bootstrap is a real slash command in the host agent. Type <code>/keystone:bootstrap</code> in Claude Code — it reads your codebase and seeds <code>.keystone/harness/corpus/state/CODEBASE_STATE.md</code> (language, frameworks, libraries, database, CI), plus paired <code>corpus/idioms/&lt;your-stack&gt;/</code> + <code>guides/idioms/&lt;your-stack&gt;/</code>, and confirms the sensor commands.</p>
 <pre class="code"><span class="prompt">$</span> claude
-<span class="dim">&gt;</span> /keystone-bootstrap</pre>
-    <p style="font-size: 0.78rem; color: var(--muted); font-family: var(--mono); margin-top: 12px; line-height: 1.7;">Bootstrap ships as both a skill (the slash command) <em>and</em> a command (<code>.harness/commands/bootstrap.md</code>). The skill projects to <code>.claude/skills/keystone-bootstrap/SKILL.md</code>; the action playbook is the underlying source of truth. The skill is the surface; the action is the substance.</p>
+<span class="dim">&gt;</span> /keystone:bootstrap</pre>
+    <p style="font-size: 0.78rem; color: var(--muted); font-family: var(--mono); margin-top: 12px; line-height: 1.7;">Bootstrap ships as both a skill (the slash command) <em>and</em> an action playbook (<code>.keystone/harness/actions/bootstrap/ACTION.md</code>). The skill projects to <code>.claude/skills/keystone-bootstrap/SKILL.md</code>; the action playbook is the underlying source of truth. The skill is the surface; the action is the substance.</p>
 
     <div class="section-label">Next</div>
     <p style="font-size: 0.9rem; color: var(--text-dim); line-height: 1.7;">You have a working harness committed to git. <strong><a href="#first-task">Your first task →</a></strong> walks through the six-phase task workflow on a tiny change.</p>
@@ -1788,7 +1804,7 @@ flowchart LR
     </div>
 
     <div class="definition">
-      <p><strong>The shape of a task.</strong> The agent reads the playbook at <code>.harness/playbooks/task.md</code> and runs the commands in order. Each phase is one command under <code>.harness/commands/&lt;id&gt;.md</code> — entry condition, activities, exit condition. The default playbook can be re-ordered, shortened, or extended by editing the file.</p>
+      <p><strong>The shape of a task.</strong> The agent reads the playbook at <code>.keystone/harness/playbooks/task/PLAYBOOK.md</code> and runs the actions in order. Each phase is one action under <code>.keystone/harness/actions/&lt;id&gt;/ACTION.md</code> — entry condition, activities, exit condition. The default playbook can be re-ordered, shortened, or extended by editing the file.</p>
     </div>
 
     <div class="section-label">2.1 — Pick a small change</div>
@@ -1819,7 +1835,7 @@ flowchart LR
 
     <div class="section-label">2.3 — Inspect what the harness recorded</div>
     <p style="font-size: 0.9rem; color: var(--text-dim); line-height: 1.7;">Sensors that wrote into state ledgers will have updated them — <code>code-debt.md</code> for TODOs found, <code>quality-radar.md</code> for the run-over-run signal, <code>harness-debt.md</code> for anything stale in the harness itself. Diff to see what changed.</p>
-<pre class="code"><span class="prompt">$</span> git diff .harness/corpus/state/</pre>
+<pre class="code"><span class="prompt">$</span> git diff .keystone/harness/corpus/state/</pre>
 
     <div class="section-label">2.4 — Commit and move on</div>
     <p style="font-size: 0.9rem; color: var(--text-dim); line-height: 1.7;">The state-ledger updates are part of your project's git history. They accumulate signal over time — the longer the harness runs, the better the orient phase becomes.</p>
@@ -1837,23 +1853,23 @@ flowchart LR
     </div>
 
     <div class="definition">
-      <p><strong>What policies do.</strong> A policy is a git repo with a <code>keystone-policy.json</code> manifest plus harness primitives (<code>guides/</code>, <code>corpus/</code>, <code>sensors/</code>, <code>hooks/</code>, <code>commands/</code>, <code>playbooks/</code>, <code>agents/</code>, <code>patterns/</code>, <code>posture/</code>, <code>tools/</code>, <code>evals/</code>). When you add a policy, its content gets vendored to <code>.harness/policies/&lt;name&gt;/</code> and merged into the cascade. The project layer always wins by default; deeper-nested policies refine outer ones; <code>strict</code> items lock absolutely.</p>
+      <p><strong>What policies do.</strong> A policy is a git repo with a <code>keystone-policy.json</code> manifest plus framework primitives (<code>guides/</code>, <code>corpus/</code>, <code>sensors/</code>, <code>actions/</code>, <code>playbooks/</code>, <code>personas/</code>, <code>evals/</code>, <code>sources/</code>). Agent escape-hatch primitives (<code>rule</code>, <code>skill</code>, <code>subagent</code>, <code>command</code>) stay project-owned — policies cannot ship them. When you add a policy, its content gets vendored to <code>.keystone/harness/policies/&lt;name&gt;/</code> and merged into the cascade. The project layer always wins by default; deeper-nested policies refine outer ones; <code>strict</code> items lock absolutely.</p>
     </div>
 
     <div class="section-label">3.1 — Add the example policy</div>
     <p style="font-size: 0.9rem; color: var(--text-dim); line-height: 1.7;"><a href="https://github.com/tacoda/tacoda-org" target="_blank" rel="noopener"><code>tacoda/tacoda-org</code></a> is a worked-example policy: documentation discipline, release process, the changelog gate. Shipped for the docs and as a template to fork.</p>
 <pre class="code"><span class="prompt">$</span> keystone policy add tacoda/tacoda-org@v2.0.0
 <span class="ar">▸</span> tacoda/tacoda-org @ v2.0.0
-<span class="ok">  ✓</span> 13 file(s) installed at .harness/policies/tacoda-org
-  wrote: .harness/lockfile.json
+<span class="ok">  ✓</span> 13 file(s) installed at .keystone/harness/policies/tacoda-org
+  wrote: .keystone/lockfile.json
 <span class="ok">✓</span> added tacoda/tacoda-org @ v2.0.0 as "tacoda-org"</pre>
 
     <div class="section-label">3.2 — What just happened</div>
     <ul class="iron-list">
       <li><strong style="color: var(--accent);">keystone.json</strong> got a new entry under <code>policies[]</code> with <code>name</code>, <code>source</code>, <code>version</code>.</li>
-      <li><strong style="color: var(--accent2);">.harness/policies/tacoda-org/</strong> was vendored from the git tag <code>v2.0.0</code> — chmod'd 0o444 on POSIX as a read-only signal.</li>
-      <li><strong style="color: var(--accent3);">.harness/lockfile.json</strong> recorded the resolved git SHA + per-file SHA-256 hashes for drift detection.</li>
-      <li>The <code>.gitignore</code> entry (added by init) keeps <code>.harness/policies/</code> out of your repo. <code>keystone policy install</code> repopulates it on a fresh clone.</li>
+      <li><strong style="color: var(--accent2);">.keystone/harness/policies/tacoda-org/</strong> was vendored from the git tag <code>v2.0.0</code> — chmod'd 0o444 on POSIX as a read-only signal.</li>
+      <li><strong style="color: var(--accent3);">.keystone/lockfile.json</strong> recorded the resolved git SHA + per-file SHA-256 hashes for drift detection.</li>
+      <li>The <code>.gitignore</code> entry (added by init) keeps <code>.keystone/harness/policies/</code> out of your repo. <code>keystone policy install</code> repopulates it on a fresh clone.</li>
     </ul>
 
     <div class="section-label">3.3 — Verify integrity</div>
@@ -1863,12 +1879,12 @@ flowchart LR
 
     <div class="section-label">3.4 — Override a policy rule (when you need to)</div>
     <p style="font-size: 0.9rem; color: var(--text-dim); line-height: 1.7;">Policies are read-only at the vendor location, but the cascade always lets the project layer win. To soften a policy rule, drop a file with the same path at the project layer:</p>
-<pre class="code"><span class="prompt">$</span> cat .harness/policies/tacoda-org/guides/release-process.md
+<pre class="code"><span class="prompt">$</span> cat .keystone/harness/policies/tacoda-org/guides/release-process.md
 <span class="comment"># inspect the policy's rule</span>
 
 <span class="prompt">$</span> keystone new guide process/release
-  wrote: .harness/guides/process/release.md
-  wrote: .harness/corpus/process/release.md
+  wrote: .keystone/harness/guides/process/release.md
+  wrote: .keystone/harness/corpus/process/release.md
 <span class="comment"># edit the new file — your version wins for `guides/process/release.md`</span></pre>
     <p style="font-size: 0.78rem; color: var(--muted); font-family: var(--mono); margin-top: 12px; line-height: 1.7;">If the policy author marked the item <code>strict</code> in <code>keystone-policy.json</code>, your override fails <code>keystone verify</code>. Strict items are a contract — the policy says "this rule is non-negotiable for any consumer." Take it up with the policy author rather than overriding silently.</p>
 
@@ -1899,11 +1915,11 @@ flowchart LR
     <div class="section-label">4.1 — Author a new guide (with paired corpus)</div>
     <p style="font-size: 0.9rem; color: var(--text-dim); line-height: 1.7;">Guides are rules the agent is always under. Corpus is the paired reasoning loaded on-demand. The <code>guide</code> generator scaffolds both:</p>
 <pre class="code"><span class="prompt">$</span> keystone new guide domain/refunds
-  wrote: .harness/guides/domain/refunds.md
-  wrote: .harness/corpus/domain/refunds.md
-  refreshed: .harness/INDEX.json
+  wrote: .keystone/harness/guides/domain/refunds.md
+  wrote: .keystone/harness/corpus/domain/refunds.md
+  refreshed: .keystone/INDEX.json
 
-<span class="prompt">$</span> cat .harness/guides/domain/refunds.md
+<span class="prompt">$</span> cat .keystone/harness/guides/domain/refunds.md
 <span class="comment"># Refunds — rules</span>
 
 One-sentence framing of what this guide governs.
@@ -1913,18 +1929,18 @@ One-sentence framing of what this guide governs.
 - Strongly-preferred rule three.
 
 For reasoning, see `corpus/domain/refunds.md`.</pre>
-    <p style="font-size: 0.78rem; color: var(--muted); font-family: var(--mono); margin-top: 12px; line-height: 1.7;">The generator emits canonical frontmatter (<code>kind: guide</code>, <code>id</code>, <code>description</code>, <code>severity</code>, optional <code>globs</code>) plus the forward-link to the paired corpus. <code>keystone lint</code> validates the shape; <code>keystone index</code> walks the tree and emits <code>.harness/INDEX.json</code> automatically after each <code>new</code> command.</p>
+    <p style="font-size: 0.78rem; color: var(--muted); font-family: var(--mono); margin-top: 12px; line-height: 1.7;">The generator emits canonical frontmatter (<code>kind: guide</code>, <code>id</code>, <code>description</code>, <code>severity</code>, optional <code>globs</code>) plus the forward-link to the paired corpus. <code>keystone lint</code> validates the shape; <code>keystone index</code> walks the tree and emits <code>.keystone/INDEX.json</code> automatically after each <code>new</code> command.</p>
 
-    <div class="section-label">4.2 — Author a new check</div>
-<pre class="code"><span class="prompt">$</span> keystone new hook accessibility-check
-  wrote: .harness/hooks/accessibility-check.md</pre>
-    <p style="font-size: 0.9rem; color: var(--text-dim); line-height: 1.7;">A deterministic check is a <a href="#hooks">hook</a> — <code>mode: computational</code> + an <code>event:</code> it fires on + a <code>run:</code> shell command. (An LLM-judgment review is a <a href="#sensors">sensor</a> instead — <code>mode: inferential</code> + a <code>returns:</code> verdict, dispatched as an agent.) Fill in the <code>run:</code> with the actual shell invocation and guard it with <code>command -v</code> so an absent tool is a clean no-op.</p>
+    <div class="section-label">4.2 — Author a new sensor</div>
+<pre class="code"><span class="prompt">$</span> keystone new sensor accessibility-check --sensor-kind computational
+  wrote: .keystone/harness/sensors/accessibility-check.md</pre>
+    <p style="font-size: 0.9rem; color: var(--text-dim); line-height: 1.7;">In 2.0, sensors carry <code>kind: sensor</code> + <code>sensor_kind: computational | inferential</code> (the migrator handled the rename for existing sensors). Sections are <code>## Command</code>, <code>## Interpretation</code>, <code>## Remediation</code> — fill them in with the actual shell invocation and how to interpret its output.</p>
 
-    <div class="section-label">4.3 — Author a new command and add it to a playbook</div>
-<pre class="code"><span class="prompt">$</span> keystone new command accessibility-audit
-  wrote: .harness/commands/accessibility-audit.md
+    <div class="section-label">4.3 — Author a new action and add it to a playbook</div>
+<pre class="code"><span class="prompt">$</span> keystone new action accessibility-audit
+  wrote: .keystone/harness/actions/accessibility-audit/ACTION.md
 
-<span class="prompt">$</span> <span class="comment"># Open .harness/playbooks/task.md and add accessibility-audit to the sequence</span></pre>
+<span class="prompt">$</span> <span class="comment"># Open .keystone/harness/playbooks/task/PLAYBOOK.md and add accessibility-audit to the sequence</span></pre>
 
     <div class="section-label">4.4 — Verify with lint + the dashboard</div>
     <p style="font-size: 0.9rem; color: var(--text-dim); line-height: 1.7;">After authoring, <code>keystone lint</code> validates primitive frontmatter (required fields per kind, deps integrity). For ambient-load and harness-debt visibility, open the localhost dashboard — the metrics page shows per-port budget detail live (SSE-pushed).</p>
@@ -1939,18 +1955,18 @@ For reasoning, see `corpus/domain/refunds.md`.</pre>
 <pre class="code"><span class="prompt">$</span> keystone new policy acme-engineering
   wrote: ./acme-engineering/keystone-policy.json
   wrote: ./acme-engineering/README.md
-  wrote: ./acme-engineering/{guides,corpus,sensors,hooks,commands,playbooks,agents,evals}/.gitkeep
+  wrote: ./acme-engineering/{guides,corpus,sensors,actions,playbooks,evals,sources}/.gitkeep
 
 <span class="prompt">$</span> cd acme-engineering
 <span class="prompt">$</span> <span class="comment"># Fill in guides/, sensors/, etc. with your shared governance.</span>
 <span class="prompt">$</span> git init &amp;&amp; git add . &amp;&amp; git commit -m "initial"
 <span class="prompt">$</span> git tag v0.1.0
 <span class="prompt">$</span> git push --tags                <span class="comment"># publish to your git host</span></pre>
-    <p style="font-size: 0.78rem; color: var(--muted); font-family: var(--mono); margin-top: 12px; line-height: 1.7;">Other projects install it with <code>keystone policy add &lt;your-org&gt;/acme-engineering@v0.1.0</code>. Policies may ship any harness primitive — guide, corpus, sensor, hook, command, playbook, agent, pattern, posture, tool, eval.</p>
+    <p style="font-size: 0.78rem; color: var(--muted); font-family: var(--mono); margin-top: 12px; line-height: 1.7;">Other projects install it with <code>keystone policy add &lt;your-org&gt;/acme-engineering@v0.1.0</code>. Policies may ship every framework primitive (guide, corpus, sensor, action, playbook, eval, source) but never agent primitives (rule, skill, subagent, command, persona) — enforced at install.</p>
 
     <div class="section-label">Where to go next</div>
     <ul class="iron-list">
-      <li>The <a href="#guides">Primitives</a> section in the sidebar covers each kind (guides, corpus, sensors, hooks, commands, playbooks, agents, tools, posture, adapters, state ledgers, flywheels) in detail.</li>
+      <li>The <a href="#guides">Framework</a> section in the sidebar covers each port (guides, corpus, sensors, actions, playbooks, adapters, state ledgers, flywheels) in detail.</li>
       <li><a href="#patterns">Patterns</a> — direction for getting the best results out of each abstraction, plus the cross-cutting habits that hold the harness together.</li>
       <li><a href="#rules">Rules &amp; iron laws</a> explains the three-tier strength gradient inside any guide.</li>
       <li><a href="#failure-modes">Agent failure modes</a> documents the guardrails the harness puts on the agent.</li>
@@ -2042,7 +2058,7 @@ For reasoning, see `corpus/domain/refunds.md`.</pre>
     <div class="page-head">
       <div class="crumb">Capabilities · Project layer</div>
       <h1>Guides — rules the agent is always under.</h1>
-      <p class="tagline">Guides are short, dense, ambient. Every guide loads on session start; the agent operates under every regular RULE, GOLDEN RULE, and IRON LAW at all times. The drift sensor checks the diff against them at implementation exit. A guide carries a <code>tier:</code> (iron-law / golden-rule / preference) and an optional <code>mode:</code> — inferential guides are ambient directives or, when glob-scoped, a <code>.claude/rules/</code> shim; computational guides (gofmt, gopls, go-vet) fire through the hook bridge.</p>
+      <p class="tagline">Guides are short, dense, ambient. Every guide loads on session start; the agent operates under every regular RULE, GOLDEN RULE, and IRON LAW at all times. The drift sensor checks the diff against them at implementation exit. <strong>Guide conceptually wraps <code>rule</code></strong> (the agent escape hatch) with richer structure — severity tiers, globs, paired corpus — but no file-level projection; the wrap is INDEX-level, surfaced to the agent via <code>.keystone/INDEX.json</code>.</p>
     </div>
 
     <div class="definition">
@@ -2101,7 +2117,7 @@ For reasoning, see `corpus/domain/refunds.md`.</pre>
 
     <p style="font-size: 0.82rem; color: var(--muted); line-height: 1.7;"><strong>Per-guide narrowing (<code>globs:</code>).</strong> The Activation column above shows each sublayer's <em>default</em>. Any guide can declare an optional <code>globs:</code> list in its frontmatter to narrow that default to a set of paths — the topic default fires first, then <code>globs:</code> intersects. A domain rule scoped to <code>src/billing/**</code> only enters context when the agent touches billing; an idiom for a specific app inside a TS stack only loads for that app. The narrowing is one-way: <code>globs:</code> can remove a guide from activation, never add it. Bootstrap seeds the initial globs from the region map in <code>corpus/state/CODEBASE_STATE.md</code> and writes a reverse-index at <code>corpus/state/GLOBS_INDEX.md</code> that pointer-style adapters read inside the <code>orient</code> playbook; Cursor gets native per-guide projection via <code>.cursor/rules/keystone-&lt;topic&gt;-&lt;name&gt;.mdc</code> with matching <code>globs:</code>. Shipped in v1.0.4.</p>
 
-    <p style="font-size: 0.82rem; color: var(--muted); line-height: 1.7;">Universal engineering principles (SOLID, TDD, BDD, dependencies, logging, prompt-injection, …) ship as an opt-in starter pack. The rule files land at <code>.harness/guides/principles/&lt;name&gt;.md</code> alongside the paired corpus under <code>.harness/corpus/principles/&lt;name&gt;.md</code>.</p>
+    <p style="font-size: 0.82rem; color: var(--muted); line-height: 1.7;">Universal engineering principles (SOLID, TDD, BDD, dependencies, logging, prompt-injection, …) ship as an opt-in starter pack. The rule files land at <code>.keystone/harness/guides/principles/&lt;name&gt;.md</code> alongside the paired corpus under <code>.keystone/harness/corpus/principles/&lt;name&gt;.md</code>.</p>
   </section>
 
   <!-- ===================== CORPUS ===================== -->
@@ -2145,7 +2161,7 @@ For reasoning, see `corpus/domain/refunds.md`.</pre>
       </div>
     </div>
 
-    <p style="font-size: 0.82rem; color: var(--muted); line-height: 1.7;">Universal principles' explanatory text (SOLID rationale, Cox/Hunt/Thomas citations, OWASP references) lands at <code>.harness/corpus/principles/</code> when the <code>universal-principles</code> starter pack is installed at <code>keystone init</code> time.</p>
+    <p style="font-size: 0.82rem; color: var(--muted); line-height: 1.7;">Universal principles' explanatory text (SOLID rationale, Cox/Hunt/Thomas citations, OWASP references) lands at <code>.keystone/harness/corpus/principles/</code> when the <code>universal-principles</code> starter pack is installed at <code>keystone init</code> time.</p>
   </section>
 
   <!-- ===================== STATE LEDGERS ===================== -->
@@ -2153,7 +2169,7 @@ For reasoning, see `corpus/domain/refunds.md`.</pre>
     <div class="page-head">
       <div class="crumb">Capabilities · Project memory</div>
       <h1>State ledgers — what the harness remembers about your project.</h1>
-      <p class="tagline">Markdown files under <code>.harness/corpus/state/</code>. Read during planning so the agent knows what your project actually looks like; written by sensors and bootstrap; edited by humans when defaults are wrong. Project memory the agent never has to rediscover.</p>
+      <p class="tagline">Markdown files under <code>.keystone/harness/corpus/state/</code>. Read during planning so the agent knows what your project actually looks like; written by sensors and bootstrap; edited by humans when defaults are wrong. Project memory the agent never has to rediscover.</p>
     </div>
 
     <div class="action-grid">
@@ -2204,24 +2220,24 @@ For reasoning, see `corpus/domain/refunds.md`.</pre>
     <div class="page-head">
       <div class="crumb">Capabilities · Project layer</div>
       <h1>Sensors — automated checks at phase boundaries.</h1>
-      <p class="tagline">Sensors are inferential reviews fired at phase boundaries. Each declares <code>kind: sensor</code> + <code>mode: inferential</code> and a <code>returns:</code> verdict; <code>keystone project</code> lowers a sensor to <code>.claude/agents/keystone-&lt;id&gt;.md</code> — the subagent an inferential hook dispatches. (Deterministic dev-checks — lint, type-check, test, build — are <a href="#hooks">hooks</a>, not sensors.) Verify gates the commit; review dispatches four reviewers in parallel on the diff; audit sweeps the whole codebase.</p>
+      <p class="tagline">Twenty-three sensors fire from inside lifecycle actions. Each declares <code>kind: sensor</code> + <code>sensor_kind: computational | inferential</code>, plus trigger, inputs, exit condition, and output. Verify gates the commit; review spawns four reviewers in parallel on the diff; audit sweeps the whole codebase. <strong>Sensor conceptually wraps <code>rule</code></strong> (the agent escape hatch) with sensor-specific structure — kind, trigger, exit condition — but no file-level projection; the wrap is INDEX-level.</p>
     </div>
 
     <div class="definition">
-      <p><strong>Symmetric model.</strong> In 3.0 the deterministic firing layer is unified: a <strong>computational</strong> check is a <a href="#hooks">hook</a> (<code>mode: computational</code> + <code>event:</code> + <code>run:</code>), while an <strong>inferential</strong> review is a <strong>sensor</strong> (<code>mode: inferential</code> + a <code>returns:</code> verdict, lowered to an agent the review hook dispatches). One <code>event:</code>+<code>run:</code> path drives hooks and computational guides alike; sensors carry the LLM-judgment half. The inventory below labels each check by its mode.</p>
+      <p><strong>2.0 frontmatter shape.</strong> Sensors carry <code>kind: sensor</code> as the canonical primitive kind; <code>sensor_kind: computational</code> or <code>sensor_kind: inferential</code> records the execution mode. The 1.x shape (<code>kind: computational | inferential</code>) was migrated automatically by <code>keystone migrate</code>. The two-field model means the index walker and lint know it's a sensor without inspecting the body.</p>
     </div>
 
-    <div class="section-label">Two modes</div>
+    <div class="section-label">Kind taxonomy</div>
     <div class="action-grid">
       <div class="action">
-        <span class="action-tag">Computational → hook</span>
+        <span class="action-tag">Computational</span>
         <h3 style="color: var(--accent3);">Deterministic execution</h3>
-        <p>A binary, script, or library returns a result that does not depend on agent reasoning. <code>lint</code>, <code>type-check</code>, <code>test</code>, <code>build</code>, <code>drift</code>, <code>coverage</code>, <code>commit-message</code>, <code>risk-fingerprint</code>, <code>traffic-topology</code>, <code>state-region</code>, <code>stack-drift</code>, <code>secret-scan</code>, <code>vuln-scan</code>, <code>sast</code>. These fire through the <a href="#hooks">hook bridge</a>.</p>
+        <p>A binary, script, or library returns a result that does not depend on agent reasoning. <code>lint</code>, <code>type-check</code>, <code>test</code>, <code>build</code>, <code>drift</code>, <code>coverage</code>, <code>commit-message</code>, <code>risk-fingerprint</code>, <code>traffic-topology</code>, <code>state-region</code>, <code>tracker-card-fetcher</code>, <code>quality-radar</code>, <code>code-debt</code>, <code>harness-debt</code>, <code>stack-drift</code>, <code>secret-scan</code>, <code>vuln-scan</code>, <code>sast</code>.</p>
       </div>
       <div class="action">
-        <span class="action-tag">Inferential → sensor</span>
+        <span class="action-tag">Inferential</span>
         <h3 style="color: var(--accent2);">Agent reasoning over a region</h3>
-        <p>An agent reviews the diff or the spec and reports findings. <code>spec-adherence</code>, <code>review-functional</code>, <code>review-security</code>, <code>review-risk</code>, <code>review-deployment</code>, <code>code-debt</code>, <code>harness-debt</code>, <code>quality-radar</code>. Each lowers to an agent a review hook dispatches in parallel where the host supports it.</p>
+        <p>An agent reviews the diff or the spec and reports findings. <code>spec-adherence</code>, <code>review-functional</code>, <code>review-security</code>, <code>review-risk</code>, <code>review-deployment</code>. Bootstrap records which inferential sensors the active adapter can run in parallel.</p>
       </div>
     </div>
 
@@ -2265,15 +2281,16 @@ For reasoning, see `corpus/domain/refunds.md`.</pre>
   <section id="plugins" class="page" data-title="Policies">
     <div class="page-head">
       <div class="crumb">Framework primitive · Standardized governance distribution</div>
-      <h1>Policies — the primitive for sharing governance.</h1>
-      <p class="tagline"><strong style="color: var(--accent4);">The standardized way to share harness content across projects, teams, and orgs.</strong> A policy is a versioned, pinned, hash-verified markdown bundle that ships any combination of primitives — guides, sensors, hooks, commands, playbooks, agents, patterns, posture, tools, corpus, evals. Vendored read-only into <code>.harness/policies/&lt;name&gt;/</code>. Bundler for AI-agent governance: write your org's rules once, every repo pulls the same pin. <strong>Optional</strong> — the harness works on its own without any.</p>
+      <h1>Policies — the framework primitive for sharing governance.</h1>
+      <p class="tagline"><strong style="color: var(--accent4);">The standardized way to share harness content across projects, teams, and orgs.</strong> A policy is a versioned, pinned, hash-verified markdown bundle that ships any combination of framework primitives — guides, sensors, actions, playbooks, personas, corpus, evals, sources. Vendored read-only into <code>.keystone/harness/policies/&lt;name&gt;/</code>. Bundler for AI-agent governance: write your org's rules once, every repo pulls the same pin. <strong>Optional</strong> — the harness works on its own without any.</p>
     </div>
 
     <div class="definition">
-      <p><strong>The distribution layer.</strong> Every other primitive describes <em>what</em> the harness teaches the agent. Policies describe <em>how that teaching travels</em> — between repos, between teams, across an org. No other harness has a package manager; this is the differentiator. One uniform mechanism, used to compose governance at any granularity from "this team alone" to "the whole org."</p>
-      <p><strong>One shape, many uses.</strong> A policy is a folder of markdown organized by primitive kind (<code>guides/</code>, <code>corpus/</code>, <code>sensors/</code>, <code>hooks/</code>, <code>commands/</code>, <code>playbooks/</code>, <code>agents/</code>, <code>patterns/</code>, <code>posture/</code>, <code>tools/</code>, <code>evals/</code>) plus a <code>keystone-policy.json</code> manifest. Nothing about the format distinguishes "an org baseline" from "a Rust idiom pack" from "a SOC 2 compliance regime" — they all materialize the same way and override the same way.</p>
-      <p><strong>Policies are read-only.</strong> The vendor directory is regenerable: <code>keystone policy install</code> fetches each pin into a content-addressable cache (<code>~/.cache/keystone/policies/</code>) and copies it into <code>.harness/policies/&lt;name&gt;/</code>, chmod'd 0o444 on POSIX. The lockfile pins per-file hashes; <code>keystone verify</code> walks each vendored file and resets the directory the moment anything diverges. Edits to vendored content don't stick — the next verify wipes them.</p>
-      <p><strong>Override by editing the project layer.</strong> The project's <code>.harness/&lt;kind&gt;/&lt;name&gt;.md</code> always wins by default. Among policies, policies nested deeper in <code>keystone.json</code> refine the outer policies they're nested in — the more specific layer takes precedence (like CSS or Rails). A policy author can mark an item <code>strict</code> to lock it absolutely — a strict item refuses every other layer, the project included; <code>keystone verify</code> reports violations with path context so you see exactly which node in the tree set the lock.</p>
+      <p><strong>The framework-level distribution layer.</strong> Every other framework primitive describes <em>what</em> the harness teaches the agent. Policies describe <em>how that teaching travels</em> — between repos, between teams, across an org. No other harness has a package manager; this is the differentiator. One uniform mechanism, used to compose governance at any granularity from "this team alone" to "the whole org."</p>
+      <p><strong>One shape, many uses.</strong> A policy is a folder of markdown organized by framework primitive kind (<code>guides/</code>, <code>corpus/</code>, <code>sensors/</code>, <code>actions/</code>, <code>playbooks/</code>, <code>personas/</code>, <code>evals/</code>, <code>sources/</code>) plus a <code>keystone-policy.json</code> manifest. Nothing about the format distinguishes "an org baseline" from "a Rust idiom pack" from "a SOC 2 compliance regime" — they all materialize the same way and override the same way.</p>
+      <p><strong>Agent primitives stay project-owned.</strong> Policies cannot ship <code>rule</code>, <code>skill</code>, <code>subagent</code>, or <code>command</code> primitives — those are host-native escape hatches that align with the project's chosen agent. <code>persona</code> ships fine because it's the framework wrapper. Enforced at install.</p>
+      <p><strong>Policies are read-only.</strong> The vendor directory is regenerable: <code>keystone policy install</code> fetches each pin into a content-addressable cache (<code>~/.cache/keystone/policies/</code>) and copies it into <code>.keystone/harness/policies/&lt;name&gt;/</code>, chmod'd 0o444 on POSIX. The lockfile pins per-file hashes; <code>keystone verify</code> walks each vendored file and resets the directory the moment anything diverges. Edits to vendored content don't stick — the next verify wipes them.</p>
+      <p><strong>Override by editing the project layer.</strong> The project's <code>.keystone/harness/&lt;kind&gt;/&lt;name&gt;.md</code> always wins by default. Among policies, policies nested deeper in <code>keystone.json</code> refine the outer policies they're nested in — the more specific layer takes precedence (like CSS or Rails). A policy author can mark an item <code>strict</code> to lock it absolutely — a strict item refuses every other layer, the project included; <code>keystone verify</code> reports violations with path context so you see exactly which node in the tree set the lock.</p>
     </div>
 
     <div class="section-label">The cascade — deterministic, by nesting</div>
@@ -2281,7 +2298,7 @@ For reasoning, see `corpus/domain/refunds.md`.</pre>
       <p class="mermaid-caption">Project always wins by default. Among policies, deeper-nested policies refine the outer policies they're nested in. A policy's <code>strict</code> declaration locks the item absolutely — nothing else, project or other policy, can override it.</p>
       <div class="mermaid">
 flowchart LR
-  project["Project<br/><i>.harness/{guides,corpus,sensors,…}/</i>"] --> r{Cascade<br/>resolution}
+  project["Project<br/><i>.keystone/harness/{guides,corpus,sensors,…}/</i>"] --> r{Cascade<br/>resolution}
   outer["Outer policy<br/><i>e.g. tacoda-org (broader)</i>"] --> r
   inner["Nested policy<br/><i>e.g. acme-team (more specific)</i>"] --> r
   sibling["Sibling policy<br/><i>(later in keystone.json)</i>"] --> r
@@ -2333,7 +2350,7 @@ flowchart LR
   ]
 }</pre>
 
-    <p style="font-size: 0.78rem; color: var(--muted); font-family: var(--mono); margin: 16px 0; line-height: 1.7;">Reads top-to-bottom from broad to specific. Resolution: <code>acme-team</code> (the deeper, more specific policy) refines <code>tacoda-org</code> (the outer baseline) for non-strict items. <code>tacoda-org</code>'s <code>strict.actions: ["changelog-check"]</code> locks the changelog gate absolutely — neither <code>acme-team</code> nor the project can ship a competing <code>commands/changelog-check</code>. The project at <code>.harness/&lt;kind&gt;/&lt;name&gt;.md</code> wins by default for everything not locked. <code>keystone verify</code> checks the whole tree. <strong>Note:</strong> the v2 schema drops the <code>harness_root</code> field; the path is fixed at <code>.harness/</code>.</p>
+    <p style="font-size: 0.78rem; color: var(--muted); font-family: var(--mono); margin: 16px 0; line-height: 1.7;">Reads top-to-bottom from broad to specific. Resolution: <code>acme-team</code> (the deeper, more specific policy) refines <code>tacoda-org</code> (the outer baseline) for non-strict items. <code>tacoda-org</code>'s <code>strict.actions: ["changelog-check"]</code> locks the changelog gate absolutely — neither <code>acme-team</code> nor the project can ship a competing <code>actions/changelog-check</code>. The project at <code>.keystone/harness/&lt;kind&gt;/&lt;name&gt;.md</code> wins by default for everything not locked. <code>keystone verify</code> checks the whole tree. <strong>Note:</strong> the v2 schema drops the <code>harness_root</code> field; the path is fixed at <code>.keystone/harness/</code>.</p>
 
     <div class="section-label">keystone-policy.json — the policy manifest</div>
 <pre class="code"><span class="comment">// keystone-policy.json at the policy repo root</span>
@@ -2360,18 +2377,17 @@ flowchart LR
       <div class="tree-line"><span class="tree-structure">├──</span><span class="tree-file">README.md</span><span class="tree-annotation ann-default">for humans browsing the repo</span></div>
       <div class="tree-line"><span class="tree-structure">├──</span><span class="tree-dir">guides/</span><span class="tree-annotation ann-1">ambient rules</span></div>
       <div class="tree-line"><span class="tree-structure">├──</span><span class="tree-dir">corpus/</span><span class="tree-annotation ann-2">on-demand reasoning</span></div>
-      <div class="tree-line"><span class="tree-structure">├──</span><span class="tree-dir">sensors/</span><span class="tree-annotation ann-3">inferential reviews</span></div>
-      <div class="tree-line"><span class="tree-structure">├──</span><span class="tree-dir">hooks/</span><span class="tree-annotation ann-3">deterministic checks</span></div>
-      <div class="tree-line"><span class="tree-structure">├──</span><span class="tree-dir">commands/</span><span class="tree-annotation ann-4">single lifecycle units</span></div>
-      <div class="tree-line"><span class="tree-structure">├──</span><span class="tree-dir">playbooks/</span><span class="tree-annotation ann-3">ordered command chains</span></div>
-      <div class="tree-line"><span class="tree-structure">├──</span><span class="tree-dir">agents/</span><span class="tree-annotation ann-1">delegated reviewers</span></div>
-      <div class="tree-line"><span class="tree-structure">└──</span><span class="tree-dir">evals/</span><span class="tree-annotation ann-3">fixture-based regression tests</span></div>
+      <div class="tree-line"><span class="tree-structure">├──</span><span class="tree-dir">sensors/</span><span class="tree-annotation ann-3">automated checks</span></div>
+      <div class="tree-line"><span class="tree-structure">├──</span><span class="tree-dir">actions/</span><span class="tree-annotation ann-4">single lifecycle units</span></div>
+      <div class="tree-line"><span class="tree-structure">├──</span><span class="tree-dir">playbooks/</span><span class="tree-annotation ann-3">ordered action chains</span></div>
+      <div class="tree-line"><span class="tree-structure">├──</span><span class="tree-dir">evals/</span><span class="tree-annotation ann-3">fixture-based regression tests</span></div>
+      <div class="tree-line"><span class="tree-structure">└──</span><span class="tree-dir">sources/</span><span class="tree-annotation ann-2">external context providers</span></div>
     </div>
 
-    <p style="font-size: 0.78rem; color: var(--muted); font-family: var(--mono); margin: 16px 0; line-height: 1.7;">The policy repo root <em>is</em> the content root — when installed, the entire tree (minus the manifest + README) is copied into <code>.harness/policies/&lt;name&gt;/</code>. Scaffold a fresh policy repo with <code>keystone new policy &lt;name&gt;</code>.</p>
+    <p style="font-size: 0.78rem; color: var(--muted); font-family: var(--mono); margin: 16px 0; line-height: 1.7;">The policy repo root <em>is</em> the content root — when installed, the entire tree (minus the manifest + README) is copied into <code>.keystone/harness/policies/&lt;name&gt;/</code>. Scaffold a fresh policy repo with <code>keystone new policy &lt;name&gt;</code>.</p>
 
     <div class="section-label">Install, update, verify</div>
-<pre class="code"><span class="comment"># Add a policy (declared in keystone.json + materialized into .harness/policies/)</span>
+<pre class="code"><span class="comment"># Add a policy (declared in keystone.json + materialized into .keystone/harness/policies/)</span>
 <span class="prompt">$</span> keystone policy add tacoda/tacoda-org@v2.0.0
 
 <span class="comment"># Materialize every policy declared in keystone.json (after `git clone`, etc.)</span>
@@ -2397,7 +2413,7 @@ flowchart LR
       <div class="action">
         <span class="action-tag">policy</span>
         <h3 style="color: var(--accent5);"><a href="https://github.com/tacoda/tacoda-org" target="_blank" rel="noopener" style="color: inherit;"><code>tacoda-org</code></a></h3>
-        <p>The reference policy — ships harness primitives (guides, corpus, commands, playbooks) and demonstrates both <code>strict</code> and <code>required</code>. Includes <code>guides/documentation</code> (Hemingway-test discipline), <code>guides/todos</code> (ownership + context), <code>commands/changelog-check</code>, <code>commands/static-analysis</code>, plus a non-strict <code>playbooks/release</code> projects can extend. <strong>Strict</strong> on the items above — no consumer overrides. <strong>Required</strong>: <code>commands/release-notes</code> — declared but not shipped; the consumer (or another policy) must define it. Pin with <code>keystone policy add tacoda/tacoda-org@v2.0.0</code>.</p>
+        <p>The reference policy — ships framework primitives (guides, corpus, actions, playbooks) and demonstrates both <code>strict</code> and <code>required</code>. Includes <code>guides/documentation</code> (Hemingway-test discipline), <code>guides/todos</code> (ownership + context), <code>actions/changelog-check</code>, <code>actions/static-analysis</code>, plus a non-strict <code>playbooks/release</code> projects can extend. <strong>Strict</strong> on the items above — no consumer overrides. <strong>Required</strong>: <code>actions/release-notes</code> — declared but not shipped; the consumer (or another policy) must define it. Pin with <code>keystone policy add tacoda/tacoda-org@v2.0.0</code>.</p>
       </div>
     </div>
 
@@ -2424,7 +2440,7 @@ flowchart LR
           </div>
           <div class="loop-step">
             <span class="loop-num">02</span>
-            <span class="loop-text"><strong>learn</strong> writes the candidate to <code>.harness/learning/inbox/</code> with a <code>candidate_kind</code> hint: <strong>rule</strong>, <strong>information</strong>, or <strong>both</strong>.</span>
+            <span class="loop-text"><strong>learn</strong> writes the candidate to <code>.keystone/harness/learning/inbox/</code> with a <code>candidate_kind</code> hint: <strong>rule</strong>, <strong>information</strong>, or <strong>both</strong>.</span>
           </div>
           <div class="loop-step">
             <span class="loop-num">03</span>
@@ -2468,7 +2484,7 @@ flowchart LR
     </div>
 
     <div class="definition">
-      <p><strong>Wishlist — a complement, not a substitute.</strong> <code>.harness/learning/wishlist.md</code> is a team-curated file listing known gaps the team plans to address eventually — performance budgets, accessibility, fixtures, external-service contracts, and the like. It is <em>not</em> the inbox: items here become real <code>learning/inbox/</code> candidates only when a real situation triggers them. The Learning flywheel still runs on lived experience; the wishlist surfaces things the agent should recognize when it sees them.</p>
+      <p><strong>Wishlist — a complement, not a substitute.</strong> <code>.keystone/harness/learning/wishlist.md</code> is a team-curated file listing known gaps the team plans to address eventually — performance budgets, accessibility, fixtures, external-service contracts, and the like. It is <em>not</em> the inbox: items here become real <code>learning/inbox/</code> candidates only when a real situation triggers them. The Learning flywheel still runs on lived experience; the wishlist surfaces things the agent should recognize when it sees them.</p>
     </div>
 
     <div class="definition" style="border-left-color: var(--accent3);">
@@ -2489,7 +2505,7 @@ flowchart LR
       <div class="action">
         <span class="action-tag">step 1 · capture</span>
         <h3 style="color: var(--accent);"><code>learn</code> action</h3>
-        <p>Any time something surprising happens — a sensor catches a class of bug the guides missed, the reviewer flags a pattern that should be canonical, a rule felt wrong in context — invoke <strong>learn</strong>. The agent writes a candidate file into <code>.harness/learning/inbox/</code> classified as <strong>rule</strong> (→ guides) or <strong>information</strong> (→ corpus).</p>
+        <p>Any time something surprising happens — a sensor catches a class of bug the guides missed, the reviewer flags a pattern that should be canonical, a rule felt wrong in context — invoke <strong>learn</strong>. The agent writes a candidate file into <code>.keystone/harness/learning/inbox/</code> classified as <strong>rule</strong> (→ guides) or <strong>information</strong> (→ corpus).</p>
       </div>
       <div class="action">
         <span class="action-tag">step 2 · queue</span>
@@ -2518,17 +2534,17 @@ flowchart LR
   <!-- ===================== PLAYBOOKS ===================== -->
   <section id="playbooks" class="page" data-title="Playbooks">
     <div class="page-head">
-      <div class="crumb">Primitive · Ordered command chain</div>
-      <h1>Playbooks — ordered chains of commands.</h1>
-      <p class="tagline">A playbook is a markdown file that runs an ordered set of <a href="#commands">commands</a>. Invoke the same way as any command: say "run <code>&lt;playbook&gt;</code>" and the agent reads the file and walks the steps. <code>keystone project</code> lowers a playbook to <code>.claude/skills/keystone-&lt;id&gt;/SKILL.md</code> so the host agent surfaces it natively.</p>
+      <div class="crumb">Framework primitive · Wraps skill</div>
+      <h1>Playbooks — ordered chains of actions.</h1>
+      <p class="tagline">A playbook is a markdown file that runs an ordered set of <a href="#actions">actions</a>. Invoke the same way as any action: say "run <code>&lt;playbook&gt;</code>" and the agent reads the file and walks the steps. <strong>Playbook wraps <code>skill</code></strong> — <code>keystone project</code> writes <code>.claude/skills/&lt;id&gt;/SKILL.md</code> so the host agent surfaces it natively.</p>
     </div>
 
     <div class="definition">
-      <p><strong>Command vs. playbook.</strong> A command is one unit of lifecycle work — <code>spec</code>, <code>verify</code>, <code>review</code>. A playbook is an ordered chain — the default <code>task</code> playbook walks spec → orient → implementation → check-drift → verify → review. Project playbooks live in <code>.harness/playbooks/</code>; policies can ship their own under <code>.harness/policies/&lt;name&gt;/playbooks/</code>, subject to the same cascade as guides and commands.</p>
+      <p><strong>Action vs. playbook.</strong> An action is one unit of lifecycle work — <code>spec</code>, <code>verify</code>, <code>review</code>. A playbook is an ordered chain — the default <code>task</code> playbook walks spec → orient → implementation → check-drift → verify → review. Project playbooks live in <code>.keystone/harness/playbooks/</code>; policies can ship their own under <code>.keystone/harness/policies/&lt;name&gt;/playbooks/</code>, subject to the same cascade as guides and actions.</p>
     </div>
 
     <div class="section-label">The default: <code>task</code></div>
-    <p style="font-size: 0.85rem; color: var(--muted); line-height: 1.7;">Every install ships with <code>.harness/playbooks/task.md</code>. Kickoff phrase: <code style="color: var(--accent);">/keystone-task on &lt;ticket-id&gt;</code>. The agent pauses for acceptance between phases; an optional <code>/keystone-learn</code> pass closes out if something surprising came up.</p>
+    <p style="font-size: 0.85rem; color: var(--muted); line-height: 1.7;">Every install ships with <code>.keystone/harness/playbooks/task/PLAYBOOK.md</code>. Kickoff phrase: <code style="color: var(--accent);">/keystone:task on &lt;ticket-id&gt;</code>. The agent pauses for acceptance between phases; an optional <code>/keystone:learn</code> pass closes out if something surprising came up.</p>
 
     <div class="pipeline" style="margin-top: 20px;">
       <div class="phase p1"><span class="phase-num">01</span><span class="phase-name">spec</span></div>
@@ -2544,83 +2560,83 @@ flowchart LR
   </section>
 
   <!-- ===================== ACTIONS ===================== -->
-  <section id="commands" class="page" data-title="Commands">
+  <section id="actions" class="page" data-title="Actions">
     <div class="page-head">
-      <div class="crumb">Primitive · Lifecycle work</div>
-      <h1>Commands — agent-agnostic units of lifecycle work.</h1>
-      <p class="tagline">Every command is one markdown file in <code>.harness/commands/&lt;id&gt;.md</code>. The agent reads its menu file on session start, finds the command in the bulleted list, follows the link, and executes it. <code>keystone project</code> lowers each command to <code>.claude/commands/keystone-&lt;id&gt;.md</code> so any host that reads slash-commands picks it up as <code>/keystone-&lt;id&gt;</code>. (Playbooks project to <code>.claude/skills/</code>.) Chained into <a href="#playbooks">playbooks</a> like <code>task</code>; individually invokable too.</p>
+      <div class="crumb">Framework primitive · Wraps command</div>
+      <h1>Actions — agent-agnostic units of lifecycle work.</h1>
+      <p class="tagline">Every action is one markdown file in <code>.keystone/harness/actions/&lt;id&gt;/ACTION.md</code>. The agent reads its menu file on session start, finds the action in the bulleted list, follows the link, and executes the playbook. <strong>Action wraps <code>command</code></strong> — <code>keystone project</code> writes <code>.claude/commands/&lt;id&gt;.md</code> so any host that reads slash-commands picks it up. (Playbooks project to <code>.claude/skills/</code>; actions project to <code>.claude/commands/</code>.) Chained into <a href="#playbooks">playbooks</a> like <code>task</code>; individually invokable too.</p>
     </div>
 
     <div class="section-label">Invocation</div>
     <div class="definition">
-      <p><strong>Natural language or slash command.</strong> Say "do a verify pass" or type <code>/keystone-verify</code> — both land at <code>.harness/commands/verify.md</code>. Every agent — Claude Code, Codex, Cursor, VS Code, Aider, GitHub Copilot, Continue, Cline, Goose, opencode — reads the same files. Adapter-specific concerns (sub-agent parallelism, autonomous shell execution, tracker integration) live in <code>.harness/adapters/&lt;agent&gt;/lifecycle.md</code>; the commands themselves don't know which agent is running them.</p>
-      <p><strong>Single-command vs. full lifecycle.</strong> Run individual commands directly, or run a <a href="#playbooks">playbook</a> like <code>task</code> to chain them with gates between phases.</p>
+      <p><strong>Natural language or slash command.</strong> Say "do a verify pass" or type <code>/keystone:verify</code> — both land at <code>.keystone/harness/actions/verify/ACTION.md</code>. Every agent — Claude Code, Codex, Cursor, VS Code, Aider, GitHub Copilot, Continue, Cline, Goose, pi — reads the same files. Adapter-specific concerns (sub-agent parallelism, autonomous shell execution, tracker integration) live in <code>.keystone/harness/adapters/&lt;agent&gt;/lifecycle.md</code>; the actions themselves don't know which agent is running them.</p>
+      <p><strong>Single-action vs. full lifecycle.</strong> Run individual actions directly, or run a <a href="#playbooks">playbook</a> like <code>task</code> to chain them with gates between phases.</p>
     </div>
 
-    <div class="section-label">Lifecycle commands — chained by the <code>task</code> playbook</div>
+    <div class="section-label">Lifecycle actions — chained by the <code>task</code> playbook</div>
     <div class="action-grid three">
       <div class="action">
         <span class="action-tag">spec phase</span>
         <h3 style="color: var(--accent);">spec</h3>
-        <p>Capture intent + acceptance criteria from a tracker card or inline. <strong style="color: var(--text);">Gate:</strong> spec approved before planning begins. Playbook: <code>commands/spec.md</code>.</p>
+        <p>Capture intent + acceptance criteria from a tracker card or inline. <strong style="color: var(--text);">Gate:</strong> spec approved before planning begins. Playbook: <code>actions/spec.md</code>.</p>
       </div>
       <div class="action">
         <span class="action-tag">planning entry</span>
         <h3 style="color: var(--accent2);">orient</h3>
-        <p>Read <code>corpus/state/CODEBASE_STATE.md</code>, lazy-load matching guides for the touched region, consult <code>risk-fingerprints.md</code> and <code>traffic-topology.md</code>, sketch a plan. <strong style="color: var(--text);">Gate:</strong> plan approved. Playbook: <code>commands/orient.md</code>.</p>
+        <p>Read <code>corpus/state/CODEBASE_STATE.md</code>, lazy-load matching guides for the touched region, consult <code>risk-fingerprints.md</code> and <code>traffic-topology.md</code>, sketch a plan. <strong style="color: var(--text);">Gate:</strong> plan approved. Playbook: <code>actions/orient.md</code>.</p>
       </div>
       <div class="action">
         <span class="action-tag">implementation exit</span>
         <h3 style="color: var(--accent3);">check-drift</h3>
-        <p>Compare the diff against IRON LAWs (fail), GOLDEN RULES (strong warn), and regular RULES (warn). Cheaper to fix while the change is fresh than during verify. Playbook: <code>commands/check-drift.md</code>.</p>
+        <p>Compare the diff against IRON LAWs (fail), GOLDEN RULES (strong warn), and regular RULES (warn). Cheaper to fix while the change is fresh than during verify. Playbook: <code>actions/check-drift.md</code>.</p>
       </div>
       <div class="action">
         <span class="action-tag">verification gate</span>
         <h3 style="color: var(--accent3);">verify</h3>
-        <p>Run sensors from <code>CODEBASE_STATE.md</code>: lint, type-check, tests, build, drift, commit-message, security trio. <strong style="color: var(--text);">No completion claims without fresh evidence — sensors must have run this turn.</strong> Playbook: <code>commands/verify.md</code>.</p>
+        <p>Run sensors from <code>CODEBASE_STATE.md</code>: lint, type-check, tests, build, drift, commit-message, security trio. <strong style="color: var(--text);">No completion claims without fresh evidence — sensors must have run this turn.</strong> Playbook: <code>actions/verify.md</code>.</p>
       </div>
       <div class="action">
         <span class="action-tag">review phase</span>
         <h3 style="color: var(--accent2);">review</h3>
-        <p>Walk spec acceptance criteria, then four review concerns: <code>review-functional</code>, <code>review-security</code>, <code>review-risk</code>, <code>review-deployment</code> — sub-agents in parallel on capable adapters. <strong style="color: var(--text);">Gate:</strong> no blockers, AC met. Playbook: <code>commands/review.md</code>.</p>
+        <p>Walk spec acceptance criteria, then four review concerns: <code>review-functional</code>, <code>review-security</code>, <code>review-risk</code>, <code>review-deployment</code> — sub-agents in parallel on capable adapters. <strong style="color: var(--text);">Gate:</strong> no blockers, AC met. Playbook: <code>actions/review.md</code>.</p>
       </div>
       <div class="action">
         <span class="action-tag">release / capture</span>
         <h3 style="color: var(--accent4);">learn</h3>
-        <p>Stage candidates into <code>learning/inbox/</code> classified as <strong>rule</strong> (→ guides) or <strong>information</strong> (→ corpus). Nothing is promoted yet — see <a href="#learning">Learning pipeline</a>. Playbook: <code>commands/learn.md</code>.</p>
+        <p>Stage candidates into <code>learning/inbox/</code> classified as <strong>rule</strong> (→ guides) or <strong>information</strong> (→ corpus). Nothing is promoted yet — see <a href="#learning">Learning pipeline</a>. Playbook: <code>actions/learn.md</code>.</p>
       </div>
     </div>
 
-    <div class="section-label">Heavyweight commands — invoked by you</div>
+    <div class="section-label">Heavyweight actions — invoked by you</div>
     <div class="action-grid three">
       <div class="action">
         <span class="action-tag">day 1</span>
         <h3 style="color: var(--accent);">bootstrap</h3>
-        <p>Initial audit. Detects stack, frameworks, libraries; seeds paired <code>corpus/idioms/</code> + <code>guides/idioms/</code>; initializes <code>CODEBASE_STATE.md</code>; populates <code>guides/computational/</code>; classifies which inferential sensors the adapter can run. Playbook: <code>commands/bootstrap.md</code>.</p>
+        <p>Initial audit. Detects stack, frameworks, libraries; seeds paired <code>corpus/idioms/</code> + <code>guides/idioms/</code>; initializes <code>CODEBASE_STATE.md</code>; populates <code>guides/computational/</code>; classifies which inferential sensors the adapter can run. Playbook: <code>actions/bootstrap.md</code>.</p>
       </div>
       <div class="action">
         <span class="action-tag">periodic</span>
         <h3 style="color: var(--accent2);">audit</h3>
-        <p>Asymmetric dual audit. <strong>Guides</strong> reviewed regularly; <strong>corpus</strong> rarely. Pruning flywheel reads the harness-debt sensor and persists findings to <code>corpus/state/harness-debt.md</code>. Playbook: <code>commands/audit.md</code>.</p>
+        <p>Asymmetric dual audit. <strong>Guides</strong> reviewed regularly; <strong>corpus</strong> rarely. Pruning flywheel reads the harness-debt sensor and persists findings to <code>corpus/state/harness-debt.md</code>. Playbook: <code>actions/audit.md</code>.</p>
       </div>
       <div class="action">
         <span class="action-tag">after learn</span>
         <h3 style="color: var(--accent3);">synthesize</h3>
-        <p>Promote items from <code>learning/inbox/</code>. Classifies each as <strong>rule</strong> (→ guides) or <strong>information</strong> (→ corpus); some both. Human gates by confidence. Playbook: <code>commands/synthesize.md</code>.</p>
+        <p>Promote items from <code>learning/inbox/</code>. Classifies each as <strong>rule</strong> (→ guides) or <strong>information</strong> (→ corpus); some both. Human gates by confidence. Playbook: <code>actions/synthesize.md</code>.</p>
       </div>
       <div class="action">
         <span class="action-tag">periodic</span>
         <h3 style="color: var(--accent3);">debt-review</h3>
-        <p>Triage <code>corpus/state/code-debt.md</code>. Walks <code>discovery</code> items, re-scores existing entries, prunes <code>stale</code> items. Harness debt is handled by <strong>audit</strong>'s Pruning flywheel; this action is code-debt only. Playbook: <code>commands/debt-review.md</code>.</p>
+        <p>Triage <code>corpus/state/code-debt.md</code>. Walks <code>discovery</code> items, re-scores existing entries, prunes <code>stale</code> items. Harness debt is handled by <strong>audit</strong>'s Pruning flywheel; this action is code-debt only. Playbook: <code>actions/debt-review.md</code>.</p>
       </div>
       <div class="action">
         <span class="action-tag">config</span>
         <h3 style="color: var(--accent5);">mode</h3>
-        <p>Set pacing mode: <code>paired</code> / <code>solo</code> / <code>autopilot</code>. Controls how often the agent stops to ask. See <a href="#modes">Pacing modes</a>. Playbook: <code>commands/mode.md</code>.</p>
+        <p>Set pacing mode: <code>paired</code> / <code>solo</code> / <code>autopilot</code>. Controls how often the agent stops to ask. See <a href="#modes">Pacing modes</a>. Playbook: <code>actions/mode.md</code>.</p>
       </div>
     </div>
 
-    <p style="font-size: 0.78rem; color: var(--muted); font-family: var(--mono); margin-top: 24px; line-height: 1.7;">Authoring a new command is one markdown file under <code>.harness/commands/&lt;id&gt;.md</code> plus a bullet in the menu file. Playbooks are short (~20–40 lines): list the activities, link to the underlying guides / sensors / state. Deeper context lives in <code>.harness/guides/process/</code>; playbooks forward-link there when they apply.</p>
+    <p style="font-size: 0.78rem; color: var(--muted); font-family: var(--mono); margin-top: 24px; line-height: 1.7;">Authoring a new action is one markdown file under <code>.keystone/harness/actions/&lt;id&gt;/ACTION.md</code> plus a bullet in the menu file. Playbooks are short (~20–40 lines): list the activities, link to the underlying guides / sensors / state. Deeper context lives in <code>.keystone/harness/guides/process/</code>; playbooks forward-link there when they apply.</p>
   </section>
 
   <!-- ===================== EVALS ===================== -->
@@ -2628,7 +2644,7 @@ flowchart LR
     <div class="page-head">
       <div class="crumb">Framework primitive · Regression testing</div>
       <h1>Evals — fixture-based regression tests for the harness.</h1>
-      <p class="tagline">A primitive at <code>.harness/evals/&lt;id&gt;/EVAL.md</code> + sibling <code>expected.json</code> + optional <code>fixture/</code>. Two levels — <strong>static</strong> (assertion over a fixture) and <strong>sensor</strong> (run a sensor against a fixture, compare its output).</p>
+      <p class="tagline">A framework primitive at <code>.keystone/harness/evals/&lt;id&gt;/EVAL.md</code> + sibling <code>expected.json</code> + optional <code>fixture/</code>. Two levels in 2.0 — <strong>static</strong> (assertion over a fixture) and <strong>sensor</strong> (run a sensor against a fixture, compare its output). Agent-level evals are reserved for 2.1.</p>
     </div>
 
     <div class="definition">
@@ -2643,11 +2659,11 @@ flowchart LR
 <span class="ok">▸</span> baseline worktree at /tmp/keystone-baseline-xxx
 <span class="ok">▸</span> running 12 eval(s) on baseline + head
 <span class="ok">▸</span> diff: 0 regression(s), 2 improvement(s), 10 unchanged
-<span class="ok">✓</span> regression report at .harness/eval-reports/2026-06-17-v1.0.4.md</pre>
+<span class="ok">✓</span> regression report at .keystone/eval-reports/2026-06-17-v1.0.4.md</pre>
 
     <div class="section-label">Layout</div>
     <div class="tree">
-      <div class="tree-line"><span class="tree-structure"></span><span class="tree-dir">.harness/evals/</span></div>
+      <div class="tree-line"><span class="tree-structure"></span><span class="tree-dir">.keystone/harness/evals/</span></div>
       <div class="tree-line"><span class="tree-structure">└──</span><span class="tree-dir">spec-adherence-baseline/</span></div>
       <div class="tree-line"><span class="tree-structure">    ├──</span><span class="tree-file">EVAL.md</span><span class="tree-annotation ann-default">scenario + assertion + diff format</span></div>
       <div class="tree-line"><span class="tree-structure">    ├──</span><span class="tree-file">expected.json</span><span class="tree-annotation ann-default">expected output</span></div>
@@ -2655,36 +2671,46 @@ flowchart LR
     </div>
   </section>
 
-  <!-- ===================== HOOKS ===================== -->
-  <section id="hooks" class="page" data-title="Hooks">
+  <!-- ===================== SOURCES ===================== -->
+  <section id="sources" class="page" data-title="Sources">
     <div class="page-head">
-      <div class="crumb">Primitive · Deterministic firing layer</div>
-      <h1>Hooks — deterministic checks bound to an event.</h1>
-      <p class="tagline">A primitive at <code>.harness/hooks/&lt;id&gt;.md</code>. A hook binds to a framework <code>event:</code> and carries a <code>run:</code> (computational — a shell script) or an <code>agent:</code> + <code>returns:</code> (inferential — a dispatched review). Computational checks the agent used to wire by hand are now hooks; so are computational guides and computational sensors — one firing path for all three.</p>
+      <div class="crumb">Framework primitive · External context providers</div>
+      <h1>Sources — external context, declared as primitives.</h1>
+      <p class="tagline">A framework primitive declaring an external context provider — folder, URL, and (Phase B) service adapters like Linear, Confluence, Jira. Stage 3 of the <a href="#contract">resolution flow</a>. Backwards-compatible with the existing <code>.keystone/context.json</code> file; full migration to <code>source</code> primitives is the 2.1 work.</p>
     </div>
 
     <div class="definition">
-      <p><strong>One bridge, many hooks.</strong> Instead of mapping each check into the host's settings, <code>keystone project</code> installs ONE generic bridge entry per host phase any hook binds to — <code>keystone hook fire &lt;phase&gt;</code>. Keystone selects the matching hooks and dispatches them itself: computational hooks run in parallel (any non-zero exit blocks), inferential hooks emit a dispatch manifest the host spawns as a subagent. Keystone owns the blocking, not the adapter.</p>
-      <p><strong>Framework events.</strong> <code>pre-command</code>, <code>post-command</code>, <code>pre-playbook</code>, <code>post-playbook</code>, <code>on-gate</code>, <code>pre-verify</code>, <code>post-verify</code>, <code>on-phase-enter</code>, <code>on-phase-exit</code> — plus the host's own tool phases (<code>PreToolUse</code>, <code>PostToolUse</code>, …). <code>keystone verify</code> auto-fires <code>pre-verify</code> (a blocking gate) and <code>post-verify</code>; <code>keystone document promote</code> fires <code>on-gate</code>.</p>
+      <p><strong>Why sources.</strong> The runtime contract says "when the rules + corpus aren't enough, query external sources." Sources declare which providers count. They're queried only when the MCP server is running; results are never applied silently — the contract forces the agent to ask where the answer should land (project, team policy, org policy, or session).</p>
+      <p><strong>Frontmatter shape.</strong> <code>kind: source</code>, <code>id</code>, <code>description</code>, <code>source_kind: folder | url | service</code> (service is Phase B), plus per-kind config (path, URL, adapter name, credentials reference).</p>
     </div>
 
-<pre class="code"><span class="comment"># Frontmatter for a computational hook</span>
----
-kind: hook
-id: secret-scan
-description: Block edits that introduce credentials or touch sensitive paths
-mode: computational
-event: PreToolUse
-run: keystone verify --sensor secret-scan
----</pre>
+    <div class="section-label">Two configuration paths</div>
+    <div class="action-grid">
+      <div class="action">
+        <span class="action-tag">backwards-compat</span>
+        <h3 style="color: var(--accent2);"><code>.keystone/context.json</code></h3>
+        <p>The 1.x configuration shape. Lists sources at the project root. Still honored at 2.0 — the MCP server reads from both <code>context.json</code> and <code>source</code> primitives. Full migration to primitives is the 2.1 work.</p>
+      </div>
+      <div class="action">
+        <span class="action-tag">2.0 canonical</span>
+        <h3 style="color: var(--accent3);"><code>.keystone/harness/sources/</code></h3>
+        <p>One source per primitive. Same frontmatter shape as every other kind; participates in the cascade, can be shipped by policies, can carry traces. The dashboard's <strong>sources</strong> page lists them with health probes and per-source query.</p>
+      </div>
+    </div>
+
+    <div class="section-label">CLI + dashboard</div>
+<pre class="code"><span class="prompt">$</span> keystone new source linear-tickets
+<span class="prompt">$</span> keystone web serve   <span class="comment"># sources page: list + add + query + health</span></pre>
+
+    <p style="font-size: 0.78rem; color: var(--muted); font-family: var(--mono); margin-top: 12px; line-height: 1.7;">The MCP server exposes <code>keystone_source_list</code>, <code>keystone_source_query</code>, <code>keystone_source_health</code> so host agents can query sources without leaving the MCP transport.</p>
   </section>
 
   <!-- ===================== AGENT PRIMITIVE: SKILLS ===================== -->
   <section id="agent-skills" class="page" data-title="Skills">
     <div class="page-head">
-      <div class="crumb">Primitive · Agent slash command</div>
+      <div class="crumb">Agent primitive · Escape hatch (use playbook instead)</div>
       <h1>Skills — agent slash commands.</h1>
-      <p class="tagline">A primitive at <code>.harness/skills/&lt;id&gt;/SKILL.md</code>. Projects to <code>.claude/skills/&lt;id&gt;/SKILL.md</code> on <code>keystone project</code>; the host agent surfaces it as <code>/keystone-&lt;id&gt;</code>. Frontmatter: <code>kind: skill</code>, <code>id</code>, <code>description</code>, plus <code>triggers:</code> (natural-language phrases that invoke the skill). Most slash-command-shaped behavior should be authored as a framework <a href="#playbooks">playbook</a>, which projects to the same <code>.claude/skills/&lt;id&gt;/SKILL.md</code> path; direct <code>skill</code> authoring is the raw host-native escape hatch.</p>
+      <p class="tagline">An agent primitive at <code>.keystone/harness/skills/&lt;id&gt;/SKILL.md</code>. Projects to <code>.claude/skills/&lt;id&gt;/SKILL.md</code> on <code>keystone project</code>; the host agent surfaces it as <code>/keystone:&lt;id&gt;</code>. Frontmatter: <code>kind: skill</code>, <code>id</code>, <code>description</code>, plus <code>triggers:</code> (natural-language phrases that invoke the skill). Most slash-command-shaped behavior should be authored as a framework <a href="#playbooks">playbook</a>, which projects to the same <code>.claude/skills/&lt;id&gt;/SKILL.md</code> path; direct <code>skill</code> authoring is the raw host-native escape hatch.</p>
     </div>
 
     <div class="definition">
@@ -2698,30 +2724,71 @@ kind: skill
 id: bootstrap
 description: First-time harness scaffold against the codebase
 triggers:
-  - "/keystone-bootstrap"
+  - "/keystone:bootstrap"
   - "bootstrap the harness"
   - "do an initial audit"
 ---</pre>
   </section>
 
-  <!-- ===================== AGENTS ===================== -->
-  <section id="agent" class="page" data-title="Agents">
+  <!-- ===================== AGENT PRIMITIVE: SUBAGENTS ===================== -->
+  <section id="subagents" class="page" data-title="Subagents">
     <div class="page-head">
-      <div class="crumb">Primitive · Delegated agent session</div>
-      <h1>Agents — delegated agent sessions.</h1>
-      <p class="tagline">A primitive at <code>.harness/agents/&lt;id&gt;.md</code> that projects to <code>.claude/agents/keystone-&lt;id&gt;.md</code> on <code>keystone project</code>. In 3.0, <strong><code>agent</code> is one kind</strong> — it absorbs the old persona/subagent split. Frontmatter requires <code>tools:</code> (the allow-list the session inherits) and carries a sharpened system prompt for the role. The four review reviewers — <code>code-reviewer</code>, <code>security-reviewer</code>, <code>drift-reviewer</code>, <code>debt-reviewer</code> — are agents an inferential hook dispatches in parallel on capable hosts.</p>
+      <div class="crumb">Agent primitive · Escape hatch (use persona instead)</div>
+      <h1>Subagents — delegated agent sessions.</h1>
+      <p class="tagline">An agent primitive at <code>.keystone/harness/subagents/&lt;id&gt;.md</code>. Projects to <code>.claude/agents/&lt;id&gt;.md</code> on <code>keystone project</code>. Frontmatter requires <code>tools:</code> — the toolset the subagent inherits. Used to spawn the four review reviewers in parallel on capable adapters. <a href="#personas">Persona</a> is the encouraged framework wrapper for this kind; the raw <code>subagent</code> primitive is the escape hatch for hand-authored host-native files.</p>
+    </div>
+
+<pre class="code"><span class="comment"># Frontmatter for a subagent primitive</span>
+---
+kind: subagent
+id: review-security
+description: OWASP top-N + secrets + authn/authz reviewer
+tools:
+  - Read
+  - Grep
+  - Bash
+---</pre>
+  </section>
+
+  <!-- ===================== AGENT PRIMITIVE: COMMANDS ===================== -->
+  <section id="commands" class="page" data-title="Commands">
+    <div class="page-head">
+      <div class="crumb">Agent primitive · Escape hatch (use action instead)</div>
+      <h1>Commands — argument-shaped invocations.</h1>
+      <p class="tagline">An agent primitive at <code>.keystone/harness/commands/&lt;id&gt;.md</code>. Projects to <code>.claude/commands/&lt;id&gt;.md</code> on <code>keystone project</code>. Frontmatter requires <code>args:</code> — the argument schema the host agent uses to shape the invocation. Authoring via the framework <a href="#actions"><code>action</code></a> kind is the encouraged path; <code>command</code> is the raw host primitive escape hatch.</p>
+    </div>
+
+<pre class="code"><span class="comment"># Frontmatter for a command primitive</span>
+---
+kind: command
+id: cut-release
+description: Cut a release with semver bump + tag + changelog gate
+args:
+  - name: level
+    enum: [patch, minor, major]
+    required: true
+---</pre>
+  </section>
+
+  <!-- ===================== FRAMEWORK PRIMITIVE: PERSONAS ===================== -->
+  <section id="personas" class="page" data-title="Personas">
+    <div class="page-head">
+      <div class="crumb">Framework primitive · Wraps subagent</div>
+      <h1>Personas — framework wrappers for subagents. <span style="color:var(--accent3);">· New in 2.0</span></h1>
+      <p class="tagline">A framework primitive at <code>.keystone/harness/personas/&lt;id&gt;.md</code> that projects to <code>.claude/agents/&lt;id&gt;.md</code> on <code>keystone project</code>. Frontmatter requires <code>tools:</code> (mirrors <a href="#subagents">subagent</a>). Personas are the encouraged path for authoring posture-flavored delegated agents — <code>security-reviewer</code>, <code>code-reviewer</code>, <code>planner</code>, <code>verifier</code>, <code>auditor</code>. The raw <a href="#subagents"><code>subagent</code></a> kind remains as an escape hatch.</p>
     </div>
 
     <div class="definition">
-      <p><strong>Posture-flavored, tools-scoped.</strong> Each agent carries a system prompt for its role (skeptical reviewer, security-first auditor, terse planner) and a <code>tools:</code> allow-list — read-only reviewers don't carry <code>Write</code>. The shipped <code>security-reviewer</code>, <code>planner</code>, <code>verifier</code>, and <code>auditor</code> are the worked examples; grep <code>.harness/agents/</code> for more.</p>
+      <p><strong>Wraps subagent.</strong> Persona is the canonical authoring surface; <code>keystone project</code> compiles it down to <code>.claude/agents/&lt;id&gt;.md</code>, which the host agent spawns as a delegated session with its own context and tools allow-list. Same-id collision with a hand-authored subagent under <code>harness/subagents/</code> is a lint error — both would project to the same <code>.claude/agents/&lt;id&gt;.md</code> path.</p>
+      <p><strong>Posture-flavored.</strong> Each persona carries a sharpened system prompt for the role (skeptical reviewer, security-first auditor, terse planner). The shipped <code>security-reviewer</code> is the canonical example; every seeded action ships a paired persona (auditor, planner, code-reviewer, verifier, etc.) — grep the harness for examples.</p>
     </div>
 
-<pre class="code"><span class="prompt">$</span> keystone new agent security-reviewer
-  wrote: .harness/agents/security-reviewer.md
+<pre class="code"><span class="prompt">$</span> keystone new persona security-reviewer
+  wrote: .keystone/harness/personas/security-reviewer.md</pre>
 
-<span class="comment"># Frontmatter for an agent primitive</span>
+<pre class="code"><span class="comment"># Frontmatter for a persona primitive</span>
 ---
-kind: agent
+kind: persona
 id: security-reviewer
 description: Security-focused PR reviewer that hunts OWASP-top-10 patterns and unsafe defaults.
 tools:
@@ -2731,105 +2798,12 @@ tools:
 ---</pre>
   </section>
 
-  <!-- ===================== TOOLS ===================== -->
-  <section id="tool" class="page" data-title="Tools">
-    <div class="page-head">
-      <div class="crumb">Primitive · Author-defined callable</div>
-      <h1>Tools — author-defined callables, any transport.</h1>
-      <p class="tagline">A primitive at <code>.harness/tools/&lt;id&gt;.md</code> declaring <code>transport: cli | mcp | plugin</code> and a <code>run:</code> handler. This is how an agent reaches an external system — Jira, an internal API, a database — now that <code>source</code> is gone. <code>transport: mcp</code> tools register themselves on keystone's own MCP server at startup; the handler shells out to <code>run:</code>, passing declared args as <code>KEYSTONE_ARG_&lt;NAME&gt;</code>. Lint enforces the contract.</p>
-    </div>
-
-    <div class="definition">
-      <p><strong>Tools are stage 3 of the contract.</strong> When the rules and corpus can't answer and the answer lives in an external system, the agent calls a tool — an MCP server, a connector, or a curl script that retrieves it. The result is evidence, not authority; the <a href="#contract">resolution contract</a> still routes where the answer lands. <code>cli</code> and <code>plugin</code> tools reach the agent through their own transports; <code>mcp</code> tools ride keystone's MCP server.</p>
-    </div>
-
-<pre class="code"><span class="comment"># Frontmatter for an mcp-transport tool</span>
----
-kind: tool
-id: jira-card
-description: Fetch a Jira card by key for spec context
-transport: mcp
-run: ./scripts/jira-fetch.sh
-args:
-  - name: key
-    required: true
----</pre>
-  </section>
-
-  <!-- ===================== POSTURE ===================== -->
-  <section id="posture" class="page" data-title="Posture">
-    <div class="page-head">
-      <div class="crumb">Primitive · Tool permissions</div>
-      <h1>Posture — allow / ask / deny, projected to settings.</h1>
-      <p class="tagline">A primitive at <code>.harness/posture/&lt;id&gt;.md</code> declaring <code>allow</code> / <code>ask</code> / <code>deny</code> tool-permission lists. <code>keystone project</code> merges them into <code>.claude/settings.json</code> permissions — additive, deduped, sorted, idempotent, preserving any user-authored entries. One file decides what the agent may do without asking, what it must confirm, and what is forbidden outright.</p>
-    </div>
-
-    <div class="definition">
-      <p><strong>Permissions as a primitive.</strong> Posture lives in the harness like everything else — versioned, shippable in a policy, surfaced in the index. Edit the markdown and the next <code>keystone project</code> (or <code>watch</code>) rewrites the host's permission lists; delete it and the entries it owned are removed.</p>
-    </div>
-
-<pre class="code"><span class="comment"># Frontmatter for a posture primitive</span>
----
-kind: posture
-id: default
-description: Baseline tool permissions for this project
-allow:
-  - "Bash(go test:*)"
-  - "Read"
-ask:
-  - "Bash(git push:*)"
-deny:
-  - "Read(./.env*)"
----</pre>
-  </section>
-
-  <!-- ===================== PATTERNS (primitive) ===================== -->
-  <section id="pattern" class="page" data-title="Pattern">
-    <div class="page-head">
-      <div class="crumb">Primitive · Documentation pattern</div>
-      <h1>Pattern — a Diátaxis shape for writing docs.</h1>
-      <p class="tagline">A primitive at <code>.harness/patterns/&lt;id&gt;.md</code> capturing a reusable documentation pattern — one of the Diátaxis modes (tutorial, how-to, reference, explanation). <code>keystone new pattern</code> scaffolds a doc skeleton in the right shape. Patterns don't project to a host surface; they're authoring guidance the agent applies when it writes documentation.</p>
-    </div>
-
-<pre class="code"><span class="comment"># Frontmatter for a pattern primitive</span>
----
-kind: pattern
-id: how-to
-description: Goal-oriented how-to guide (Diátaxis)
-mode: how-to
----</pre>
-  </section>
-
-  <!-- ===================== DOCUMENTS ===================== -->
-  <section id="document" class="page" data-title="Documents">
-    <div class="page-head">
-      <div class="crumb">Primitive · Gate-validated work doc</div>
-      <h1>Documents — work that advances through gates.</h1>
-      <p class="tagline">A primitive at <code>.harness/documents/&lt;id&gt;.md</code> declaring a document type with ordered <code>gates:</code>. Instances live under <code>.harness/work/</code> and are driven by <code>keystone document</code> — <code>list</code> shows them, <code>promote</code> advances one through a gate (validated; firing <code>on-gate</code> hooks on success). The walker skips <code>.harness/work/</code>, so instances are tracked by the subcommand, not indexed as primitives.</p>
-    </div>
-
-    <div class="definition">
-      <p><strong>Why a document kind.</strong> Specs, roadmaps, design notes, RFCs — work artifacts that move through a defined lifecycle (draft → reviewed → accepted). The document type defines the gates; <code>keystone document promote</code> enforces the order and won't skip a gate.</p>
-    </div>
-
-<pre class="code"><span class="prompt">$</span> keystone document list
-<span class="prompt">$</span> keystone document promote roadmaps/2026-h2 --to reviewed
-
-<span class="comment"># Frontmatter for a document type</span>
----
-kind: document
-id: roadmap
-description: Quarterly roadmap that advances draft -> reviewed -> accepted
-gates: [draft, reviewed, accepted]
----</pre>
-  </section>
-
   <!-- ===================== RULES & IRON LAWS ===================== -->
-  <section id="rules" class="page" data-title="Tiers &amp; iron laws">
+  <section id="rules" class="page" data-title="Rules &amp; iron laws">
     <div class="page-head">
-      <div class="crumb">Discipline · Guide tiers + iron laws</div>
-      <h1>Tiers — three strengths, nine iron laws.</h1>
-      <p class="tagline">In 3.0 there is no <code>rule</code> kind — rules are authored as <a href="#guides">guides</a>, and each guide carries a <code>tier:</code> (<code>iron-law</code> | <code>golden-rule</code> | <code>preference</code>, default <code>preference</code>). Three strengths — regular <strong>RULES</strong>, <strong>GOLDEN RULES</strong>, <strong>IRON LAW</strong>. The drift sensor enforces all three: IRON LAW fail, GOLDEN warn strongly, RULES warn. A glob-scoped guide projects to a <code>.claude/rules/</code> shim where the host supports it.</p>
+      <div class="crumb">Agent primitive · Iron laws</div>
+      <h1>Rules — three tiers, nine iron laws.</h1>
+      <p class="tagline">In 2.0 the agent primitive is <code>kind: rule</code>. Each rule carries <code>severity:</code> (the explicit field replaces the 1.x H2-tier parsing). Three tiers — regular <strong>RULES</strong>, <strong>GOLDEN RULES</strong>, <strong>IRON LAW</strong>. The drift sensor enforces all three: IRON LAW fail, GOLDEN warn strongly, RULES warn. Rules project to <code>.claude/rules/</code>-style native surfaces where the host agent supports them.</p>
     </div>
 
     <div class="action-grid three">
@@ -2945,17 +2919,17 @@ gates: [draft, reviewed, accepted]
     <div class="page-head">
       <div class="crumb">Reference · Command-line</div>
       <h1>CLI — Cobra command tree.</h1>
-      <p class="tagline">2.0 ships a much bigger surface than 1.x — index, lint, project, verify, migrate, new (any kind), search, graph, watch, snapshot, eval, policy, mcp, web. The <code>--harness-root</code> flag is gone; the path is fixed at <code>.harness/</code>. <code>huh</code> is removed — <code>init</code> prompts at most once (agent target).</p>
+      <p class="tagline">2.0 ships a much bigger surface than 1.x — index, lint, project, verify, migrate, new (any kind), search, graph, watch, snapshot, eval, policy, mcp, web. The <code>--harness-root</code> flag is gone; the path is fixed at <code>.keystone/harness/</code>. <code>huh</code> is removed — <code>init</code> prompts at most once (agent target).</p>
     </div>
 
     <div class="section-label">Verb table</div>
     <p style="font-size: 0.85rem; color: var(--muted); line-height: 1.7; margin-bottom: 14px;">Every command has <code>--help</code>. <code>keystone completion bash|zsh|fish|powershell</code> for shell autocomplete (Cobra default).</p>
 
-<pre class="code"><span class="comment"># Scaffold .harness/ + agent target into the cwd. One question: agent target.
+<pre class="code"><span class="comment"># Scaffold .keystone/ + agent target into the cwd. One question: agent target.
 # Idempotent by default — existing files are kept.</span>
 <span class="prompt">$</span> keystone init [--agent &lt;label&gt;] [--architecture ...] [--compliance ...]
 
-<span class="comment"># Walk .harness/, emit .harness/INDEX.json (primitive descriptors)</span>
+<span class="comment"># Walk .keystone/harness/, emit .keystone/INDEX.json (primitive descriptors)</span>
 <span class="prompt">$</span> keystone index
 
 <span class="comment"># Validate canonical frontmatter (kind, id, description + per-kind required
@@ -2963,10 +2937,10 @@ gates: [draft, reviewed, accepted]
 <span class="prompt">$</span> keystone lint [--verbose]
 
 <span class="comment"># Regenerate host projections (.claude/skills/, .claude/agents/, .claude/commands/,
-# .cursor/rules/, …) from canonical sources under .harness/</span>
+# .cursor/rules/, …) from canonical sources under .keystone/harness/</span>
 <span class="prompt">$</span> keystone project
 
-<span class="comment"># Cascade verify: per-file hashes against .harness/lockfile.json, drift-reset,
+<span class="comment"># Cascade verify: per-file hashes against .keystone/lockfile.json, drift-reset,
 # strict-violation report with path context. Exits non-zero on violations.</span>
 <span class="prompt">$</span> keystone verify
 
@@ -2976,17 +2950,16 @@ gates: [draft, reviewed, accepted]
 <span class="comment"># Generators — every primitive kind, plus adapter + policy</span>
 <span class="prompt">$</span> keystone new guide &lt;topic&gt;/&lt;id&gt;
 <span class="prompt">$</span> keystone new corpus &lt;topic&gt;/&lt;id&gt;
-<span class="prompt">$</span> keystone new sensor &lt;id&gt;
-<span class="prompt">$</span> keystone new hook &lt;id&gt;
-<span class="prompt">$</span> keystone new command &lt;id&gt;
-<span class="prompt">$</span> keystone new skill &lt;id&gt;
+<span class="prompt">$</span> keystone new sensor &lt;id&gt; [--sensor-kind &lt;k&gt;]
+<span class="prompt">$</span> keystone new action &lt;id&gt;
 <span class="prompt">$</span> keystone new playbook &lt;id&gt;
-<span class="prompt">$</span> keystone new agent &lt;id&gt;
-<span class="prompt">$</span> keystone new pattern &lt;id&gt;
-<span class="prompt">$</span> keystone new posture &lt;id&gt;
-<span class="prompt">$</span> keystone new tool &lt;id&gt;
-<span class="prompt">$</span> keystone new document &lt;id&gt;
 <span class="prompt">$</span> keystone new eval &lt;id&gt;
+<span class="prompt">$</span> keystone new source &lt;id&gt;
+<span class="prompt">$</span> keystone new rule &lt;id&gt;
+<span class="prompt">$</span> keystone new skill &lt;id&gt;
+<span class="prompt">$</span> keystone new subagent &lt;id&gt;
+<span class="prompt">$</span> keystone new command &lt;id&gt;
+<span class="prompt">$</span> keystone new persona &lt;id&gt;
 <span class="prompt">$</span> keystone new adapter &lt;agent&gt;
 <span class="prompt">$</span> keystone new policy &lt;name&gt;              <span class="comment"># scaffold a fresh policy repo</span>
 
@@ -2997,10 +2970,10 @@ gates: [draft, reviewed, accepted]
 <span class="comment"># Render the primitive-relationship graph (deps + traces)</span>
 <span class="prompt">$</span> keystone graph --format mermaid|dot
 
-<span class="comment"># fsnotify loop: index + project + lint on every change in .harness/</span>
+<span class="comment"># fsnotify loop: index + project + lint on every change in .keystone/</span>
 <span class="prompt">$</span> keystone watch
 
-<span class="comment"># Local tar.gz snapshots of .harness/ — safe experiments + migrate insurance</span>
+<span class="comment"># Local tar.gz snapshots of .keystone/ — safe experiments + migrate insurance</span>
 <span class="prompt">$</span> keystone snapshot save [--label pre-2.0]
 <span class="prompt">$</span> keystone snapshot list
 <span class="prompt">$</span> keystone snapshot restore &lt;id&gt;
@@ -3053,7 +3026,7 @@ gates: [draft, reviewed, accepted]
       <div class="action">
         <span class="action-tag">snapshot save|list|restore</span>
         <h3 style="color: var(--accent5);">Safe experiments</h3>
-        <p>Local tar.gz snapshots of the entire <code>.harness/</code> tree. Pair with <code>migrate</code> or before any aggressive learn / prune sweep. Snapshots live under <code>.harness/snapshots/</code> and are gitignored.</p>
+        <p>Local tar.gz snapshots of the entire <code>.keystone/</code> tree. Pair with <code>migrate</code> or before any aggressive learn / prune sweep. Snapshots live under <code>.keystone/snapshots/</code> and are gitignored.</p>
       </div>
     </div>
   </section>
@@ -3063,15 +3036,15 @@ gates: [draft, reviewed, accepted]
     <div class="page-head">
       <div class="crumb">Surfaces · Runtime contract for host agents</div>
       <h1>Built-in MCP server.</h1>
-      <p class="tagline">Same Go binary, separate verb. <code>keystone mcp install --agent claude-code</code> writes <code>.mcp.json</code>; the host launches <code>keystone mcp serve</code> on session start over stdio. The server reads the same <code>.harness/</code> tree the CLI authors — one source of truth for the author surface and the runtime surface.</p>
+      <p class="tagline">Same Go binary, separate verb. <code>keystone mcp install --agent claude-code</code> writes <code>.mcp.json</code>; the host launches <code>keystone mcp serve</code> on session start over stdio. The server reads the same <code>.keystone/harness/</code> tree the CLI authors — one source of truth for the author surface and the runtime surface.</p>
     </div>
 
     <div class="definition">
       <p><strong>One-line wiring.</strong> <code>keystone mcp install --agent claude-code</code> writes the agent's MCP config (<code>.mcp.json</code> for Claude Code; <code>.cursor/mcp.json</code> for Cursor; equivalent for VS Code and Codex). No editing JSON by hand. The next time the host agent starts, the keystone server is wired in.</p>
-      <p><strong>The MCP server carries the contract.</strong> The resolution flow (rules → corpus → tool → ask) is encoded in the server's <code>instructions</code> block. Every session starts inside it.</p>
+      <p><strong>The MCP server carries the contract.</strong> The five-stage resolution flow (rules → corpus → external → ask → resolve contradictions) is encoded in the server's <code>instructions</code> block. Every session starts inside it.</p>
     </div>
 
-    <div class="section-label">Tool surface</div>
+    <div class="section-label">Tool surface (21 tools)</div>
     <div class="action-grid">
       <div class="action">
         <span class="action-tag">Read</span>
@@ -3089,9 +3062,9 @@ gates: [draft, reviewed, accepted]
         <p><code>keystone_eval_list</code>, <code>keystone_eval_run</code>, <code>keystone_eval_report</code>, <code>keystone_eval_baseline</code> — agents can request regression diffs against a git ref directly.</p>
       </div>
       <div class="action">
-        <span class="action-tag">Tools</span>
-        <h3 style="color: var(--accent4);">Author-defined tools</h3>
-        <p>Every <code>kind: tool</code> with <code>transport: mcp</code> registers itself on this server at startup — the handler shells out to its <code>run:</code>, passing declared args as <code>KEYSTONE_ARG_&lt;NAME&gt;</code>. This is how the agent reaches external systems.</p>
+        <span class="action-tag">Sources</span>
+        <h3 style="color: var(--accent4);">External context</h3>
+        <p><code>keystone_source_list</code>, <code>keystone_source_query</code>, <code>keystone_source_health</code> — adapter framework for folder + URL today; service adapters (Linear, Confluence, etc.) in Phase B.</p>
       </div>
       <div class="action">
         <span class="action-tag">Write</span>
@@ -3107,9 +3080,11 @@ gates: [draft, reviewed, accepted]
 
     <div class="section-label">Resource surface</div>
 <pre class="code"><span class="comment"># Read-only resources the agent can subscribe to via mcp://</span>
-keystone://index                       <span class="comment"># full .harness/INDEX.json</span>
+keystone://index                       <span class="comment"># full .keystone/INDEX.json</span>
 keystone://primitive/{kind}/{id}       <span class="comment"># one body</span>
 keystone://harness/status              <span class="comment"># install audit</span>
+keystone://source/list
+keystone://source/{name}/health
 skill://list                           <span class="comment"># auto-discovery</span>
 skill://{name}/SKILL.md</pre>
 
@@ -3132,11 +3107,11 @@ skill://{name}/SKILL.md</pre>
     <div class="page-head">
       <div class="crumb">Surfaces · Localhost operator view</div>
       <h1>Localhost dashboard.</h1>
-      <p class="tagline"><code>keystone web serve</code> opens <code>http://localhost:4773</code> (port <strong>4773</strong> = KEYS on a phone keypad). HTMX SPA shell + narrow-topic SSE push in the same Go binary. fsnotify watches <code>.harness/</code> and swaps the affected widget — not the whole page — the moment a file changes. <strong>Four sections</strong>, each with its own tabs; same data model as the CLI and MCP server.</p>
+      <p class="tagline"><code>keystone web serve</code> opens <code>http://localhost:4773</code> (port <strong>4773</strong> = KEYS on a phone keypad). HTMX SPA shell + narrow-topic SSE push in the same Go binary. fsnotify watches <code>.keystone/</code> and swaps the affected widget — not the whole page — the moment a file changes. <strong>Five sections</strong>, each with its own tabs; same data model as the CLI and MCP server.</p>
     </div>
 
     <div class="definition">
-      <p><strong>Localhost-only.</strong> The dashboard binds to <code>127.0.0.1</code> by default. No auth — your machine is the trust boundary. Read-only REST API under <code>/api/*</code>; SSE push at <code>/events</code>; widget fragments at <code>/web/widgets/*</code>. fsnotify on <code>.harness/</code> emits the narrowest topic that matches the dirty paths (<code>primitives-changed</code>, <code>inbox-changed</code>, <code>prune-changed</code>) plus the coarse <code>harness-changed</code> for generic listeners.</p>
+      <p><strong>Localhost-only.</strong> The dashboard binds to <code>127.0.0.1</code> by default. No auth — your machine is the trust boundary. Read-only REST API under <code>/api/*</code>; SSE push at <code>/events</code>; widget fragments at <code>/web/widgets/*</code>. fsnotify on <code>.keystone/</code> emits the narrowest topic that matches the dirty paths (<code>primitives-changed</code>, <code>sources-changed</code>, <code>inbox-changed</code>, <code>prune-changed</code>) plus the coarse <code>harness-changed</code> for generic listeners.</p>
     </div>
 
     <div class="definition" style="border-left-color: var(--accent3);">
@@ -3148,7 +3123,7 @@ skill://{name}/SKILL.md</pre>
       <figcaption style="font-size: 0.78rem; color: var(--muted); font-family: var(--mono); margin-top: 8px; text-align: center;">Observability page · KPI strip + per-session audit log + metrics snapshot.</figcaption>
     </figure>
 
-    <div class="section-label">4 sections</div>
+    <div class="section-label">5 sections</div>
     <div class="action-grid">
       <div class="action">
         <span class="action-tag">/observability</span>
@@ -3161,9 +3136,14 @@ skill://{name}/SKILL.md</pre>
         <p><strong>Tabs:</strong> primitives · policies · investigator · graph. Filterable primitive table with kind + glob filter; detail pages with cross-reference panel; "New" scaffolder for every kind. Policies tab lists installed packages + add/remove forms. Investigator shows the cascade by layer. Graph renders on <code>intersect once</code> — opens cheap, only fetches Mermaid when you scroll to the canvas.</p>
       </div>
       <div class="action">
+        <span class="action-tag">/sources</span>
+        <h3 style="color: var(--accent4);">Sources</h3>
+        <p>List + per-source detail + add form + health probe + per-source query. The same source adapters the MCP server calls. SSE topic <code>sources-changed</code> fires whenever <code>context.json</code> or a policy tree moves.</p>
+      </div>
+      <div class="action">
         <span class="action-tag">/flywheels</span>
         <h3 style="color: var(--accent5);">Flywheels</h3>
-        <p><strong>Tabs:</strong> overview · inbox · prune. Overview renders the click-to-copy <code>/keystone-learn</code> / <code>/keystone-synthesize</code> / <code>/keystone-audit</code> commands. Inbox walks learning candidates with accept / reject. Prune surfaces lint + heuristic findings with one-click archive.</p>
+        <p><strong>Tabs:</strong> overview · inbox · prune. Overview renders the click-to-copy <code>/keystone:learn</code> / <code>/keystone:synthesize</code> / <code>/keystone:audit</code> commands. Inbox walks learning candidates with accept / reject. Prune surfaces lint + heuristic findings with one-click archive.</p>
       </div>
       <div class="action">
         <span class="action-tag">/quality</span>
@@ -3178,7 +3158,7 @@ skill://{name}/SKILL.md</pre>
     </div>
 
     <div class="section-label">Per-session audit log</div>
-    <p style="font-size: 0.85rem; color: var(--muted); line-height: 1.7;">Every <code>keystone web serve</code> opens <code>.harness/state/audit/session-&lt;UTC&gt;-&lt;pid&gt;.jsonl</code> (append-only, <code>O_CREATE|O_EXCL</code>, never overwritten). Each debounced watcher burst writes one line: timestamp, topics emitted, dirty paths, summary. Startup prune trims to ≤50 sessions or 30 days — looser of the two. The Observability audit widget tails the current session with a selector for history. Directory is git-ignored.</p>
+    <p style="font-size: 0.85rem; color: var(--muted); line-height: 1.7;">Every <code>keystone web serve</code> opens <code>.keystone/state/audit/session-&lt;UTC&gt;-&lt;pid&gt;.jsonl</code> (append-only, <code>O_CREATE|O_EXCL</code>, never overwritten). Each debounced watcher burst writes one line: timestamp, topics emitted, dirty paths, summary. Startup prune trims to ≤50 sessions or 30 days — looser of the two. The Observability audit widget tails the current session with a selector for history. Directory is git-ignored.</p>
   </section>
 
   <!-- ===================== SUPPORTED AGENTS ===================== -->
@@ -3199,7 +3179,6 @@ skill://{name}/SKILL.md</pre>
       <div class="agent-row"><span class="agent-name">Codex CLI</span><span class="agent-status real">full</span><span class="agent-menu">AGENTS.md</span></div>
       <div class="agent-row"><span class="agent-name">pi.dev</span><span class="agent-status real">full</span><span class="agent-menu">AGENTS.md + .pi/prompts/</span></div>
       <div class="agent-row"><span class="agent-name">Cursor</span><span class="agent-status real">full</span><span class="agent-menu">.cursor/rules/keystone-*.mdc</span></div>
-      <div class="agent-row"><span class="agent-name">opencode</span><span class="agent-status real">full</span><span class="agent-menu">AGENTS.md + .opencode/rules/</span></div>
       <div class="agent-row"><span class="agent-name">Aider</span><span class="agent-status gaps">real · gaps</span><span class="agent-menu">CONVENTIONS.md</span></div>
       <div class="agent-row"><span class="agent-name">GitHub Copilot (VS Code + CLI)</span><span class="agent-status gaps">real · gaps</span><span class="agent-menu">.github/copilot-instructions.md</span></div>
       <div class="agent-row"><span class="agent-name">Continue</span><span class="agent-status gaps">real · gaps</span><span class="agent-menu">.continuerules</span></div>
@@ -3208,7 +3187,7 @@ skill://{name}/SKILL.md</pre>
       <div class="agent-row"><span class="agent-name">(any other)</span><span class="agent-status fallback">fallback</span><span class="agent-menu">AGENTS.md</span></div>
     </div>
 
-    <p style="font-size: 0.78rem; color: var(--muted); font-family: var(--mono); margin-top: 16px; line-height: 1.7;"><strong style="color: var(--text);">full</strong> — adapter covers every harness feature natively. <strong style="color: var(--text);">real · gaps</strong> — adapter covers the lifecycle but the agent lacks one or more native features (sub-agent parallelism, autonomous shell execution, autonomous tracker integration, etc.). <code>keystone init</code> prints the specific gaps at the end of its run with actionable remedies. Lifecycle invocation itself is uniform — slash commands and natural language against the actions in <code>.harness/commands/</code> both work the same way in every agent. <strong>MCP install</strong>: <code>keystone mcp install --agent &lt;name&gt;</code> supports the canonical hosts (<code>claude-code</code>, <code>cursor</code>, <code>vscode</code>, <code>codex</code>, <code>opencode</code>); the broader agent set above can read the harness even without MCP wiring, via the projected menu file alone.</p>
+    <p style="font-size: 0.78rem; color: var(--muted); font-family: var(--mono); margin-top: 16px; line-height: 1.7;"><strong style="color: var(--text);">full</strong> — adapter covers every harness feature natively. <strong style="color: var(--text);">real · gaps</strong> — adapter covers the lifecycle but the agent lacks one or more native features (sub-agent parallelism, autonomous shell execution, autonomous tracker integration, etc.). <code>keystone init</code> prints the specific gaps at the end of its run with actionable remedies. Lifecycle invocation itself is uniform — slash commands and natural language against the actions in <code>.keystone/harness/actions/</code> both work the same way in every agent. <strong>MCP install</strong>: <code>keystone mcp install --agent &lt;name&gt;</code> supports the four canonical hosts (<code>claude-code</code>, <code>cursor</code>, <code>vscode</code>, <code>codex</code>); the broader agent set above can read the harness even without MCP wiring, via the projected menu file alone.</p>
 
     <div class="definition" style="margin-top: 24px; border-left-color: var(--accent3);">
       <p><strong style="color: var(--accent3);">Biggest gap: sub-agent parallelism for review.</strong> When an adapter lacks native sub-agent support, the four review concerns (<code>review-functional</code>, <code>review-security</code>, <code>review-risk</code>, <code>review-deployment</code>) collapse into a single conversation. The same context window wears four hats sequentially, sharing the same primed framing — and findings degrade accordingly. Security blind spots survive a functional pass; deployment risk gets folded into "looks fine."</p>
@@ -3221,7 +3200,7 @@ skill://{name}/SKILL.md</pre>
     <div class="page-head">
       <div class="crumb">Reference · How each agent runs the harness</div>
       <h1>Adapters — three markdown files per supported agent.</h1>
-      <p class="tagline">Every supported agent ships an adapter under <code>.harness/adapters/&lt;agent&gt;/</code>. Three files: <code>lifecycle.md</code>, <code>activation.md</code>, <code>sensors.md</code>. They capture how that specific agent runs the harness — sub-agent spawning, shell execution, tracker integration, sensor invocation. The action playbooks stay agent-neutral; adapters document the bridge.</p>
+      <p class="tagline">Every supported agent ships an adapter under <code>.keystone/harness/adapters/&lt;agent&gt;/</code>. Three files: <code>lifecycle.md</code>, <code>activation.md</code>, <code>sensors.md</code>. They capture how that specific agent runs the harness — sub-agent spawning, shell execution, tracker integration, sensor invocation. The action playbooks stay agent-neutral; adapters document the bridge.</p>
     </div>
 
     <div class="section-label">The three files</div>
@@ -3254,7 +3233,6 @@ skill://{name}/SKILL.md</pre>
       <div class="agent-row"><span class="agent-name">Codex CLI</span><span class="agent-menu"><code>adapters/codex/</code></span><span class="agent-status real">full</span></div>
       <div class="agent-row"><span class="agent-name">pi.dev</span><span class="agent-menu"><code>adapters/pi/</code></span><span class="agent-status real">full</span></div>
       <div class="agent-row"><span class="agent-name">Cursor</span><span class="agent-menu"><code>adapters/cursor/</code></span><span class="agent-status real">full</span></div>
-      <div class="agent-row"><span class="agent-name">opencode</span><span class="agent-menu"><code>adapters/opencode/</code></span><span class="agent-status real">full</span></div>
       <div class="agent-row"><span class="agent-name">Aider</span><span class="agent-menu"><code>adapters/aider/</code></span><span class="agent-status gaps">real · gaps</span></div>
       <div class="agent-row"><span class="agent-name">GitHub Copilot</span><span class="agent-menu"><code>adapters/github-copilot/</code></span><span class="agent-status gaps">real · gaps</span></div>
       <div class="agent-row"><span class="agent-name">Continue</span><span class="agent-menu"><code>adapters/continue/</code></span><span class="agent-status gaps">real · gaps</span></div>
@@ -3265,7 +3243,7 @@ skill://{name}/SKILL.md</pre>
 
     <div class="definition" style="margin-top: 24px;">
       <p><strong>Authoring a new adapter.</strong> Three markdown files, modeled on an existing adapter. The most useful reference shapes are <code>adapters/claude-code/</code> (full coverage, sub-agent parallelism, autonomous shell) and <code>adapters/_generic/</code> (fallback — no execution, no sub-agents, everything surfaces to the human). Adapters marked <em>real · gaps</em> can be promoted to <em>full</em> as the upstream agent gains the missing capability; the gap list lives in the adapter's own README.</p>
-      <p><strong>Adding a new target bundle to an existing install.</strong> <code>keystone target add &lt;agent&gt;</code> installs the adapter bundle and the menu file for that agent into an existing <code>.harness/</code>. Teams running multiple agents pass a comma-separated list to <code>keystone init --agent</code> or add agents incrementally with <code>target add</code>.</p>
+      <p><strong>Adding a new target bundle to an existing install.</strong> <code>keystone target add &lt;agent&gt;</code> installs the adapter bundle and the menu file for that agent into an existing <code>.keystone/harness/</code>. Teams running multiple agents pass a comma-separated list to <code>keystone init --agent</code> or add agents incrementally with <code>target add</code>.</p>
     </div>
 
     <p style="font-size: 0.78rem; color: var(--muted); font-family: var(--mono); margin-top: 16px; line-height: 1.7;">For the per-agent coverage matrix (which capabilities are native, which gap), see <a href="#agents">Supported agents</a>.</p>
@@ -3276,10 +3254,10 @@ skill://{name}/SKILL.md</pre>
     <div class="page-head">
       <div class="crumb">Reference · <code>keystone init</code></div>
       <h1>Install-time options — declared intent.</h1>
-      <p class="tagline">These are the questions only a human can answer — declared intent, not facts a script could infer from the codebase. In 2.0, <code>init</code> prompts at most once (agent target). Anything additional you want at install time is an opt-in flag — nothing scaffolds silently. Selections land in <code>.harness/corpus/state/INSTALL_PROFILE.md</code>; bootstrap reads them as the starting hint.</p>
+      <p class="tagline">These are the questions only a human can answer — declared intent, not facts a script could infer from the codebase. In 2.0, <code>init</code> prompts at most once (agent target). Anything additional you want at install time is an opt-in flag — nothing scaffolds silently. Selections land in <code>.keystone/harness/corpus/state/INSTALL_PROFILE.md</code>; bootstrap reads them as the starting hint.</p>
     </div>
 
-    <p style="font-size: 0.82rem; color: var(--muted); line-height: 1.7; margin-bottom: 16px;">Each <code>--architecture</code> / <code>--compliance</code> label installs a paired corpus + guide. The files land at <code>.harness/corpus/&lt;category&gt;/&lt;label&gt;.md</code> and <code>.harness/guides/&lt;category&gt;/&lt;label&gt;.md</code> — e.g. <code>--architecture hexagonal</code> drops <code>.harness/guides/architecture/hexagonal.md</code>. The <code>--starter universal-principles</code> pack lands at <code>.harness/{corpus,guides}/principles/&lt;name&gt;.md</code>.</p>
+    <p style="font-size: 0.82rem; color: var(--muted); line-height: 1.7; margin-bottom: 16px;">Each <code>--architecture</code> / <code>--compliance</code> label installs a paired corpus + guide. The files land at <code>.keystone/harness/corpus/&lt;category&gt;/&lt;label&gt;.md</code> and <code>.keystone/harness/guides/&lt;category&gt;/&lt;label&gt;.md</code> — e.g. <code>--architecture hexagonal</code> drops <code>.keystone/harness/guides/architecture/hexagonal.md</code>. The <code>--starter universal-principles</code> pack lands at <code>.keystone/harness/{corpus,guides}/principles/&lt;name&gt;.md</code>.</p>
 
     <div class="action-grid">
       <div class="action">
@@ -3314,7 +3292,7 @@ skill://{name}/SKILL.md</pre>
       </div>
     </div>
 
-    <p style="font-size: 0.78rem; color: var(--muted); font-family: var(--mono); margin-top: 16px; line-height: 1.7;">Language stack, frameworks &amp; libraries, database, CI platform — <strong style="color: var(--text);">not asked here</strong>. Bootstrap detects them from the codebase on first run, where it has accurate context. To install policies for shared governance, use <code>keystone policy add &lt;shorthand&gt;</code> after init — see <a href="#plugins">Policies</a>. <strong>The <code>--harness-root</code> flag is gone in 2.0</strong> — the path is fixed at <code>.harness/</code>.</p>
+    <p style="font-size: 0.78rem; color: var(--muted); font-family: var(--mono); margin-top: 16px; line-height: 1.7;">Language stack, frameworks &amp; libraries, database, CI platform — <strong style="color: var(--text);">not asked here</strong>. Bootstrap detects them from the codebase on first run, where it has accurate context. To install policies for shared governance, use <code>keystone policy add &lt;shorthand&gt;</code> after init — see <a href="#plugins">Policies</a>. <strong>The <code>--harness-root</code> flag is gone in 2.0</strong> — the path is fixed at <code>.keystone/harness/</code>.</p>
   </section>
 
   <!-- ===================== CONTEXT BUDGET ===================== -->
@@ -3339,27 +3317,27 @@ skill://{name}/SKILL.md</pre>
       <div class="action">
         <span class="action-tag">tier 1 · ambient</span>
         <h3 style="color: var(--accent2);">Always-loaded guides</h3>
-        <p><strong style="font-family: var(--mono); color: var(--accent2);">~35K tokens</strong> · <code>.harness/README.md</code> + every file under <code>.harness/guides/</code> + every file under <code>.harness/policies/*/guides/</code>. Marked <em>"Always loaded"</em> in the menu — the agent reads them on the first turn and the provider's prompt cache holds them after.</p>
+        <p><strong style="font-family: var(--mono); color: var(--accent2);">~35K tokens</strong> · <code>.keystone/harness/README.md</code> + every file under <code>.keystone/harness/guides/</code> + every file under <code>.keystone/harness/policies/*/guides/</code>. Marked <em>"Always loaded"</em> in the menu — the agent reads them on the first turn and the provider's prompt cache holds them after.</p>
       </div>
       <div class="action">
         <span class="action-tag">tier 2 · on-demand</span>
         <h3 style="color: var(--accent3);">Corpus reach</h3>
-        <p><strong style="font-family: var(--mono); color: var(--accent3);">~1–3K per file</strong> · <code>.harness/corpus/</code> and <code>.harness/policies/*/corpus/</code>. Loaded only when the agent follows a forward-link from an ambient guide. Most turns: <strong>0 files</strong>. Deep-reasoning turn: 2–3 files.</p>
+        <p><strong style="font-family: var(--mono); color: var(--accent3);">~1–3K per file</strong> · <code>.keystone/harness/corpus/</code> and <code>.keystone/harness/policies/*/corpus/</code>. Loaded only when the agent follows a forward-link from an ambient guide. Most turns: <strong>0 files</strong>. Deep-reasoning turn: 2–3 files.</p>
       </div>
       <div class="action">
         <span class="action-tag">tier 2 · on-demand</span>
         <h3 style="color: var(--accent4);">Action playbook</h3>
-        <p><strong style="font-family: var(--mono); color: var(--accent4);">~0.3–0.5K per action</strong> · one file from <code>.harness/commands/</code> when you invoke spec / orient / verify / review / audit / etc. Only the playbook for the action you ran enters context — never the whole directory.</p>
+        <p><strong style="font-family: var(--mono); color: var(--accent4);">~0.3–0.5K per action</strong> · one file from <code>.keystone/harness/actions/</code> when you invoke spec / orient / verify / review / audit / etc. Only the playbook for the action you ran enters context — never the whole directory.</p>
       </div>
       <div class="action">
         <span class="action-tag">tier 3 · transient</span>
         <h3 style="color: var(--accent5);">Sensor output</h3>
-        <p><strong style="font-family: var(--mono); color: var(--accent5);">~1–5K per verify</strong> · lint, type-check, test, build output for the turn. Sensor <em>contracts</em> in <code>.harness/sensors/</code> are never loaded as source — only the output the sensor emits crosses into context, and it leaves with the next turn.</p>
+        <p><strong style="font-family: var(--mono); color: var(--accent5);">~1–5K per verify</strong> · lint, type-check, test, build output for the turn. Sensor <em>contracts</em> in <code>.keystone/harness/sensors/</code> are never loaded as source — only the output the sensor emits crosses into context, and it leaves with the next turn.</p>
       </div>
       <div class="action">
         <span class="action-tag">tier — · never</span>
         <h3>What the cascade keeps out</h3>
-        <p>Sensor contracts, the rest of <code>commands/</code>, every adapter except the one bound to your agent, <code>archive/</code>, <code>learning/inbox/</code> (until <code>audit</code>), and every file the agent never opens. The harness on disk can grow to hundreds of KB without changing the ambient cost.</p>
+        <p>Sensor contracts, the rest of <code>actions/</code>, every adapter except the one bound to your agent, <code>archive/</code>, <code>learning/inbox/</code> (until <code>audit</code>), and every file the agent never opens. The harness on disk can grow to hundreds of KB without changing the ambient cost.</p>
       </div>
     </div>
 
@@ -3387,22 +3365,22 @@ skill://{name}/SKILL.md</pre>
       <div class="action">
         <span class="action-tag">scenario 3</span>
         <h3 style="color: var(--accent3);"><code>verify</code> action</h3>
-        <p><strong style="font-family: var(--mono); color: var(--accent3);">~40–45K tokens</strong> · baseline + <code>commands/verify.md</code> (~0.4K) + sensor output for lint / type-check / test / build / drift / commit-message (~2–5K). The single most common harness-aware turn.</p>
+        <p><strong style="font-family: var(--mono); color: var(--accent3);">~40–45K tokens</strong> · baseline + <code>actions/verify.md</code> (~0.4K) + sensor output for lint / type-check / test / build / drift / commit-message (~2–5K). The single most common harness-aware turn.</p>
       </div>
       <div class="action">
         <span class="action-tag">scenario 4</span>
         <h3 style="color: var(--accent4);"><code>review</code> action</h3>
-        <p><strong style="font-family: var(--mono); color: var(--accent4);">~45–55K tokens</strong> · baseline + <code>commands/review.md</code> + 2–3 corpus reaches the review playbook follows (~4–6K) + the diff. Sub-agents spawn with their own copies of the ambient guides; the parent context stays bounded.</p>
+        <p><strong style="font-family: var(--mono); color: var(--accent4);">~45–55K tokens</strong> · baseline + <code>actions/review.md</code> + 2–3 corpus reaches the review playbook follows (~4–6K) + the diff. Sub-agents spawn with their own copies of the ambient guides; the parent context stays bounded.</p>
       </div>
       <div class="action">
         <span class="action-tag">scenario 5</span>
         <h3 style="color: var(--accent5);"><code>task</code> action (full lifecycle)</h3>
-        <p><strong style="font-family: var(--mono); color: var(--accent5);">~50–70K tokens</strong> · baseline + <code>commands/task.md</code> + each phase playbook loaded as it runs (spec, orient, implementation, check-drift, verify, review) + <code>CODEBASE_STATE.md</code> + sensor output. The heaviest non-audit turn — but amortized across the entire ticket.</p>
+        <p><strong style="font-family: var(--mono); color: var(--accent5);">~50–70K tokens</strong> · baseline + <code>actions/task.md</code> + each phase playbook loaded as it runs (spec, orient, implementation, check-drift, verify, review) + <code>CODEBASE_STATE.md</code> + sensor output. The heaviest non-audit turn — but amortized across the entire ticket.</p>
       </div>
       <div class="action" style="border-color: rgba(245,158,11,0.3); grid-column: span 2;">
         <span class="action-tag" style="background: rgba(245,158,11,0.12); color: var(--accent3); border-color: rgba(245,158,11,0.3);">scenario 6 · heaviest</span>
         <h3 style="color: var(--accent3);"><code>audit</code> action — worst case</h3>
-        <p><strong style="font-family: var(--mono); color: var(--accent3);">~75–90K tokens</strong> · baseline + <code>commands/audit.md</code> + <code>commands/synthesize.md</code> + <code>learning/inbox/</code> sweep + multi-file corpus reach across both <code>.harness/corpus/</code> and <code>.harness/policies/*/corpus/</code> (the universal-principles starter pack's corpus alone is ~45K if fully reached). This is the most expensive single operation in the harness. Runs on cadence (monthly, or after a major feature) — not per task. If you are running it per ticket, you are paying audit prices for review work.</p>
+        <p><strong style="font-family: var(--mono); color: var(--accent3);">~75–90K tokens</strong> · baseline + <code>actions/audit.md</code> + <code>actions/synthesize.md</code> + <code>learning/inbox/</code> sweep + multi-file corpus reach across both <code>.keystone/harness/corpus/</code> and <code>.keystone/harness/policies/*/corpus/</code> (the universal-principles starter pack's corpus alone is ~45K if fully reached). This is the most expensive single operation in the harness. Runs on cadence (monthly, or after a major feature) — not per task. If you are running it per ticket, you are paying audit prices for review work.</p>
       </div>
     </div>
 
@@ -3429,8 +3407,8 @@ skill://{name}/SKILL.md</pre>
         <li><span class="il-tag">Use a harness</span><span>Tell us where Keystone's defaults match — or clash with — what you've already built. We learn the most from people who've tried something else first.</span></li>
         <li><span class="il-tag">No harness yet</span><span>Tell us what's blocking adoption — friction, missing agent support, unclear docs, or workflows that don't fit your project.</span></li>
         <li><span class="il-tag">Hit a bug</span><span>File it, even with a rough repro. Sensors and guides get sharper every time someone shows us a corner we missed.</span></li>
-        <li><span class="il-tag">Write an adapter</span><span>Adapters for agents currently marked "real · gaps" can be promoted to "full" — see <code>.harness/adapters/README.md</code> for the shape.</span></li>
-        <li><span class="il-tag">Publish a policy</span><span>Vendor lists, license rules, release gates, compliance regimes, idiom bundles, domain libraries — anything reusable across projects ships as a policy. <a href="https://github.com/tacoda/tacoda-org" target="_blank" rel="noopener">tacoda-org</a> is the reference shape, covering harness primitives plus <code>strict</code> and <code>required</code>.</span></li>
+        <li><span class="il-tag">Write an adapter</span><span>Adapters for agents currently marked "real · gaps" can be promoted to "full" — see <code>.keystone/harness/adapters/README.md</code> for the shape.</span></li>
+        <li><span class="il-tag">Publish a policy</span><span>Vendor lists, license rules, release gates, compliance regimes, idiom bundles, domain libraries — anything reusable across projects ships as a policy. <a href="https://github.com/tacoda/tacoda-org" target="_blank" rel="noopener">tacoda-org</a> is the reference shape, covering framework primitives plus <code>strict</code> and <code>required</code>.</span></li>
       </ul>
       <div class="cta-buttons">
         <a class="cta-btn cta-primary" href="https://github.com/tacoda/keystone/discussions" target="_blank" rel="noopener">▸ Start a Discussion</a>
