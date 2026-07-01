@@ -43,12 +43,12 @@ phase: verify
 ---
 # body
 `,
-		"charter/hooks/build.md": `---
-kind: hook
+		"charter/sensors/build.md": `---
+kind: sensor
 id: build
 description: Build at the verify gate.
 mode: computational
-event: pre-verify
+on: pre-verify
 run: go build ./...
 ---
 # body
@@ -116,7 +116,7 @@ func TestWalk_FindsAllKindsSkipsReadmesAndNonFM(t *testing.T) {
 		"guide/idioms/rails/migrations",
 		"corpus/corpus/idioms/rails/migrations",
 		"sensor/drift",
-		"hook/build",
+		"sensor/build",
 		"skill/review-code",
 		"agent/cavecrew-reviewer",
 		"command/verify",

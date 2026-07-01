@@ -1,17 +1,19 @@
 ---
-kind: hook
-mode: computational
-event: pre-verify
-run: '# TODO: wire the stack-drift command (see corpus/state/CODEBASE_STATE.md)'
+kind: sensor
 id: stack-drift
 description: 'Detects when the empirical reality of the repo has diverged from what CODEBASESTATE.'
+tags:
+  - computational
+mode: computational
+on: Stop
+run: true
 ---
 # Sensor: stack-drift
 
 Detects when the empirical reality of the repo has diverged from what `CODEBASE_STATE.md` records. Re-running bootstrap is **not** the answer — bootstrap is a one-time initial scaffold. When this sensor flags drift, it's a trigger for **audit** to reconcile the relevant parts.
 
 - **Trigger** — **audit** (full sweep) and on-demand when a change touches a region whose stack signals look off.
-- **Inputs** — `charter/corpus/state/CODEBASE_STATE.md` (declared stacks, regions, tool commands) and the actual repo (`package.json`, `go.mod`, `pyproject.toml`, `Gemfile`, `Cargo.toml`, `requirements.txt`, `build.gradle`, language file extensions per region).
+- **Inputs** — `.charter/corpus/state/CODEBASE_STATE.md` (declared stacks, regions, tool commands) and the actual repo (`package.json`, `go.mod`, `pyproject.toml`, `Gemfile`, `Cargo.toml`, `requirements.txt`, `build.gradle`, language file extensions per region).
 - **Exit condition** — every declared stack and region has been compared against the repo and either matches or has a drift entry.
 - **Output** — per-divergence row: declared value, observed value, recommended reconciliation.
 - **State writes** — none directly. Findings feed the [charter-debt sensor](charter-debt.md) as `drifted-state` items; **audit**'s Pruning flywheel turns them into ledger entries.

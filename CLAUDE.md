@@ -41,7 +41,7 @@ keystone index                 # regenerate .charter/INDEX*.json
 keystone project               # regenerate .claude/* + merge hooks into settings
 keystone watch                 # long-running: re-project on every guide/sensor/agent save (300ms debounce)
 keystone verify                # policy + cascade check (auto-fires pre/post-verify hooks)
-keystone hook fire <event>     # dispatch framework hooks bound to an event
+keystone signal fire <name>    # dispatch primitives subscribed (on:) to a signal (hook fire = alias)
 ```
 
 > **Instant projection.** Run `keystone watch` in a side terminal while
@@ -59,8 +59,9 @@ keystone hook fire <event>     # dispatch framework hooks bound to an event
 ## Where things go
 
 - **New rule / convention** → `.charter/guides/idioms/<topic>.md` + paired corpus
-- **New computational check** → `.charter/hooks/<id>.md` (`event:` + `run:`)
-- **New review** → `.charter/sensors/<id>.md` (`mode: inferential`, `returns:`) or a reviewer `.charter/agents/<id>.md`
+- **New computational check** → `.charter/sensors/<id>.md` (`mode: computational`, `on:` + `run:`)
+- **New review** → `.charter/sensors/<id>.md` (`mode: inferential`, `on:` + `returns:`) or a reviewer `.charter/agents/<id>.md`
+- **New side-effect** → `.charter/tools/<id>.md` (`transport:` + `on:`)
 - **New workflow** → `.charter/playbooks/<id>.md`
 - **New keystone subcommand** → `cmd/keystone/<name>.go` + wire in `root.go`
 

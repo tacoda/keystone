@@ -51,44 +51,48 @@ func Parse(fileContents string) (Frontmatter, bool, error) {
 // ("- foo") or full Arg mappings. The string form lifts to
 // Arg{Name: <s>} so authors don't have to spell out every field for the
 // common case.
+// fmShadow mirrors Frontmatter's YAML shape without its UnmarshalYAML
+// method, so decoding into it doesn't recurse. Kept at package scope to
+// keep UnmarshalYAML itself small.
+type fmShadow struct {
+	Kind         string        `yaml:"kind"`
+	ID           string        `yaml:"id"`
+	Description  string        `yaml:"description"`
+	Globs        []string      `yaml:"globs"`
+	Phase        string        `yaml:"phase"`
+	Triggers     []string      `yaml:"triggers"`
+	Tools        []string      `yaml:"tools"`
+	Model        string        `yaml:"model"`
+	Args         yaml.Node     `yaml:"args"`
+	Corpus       []string      `yaml:"corpus"`
+	Deps         []string      `yaml:"deps"`
+	Severity     string        `yaml:"severity"`
+	Tier         string        `yaml:"tier"`
+	Tags         []string      `yaml:"tags"`
+	Includes     []string      `yaml:"includes"`
+	HostTriggers []HostTrigger `yaml:"host_triggers"`
+	Produces     []string      `yaml:"produces"`
+	Consumes     []string      `yaml:"consumes"`
+	Stop         string        `yaml:"stop"`
+	Gates        []string      `yaml:"gates"`
+	Gate         string        `yaml:"gate"`
+	Type         string        `yaml:"type"`
+	ProducedBy   string        `yaml:"produced_by"`
+	Supersedes   []string      `yaml:"supersedes"`
+	Mode         string        `yaml:"mode"`
+	On           string        `yaml:"on"`
+	Event        string        `yaml:"event"` // back-compat alias for `on:`
+	Run          string        `yaml:"run"`
+	Transport    string        `yaml:"transport"`
+	Agent        string        `yaml:"agent"`
+	Returns      string        `yaml:"returns"`
+	Allow        []string      `yaml:"allow"`
+	Ask          []string      `yaml:"ask"`
+	Deny         []string      `yaml:"deny"`
+}
+
 func (f *Frontmatter) UnmarshalYAML(value *yaml.Node) error {
-	// Use a shadow type to avoid recursion through this method.
-	type shadow struct {
-		Kind         string        `yaml:"kind"`
-		ID           string        `yaml:"id"`
-		Description  string        `yaml:"description"`
-		Globs        []string      `yaml:"globs"`
-		Phase        string        `yaml:"phase"`
-		Triggers     []string      `yaml:"triggers"`
-		Tools        []string      `yaml:"tools"`
-		Model        string        `yaml:"model"`
-		Args         yaml.Node     `yaml:"args"`
-		Corpus       []string      `yaml:"corpus"`
-		Deps         []string      `yaml:"deps"`
-		Severity     string        `yaml:"severity"`
-		Tier         string        `yaml:"tier"`
-		Tags         []string      `yaml:"tags"`
-		Includes     []string      `yaml:"includes"`
-		HostTriggers []HostTrigger `yaml:"host_triggers"`
-		Produces     []string      `yaml:"produces"`
-		Consumes     []string      `yaml:"consumes"`
-		Stop         string        `yaml:"stop"`
-		Gates        []string      `yaml:"gates"`
-		Gate         string        `yaml:"gate"`
-		Type         string        `yaml:"type"`
-		ProducedBy   string        `yaml:"produced_by"`
-		Supersedes   []string      `yaml:"supersedes"`
-		Mode         string        `yaml:"mode"`
-		Event        string        `yaml:"event"`
-		Run          string        `yaml:"run"`
-		Transport    string        `yaml:"transport"`
-		Agent        string        `yaml:"agent"`
-		Returns      string        `yaml:"returns"`
-		Allow        []string      `yaml:"allow"`
-		Ask          []string      `yaml:"ask"`
-		Deny         []string      `yaml:"deny"`
-	}
-	var s shadow
+	var s fmShadow
 	if err := value.Decode(&s); err != nil {
 		return err
 	}
@@ -116,7 +120,7 @@ func (f *Frontmatter) UnmarshalYAML(value *yaml.Node) error {
 	f.ProducedBy = s.ProducedBy
 	f.Supersedes = s.Supersedes
 	f.Mode = s.Mode
-	f.Event = s.Event
+	f.Event = firstNonEmpty(s.On, s.Event) // `on:` canonical; `event:` alias
 	f.Run = s.Run
 	f.Transport = s.Transport
 	f.Agent = s.Agent
@@ -124,13 +128,20 @@ func (f *Frontmatter) UnmarshalYAML(value *yaml.Node) error {
 	f.Allow = s.Allow
 	f.Ask = s.Ask
 	f.Deny = s.Deny
-
 	args, err := decodeArgsNode(s.Args)
 	if err != nil {
 		return err
 	}
 	f.Args = args
 	return nil
+}
+
+// firstNonEmpty returns the first non-empty string, else "".
+func firstNonEmpty(a, b string) string {
+	if a != "" {
+		return a
+	}
+	return b
 }
 
 // decodeArgsNode lifts the flexible `args:` form into []Arg. Each entry may be

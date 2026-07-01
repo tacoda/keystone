@@ -56,9 +56,8 @@ const (
 	// lacks. The keystone names (guide/sensor/playbook) stay where the
 	// abstraction maps 1-to-many to host mechanisms by `mode:`; the host
 	// names (command/skill/agent) stay where the concept is identical.
-	KindGuide    Kind = "guide"    // ambient, glob-scoped directive → rule (inferential) | hook (computational)
-	KindSensor   Kind = "sensor"   // phase-gated check → hook (computational) | agent (inferential)
-	KindHook     Kind = "hook"     // framework hook layer: event (host phase | framework event) → run:/agent:
+	KindGuide    Kind = "guide"    // ambient, glob-scoped directive → rule (inferential) | LSP (computational)
+	KindSensor   Kind = "sensor"   // a check that reacts to a signal/phase → verdict (exit/HTTP status); gates
 	KindCommand  Kind = "command"  // a unit of work / lifecycle step (was action)
 	KindSkill    Kind = "skill"    // composed capability
 	KindPlaybook Kind = "playbook" // composed sequence of commands with gates
@@ -86,7 +85,7 @@ const (
 // `rule` is intentionally absent — it is a projection-target name, not an
 // authorable kind (author a `guide`).
 var KnownKinds = []Kind{
-	KindGuide, KindSensor, KindHook, KindCommand, KindSkill, KindPlaybook,
+	KindGuide, KindSensor, KindCommand, KindSkill, KindPlaybook,
 	KindAgent, KindPattern, KindPosture, KindTool, KindDocument,
 	KindCorpus, KindEval, KindConcern,
 }
@@ -98,7 +97,6 @@ var KnownKinds = []Kind{
 var canonicalDirKind = map[string]Kind{
 	"guides":    KindGuide,
 	"sensors":   KindSensor,
-	"hooks":     KindHook,
 	"commands":  KindCommand,
 	"skills":    KindSkill,
 	"playbooks": KindPlaybook,
@@ -182,9 +180,13 @@ type Frontmatter struct {
 	// computational.
 	Mode string `yaml:"mode,omitempty" json:"mode,omitempty"`
 
-	// Event binds a `hook` to a host phase (PreToolUse…) or a keystone
-	// framework event (pre-command, on-gate, pre-verify…).
-	Event string `yaml:"event,omitempty" json:"event,omitempty"`
+	// Event is the signal or host phase a primitive subscribes to via its
+	// `on:` field — a sensor (check), tool (side-effect), or agent (review)
+	// self-declares what fires it, the way a skill declares `triggers:`.
+	// A host phase (PreToolUse…) bridges into the host; a signal
+	// (pre-verify, on-gate, a custom name) is keystone-fired. The YAML key
+	// is `on:`; `event:` is accepted as a back-compat alias.
+	Event string `yaml:"on,omitempty" json:"on,omitempty"`
 
 	// Run is the shell command/script a computational hook/sensor/tool
 	// executes. NOT the `command` kind — that is an agent-driven unit of

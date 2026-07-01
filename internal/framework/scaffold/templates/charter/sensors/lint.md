@@ -1,7 +1,7 @@
 ---
-kind: hook
+kind: sensor
 mode: computational
-event: pre-verify
+on: pre-verify
 run: '# TODO: wire the lint command (see corpus/state/CODEBASE_STATE.md)'
 id: lint
 description: 'Surface-level style and pattern checks.'

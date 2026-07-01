@@ -1,11 +1,11 @@
 ---
-kind: hook
+kind: sensor
 id: risk-fingerprint
 description: 'Computes complexity + coupling + coverage patterns per region.'
 tags:
   - computational
 mode: computational
-event: Stop
+on: Stop
 run: true
 ---
 # Sensor: risk-fingerprint

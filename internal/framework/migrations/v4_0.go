@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"regexp"
+	"strings"
 )
 
 // Version 4.0 — the harness→charter rename. Keystone is the charter
@@ -43,6 +45,9 @@ func planUp_4_0(absDir string) (*Plan, error) {
 		}
 		return nil
 	})
+	p.Add("fold hooks/ into sensors/ (the hook kind is retired; a check is a sensor)", func(absDir string) error {
+		return foldHooksToSensors_4_0(filepath.Join(absDir, charterRoot_4_0))
+	})
 	p.Add("rebuild INDEX.json + INDEX.lite.json at the .charter/ root", func(absDir string) error {
 		// indexDir == the charter root: at 4.0 the umbrella IS the root.
 		return rebuildIndex(absDir, charterRoot_4_0, charterRoot_4_0)
@@ -57,6 +62,60 @@ func planDown_4_0(absDir string) (*Plan, error) {
 	})
 	return p, nil
 }
+
+// foldHooksToSensors_4_0 retires the `hook` kind: every file under
+// <charter>/hooks/ becomes a `sensor` (a hook was only ever a check or a
+// side-effect firing on an event). It rewrites `kind: hook` → `kind:
+// sensor` and the `event:` key → `on:`, moves the file to sensors/, then
+// removes the empty hooks/ dir. Idempotent — a no-op once hooks/ is gone.
+func foldHooksToSensors_4_0(charterAbs string) error {
+	hooksDir := filepath.Join(charterAbs, "hooks")
+	entries, err := os.ReadDir(hooksDir)
+	if os.IsNotExist(err) {
+		return nil // already folded
+	}
+	if err != nil {
+		return err
+	}
+	sensorsDir := filepath.Join(charterAbs, "sensors")
+	if err := os.MkdirAll(sensorsDir, 0o755); err != nil {
+		return err
+	}
+	for _, e := range entries {
+		if e.IsDir() || !strings.HasSuffix(e.Name(), ".md") {
+			continue
+		}
+		if err := foldOneHook_4_0(hooksDir, sensorsDir, e.Name()); err != nil {
+			return err
+		}
+	}
+	_ = os.Remove(hooksDir) // best-effort; only removes if empty
+	return nil
+}
+
+// foldOneHook_4_0 rewrites one hook file to a sensor and moves it.
+func foldOneHook_4_0(hooksDir, sensorsDir, name string) error {
+	src := filepath.Join(hooksDir, name)
+	dst := filepath.Join(sensorsDir, name)
+	if _, err := os.Stat(dst); err == nil {
+		return fmt.Errorf("fold hook %s: %s already exists — resolve by hand", name, dst)
+	}
+	data, err := os.ReadFile(src)
+	if err != nil {
+		return err
+	}
+	out := reHookKind_4_0.ReplaceAllString(string(data), "${1}kind: sensor")
+	out = reEventKey_4_0.ReplaceAllString(out, "${1}on:")
+	if err := os.WriteFile(dst, []byte(out), 0o644); err != nil {
+		return err
+	}
+	return os.Remove(src)
+}
+
+var (
+	reHookKind_4_0 = regexp.MustCompile(`(?m)^(\s*)kind:\s*hook\s*$`)
+	reEventKey_4_0 = regexp.MustCompile(`(?m)^(\s*)event:`)
+)
 
 // renameRoot_4_0 moves src→dst under absDir. Idempotent: a no-op once
 // src is gone. Refuses to clobber an existing dst.

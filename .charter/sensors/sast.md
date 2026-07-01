@@ -1,11 +1,11 @@
 ---
-kind: hook
+kind: sensor
 id: sast
 description: 'Static application security testing — pattern-based detection of insecure code in the source tree (SQL injection, command injection, weak...'
 tags:
   - computational
 mode: computational
-event: Stop
+on: Stop
 run: true
 ---
 # Sensor: sast

@@ -86,6 +86,7 @@ func init() {
 	rootCmd.AddCommand(showCmd())
 	rootCmd.AddCommand(documentCmd())
 	rootCmd.AddCommand(hookCmd())
+	rootCmd.AddCommand(signalCmd())
 	rootCmd.AddCommand(projectCmd())
 	rootCmd.AddCommand(migrateCmd())
 	rootCmd.AddCommand(mcpCmd())
@@ -269,6 +270,16 @@ func hookCmd() *cobra.Command {
 		Short:              "Fire framework hooks bound to a workflow event",
 		DisableFlagParsing: true,
 		RunE:               runAndForward(runHook),
+	}
+	return c
+}
+
+func signalCmd() *cobra.Command {
+	c := &cobra.Command{
+		Use:                "signal",
+		Short:              "Fire or list keystone signals (extensible framework events)",
+		DisableFlagParsing: true,
+		RunE:               runAndForward(runSignal),
 	}
 	return c
 }

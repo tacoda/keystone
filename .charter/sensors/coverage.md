@@ -1,11 +1,11 @@
 ---
-kind: hook
+kind: sensor
 id: coverage
 description: 'Reads test coverage and updates the State layer.'
 tags:
   - computational
 mode: computational
-event: Stop
+on: Stop
 run: true
 ---
 # Sensor: coverage

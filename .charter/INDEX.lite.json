@@ -1,6 +1,6 @@
 {
   "version": "2.0",
-  "generated": "2026-07-01T19:26:54Z",
+  "generated": "2026-07-01T20:19:44Z",
   "primitives": [
     {
       "kind": "agent",
@@ -358,84 +358,84 @@
       "description": "The phase where claims are paired with evidence before commit."
     },
     {
-      "kind": "hook",
+      "kind": "playbook",
+      "id": "task",
+      "description": "End-to-end task workflow."
+    },
+    {
+      "kind": "sensor",
       "id": "build",
       "description": "The project's build / compile / package step."
     },
     {
-      "kind": "hook",
+      "kind": "sensor",
       "id": "commit-message",
       "description": "Validates conventional-commit format and absence of AI attribution."
     },
     {
-      "kind": "hook",
+      "kind": "sensor",
       "id": "coverage",
       "description": "Reads test coverage and updates the State layer."
     },
     {
-      "kind": "hook",
+      "kind": "sensor",
       "id": "drift",
       "description": "Compares the diff (or full codebase, during audit) against loaded guide rules."
     },
     {
-      "kind": "hook",
+      "kind": "sensor",
       "id": "lint",
       "description": "Surface-level style and pattern checks."
     },
     {
-      "kind": "hook",
+      "kind": "sensor",
       "id": "risk-fingerprint",
       "description": "Computes complexity + coupling + coverage patterns per region."
     },
     {
-      "kind": "hook",
+      "kind": "sensor",
       "id": "sast",
       "description": "Static application security testing — pattern-based detection of insecure code in the source tree (SQL injection, command injection, weak..."
     },
     {
-      "kind": "hook",
+      "kind": "sensor",
       "id": "secret-scan",
       "description": "Scans the diff (or repo, on audit) for committed secrets — API keys, tokens, private keys, credentials."
     },
     {
-      "kind": "hook",
+      "kind": "sensor",
       "id": "spec-adherence",
       "description": "Walks the spec's acceptance criteria against the current diff."
     },
     {
-      "kind": "hook",
+      "kind": "sensor",
       "id": "stack-drift",
       "description": "Detects when the empirical reality of the repo has diverged from what CODEBASESTATE."
     },
     {
-      "kind": "hook",
+      "kind": "sensor",
       "id": "state-region",
       "description": "Read-only."
     },
     {
-      "kind": "hook",
+      "kind": "sensor",
       "id": "test",
       "description": "The project's test suite."
     },
     {
-      "kind": "hook",
+      "kind": "sensor",
       "id": "traffic-topology",
       "description": "Combines git churn + recency + business criticality into a map of where attention concentrates."
     },
     {
-      "kind": "hook",
+      "kind": "sensor",
       "id": "type-check",
       "description": "Signature and contract consistency."
     },
     {
-      "kind": "hook",
+      "kind": "sensor",
       "id": "vuln-scan",
       "description": "Scans declared dependencies for known vulnerabilities (CVEs, advisories)."
-    },
-    {
-      "kind": "playbook",
-      "id": "task",
-      "description": "End-to-end task workflow."
     },
     {
       "kind": "skill",

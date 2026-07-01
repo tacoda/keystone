@@ -151,6 +151,7 @@ Additive, each its own slice. Land after the rebrand core (2b/3), before release
 - **F2 — Effective charter view** (`keystone charter show --effective`): materialize the fully-resolved post-cascade charter (project + nested policies + strict). Surfaces existing loader output. + dashboard page.
 - **F3 — Charter amendments + provenance**: first-class human-readable record of charter evolution + who authored/ratified each fragment, hash-pinned. Ties to learning flywheel + AAIF GOVERNANCE story.
 - **F4 — Charter conformance score**: fold evals + quality-radar into one charter-adherence score. Define criteria sharply first (avoid vanity metric).
+- **F5 — Extensible signals** (user-requested): rename framework events → **signals** (distinct from host **hooks** and from **sensors** which react). Invert the classifier (host phases closed, signals open — fixes custom names misread as host phases); expand built-in lifecycle signals keystone fires; custom signals declared in `keystone.json` (`signals:`); `keystone signal fire/list` (alias `hook fire`). Mental model: signal (WHEN) → hook (wiring) → sensor/run/agent (WHAT).
 - Each: tests + `keystone verify` clean + code-health no regression.
 
 ### Phase 5 — Release 4.0.0

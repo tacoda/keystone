@@ -49,12 +49,6 @@ func writeGenerators() []writeGen {
 			desc:  "Scaffold a rule — a glob-scoped directive. id form: '<topic>/<name>' (e.g. 'process/release').",
 		},
 		{
-			tool:  "keystone_new_hook",
-			verb:  "hook",
-			idArg: "<name>",
-			desc:  "Scaffold a hook (automated check that projects to a host hook). id form: '<name>'.",
-		},
-		{
 			tool:  "keystone_new_command",
 			verb:  "command",
 			idArg: "<id>",

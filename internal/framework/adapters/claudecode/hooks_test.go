@@ -14,7 +14,7 @@ import (
 // A hook fires deterministically via run: — required for it to bridge.
 func hookOn(id, event string) primitive.Primitive {
 	return primitive.Primitive{
-		Frontmatter: primitive.Frontmatter{Kind: "hook", ID: id, Event: event, Run: "true"},
+		Frontmatter: primitive.Frontmatter{Kind: "sensor", ID: id, Event: event, Run: "true"},
 	}
 }
 

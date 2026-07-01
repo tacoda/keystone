@@ -3,6 +3,7 @@ package migrations
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -13,6 +14,7 @@ func seed30Install(t *testing.T) string {
 	tmp := t.TempDir()
 	files := map[string]string{
 		".harness/guides/idioms/go/stdlib-first.md": "---\nkind: guide\nid: guides/idioms/go/stdlib-first\ndescription: x\nglobs:\n  - \"**/*.go\"\n---\n# Stdlib first\n",
+		".harness/hooks/build.md":                   "---\nkind: hook\nid: build\ndescription: x\nmode: computational\nevent: Stop\nrun: go build ./...\n---\nbody\n",
 		".harness/context.json":                     "{}\n",
 	}
 	for rel, body := range files {
@@ -59,6 +61,26 @@ func TestV4_Up_RenamesRootDropsContextRebuildsIndex(t *testing.T) {
 		if _, err := os.Stat(filepath.Join(tmp, ".charter", name)); err != nil {
 			t.Errorf("%s not rebuilt: %v", name, err)
 		}
+	}
+}
+
+func TestV4_Up_FoldsHooksToSensors(t *testing.T) {
+	tmp := seed30Install(t)
+	runV4(t, tmp, planUp_4_0)
+
+	if dirExists(filepath.Join(tmp, ".charter/hooks")) {
+		t.Error("hooks/ should be folded away")
+	}
+	folded, err := os.ReadFile(filepath.Join(tmp, ".charter/sensors/build.md"))
+	if err != nil {
+		t.Fatalf("folded sensor missing: %v", err)
+	}
+	s := string(folded)
+	if !strings.Contains(s, "kind: sensor") || strings.Contains(s, "kind: hook") {
+		t.Errorf("kind not rewritten to sensor:\n%s", s)
+	}
+	if !strings.Contains(s, "on: Stop") || strings.Contains(s, "event: Stop") {
+		t.Errorf("event: not rewritten to on::\n%s", s)
 	}
 }
 

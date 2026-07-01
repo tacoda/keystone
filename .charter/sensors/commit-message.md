@@ -1,10 +1,12 @@
 ---
-kind: hook
-mode: computational
-event: PreToolUse
-run: '# TODO: wire the commit-message check'
+kind: sensor
 id: commit-message
 description: 'Validates conventional-commit format and absence of AI attribution.'
+tags:
+  - computational
+mode: computational
+on: PreToolUse
+run: keystone verify --sensor commit-message
 ---
 # Sensor: commit-message
 

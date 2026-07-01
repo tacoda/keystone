@@ -17,7 +17,6 @@ import (
 // newDispatch maps each `keystone new <verb>` to its scaffold generator.
 var newDispatch = map[string]func([]string) error{
 	"rule":     runNewRule,
-	"hook":     runNewHook,
 	"command":  runNewCommand,
 	"skill":    runNewSkill,
 	"agent":    runNewAgent,
@@ -43,7 +42,7 @@ func runNew(args []string) error {
 	}
 	gen, ok := newDispatch[args[0]]
 	if !ok {
-		return fmt.Errorf("unknown kind %q (use: rule, hook, command, skill, agent, pattern, posture, tool, document, corpus, eval, adapter, policy)", args[0])
+		return fmt.Errorf("unknown kind %q (use: rule, command, skill, agent, pattern, posture, tool, document, corpus, eval, adapter, policy)", args[0])
 	}
 	return gen(args[1:])
 }
@@ -54,7 +53,6 @@ func printNewUsage(w *os.File) {
 Usage:
 
     keystone new rule <topic>/<name>      [--dir <path>]   # glob-scoped directive + paired corpus
-    keystone new hook <name>              [--dir <path>]   # automated check (projects to host hook)
     keystone new command <id>             [--dir <path>]   # a unit of work / lifecycle step
     keystone new skill <id>               [--dir <path>]   # a composed capability
     keystone new agent <id>               [--dir <path>]   # a role spawned as a subagent
@@ -77,7 +75,6 @@ filename normalizes : to -.
 Examples:
   keystone new rule process/release        # .charter/rules/process/release.md
                                            # + paired .charter/corpus/process/release.md
-  keystone new hook lint                    # .charter/hooks/lint.md
   keystone new skill keystone:index         # .charter/skills/keystone-index/SKILL.md
   keystone new agent security-reviewer      # .charter/agents/security-reviewer.md
   keystone new command review               # .charter/commands/review.md

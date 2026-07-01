@@ -1,10 +1,12 @@
 ---
-kind: hook
-mode: computational
-event: pre-verify
-run: '# TODO: wire the type-check command (see corpus/state/CODEBASE_STATE.md)'
+kind: sensor
 id: type-check
 description: 'Signature and contract consistency.'
+tags:
+  - computational
+mode: computational
+on: Stop
+run: go vet ./...
 ---
 # Sensor: type-check
 

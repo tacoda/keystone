@@ -160,11 +160,13 @@ triggers, and open a body only when its activation condition matches.
 - **corpus** — a guide's ` + "`corpus:`" + ` (or a prose forward-link) points at it — the *why*, on demand.
 - **command** — user intent matches ` + "`description`" + ` + ` + "`phase`" + `; the body is a unit of work.
 - **playbook** — a composed sequence of commands with human ` + "`gates:`" + `.
-- **sensor** — a phase-gated check; inferential → an agent review, computational → a host hook.
-- **hook** — fires deterministically on an ` + "`event:`" + ` → ` + "`run:`" + ` shell or ` + "`agent:`" + ` dispatch.
+- **sensor** — a check that reacts to a signal or host phase (` + "`on:`" + `); computational (` + "`run:`" + ` → status verdict) or inferential (agent review → schema); gates.
+- **tool** — an author-defined external callable; on-demand, or a side-effect when it declares ` + "`on:`" + `.
 - **skill** — auto-activates by ` + "`triggers:`" + ` match.
 - **agent** — a role spawned as a subagent by ` + "`id`" + `; the body is its system prompt.
 - **pattern** — a reusable documentation pattern; apply when writing docs.
+
+A **signal** is a keystone framework event (` + "`on:`" + `); host phases are bridged, any other ` + "`on:`" + ` value is a signal (extensible; ` + "`keystone signal list`" + `).
 
 ## Iron laws (non-negotiable, every phase)
 

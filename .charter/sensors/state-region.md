@@ -1,11 +1,11 @@
 ---
-kind: hook
+kind: sensor
 id: state-region
 description: 'Read-only.'
 tags:
   - computational
 mode: computational
-event: PostToolUse
+on: PostToolUse
 run: true
 ---
 # Sensor: state-region

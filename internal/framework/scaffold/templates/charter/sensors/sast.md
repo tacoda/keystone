@@ -1,7 +1,7 @@
 ---
-kind: hook
+kind: sensor
 mode: computational
-event: pre-verify
+on: pre-verify
 run: '# TODO: wire the sast command (see corpus/state/CODEBASE_STATE.md)'
 id: sast
 description: 'Static application security testing — pattern-based detection of insecure code in the source tree (SQL injection, command injection, weak...'

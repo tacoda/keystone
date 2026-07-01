@@ -10,7 +10,6 @@ func TestInferKind(t *testing.T) {
 	cases := map[string]Kind{
 		".charter/guides/idioms/go/stdlib-first.md": KindGuide,
 		".charter/sensors/build.md":                 KindSensor,
-		".charter/hooks/pre-verify.md":              KindHook,
 		".charter/commands/verify.md":               KindCommand,
 		".charter/skills/task/SKILL.md":             KindSkill,
 		".charter/agents/code-reviewer.md":          KindAgent,

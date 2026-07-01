@@ -30,13 +30,12 @@ keystone web serve                  # optional: open the dashboard
 
 ## What's in the charter
 
-`.charter/` holds **14 primitive kinds**:
+`.charter/` holds **13 primitive kinds**:
 
 | Kind         | What it is                                                            |
 | ------------ | --------------------------------------------------------------------- |
 | `guide`      | ambient, glob-scoped directive — inferential → `.claude/rules/` shim; computational → a host hook (LSP) |
-| `sensor`     | phase-gated check — inferential review (→ agent) or computational (→ hook) |
-| `hook`       | the deterministic fire layer: an `event:` → `run:` (shell) or `agent:` dispatch |
+| `sensor`     | a check that reacts to a signal or host phase (`on:`) — computational (`run:` → exit/HTTP status verdict) or inferential (agent review → schema); gates |
 | `agent`      | a role spawned as a subagent                                          |
 | `command`    | a unit of work / lifecycle step                                       |
 | `skill`      | a single composed capability                                          |
@@ -46,7 +45,7 @@ keystone web serve                  # optional: open the dashboard
 | `document`   | a governed output (plan / review / adr / retro / feature)             |
 | `concern`    | a composition mixin                                                   |
 | `posture`    | tool/permission posture → settings.json                               |
-| `tool`       | an author-defined callable (transport: cli \| mcp \| plugin)          |
+| `tool`       | an author-defined external callable (transport: cli \| http \| mcp \| plugin); on-demand, or a side-effect when it declares `on:` |
 | `eval`       | the eval harness                                                      |
 
 keystone is the model layer over host primitives: each kind adds
@@ -60,6 +59,18 @@ Every primitive carries canonical frontmatter — `kind`, `id`,
 `includes`, …). The walker emits a single `.charter/INDEX.json` listing
 every primitive's descriptor; agents read the index first and open
 bodies only when their activation conditions match.
+
+## Signals
+
+A **signal** is a keystone framework event the host can't see — the
+extensible, higher-level counterpart to a host hook phase. A primitive
+subscribes to one via `on:` (like a skill declares `triggers:`): a
+`sensor` runs a check, a `tool` fires a side-effect, an `agent` runs a
+review. Host phases (`PreToolUse`, `Stop`, …) are a closed set bridged
+into the host; **any other `on:` value is a signal**, so projects define
+their own — declare them in `keystone.json` `signals:` and fire with
+`keystone signal fire <name>` (`keystone signal list` to discover). The
+`hook` kind is retired — reactions self-subscribe.
 
 ## The contract: rules → corpus → ask
 
@@ -85,7 +96,7 @@ block and in `guides/process/runtime-resolution.md`.
 | `keystone project`       | Regenerate `.claude/` / `.cursor/` host projections from canonical sources.    |
 | `keystone verify`        | Cascade + policy-drift check.                                                  |
 | `keystone migrate`       | Version-to-version charter upgrade (… → 4.0). Idempotent.                                    |
-| `keystone new <kind>`    | Scaffold any of the 14 primitive kinds + adapter + policy.                     |
+| `keystone new <kind>`    | Scaffold any of the 13 primitive kinds + adapter + policy.                     |
 | `keystone search <q>`    | Full-text search across every primitive.                                       |
 | `keystone graph`         | Render the primitive-relationship graph (Mermaid or DOT).                      |
 | `keystone watch`         | fsnotify loop: index + project + lint on change.                               |

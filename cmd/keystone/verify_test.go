@@ -13,7 +13,7 @@ func TestVerify_PreVerifyHookBlocks(t *testing.T) {
 	if err := os.WriteFile(filepath.Join(root, "keystone.json"), []byte(`{"version":"2","policies":[]}`+"\n"), 0o644); err != nil {
 		t.Fatal(err)
 	}
-	seedHook(t, root, "block", "---\nkind: hook\nid: block\ndescription: x\nmode: computational\nevent: pre-verify\nrun: \"exit 1\"\n---\nbody\n")
+	seedHook(t, root, "block", "---\nkind: sensor\nid: block\ndescription: x\nmode: computational\non: pre-verify\nrun: \"exit 1\"\n---\nbody\n")
 
 	if err := verifyWithHooks([]string{"--dir", root}); err == nil {
 		t.Error("expected a failing pre-verify hook to block verify")

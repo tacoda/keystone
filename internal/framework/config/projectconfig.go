@@ -40,6 +40,22 @@ type ProjectConfig struct {
 	Policies         []PolicyNode          `json:"policies"`
 	Budgets          map[string]BudgetSpec `json:"budgets,omitempty"`
 	Adapters         []string              `json:"adapters,omitempty"`
+	// Signals are project-defined framework events beyond the built-ins.
+	// A hook may bind to any signal; declaring it here lets lint catch
+	// typos and `keystone signal list` surface it. Firing works without
+	// declaration (any non-host-phase event is a signal).
+	Signals []string `json:"signals,omitempty"`
+}
+
+// HasSignal reports whether name is a known signal for this project —
+// a keystone built-in or a project-declared custom one.
+func (c *ProjectConfig) HasSignal(name string) bool {
+	for _, s := range c.Signals {
+		if s == name {
+			return true
+		}
+	}
+	return false
 }
 
 // Adapter names recognized by `keystone project`. Adding an entry here

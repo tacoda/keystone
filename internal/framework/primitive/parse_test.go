@@ -179,7 +179,7 @@ body
 // `agent:` that must emit a `returns:`-schema'd result.
 func TestParse_HookFields(t *testing.T) {
 	comp := mustParse(t, `---
-kind: hook
+kind: sensor
 id: gofmt-on-save
 description: Format Go files after every edit.
 mode: computational
@@ -188,7 +188,7 @@ run: gofmt -w "$KEYSTONE_FILE"
 ---
 body
 `)
-	eqStr(t, "Kind", comp.Kind, "hook")
+	eqStr(t, "Kind", comp.Kind, "sensor")
 	eqStr(t, "Mode", comp.Mode, "computational")
 	eqStr(t, "Event", comp.Event, "PostToolUse")
 	eqStr(t, "Run", comp.Run, `gofmt -w "$KEYSTONE_FILE"`)

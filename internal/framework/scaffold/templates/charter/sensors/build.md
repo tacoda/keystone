@@ -1,7 +1,7 @@
 ---
-kind: hook
+kind: sensor
 mode: computational
-event: pre-verify
+on: pre-verify
 run: '# TODO: wire the build command (see corpus/state/CODEBASE_STATE.md)'
 id: build
 description: 'The project''s build / compile / package step.'

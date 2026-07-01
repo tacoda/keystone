@@ -1,12 +1,10 @@
 ---
-kind: hook
+kind: sensor
+mode: computational
+on: pre-verify
+run: '# TODO: wire the test command (see corpus/state/CODEBASE_STATE.md)'
 id: test
 description: 'The project''s test suite.'
-tags:
-  - computational
-mode: computational
-event: Stop
-run: go test ./...
 ---
 # Sensor: test
 

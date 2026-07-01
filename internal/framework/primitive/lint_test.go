@@ -134,18 +134,19 @@ func TestLint_SensorContract(t *testing.T) {
 	}
 }
 
-// TestLint_HookActionContract — the `hook` kind carries the same action
-// contract as sensor: computational → run:, inferential → agent: + returns:.
-func TestLint_HookActionContract(t *testing.T) {
+// TestLint_SensorActionContract — a sensor's mode contract: computational
+// requires `run:`; inferential requires a `returns:` verdict schema (the
+// sensor body is the review prompt — no separate agent: needed).
+func TestLint_SensorActionContract(t *testing.T) {
 	infMissing := Lint([]Primitive{{Frontmatter: Frontmatter{
-		Kind: "hook", ID: "on-gate-review", Description: "d", Mode: "inferential", Event: "on-gate"}}})
-	if !find(t, infMissing, FindingError, "agent") || !find(t, infMissing, FindingError, "returns") {
-		t.Errorf("expected inferential hook to require agent+returns, got %v", infMissing)
+		Kind: "sensor", ID: "on-gate-review", Description: "d", Mode: "inferential", Event: "on-gate"}}})
+	if !find(t, infMissing, FindingError, "returns") {
+		t.Errorf("expected inferential sensor to require returns, got %v", infMissing)
 	}
 	compMissing := Lint([]Primitive{{Frontmatter: Frontmatter{
-		Kind: "hook", ID: "fmt", Description: "d", Mode: "computational", Event: "PostToolUse"}}})
+		Kind: "sensor", ID: "fmt", Description: "d", Mode: "computational", Event: "PostToolUse"}}})
 	if !find(t, compMissing, FindingError, "run") {
-		t.Errorf("expected computational hook to require run, got %v", compMissing)
+		t.Errorf("expected computational sensor to require run, got %v", compMissing)
 	}
 }
 
@@ -232,7 +233,7 @@ func TestLint_Clean(t *testing.T) {
 	ps := []Primitive{
 		{Frontmatter: Frontmatter{Kind: "guide", ID: "p/x", Description: "Real description."}},
 		{Frontmatter: Frontmatter{Kind: "sensor", ID: "review", Description: "Real description.", Mode: "inferential", Agent: "reviewer", Returns: "findings"}},
-		{Frontmatter: Frontmatter{Kind: "hook", ID: "on-gate", Description: "Real description.", Mode: "inferential", Event: "on-gate", Agent: "reviewer", Returns: "verdict"}},
+		{Frontmatter: Frontmatter{Kind: "sensor", ID: "on-gate", Description: "Real description.", Mode: "inferential", Event: "on-gate", Agent: "reviewer", Returns: "verdict"}},
 		{Frontmatter: Frontmatter{Kind: "skill", ID: "demo", Description: "Real description.", Triggers: []string{"demo"}}},
 		{Frontmatter: Frontmatter{Kind: "agent", ID: "demo", Description: "Real description.", Tools: []string{"Read"}}},
 		{Frontmatter: Frontmatter{Kind: "document", ID: "implementation-plan", Description: "Real description."}},

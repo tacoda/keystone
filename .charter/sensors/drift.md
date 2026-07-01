@@ -1,11 +1,11 @@
 ---
-kind: hook
+kind: sensor
 id: drift
 description: 'Compares the diff (or full codebase, during audit) against loaded guide rules.'
 tags:
   - computational
 mode: computational
-event: PostToolUse
+on: PostToolUse
 run: keystone verify --sensor drift
 ---
 # Sensor: drift

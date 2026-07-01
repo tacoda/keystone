@@ -420,9 +420,8 @@ func TestV2_3_Up_Idempotent(t *testing.T) {
 	mustMkdir(t, filepath.Join(tmp, ".keystone/harness/sensors"))
 	mustMkdir(t, filepath.Join(tmp, ".keystone/harness/concerns"))
 	mustMkdir(t, filepath.Join(tmp, ".keystone/harness/personas"))
-	mustMkdir(t, filepath.Join(tmp, ".keystone/harness/hooks"))
-	mustWrite(t, filepath.Join(tmp, ".keystone/harness/hooks/build.md"),
-		"---\nkind: hook\nid: build\ndescription: x\nmode: computational\nevent: Stop\nrun: go build ./...\n---\nbody\n")
+	mustWrite(t, filepath.Join(tmp, ".keystone/harness/sensors/build.md"),
+		"---\nkind: sensor\nid: build\ndescription: x\nmode: computational\nevent: Stop\nrun: go build ./...\n---\nbody\n")
 	mustWrite(t, filepath.Join(tmp, ".keystone/harness/concerns/shared-tools.md"),
 		"---\nkind: concern\nid: shared-tools\ndescription: x\ntools:\n  - Read\n  - Grep\ntags:\n  - composition\n---\nbody\n")
 	mustWrite(t, filepath.Join(tmp, ".keystone/harness/personas/reviewer.md"),

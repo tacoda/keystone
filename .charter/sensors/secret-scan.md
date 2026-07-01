@@ -1,11 +1,11 @@
 ---
-kind: hook
+kind: sensor
 id: secret-scan
 description: 'Scans the diff (or repo, on audit) for committed secrets — API keys, tokens, private keys, credentials.'
 tags:
   - computational
 mode: computational
-event: PreToolUse
+on: PreToolUse
 run: keystone verify --sensor secret-scan
 ---
 # Sensor: secret-scan

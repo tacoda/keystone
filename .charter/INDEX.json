@@ -1,6 +1,6 @@
 {
   "version": "2.0",
-  "generated": "2026-07-01T19:26:54Z",
+  "generated": "2026-07-01T20:19:44Z",
   "primitives": [
     {
       "kind": "agent",
@@ -541,7 +541,7 @@
         "internal/**/*.go"
       ],
       "mode": "computational",
-      "event": "PostToolUse",
+      "on": "PostToolUse",
       "run": "command -v go \u003e/dev/null 2\u003e\u00261 \u0026\u0026 go vet ./... || true",
       "path": ".charter/guides/computational/go-vet.md",
       "provenance": "project"
@@ -555,7 +555,7 @@
         "internal/**/*.go"
       ],
       "mode": "computational",
-      "event": "PostToolUse",
+      "on": "PostToolUse",
       "run": "command -v gofmt \u003e/dev/null 2\u003e\u00261 \u0026\u0026 test -z \"$(gofmt -l cmd internal)\" || true",
       "path": ".charter/guides/computational/gofmt.md",
       "provenance": "project"
@@ -569,7 +569,7 @@
         "internal/**/*.go"
       ],
       "mode": "computational",
-      "event": "PostToolUse",
+      "on": "PostToolUse",
       "run": "command -v gopls \u003e/dev/null 2\u003e\u00261 \u0026\u0026 gopls version \u003e/dev/null 2\u003e\u00261 || true",
       "path": ".charter/guides/computational/gopls.md",
       "provenance": "project"
@@ -782,206 +782,206 @@
       "provenance": "project"
     },
     {
-      "kind": "hook",
-      "id": "build",
-      "description": "The project's build / compile / package step.",
-      "mode": "computational",
-      "event": "Stop",
-      "run": "go build ./...",
-      "tags": [
-        "computational"
-      ],
-      "path": ".charter/hooks/build.md",
-      "provenance": "project"
-    },
-    {
-      "kind": "hook",
-      "id": "commit-message",
-      "description": "Validates conventional-commit format and absence of AI attribution.",
-      "mode": "computational",
-      "event": "PreToolUse",
-      "run": "keystone verify --sensor commit-message",
-      "tags": [
-        "computational"
-      ],
-      "path": ".charter/hooks/commit-message.md",
-      "provenance": "project"
-    },
-    {
-      "kind": "hook",
-      "id": "coverage",
-      "description": "Reads test coverage and updates the State layer.",
-      "mode": "computational",
-      "event": "Stop",
-      "run": "true",
-      "tags": [
-        "computational"
-      ],
-      "path": ".charter/hooks/coverage.md",
-      "provenance": "project"
-    },
-    {
-      "kind": "hook",
-      "id": "drift",
-      "description": "Compares the diff (or full codebase, during audit) against loaded guide rules.",
-      "mode": "computational",
-      "event": "PostToolUse",
-      "run": "keystone verify --sensor drift",
-      "tags": [
-        "computational"
-      ],
-      "path": ".charter/hooks/drift.md",
-      "provenance": "project"
-    },
-    {
-      "kind": "hook",
-      "id": "lint",
-      "description": "Surface-level style and pattern checks.",
-      "mode": "computational",
-      "event": "Stop",
-      "run": "go vet ./...",
-      "tags": [
-        "computational"
-      ],
-      "path": ".charter/hooks/lint.md",
-      "provenance": "project"
-    },
-    {
-      "kind": "hook",
-      "id": "risk-fingerprint",
-      "description": "Computes complexity + coupling + coverage patterns per region.",
-      "mode": "computational",
-      "event": "Stop",
-      "run": "true",
-      "tags": [
-        "computational"
-      ],
-      "path": ".charter/hooks/risk-fingerprint.md",
-      "provenance": "project"
-    },
-    {
-      "kind": "hook",
-      "id": "sast",
-      "description": "Static application security testing — pattern-based detection of insecure code in the source tree (SQL injection, command injection, weak...",
-      "mode": "computational",
-      "event": "Stop",
-      "run": "true",
-      "tags": [
-        "computational"
-      ],
-      "path": ".charter/hooks/sast.md",
-      "provenance": "project"
-    },
-    {
-      "kind": "hook",
-      "id": "secret-scan",
-      "description": "Scans the diff (or repo, on audit) for committed secrets — API keys, tokens, private keys, credentials.",
-      "mode": "computational",
-      "event": "PreToolUse",
-      "run": "keystone verify --sensor secret-scan",
-      "tags": [
-        "computational"
-      ],
-      "path": ".charter/hooks/secret-scan.md",
-      "provenance": "project"
-    },
-    {
-      "kind": "hook",
-      "id": "spec-adherence",
-      "description": "Walks the spec's acceptance criteria against the current diff.",
-      "mode": "computational",
-      "event": "Stop",
-      "run": "true",
-      "tags": [
-        "computational"
-      ],
-      "path": ".charter/hooks/spec-adherence.md",
-      "provenance": "project"
-    },
-    {
-      "kind": "hook",
-      "id": "stack-drift",
-      "description": "Detects when the empirical reality of the repo has diverged from what CODEBASESTATE.",
-      "mode": "computational",
-      "event": "Stop",
-      "run": "true",
-      "tags": [
-        "computational"
-      ],
-      "path": ".charter/hooks/stack-drift.md",
-      "provenance": "project"
-    },
-    {
-      "kind": "hook",
-      "id": "state-region",
-      "description": "Read-only.",
-      "mode": "computational",
-      "event": "PostToolUse",
-      "run": "true",
-      "tags": [
-        "computational"
-      ],
-      "path": ".charter/hooks/state-region.md",
-      "provenance": "project"
-    },
-    {
-      "kind": "hook",
-      "id": "test",
-      "description": "The project's test suite.",
-      "mode": "computational",
-      "event": "Stop",
-      "run": "go test ./...",
-      "tags": [
-        "computational"
-      ],
-      "path": ".charter/hooks/test.md",
-      "provenance": "project"
-    },
-    {
-      "kind": "hook",
-      "id": "traffic-topology",
-      "description": "Combines git churn + recency + business criticality into a map of where attention concentrates.",
-      "mode": "computational",
-      "event": "Stop",
-      "run": "true",
-      "tags": [
-        "computational"
-      ],
-      "path": ".charter/hooks/traffic-topology.md",
-      "provenance": "project"
-    },
-    {
-      "kind": "hook",
-      "id": "type-check",
-      "description": "Signature and contract consistency.",
-      "mode": "computational",
-      "event": "Stop",
-      "run": "go vet ./...",
-      "tags": [
-        "computational"
-      ],
-      "path": ".charter/hooks/type-check.md",
-      "provenance": "project"
-    },
-    {
-      "kind": "hook",
-      "id": "vuln-scan",
-      "description": "Scans declared dependencies for known vulnerabilities (CVEs, advisories).",
-      "mode": "computational",
-      "event": "Stop",
-      "run": "true",
-      "tags": [
-        "computational"
-      ],
-      "path": ".charter/hooks/vuln-scan.md",
-      "provenance": "project"
-    },
-    {
       "kind": "playbook",
       "id": "task",
       "description": "End-to-end task workflow.",
       "model": "opus",
       "path": ".charter/playbooks/task.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "sensor",
+      "id": "build",
+      "description": "The project's build / compile / package step.",
+      "mode": "computational",
+      "on": "Stop",
+      "run": "go build ./...",
+      "tags": [
+        "computational"
+      ],
+      "path": ".charter/sensors/build.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "sensor",
+      "id": "commit-message",
+      "description": "Validates conventional-commit format and absence of AI attribution.",
+      "mode": "computational",
+      "on": "PreToolUse",
+      "run": "keystone verify --sensor commit-message",
+      "tags": [
+        "computational"
+      ],
+      "path": ".charter/sensors/commit-message.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "sensor",
+      "id": "coverage",
+      "description": "Reads test coverage and updates the State layer.",
+      "mode": "computational",
+      "on": "Stop",
+      "run": "true",
+      "tags": [
+        "computational"
+      ],
+      "path": ".charter/sensors/coverage.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "sensor",
+      "id": "drift",
+      "description": "Compares the diff (or full codebase, during audit) against loaded guide rules.",
+      "mode": "computational",
+      "on": "PostToolUse",
+      "run": "keystone verify --sensor drift",
+      "tags": [
+        "computational"
+      ],
+      "path": ".charter/sensors/drift.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "sensor",
+      "id": "lint",
+      "description": "Surface-level style and pattern checks.",
+      "mode": "computational",
+      "on": "Stop",
+      "run": "go vet ./...",
+      "tags": [
+        "computational"
+      ],
+      "path": ".charter/sensors/lint.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "sensor",
+      "id": "risk-fingerprint",
+      "description": "Computes complexity + coupling + coverage patterns per region.",
+      "mode": "computational",
+      "on": "Stop",
+      "run": "true",
+      "tags": [
+        "computational"
+      ],
+      "path": ".charter/sensors/risk-fingerprint.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "sensor",
+      "id": "sast",
+      "description": "Static application security testing — pattern-based detection of insecure code in the source tree (SQL injection, command injection, weak...",
+      "mode": "computational",
+      "on": "Stop",
+      "run": "true",
+      "tags": [
+        "computational"
+      ],
+      "path": ".charter/sensors/sast.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "sensor",
+      "id": "secret-scan",
+      "description": "Scans the diff (or repo, on audit) for committed secrets — API keys, tokens, private keys, credentials.",
+      "mode": "computational",
+      "on": "PreToolUse",
+      "run": "keystone verify --sensor secret-scan",
+      "tags": [
+        "computational"
+      ],
+      "path": ".charter/sensors/secret-scan.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "sensor",
+      "id": "spec-adherence",
+      "description": "Walks the spec's acceptance criteria against the current diff.",
+      "mode": "computational",
+      "on": "Stop",
+      "run": "true",
+      "tags": [
+        "computational"
+      ],
+      "path": ".charter/sensors/spec-adherence.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "sensor",
+      "id": "stack-drift",
+      "description": "Detects when the empirical reality of the repo has diverged from what CODEBASESTATE.",
+      "mode": "computational",
+      "on": "Stop",
+      "run": "true",
+      "tags": [
+        "computational"
+      ],
+      "path": ".charter/sensors/stack-drift.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "sensor",
+      "id": "state-region",
+      "description": "Read-only.",
+      "mode": "computational",
+      "on": "PostToolUse",
+      "run": "true",
+      "tags": [
+        "computational"
+      ],
+      "path": ".charter/sensors/state-region.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "sensor",
+      "id": "test",
+      "description": "The project's test suite.",
+      "mode": "computational",
+      "on": "Stop",
+      "run": "go test ./...",
+      "tags": [
+        "computational"
+      ],
+      "path": ".charter/sensors/test.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "sensor",
+      "id": "traffic-topology",
+      "description": "Combines git churn + recency + business criticality into a map of where attention concentrates.",
+      "mode": "computational",
+      "on": "Stop",
+      "run": "true",
+      "tags": [
+        "computational"
+      ],
+      "path": ".charter/sensors/traffic-topology.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "sensor",
+      "id": "type-check",
+      "description": "Signature and contract consistency.",
+      "mode": "computational",
+      "on": "Stop",
+      "run": "go vet ./...",
+      "tags": [
+        "computational"
+      ],
+      "path": ".charter/sensors/type-check.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "sensor",
+      "id": "vuln-scan",
+      "description": "Scans declared dependencies for known vulnerabilities (CVEs, advisories).",
+      "mode": "computational",
+      "on": "Stop",
+      "run": "true",
+      "tags": [
+        "computational"
+      ],
+      "path": ".charter/sensors/vuln-scan.md",
       "provenance": "project"
     },
     {
@@ -1545,7 +1545,10 @@
       "process/surgical-edits",
       "process/verification"
     ],
-    "hook": [
+    "playbook": [
+      "task"
+    ],
+    "sensor": [
       "build",
       "commit-message",
       "coverage",
@@ -1561,9 +1564,6 @@
       "traffic-topology",
       "type-check",
       "vuln-scan"
-    ],
-    "playbook": [
-      "task"
     ],
     "skill": [
       "keystone:audit",
