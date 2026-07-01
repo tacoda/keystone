@@ -75,6 +75,9 @@ transport: cli | mcp — not a server-side resolution stage.)
   keystone_explain id=<i> [kind=<k>]
       Explain a primitive — how it activates, what it links to, where it
       projects. Use before reading a whole body.
+  keystone_charter_conformance
+      Rubric verdict (CONFORMANT|DRIFTING|NON-CONFORMANT) from objective
+      checks: cascade, frontmatter validity, pairing, coverage.
 
 ## Reactions (what fires when)
 

@@ -20,6 +20,25 @@ func registerCharterViews(s *server.MCPServer, projectDir string) {
 	registerSignalListTool(s, projectDir)
 	registerCoverageTool(s, projectDir)
 	registerExplainTool(s, projectDir)
+	registerConformanceTool(s, projectDir)
+}
+
+// registerConformanceTool reports the charter-conformance rubric: an
+// objective PASS/PARTIAL/FAIL per criterion plus an overall verdict.
+func registerConformanceTool(s *server.MCPServer, projectDir string) {
+	s.AddTool(
+		mcp.NewTool("keystone_charter_conformance",
+			mcp.WithDescription("Score the charter-conformance rubric: cascade integrity, frontmatter validity, guide↔corpus pairing, and coverage — each PASS/PARTIAL/FAIL — with an overall verdict (CONFORMANT | DRIFTING | NON-CONFORMANT)."),
+		),
+		func(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+			rub, err := charter.Conformance(projectDir, kconfig.DefaultCharterRoot)
+			if err != nil {
+				return mcp.NewToolResultError(err.Error()), nil
+			}
+			body, _ := json.MarshalIndent(rub, "", "  ")
+			return mcp.NewToolResultText(string(body)), nil
+		},
+	)
 }
 
 // registerExplainTool explains a primitive — how it activates, what it

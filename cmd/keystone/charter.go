@@ -27,9 +27,27 @@ func runCharter(args []string) error {
 		return runCharterCoverage(args[1:])
 	case "show":
 		return runCharterShow(args[1:])
+	case "conformance":
+		return runCharterConformance(args[1:])
 	default:
-		return fmt.Errorf("unknown charter subcommand %q (use: coverage | show)", args[0])
+		return fmt.Errorf("unknown charter subcommand %q (use: coverage | show | conformance)", args[0])
 	}
+}
+
+func runCharterConformance(args []string) error {
+	absDir, err := filepath.Abs(dirArg(args))
+	if err != nil {
+		return fmt.Errorf("resolve dir: %w", err)
+	}
+	rub, err := charter.Conformance(absDir, config.DefaultCharterRoot)
+	if err != nil {
+		return fmt.Errorf("conformance: %w", err)
+	}
+	fmt.Fprintf(os.Stdout, "Charter conformance: %s\n\n", rub.Verdict)
+	for _, c := range rub.Criteria {
+		fmt.Fprintf(os.Stdout, "  %-8s %-22s %s\n", c.Status, c.Name, c.Detail)
+	}
+	return nil
 }
 
 func runCharterCoverage(args []string) error {
@@ -187,6 +205,7 @@ Usage:
 
     keystone charter coverage [--dir D]                        # files no guide governs (uncharted territory)
     keystone charter show [--effective] [--kind K] [--dir D]   # the charter roster
+    keystone charter conformance [--dir D]                     # rubric: does the repo conform to its charter?
 
 Coverage reports which project files a guide's globs match and which are
 uncharted — where the agent runs with no ambient rule. Show lists the
