@@ -13,8 +13,8 @@ import (
 	"github.com/mark3labs/mcp-go/server"
 )
 
-// registerWriteTools adds the mutate-the-harness tools: every `new`
-// generator, plus `harness_bootstrap` (runs init) and `target_add`.
+// registerWriteTools adds the mutate-the-charter tools: every `new`
+// generator, plus `charter_bootstrap` (runs init) and `target_add`.
 //
 // Each tool shells out to the keystone binary itself so the MCP layer
 // reuses the CLI's argument parsing + flag handling unchanged. Same
@@ -34,7 +34,7 @@ func registerWriteTools(s *server.MCPServer, projectDir string) {
 	for _, g := range writeGenerators() {
 		registerGenerator(s, projectDir, g.tool, g.verb, g.idArg, g.desc, g.extras)
 	}
-	registerHarnessTools(s, projectDir)
+	registerCharterTools(s, projectDir)
 }
 
 // writeGenerators is the catalog of scaffold generators exposed over MCP — one
@@ -94,7 +94,7 @@ func writeGenerators() []writeGen {
 			tool:  "keystone_new_document",
 			verb:  "document",
 			idArg: "<id>",
-			desc:  "Scaffold a document template (governed output: plan, review, adr, retro, feature). Instances land in .keystone/work/.",
+			desc:  "Scaffold a document template (governed output: plan, review, adr, retro, feature). Instances land in .charter/work/.",
 		},
 		{
 			tool:  "keystone_new_corpus",
@@ -120,12 +120,12 @@ func writeGenerators() []writeGen {
 	}
 }
 
-// registerHarnessTools registers the harness-lifecycle MCP tools (bootstrap,
+// registerCharterTools registers the charter-lifecycle MCP tools (bootstrap,
 // target add) and the index/project maintenance tools.
-func registerHarnessTools(s *server.MCPServer, projectDir string) {
+func registerCharterTools(s *server.MCPServer, projectDir string) {
 	s.AddTool(
-		mcp.NewTool("keystone_harness_bootstrap",
-			mcp.WithDescription("Scaffold the harness into the project directory (non-interactive equivalent of `keystone init`). Use this when the project has no `.keystone/` yet."),
+		mcp.NewTool("keystone_charter_bootstrap",
+			mcp.WithDescription("Scaffold the charter into the project directory (non-interactive equivalent of `keystone init`). Use this when the project has no `.charter/` yet."),
 			mcp.WithString("agent",
 				mcp.Required(),
 				mcp.Description("Target agent to bind (e.g. claude-code, codex, cursor, _generic)."),
@@ -146,7 +146,7 @@ func registerHarnessTools(s *server.MCPServer, projectDir string) {
 
 	s.AddTool(
 		mcp.NewTool("keystone_target_add",
-			mcp.WithDescription("Add another agent target to an existing harness. Equivalent to `keystone target add <agent>`."),
+			mcp.WithDescription("Add another agent target to an existing charter. Equivalent to `keystone target add <agent>`."),
 			mcp.WithString("agent",
 				mcp.Required(),
 				mcp.Description("Agent target to install (e.g. claude-code, codex, cursor)."),
@@ -170,7 +170,7 @@ func registerHarnessTools(s *server.MCPServer, projectDir string) {
 	// INDEX.json and host projections stay current.
 	s.AddTool(
 		mcp.NewTool("keystone_index_refresh",
-			mcp.WithDescription("Regenerate .keystone/INDEX.json from the harness. Call after any keystone_new_* tool."),
+			mcp.WithDescription("Regenerate .charter/INDEX.json from the charter. Call after any keystone_new_* tool."),
 		),
 		func(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 			out, err := execKeystone(ctx, "index", "--dir", projectDir)
@@ -237,12 +237,12 @@ func registerGenerator(
 				return mcp.NewToolResultError(fmt.Sprintf("%s failed: %v\n%s", toolName, err, out)), nil
 			}
 			body, _ := json.MarshalIndent(map[string]any{
-				"tool":     toolName,
-				"verb":     verb,
-				"id":       id,
-				"output":   strings.TrimSpace(out),
-				"project":  projectDir,
-				"refresh_hint": "Call keystone_index_refresh next to rebuild .keystone/INDEX.json.",
+				"tool":         toolName,
+				"verb":         verb,
+				"id":           id,
+				"output":       strings.TrimSpace(out),
+				"project":      projectDir,
+				"refresh_hint": "Call keystone_index_refresh next to rebuild .charter/INDEX.json.",
 			}, "", "  ")
 			return mcp.NewToolResultText(string(body)), nil
 		},

@@ -1,4 +1,4 @@
-// Package primitive defines the canonical descriptor that every harness
+// Package primitive defines the canonical descriptor that every charter
 // file declares in its frontmatter, plus the index aggregator that the
 // agent reads in lieu of the raw markdown tree.
 //
@@ -9,12 +9,12 @@ package primitive
 
 import "strings"
 
-// Kind names every primitive that can appear in the harness. The set is
+// Kind names every primitive that can appear in the charter. The set is
 // closed; unknown kinds are a lint error.
 //
 // 2.0 explicitly excludes MCP prompts: prompts only make sense when an
 // MCP server and a client UI surface them to the human, and a CLI-only
-// harness has no path to invoke them. Slash commands cover human-
+// charter has no path to invoke them. Slash commands cover human-
 // triggered templated workflows; skills cover agent-self-triggered
 // patterns. A future MCP-only catalog can live outside this contract.
 //
@@ -23,15 +23,15 @@ import "strings"
 // authoring surface, the agent primitive is the raw host-native
 // equivalent kept as an escape hatch.
 //
-//   Framework abstractions (encouraged by default — author here):
-//     wrappers       guide, sensor (→ rule)
-//                    action        (→ command)
-//                    playbook      (→ skill)
-//                    persona       (→ subagent)
-//     standalone     corpus, eval, source
+//	Framework abstractions (encouraged by default — author here):
+//	  wrappers       guide, sensor (→ rule)
+//	                 action        (→ command)
+//	                 playbook      (→ skill)
+//	                 persona       (→ subagent)
+//	  standalone     corpus, eval, source
 //
-//   Agent abstractions (raw host-native passthrough — escape hatches):
-//     rule, skill, subagent, command
+//	Agent abstractions (raw host-native passthrough — escape hatches):
+//	  rule, skill, subagent, command
 //
 // Wrap mechanics:
 //
@@ -72,8 +72,7 @@ const (
 	KindCorpus Kind = "corpus" // deep reasoning, loaded on-demand
 	KindEval   Kind = "eval"
 	// `source` is no longer an authorable kind: external-system access is a
-	// `tool` (transport: cli=curl / mcp). The live external-source config
-	// remains in context.json (subsystem removal is a later slice).
+	// `tool` (transport: cli=curl / mcp).
 
 	// Composition primitive. A concern is a reusable fragment of
 	// frontmatter + body that other primitives pull in via the
@@ -92,7 +91,7 @@ var KnownKinds = []Kind{
 	KindCorpus, KindEval, KindConcern,
 }
 
-// canonicalDirKind maps a canonical harness subdirectory to the kind it
+// canonicalDirKind maps a canonical charter subdirectory to the kind it
 // holds. Convention over configuration: a file's directory is its kind
 // declaration, so `kind:` may be omitted from frontmatter and inferred.
 // No `rules/` entry — `rule` is not a kind.
@@ -123,12 +122,12 @@ func resolveKind(explicit, relPath string) string {
 }
 
 // InferKind returns the kind implied by a primitive's canonical
-// directory — the path segment immediately under "harness/" — or "" when
+// directory — the path segment immediately under "charter/" — or "" when
 // the path is off-convention. relPath is project-relative POSIX. This is
 // the convention-over-configuration entry point: Walk fills an empty
 // `kind:` from the directory, so authors need not declare it.
 func InferKind(relPath string) Kind {
-	const marker = "harness/"
+	const marker = "charter/"
 	i := strings.Index(relPath, marker)
 	if i < 0 {
 		return ""
@@ -161,13 +160,13 @@ const (
 	TierPreference GuideTier = "preference"
 )
 
-// Frontmatter is what each harness file declares between the `---` fences.
+// Frontmatter is what each charter file declares between the `---` fences.
 // Fields not relevant to a given kind are simply omitted; the indexer
 // records what's present and the linter checks what's required.
 type Frontmatter struct {
-	Kind        string   `yaml:"kind"        json:"kind"`
-	ID          string   `yaml:"id"          json:"id"`
-	Description string   `yaml:"description" json:"description"`
+	Kind        string `yaml:"kind"        json:"kind"`
+	ID          string `yaml:"id"          json:"id"`
+	Description string `yaml:"description" json:"description"`
 
 	Globs    []string `yaml:"globs,omitempty"    json:"globs,omitempty"`
 	Phase    string   `yaml:"phase,omitempty"    json:"phase,omitempty"`
@@ -224,12 +223,12 @@ type Frontmatter struct {
 	// its own `gates:` lifecycle, a `type:` subtype (e.g. feature), and
 	// `produced_by:` the command that writes it. `supersedes:` lets a new
 	// rule or document flag the older one it replaces.
-	Produces   []string `yaml:"produces,omitempty"    json:"produces,omitempty"`
-	Consumes   []string `yaml:"consumes,omitempty"    json:"consumes,omitempty"`
-	Stop       string   `yaml:"stop,omitempty"        json:"stop,omitempty"`
-	Gates      []string `yaml:"gates,omitempty"       json:"gates,omitempty"`
+	Produces []string `yaml:"produces,omitempty"    json:"produces,omitempty"`
+	Consumes []string `yaml:"consumes,omitempty"    json:"consumes,omitempty"`
+	Stop     string   `yaml:"stop,omitempty"        json:"stop,omitempty"`
+	Gates    []string `yaml:"gates,omitempty"       json:"gates,omitempty"`
 	// Gate is the current lifecycle state of a document *instance* (under
-	// .keystone/work/). Templates declare `gates:` (the ordered set);
+	// .charter/work/). Templates declare `gates:` (the ordered set);
 	// instances carry `gate:` (where they are now). `keystone document
 	// promote` advances it.
 	Gate       string   `yaml:"gate,omitempty"        json:"gate,omitempty"`
@@ -254,7 +253,7 @@ type Frontmatter struct {
 
 	// HostTriggers is the per-host activation surface for computational
 	// sensors. Same pattern as other primitive frontmatter — declared
-	// inline in the sensor's `.keystone/harness/sensors/<id>.md` rather
+	// inline in the sensor's `.charter/sensors/<id>.md` rather
 	// than in a separate config file. Each entry projects to one host
 	// hook entry (Claude Code: .claude/settings.json; Cursor: equivalent
 	// hook config; etc.) via per-host adapters. Empty for LLM-judgment
@@ -287,12 +286,12 @@ type Arg struct {
 	Description string `yaml:"description,omitempty" json:"description,omitempty"`
 }
 
-// Primitive is one indexed harness file: its descriptor plus the
+// Primitive is one indexed charter file: its descriptor plus the
 // path the agent opens to read the body. Paths are repo-relative
 // POSIX.
 //
 // Provenance is derived from Path at walk-time — never authored in
-// frontmatter. "project" for any harness-root file outside a vendored
+// frontmatter. "project" for any charter-root file outside a vendored
 // policy; "policy/<name>" for vendored policy content. Answers
 // "where did this rule come from?" without the install step needing
 // to mutate files.
@@ -302,15 +301,15 @@ type Primitive struct {
 	Provenance  string `json:"provenance,omitempty"`
 }
 
-// Index is the aggregator emitted at <harness-root>/INDEX.json. The
+// Index is the aggregator emitted at <charter-root>/INDEX.json. The
 // agent reads this once at session start and consults Path only when
 // it decides to activate the primitive.
 type Index struct {
-	Version    string                `json:"version"`
-	Generated  string                `json:"generated"`
-	Primitives []Primitive           `json:"primitives"`
-	ByKind     map[string][]string   `json:"by_kind"`
-	ByGlob     map[string][]string   `json:"by_glob,omitempty"`
+	Version    string              `json:"version"`
+	Generated  string              `json:"generated"`
+	Primitives []Primitive         `json:"primitives"`
+	ByKind     map[string][]string `json:"by_kind"`
+	ByGlob     map[string][]string `json:"by_glob,omitempty"`
 }
 
 // IndexVersion is the schema version emitted into Index.Version. Bumped

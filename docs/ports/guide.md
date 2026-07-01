@@ -6,8 +6,8 @@
 ## Path convention
 
 ```
-harness/guides/<topic>/<name>.md                              # project-owned
-harness/policies/<policy>/guides/<topic>/<name>.md             # policy-owned (read-only)
+.charter/guides/<topic>/<name>.md                            # project-owned
+.charter/policies/<policy>/guides/<topic>/<name>.md           # policy-owned (read-only)
 ```
 
 `<topic>` groups related guides (`process`, `principles`, `idioms`, `domain`, `computational`). Topic directories are open-ended — adding a new topic is just creating a new directory.
@@ -41,7 +41,7 @@ For reasoning, see [`corpus/<topic>/<name>.md`](corpus/<topic>/<name>.md).
 
 - **H1 title** — required. Format: `# <Name> — rules` (the `— rules` suffix is convention, not enforced).
 - **Frontmatter** — optional. Recognized keys: `kind:` (declared on computational guides; documented in their topic README), `globs:` (see below). Unrecognized keys are ignored. Bare-content guides remain valid.
-- **Forward-link to corpus** — required when a paired corpus file exists. Harness-root-relative path (no `../` segments; `keystone doctor` enforces).
+- **Forward-link to corpus** — required when a paired corpus file exists. Charter-root-relative path (no `../` segments; `keystone doctor` enforces).
 - **Length** — short. A guide is rules; long-form belongs in corpus. Rough ceiling: one screen.
 
 ### Rules tiers
@@ -123,7 +123,7 @@ Globs match against an action-scoped set of paths. Each action computes its own 
 
 For a given `guides/<topic>/<name>.md`:
 
-1. The project's `harness/guides/<topic>/<name>.md` always wins by default.
+1. The project's `.charter/guides/<topic>/<name>.md` always wins by default.
 2. Otherwise, among policies, policies nested deeper in `keystone.json` refine the outer policies they're nested in.
 3. A `strict.guides: [<name>]` declaration on any tree node makes that item absolute — nothing else can override it, not the project, not any other policy. `keystone verify` reports a violation if any layer attempts to shadow a strict item.
 

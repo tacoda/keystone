@@ -15,15 +15,15 @@ import (
 func evalCmd() *cobra.Command {
 	c := &cobra.Command{
 		Use:   "eval",
-		Short: "Run harness evals (static + sensor levels)",
-		Long: `keystone eval — measure how the harness behaves against
+		Short: "Run charter evals (static + sensor levels)",
+		Long: `keystone eval — measure how the charter behaves against
 known scenarios. Each eval is a primitive of kind: eval, living at
-.keystone/harness/evals/<id>/EVAL.md with a sibling expected.json
+.charter/evals/<id>/EVAL.md with a sibling expected.json
 and optional fixture/.
 
 Subcommands:
   run     Execute every eval (or a --filter subset) and write a report.
-  list    Print every eval id discovered in the harness.
+  list    Print every eval id discovered in the charter.
 
 Phase A (this release) implements static + sensor levels. Agent-level
 evals (LLM-driven, judge-graded) land in 2.1.`,
@@ -116,7 +116,7 @@ func evalListCmd() *cobra.Command {
 	var dir string
 	c := &cobra.Command{
 		Use:   "list",
-		Short: "Print every eval id discovered in the harness",
+		Short: "Print every eval id discovered in the charter",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			abs, err := filepath.Abs(dir)
 			if err != nil {

@@ -7,11 +7,11 @@ import (
 )
 
 // runNewHook handles `keystone new hook <id>`. Scaffolds
-// <harness-root>/hooks/<id>.md — an automated check that projects to a
+// <charter-root>/hooks/<id>.md — an automated check that projects to a
 // host hook via `host_triggers:`. The 2.x `sensor` kind split in 3.0:
 // computational checks are `hook`; inferential review folds into `agent`.
 func runNewHook(args []string) error {
-	projectDir, harnessRoot, remaining, err := parseDirAndHarnessRoot(args)
+	projectDir, charterRoot, remaining, err := parseDirAndCharterRoot(args)
 	if err != nil {
 		return err
 	}
@@ -23,7 +23,7 @@ func runNewHook(args []string) error {
 		return fmt.Errorf("hook id: %w", err)
 	}
 	diskName := strings.ReplaceAll(id, ":", "-")
-	path := filepath.Join(projectDir, harnessRoot, "hooks", diskName+".md")
+	path := filepath.Join(projectDir, charterRoot, "hooks", diskName+".md")
 	body := fmt.Sprintf(`---
 kind: hook
 id: %s
@@ -48,12 +48,12 @@ command and keystone verify --fix will run it.
 }
 
 // runNewDocument handles `keystone new document <id>`. Scaffolds
-// <harness-root>/documents/<id>.md — a template for a governed output
+// <charter-root>/documents/<id>.md — a template for a governed output
 // document (plan, review, ADR, retro, feature). Instances are written
-// under .keystone/work/ and advanced through `gates:` by `keystone
+// under .charter/work/ and advanced through `gates:` by `keystone
 // document promote`.
 func runNewDocument(args []string) error {
-	projectDir, harnessRoot, remaining, err := parseDirAndHarnessRoot(args)
+	projectDir, charterRoot, remaining, err := parseDirAndCharterRoot(args)
 	if err != nil {
 		return err
 	}
@@ -65,7 +65,7 @@ func runNewDocument(args []string) error {
 		return fmt.Errorf("document id: %w", err)
 	}
 	diskName := strings.ReplaceAll(id, ":", "-")
-	path := filepath.Join(projectDir, harnessRoot, "documents", diskName+".md")
+	path := filepath.Join(projectDir, charterRoot, "documents", diskName+".md")
 	body := fmt.Sprintf(`---
 kind: document
 id: %s
@@ -83,7 +83,7 @@ gates:
 # %s
 
 The template another operator fills in. Each section is a heading the
-author completes; the filled instance lands in .keystone/work/<task-id>/.
+author completes; the filled instance lands in .charter/work/<task-id>/.
 
 ## Sections
 

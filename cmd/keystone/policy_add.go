@@ -11,7 +11,7 @@ import (
 	"github.com/tacoda/keystone/internal/framework/lockfile"
 )
 
-// runPolicyAdd handles `keystone policy add <shorthand> [--name <n>] [--dir <path>] [--harness-root <name>]`.
+// runPolicyAdd handles `keystone policy add <shorthand> [--name <n>] [--dir <path>] [--charter-root <name>]`.
 //
 // Parses the shorthand into source+version, derives a default name (the
 // last source path segment) unless --name overrides, appends a PolicyNode
@@ -72,9 +72,9 @@ func runPolicyAdd(args []string) error {
 	if err != nil {
 		return fmt.Errorf("resolve dir: %w", err)
 	}
-	harnessRoot := config.DefaultHarnessRoot
+	charterRoot := config.DefaultCharterRoot
 
-	cfg, err := loadOrCreateProjectConfig(absDir, harnessRoot)
+	cfg, err := loadOrCreateProjectConfig(absDir, charterRoot)
 	if err != nil {
 		return err
 	}
@@ -94,14 +94,14 @@ func runPolicyAdd(args []string) error {
 		return err
 	}
 
-	lf, err := lockfile.Read(absDir, harnessRoot)
+	lf, err := lockfile.Read(absDir, charterRoot)
 	if err != nil {
 		return err
 	}
-	if err := installOnePolicy(absDir, harnessRoot, node, lf); err != nil {
+	if err := installOnePolicy(absDir, charterRoot, node, lf); err != nil {
 		return err
 	}
-	if err := lockfile.Write(absDir, harnessRoot, lf); err != nil {
+	if err := lockfile.Write(absDir, charterRoot, lf); err != nil {
 		return err
 	}
 
@@ -113,13 +113,13 @@ func runPolicyAdd(args []string) error {
 // freshly-defaulted one if no file exists yet. This makes `policy add` work
 // before `init` has written a keystone.json — the next write persists the
 // new file.
-func loadOrCreateProjectConfig(projectDir, harnessRoot string) (*config.ProjectConfig, error) {
+func loadOrCreateProjectConfig(projectDir, charterRoot string) (*config.ProjectConfig, error) {
 	cfg, err := config.ReadProjectConfig(projectDir)
 	if err == nil {
 		return cfg, nil
 	}
 	if errors.Is(err, os.ErrNotExist) {
-		return config.DefaultProjectConfig(harnessRoot), nil
+		return config.DefaultProjectConfig(charterRoot), nil
 	}
 	return nil, err
 }
@@ -161,7 +161,7 @@ func printPolicyAddUsage(w *os.File) {
 	fmt.Fprint(w, `keystone policy add — install a new policy
 
 Usage:
-  keystone policy add <shorthand> [--name <n>] [--dir <path>] [--harness-root <name>]
+  keystone policy add <shorthand> [--name <n>] [--dir <path>] [--charter-root <name>]
 
 Shorthand: [<host>/]<owner>/<repo>@<version>. The host defaults to
 github.com when omitted; the version is required and is a git ref (tag,
@@ -179,7 +179,7 @@ To nest under another policy, edit keystone.json by hand and re-run
 Flags:
   --name <n>             Override the default policy name (last source segment).
   --dir <path>           Project root (defaults to cwd).
-  --harness-root <name>  Harness directory name (defaults to keystone.json's
-                         harness_root, then "harness").
+  --charter-root <name>  Charter directory name (defaults to keystone.json's
+                         harness_root, then "charter").
 `)
 }

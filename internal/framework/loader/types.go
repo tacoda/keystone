@@ -1,5 +1,5 @@
 // Package loader resolves <port>/<name> against a cascade of project +
-// policy layers. The project's harness/ always wins by default; among
+// policy layers. The project's charter/ always wins by default; among
 // policies, policies nested deeper in keystone.json's policies[] tree refine
 // the outer policies they're nested in. A policy's strict declarations lock
 // items absolutely — nothing else can override them.
@@ -13,7 +13,7 @@ package loader
 import "io/fs"
 
 // Policy represents one source layer in the cascade. Root is the content
-// root of that layer — harness/ for the project layer, the vendored policy
+// root of that layer — charter/ for the project layer, the vendored policy
 // directory for policy layers.
 type Policy struct {
 	Name string // "project" for the project layer; the policy's name otherwise
@@ -25,7 +25,7 @@ type Policy struct {
 // their children). The Loader resolves against Project first; among policies,
 // deeper-nested policies refine the outer policies they're nested in.
 type Cascade struct {
-	Project Policy
+	Project  Policy
 	Policies []Policy
 }
 

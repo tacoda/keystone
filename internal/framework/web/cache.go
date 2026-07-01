@@ -19,7 +19,7 @@ import (
 var walkFn = primitive.Walk
 
 // layerSnapshot is one cache entry — the most recent walk of a
-// single harness root.
+// single charter root.
 type layerSnapshot struct {
 	primitives []primitive.Primitive
 	index      primitive.Index
@@ -27,7 +27,7 @@ type layerSnapshot struct {
 }
 
 // primitiveCache holds the most recent walk of every accessed
-// harness layer — project root plus every declared policy root.
+// charter layer — project root plus every declared policy root.
 // Page handlers read from here instead of re-walking on every
 // request. The fsWatcher refreshes dirty layers on debounced file
 // changes; other layers stay warm.
@@ -35,9 +35,9 @@ type primitiveCache struct {
 	projectDir string
 
 	mu     sync.RWMutex
-	layers map[string]*layerSnapshot // key: harnessRoot (filepath-relative)
+	layers map[string]*layerSnapshot // key: charterRoot (filepath-relative)
 
-	// coldMu serializes cold-miss walks per harnessRoot key, so two
+	// coldMu serializes cold-miss walks per charterRoot key, so two
 	// goroutines that hit getLayer simultaneously do not both walk
 	// the same tree. Warm reads never touch coldMu.
 	coldMu sync.Map
@@ -50,10 +50,10 @@ func newPrimitiveCache(projectDir string) *primitiveCache {
 	}
 }
 
-// refreshLayer walks a single harness root and replaces its cached
+// refreshLayer walks a single charter root and replaces its cached
 // snapshot. Safe to call from any goroutine.
-func (c *primitiveCache) refreshLayer(harnessRoot string) {
-	prims, _, err := walkFn(c.projectDir, harnessRoot)
+func (c *primitiveCache) refreshLayer(charterRoot string) {
+	prims, _, err := walkFn(c.projectDir, charterRoot)
 	snap := &layerSnapshot{primitives: prims}
 	if err != nil {
 		// Vendored policy trees may not be installed — surface as an
@@ -65,7 +65,7 @@ func (c *primitiveCache) refreshLayer(harnessRoot string) {
 		snap.index = primitive.Build(prims, time.Now())
 	}
 	c.mu.Lock()
-	c.layers[harnessRoot] = snap
+	c.layers[charterRoot] = snap
 	c.mu.Unlock()
 }
 
@@ -73,24 +73,24 @@ func (c *primitiveCache) refreshLayer(harnessRoot string) {
 // single layer. Cold-miss triggers a synchronous walk so the first
 // request never sees empty data. Concurrent cold-misses on the same
 // layer collapse to a single walk via coldMu.
-func (c *primitiveCache) getLayer(harnessRoot string) ([]primitive.Primitive, primitive.Index, error) {
+func (c *primitiveCache) getLayer(charterRoot string) ([]primitive.Primitive, primitive.Index, error) {
 	c.mu.RLock()
-	snap, ok := c.layers[harnessRoot]
+	snap, ok := c.layers[charterRoot]
 	c.mu.RUnlock()
 	if !ok {
-		// Per-key serialization: at most one walker per harnessRoot.
-		mIface, _ := c.coldMu.LoadOrStore(harnessRoot, &sync.Mutex{})
+		// Per-key serialization: at most one walker per charterRoot.
+		mIface, _ := c.coldMu.LoadOrStore(charterRoot, &sync.Mutex{})
 		m := mIface.(*sync.Mutex)
 		m.Lock()
 		// Recheck under per-key lock — a sibling goroutine may have
 		// already filled the cache while we waited.
 		c.mu.RLock()
-		snap, ok = c.layers[harnessRoot]
+		snap, ok = c.layers[charterRoot]
 		c.mu.RUnlock()
 		if !ok {
-			c.refreshLayer(harnessRoot)
+			c.refreshLayer(charterRoot)
 			c.mu.RLock()
-			snap = c.layers[harnessRoot]
+			snap = c.layers[charterRoot]
 			c.mu.RUnlock()
 		}
 		m.Unlock()
@@ -104,26 +104,26 @@ func (c *primitiveCache) getLayer(harnessRoot string) ([]primitive.Primitive, pr
 // refresh is the project-default convenience wrapper used by callers
 // that only care about the project layer (loadPrimitives, buildIndex).
 func (c *primitiveCache) refresh() {
-	c.refreshLayer(config.DefaultHarnessRoot)
+	c.refreshLayer(config.DefaultCharterRoot)
 }
 
 // get is the project-default convenience wrapper. Same contract as
-// getLayer(DefaultHarnessRoot).
+// getLayer(DefaultCharterRoot).
 func (c *primitiveCache) get() ([]primitive.Primitive, primitive.Index, error) {
-	return c.getLayer(config.DefaultHarnessRoot)
+	return c.getLayer(config.DefaultCharterRoot)
 }
 
-// knownLayerRoots returns the harness roots that should be cached —
+// knownLayerRoots returns the charter roots that should be cached —
 // project + every declared policy. Recomputed per call so policy
 // changes mid-run are picked up.
 func (s *server) knownLayerRoots() []string {
-	roots := []string{config.DefaultHarnessRoot}
+	roots := []string{config.DefaultCharterRoot}
 	cfg, _ := config.ReadProjectConfig(s.projectDir)
 	if cfg == nil {
 		return roots
 	}
 	for _, p := range flattenPolicies(cfg.Policies) {
-		roots = append(roots, filepath.Join(config.DefaultHarnessRoot, policies.PolicyRoot, p.Name))
+		roots = append(roots, filepath.Join(config.DefaultCharterRoot, policies.PolicyRoot, p.Name))
 	}
 	return roots
 }

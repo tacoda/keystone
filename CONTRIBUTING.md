@@ -5,18 +5,21 @@ once, then file issues / open PRs.
 
 ## What keystone is
 
-Keystone is an **agent harness framework**. The harness — a tree of
-typed primitives at `.keystone/harness/` — is the product. The CLI
-and the MCP server are tooling that helps you author and serve that
-harness, but neither is required at runtime. Once a project has a
-harness, any agent that reads `.keystone/INDEX.json` and the
-primitive bodies it points at can operate on it.
+Keystone is the **coding-agent charter manager**. The charter — a tree
+of typed primitives at `.charter/` — is the product. A **harness** is
+the engine that runs the model (Claude Code, the orchestrator, the
+runner); Keystone is not a harness, it manages the charter that
+constrains one. The CLI and the MCP server are tooling that helps you
+author and serve that charter, but neither is required at runtime. Once
+a project has a charter, any agent that reads `.charter/INDEX.json` and
+the primitive bodies it points at can operate on it. (See
+[`GLOSSARY.md`](GLOSSARY.md) for the charter/harness distinction.)
 
 That framing affects the work:
 
-- **Harness shape changes are big deals.** The on-disk layout +
+- **Charter shape changes are big deals.** The on-disk layout +
   frontmatter schema are the public contract. Breaking changes ship
-  in a major release (e.g. 2.0) with a migrator.
+  in a major release (e.g. 4.0) with a migrator.
 - **CLI + MCP server are interfaces.** Adding tools / commands is
   low-friction; changing what a primitive *is* requires more care.
 
@@ -54,7 +57,7 @@ go run ./cmd/keystone web serve --dir "$WORK" --port 4773
 cmd/keystone/                  # Cobra CLI entry points; one verb per file
 internal/framework/
   config/                      # keystone.json schema + paths
-  lockfile/                    # .keystone/lockfile.json
+  lockfile/                    # .charter/lockfile.json
   loader/                      # cascade verifier + dependency graph
   manifest/                    # keystone-policy.json (per-policy)
   patch/                       # patch op model + apply
@@ -83,8 +86,8 @@ docs/
   canonical primitive frontmatter (`kind`, `id`, `description`, plus
   per-kind required fields). `keystone lint` is the gate.
 - **No YAML files** keystone owns. Standalone config is JSON
-  (`keystone.json`, `.keystone/lockfile.json`, `.keystone/context.json`,
-  `.keystone/INDEX.json`, patches/*.json). YAML inside markdown
+  (`keystone.json`, `.charter/lockfile.json`, `.charter/context.json`,
+  `.charter/INDEX.json`, patches/*.json). YAML inside markdown
   frontmatter is fine (markdown convention; the parser accepts JSON
   there too).
 
@@ -111,7 +114,7 @@ subagent, command). Pick the right layer.
 - **Bug.** Reproduction steps, expected vs. actual, what you ran on
   (OS, Go version, keystone version).
 - **Feature.** Describe the user-visible behavior change first. If
-  the harness contract changes, say so up front — it changes the
+  the charter contract changes, say so up front — it changes the
   review bar.
 
 ## Pull requests

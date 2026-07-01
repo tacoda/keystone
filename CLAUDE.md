@@ -1,4 +1,4 @@
-# Keystone — the agent harness framework
+# Keystone — the coding-agent charter manager
 
 ## Stack
 
@@ -26,8 +26,8 @@ internal/framework/   — agent-agnostic core
   adapters/           — per-host projection (claudecode, cursor, …)
   mcp/                — MCP server
   web/                — local dashboard
-.harness/    — this project's own harness (dogfood)
-.claude/              — projected from .harness/ — do not hand-edit
+.charter/    — this project's own charter (dogfood)
+.claude/              — projected from .charter/ — do not hand-edit
 ```
 
 ## Common commands
@@ -37,7 +37,7 @@ go build ./cmd/keystone        # build the CLI
 go install ./cmd/keystone      # install on PATH (refresh after every Frontmatter or CLI change — hooks call the installed binary)
 go test ./...                  # all tests
 go vet ./...                   # static check (must pass before commit)
-keystone index                 # regenerate .harness/INDEX*.json
+keystone index                 # regenerate .charter/INDEX*.json
 keystone project               # regenerate .claude/* + merge hooks into settings
 keystone watch                 # long-running: re-project on every guide/sensor/agent save (300ms debounce)
 keystone verify                # policy + cascade check (auto-fires pre/post-verify hooks)
@@ -45,7 +45,7 @@ keystone hook fire <event>     # dispatch framework hooks bound to an event
 ```
 
 > **Instant projection.** Run `keystone watch` in a side terminal while
-> editing primitives. Any save under `.harness/` regenerates
+> editing primitives. Any save under `.charter/` regenerates
 > `INDEX.json` + `INDEX.lite.json` + `.claude/*` + `AGENTS.md` +
 > `.cursor/rules/*` + `.aider.conf.yml` + `.continue/rules/*` within
 > the debounce window. The next agent invocation sees the updated
@@ -58,10 +58,10 @@ keystone hook fire <event>     # dispatch framework hooks bound to an event
 
 ## Where things go
 
-- **New rule / convention** → `.harness/guides/idioms/<topic>.md` + paired corpus
-- **New computational check** → `.harness/hooks/<id>.md` (`event:` + `run:`)
-- **New review** → `.harness/sensors/<id>.md` (`mode: inferential`, `returns:`) or a reviewer `.harness/agents/<id>.md`
-- **New workflow** → `.harness/playbooks/<id>.md`
+- **New rule / convention** → `.charter/guides/idioms/<topic>.md` + paired corpus
+- **New computational check** → `.charter/hooks/<id>.md` (`event:` + `run:`)
+- **New review** → `.charter/sensors/<id>.md` (`mode: inferential`, `returns:`) or a reviewer `.charter/agents/<id>.md`
+- **New workflow** → `.charter/playbooks/<id>.md`
 - **New keystone subcommand** → `cmd/keystone/<name>.go` + wire in `root.go`
 
 After any primitive add / move / delete: run `keystone index && keystone project`.

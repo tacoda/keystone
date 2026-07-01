@@ -63,14 +63,14 @@ var (
 
 func planUp_3_0(absDir string) (*Plan, error) {
 	p := &Plan{}
-	newRoot := config.DefaultHarnessRoot // .harness
-	if !dirExists(filepath.Join(absDir, legacyHarnessRoot)) && !dirExists(filepath.Join(absDir, newRoot)) {
+	newRoot := ".harness" // frozen: 3.0 produced .harness; 4.0 renames it to .charter via v4_0
+	if !dirExists(filepath.Join(absDir, legacyCharterRoot)) && !dirExists(filepath.Join(absDir, newRoot)) {
 		// Fresh install — scaffolded directly from 3.0 templates.
 		return p, nil
 	}
 
 	p.Add("move the harness from .keystone/ to .harness/ (one standardized root)", func(absDir string) error {
-		return relocateToHarness(absDir, newRoot)
+		return relocateToCharter(absDir, newRoot)
 	})
 	p.Add("rename primitives to the 3.0 vocabulary + move to canonical dirs", func(absDir string) error {
 		return migratePrimitivesV3(filepath.Join(absDir, newRoot))
@@ -93,20 +93,20 @@ func planUp_3_0(absDir string) (*Plan, error) {
 	return p, nil
 }
 
-// relocateToHarness moves a pre-3.0 `.keystone/` install to the single
+// relocateToCharter moves a pre-3.0 `.keystone/` install to the single
 // `.harness/` root: the harness subtree becomes the root, and the
 // umbrella files (INDEX*, lockfile, state, context.json) move up into it.
 // Idempotent — a no-op once `.keystone/harness` is gone.
-func relocateToHarness(absDir, newRoot string) error {
-	legacyHarnessAbs := filepath.Join(absDir, legacyHarnessRoot)
+func relocateToCharter(absDir, newRoot string) error {
+	legacyCharterAbs := filepath.Join(absDir, legacyCharterRoot)
 	newRootAbs := filepath.Join(absDir, newRoot)
-	if !dirExists(legacyHarnessAbs) {
+	if !dirExists(legacyCharterAbs) {
 		return nil // already migrated
 	}
 	if dirExists(newRootAbs) {
-		return fmt.Errorf("both %s and %s exist — resolve by hand", legacyHarnessRoot, newRoot)
+		return fmt.Errorf("both %s and %s exist — resolve by hand", legacyCharterRoot, newRoot)
 	}
-	if err := os.Rename(legacyHarnessAbs, newRootAbs); err != nil {
+	if err := os.Rename(legacyCharterAbs, newRootAbs); err != nil {
 		return fmt.Errorf("move harness tree: %w", err)
 	}
 	// Lift the umbrella files from .keystone/ into the new root.
@@ -251,8 +251,8 @@ func rewriteForV3(oldKind string, fm primitive.Frontmatter) *kindRewrite {
 }
 
 var (
-	reToolsKey         = regexp.MustCompile(`(?m)^tools:`)
-	reTriggersKey      = regexp.MustCompile(`(?m)^triggers:`)
+	reToolsKey          = regexp.MustCompile(`(?m)^tools:`)
+	reTriggersKey       = regexp.MustCompile(`(?m)^triggers:`)
 	reHostTriggersBlock = regexp.MustCompile(`(?m)^host_triggers:\n(?:[ \t]+.*\n)*`)
 )
 

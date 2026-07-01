@@ -11,19 +11,19 @@ import (
 )
 
 // InboxItem is one learning-candidate file under
-// .keystone/harness/learning/inbox/. The body is the raw markdown
+// .charter/learning/inbox/. The body is the raw markdown
 // the agent wrote when it captured the candidate.
 type InboxItem struct {
-	Name   string `json:"name"`     // filename only
-	Path   string `json:"path"`     // repo-relative
+	Name   string `json:"name"` // filename only
+	Path   string `json:"path"` // repo-relative
 	Body   string `json:"body"`
-	Status string `json:"status"`   // pulled from frontmatter when present
+	Status string `json:"status"` // pulled from frontmatter when present
 }
 
 // listInbox walks the learning inbox and returns each candidate in
 // chronological order (newest first by mtime).
 func listInbox(projectDir string) ([]InboxItem, error) {
-	dir := filepath.Join(projectDir, config.DefaultHarnessRoot, "learning", "inbox")
+	dir := filepath.Join(projectDir, config.DefaultCharterRoot, "learning", "inbox")
 	entries, err := os.ReadDir(dir)
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -46,7 +46,7 @@ func listInbox(projectDir string) ([]InboxItem, error) {
 		}
 		out = append(out, InboxItem{
 			Name:   e.Name(),
-			Path:   filepath.ToSlash(filepath.Join(config.DefaultHarnessRoot, "learning", "inbox", e.Name())),
+			Path:   filepath.ToSlash(filepath.Join(config.DefaultCharterRoot, "learning", "inbox", e.Name())),
 			Body:   string(body),
 			Status: extractStatus(string(body)),
 		})
@@ -106,7 +106,7 @@ func (s *server) handleActionInboxReject(w http.ResponseWriter, r *http.Request)
 		htmxFragment(w, errorFragment("invalid name"))
 		return
 	}
-	path := filepath.Join(s.projectDir, config.DefaultHarnessRoot, "learning", "inbox", name)
+	path := filepath.Join(s.projectDir, config.DefaultCharterRoot, "learning", "inbox", name)
 	if err := os.Remove(path); err != nil {
 		htmxFragment(w, errorFragment(err.Error()))
 		return
@@ -133,7 +133,7 @@ func (s *server) handleActionInboxAccept(w http.ResponseWriter, r *http.Request)
 		htmxFragment(w, errorFragment("invalid name"))
 		return
 	}
-	path := filepath.Join(s.projectDir, config.DefaultHarnessRoot, "learning", "inbox", name)
+	path := filepath.Join(s.projectDir, config.DefaultCharterRoot, "learning", "inbox", name)
 	body, err := os.ReadFile(path)
 	if err != nil {
 		htmxFragment(w, errorFragment(err.Error()))

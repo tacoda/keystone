@@ -18,13 +18,13 @@ import (
 // the registered runner reads that file when present.
 var secretScanPatterns = []*regexp.Regexp{
 	regexp.MustCompile(`(?i)(aws|amazon)[_-]?(secret|access)[_-]?key[_-]?(id)?\s*[:=]\s*["']?[A-Z0-9/+=]{20,}["']?`),
-	regexp.MustCompile(`(?i)AKIA[0-9A-Z]{16}`),                                 // AWS access key id
-	regexp.MustCompile(`(?i)ghp_[A-Za-z0-9]{36}`),                              // GitHub personal access token
-	regexp.MustCompile(`(?i)gho_[A-Za-z0-9]{36}`),                              // GitHub OAuth token
-	regexp.MustCompile(`(?i)xox[abprs]-[A-Za-z0-9-]{10,}`),                     // Slack tokens
-	regexp.MustCompile(`(?i)sk[_-](live|test)[_-][A-Za-z0-9]{20,}`),            // Stripe secret key
-	regexp.MustCompile(`(?i)-----BEGIN (RSA|EC|OPENSSH|PGP|DSA) PRIVATE KEY`),  // PEM-format private keys
-	regexp.MustCompile(`(?i)bearer\s+[A-Za-z0-9._\-]{20,}`),                    // Bearer tokens
+	regexp.MustCompile(`(?i)AKIA[0-9A-Z]{16}`),                                // AWS access key id
+	regexp.MustCompile(`(?i)ghp_[A-Za-z0-9]{36}`),                             // GitHub personal access token
+	regexp.MustCompile(`(?i)gho_[A-Za-z0-9]{36}`),                             // GitHub OAuth token
+	regexp.MustCompile(`(?i)xox[abprs]-[A-Za-z0-9-]{10,}`),                    // Slack tokens
+	regexp.MustCompile(`(?i)sk[_-](live|test)[_-][A-Za-z0-9]{20,}`),           // Stripe secret key
+	regexp.MustCompile(`(?i)-----BEGIN (RSA|EC|OPENSSH|PGP|DSA) PRIVATE KEY`), // PEM-format private keys
+	regexp.MustCompile(`(?i)bearer\s+[A-Za-z0-9._\-]{20,}`),                   // Bearer tokens
 	regexp.MustCompile(`(?i)(api[_-]?key|api[_-]?secret|access[_-]?token|auth[_-]?token)\s*[:=]\s*["'][A-Za-z0-9._\-]{16,}["']`),
 }
 

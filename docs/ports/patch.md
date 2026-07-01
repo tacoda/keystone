@@ -11,7 +11,7 @@ Inside the framework repo:
 internal/framework/scaffold/templates/patches/<version>/<NNN>-<slug>.json
 ```
 
-Embedded into the binary; surfaced to consumers via `keystone patch`. No user-side patches at 1.0 (a future minor may add per-project patches under `<harness-root>/patches/`).
+Embedded into the binary; surfaced to consumers via `keystone patch`. No user-side patches at 1.0 (a future minor may add per-project patches under `<charter-root>/patches/`).
 
 ## Required shape
 
@@ -51,7 +51,7 @@ Conflicts are surfaced but never auto-resolved — a diverged file means the con
 
 ## How `keystone patch` walks them
 
-1. Reads the install's recorded `keystone_version` (from `<harness-root>/keystone.lock.json`).
+1. Reads the install's recorded `keystone_version` (from `<charter-root>/keystone.lock.json`).
 2. Lists every patch whose version directory is strictly greater than the recorded version, sorted by `(version asc, filename asc)`.
 3. For each patch: plans every operation, previews changes (or applies them with `--apply`), then bumps `keystone_version` to that patch's version after the whole patch succeeds.
 4. Conflicts halt the patch run for that version directory — the user resolves, re-runs.
@@ -63,7 +63,7 @@ Patches at 1.0 cover **config-schema bumps** and **framework-scaffolded scaffold
 - ✅ Add/rename a field in `keystone.json`.
 - ✅ Update the lockfile schema (with a corresponding `Version` bump in `internal/framework/lockfile/`).
 - ✅ Move a generated file (`INSTALL_PROFILE.md`) to a new location.
-- ✅ Update framework-scaffolded scaffold prose — the READMEs under `harness/`, sensor playbooks (`harness/sensors/*.md`), and action playbooks (`harness/actions/*.md`) that ship from `keystone init`. These describe how the harness works; they are framework prose that happens to live in the user's tree.
+- ✅ Update framework-scaffolded scaffold prose — the READMEs under `.charter/`, sensor playbooks (`.charter/sensors/*.md`), and action playbooks (`.charter/actions/*.md`) that ship from `keystone init`. These describe how the charter works; they are framework prose that happens to live in the user's tree.
 - ❌ Edit the rules content the user authored — anything they wrote into a guide body, a corpus entry, a domain invariant, or a custom adapter override. That's in their git; they own it.
 
 The bright line is **scaffold prose vs. user rules**: the framework owns the prose it scaffolded; the user owns the rules they wrote. `replace_block` failures (exact-match mismatch) surface user customizations as conflicts so they never get clobbered silently.

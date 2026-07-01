@@ -35,12 +35,12 @@ Usage:
   keystone target help
 
 Commands:
-  add    Install another agent target bundle into an existing harness.
+  add    Install another agent target bundle into an existing charter.
 `)
 }
 
 // runTargetAdd installs one or more additional agent target bundles into an
-// existing harness directory. Errors out if any requested agent is already
+// existing charter directory. Errors out if any requested agent is already
 // recorded in the lockfile — the user must explicitly remove it first
 // rather than risk silent overwrites.
 func runTargetAdd(args []string, assets fs.FS) error {
@@ -77,10 +77,10 @@ func runTargetAdd(args []string, assets fs.FS) error {
 	if err != nil {
 		return fmt.Errorf("resolve dir: %w", err)
 	}
-	harnessRoot := config.DefaultHarnessRoot
-	if _, err := os.Stat(filepath.Join(absDir, harnessRoot)); err != nil {
+	charterRoot := config.DefaultCharterRoot
+	if _, err := os.Stat(filepath.Join(absDir, charterRoot)); err != nil {
 		if os.IsNotExist(err) {
-			return fmt.Errorf("no %s/ in %s — run `keystone init` first", harnessRoot, absDir)
+			return fmt.Errorf("no %s/ in %s — run `keystone init` first", charterRoot, absDir)
 		}
 		return err
 	}
@@ -102,7 +102,7 @@ func runTargetAdd(args []string, assets fs.FS) error {
 		return fmt.Errorf("no agents supplied")
 	}
 
-	existing, err := readInstalledAgents(absDir, harnessRoot)
+	existing, err := readInstalledAgents(absDir, charterRoot)
 	if err != nil {
 		return fmt.Errorf("read installed agents: %w", err)
 	}
@@ -122,40 +122,40 @@ func runTargetAdd(args []string, assets fs.FS) error {
 		}
 	}
 
-	if err := appendInstalledAgents(absDir, harnessRoot, requested); err != nil {
+	if err := appendInstalledAgents(absDir, charterRoot, requested); err != nil {
 		return fmt.Errorf("update lockfile: %w", err)
 	}
 
 	for _, agent := range requested {
-		printAgentWarnings(agent, harnessRoot)
+		printAgentWarnings(agent, charterRoot)
 	}
-	printTargetAddNextSteps(requested, harnessRoot)
+	printTargetAddNextSteps(requested, charterRoot)
 	return nil
 }
 
 func printTargetAddUsage(w *os.File) {
-	fmt.Fprint(w, `keystone target add — install another agent's target bundle into an existing harness
+	fmt.Fprint(w, `keystone target add — install another agent's target bundle into an existing charter
 
 Usage:
   keystone target add <agent>[,<agent>...] [--dir <path>]
 
-Requires harness/ to exist in <dir> (default: .). Errors out if any of the
+Requires charter/ to exist in <dir> (default: .). Errors out if any of the
 requested agents is already recorded in the lockfile.
 
 Flags:
-  --dir <path>   Directory containing harness/ (defaults to cwd).
+  --dir <path>   Directory containing charter/ (defaults to cwd).
 `)
 }
 
-func printTargetAddNextSteps(agents []string, harnessRoot string) {
-	fmt.Fprintf(os.Stdout, "\n✓ added %s to the harness.\n\n", strings.Join(agents, ", "))
+func printTargetAddNextSteps(agents []string, charterRoot string) {
+	fmt.Fprintf(os.Stdout, "\n✓ added %s to the charter.\n\n", strings.Join(agents, ", "))
 	if len(agents) == 1 {
 		fmt.Fprintf(os.Stdout, "  See %s/adapters/%s/lifecycle.md for how to invoke actions in it.\n",
-			harnessRoot, agentTargetDir(agents[0]))
+			charterRoot, agentTargetDir(agents[0]))
 	} else {
 		fmt.Fprint(os.Stdout, "  See:\n")
 		for _, a := range agents {
-			fmt.Fprintf(os.Stdout, "    %s/adapters/%s/lifecycle.md\n", harnessRoot, agentTargetDir(a))
+			fmt.Fprintf(os.Stdout, "    %s/adapters/%s/lifecycle.md\n", charterRoot, agentTargetDir(a))
 		}
 	}
 	fmt.Fprintln(os.Stdout)

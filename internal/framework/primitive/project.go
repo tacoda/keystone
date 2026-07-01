@@ -43,7 +43,7 @@ type ProjectionResult struct {
 //
 // Other kinds (corpus, sensor, eval, source, rule) and guides without
 // declared globs have no host-native projection at this layer — the
-// agent reads them through .keystone/INDEX.json + the canonical paths
+// agent reads them through .charter/INDEX.json + the canonical paths
 // directly. Guides without globs are global-process content that is
 // either always-on (and distilled into CLAUDE.md) or on-demand via
 // INDEX.json; only globbed idiom guides need an ambient
@@ -143,7 +143,7 @@ const (
 )
 
 // keystoneProjectionPrefix is prepended to every projected host artifact so
-// the harness owns a clear namespace (`/keystone-<name>` for commands, etc.).
+// the charter owns a clear namespace (`/keystone-<name>` for commands, etc.).
 const keystoneProjectionPrefix = "keystone-"
 
 // projectedDiskName renders a primitive id as a kebab-case, keystone-prefixed
@@ -168,7 +168,7 @@ func projectedDiskName(id string) string {
 // so the resulting filenames stay short:
 //
 //	guides/idioms/go/stdlib-first              → keystone-go-stdlib-first
-//	guides/idioms/harness-content/state-files  → keystone-harness-content-state-files
+//	guides/idioms/charter-content/state-files  → keystone-charter-content-state-files
 //	guides/process/foo                         → keystone-process-foo (fallback)
 func ruleShimDiskID(guideID string) string {
 	trimmed := strings.TrimPrefix(guideID, "guides/idioms/")

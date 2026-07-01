@@ -380,7 +380,6 @@ func TestV2_2_Up_Idempotent(t *testing.T) {
 	}
 }
 
-
 func TestV2_3_Up_OnEmptyProject(t *testing.T) {
 	tmp := t.TempDir()
 	plan, err := planUp_2_3(tmp)

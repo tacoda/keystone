@@ -11,11 +11,11 @@ import (
 // reference, explanation). The scaffold generates a documentation skeleton the
 // author fills in; it is not a code generator and has no projection.
 func runNewPattern(args []string) error {
-	id, projectDir, harnessRoot, err := newOneArg(args, "pattern")
+	id, projectDir, charterRoot, err := newOneArg(args, "pattern")
 	if err != nil {
 		return err
 	}
-	path := filepath.Join(projectDir, harnessRoot, "patterns", strings.ReplaceAll(id, ":", "-")+".md")
+	path := filepath.Join(projectDir, charterRoot, "patterns", strings.ReplaceAll(id, ":", "-")+".md")
 	body := fmt.Sprintf(`---
 kind: pattern
 id: %s
@@ -52,11 +52,11 @@ A short model document following the pattern.
 // allow/ask/deny tool-permission lists that project to the host's permissions
 // block (Claude Code: .claude/settings.json).
 func runNewPosture(args []string) error {
-	id, projectDir, harnessRoot, err := newOneArg(args, "posture")
+	id, projectDir, charterRoot, err := newOneArg(args, "posture")
 	if err != nil {
 		return err
 	}
-	path := filepath.Join(projectDir, harnessRoot, "posture", strings.ReplaceAll(id, ":", "-")+".md")
+	path := filepath.Join(projectDir, charterRoot, "posture", strings.ReplaceAll(id, ":", "-")+".md")
 	body := fmt.Sprintf(`---
 kind: posture
 id: %s
@@ -83,12 +83,12 @@ the trust boundary they encode.
 // or a plain CLI. The scaffold declares the `transport:`, a `run:` handler,
 // and the `args:` input schema.
 func runNewTool(args []string) error {
-	id, projectDir, harnessRoot, err := newOneArg(args, "tool")
+	id, projectDir, charterRoot, err := newOneArg(args, "tool")
 	if err != nil {
 		return err
 	}
 	diskName := strings.ReplaceAll(id, ":", "-")
-	path := filepath.Join(projectDir, harnessRoot, "tools", diskName+".md")
+	path := filepath.Join(projectDir, charterRoot, "tools", diskName+".md")
 	body := fmt.Sprintf(`---
 kind: tool
 id: %s
@@ -111,9 +111,9 @@ reach for it instead of a built-in tool.
 }
 
 // newOneArg is the shared front-half for single-id scaffolds: parse flags,
-// require exactly one id, validate it. Returns (id, projectDir, harnessRoot).
-func newOneArg(args []string, kind string) (id, projectDir, harnessRoot string, err error) {
-	projectDir, harnessRoot, remaining, err := parseDirAndHarnessRoot(args)
+// require exactly one id, validate it. Returns (id, projectDir, charterRoot).
+func newOneArg(args []string, kind string) (id, projectDir, charterRoot string, err error) {
+	projectDir, charterRoot, remaining, err := parseDirAndCharterRoot(args)
 	if err != nil {
 		return "", "", "", err
 	}
@@ -123,5 +123,5 @@ func newOneArg(args []string, kind string) (id, projectDir, harnessRoot string, 
 	if err := validatePrimitiveID(remaining[0]); err != nil {
 		return "", "", "", fmt.Errorf("%s id: %w", kind, err)
 	}
-	return remaining[0], projectDir, harnessRoot, nil
+	return remaining[0], projectDir, charterRoot, nil
 }

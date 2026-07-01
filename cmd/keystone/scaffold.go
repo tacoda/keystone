@@ -12,8 +12,8 @@ import (
 type copyMode int
 
 const (
-	overwrite     copyMode = iota // replace existing files
-	skipIfExists                  // leave existing files alone; warn
+	overwrite    copyMode = iota // replace existing files
+	skipIfExists                 // leave existing files alone; warn
 )
 
 // copyTree copies every regular file under srcRoot in the embedded FS to

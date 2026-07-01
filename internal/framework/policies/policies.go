@@ -1,6 +1,6 @@
 // Package policies implements the 1.0 vendored-policy flow: fetch a policy
 // repo at a pinned ref into a content-addressable cache, install it under
-// <harness-root>/policies/<name>/, hash every file for drift detection, and
+// <charter-root>/policies/<name>/, hash every file for drift detection, and
 // reset the directory on any drift.
 //
 // The vendor directory is gitignored at the consumer side and treated as

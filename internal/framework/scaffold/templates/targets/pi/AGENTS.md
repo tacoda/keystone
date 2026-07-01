@@ -1,13 +1,13 @@
-## Keystone harness
+## Keystone charter
 
-This project uses a **keystone harness**. Framework primitives — guides,
+This project uses a **keystone charter**. Framework primitives — guides,
 corpus, sensors, actions, playbooks — plus host-native ones (skills,
 subagents, commands, rules) all live under
-[`.keystone/harness/`](.keystone/harness/). Discover what's available
+[`.charter/`](.charter/). Discover what's available
 through the index; open primitive bodies on demand.
 
 **Read first:**
-[`.keystone/INDEX.json`](.keystone/INDEX.json) — one entry per
+[`.charter/INDEX.json`](.charter/INDEX.json) — one entry per
 primitive, each with `kind`, `id`, `description`, and `path`. Open
 `path` only when you decide to activate the primitive.
 
@@ -39,7 +39,7 @@ action's body lives at its INDEX `path`.
 - No AI attribution in commits, PRs, or tracker comments.
 - No silent overwrites of state files.
 
-**Override** — your project files at `.keystone/harness/<kind>/<id>.md`
+**Override** — your project files at `.charter/<kind>/<id>.md`
 always win by default. Among installed policies, policies nested deeper
 in `keystone.json` refine outer policies. A policy can mark an item
 `strict` to make it absolute.

@@ -14,7 +14,7 @@ import (
 	"github.com/tacoda/keystone/internal/framework/config"
 )
 
-// fsWatcher tails .keystone/ for changes and republishes them onto
+// fsWatcher tails .charter/ for changes and republishes them onto
 // the SSE hub as htmx-flavored events. The dashboard subscribes to
 // /events with `sse-swap` directives; an SSE message with an HTML
 // fragment swaps the matching DOM node.
@@ -27,7 +27,7 @@ import (
 // it sees. At publish time those paths are classified into the
 // narrowest SSE topic(s) that apply (see topics.go) so widgets only
 // re-fetch when something they care about actually moved. The
-// coarse `harness-changed` topic is always emitted, so widgets that
+// coarse `charter-changed` topic is always emitted, so widgets that
 // subscribe to it still tick on every burst.
 type fsWatcher struct {
 	projectDir     string
@@ -59,8 +59,7 @@ func newFSWatcher(projectDir string, hub *sseHub, onChange func()) (*fsWatcher, 
 	}
 
 	watched := []string{
-		filepath.Join(projectDir, ".keystone"),
-		filepath.Join(projectDir, config.DefaultHarnessRoot),
+		filepath.Join(projectDir, config.DefaultCharterRoot),
 	}
 	for _, root := range watched {
 		if err := addRecursive(w, root); err != nil {
@@ -98,7 +97,7 @@ func (fw *fsWatcher) loop(ctx context.Context) {
 			// Ignore irrelevant churn — .git, .swp, files our own
 			// write path produces.
 			base := filepath.Base(ev.Name)
-			if strings.HasPrefix(base, ".") && base != ".keystone" {
+			if strings.HasPrefix(base, ".") && base != filepath.Base(config.DefaultCharterRoot) {
 				continue
 			}
 			if strings.HasSuffix(base, "~") || strings.HasSuffix(base, ".swp") {
@@ -143,7 +142,7 @@ func (fw *fsWatcher) record(path string) {
 
 // publish emits one SSE event per topic the debounce burst touched.
 // Topics are derived from the dirty path set via topicsForPath();
-// the coarse `harness-changed` topic always fires so generic
+// the coarse `charter-changed` topic always fires so generic
 // subscribers tick on every burst.
 //
 // We deliberately do NOT compute the diff server-side. The dashboard
@@ -170,21 +169,21 @@ func (fw *fsWatcher) publish() {
 
 	// Classify. The first burst on a fresh watcher (no recorded
 	// paths — e.g. a direct fire from tests) still emits the coarse
-	// topic so anything listening to harness-changed ticks.
+	// topic so anything listening to charter-changed ticks.
 	perPath := make([][]sseTopic, 0, len(paths))
 	for _, p := range paths {
 		perPath = append(perPath, topicsForPath(fw.projectDir, p))
 	}
 	topics := unionTopics(perPath)
 	if len(topics) == 0 {
-		topics = []sseTopic{topicHarness}
+		topics = []sseTopic{topicCharter}
 	}
 
 	now := time.Now().Format(time.RFC3339)
 	for _, t := range topics {
 		var data string
 		switch t {
-		case topicHarness:
+		case topicCharter:
 			// The shell's "live" pill — out-of-band swap so it
 			// updates anywhere the layout is mounted.
 			data = fmt.Sprintf(`<span id="last-updated" hx-swap-oob="true" class="updated">updated %s</span>`, now)

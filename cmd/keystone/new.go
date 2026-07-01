@@ -11,7 +11,7 @@ import (
 
 // runNew dispatches `keystone new <port> <name>` to the matching scaffold.
 // Generators emit skeleton markdown that already conforms to the path
-// convention (harness-root-relative inter-harness links, no ../) and the
+// convention (charter-root-relative inter-charter links, no ../) and the
 // port contract (frontmatter, required sections). The author fills in
 // the body.
 // newDispatch maps each `keystone new <verb>` to its scaffold generator.
@@ -68,28 +68,28 @@ Usage:
     keystone new policy <name>            [--dir <path>]
 
 Each generator drops a skeleton at the conventional path with the right
-frontmatter, sections, and harness-root-relative cross-references. The
-harness root is .keystone/harness/.
+frontmatter, sections, and charter-root-relative cross-references. The
+charter root is .charter/.
 
 Ids may use the colon-namespaced form (e.g. keystone:index); the disk
 filename normalizes : to -.
 
 Examples:
-  keystone new rule process/release        # .keystone/harness/rules/process/release.md
-                                           # + paired .keystone/harness/corpus/process/release.md
-  keystone new hook lint                    # .keystone/harness/hooks/lint.md
-  keystone new skill keystone:index         # .keystone/harness/skills/keystone-index/SKILL.md
-  keystone new agent security-reviewer      # .keystone/harness/agents/security-reviewer.md
-  keystone new command review               # .keystone/harness/commands/review.md
-  keystone new document adr                 # .keystone/harness/documents/adr.md
+  keystone new rule process/release        # .charter/rules/process/release.md
+                                           # + paired .charter/corpus/process/release.md
+  keystone new hook lint                    # .charter/hooks/lint.md
+  keystone new skill keystone:index         # .charter/skills/keystone-index/SKILL.md
+  keystone new agent security-reviewer      # .charter/agents/security-reviewer.md
+  keystone new command review               # .charter/commands/review.md
+  keystone new document adr                 # .charter/documents/adr.md
   keystone new policy acme-policies         # ./acme-policies/ (policy repo skeleton)
 `)
 }
 
-// parseDirAndHarnessRoot is the shared flag parser for in-harness
-// generators. Returns (projectDir, harnessRoot, remaining-args). The
-// harness root is fixed at 2.0; only --dir is honored as a flag.
-func parseDirAndHarnessRoot(args []string) (projectDir, harnessRoot string, remaining []string, err error) {
+// parseDirAndCharterRoot is the shared flag parser for in-charter
+// generators. Returns (projectDir, charterRoot, remaining-args). The
+// charter root is fixed at 2.0; only --dir is honored as a flag.
+func parseDirAndCharterRoot(args []string) (projectDir, charterRoot string, remaining []string, err error) {
 	dir := "."
 	remaining = make([]string, 0, len(args))
 	for i := 0; i < len(args); i++ {
@@ -111,7 +111,7 @@ func parseDirAndHarnessRoot(args []string) (projectDir, harnessRoot string, rema
 	if err != nil {
 		return "", "", nil, fmt.Errorf("resolve dir: %w", err)
 	}
-	return absDir, config.DefaultHarnessRoot, remaining, nil
+	return absDir, config.DefaultCharterRoot, remaining, nil
 }
 
 // writeSkeleton writes content to path, refusing to overwrite an existing

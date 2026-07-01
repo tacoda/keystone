@@ -18,13 +18,13 @@ import (
 	"github.com/tacoda/keystone/internal/framework/scaffold"
 )
 
-// runDoctor handles `keystone doctor [--dir <path>] [--harness-root <name>]
+// runDoctor handles `keystone doctor [--dir <path>] [--charter-root <name>]
 // [--paths-only] [--policies-only] [--drift-only]`.
 //
 // Runs three independent checks against an existing install:
 //
-//  1. Path conformance — scan every markdown file under <harness-root>/
-//     (excluding vendored policies) and flag any inter-harness link with
+//  1. Path conformance — scan every markdown file under <charter-root>/
+//     (excluding vendored policies) and flag any inter-charter link with
 //     '../' or './' segments. See docs/conventions.md for the rule.
 //  2. Policy drift — load keystone.json + lockfile, run loader.Verify;
 //     drifted policies get reset and the user is told to re-run
@@ -34,9 +34,10 @@ import (
 //     so the author can decide whether to refresh.
 //
 // Exit codes:
-//   0 — every check clean (or only template drift, which is informational).
-//   0 — policy drift was auto-reset; install needed to repopulate.
-//   1 — any path violation or strict-cascade violation.
+//
+//	0 — every check clean (or only template drift, which is informational).
+//	0 — policy drift was auto-reset; install needed to repopulate.
+//	1 — any path violation or strict-cascade violation.
 func runDoctor(args []string) error {
 	dir := "."
 	runAll := true
@@ -84,30 +85,30 @@ func runDoctor(args []string) error {
 	if err != nil {
 		return fmt.Errorf("resolve dir: %w", err)
 	}
-	harnessRoot := config.DefaultHarnessRoot
+	charterRoot := config.DefaultCharterRoot
 
 	hadErrors := false
 
 	if runPaths {
 		if fix {
-			fixed, err := fixPathConventions(absDir, harnessRoot)
+			fixed, err := fixPathConventions(absDir, charterRoot)
 			if err != nil {
 				return fmt.Errorf("path fix: %w", err)
 			}
-			fmt.Fprintf(os.Stdout, "✓ paths: rewrote %d link(s) to harness-root-relative form\n", fixed)
+			fmt.Fprintf(os.Stdout, "✓ paths: rewrote %d link(s) to charter-root-relative form\n", fixed)
 		}
-		violations, err := checkPathConventions(absDir, harnessRoot)
+		violations, err := checkPathConventions(absDir, charterRoot)
 		if err != nil {
 			return fmt.Errorf("path check: %w", err)
 		}
-		printPathReport(violations, harnessRoot)
+		printPathReport(violations, charterRoot)
 		if len(violations) > 0 {
 			hadErrors = true
 		}
 	}
 
 	if runPoliciesCheck {
-		errs, err := checkPolicyIntegrity(absDir, harnessRoot)
+		errs, err := checkPolicyIntegrity(absDir, charterRoot)
 		if err != nil {
 			return fmt.Errorf("policy check: %w", err)
 		}
@@ -117,16 +118,16 @@ func runDoctor(args []string) error {
 	}
 
 	if runDriftCheck {
-		drifts, err := checkTemplateDrift(absDir, harnessRoot)
+		drifts, err := checkTemplateDrift(absDir, charterRoot)
 		if err != nil {
 			return fmt.Errorf("drift check: %w", err)
 		}
-		printTemplateDrift(drifts, harnessRoot)
+		printTemplateDrift(drifts, charterRoot)
 		// Template drift is informational — never sets hadErrors.
 	}
 
 	if runBudget {
-		if err := runBudgetReport(absDir, harnessRoot); err != nil {
+		if err := runBudgetReport(absDir, charterRoot); err != nil {
 			return fmt.Errorf("budget check: %w", err)
 		}
 		// Budget over-runs are warnings, not errors — never sets hadErrors.
@@ -138,13 +139,13 @@ func runDoctor(args []string) error {
 	return nil
 }
 
-// runBudgetReport walks the harness, estimates per-file token use, and
+// runBudgetReport walks the charter, estimates per-file token use, and
 // renders the per-port breakdown vs the budgets declared in keystone.json.
 // Always informational — over-budget ports print a warning but never
 // set a non-zero exit. Projects that want stricter enforcement can wrap
 // `keystone doctor --budget` in a script that greps for the warning marker.
-func runBudgetReport(projectDir, harnessRoot string) error {
-	alloc, err := walkHarnessBudget(projectDir, harnessRoot)
+func runBudgetReport(projectDir, charterRoot string) error {
+	alloc, err := walkCharterBudget(projectDir, charterRoot)
 	if err != nil {
 		return err
 	}
@@ -152,7 +153,7 @@ func runBudgetReport(projectDir, harnessRoot string) error {
 
 	reps := alloc.Report(cfg, 5)
 	if len(reps) == 0 {
-		fmt.Fprintf(os.Stdout, "  no markdown content under %s/ — nothing to count\n", harnessRoot)
+		fmt.Fprintf(os.Stdout, "  no markdown content under %s/ — nothing to count\n", charterRoot)
 		return nil
 	}
 
@@ -187,13 +188,13 @@ func runBudgetReport(projectDir, harnessRoot string) error {
 	return nil
 }
 
-// walkHarnessBudget scans every .md file under <harnessRoot>/, classifies
+// walkCharterBudget scans every .md file under <charterRoot>/, classifies
 // it by port (skipping non-port paths like README, learning/, archive/),
 // estimates its tokens, and records the result in an Allocator.
-func walkHarnessBudget(projectDir, harnessRoot string) (*budget.Allocator, error) {
+func walkCharterBudget(projectDir, charterRoot string) (*budget.Allocator, error) {
 	alloc := budget.NewAllocator()
-	root := filepath.Join(projectDir, harnessRoot)
-	skip := filepath.Join(harnessRoot, policies.PolicyRoot)
+	root := filepath.Join(projectDir, charterRoot)
+	skip := filepath.Join(charterRoot, policies.PolicyRoot)
 
 	err := filepath.WalkDir(root, func(p string, d fs.DirEntry, err error) error {
 		if err != nil {
@@ -213,7 +214,7 @@ func walkHarnessBudget(projectDir, harnessRoot string) (*budget.Allocator, error
 		if filepath.Ext(p) != ".md" {
 			return nil
 		}
-		port := budget.PortForPath(rel, harnessRoot)
+		port := budget.PortForPath(rel, charterRoot)
 		if port == "" {
 			return nil
 		}
@@ -243,14 +244,14 @@ func anyBudgetDeclared(cfg *config.ProjectConfig) bool {
 }
 
 func printDoctorUsage(w *os.File) {
-	fmt.Fprint(w, `keystone doctor — audit an existing harness install
+	fmt.Fprint(w, `keystone doctor — audit an existing charter install
 
 Usage:
-  keystone doctor [--dir <path>] [--harness-root <name>] [--paths-only|--policies-only|--drift-only]
+  keystone doctor [--dir <path>] [--charter-root <name>] [--paths-only|--policies-only|--drift-only]
 
 Runs three independent checks by default:
 
-  paths   — every inter-harness link must be harness-root-relative;
+  paths   — every inter-charter link must be charter-root-relative;
             '../' and './' segments are forbidden (see docs/conventions.md
             for the rule). Violations exit non-zero.
   policies — walks vendored policies, detects drift, resets drifted policies
@@ -270,10 +271,10 @@ Flags:
   --fix                   Rewrite path violations in place (paths check only).
                           Each '../' or './' link is resolved against the
                           source file's directory and replaced with the
-                          harness-root-relative form.
+                          charter-root-relative form.
   --dir <path>            Project root (defaults to cwd).
-  --harness-root <name>   Override the harness folder (defaults to the
-                          value in keystone.json, then "harness").
+  --charter-root <name>   Override the charter folder (defaults to the
+                          value in keystone.json, then "charter").
 `)
 }
 
@@ -290,9 +291,9 @@ type pathViolation struct {
 // out at violation time.
 var markdownLink = regexp.MustCompile(`\[[^\]]*\]\(([^)]+)\)`)
 
-func checkPathConventions(projectDir, harnessRoot string) ([]pathViolation, error) {
-	root := filepath.Join(projectDir, harnessRoot)
-	skip := filepath.Join(harnessRoot, policies.PolicyRoot)
+func checkPathConventions(projectDir, charterRoot string) ([]pathViolation, error) {
+	root := filepath.Join(projectDir, charterRoot)
+	skip := filepath.Join(charterRoot, policies.PolicyRoot)
 	var hits []pathViolation
 
 	err := filepath.WalkDir(root, func(path string, d fs.DirEntry, err error) error {
@@ -330,17 +331,17 @@ func checkPathConventions(projectDir, harnessRoot string) ([]pathViolation, erro
 	return hits, err
 }
 
-// fixPathConventions walks every markdown file under <harness-root>/
+// fixPathConventions walks every markdown file under <charter-root>/
 // (excluding vendored policies) and rewrites markdown links with '../'
-// or './' segments to their harness-root-relative form. Returns the
+// or './' segments to their charter-root-relative form. Returns the
 // total count of rewritten links.
 //
-// Resolution: for a link `target` in a file at `<harnessRoot>/<rel>`,
-// the harness-root-relative form is path.Join(dir(rel), target). Go's
+// Resolution: for a link `target` in a file at `<charterRoot>/<rel>`,
+// the charter-root-relative form is path.Join(dir(rel), target). Go's
 // path.Join normalizes the '..' and '.' segments correctly.
-func fixPathConventions(projectDir, harnessRoot string) (int, error) {
-	root := filepath.Join(projectDir, harnessRoot)
-	skip := filepath.Join(harnessRoot, policies.PolicyRoot)
+func fixPathConventions(projectDir, charterRoot string) (int, error) {
+	root := filepath.Join(projectDir, charterRoot)
+	skip := filepath.Join(charterRoot, policies.PolicyRoot)
 	count := 0
 
 	err := filepath.WalkDir(root, func(p string, d fs.DirEntry, err error) error {
@@ -365,9 +366,9 @@ func fixPathConventions(projectDir, harnessRoot string) (int, error) {
 		if err != nil {
 			return err
 		}
-		// Path of this file's directory relative to harness root.
-		insideHarness := strings.TrimPrefix(rel, harnessRoot+"/")
-		fileDir := path.Dir(insideHarness)
+		// Path of this file's directory relative to charter root.
+		insideCharter := strings.TrimPrefix(rel, charterRoot+"/")
+		fileDir := path.Dir(insideCharter)
 		if fileDir == "." {
 			fileDir = ""
 		}
@@ -413,7 +414,7 @@ func fixPathConventions(projectDir, harnessRoot string) (int, error) {
 	return count, nil
 }
 
-// hasForbiddenSegment returns true for inter-harness link targets that
+// hasForbiddenSegment returns true for inter-charter link targets that
 // contain '../' or './' segments. URL-style targets are exempt.
 func hasForbiddenSegment(target string) bool {
 	if target == "" {
@@ -438,9 +439,9 @@ func hasForbiddenSegment(target string) bool {
 	return false
 }
 
-func printPathReport(hits []pathViolation, harnessRoot string) {
+func printPathReport(hits []pathViolation, charterRoot string) {
 	if len(hits) == 0 {
-		fmt.Fprintf(os.Stdout, "✓ paths: every inter-harness link is harness-root-relative (no ../ or ./ segments)\n")
+		fmt.Fprintf(os.Stdout, "✓ paths: every inter-charter link is charter-root-relative (no ../ or ./ segments)\n")
 		return
 	}
 	sort.Slice(hits, func(i, j int) bool {
@@ -449,18 +450,18 @@ func printPathReport(hits []pathViolation, harnessRoot string) {
 		}
 		return hits[i].File < hits[j].File
 	})
-	fmt.Fprintf(os.Stdout, "✗ paths: %d inter-harness link(s) use forbidden ../ or ./ segments\n", len(hits))
+	fmt.Fprintf(os.Stdout, "✗ paths: %d inter-charter link(s) use forbidden ../ or ./ segments\n", len(hits))
 	for _, h := range hits {
 		fmt.Fprintf(os.Stdout, "    %s:%d  %s\n", h.File, h.Line, h.Link)
 	}
-	fmt.Fprintf(os.Stdout, "  Convention: inter-harness links are written relative to the harness root\n")
+	fmt.Fprintf(os.Stdout, "  Convention: inter-charter links are written relative to the charter root\n")
 	fmt.Fprintf(os.Stdout, "  (e.g. `corpus/process/spec.md`, not `../../corpus/process/spec.md`).\n")
 	fmt.Fprintf(os.Stdout, "  See docs/conventions.md for the rule.\n")
 }
 
 // --- Policy integrity check ---------------------------------------------
 
-func checkPolicyIntegrity(projectDir, harnessRoot string) (int, error) {
+func checkPolicyIntegrity(projectDir, charterRoot string) (int, error) {
 	cfg, err := config.ReadProjectConfig(projectDir)
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -473,7 +474,7 @@ func checkPolicyIntegrity(projectDir, harnessRoot string) (int, error) {
 		fmt.Fprintf(os.Stdout, "✓ policies: keystone.json declares no policies — nothing to verify\n")
 		return 0, nil
 	}
-	lf, err := lockfile.Read(projectDir, harnessRoot)
+	lf, err := lockfile.Read(projectDir, charterRoot)
 	if err != nil {
 		return 0, err
 	}
@@ -493,7 +494,7 @@ func checkPolicyIntegrity(projectDir, harnessRoot string) (int, error) {
 			for _, f := range d.Files {
 				fmt.Fprintf(os.Stdout, "        - %s (%s)\n", f.Path, f.Kind)
 			}
-			if err := policies.Reset(d.Policy, projectDir, harnessRoot); err != nil {
+			if err := policies.Reset(d.Policy, projectDir, charterRoot); err != nil {
 				return 0, err
 			}
 		}
@@ -515,21 +516,21 @@ func checkPolicyIntegrity(projectDir, harnessRoot string) (int, error) {
 // --- Template drift check -----------------------------------------------
 
 type templateDiff struct {
-	Rel string // path under harness root
+	Rel string // path under charter root
 }
 
-func checkTemplateDrift(projectDir, harnessRoot string) ([]templateDiff, error) {
-	root := filepath.Join(projectDir, harnessRoot)
+func checkTemplateDrift(projectDir, charterRoot string) ([]templateDiff, error) {
+	root := filepath.Join(projectDir, charterRoot)
 	var diffs []templateDiff
 
-	err := fs.WalkDir(scaffold.Templates, "harness", func(path string, d fs.DirEntry, err error) error {
+	err := fs.WalkDir(scaffold.Templates, "charter", func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
 		if d.IsDir() {
 			return nil
 		}
-		rel := strings.TrimPrefix(path, "harness/")
+		rel := strings.TrimPrefix(path, "charter/")
 		userPath := filepath.Join(root, rel)
 		userBytes, err := os.ReadFile(userPath)
 		if err != nil {
@@ -555,14 +556,14 @@ func checkTemplateDrift(projectDir, harnessRoot string) ([]templateDiff, error) 
 	return diffs, nil
 }
 
-func printTemplateDrift(diffs []templateDiff, harnessRoot string) {
+func printTemplateDrift(diffs []templateDiff, charterRoot string) {
 	if len(diffs) == 0 {
 		fmt.Fprintf(os.Stdout, "✓ drift: every default file matches the binary's current templates\n")
 		return
 	}
 	fmt.Fprintf(os.Stdout, "ℹ drift: %d scaffolded file(s) diverge from the current templates\n", len(diffs))
 	for _, d := range diffs {
-		fmt.Fprintf(os.Stdout, "    %s/%s\n", harnessRoot, d.Rel)
+		fmt.Fprintf(os.Stdout, "    %s/%s\n", charterRoot, d.Rel)
 	}
 	fmt.Fprintln(os.Stdout, "  These are either intentional project customizations or files the templates")
 	fmt.Fprintln(os.Stdout, "  changed upstream. Compare with `keystone init --reset --i-understand-this-is-destructive`")

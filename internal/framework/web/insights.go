@@ -13,7 +13,7 @@ import (
 )
 
 // Insight is one suggested action the dashboard surfaces to improve
-// the harness. Severities are "high" (act soon), "medium" (worth
+// the charter. Severities are "high" (act soon), "medium" (worth
 // addressing next pass), "low" (informational).
 type Insight struct {
 	ID       string `json:"id"`
@@ -26,8 +26,8 @@ type Insight struct {
 	ActionLink string `json:"action_link,omitempty"`
 }
 
-// collectInsights derives suggestions from the current harness state.
-// Pure read; no I/O outside the harness tree. Stable order: severity
+// collectInsights derives suggestions from the current charter state.
+// Pure read; no I/O outside the charter tree. Stable order: severity
 // then id.
 func (s *server) collectInsights(primitives []primitive.Primitive) []Insight {
 	var out []Insight
@@ -67,12 +67,12 @@ func (s *server) collectInsights(primitives []primitive.Primitive) []Insight {
 	}
 
 	// 3. Stale INDEX → medium.
-	indexPath := filepath.Join(s.projectDir, config.KeystoneDir(config.DefaultHarnessRoot), config.IndexName)
+	indexPath := filepath.Join(s.projectDir, config.KeystoneDir(config.DefaultCharterRoot), config.IndexName)
 	indexInfo, indexErr := os.Stat(indexPath)
 	if indexErr != nil {
 		out = append(out, Insight{
 			ID: "index.missing", Severity: "high",
-			Title:      "no .keystone/INDEX.json",
+			Title:      "no .charter/INDEX.json",
 			Detail:     "Agents read the index first. Without it, every primitive must be opened blindly — defeats the staged resolution flow.",
 			Action:     "run `keystone index`",
 			ActionLink: "",
@@ -90,9 +90,9 @@ func (s *server) collectInsights(primitives []primitive.Primitive) []Insight {
 		if stale {
 			out = append(out, Insight{
 				ID: "index.stale", Severity: "medium",
-				Title:      "INDEX.json is older than at least one primitive",
-				Detail:     "Re-run `keystone index` so the agent's descriptor surface matches the harness on disk.",
-				Action:     "run `keystone index`",
+				Title:  "INDEX.json is older than at least one primitive",
+				Detail: "Re-run `keystone index` so the agent's descriptor surface matches the charter on disk.",
+				Action: "run `keystone index`",
 			})
 		}
 	}
@@ -115,8 +115,8 @@ func (s *server) collectInsights(primitives []primitive.Primitive) []Insight {
 			ID: "skills.zero", Severity: "low",
 			Title:      "no project-authored skills",
 			Detail:     "Skills are host-native agent abstractions Claude Code auto-loads by trigger phrase. Adding even one (`keystone new skill`) makes recurring tasks one-phrase.",
-			Action:     "/harness/primitives/new",
-			ActionLink: "/harness/primitives/new",
+			Action:     "/charter/primitives/new",
+			ActionLink: "/charter/primitives/new",
 		})
 	}
 
@@ -131,16 +131,16 @@ func (s *server) collectInsights(primitives []primitive.Primitive) []Insight {
 				ID: "severity.over-iron", Severity: "low",
 				Title:      "more than 60% of guides are severity: must",
 				Detail:     "When everything is iron-law, nothing is. Demote routine rules to `should` so the agent can tell signal from boilerplate.",
-				Action:     "/harness/primitives?kind=guide",
-				ActionLink: "/harness/primitives?kind=guide",
+				Action:     "/charter/primitives?kind=guide",
+				ActionLink: "/charter/primitives?kind=guide",
 			})
 		case ratio < 0.05 && totalGuides > 10:
 			out = append(out, Insight{
 				ID: "severity.under-iron", Severity: "low",
 				Title:      "<5% of guides are severity: must",
 				Detail:     "If no rules are iron-law, the agent has no clear non-negotiables. Promote a handful (security, data-loss prevention, etc.).",
-				Action:     "/harness/primitives?kind=guide",
-				ActionLink: "/harness/primitives?kind=guide",
+				Action:     "/charter/primitives?kind=guide",
+				ActionLink: "/charter/primitives?kind=guide",
 			})
 		}
 	}
@@ -165,7 +165,7 @@ func (s *server) collectInsights(primitives []primitive.Primitive) []Insight {
 }
 
 func inboxStats(projectDir string) (oldest time.Duration, count int) {
-	dir := filepath.Join(projectDir, config.DefaultHarnessRoot, "learning", "inbox")
+	dir := filepath.Join(projectDir, config.DefaultCharterRoot, "learning", "inbox")
 	entries, err := os.ReadDir(dir)
 	if err != nil {
 		return 0, 0

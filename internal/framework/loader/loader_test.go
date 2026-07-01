@@ -19,20 +19,20 @@ func makeFS(files map[string]string) fs.FS {
 
 func TestDefaultLoader_Resolve(t *testing.T) {
 	project := makeFS(map[string]string{
-		"guides/process/spec.md":     "project version of spec",
-		"guides/process/orient.md":   "project version of orient",
-		"sensors/build.md":           "project sensor",
-		"corpus/principles/tdd.md":   "project tdd corpus",
+		"guides/process/spec.md":   "project version of spec",
+		"guides/process/orient.md": "project version of orient",
+		"sensors/build.md":         "project sensor",
+		"corpus/principles/tdd.md": "project tdd corpus",
 	})
 	universal := makeFS(map[string]string{
-		"guides/process/spec.md":      "universal version of spec",
-		"guides/principles/bdd.md":    "universal bdd guide",
-		"corpus/principles/tdd.md":    "universal tdd corpus",
-		"corpus/principles/bdd.md":    "universal bdd corpus",
+		"guides/process/spec.md":   "universal version of spec",
+		"guides/principles/bdd.md": "universal bdd guide",
+		"corpus/principles/tdd.md": "universal tdd corpus",
+		"corpus/principles/bdd.md": "universal bdd corpus",
 	})
 	team := makeFS(map[string]string{
-		"sensors/rubocop.md":         "team rubocop sensor",
-		"guides/principles/bdd.md":   "team bdd guide override attempt",
+		"sensors/rubocop.md":       "team rubocop sensor",
+		"guides/principles/bdd.md": "team bdd guide override attempt",
 	})
 
 	cascade := Cascade{
@@ -129,7 +129,7 @@ func TestDefaultLoader_NilRoot(t *testing.T) {
 		"guides/process/spec.md": "policy spec",
 	})
 	cascade := Cascade{
-		Project: Policy{Name: "project", Root: nil},
+		Project:  Policy{Name: "project", Root: nil},
 		Policies: []Policy{{Name: "p1", Root: policy}},
 	}
 	l := New(cascade)

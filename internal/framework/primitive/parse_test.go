@@ -13,8 +13,8 @@ func TestSplitFrontmatter(t *testing.T) {
 		wantOK   bool
 	}{
 		{
-			name: "valid",
-			in: "---\nkind: rule\n---\nbody\n",
+			name:     "valid",
+			in:       "---\nkind: rule\n---\nbody\n",
 			wantFM:   "kind: rule\n",
 			wantBody: "body\n",
 			wantOK:   true,

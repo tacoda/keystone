@@ -21,8 +21,8 @@ import (
 // to Cobra-native definitions.
 var rootCmd = &cobra.Command{
 	Use:               "keystone",
-	Short:             "Install and operate the project harness",
-	Long:              `keystone — install, audit, and serve the project harness from the CLI or MCP server.`,
+	Short:             "Install and operate the project charter",
+	Long:              `keystone — install, audit, and serve the project charter from the CLI or MCP server.`,
 	SilenceUsage:      true,
 	SilenceErrors:     true,
 	PersistentPreRunE: warnIfPendingMigrations,
@@ -125,8 +125,8 @@ func runAndForwardAssets(fn func(args []string, assets fs.FS) error) func(*cobra
 func initCmd() *cobra.Command {
 	c := &cobra.Command{
 		Use:                "init [dir]",
-		Short:              "Scaffold the harness into a directory",
-		Long:               "Scaffold the harness folder and the agent menu file(s) into <dir> (default: current directory).",
+		Short:              "Scaffold the charter into a directory",
+		Long:               "Scaffold the charter folder and the agent menu file(s) into <dir> (default: current directory).",
 		DisableFlagParsing: true,
 		RunE:               runAndForwardAssets(runInit),
 	}
@@ -186,7 +186,7 @@ func newCmd() *cobra.Command {
 func targetCmd() *cobra.Command {
 	c := &cobra.Command{
 		Use:                "target",
-		Short:              "Manage agent targets installed under .keystone/harness/adapters/",
+		Short:              "Manage agent targets installed under .charter/adapters/",
 		DisableFlagParsing: true,
 		RunE:               runAndForwardAssets(runTarget),
 	}
@@ -216,7 +216,7 @@ func patchCmd() *cobra.Command {
 func indexCmd() *cobra.Command {
 	c := &cobra.Command{
 		Use:                "index",
-		Short:              "Emit .keystone/INDEX.json — primitive descriptors only",
+		Short:              "Emit .charter/INDEX.json — primitive descriptors only",
 		DisableFlagParsing: true,
 		RunE:               runAndForward(runIndex),
 	}

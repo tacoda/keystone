@@ -8,10 +8,10 @@ import (
 	"github.com/tacoda/keystone/internal/framework/primitive"
 )
 
-// seedHook writes a hook primitive under <root>/.harness/hooks/<id>.md.
+// seedHook writes a hook primitive under <root>/.charter/hooks/<id>.md.
 func seedHook(t *testing.T, root, id, body string) {
 	t.Helper()
-	path := filepath.Join(root, ".harness", "hooks", id+".md")
+	path := filepath.Join(root, ".charter", "hooks", id+".md")
 	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
 		t.Fatal(err)
 	}

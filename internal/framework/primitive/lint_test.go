@@ -17,9 +17,9 @@ func find(t *testing.T, fs []Finding, severity FindingSeverity, msgContains stri
 
 func TestLint_RequiredFields(t *testing.T) {
 	ps := []Primitive{
-		{Frontmatter: Frontmatter{Kind: "guide", ID: "p/x"}}, // missing description
+		{Frontmatter: Frontmatter{Kind: "guide", ID: "p/x"}},        // missing description
 		{Frontmatter: Frontmatter{Kind: "skill", Description: "x"}}, // missing id
-		{Frontmatter: Frontmatter{ID: "x", Description: "x"}}, // missing kind
+		{Frontmatter: Frontmatter{ID: "x", Description: "x"}},       // missing kind
 	}
 	fs := Lint(ps)
 	if !find(t, fs, FindingError, "missing required field `description`") {
@@ -250,7 +250,7 @@ func TestLint_TagsKebabCase(t *testing.T) {
 				Kind: "guide", ID: "g1", Description: "x", Globs: []string{"x"},
 				Tags: []string{"valid-tag", "Bad_Tag", "ALSO-BAD"},
 			},
-			Path: ".harness/guides/g1.md",
+			Path: ".charter/guides/g1.md",
 		},
 	}
 	findings := Lint(prims)

@@ -4,7 +4,7 @@
 // match the file in focus, the same triggering shape as Claude Code's
 // `.claude/rules/`.
 //
-// Source of truth lives in `.keystone/harness/guides/idioms/*.md`
+// Source of truth lives in `.charter/guides/idioms/*.md`
 // (kind=guide with non-empty globs). The shim body is the same
 // extracted IRON LAW / GOLDEN RULE / RULES / Anti-patterns block the
 // Claude Code shim carries; only the frontmatter shape differs to

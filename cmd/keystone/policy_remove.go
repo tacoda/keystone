@@ -11,7 +11,7 @@ import (
 	"github.com/tacoda/keystone/internal/framework/policies"
 )
 
-// runPolicyRemove handles `keystone policy remove <name> [--dir <path>] [--harness-root <name>]`.
+// runPolicyRemove handles `keystone policy remove <name> [--dir <path>] [--charter-root <name>]`.
 //
 // Removes the named policy from keystone.json, deletes its vendor
 // directory, and drops its entry from the lockfile. Re-adding it later
@@ -50,7 +50,7 @@ func runPolicyRemove(args []string) error {
 	if err != nil {
 		return fmt.Errorf("resolve dir: %w", err)
 	}
-	harnessRoot := config.DefaultHarnessRoot
+	charterRoot := config.DefaultCharterRoot
 
 	cfg, err := config.ReadProjectConfig(absDir)
 	if err != nil {
@@ -70,16 +70,16 @@ func runPolicyRemove(args []string) error {
 		return err
 	}
 
-	if err := policies.Reset(name, absDir, harnessRoot); err != nil {
+	if err := policies.Reset(name, absDir, charterRoot); err != nil {
 		return err
 	}
 
-	lf, err := lockfile.Read(absDir, harnessRoot)
+	lf, err := lockfile.Read(absDir, charterRoot)
 	if err != nil {
 		return err
 	}
 	delete(lf.Policies, name)
-	if err := lockfile.Write(absDir, harnessRoot, lf); err != nil {
+	if err := lockfile.Write(absDir, charterRoot, lf); err != nil {
 		return err
 	}
 
@@ -91,13 +91,13 @@ func printPolicyRemoveUsage(w *os.File) {
 	fmt.Fprint(w, `keystone policy remove — uninstall a policy
 
 Usage:
-  keystone policy remove <name> [--dir <path>] [--harness-root <name>]
+  keystone policy remove <name> [--dir <path>] [--charter-root <name>]
 
 Removes the named policy from keystone.json, deletes its vendor directory,
 and drops its lockfile entry.
 
 Flags:
   --dir <path>           Project root (defaults to cwd).
-  --harness-root <name>  Harness directory name.
+  --charter-root <name>  Charter directory name.
 `)
 }

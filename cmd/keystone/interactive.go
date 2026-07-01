@@ -24,7 +24,7 @@ func isTerminal(f *os.File) bool {
 // Returns the chosen target name, or "" if the user picked default
 // — caller falls back to `_generic`.
 //
-// Deliberately no huh dependency. The harness should bootstrap with
+// Deliberately no huh dependency. The charter should bootstrap with
 // the smallest possible interaction surface; later questions live
 // in the bootstrap action, where the agent can ask them
 // conversationally against the actual codebase.

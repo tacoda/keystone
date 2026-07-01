@@ -10,7 +10,7 @@ import (
 	"github.com/tacoda/keystone/internal/framework/eval"
 )
 
-// handleEvals lists every eval discovered in the harness + offers a
+// handleEvals lists every eval discovered in the charter + offers a
 // "run all" button.
 func (s *server) handleEvals(w http.ResponseWriter, r *http.Request) {
 	specs, err := eval.LoadAll(s.projectDir)

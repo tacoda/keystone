@@ -66,9 +66,9 @@ func (s *server) kpiInbox() kpi {
 	}
 }
 
-// kpiLint returns the count of hard lint errors across the harness.
+// kpiLint returns the count of hard lint errors across the charter.
 // Bad tone if non-zero; ok otherwise. Lint is the cheapest signal
-// the agent has that the harness is in a broken state.
+// the agent has that the charter is in a broken state.
 func (s *server) kpiLint() kpi {
 	primitives, err := s.loadPrimitives()
 	if err != nil {
@@ -98,7 +98,7 @@ func (s *server) kpiLint() kpi {
 // surface than what's actually shipped — the most common cause of
 // "I edited the rule and the agent didn't notice."
 func (s *server) kpiIndex() kpi {
-	indexPath := filepath.Join(s.projectDir, config.KeystoneDir(config.DefaultHarnessRoot), config.IndexName)
+	indexPath := filepath.Join(s.projectDir, config.KeystoneDir(config.DefaultCharterRoot), config.IndexName)
 	if _, err := os.Stat(indexPath); err != nil {
 		return kpi{Label: "index", Value: "missing", Tone: "bad", Hint: "run `keystone index`", Topic: topicPrimitives}
 	}
@@ -141,4 +141,3 @@ func (s *server) handleKPIWidget(w http.ResponseWriter, r *http.Request) {
 		"Name": name,
 	})
 }
-

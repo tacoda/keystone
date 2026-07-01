@@ -38,14 +38,14 @@ func TestAuditLog_AppendWritesJSONL(t *testing.T) {
 	}
 	a.Append(auditEntry{
 		Timestamp: "2026-06-18T12:00:00Z",
-		Topics:    []string{"harness-changed", "primitives-changed"},
-		Paths:     []string{".keystone/harness/guides/process/spec.md"},
-		Summary:   ".keystone/harness/guides/process/spec.md",
+		Topics:    []string{"charter-changed", "primitives-changed"},
+		Paths:     []string{".charter/guides/process/spec.md"},
+		Summary:   ".charter/guides/process/spec.md",
 	})
 	a.Append(auditEntry{
 		Timestamp: "2026-06-18T12:00:01Z",
-		Topics:    []string{"harness-changed"},
-		Summary:   "watcher fired (topics: harness-changed)",
+		Topics:    []string{"charter-changed"},
+		Summary:   "watcher fired (topics: charter-changed)",
 	})
 	if err := a.Close(); err != nil {
 		t.Fatalf("close: %v", err)
@@ -118,9 +118,9 @@ func TestSummarizeAudit(t *testing.T) {
 		topics []string
 		want   string
 	}{
-		{"empty paths", nil, []string{"harness-changed"}, "watcher fired (topics: harness-changed)"},
-		{"single path", []string{".keystone/harness/guides/x.md"}, []string{"harness-changed"}, ".keystone/harness/guides/x.md"},
-		{"multi path", []string{".keystone/a", ".keystone/b", ".keystone/c"}, []string{"harness-changed"}, ".keystone/a (+2 more)"},
+		{"empty paths", nil, []string{"charter-changed"}, "watcher fired (topics: charter-changed)"},
+		{"single path", []string{".charter/guides/x.md"}, []string{"charter-changed"}, ".charter/guides/x.md"},
+		{"multi path", []string{".charter/a", ".charter/b", ".charter/c"}, []string{"charter-changed"}, ".charter/a (+2 more)"},
 	}
 	for _, c := range cases {
 		got := summarizeAudit(c.paths, c.topics)

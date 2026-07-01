@@ -11,16 +11,17 @@ import (
 	"github.com/tacoda/keystone/internal/framework/eval"
 )
 
-// registerEvalTools wires the MCP surface for harness evals.
+// registerEvalTools wires the MCP surface for charter evals.
 //
 // Tools:
-//   keystone_eval_list             List every eval id in the harness.
-//   keystone_eval_run [filter]     Run all (or filtered) evals; return a JSON report.
-//   keystone_eval_report           Run + render markdown (human consumption).
+//
+//	keystone_eval_list             List every eval id in the charter.
+//	keystone_eval_run [filter]     Run all (or filtered) evals; return a JSON report.
+//	keystone_eval_report           Run + render markdown (human consumption).
 func registerEvalTools(s *server.MCPServer, projectDir string) {
 	s.AddTool(
 		mcp.NewTool("keystone_eval_list",
-			mcp.WithDescription("List every eval id declared in .keystone/harness/evals/. Returns descriptors (id, level, description) without running anything."),
+			mcp.WithDescription("List every eval id declared in .charter/evals/. Returns descriptors (id, level, description) without running anything."),
 		),
 		func(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 			specs, err := eval.LoadAll(projectDir)
@@ -83,7 +84,7 @@ func registerEvalTools(s *server.MCPServer, projectDir string) {
 
 	s.AddTool(
 		mcp.NewTool("keystone_eval_baseline",
-			mcp.WithDescription("Run evals against the current harness AND a git ref's worktree; return regressions/fixes/new/removed. Use this in PR reviews to confirm a harness change improved (or at minimum didn't regress) the measured behavior."),
+			mcp.WithDescription("Run evals against the current charter AND a git ref's worktree; return regressions/fixes/new/removed. Use this in PR reviews to confirm a charter change improved (or at minimum didn't regress) the measured behavior."),
 			mcp.WithString("ref",
 				mcp.Required(),
 				mcp.Description("Git ref to compare against (e.g. `main`, a tag, a commit SHA)."),

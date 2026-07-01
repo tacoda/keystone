@@ -59,7 +59,7 @@ func init() {
 func planUp_2_3(absDir string) (*Plan, error) {
 	p := &Plan{}
 
-	harnessRoot := legacyHarnessRoot
+	harnessRoot := legacyCharterRoot
 	harnessAbs := filepath.Join(absDir, harnessRoot)
 	if !dirExists(harnessAbs) {
 		// Fresh install — `keystone init` scaffolds from 2.3 templates.
@@ -119,7 +119,7 @@ func planDown_2_3(absDir string) (*Plan, error) {
 	// severity-wrap behavior. 2.2's projection rewrites every
 	// keystone-managed entry with unwrapped commands.
 	p.Add("re-walk WITHOUT compose, rebuild INDEX (drops merged tags / includes effects)", func(absDir string) error {
-		primitives, _, err := primitive.Walk(absDir, legacyHarnessRoot)
+		primitives, _, err := primitive.Walk(absDir, legacyCharterRoot)
 		if err != nil {
 			return err
 		}
@@ -132,7 +132,7 @@ func planDown_2_3(absDir string) (*Plan, error) {
 	})
 
 	p.Add("re-project hooks without severity wrappers (uncomposed primitives)", func(absDir string) error {
-		primitives, _, err := primitive.Walk(absDir, legacyHarnessRoot)
+		primitives, _, err := primitive.Walk(absDir, legacyCharterRoot)
 		if err != nil {
 			return err
 		}

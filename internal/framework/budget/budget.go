@@ -21,7 +21,7 @@ import (
 // Estimate returns the approximate token count for content. The
 // approximation is "count whitespace-separated runs of non-whitespace
 // characters" — close enough for relative comparisons between files
-// and ports, low enough overhead to scan an entire harness in
+// and ports, low enough overhead to scan an entire charter in
 // milliseconds.
 //
 // Empirically this under-counts compared to tiktoken's BPE by ~25–35%
@@ -40,10 +40,10 @@ type FileEntry struct {
 // PortReport is the per-port breakdown built by Report.
 type PortReport struct {
 	Port      string
-	Tokens    int          // total across all files for this port
-	MaxTokens int          // from keystone.json's budgets block; 0 means no cap
-	OverBy    int          // Tokens - MaxTokens; 0 or negative means within budget
-	TopFiles  []FileEntry  // top contributors, sorted desc by Tokens
+	Tokens    int         // total across all files for this port
+	MaxTokens int         // from keystone.json's budgets block; 0 means no cap
+	OverBy    int         // Tokens - MaxTokens; 0 or negative means within budget
+	TopFiles  []FileEntry // top contributors, sorted desc by Tokens
 }
 
 // IsOverBudget reports whether this port exceeded its declared cap.
@@ -53,7 +53,7 @@ func (p PortReport) IsOverBudget() bool {
 }
 
 // Allocator aggregates per-port, per-file consumption as the doctor walks
-// the harness tree. Add is safe to call from one goroutine; the Allocator
+// the charter tree. Add is safe to call from one goroutine; the Allocator
 // is not thread-safe.
 type Allocator struct {
 	files map[string][]FileEntry // port → entries
@@ -124,21 +124,21 @@ func (a *Allocator) Report(cfg *config.ProjectConfig, topN int) []PortReport {
 	return out
 }
 
-// PortForPath returns the port name a relative harness path belongs to,
+// PortForPath returns the port name a relative charter path belongs to,
 // or "" when the path does not map to any port (e.g. README.md at the
-// harness root, learning/ state, archive/ state). The caller can use ""
+// charter root, learning/ state, archive/ state). The caller can use ""
 // as a signal to skip the file.
 //
-// Examples (with harnessRoot="harness"):
+// Examples (with charterRoot="charter"):
 //
-//	"harness/guides/process/spec.md" → "guides"
-//	"harness/corpus/principles/tdd.md" → "corpus"
-//	"harness/sensors/build.md" → "sensors"
-//	"harness/adapters/claude-code/lifecycle.md" → "adapters"
-//	"harness/learning/inbox/X.md" → ""
-//	"harness/README.md" → ""
-func PortForPath(relPath, harnessRoot string) string {
-	prefix := harnessRoot + "/"
+//	"charter/guides/process/spec.md" → "guides"
+//	"charter/corpus/principles/tdd.md" → "corpus"
+//	"charter/sensors/build.md" → "sensors"
+//	"charter/adapters/claude-code/lifecycle.md" → "adapters"
+//	"charter/learning/inbox/X.md" → ""
+//	"charter/README.md" → ""
+func PortForPath(relPath, charterRoot string) string {
+	prefix := charterRoot + "/"
 	if !strings.HasPrefix(relPath, prefix) {
 		return ""
 	}

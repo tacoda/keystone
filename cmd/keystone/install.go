@@ -11,11 +11,11 @@ import (
 	"github.com/tacoda/keystone/internal/framework/policies"
 )
 
-// runInstall handles `keystone install [--dir <path>] [--harness-root <name>]`.
+// runInstall handles `keystone install [--dir <path>] [--charter-root <name>]`.
 //
 // Reads keystone.json from --dir (or cwd), then for each policy in the
 // declared tree: fetch the source at its pinned version into the
-// content-addressable cache, install the content under <harness-root>/policies/<name>/,
+// content-addressable cache, install the content under <charter-root>/policies/<name>/,
 // record per-file hashes in the lockfile. Re-installing existing policies
 // rewrites the vendor directory from cache; drift detected post-install is
 // reset to the pinned state.
@@ -47,7 +47,7 @@ func runInstall(args []string) error {
 	if err != nil {
 		return fmt.Errorf("resolve dir: %w", err)
 	}
-	harnessRoot := config.DefaultHarnessRoot
+	charterRoot := config.DefaultCharterRoot
 
 	cfg, err := config.ReadProjectConfig(absDir)
 	if err != nil {
@@ -62,29 +62,29 @@ func runInstall(args []string) error {
 		return nil
 	}
 
-	lf, err := lockfile.Read(absDir, harnessRoot)
+	lf, err := lockfile.Read(absDir, charterRoot)
 	if err != nil {
 		return err
 	}
 
 	flat := flattenPolicies(cfg.Policies)
 	for _, node := range flat {
-		if err := installOnePolicy(absDir, harnessRoot, node, lf); err != nil {
+		if err := installOnePolicy(absDir, charterRoot, node, lf); err != nil {
 			return fmt.Errorf("policy %q: %w", node.Name, err)
 		}
 	}
 
-	if err := lockfile.Write(absDir, harnessRoot, lf); err != nil {
+	if err := lockfile.Write(absDir, charterRoot, lf); err != nil {
 		return err
 	}
-	fmt.Fprintf(os.Stdout, "  wrote: %s\n", filepath.Join(absDir, lockfile.RelPath(harnessRoot)))
+	fmt.Fprintf(os.Stdout, "  wrote: %s\n", filepath.Join(absDir, lockfile.RelPath(charterRoot)))
 	fmt.Fprintf(os.Stdout, "✓ installed %d policy(s).\n", len(flat))
 	return nil
 }
 
 // installOnePolicy runs the fetch → install → record-in-lockfile pipeline
 // for a single policy node.
-func installOnePolicy(projectDir, harnessRoot string, node config.PolicyNode, lf *lockfile.Lockfile) error {
+func installOnePolicy(projectDir, charterRoot string, node config.PolicyNode, lf *lockfile.Lockfile) error {
 	gitURL := config.ExpandSource(node.Source)
 	fmt.Fprintf(os.Stdout, "▸ %s @ %s\n", node.Source, node.Version)
 
@@ -93,7 +93,7 @@ func installOnePolicy(projectDir, harnessRoot string, node config.PolicyNode, lf
 		return fmt.Errorf("fetch: %w", err)
 	}
 
-	installed, err := policies.Install(cached, node.Name, projectDir, harnessRoot)
+	installed, err := policies.Install(cached, node.Name, projectDir, charterRoot)
 	if err != nil {
 		return fmt.Errorf("install: %w", err)
 	}
@@ -108,7 +108,7 @@ func installOnePolicy(projectDir, harnessRoot string, node config.PolicyNode, lf
 
 	fmt.Fprintf(os.Stdout, "  ✓ %d file(s) installed at %s\n",
 		len(installed.Files),
-		filepath.Join(harnessRoot, policies.PolicyRoot, node.Name))
+		filepath.Join(charterRoot, policies.PolicyRoot, node.Name))
 	return nil
 }
 
@@ -127,12 +127,12 @@ func printInstallUsage(w *os.File) {
 	fmt.Fprint(w, `keystone install — materialize every policy declared in keystone.json
 
 Usage:
-  keystone install [--dir <path>] [--harness-root <name>]
+  keystone install [--dir <path>] [--charter-root <name>]
 
 Reads keystone.json from <dir> (default: .), then for each policy in the
 declared tree: fetches the source at its pinned version into a content-
-addressable cache, copies the content into <harness-root>/policies/<name>/,
-and records per-file hashes in <harness-root>/keystone.lock.json so drift
+addressable cache, copies the content into <charter-root>/policies/<name>/,
+and records per-file hashes in <charter-root>/keystone.lock.json so drift
 can be detected later.
 
 Re-running install is safe: existing vendor directories are rewritten from
@@ -140,7 +140,7 @@ the cache, so a stale or hand-edited tree is reset to the pinned state.
 
 Flags:
   --dir <path>           Project root (defaults to cwd).
-  --harness-root <name>  Harness directory name (defaults to keystone.json's
-                         harness_root, then "harness").
+  --charter-root <name>  Charter directory name (defaults to keystone.json's
+                         harness_root, then "charter").
 `)
 }

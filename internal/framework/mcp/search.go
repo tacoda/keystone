@@ -11,13 +11,13 @@ import (
 	"github.com/tacoda/keystone/internal/framework/primitive"
 )
 
-// registerSearchTool exposes the harness-wide substring search as an
+// registerSearchTool exposes the charter-wide substring search as an
 // MCP tool. Agents call this when "where is the convention about X?"
 // is the actual question.
 func registerSearchTool(s *server.MCPServer, projectDir string) {
 	s.AddTool(
 		mcp.NewTool("keystone_search",
-			mcp.WithDescription("Search every primitive (id, description, globs, traces, body) for a substring. Returns ranked hits w/ excerpt + match location. Use this before falling through to corpus or external sources — often the answer is already in the harness."),
+			mcp.WithDescription("Search every primitive (id, description, globs, traces, body) for a substring. Returns ranked hits w/ excerpt + match location. Use this before falling through to corpus or external sources — often the answer is already in the charter."),
 			mcp.WithString("query",
 				mcp.Required(),
 				mcp.Description("Free-form search string. Case-insensitive substring match."),
@@ -32,7 +32,7 @@ func registerSearchTool(s *server.MCPServer, projectDir string) {
 				return mcp.NewToolResultError(err.Error()), nil
 			}
 			limit := int(req.GetFloat("limit", 25))
-			primitives, _, err := primitive.Walk(projectDir, kconfig.DefaultHarnessRoot)
+			primitives, _, err := primitive.Walk(projectDir, kconfig.DefaultCharterRoot)
 			if err != nil {
 				return mcp.NewToolResultError(err.Error()), nil
 			}

@@ -8,27 +8,27 @@ import (
 
 func TestInferKind(t *testing.T) {
 	cases := map[string]Kind{
-		".harness/guides/idioms/go/stdlib-first.md": KindGuide,
-		".harness/sensors/build.md":                 KindSensor,
-		".harness/hooks/pre-verify.md":              KindHook,
-		".harness/commands/verify.md":               KindCommand,
-		".harness/skills/task/SKILL.md":             KindSkill,
-		".harness/agents/code-reviewer.md":          KindAgent,
-		".harness/playbooks/task.md":                KindPlaybook,
-		".harness/patterns/retry-with-backoff.md":   KindPattern,
-		".harness/posture/default.md":               KindPosture,
-		".harness/tools/grep-symbols.md":            KindTool,
-		".harness/documents/adr.md":                 KindDocument,
-		".harness/corpus/process/spec.md":           KindCorpus,
-		".harness/concerns/reads-diff.md":           KindConcern,
-		".harness/evals/regression.md":              KindEval,
+		".charter/guides/idioms/go/stdlib-first.md": KindGuide,
+		".charter/sensors/build.md":                 KindSensor,
+		".charter/hooks/pre-verify.md":              KindHook,
+		".charter/commands/verify.md":               KindCommand,
+		".charter/skills/task/SKILL.md":             KindSkill,
+		".charter/agents/code-reviewer.md":          KindAgent,
+		".charter/playbooks/task.md":                KindPlaybook,
+		".charter/patterns/retry-with-backoff.md":   KindPattern,
+		".charter/posture/default.md":               KindPosture,
+		".charter/tools/grep-symbols.md":            KindTool,
+		".charter/documents/adr.md":                 KindDocument,
+		".charter/corpus/process/spec.md":           KindCorpus,
+		".charter/concerns/reads-diff.md":           KindConcern,
+		".charter/evals/regression.md":              KindEval,
 		// `rule` is not a kind in 3.0 — author a guide. `source` is no longer
 		// a kind either (external access is a tool). Both dirs are
 		// off-convention and infer nothing.
-		".harness/rules/x.md":      "",
-		".harness/sources/jira.md": "",
-		".harness/whatever/x.md":   "", // off-convention
-		"README.md":               "", // no harness/
+		".charter/rules/x.md":      "",
+		".charter/sources/jira.md": "",
+		".charter/whatever/x.md":   "", // off-convention
+		"README.md":                "", // no charter/
 	}
 	for path, want := range cases {
 		if got := InferKind(path); got != want {
@@ -41,7 +41,7 @@ func TestInferKind(t *testing.T) {
 // its kind from the canonical directory (convention over configuration).
 func TestWalk_InfersKindFromDir(t *testing.T) {
 	root := t.TempDir()
-	src := filepath.Join(root, ".harness/guides/process/spec.md")
+	src := filepath.Join(root, ".charter/guides/process/spec.md")
 	if err := os.MkdirAll(filepath.Dir(src), 0o755); err != nil {
 		t.Fatal(err)
 	}
@@ -50,7 +50,7 @@ func TestWalk_InfersKindFromDir(t *testing.T) {
 	if err := os.WriteFile(src, []byte(body), 0o644); err != nil {
 		t.Fatal(err)
 	}
-	primitives, _, err := Walk(root, ".harness")
+	primitives, _, err := Walk(root, ".charter")
 	if err != nil {
 		t.Fatalf("Walk: %v", err)
 	}
@@ -66,7 +66,7 @@ func TestWalk_InfersKindFromDir(t *testing.T) {
 // inference (escape hatch).
 func TestWalk_ExplicitKindWins(t *testing.T) {
 	root := t.TempDir()
-	src := filepath.Join(root, ".harness/guides/special.md")
+	src := filepath.Join(root, ".charter/guides/special.md")
 	if err := os.MkdirAll(filepath.Dir(src), 0o755); err != nil {
 		t.Fatal(err)
 	}
@@ -74,7 +74,7 @@ func TestWalk_ExplicitKindWins(t *testing.T) {
 	if err := os.WriteFile(src, []byte(body), 0o644); err != nil {
 		t.Fatal(err)
 	}
-	primitives, _, err := Walk(root, ".harness")
+	primitives, _, err := Walk(root, ".charter")
 	if err != nil {
 		t.Fatalf("Walk: %v", err)
 	}

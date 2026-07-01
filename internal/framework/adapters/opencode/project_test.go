@@ -30,13 +30,13 @@ func writeSource(t *testing.T, root, kind, id, rel, body string) primitive.Primi
 func TestProjectAgents_MirrorsSkillsAgentsCommands(t *testing.T) {
 	root := t.TempDir()
 	prims := []primitive.Primitive{
-		writeSource(t, root, "skill", "foo", ".harness/skills/foo/SKILL.md", "skill body\n"),
-		writeSource(t, root, "command", "verify", ".harness/commands/verify.md", "command body\n"),
-		writeSource(t, root, "agent", "reviewer", ".harness/agents/reviewer.md", "agent body\n"),
+		writeSource(t, root, "skill", "foo", ".charter/skills/foo/SKILL.md", "skill body\n"),
+		writeSource(t, root, "command", "verify", ".charter/commands/verify.md", "command body\n"),
+		writeSource(t, root, "agent", "reviewer", ".charter/agents/reviewer.md", "agent body\n"),
 	}
 	// A globbed guide projects to .opencode/rules/ as a rule-shim.
 	guide := writeSource(t, root, "guide", "guides/idioms/go/stdlib-first",
-		".harness/guides/idioms/go/stdlib-first.md", "# Stdlib first\n\n## IRON LAW\n- x\n")
+		".charter/guides/idioms/go/stdlib-first.md", "# Stdlib first\n\n## IRON LAW\n- x\n")
 	guide.Globs = []string{"**/*.go"}
 	prims = append(prims, guide)
 
@@ -75,7 +75,7 @@ func TestProjectAgents_MirrorsSkillsAgentsCommands(t *testing.T) {
 func TestProjectAgents_IsIdempotent(t *testing.T) {
 	root := t.TempDir()
 	prims := []primitive.Primitive{
-		writeSource(t, root, "skill", "foo", ".harness/skills/foo/SKILL.md", "body\n"),
+		writeSource(t, root, "skill", "foo", ".charter/skills/foo/SKILL.md", "body\n"),
 	}
 	if _, err := ProjectAgents(root, prims); err != nil {
 		t.Fatal(err)

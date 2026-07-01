@@ -18,15 +18,18 @@ type IncomingRef struct {
 // an error.
 //
 // Reference forms accepted in deps:
-//   <kind>/<id>          (canonical)
+//
+//	<kind>/<id>          (canonical)
 //
 // Reference forms accepted in traces:
-//   corpus/<topic>/<name>     (canonical)
-//   <topic>/<name>            (treated as corpus by default)
+//
+//	corpus/<topic>/<name>     (canonical)
+//	<topic>/<name>            (treated as corpus by default)
 //
 // Reference forms accepted in includes (only meaningful when target
 // is a concern):
-//   <id>                 (bare concern id; canonical)
+//
+//	<id>                 (bare concern id; canonical)
 func IncomingRefs(primitives []Primitive, target Primitive) []IncomingRef {
 	want := target.Kind + "/" + target.ID
 	wantBare := target.ID

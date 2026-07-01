@@ -10,20 +10,22 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/tacoda/keystone/internal/framework/config"
 )
 
 // auditEntry is one line in the per-session JSONL audit log. The
 // shape stays small and stable — anything fancy belongs in INDEX
 // or the watcher event stream, not here.
 type auditEntry struct {
-	Timestamp string   `json:"ts"`             // RFC3339, UTC
-	Topics    []string `json:"topics"`         // SSE topics this burst emitted
-	Paths     []string `json:"paths,omitempty"` // dirty paths inside .keystone/
-	Summary   string   `json:"summary"`        // one-line human description
+	Timestamp string   `json:"ts"`              // RFC3339, UTC
+	Topics    []string `json:"topics"`          // SSE topics this burst emitted
+	Paths     []string `json:"paths,omitempty"` // dirty paths inside .charter/
+	Summary   string   `json:"summary"`         // one-line human description
 }
 
-// auditLog persists harness change events to a per-session
-// append-only JSONL file under `.keystone/state/audit/`. One file
+// auditLog persists charter change events to a per-session
+// append-only JSONL file under `.charter/state/audit/`. One file
 // per `keystone web serve` process; never overwritten. The
 // dashboard reads the tail to render the audit widget; older
 // sessions sit on disk until startup prune.
@@ -42,14 +44,14 @@ type auditLog struct {
 // auditDirFor returns the canonical audit dir under a project. Kept
 // as a function so tests can mirror the layout against a temp dir.
 func auditDirFor(projectDir string) string {
-	return filepath.Join(projectDir, ".keystone", "state", "audit")
+	return filepath.Join(projectDir, config.DefaultCharterRoot, "state", "audit")
 }
 
 // openAuditLog creates the audit dir if missing and opens a fresh
 // session file `session-<UTC>-<pid>.jsonl` for append. Uses
 // O_CREATE|O_EXCL so we never silently overwrite an existing file —
 // the timestamp+pid combo collision is effectively impossible, but
-// the harness iron law says never overwrite, period.
+// the charter iron law says never overwrite, period.
 func openAuditLog(projectDir string) (*auditLog, error) {
 	dir := auditDirFor(projectDir)
 	if err := os.MkdirAll(dir, 0o755); err != nil {

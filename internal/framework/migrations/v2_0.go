@@ -40,27 +40,27 @@ const v2KeystoneJSON = "keystone.json"
 func planUp_2_0(absDir string) (*Plan, error) {
 	p := &Plan{}
 
-	legacyHarness := filepath.Join(absDir, "harness")
-	newHarness := filepath.Join(absDir, ".keystone", "harness")
+	legacyCharter := filepath.Join(absDir, "harness")
+	newCharter := filepath.Join(absDir, ".keystone", "harness")
 	keystoneDir := filepath.Join(absDir, ".keystone")
 
-	if dirExists(legacyHarness) && dirExists(newHarness) {
+	if dirExists(legacyCharter) && dirExists(newCharter) {
 		return nil, fmt.Errorf("both legacy harness/ and .keystone/harness/ exist — resolve by hand before migrating up")
 	}
 
-	if dirExists(legacyHarness) {
+	if dirExists(legacyCharter) {
 		p.Add("move harness/ → .keystone/harness/", func(_ string) error {
 			if err := os.MkdirAll(keystoneDir, 0o755); err != nil {
 				return err
 			}
-			return os.Rename(legacyHarness, newHarness)
+			return os.Rename(legacyCharter, newCharter)
 		})
 	}
 
 	p.Add("lift lockfile → .keystone/lockfile.json", func(_ string) error {
 		newLockPath := filepath.Join(keystoneDir, "lockfile.json")
 		for _, cand := range []string{
-			filepath.Join(newHarness, "keystone.lock.json"),
+			filepath.Join(newCharter, "keystone.lock.json"),
 			filepath.Join(absDir, "keystone.lock.json"),
 		} {
 			if fileExists(cand) {
@@ -73,8 +73,8 @@ func planUp_2_0(absDir string) (*Plan, error) {
 		return nil
 	})
 
-	pluginsDir := filepath.Join(newHarness, "plugins")
-	policiesDir := filepath.Join(newHarness, "policies")
+	pluginsDir := filepath.Join(newCharter, "plugins")
+	policiesDir := filepath.Join(newCharter, "policies")
 	p.Add("rename .keystone/harness/plugins/ → .keystone/harness/policies/", func(_ string) error {
 		if !dirExists(pluginsDir) {
 			return nil
@@ -120,11 +120,11 @@ func planUp_2_0(absDir string) (*Plan, error) {
 func planDown_2_0(absDir string) (*Plan, error) {
 	p := &Plan{}
 
-	legacyHarness := filepath.Join(absDir, "harness")
-	newHarness := filepath.Join(absDir, ".keystone", "harness")
+	legacyCharter := filepath.Join(absDir, "harness")
+	newCharter := filepath.Join(absDir, ".keystone", "harness")
 	keystoneDir := filepath.Join(absDir, ".keystone")
 
-	if dirExists(legacyHarness) && dirExists(newHarness) {
+	if dirExists(legacyCharter) && dirExists(newCharter) {
 		return nil, fmt.Errorf("both legacy harness/ and .keystone/harness/ exist — resolve by hand before migrating down")
 	}
 
@@ -135,8 +135,8 @@ func planDown_2_0(absDir string) (*Plan, error) {
 		})
 	}
 
-	pluginsDir := filepath.Join(newHarness, "plugins")
-	policiesDir := filepath.Join(newHarness, "policies")
+	pluginsDir := filepath.Join(newCharter, "plugins")
+	policiesDir := filepath.Join(newCharter, "policies")
 	p.Add("rename keystone-policy.json → keystone-plugin.json in vendored policies", func(_ string) error {
 		if !dirExists(policiesDir) {
 			return nil
@@ -178,10 +178,10 @@ func planDown_2_0(absDir string) (*Plan, error) {
 		// The harness is still under .keystone/harness/ at this point;
 		// the harness-move step below relocates it back. We drop the
 		// lockfile inside the harness so the harness-rename carries it.
-		destDir := newHarness
+		destDir := newCharter
 		if !dirExists(destDir) {
-			// Harness already moved back — drop next to it instead.
-			destDir = legacyHarness
+			// Charter already moved back — drop next to it instead.
+			destDir = legacyCharter
 			if !dirExists(destDir) {
 				if err := os.MkdirAll(destDir, 0o755); err != nil {
 					return err
@@ -191,9 +191,9 @@ func planDown_2_0(absDir string) (*Plan, error) {
 		return os.Rename(newLockPath, filepath.Join(destDir, "keystone.lock.json"))
 	})
 
-	if dirExists(newHarness) {
+	if dirExists(newCharter) {
 		p.Add("move .keystone/harness/ → harness/", func(_ string) error {
-			if err := os.Rename(newHarness, legacyHarness); err != nil {
+			if err := os.Rename(newCharter, legacyCharter); err != nil {
 				return err
 			}
 			// Best-effort: remove the now-empty .keystone/ dir.

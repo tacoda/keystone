@@ -49,12 +49,12 @@ func TestRouter_NewSectionURLs(t *testing.T) {
 		"/observability",
 		"/observability/metrics",
 		"/observability/insights",
-		"/harness",
-		"/harness/primitives",
-		"/harness/primitives/new",
-		"/harness/policies",
-		"/harness/investigator",
-		"/harness/graph",
+		"/charter",
+		"/charter/primitives",
+		"/charter/primitives/new",
+		"/charter/policies",
+		"/charter/investigator",
+		"/charter/graph",
 		"/flywheels",
 		"/flywheels/inbox",
 		"/flywheels/prune",
@@ -147,19 +147,19 @@ func TestRouter_GraphWidget(t *testing.T) {
 	}
 }
 
-// TestRouter_HarnessPrimitiveDetailURL exercises the kind/id prefix
-// dispatch under the new harness section.
-func TestRouter_HarnessPrimitiveDetailURL(t *testing.T) {
+// TestRouter_CharterPrimitiveDetailURL exercises the kind/id prefix
+// dispatch under the new charter section.
+func TestRouter_CharterPrimitiveDetailURL(t *testing.T) {
 	_, h := newTestRouter(t)
 	rr := httptest.NewRecorder()
 	// No matching primitive — empty tempdir — but the route must
 	// reach the handler (which returns 404 on miss), not the
 	// catch-all NotFound. We accept any non-500 here; the contract
 	// is that the URL pattern is recognized.
-	req := httptest.NewRequest(http.MethodGet, "/harness/primitives/guide/some-id", nil)
+	req := httptest.NewRequest(http.MethodGet, "/charter/primitives/guide/some-id", nil)
 	h.ServeHTTP(rr, req)
 	if rr.Code >= 500 {
-		t.Errorf("GET /harness/primitives/guide/some-id: status %d want < 500", rr.Code)
+		t.Errorf("GET /charter/primitives/guide/some-id: status %d want < 500", rr.Code)
 	}
 }
 

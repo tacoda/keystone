@@ -12,9 +12,9 @@ import (
 
 func TestToolMCPName(t *testing.T) {
 	cases := map[string]string{
-		"grep-symbols":    "keystone_tool_grep_symbols",
-		"keystone:fmt":    "keystone_tool_keystone_fmt",
-		"a/b/c":           "keystone_tool_a_b_c",
+		"grep-symbols": "keystone_tool_grep_symbols",
+		"keystone:fmt": "keystone_tool_keystone_fmt",
+		"a/b/c":        "keystone_tool_a_b_c",
 	}
 	for id, want := range cases {
 		if got := toolMCPName(id); got != want {

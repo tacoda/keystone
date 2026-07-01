@@ -13,7 +13,7 @@ import (
 	"strings"
 )
 
-// PolicyRoot is the directory under <project>/<harnessRoot>/ where every
+// PolicyRoot is the directory under <project>/<charterRoot>/ where every
 // installed policy lives. Gitignored at the consumer side; managed by the
 // vendor flow, not by users.
 const PolicyRoot = "policies"
@@ -44,7 +44,7 @@ type policyManifest struct {
 	Version string `json:"version"`
 }
 
-// Install copies the cached policy tree into <projectDir>/<harnessRoot>/policies/<name>/,
+// Install copies the cached policy tree into <projectDir>/<charterRoot>/policies/<name>/,
 // computes per-file SHA-256 hashes for the lockfile, and chmods files
 // read-only on POSIX (best-effort).
 //
@@ -54,18 +54,18 @@ type policyManifest struct {
 //
 // If the destination already exists, it is removed first — Install is the
 // "fresh write" path used by both first-install and drift-reset.
-func Install(cached *Cached, name, projectDir, harnessRoot string) (*Installed, error) {
+func Install(cached *Cached, name, projectDir, charterRoot string) (*Installed, error) {
 	if cached == nil {
 		return nil, fmt.Errorf("policies.Install: nil Cached")
 	}
 	if name == "" {
 		return nil, fmt.Errorf("policies.Install: empty name")
 	}
-	if harnessRoot == "" {
-		return nil, fmt.Errorf("policies.Install: empty harnessRoot")
+	if charterRoot == "" {
+		return nil, fmt.Errorf("policies.Install: empty charterRoot")
 	}
 
-	target := policyDir(projectDir, harnessRoot, name)
+	target := policyDir(projectDir, charterRoot, name)
 	if err := os.RemoveAll(target); err != nil {
 		return nil, fmt.Errorf("clear target: %w", err)
 	}
@@ -118,7 +118,7 @@ func Install(cached *Cached, name, projectDir, harnessRoot string) (*Installed, 
 
 		// Record the hash keyed by path relative to the project root, so the
 		// lockfile entry lines up with how Verify walks the tree.
-		relFromProject := filepath.ToSlash(filepath.Join(harnessRoot, PolicyRoot, name, rel))
+		relFromProject := filepath.ToSlash(filepath.Join(charterRoot, PolicyRoot, name, rel))
 		files[relFromProject] = hash
 
 		// Capture the manifest's declared name/version on the way past.
@@ -151,8 +151,8 @@ func Install(cached *Cached, name, projectDir, harnessRoot string) (*Installed, 
 
 // policyDir returns the absolute path of the install directory for a
 // single policy.
-func policyDir(projectDir, harnessRoot, name string) string {
-	return filepath.Join(projectDir, harnessRoot, PolicyRoot, name)
+func policyDir(projectDir, charterRoot, name string) string {
+	return filepath.Join(projectDir, charterRoot, PolicyRoot, name)
 }
 
 // copyFile streams src to dst and returns the "sha256:<hex>" hash of the

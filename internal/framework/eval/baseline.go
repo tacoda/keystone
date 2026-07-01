@@ -11,10 +11,10 @@ import (
 
 // BaselineDiff is the side-by-side result of a baseline run.
 type BaselineDiff struct {
-	Baseline Report     `json:"baseline"`
-	Current  Report     `json:"current"`
-	Changes  []Change   `json:"changes"`
-	Summary  DiffStats  `json:"summary"`
+	Baseline Report    `json:"baseline"`
+	Current  Report    `json:"current"`
+	Changes  []Change  `json:"changes"`
+	Summary  DiffStats `json:"summary"`
 }
 
 type Change struct {

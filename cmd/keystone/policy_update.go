@@ -12,7 +12,7 @@ import (
 )
 
 // runPolicyUpdate handles `keystone policy update <name> [@<new-version>]
-// [--dir <path>] [--harness-root <name>]`.
+// [--dir <path>] [--charter-root <name>]`.
 //
 // Looks up the named policy in keystone.json, optionally bumps its version,
 // then resets and re-installs it. Re-fetching is the right move even when
@@ -63,7 +63,7 @@ func runPolicyUpdate(args []string) error {
 	if err != nil {
 		return fmt.Errorf("resolve dir: %w", err)
 	}
-	harnessRoot := config.DefaultHarnessRoot
+	charterRoot := config.DefaultCharterRoot
 
 	cfg, err := config.ReadProjectConfig(absDir)
 	if err != nil {
@@ -87,18 +87,18 @@ func runPolicyUpdate(args []string) error {
 
 	// Always reset before reinstall — picks up any moving-ref drift even
 	// when the version field hasn't changed.
-	if err := policies.Reset(node.Name, absDir, harnessRoot); err != nil {
+	if err := policies.Reset(node.Name, absDir, charterRoot); err != nil {
 		return err
 	}
 
-	lf, err := lockfile.Read(absDir, harnessRoot)
+	lf, err := lockfile.Read(absDir, charterRoot)
 	if err != nil {
 		return err
 	}
-	if err := installOnePolicy(absDir, harnessRoot, *node, lf); err != nil {
+	if err := installOnePolicy(absDir, charterRoot, *node, lf); err != nil {
 		return err
 	}
-	if err := lockfile.Write(absDir, harnessRoot, lf); err != nil {
+	if err := lockfile.Write(absDir, charterRoot, lf); err != nil {
 		return err
 	}
 
@@ -110,7 +110,7 @@ func printPolicyUpdateUsage(w *os.File) {
 	fmt.Fprint(w, `keystone policy update — re-resolve and reinstall an installed policy
 
 Usage:
-  keystone policy update <name> [@<new-version>] [--dir <path>] [--harness-root <name>]
+  keystone policy update <name> [@<new-version>] [--dir <path>] [--charter-root <name>]
 
 If <new-version> is supplied, the version field in keystone.json is bumped
 and the new ref is fetched. Without a version, the recorded ref is re-
@@ -121,6 +121,6 @@ any local edits are discarded.
 
 Flags:
   --dir <path>           Project root (defaults to cwd).
-  --harness-root <name>  Harness directory name.
+  --charter-root <name>  Charter directory name.
 `)
 }
