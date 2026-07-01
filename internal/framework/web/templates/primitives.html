@@ -3,7 +3,7 @@
 {{define "main"}}
 <section class="card">
   <h1>primitives</h1>
-  <p class="muted">{{.Total}} total in harness</p>
+  <p class="muted">{{.Total}} total in charter</p>
 
   <form class="filters"
         hx-get="/web/fragments/primitives"
@@ -33,7 +33,7 @@
   {{if .AllTags}}
   <div class="tag-cloud" style="margin: 12px 0 4px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center;">
     <span class="muted" style="font-size: 0.85em;">jump to tag:</span>
-    {{range .AllTags}}<a href="/harness/primitives?tag={{.}}" style="font-size: 0.82em; padding: 2px 9px; border: 1px solid var(--border, #2f3548); border-radius: 12px; text-decoration: none;">{{.}}</a>{{end}}
+    {{range .AllTags}}<a href="/charter/primitives?tag={{.}}" style="font-size: 0.82em; padding: 2px 9px; border: 1px solid var(--border, #2f3548); border-radius: 12px; text-decoration: none;">{{.}}</a>{{end}}
   </div>
   {{end}}
 

@@ -71,7 +71,7 @@ transport: cli | mcp — not a server-side resolution stage.)
 ## Write tools (each shells out to the keystone binary)
 
   keystone_new_<kind>          Scaffold a new primitive.
-                               <kind> ∈ {guide, sensor, hook, agent,
+                               <kind> ∈ {guide, sensor, agent,
                                          command, skill, playbook, pattern,
                                          posture, tool, corpus, document,
                                          adapter, policy}.
@@ -155,7 +155,7 @@ func registerTools(s *server.MCPServer, projectDir string) {
 		mcp.NewTool("keystone_list_primitives",
 			mcp.WithDescription("List charter primitives, optionally filtered by kind, glob, or tag(s). Returns descriptors only — open bodies via keystone_get_primitive. The returned descriptors reflect the COMPOSED view (concern `includes:` already merged into list fields)."),
 			mcp.WithString("kind",
-				mcp.Description("Filter by kind (guide, sensor, hook, agent, command, skill, playbook, pattern, corpus, document, concern, posture, tool, eval). Omit for all."),
+				mcp.Description("Filter by kind (guide, sensor, agent, command, skill, playbook, pattern, corpus, document, concern, posture, tool, eval). Omit for all."),
 			),
 			mcp.WithString("glob",
 				mcp.Description("Filter primitives that declare this glob pattern in their `globs:` frontmatter. Exact-string match on the pattern."),
@@ -268,7 +268,7 @@ func registerTools(s *server.MCPServer, projectDir string) {
 			mcp.WithDescription("Return the full body of a single primitive given its kind and id. The body includes the frontmatter and the markdown that follows."),
 			mcp.WithString("kind",
 				mcp.Required(),
-				mcp.Description("Primitive kind (guide, sensor, hook, agent, command, skill, playbook, pattern, corpus, document, concern, posture, tool, eval)."),
+				mcp.Description("Primitive kind (guide, sensor, agent, command, skill, playbook, pattern, corpus, document, concern, posture, tool, eval)."),
 			),
 			mcp.WithString("id",
 				mcp.Required(),
