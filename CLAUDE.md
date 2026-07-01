@@ -1,4 +1,4 @@
-# Keystone — the coding-agent charter manager
+# Keystone — the agent charter framework
 
 ## Stack
 

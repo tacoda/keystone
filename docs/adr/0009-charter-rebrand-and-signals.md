@@ -22,7 +22,7 @@ term.
 
 ## Decision
 
-**Rebrand harness → charter.** Keystone is the *coding-agent charter manager*.
+**Rebrand harness → charter.** Keystone is the *charter framework*.
 The artifact is a **charter** at `.charter/`; `HARNESS.md` → `CHARTER.md`. A
 harness is the engine; a charter is the authored spec that constrains it
 (authorship test — see `GLOSSARY.md`). "harness" survives in copy only where it

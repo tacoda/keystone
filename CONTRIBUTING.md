@@ -5,7 +5,7 @@ once, then file issues / open PRs.
 
 ## What keystone is
 
-Keystone is the **coding-agent charter manager**. The charter — a tree
+Keystone is the **charter framework**. The charter — a tree
 of typed primitives at `.charter/` — is the product. A **harness** is
 the engine that runs the model (Claude Code, the orchestrator, the
 runner); Keystone is not a harness, it manages the charter that
@@ -105,9 +105,10 @@ PR:
 7. Update the menu templates so the dashboard + agent know about the
    new kind.
 
-Two-layer taxonomy still applies — framework abstraction (guide,
-corpus, sensor, action, playbook) vs. agent abstraction (rule, skill,
-subagent, command). Pick the right layer.
+There are 13 kinds (the `hook` kind was retired at 4.0 — a reaction is a
+`sensor` (check), a `tool` (side-effect), or an `agent` (review) that
+self-subscribes to a signal or host phase via `on:`). Pick the kind by
+what the primitive *is*, not how it fires.
 
 ## Filing issues
 

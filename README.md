@@ -1,7 +1,8 @@
 # Keystone
 
-**Keystone is the coding-agent charter manager** — constraint engineering at
-the repository level. A small Go toolchain — CLI + MCP server + localhost
+**Keystone is the agent charter framework** — **charter engineering**
+(a.k.a. **constraint engineering**) at the repository level: you author the
+standards that constrain your coding agents, per repo. A small Go toolchain — CLI + MCP server + localhost
 dashboard — that drops a structured, primitive-typed markdown **charter** into
 your repo and keeps it healthy. Once installed, neither tool is required at
 runtime. The charter is plain files; any agent that reads

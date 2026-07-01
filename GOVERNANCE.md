@@ -1,7 +1,7 @@
 # Governance
 
 How the Keystone project is run, and how a **charter** is amended. Keystone is
-the coding-agent charter manager; this document governs both the software and
+the agent charter framework; this document governs both the software and
 the charter model it maintains. It complements [`CONTRIBUTING.md`](CONTRIBUTING.md)
 (how to contribute) and [`GLOSSARY.md`](GLOSSARY.md) (the charter/harness lexicon).
 

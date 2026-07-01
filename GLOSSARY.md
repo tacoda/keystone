@@ -50,16 +50,31 @@ vs. policy — the same split that puts Claude Code in the harness but your
 
 ## Keystone
 
-The coding-agent charter manager: a CLI + MCP server + dashboard that authors,
+The agent charter framework: a CLI + MCP server + dashboard that authors,
 validates, projects, and maintains the charter. Keystone is **not** a harness —
 it manages the charter that constrains whatever harness you run.
 
 ## Primitive
 
-A typed unit of the charter — one of 14 kinds (`guide`, `sensor`, `hook`,
+A typed unit of the charter — one of 13 kinds (`guide`, `sensor`,
 `agent`, `command`, `skill`, `playbook`, `pattern`, `corpus`, `document`,
 `concern`, `posture`, `tool`, `eval`). Each carries canonical frontmatter and a
 canonical path under `.charter/`.
+
+## Signal
+
+A keystone **framework event** — the extensible, higher-level counterpart
+to a host hook phase. A primitive subscribes to one via `on:` (like a
+skill declares `triggers:`); when the signal fires, the subscriber reacts:
+
+- **sensor** — a check → verdict (exit/HTTP status); gates.
+- **tool** — an external callable; on-demand, or a side-effect with `on:`.
+- **agent** — an inferential review → structured `returns:`.
+
+Host phases (`PreToolUse`, `Stop`, …) are a closed set bridged into the
+host; *any other* `on:` value is a signal, so projects define their own
+(`keystone.json signals:`, `keystone signal fire|list`). The `hook`
+primitive kind is retired — reactions self-subscribe.
 
 ## Projection
 
