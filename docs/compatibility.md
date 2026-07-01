@@ -36,7 +36,7 @@ The ten ports and their on-disk shapes are stable:
 | Budget | [`docs/ports/budget.md`](ports/budget.md) |
 
 What "stable" means for a port:
-- **Path convention** for the port stays put. Guides at `<harness-root>/guides/<topic>/<name>.md` are forever.
+- **Path convention** for the port stays put. Guides at `<charter-root>/guides/<topic>/<name>.md` are forever.
 - **Required frontmatter keys** keep their names and meanings. Optional keys can be added.
 - **Required sections** (e.g. sensors' `## Command`, `## Interpretation`, `## Remediation`) keep their names.
 - **Cascade behavior** is fixed — project wins by default; among plugins, plugins nested deeper in `keystone.json` refine the outer plugins they're nested in; a plugin's `strict` declaration locks the item absolutely so nothing (project or any other plugin) can override it.
@@ -69,7 +69,7 @@ Every `keystone new <port> <name>` produces a skeleton with:
 - The right H1 title format for the port.
 - The right frontmatter (none for most ports; `kind:` for sensors).
 - The right required sections (e.g. `## Entry condition` / `## Activities` / `## Exit condition` for actions).
-- Harness-root-relative cross-references — never `../` or `./` segments.
+- Charter-root-relative cross-references — never `../` or `./` segments.
 
 The fine details of skeleton content (placeholder text inside sections) are templates, not contract.
 
@@ -77,9 +77,9 @@ The fine details of skeleton content (placeholder text inside sections) are temp
 [`docs/conventions.md`](conventions.md) is the canonical reference. The table's columns (Port / Project path / Plugin path / Activation / Frontmatter / Required shape / Cascade / Strict-able / Generator) stay; rows can be added when new ports land; existing rows don't have their meanings revised silently.
 
 ### Project-side paths
-- The harness folder name lives in `keystone.json#harness_root` (default `harness`).
-- The lockfile is at `<harness-root>/keystone.lock.json`.
-- Vendored plugins are at `<harness-root>/plugins/<name>/`, gitignored.
+- The charter folder name lives in `keystone.json#harness_root` (default `charter`).
+- The lockfile is at `<charter-root>/keystone.lock.json`.
+- Vendored plugins are at `<charter-root>/plugins/<name>/`, gitignored.
 - `keystone.json` is at the project root.
 
 The shape of these paths is part of the contract. The lockfile is permitted to grow new optional fields under the existing schema.

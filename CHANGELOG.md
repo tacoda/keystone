@@ -2,6 +2,71 @@
 
 All notable changes to keystone are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); the project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.0.0] — 2026-07-01
+
+Major release — the **charter rebrand**. Keystone is the *coding-agent
+charter manager*, not a harness. A **harness** is the engine that runs
+the model (Claude Code, the orchestrator, the runner); a **charter** is
+the authored standards that constrain it. The artifact moves from
+`.harness/` to **`.charter/`** and is renamed throughout. The other
+anchor: framework events become extensible **signals**, and the `hook`
+primitive kind is retired — reactions self-subscribe via `on:`.
+
+Breaking. `keystone migrate up` carries a 3.0 install to 4.0: it renames
+`.harness/ → .charter/` and `HARNESS.md → CHARTER.md`, folds `hooks/`
+into `sensors/` (`kind: hook → sensor`, `event: → on:`, frontmatter
+only), drops the vestigial `context.json`, and rebuilds the index.
+Idempotent; `event:` still parses as a back-compat alias for `on:`.
+
+### Added
+
+- **`.charter/` as the charter root.** `DefaultCharterRoot = ".charter"`.
+  `CHARTER.md` is the single canonical agent entrypoint (full
+  orientation); every host file (CLAUDE.md, AGENTS.md, CONVENTIONS.md,
+  Cursor/Continue rules) is now a **thin pointer** to it — Claude Code
+  via native `@CHARTER.md` import, others via an imperative "read
+  CHARTER.md" plus a per-host **capability delta** (subagents / slash
+  commands / skills / hooks). See `GLOSSARY.md`.
+- **Signals.** A signal is a keystone framework event; host phases are a
+  closed set and *any other* `on:` value is a signal, so projects define
+  their own (`keystone.json` `signals:`). `keystone signal fire|list`
+  (`hook fire` kept as an alias). Reactions self-subscribe via `on:`: a
+  `sensor` checks (verdict), a `tool` fires a side-effect (transport
+  cli|http|mcp|plugin), an `agent` reviews.
+- **`keystone charter coverage`** — files no guide governs (uncharted
+  territory). **`keystone charter show [--effective]`** — the roster;
+  `--effective` resolves the post-cascade winning set. **`keystone
+  charter conformance`** — a rubric (cascade / validity / pairing /
+  coverage → CONFORMANT | DRIFTING | NON-CONFORMANT).
+- **`keystone explain <id>`** — explain any primitive (how it activates,
+  what it links to, where it projects) + flag uncommitted changes.
+- **Dashboard + MCP** gain Coverage and Signals surfaces; MCP adds
+  `keystone_signal_list`, `keystone_charter_coverage`,
+  `keystone_charter_conformance`, `keystone_explain`.
+- **`GOVERNANCE.md`** — project + charter-amendment governance
+  (roles, decision-making, the learn→synthesize→ratify flywheel,
+  provenance / hash-pinning). ADR 0009 records the 4.0 amendments.
+
+### Changed
+
+- Positioning: "the agent harness framework" → **"the coding-agent
+  charter manager"** across README, CLI, MCP, dashboard, and templates.
+- Primitive kinds: **13** (was 14) — `hook` retired.
+- `tool` gains an `http` transport and an `on:` field (signal-fired
+  side-effect vs on-demand).
+
+### Fixed
+
+- Dashboard nav 404s (stale `/harness/` links) and dead SSE (topic
+  `harness-changed` → `charter-changed`).
+- Stale pre-3.0 `.keystone/` runtime paths (MCP index path, audit dir,
+  snapshot target, fs watchers) routed through the charter root.
+
+### Removed
+
+- The `hook` primitive kind and the `.harness/hooks/` directory
+  (folded into `sensors/`). The vestigial `context.json`.
+
 ## [3.0.0] — 2026-06-28
 
 Major release. Two structural moves anchor 3.0: the harness root

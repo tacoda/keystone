@@ -20,12 +20,12 @@ type SearchHit struct {
 // weighted score; ties broken alphabetically.
 //
 // Scoring (deliberately naive — readable + good-enough for a
-// few-hundred-primitive harness):
+// few-hundred-primitive charter):
 //
-//   id match            +10
-//   description match    +5
-//   globs / traces       +3
-//   body substring       +1
+//	id match            +10
+//	description match    +5
+//	globs / traces       +3
+//	body substring       +1
 //
 // Returns at most `limit` results (0 = all). Query is lowercased
 // and matched case-insensitively.

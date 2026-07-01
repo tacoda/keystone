@@ -70,30 +70,30 @@ func runInit(args []string, assets fs.FS) error {
 
 	preflight(absDir)
 
-	harnessDest := filepath.Join(absDir, flags.harnessRoot)
-	harnessExists := false
-	if _, err := os.Stat(harnessDest); err == nil {
-		harnessExists = true
+	charterDest := filepath.Join(absDir, flags.charterRoot)
+	charterExists := false
+	if _, err := os.Stat(charterDest); err == nil {
+		charterExists = true
 	} else if !os.IsNotExist(err) {
 		return err
 	}
 
 	mode := skipIfExists
 	if flags.reset {
-		if harnessExists {
-			fmt.Fprintf(os.Stdout, "▸ --reset: removing existing %s/\n", harnessDest)
-			if err := os.RemoveAll(harnessDest); err != nil {
-				return fmt.Errorf("reset harness: %w", err)
+		if charterExists {
+			fmt.Fprintf(os.Stdout, "▸ --reset: removing existing %s/\n", charterDest)
+			if err := os.RemoveAll(charterDest); err != nil {
+				return fmt.Errorf("reset charter: %w", err)
 			}
 		}
 		mode = overwrite
-	} else if harnessExists {
-		fmt.Fprintf(os.Stdout, "▸ %s/ already exists — writing only new files (existing files are kept; pass --reset to rewrite)\n", harnessDest)
+	} else if charterExists {
+		fmt.Fprintf(os.Stdout, "▸ %s/ already exists — writing only new files (existing files are kept; pass --reset to rewrite)\n", charterDest)
 	}
 
-	fmt.Fprintf(os.Stdout, "▸ installing harness to %s\n", harnessDest)
-	if err := copyTree(assets, "harness", harnessDest, mode); err != nil {
-		return fmt.Errorf("copy harness: %w", err)
+	fmt.Fprintf(os.Stdout, "▸ installing charter to %s\n", charterDest)
+	if err := copyTree(assets, "charter", charterDest, mode); err != nil {
+		return fmt.Errorf("copy charter: %w", err)
 	}
 
 	for _, agent := range agents {
@@ -102,27 +102,27 @@ func runInit(args []string, assets fs.FS) error {
 		}
 	}
 
-	if err := installConditional(assets, absDir, flags.harnessRoot, flags.selections); err != nil {
+	if err := installConditional(assets, absDir, flags.charterRoot, flags.selections); err != nil {
 		return fmt.Errorf("install optional content: %w", err)
 	}
 
-	if err := initializeLockfile(absDir, flags.harnessRoot, agents); err != nil {
+	if err := initializeLockfile(absDir, flags.charterRoot, agents); err != nil {
 		return fmt.Errorf("initialize lockfile: %w", err)
 	}
 
-	if err := writeProjectConfigIfMissing(absDir, flags.harnessRoot); err != nil {
+	if err := writeProjectConfigIfMissing(absDir, flags.charterRoot); err != nil {
 		return fmt.Errorf("initialize project config: %w", err)
 	}
 
-	if err := ensureGitignore(absDir, flags.harnessRoot); err != nil {
+	if err := ensureGitignore(absDir, flags.charterRoot); err != nil {
 		return fmt.Errorf("update .gitignore: %w", err)
 	}
 
-	if err := writeInstallProfile(absDir, flags.harnessRoot, flags.selections); err != nil {
+	if err := writeInstallProfile(absDir, flags.charterRoot, flags.selections); err != nil {
 		return fmt.Errorf("write install profile: %w", err)
 	}
 
-	// Index + project: write .keystone/INDEX.json so the agent can read
+	// Index + project: write .charter/INDEX.json so the agent can read
 	// the primitive descriptor at session start, and project skills /
 	// subagents / commands into the host-native tree (`.claude/skills/`,
 	// `.claude/agents/`, `.claude/commands/`) so they're discoverable as
@@ -130,19 +130,19 @@ func runInit(args []string, assets fs.FS) error {
 	// host agent can't see. Errors are non-fatal — the structural install
 	// is already complete and these artifacts can be regenerated with
 	// `keystone index` / `keystone project`.
-	if err := indexAndProject(absDir, flags.harnessRoot); err != nil {
+	if err := indexAndProject(absDir, flags.charterRoot); err != nil {
 		fmt.Fprintf(os.Stderr, "! post-install index/project skipped: %v\n", err)
 	}
 
-	if err := reportAmbientLoad(absDir, flags.harnessRoot); err != nil {
+	if err := reportAmbientLoad(absDir, flags.charterRoot); err != nil {
 		// Non-fatal: budget reporting is a nicety, not a precondition.
 		fmt.Fprintf(os.Stderr, "! ambient-load report skipped: %v\n", err)
 	}
 
 	for _, agent := range agents {
-		printAgentWarnings(agent, flags.harnessRoot)
+		printAgentWarnings(agent, flags.charterRoot)
 	}
-	printNextSteps(agents, flags.harnessRoot)
+	printNextSteps(agents, flags.charterRoot)
 	return nil
 }
 
@@ -152,8 +152,8 @@ func runInit(args []string, assets fs.FS) error {
 // keystone.json's budgets block (just-written by init), so users with a
 // pre-existing budgets section see the over-budget warning surfaced on
 // the first run too.
-func reportAmbientLoad(projectDir, harnessRoot string) error {
-	alloc, err := walkHarnessBudget(projectDir, harnessRoot)
+func reportAmbientLoad(projectDir, charterRoot string) error {
+	alloc, err := walkCharterBudget(projectDir, charterRoot)
 	if err != nil {
 		return err
 	}
@@ -182,13 +182,13 @@ func reportAmbientLoad(projectDir, harnessRoot string) error {
 	return nil
 }
 
-// indexAndProject regenerates .keystone/INDEX.json and projects every
+// indexAndProject regenerates .charter/INDEX.json and projects every
 // agent-kind primitive (skill / subagent / command) into the host-native
 // tree under .claude/. Called once at the end of `keystone init` so a
 // fresh install ships discoverable slash commands without an extra
 // manual step.
-func indexAndProject(projectDir, harnessRoot string) error {
-	primitives, warnings, err := primitive.Walk(projectDir, harnessRoot)
+func indexAndProject(projectDir, charterRoot string) error {
+	primitives, warnings, err := primitive.Walk(projectDir, charterRoot)
 	if err != nil {
 		return fmt.Errorf("walk primitives: %w", err)
 	}
@@ -197,7 +197,7 @@ func indexAndProject(projectDir, harnessRoot string) error {
 	}
 
 	idx := primitive.Build(primitives, time.Now())
-	indexPath := filepath.Join(projectDir, config.KeystoneDir(harnessRoot), config.IndexName)
+	indexPath := filepath.Join(projectDir, config.KeystoneDir(charterRoot), config.IndexName)
 	if err := primitive.Write(indexPath, idx); err != nil {
 		return fmt.Errorf("write index: %w", err)
 	}
@@ -209,27 +209,38 @@ func indexAndProject(projectDir, harnessRoot string) error {
 	if err != nil {
 		return fmt.Errorf("project primitives: %w", err)
 	}
+	printProjectionResults(projectDir, results)
+
+	// Always-on entrypoint surface: canonical CHARTER.md + AGENTS.md
+	// pointer. Written before target templates are copied (skip-if-
+	// exists) so a fresh install ships them.
+	return writeCharterSurface(projectDir, true)
+}
+
+// printProjectionResults logs each host-native file the projector wrote
+// and a one-line summary count.
+func printProjectionResults(projectDir string, results []primitive.ProjectionResult) {
 	wrote := 0
 	for _, r := range results {
-		if r.Action == "wrote" {
-			if rel, e := filepath.Rel(projectDir, r.Dest); e == nil {
-				fmt.Fprintf(os.Stdout, "  wrote: %s\n", rel)
-			}
-			wrote++
+		if r.Action != "wrote" {
+			continue
 		}
+		if rel, e := filepath.Rel(projectDir, r.Dest); e == nil {
+			fmt.Fprintf(os.Stdout, "  wrote: %s\n", rel)
+		}
+		wrote++
 	}
 	if wrote > 0 {
 		fmt.Fprintf(os.Stdout, "  projected %d primitive(s) to host-native paths\n", wrote)
 	}
-	return nil
 }
 
-// initializeLockfile creates <harnessRoot>/keystone.lock.json if it doesn't
+// initializeLockfile creates <charterRoot>/keystone.lock.json if it doesn't
 // exist yet, or fills in the keystone section if a prior call only wrote
 // policy entries. Records the binary version, install date, the configured
-// harness root, and the agent IDs whose menu files were just installed.
-func initializeLockfile(destDir, harnessRoot string, agents []string) error {
-	lf, err := ensureLockfile(destDir, harnessRoot)
+// charter root, and the agent IDs whose menu files were just installed.
+func initializeLockfile(destDir, charterRoot string, agents []string) error {
+	lf, err := ensureLockfile(destDir, charterRoot)
 	if err != nil {
 		return err
 	}
@@ -247,10 +258,10 @@ func initializeLockfile(destDir, harnessRoot string, agents []string) error {
 			seen[a] = true
 		}
 	}
-	if err := lockfile.Write(destDir, harnessRoot, lf); err != nil {
+	if err := lockfile.Write(destDir, charterRoot, lf); err != nil {
 		return err
 	}
-	fmt.Fprintf(os.Stdout, "  wrote: %s\n", filepath.Join(destDir, lockfile.RelPath(harnessRoot)))
+	fmt.Fprintf(os.Stdout, "  wrote: %s\n", filepath.Join(destDir, lockfile.RelPath(charterRoot)))
 	return nil
 }
 
@@ -332,14 +343,14 @@ func preflight(dir string) {
 // writeProjectConfigIfMissing creates keystone.json at the project root if
 // it doesn't exist yet. Re-running init never overwrites a user-edited
 // keystone.json — the user's policy tree is preserved.
-func writeProjectConfigIfMissing(projectDir, harnessRoot string) error {
+func writeProjectConfigIfMissing(projectDir, charterRoot string) error {
 	if _, err := config.ReadProjectConfig(projectDir); err == nil {
 		fmt.Fprintf(os.Stdout, "  exists: %s (kept)\n", filepath.Join(projectDir, config.ProjectConfigFile))
 		return nil
 	} else if !errors.Is(err, os.ErrNotExist) {
 		return err
 	}
-	cfg := config.DefaultProjectConfig(harnessRoot)
+	cfg := config.DefaultProjectConfig(charterRoot)
 	if err := config.WriteProjectConfig(projectDir, cfg); err != nil {
 		return err
 	}
@@ -351,8 +362,8 @@ func writeProjectConfigIfMissing(projectDir, harnessRoot string) error {
 // directory entry. Creates the file if missing; appends only the missing
 // lines if present. The vendored tree is regenerated by `keystone install`
 // from cache + sources, so it should not be tracked.
-func ensureGitignore(projectDir, harnessRoot string) error {
-	policiesLine := filepath.ToSlash(filepath.Join(harnessRoot, policies.PolicyRoot)) + "/"
+func ensureGitignore(projectDir, charterRoot string) error {
+	policiesLine := filepath.ToSlash(filepath.Join(charterRoot, policies.PolicyRoot)) + "/"
 	path := filepath.Join(projectDir, ".gitignore")
 
 	existing, err := os.ReadFile(path)
@@ -399,33 +410,33 @@ func alreadyHas(body, line string) bool {
 	return false
 }
 
-func printNextSteps(agents []string, harnessRoot string) {
+func printNextSteps(agents []string, charterRoot string) {
 	list := strings.Join(agents, ", ")
 
 	var bootstrapIn, lifecycle string
 	if len(agents) == 1 {
 		bootstrapIn = fmt.Sprintf("in %s", agents[0])
 		lifecycle = fmt.Sprintf("     See %s/adapters/%s/lifecycle.md for how to invoke it.\n",
-			harnessRoot, agentTargetDir(agents[0]))
+			charterRoot, agentTargetDir(agents[0]))
 	} else {
-		bootstrapIn = "in any one of the agents above (the harness edits are agent-agnostic)"
+		bootstrapIn = "in any one of the agents above (the charter edits are agent-agnostic)"
 		var b strings.Builder
 		b.WriteString("     See:\n")
 		for _, a := range agents {
-			fmt.Fprintf(&b, "       %s/adapters/%s/lifecycle.md\n", harnessRoot, agentTargetDir(a))
+			fmt.Fprintf(&b, "       %s/adapters/%s/lifecycle.md\n", charterRoot, agentTargetDir(a))
 		}
 		b.WriteString("     for how to invoke it in each agent.\n")
 		lifecycle = b.String()
 	}
 
 	fmt.Fprintf(os.Stdout, `
-✓ harness installed for %s.
+✓ charter installed for %s.
 
   ▶ Next: run the /keystone:bootstrap skill %s.
 
      Bootstrap reads your codebase and seeds %s/corpus/state/CODEBASE_STATE.md,
      %s/corpus/idioms/<your-stack>/, and the paired %s/guides/idioms/<your-stack>/
-     so the harness reflects your project. It also confirms the sensor commands.
+     so the charter reflects your project. It also confirms the sensor commands.
 %s
 Also:
 
@@ -433,5 +444,5 @@ Also:
     (corpus, guides, sensors, policies, flywheels).
   • Review %s/corpus/state/INSTALL_PROFILE.md and adjust if needed.
   • Commit %s/ and any agent-specific files this installer created.
-`, list, bootstrapIn, harnessRoot, harnessRoot, harnessRoot, lifecycle, harnessRoot, harnessRoot, harnessRoot)
+`, list, bootstrapIn, charterRoot, charterRoot, charterRoot, lifecycle, charterRoot, charterRoot, charterRoot)
 }

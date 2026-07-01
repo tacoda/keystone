@@ -1,7 +1,7 @@
 # Port: Primitive
 
 **Activation:** This port is not a runtime port — it is the *shape* every other port-typed file shares. The agent never "activates a primitive"; it activates a rule, an action, a skill, etc. The primitive shape is what makes those activations cheap.
-**Purpose:** One canonical frontmatter schema across every harness file. Lets the agent read a single `harness/INDEX.json` of descriptors and open bodies only on activation, instead of reading every markdown file to discover what is there.
+**Purpose:** One canonical frontmatter schema across every charter file. Lets the agent read a single `.charter/INDEX.json` of descriptors and open bodies only on activation, instead of reading every markdown file to discover what is there.
 
 Every other port doc in this directory — `guide.md`, `action.md`, `corpus.md`, `sensor.md`, `adapter.md`, `playbook.md` — refines this shape with its own required fields and activation rules. When those docs and this one disagree on a shared field, **this doc wins**.
 
@@ -40,15 +40,15 @@ framework shape adds nothing.
 
 ## Why a shared shape
 
-`keystone-mcp` already factors harness content into typed primitives (`ContextDoc{kind, id, severity, source, …}`) and exposes a *descriptor* surface (`keystone_list_topics`) separate from body content. The agent reads descriptors; bodies stay cold until needed.
+`keystone-mcp` already factors charter content into typed primitives (`ContextDoc{kind, id, severity, source, …}`) and exposes a *descriptor* surface (`keystone_list_topics`) separate from body content. The agent reads descriptors; bodies stay cold until needed.
 
-The static harness can give the agent the same affordance without a server: every file declares the same descriptor in frontmatter, the generator emits a single `harness/INDEX.json`, and the menu file (`CLAUDE.md`, `AGENTS.md`, `.cursor/rules/keystone.mdc`) instructs the agent to read the index first and open bodies only on activation.
+The static charter can give the agent the same affordance without a server: every file declares the same descriptor in frontmatter, the generator emits a single `.charter/INDEX.json`, and the menu file (`CLAUDE.md`, `AGENTS.md`, `.cursor/rules/keystone.mdc`) instructs the agent to read the index first and open bodies only on activation.
 
 Same source of truth (markdown). Far less reading per session. Primitives instead of prose wherever the host supports them.
 
 ## Canonical frontmatter
 
-Every harness file ships this frontmatter block. Per-kind required and optional fields are listed under [Required by kind](#required-by-kind).
+Every charter file ships this frontmatter block. Per-kind required and optional fields are listed under [Required by kind](#required-by-kind).
 
 ```yaml
 ---
@@ -122,9 +122,9 @@ Bodies are unchanged markdown. Only the descriptor surface differs per kind.
 | `command`  | `kind`, `id`, `description`, `args`                                                            | Host slash-command invocation                                   |
 | `sensor`   | `kind`, `id`, `description`, `phase`                                                           | Per-phase, narrowed by `globs`                                  |
 
-## `harness/INDEX.json`
+## `.charter/INDEX.json`
 
-The indexer (`keystone index`) walks every primitive file under `harness/` and `.claude/`, parses frontmatter, and emits a single artifact:
+The indexer (`keystone index`) walks every primitive file under `.charter/` and `.claude/`, parses frontmatter, and emits a single artifact:
 
 ```json
 {
@@ -134,7 +134,7 @@ The indexer (`keystone index`) walks every primitive file under `harness/` and `
     {
       "kind": "rule",
       "id": "idioms/rails/migrations",
-      "path": "harness/guides/idioms/rails/migrations.md",
+      "path": ".charter/guides/idioms/rails/migrations.md",
       "description": "Migrations are reversible and small.",
       "globs": ["db/migrate/**"],
       "severity": "must",
@@ -143,7 +143,7 @@ The indexer (`keystone index`) walks every primitive file under `harness/` and `
     {
       "kind": "action",
       "id": "verify",
-      "path": "harness/actions/verify.md",
+      "path": ".charter/actions/verify.md",
       "description": "Run pre-commit + spawn review agents on current diff.",
       "phase": "verify",
       "deps": ["sensor/lint", "subagent/code-reviewer"]
@@ -177,7 +177,7 @@ For hosts that have a native primitive, keystone *emits* the projection from the
 
 MCP prompts are deliberately not a primitive kind — they require an MCP
 server plus a client-side UI for the human to pick from, neither of
-which the CLI-driven harness can guarantee. Human-triggered templated
+which the CLI-driven charter can guarantee. Human-triggered templated
 workflows belong to slash commands; agent-self-triggered patterns
 belong to skills.
 
@@ -204,7 +204,7 @@ Exactly one file loads per `(kind, id)`.
 - `globs` parse cleanly (no `globs: []`).
 - `severity` and `tier` agree when both are present.
 
-`keystone verify` (existing cascade verifier) additionally requires `harness/INDEX.json` to be newer than every primitive file — stale indexes fail the check, and `bootstrap` / `synthesize` / `learn` actions are responsible for calling `keystone index` on their way out.
+`keystone verify` (existing cascade verifier) additionally requires `.charter/INDEX.json` to be newer than every primitive file — stale indexes fail the check, and `bootstrap` / `synthesize` / `learn` actions are responsible for calling `keystone index` on their way out.
 
 ## Authoring
 
@@ -216,5 +216,5 @@ Scaffolds a primitive of the given kind with canonical frontmatter pre-populated
 
 ## Out of scope
 
-- **MCP prompts as a primitive kind.** Prompts require an MCP server *and* a client-side UI for a human to pick one; the CLI harness has neither guarantee. Use slash commands (human-triggered) or skills (agent-self-triggered) instead. A keystone-mcp deployment that wants to ship templated prompts can keep them in an MCP-specific location outside the canonical harness contract.
-- **Runtime dispatch.** No `keystone serve`, no `keystone get|list|exec`. The CLI authors and maintains the harness; the agent reads the artifacts directly.
+- **MCP prompts as a primitive kind.** Prompts require an MCP server *and* a client-side UI for a human to pick one; the CLI charter has neither guarantee. Use slash commands (human-triggered) or skills (agent-self-triggered) instead. A keystone-mcp deployment that wants to ship templated prompts can keep them in an MCP-specific location outside the canonical charter contract.
+- **Runtime dispatch.** No `keystone serve`, no `keystone get|list|exec`. The CLI authors and maintains the charter; the agent reads the artifacts directly.

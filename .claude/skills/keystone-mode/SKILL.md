@@ -1,6 +1,6 @@
 ---
 name: keystone-mode
-description: Switch the harness pacing mode (paired / solo / autopilot).
+description: Switch the charter pacing mode (paired / solo / autopilot).
 tools:
   - Read
   - Write
@@ -16,13 +16,13 @@ Toggles how often the agent stops to ask. Three modes:
 - **solo** — agent runs through phases, asks at unclear forks.
 - **autopilot** — agent runs end-to-end; asks only on hard blockers.
 
-Canonical playbook: `.keystone/harness/actions/mode.md`. Mode definitions
-live in `.keystone/harness/guides/process/modes.md`.
+Canonical playbook: `.charter/actions/mode.md`. Mode definitions
+live in `.charter/guides/process/modes.md`.
 
 ## Run
 
-Open `.keystone/harness/actions/mode.md`. Decide the target mode + write
-the change to `.keystone/harness/corpus/state/MODE.md`.
+Open `.charter/actions/mode.md`. Decide the target mode + write
+the change to `.charter/corpus/state/MODE.md`.
 
 ## When to trigger
 

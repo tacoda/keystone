@@ -118,7 +118,7 @@ func TestInstall_CopiesAndHashes(t *testing.T) {
 	}
 
 	project := t.TempDir()
-	installed, err := Install(c, "example", project, "harness")
+	installed, err := Install(c, "example", project, "charter")
 	if err != nil {
 		t.Fatalf("Install: %v", err)
 	}
@@ -130,9 +130,9 @@ func TestInstall_CopiesAndHashes(t *testing.T) {
 	}
 
 	wantPaths := []string{
-		"harness/policies/example/keystone-policy.json",
-		"harness/policies/example/guides/principles/spec.md",
-		"harness/policies/example/corpus/principles/spec.md",
+		"charter/policies/example/keystone-policy.json",
+		"charter/policies/example/guides/principles/spec.md",
+		"charter/policies/example/corpus/principles/spec.md",
 	}
 	for _, p := range wantPaths {
 		if _, ok := installed.Files[p]; !ok {
@@ -146,7 +146,7 @@ func TestInstall_CopiesAndHashes(t *testing.T) {
 
 	// Best-effort read-only check on POSIX.
 	if runtime.GOOS != "windows" {
-		info, err := os.Stat(filepath.Join(project, "harness/policies/example/guides/principles/spec.md"))
+		info, err := os.Stat(filepath.Join(project, "charter/policies/example/guides/principles/spec.md"))
 		if err != nil {
 			t.Fatalf("stat: %v", err)
 		}
@@ -171,15 +171,15 @@ func TestInstall_AllowsFrameworkWrappers(t *testing.T) {
 
 	repo := filepath.Join(t.TempDir(), "repo")
 	files := map[string]string{
-		"keystone-policy.json":             `{"name":"example","version":"1.0.0"}`,
-		"guides/principles/spec.md":        "guide body",
-		"sensors/lint.md":                  "sensor body",
-		"actions/verify.md":                "action body",
-		"playbooks/task.md":                "playbook body",
-		"personas/security-reviewer.md":    "persona body",
-		"corpus/principles/spec.md":        "corpus body",
-		"evals/demo/EVAL.md":               "eval body",
-		"sources/docs.md":                  "source body",
+		"keystone-policy.json":          `{"name":"example","version":"1.0.0"}`,
+		"guides/principles/spec.md":     "guide body",
+		"sensors/lint.md":               "sensor body",
+		"actions/verify.md":             "action body",
+		"playbooks/task.md":             "playbook body",
+		"personas/security-reviewer.md": "persona body",
+		"corpus/principles/spec.md":     "corpus body",
+		"evals/demo/EVAL.md":            "eval body",
+		"sources/docs.md":               "source body",
 	}
 	url := initBareRepoWithTag(t, repo, "v1", files)
 
@@ -188,12 +188,12 @@ func TestInstall_AllowsFrameworkWrappers(t *testing.T) {
 		t.Fatalf("Fetch: %v", err)
 	}
 	project := t.TempDir()
-	if _, err := Install(cached, "example", project, "harness"); err != nil {
+	if _, err := Install(cached, "example", project, "charter"); err != nil {
 		t.Fatalf("install rejected a framework-wrapper policy: %v", err)
 	}
 
 	// Confirm persona file actually landed at the vendored path.
-	want := filepath.Join(project, "harness", PolicyRoot, "example", "personas", "security-reviewer.md")
+	want := filepath.Join(project, "charter", PolicyRoot, "example", "personas", "security-reviewer.md")
 	if _, err := os.Stat(want); err != nil {
 		t.Errorf("expected vendored persona at %s, got %v", want, err)
 	}
@@ -238,7 +238,7 @@ func TestInstall_RejectsAgentAbstractions(t *testing.T) {
 				t.Fatalf("Fetch: %v", err)
 			}
 			project := t.TempDir()
-			_, err = Install(cached, "example", project, "harness")
+			_, err = Install(cached, "example", project, "charter")
 			if err == nil {
 				t.Fatalf("expected install to reject agent-abstraction dir %q, got nil", c.dir)
 			}
@@ -269,13 +269,13 @@ func TestVerify_CleanAndDirty(t *testing.T) {
 	}
 
 	project := t.TempDir()
-	installed, err := Install(c, "example", project, "harness")
+	installed, err := Install(c, "example", project, "charter")
 	if err != nil {
 		t.Fatalf("Install: %v", err)
 	}
 
 	// Clean state: no drift.
-	drifts, err := Verify("example", project, "harness", installed.Files)
+	drifts, err := Verify("example", project, "charter", installed.Files)
 	if err != nil {
 		t.Fatalf("Verify clean: %v", err)
 	}
@@ -284,14 +284,14 @@ func TestVerify_CleanAndDirty(t *testing.T) {
 	}
 
 	// Modify a file → DriftModified.
-	policyA := filepath.Join(project, "harness/policies/example/guides/a.md")
+	policyA := filepath.Join(project, "charter/policies/example/guides/a.md")
 	if err := os.Chmod(policyA, 0o644); err != nil {
 		t.Fatalf("chmod for edit: %v", err)
 	}
 	if err := os.WriteFile(policyA, []byte("tampered"), 0o644); err != nil {
 		t.Fatalf("tamper: %v", err)
 	}
-	drifts, err = Verify("example", project, "harness", installed.Files)
+	drifts, err = Verify("example", project, "charter", installed.Files)
 	if err != nil {
 		t.Fatalf("Verify modified: %v", err)
 	}
@@ -300,13 +300,13 @@ func TestVerify_CleanAndDirty(t *testing.T) {
 	}
 
 	// Remove a file → DriftMissing.
-	if err := os.Chmod(filepath.Join(project, "harness/policies/example/guides/b.md"), 0o644); err != nil {
+	if err := os.Chmod(filepath.Join(project, "charter/policies/example/guides/b.md"), 0o644); err != nil {
 		t.Fatalf("chmod: %v", err)
 	}
-	if err := os.Remove(filepath.Join(project, "harness/policies/example/guides/b.md")); err != nil {
+	if err := os.Remove(filepath.Join(project, "charter/policies/example/guides/b.md")); err != nil {
 		t.Fatalf("remove b: %v", err)
 	}
-	drifts, err = Verify("example", project, "harness", installed.Files)
+	drifts, err = Verify("example", project, "charter", installed.Files)
 	if err != nil {
 		t.Fatalf("Verify missing: %v", err)
 	}
@@ -319,10 +319,10 @@ func TestVerify_CleanAndDirty(t *testing.T) {
 	}
 
 	// Add an extra file → DriftExtra.
-	if err := os.WriteFile(filepath.Join(project, "harness/policies/example/guides/c.md"), []byte("extra"), 0o644); err != nil {
+	if err := os.WriteFile(filepath.Join(project, "charter/policies/example/guides/c.md"), []byte("extra"), 0o644); err != nil {
 		t.Fatalf("write c: %v", err)
 	}
-	drifts, err = Verify("example", project, "harness", installed.Files)
+	drifts, err = Verify("example", project, "charter", installed.Files)
 	if err != nil {
 		t.Fatalf("Verify extra: %v", err)
 	}
@@ -354,16 +354,16 @@ func TestReset_RemovesEvenReadOnlyTree(t *testing.T) {
 	}
 
 	project := t.TempDir()
-	if _, err := Install(c, "example", project, "harness"); err != nil {
+	if _, err := Install(c, "example", project, "charter"); err != nil {
 		t.Fatalf("Install: %v", err)
 	}
 
-	target := filepath.Join(project, "harness/policies/example")
+	target := filepath.Join(project, "charter/policies/example")
 	if _, err := os.Stat(target); err != nil {
 		t.Fatalf("expected install dir: %v", err)
 	}
 
-	if err := Reset("example", project, "harness"); err != nil {
+	if err := Reset("example", project, "charter"); err != nil {
 		t.Fatalf("Reset: %v", err)
 	}
 	if _, err := os.Stat(target); !os.IsNotExist(err) {

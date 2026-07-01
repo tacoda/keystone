@@ -3,7 +3,7 @@
 {{define "main"}}
 <section class="card">
   <h1>insights</h1>
-  <p class="muted">Concrete suggestions to make the harness perform better. Derived from the same data the lint, prune, and metrics views use — distilled into "what to do next."</p>
+  <p class="muted">Concrete suggestions to make the charter perform better. Derived from the same data the lint, prune, and metrics views use — distilled into "what to do next."</p>
 
   <div class="stats">
     <div class="stat"><div class="label">high</div><div class="value bad">{{index .Counts "high"}}</div></div>
@@ -30,7 +30,7 @@
   </div>
   {{end}}
   {{else}}
-  <p class="muted">no suggestions — harness is in good shape.</p>
+  <p class="muted">no suggestions — charter is in good shape.</p>
   {{end}}
 </section>
 
@@ -45,6 +45,6 @@
     <li>missing project skills</li>
     <li>severity distribution across guides (iron-law concentration)</li>
   </ul>
-  <p class="muted">More signals land as the harness collects telemetry (rule activations, sensor outcomes, contradiction-resolutions).</p>
+  <p class="muted">More signals land as the charter collects telemetry (rule activations, sensor outcomes, contradiction-resolutions).</p>
 </section>
 {{end}}

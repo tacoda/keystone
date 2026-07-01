@@ -9,7 +9,7 @@ tools:
 
 Surfaces and categorizes **debt in the codebase** — the known-suboptimal code the team has chosen to live with, plus the shape of any new debt being added in the current diff.
 
-Paired sensor: [`harness-debt`](harness-debt.md) — covers debt in the harness itself (stale rules, placeholder bootstrap, empty idiom dirs, etc.). The two are tracked separately on purpose.
+Paired sensor: [`charter-debt`](charter-debt.md) — covers debt in the charter itself (stale rules, placeholder bootstrap, empty idiom dirs, etc.). The two are tracked separately on purpose.
 
 - **Trigger** — **audit** (codebase-wide) and **review** (diff-scoped).
 - **Inputs** — `git grep` for debt markers (`TODO`, `FIXME`, `HACK`, `XXX`, `DEPRECATED`), complexity hotspots from [risk-fingerprint](risk-fingerprint.md), and any debt items already listed in `corpus/state/code-debt.md`.

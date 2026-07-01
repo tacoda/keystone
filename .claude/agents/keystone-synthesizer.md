@@ -10,7 +10,7 @@ model: opus
 
 # Synthesizer
 
-You read candidate files under `harness/learning/inbox/` and decide:
+You read candidate files under `.charter/learning/inbox/` and decide:
 promote to a guide (binding rule), promote to corpus (reasoning doc),
 merge into an existing primitive, or archive as a one-off.
 

@@ -44,10 +44,10 @@ import (
 // regenerate from 2.1 sources. Preserves source content.
 
 // Legacy 2.x layout, pinned so the pre-3.0 migrations keep operating on
-// `.keystone/` no matter where DefaultHarnessRoot points now. The 3.0
+// `.keystone/` no matter where DefaultCharterRoot points now. The 3.0
 // migration (v3_0) moves this tree to `.harness/`.
 const (
-	legacyHarnessRoot = ".keystone/harness"
+	legacyCharterRoot = ".keystone/harness"
 	legacyKeystoneDir = ".keystone"
 )
 
@@ -64,8 +64,8 @@ func planUp_2_2(absDir string) (*Plan, error) {
 
 	// 2.2 predates the 3.0 `.harness` move — pin to the legacy layout so
 	// this migration keeps operating on `.keystone/` regardless of the
-	// current DefaultHarnessRoot.
-	harnessRoot := legacyHarnessRoot
+	// current DefaultCharterRoot.
+	harnessRoot := legacyCharterRoot
 	harnessAbs := filepath.Join(absDir, harnessRoot)
 	if !dirExists(harnessAbs) {
 		// Fresh install — `keystone init` will scaffold from the 2.2

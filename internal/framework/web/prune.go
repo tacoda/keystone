@@ -22,7 +22,7 @@ type PruneCandidate struct {
 }
 
 // findPruneCandidates runs the heuristics described in the pruning
-// flywheel against the current harness. Aggregates with lint
+// flywheel against the current charter. Aggregates with lint
 // findings so the dashboard surfaces both in one place.
 //
 // Heuristics applied:

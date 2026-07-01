@@ -1,13 +1,13 @@
 # Port: Computational guide
 
-**Activation:** Ambient. The underlying tool (LSP, formatter, pre-commit hook) runs continuously; the harness file documents its existence for the **stack-drift** sensor.
+**Activation:** Ambient. The underlying tool (LSP, formatter, pre-commit hook) runs continuously; the charter file documents its existence for the **stack-drift** sensor.
 **Purpose:** Inventory of deterministic enforcement the project's stack already provides — language servers, formatters-on-save, editor lint, pre-commit hooks scoped to formatting. The agent doesn't reason over these files at runtime; the **stack-drift** sensor uses them to detect when documented enforcement diverges from what's actually wired.
 
 ## Path convention
 
 ```
-harness/guides/computational/<tool>.md                        # project-owned
-harness/policies/<policy>/guides/computational/<tool>.md       # policy-owned (read-only)
+.charter/guides/computational/<tool>.md                      # project-owned
+.charter/policies/<policy>/guides/computational/<tool>.md     # policy-owned (read-only)
 ```
 
 One file per tool. Flat under `computational/` — no further sub-directories.
@@ -36,11 +36,11 @@ globs:                # optional, documentation-only
 
 ## Cascade behavior
 
-Project wins. Pruning flywheel removes entries when the tool stops running locally (the **harness-debt** sensor flags `failing-sensor` and `empty-shell`).
+Project wins. Pruning flywheel removes entries when the tool stops running locally (the **charter-debt** sensor flags `failing-sensor` and `empty-shell`).
 
 ## Example
 
-See `harness/guides/computational/gofmt.md`.
+See `.charter/guides/computational/gofmt.md`.
 
 ## Authoring
 

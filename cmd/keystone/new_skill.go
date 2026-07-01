@@ -7,10 +7,10 @@ import (
 )
 
 // runNewEval handles `keystone new eval <id>`. Scaffolds
-// <harness>/evals/<id>/EVAL.md + sibling expected.json stub. The
+// <charter>/evals/<id>/EVAL.md + sibling expected.json stub. The
 // `id` becomes both the disk dir name and the frontmatter id.
 func runNewEval(args []string) error {
-	projectDir, harnessRoot, remaining, err := parseDirAndHarnessRoot(args)
+	projectDir, charterRoot, remaining, err := parseDirAndCharterRoot(args)
 	if err != nil {
 		return err
 	}
@@ -22,7 +22,7 @@ func runNewEval(args []string) error {
 		return fmt.Errorf("eval id: %w", err)
 	}
 	diskName := strings.ReplaceAll(id, ":", "-")
-	dir := filepath.Join(projectDir, harnessRoot, "evals", diskName)
+	dir := filepath.Join(projectDir, charterRoot, "evals", diskName)
 	evalPath := filepath.Join(dir, "EVAL.md")
 	expPath := filepath.Join(dir, "expected.json")
 
@@ -61,7 +61,7 @@ the run will check.
 }
 
 // runNewSkill handles `keystone new skill <id>`. Scaffolds
-// <harness-root>/skills/<dir>/SKILL.md with canonical primitive
+// <charter-root>/skills/<dir>/SKILL.md with canonical primitive
 // frontmatter.
 //
 // The id may use the canonical colon-namespaced form
@@ -70,7 +70,7 @@ the run will check.
 // records the colon form as `id:` so INDEX.json reports it
 // unchanged.
 func runNewSkill(args []string) error {
-	projectDir, harnessRoot, remaining, err := parseDirAndHarnessRoot(args)
+	projectDir, charterRoot, remaining, err := parseDirAndCharterRoot(args)
 	if err != nil {
 		return err
 	}
@@ -82,7 +82,7 @@ func runNewSkill(args []string) error {
 		return fmt.Errorf("skill id: %w", err)
 	}
 	diskName := strings.ReplaceAll(id, ":", "-")
-	path := filepath.Join(projectDir, harnessRoot, "skills", diskName, "SKILL.md")
+	path := filepath.Join(projectDir, charterRoot, "skills", diskName, "SKILL.md")
 	body := fmt.Sprintf(`---
 kind: skill
 id: %s
@@ -112,9 +112,9 @@ If the skill wraps a shell command, show the exact invocation:
 }
 
 // runNewSubagent handles `keystone new subagent <id>`. Scaffolds
-// <harness-root>/agents/<id>.md with canonical primitive frontmatter.
+// <charter-root>/agents/<id>.md with canonical primitive frontmatter.
 func runNewAgent(args []string) error {
-	projectDir, harnessRoot, remaining, err := parseDirAndHarnessRoot(args)
+	projectDir, charterRoot, remaining, err := parseDirAndCharterRoot(args)
 	if err != nil {
 		return err
 	}
@@ -126,7 +126,7 @@ func runNewAgent(args []string) error {
 		return fmt.Errorf("agent id: %w", err)
 	}
 	diskName := strings.ReplaceAll(id, ":", "-")
-	path := filepath.Join(projectDir, harnessRoot, "agents", diskName+".md")
+	path := filepath.Join(projectDir, charterRoot, "agents", diskName+".md")
 	body := fmt.Sprintf(`---
 kind: agent
 id: %s
@@ -150,9 +150,9 @@ What the subagent returns to its caller. Be explicit about format
 }
 
 // runNewCommand handles `keystone new command <id>`. Scaffolds
-// <harness-root>/commands/<id>.md with canonical primitive frontmatter.
+// <charter-root>/commands/<id>.md with canonical primitive frontmatter.
 func runNewCommand(args []string) error {
-	projectDir, harnessRoot, remaining, err := parseDirAndHarnessRoot(args)
+	projectDir, charterRoot, remaining, err := parseDirAndCharterRoot(args)
 	if err != nil {
 		return err
 	}
@@ -164,7 +164,7 @@ func runNewCommand(args []string) error {
 		return fmt.Errorf("command id: %w", err)
 	}
 	diskName := strings.ReplaceAll(id, ":", "-")
-	path := filepath.Join(projectDir, harnessRoot, "commands", diskName+".md")
+	path := filepath.Join(projectDir, charterRoot, "commands", diskName+".md")
 	body := fmt.Sprintf(`---
 kind: command
 id: %s

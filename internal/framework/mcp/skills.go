@@ -16,12 +16,13 @@ import (
 )
 
 // registerSkillResources auto-discovers every SKILL.md under
-// .keystone/harness/skills/ and exposes them as MCP resources.
+// .charter/skills/ and exposes them as MCP resources.
 // Hosts like Claude Code that auto-load `skill://` URIs pick these up
 // without further configuration.
 //
 // The URI form is:
-//   skill://<disk-name>/SKILL.md
+//
+//	skill://<disk-name>/SKILL.md
 //
 // where <disk-name> is the directory name on disk (colons in the
 // canonical id are normalized to hyphens — see new_skill.go). The
@@ -31,7 +32,7 @@ func registerSkillResources(s *server.MCPServer, projectDir string) {
 	s.AddResource(
 		mcp.NewResource("skill://list",
 			"Project-local skills",
-			mcp.WithResourceDescription("Every SKILL.md under .keystone/harness/skills/. URI form: skill://<name>/SKILL.md."),
+			mcp.WithResourceDescription("Every SKILL.md under .charter/skills/. URI form: skill://<name>/SKILL.md."),
 			mcp.WithMIMEType("application/json"),
 		),
 		func(ctx context.Context, req mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
@@ -106,11 +107,11 @@ type skillEntry struct {
 	description string // pulled from frontmatter if present
 }
 
-// walkSkills scans .keystone/harness/skills/ for SKILL.md files.
+// walkSkills scans .charter/skills/ for SKILL.md files.
 // Returns an empty slice if the directory does not exist (a fresh
 // install without authored skills still serves the resource API).
 func walkSkills(projectDir string) ([]skillEntry, error) {
-	root := filepath.Join(projectDir, kconfig.DefaultHarnessRoot, "skills")
+	root := filepath.Join(projectDir, kconfig.DefaultCharterRoot, "skills")
 	info, err := os.Stat(root)
 	if err != nil {
 		if os.IsNotExist(err) {

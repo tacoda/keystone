@@ -6,8 +6,8 @@
 ## Path convention
 
 ```
-harness/sensors/<name>.md                                     # project-owned
-harness/policies/<policy>/sensors/<name>.md                    # policy-owned (read-only)
+.charter/sensors/<name>.md                                   # project-owned
+.charter/policies/<policy>/sensors/<name>.md                  # policy-owned (read-only)
 ```
 
 Flat — no topic directory. Sensors are global by name across the cascade.

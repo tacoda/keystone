@@ -30,9 +30,9 @@ func printPolicyUsage(w *os.File) {
 	fmt.Fprint(w, `keystone policy — manage installed policies
 
 Usage:
-  keystone policy add <shorthand> [--name <n>] [--dir <path>] [--harness-root <name>]
-  keystone policy update <name> [@<new-version>] [--dir <path>] [--harness-root <name>]
-  keystone policy remove <name> [--dir <path>] [--harness-root <name>]
+  keystone policy add <shorthand> [--name <n>] [--dir <path>] [--charter-root <name>]
+  keystone policy update <name> [@<new-version>] [--dir <path>] [--charter-root <name>]
+  keystone policy remove <name> [--dir <path>] [--charter-root <name>]
   keystone policy help
 
 Commands:

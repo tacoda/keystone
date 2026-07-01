@@ -1,35 +1,42 @@
 # Keystone
 
-**Keystone is the agent harness framework.** A small Go toolchain — CLI + MCP
-server + localhost dashboard — that drops a structured, primitive-typed
-markdown harness into your repo and keeps it healthy. Once installed,
-neither tool is required at runtime. The harness is plain files; any agent
-that reads `.harness/INDEX.json` and the bodies it points at can operate
-the project.
+**Keystone is the agent charter framework** — **charter engineering**
+(a.k.a. **constraint engineering**) at the repository level: you author the
+standards that constrain your coding agents, per repo. A small Go toolchain — CLI + MCP server + localhost
+dashboard — that drops a structured, primitive-typed markdown **charter** into
+your repo and keeps it healthy. Once installed, neither tool is required at
+runtime. The charter is plain files; any agent that reads
+`.charter/INDEX.json` and the bodies it points at can operate the project.
 
-The CLI authors and maintains the harness. The MCP server dispatches the
-same harness to host agents (Claude Code, Cursor, Codex, opencode, …) over the
+A **harness** is the engine that runs the model — the coding agent (Claude
+Code, Cursor, Codex, opencode, …), the orchestrator, the runner. Keystone is
+not a harness. It manages the **charter**: the standards you *author* to
+constrain whatever harness runs, so each unique repo gets reliable, quality
+output. (Author the spec → charter. Be the engine → harness. See
+[`GLOSSARY.md`](GLOSSARY.md).)
+
+The CLI authors and maintains the charter. The MCP server dispatches the
+same charter to host agents (Claude Code, Cursor, Codex, opencode, …) over the
 model-context-protocol. The dashboard at `http://localhost:4773` gives a
 local operator view — metrics, insights, prune, eval runs.
-All three are convenience. The harness alone is enough.
+All three are convenience. The charter alone is enough.
 
 ```
 brew install tacoda/tap/keystone    # or grab a release binary
-keystone init                       # writes .harness/ + agent menu
-keystone index                      # emits .harness/INDEX.json
+keystone init                       # writes .charter/ + agent menu
+keystone index                      # emits .charter/INDEX.json
 keystone mcp install --agent claude-code   # one-line agent wiring
 keystone web serve                  # optional: open the dashboard
 ```
 
-## What's in the harness
+## What's in the charter
 
-`.harness/` holds **14 primitive kinds**:
+`.charter/` holds **13 primitive kinds**:
 
 | Kind         | What it is                                                            |
 | ------------ | --------------------------------------------------------------------- |
 | `guide`      | ambient, glob-scoped directive — inferential → `.claude/rules/` shim; computational → a host hook (LSP) |
-| `sensor`     | phase-gated check — inferential review (→ agent) or computational (→ hook) |
-| `hook`       | the deterministic fire layer: an `event:` → `run:` (shell) or `agent:` dispatch |
+| `sensor`     | a check that reacts to a signal or host phase (`on:`) — computational (`run:` → exit/HTTP status verdict) or inferential (agent review → schema); gates |
 | `agent`      | a role spawned as a subagent                                          |
 | `command`    | a unit of work / lifecycle step                                       |
 | `skill`      | a single composed capability                                          |
@@ -39,7 +46,7 @@ keystone web serve                  # optional: open the dashboard
 | `document`   | a governed output (plan / review / adr / retro / feature)             |
 | `concern`    | a composition mixin                                                   |
 | `posture`    | tool/permission posture → settings.json                               |
-| `tool`       | an author-defined callable (transport: cli \| mcp \| plugin)          |
+| `tool`       | an author-defined external callable (transport: cli \| http \| mcp \| plugin); on-demand, or a side-effect when it declares `on:` |
 | `eval`       | the eval harness                                                      |
 
 keystone is the model layer over host primitives: each kind adds
@@ -50,9 +57,21 @@ lacks. It projects to native paths (`.claude/skills/`, `.claude/agents/`,
 Every primitive carries canonical frontmatter — `kind`, `id`,
 `description`, plus per-kind fields (`globs`, `phase`, `triggers`,
 `tier`, `mode`, `event`, `run`, `agent`, `returns`, `tools`, `corpus`,
-`includes`, …). The walker emits a single `.harness/INDEX.json` listing
+`includes`, …). The walker emits a single `.charter/INDEX.json` listing
 every primitive's descriptor; agents read the index first and open
 bodies only when their activation conditions match.
+
+## Signals
+
+A **signal** is a keystone framework event the host can't see — the
+extensible, higher-level counterpart to a host hook phase. A primitive
+subscribes to one via `on:` (like a skill declares `triggers:`): a
+`sensor` runs a check, a `tool` fires a side-effect, an `agent` runs a
+review. Host phases (`PreToolUse`, `Stop`, …) are a closed set bridged
+into the host; **any other `on:` value is a signal**, so projects define
+their own — declare them in `keystone.json` `signals:` and fire with
+`keystone signal fire <name>` (`keystone signal list` to discover). The
+`hook` kind is retired — reactions self-subscribe.
 
 ## The contract: rules → corpus → ask
 
@@ -73,16 +92,21 @@ block and in `guides/process/runtime-resolution.md`.
 | Verb                     | What it does                                                                  |
 | ------------------------ | ----------------------------------------------------------------------------- |
 | `keystone init`          | Minimum-friction scaffold. One question (agent target) or zero with `--agent`. |
-| `keystone index`         | Walk `.harness/`, emit `INDEX.json`.                                  |
+| `keystone index`         | Walk `.charter/`, emit `INDEX.json`.                                  |
 | `keystone lint`          | Validate primitive frontmatter; required fields per kind, deps integrity.      |
 | `keystone project`       | Regenerate `.claude/` / `.cursor/` host projections from canonical sources.    |
 | `keystone verify`        | Cascade + policy-drift check.                                                  |
-| `keystone migrate`       | Version-to-version harness upgrade (… → 3.0). Idempotent.                                    |
-| `keystone new <kind>`    | Scaffold any of the 14 primitive kinds + adapter + policy.                     |
+| `keystone charter coverage` | Which project files no guide governs ("uncharted territory").               |
+| `keystone charter show`  | Charter roster; `--effective` resolves the post-cascade winning set.           |
+| `keystone explain <id>`  | Explain a primitive — how it activates, what it links to, uncommitted changes. |
+| `keystone charter conformance` | Rubric — does the repo conform to its charter? (cascade/validity/pairing/coverage) |
+| `keystone signal fire\|list` | Fire or list signals (extensible framework events).                        |
+| `keystone migrate`       | Version-to-version charter upgrade (… → 4.0). Idempotent.                                    |
+| `keystone new <kind>`    | Scaffold any of the 13 primitive kinds + adapter + policy.                     |
 | `keystone search <q>`    | Full-text search across every primitive.                                       |
 | `keystone graph`         | Render the primitive-relationship graph (Mermaid or DOT).                      |
 | `keystone watch`         | fsnotify loop: index + project + lint on change.                               |
-| `keystone snapshot`      | Save / list / restore tarballs of `.harness/` for safe experiments.           |
+| `keystone snapshot`      | Save / list / restore tarballs of `.charter/` for safe experiments.           |
 | `keystone eval run`      | Run static + sensor evals. `--baseline <ref>` for regression diffs.            |
 | `keystone policy`        | Add / update / remove vendored policies.                                       |
 | `keystone mcp serve`     | Launch the MCP server over stdio (host-launched).                              |
@@ -107,14 +131,14 @@ Tool surface:
 - **Eval** — `keystone_eval_list`, `keystone_eval_run`, `keystone_eval_report`,
   `keystone_eval_baseline`
 - **Write** — `keystone_new_<kind>` for every kind, plus
-  `keystone_harness_bootstrap`, `keystone_target_add`,
+  `keystone_charter_bootstrap`, `keystone_target_add`,
   `keystone_index_refresh`, `keystone_project_refresh`
 
 Resource surface:
 
 - `keystone://index` — full `INDEX.json`
 - `keystone://primitive/{kind}/{id}` — one body
-- `keystone://harness/status` — install audit
+- `keystone://charter/status` — install audit
 - `skill://list`, `skill://{name}/SKILL.md` — auto-discovery
 
 Prompt surface: `keystone_bootstrap`, `keystone_task`, `keystone_audit`,
@@ -130,7 +154,7 @@ Pages:
 
 - **home** — counts by kind
 - **metrics** — primitive counts, lint stats, freshness, index health
-- **insights** — suggested actions to improve harness performance
+- **insights** — suggested actions to improve charter performance
 - **primitives** — table w/ kind + glob filter; detail page w/
   cross-references
 - **policies** — list + add/remove
@@ -141,15 +165,15 @@ Pages:
 - **inbox** — walk learning candidates, accept/reject
 - **flywheels** — copy-paste invocations for learn / synthesize / audit
 - **evals** — declared evals + run button + report fragment
-- **search** — HTMX-live full-text across the harness
+- **search** — HTMX-live full-text across the charter
 - **graph** — Mermaid-rendered dependency graph
 
-SSE push at `/events` swaps fragments when files in `.harness/` change.
+SSE push at `/events` swaps fragments when files in `.charter/` change.
 REST API under `/api/` is read-only.
 
 ## Policies
 
-Vendored harness fragments — declared in `keystone.json`, pinned by
+Vendored charter fragments — declared in `keystone.json`, pinned by
 version, hash-verified, drift-reset on `keystone verify`. A policy can
 ship any primitive kind; the project layer always wins by default.
 Cascade order: project wins; nested policies refine outer; `strict`
@@ -161,9 +185,9 @@ keystone policy add tacoda/tacoda-org@v2.0.0
 
 ## After install, the tools are optional
 
-The harness is markdown on disk. An agent that reads
-`.harness/INDEX.json` plus the primitive bodies it points at can
-operate the harness without keystone installed. The CLI helps you
+The charter is markdown on disk. An agent that reads
+`.charter/INDEX.json` plus the primitive bodies it points at can
+operate the charter without keystone installed. The CLI helps you
 author + maintain; the MCP server gives the agent structured access;
 the dashboard gives you a local operator view. None are runtime
 dependencies.
@@ -171,14 +195,14 @@ dependencies.
 ## License
 
 MIT. See [`LICENSE`](LICENSE). Contributions welcome — see
-[`CONTRIBUTING.md`](CONTRIBUTING.md).
+[`CONTRIBUTING.md`](CONTRIBUTING.md). Project + charter-amendment
+governance is in [`GOVERNANCE.md`](GOVERNANCE.md).
 
 ---
 
-**Migration from 1.x:** run `keystone migrate` once. It moves
-`harness/` to `.harness/`, lifts `keystone.lock` to
-`.harness/lockfile.json`, renames `plugins/` → `policies/` (and
-`keystone-plugin.json` → `keystone-policy.json`), rewrites
-`keystone.json` to v2 schema, regenerates `INDEX.json` and host
-projections. Idempotent — safe to re-run. Backup first via
-`keystone snapshot save --label pre-2.0`.
+**Migration to 4.0:** run `keystone migrate` once. It brings any prior
+layout up to current — most notably 4.0 renames `.harness/` to
+`.charter/` (and `HARNESS.md` → `CHARTER.md`), rewrites `keystone.json`
+references, and regenerates `INDEX.json` and host projections.
+Idempotent — safe to re-run. Backup first via
+`keystone snapshot save --label pre-4.0`.

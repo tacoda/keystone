@@ -14,23 +14,23 @@ import (
 	"github.com/tacoda/keystone/internal/framework/primitive"
 )
 
-// MetricsSnapshot is the per-request view of harness health. Cheap
-// to compute — walks the harness once, no caching.
+// MetricsSnapshot is the per-request view of charter health. Cheap
+// to compute — walks the charter once, no caching.
 type MetricsSnapshot struct {
-	ProjectDir     string             `json:"project_dir"`
-	Generated      string             `json:"generated"`
-	PrimitiveTotal int                `json:"primitive_total"`
-	ByKind         map[string]int     `json:"by_kind"`
-	LintErrors     int                `json:"lint_errors"`
-	LintWarnings   int                `json:"lint_warnings"`
-	Freshness      []FreshnessEntry   `json:"freshness"`
-	IndexFresh     bool               `json:"index_fresh"`
-	IndexFile      string             `json:"index_file"`
-	IndexAge       string             `json:"index_age,omitempty"`
+	ProjectDir     string           `json:"project_dir"`
+	Generated      string           `json:"generated"`
+	PrimitiveTotal int              `json:"primitive_total"`
+	ByKind         map[string]int   `json:"by_kind"`
+	LintErrors     int              `json:"lint_errors"`
+	LintWarnings   int              `json:"lint_warnings"`
+	Freshness      []FreshnessEntry `json:"freshness"`
+	IndexFresh     bool             `json:"index_fresh"`
+	IndexFile      string           `json:"index_file"`
+	IndexAge       string           `json:"index_age,omitempty"`
 }
 
 // FreshnessEntry reports the most-recently-modified primitive per
-// kind. Useful for spotting work-in-progress areas of the harness
+// kind. Useful for spotting work-in-progress areas of the charter
 // at a glance.
 type FreshnessEntry struct {
 	Kind     string `json:"kind"`
@@ -92,7 +92,7 @@ func (s *server) collectMetrics(ctx context.Context) (*MetricsSnapshot, error) {
 		}
 	}
 
-	indexPath := filepath.Join(s.projectDir, kconfig.KeystoneDir(kconfig.DefaultHarnessRoot), kconfig.IndexName)
+	indexPath := filepath.Join(s.projectDir, kconfig.KeystoneDir(kconfig.DefaultCharterRoot), kconfig.IndexName)
 	indexFresh := false
 	indexAge := ""
 	if info, err := os.Stat(indexPath); err == nil {
@@ -153,7 +153,7 @@ func (s *server) apiMetrics(w http.ResponseWriter, r *http.Request) {
 func humanizeDuration(d time.Duration) string {
 	switch {
 	case d < time.Minute:
-		return strings.TrimSuffix(strings.TrimSuffix((d / time.Second).String()+"s", "0s"), "s") + "s"
+		return strings.TrimSuffix(strings.TrimSuffix((d/time.Second).String()+"s", "0s"), "s") + "s"
 	case d < time.Hour:
 		return (d / time.Minute).String() + "m"
 	case d < 24*time.Hour:

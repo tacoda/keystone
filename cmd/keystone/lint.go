@@ -12,7 +12,7 @@ import (
 
 // runLint handles `keystone lint [--dir <path>]`.
 //
-// Walks every primitive under .keystone/harness/, parses frontmatter,
+// Walks every primitive under .charter/, parses frontmatter,
 // runs Lint(), prints findings, and exits non-zero on any error-level
 // finding. Warnings are reported but never block the exit.
 func runLint(args []string) error {
@@ -45,9 +45,9 @@ func runLint(args []string) error {
 	if err != nil {
 		return fmt.Errorf("resolve dir: %w", err)
 	}
-	harnessRoot := config.DefaultHarnessRoot
+	charterRoot := config.DefaultCharterRoot
 
-	primitives, warnings, err := primitive.Walk(absDir, harnessRoot)
+	primitives, warnings, err := primitive.Walk(absDir, charterRoot)
 	if err != nil {
 		return err
 	}
@@ -97,14 +97,14 @@ func printLintUsage(w *os.File) {
 Usage:
   keystone lint [--dir <path>] [--verbose]
 
-Walks every canonical primitive under .keystone/harness/, checks each
+Walks every canonical primitive under .charter/, checks each
 file's frontmatter against the canonical schema, and reports any
 violations. Exits non-zero on any error-level finding.
 
 Hard errors (block exit):
   - missing kind / id / description
   - unknown kind value
-  - duplicate (kind, id) across the harness
+  - duplicate (kind, id) across the charter
   - empty globs entry
   - skill missing triggers, subagent missing tools
 

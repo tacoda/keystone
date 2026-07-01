@@ -17,9 +17,9 @@ import (
 // renders. Each layer (project + each declared policy) carries the
 // primitives it ships; strict items are flagged per policy.
 type PolicyInventory struct {
-	ProjectDir   string         `json:"project_dir"`
-	Layers       []LayerEntry   `json:"layers"`
-	Search       string         `json:"search,omitempty"`
+	ProjectDir string       `json:"project_dir"`
+	Layers     []LayerEntry `json:"layers"`
+	Search     string       `json:"search,omitempty"`
 }
 
 // LayerEntry is one cascade layer — either the project or a named
@@ -49,7 +49,7 @@ func (s *server) collectInventory(_ context.Context, search string) (*PolicyInve
 	needle := strings.ToLower(strings.TrimSpace(search))
 
 	// Project layer.
-	projectPrimitives, _, err := s.primitiveCache.getLayer(config.DefaultHarnessRoot)
+	projectPrimitives, _, err := s.primitiveCache.getLayer(config.DefaultCharterRoot)
 	if err != nil {
 		return nil, err
 	}
@@ -65,7 +65,7 @@ func (s *server) collectInventory(_ context.Context, search string) (*PolicyInve
 		return inv, nil
 	}
 	for _, p := range flattenPolicies(cfg.Policies) {
-		policyRoot := filepath.Join(config.DefaultHarnessRoot, policies.PolicyRoot, p.Name)
+		policyRoot := filepath.Join(config.DefaultCharterRoot, policies.PolicyRoot, p.Name)
 		// getLayer returns nil + err on a missing vendored tree; we
 		// surface that as zero primitives, mirroring the previous
 		// per-call Walk behavior.

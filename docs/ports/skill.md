@@ -6,8 +6,8 @@
 ## Path convention
 
 ```
-harness/skills/<slug>/SKILL.md                                # project-owned
-harness/policies/<policy>/skills/<slug>/SKILL.md               # policy-owned (read-only)
+.charter/skills/<slug>/SKILL.md                              # project-owned
+.charter/policies/<policy>/skills/<slug>/SKILL.md             # policy-owned (read-only)
 ```
 
 A skill is a folder (`<slug>/`) holding `SKILL.md`. The slug becomes the host-native skill id.
@@ -41,7 +41,7 @@ Project wins by default; among policies, deeper-nested refines outer. `strict.sk
 
 ## Example
 
-See `harness/skills/keystone-bootstrap/SKILL.md`.
+See `.charter/skills/keystone-bootstrap/SKILL.md`.
 
 ## Authoring
 

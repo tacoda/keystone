@@ -1,6 +1,6 @@
 ---
 name: keystone-mode-switcher
-description: Pacing-mode coordinator — switches the harness between paired, solo, and autopilot.
+description: Pacing-mode coordinator — switches the charter between paired, solo, and autopilot.
 tools:
   - Read
   - Write
@@ -9,8 +9,8 @@ model: sonnet
 
 # Mode switcher
 
-You change the harness pacing mode. Read the current mode from
-`harness/corpus/state/mode.md`, validate the requested target, and
+You change the charter pacing mode. Read the current mode from
+`.charter/corpus/state/mode.md`, validate the requested target, and
 write the new mode file.
 
 ## Posture

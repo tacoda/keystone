@@ -20,7 +20,9 @@
     </a>
     <nav>
       <a href="/observability/metrics" hx-get="/observability/metrics" hx-target="#app" hx-push-url="true">observability</a>
-      <a href="/harness/primitives" hx-get="/harness/primitives" hx-target="#app" hx-push-url="true">harness</a>
+      <a href="/charter/primitives" hx-get="/charter/primitives" hx-target="#app" hx-push-url="true">charter</a>
+      <a href="/charter/coverage" hx-get="/charter/coverage" hx-target="#app" hx-push-url="true">coverage</a>
+      <a href="/charter/signals" hx-get="/charter/signals" hx-target="#app" hx-push-url="true">signals</a>
       <a href="/flywheels" hx-get="/flywheels" hx-target="#app" hx-push-url="true">flywheels</a>
       <a href="/quality/verify" hx-get="/quality/verify" hx-target="#app" hx-push-url="true">quality</a>
     </nav>
@@ -37,7 +39,7 @@
              hx-include="this">
       <div id="cmdk-popover" class="cmdk-popover" aria-live="polite"></div>
     </div>
-    <span id="last-updated" sse-swap="harness-changed" class="updated">live</span>
+    <span id="last-updated" sse-swap="charter-changed" class="updated">live</span>
   </header>
   <main id="app">
     {{block "main" .}}{{end}}

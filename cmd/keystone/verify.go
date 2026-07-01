@@ -29,9 +29,9 @@ import (
 // protocol JSON from stdin when present (tool_input.file_path,
 // tool_input.content, command). Exit codes follow the hook protocol:
 //
-//   0  pass / advisory
-//   2  block with the sensor's Message rendered to stderr
-//   1  internal error
+//	0  pass / advisory
+//	2  block with the sensor's Message rendered to stderr
+//	1  internal error
 func runVerify(args []string) error {
 	dir := "."
 	sensorID := ""
@@ -72,7 +72,7 @@ func runVerify(args []string) error {
 	if err != nil {
 		return fmt.Errorf("resolve dir: %w", err)
 	}
-	harnessRoot := config.DefaultHarnessRoot
+	charterRoot := config.DefaultCharterRoot
 
 	cfg, err := config.ReadProjectConfig(absDir)
 	if err != nil {
@@ -82,7 +82,7 @@ func runVerify(args []string) error {
 		return err
 	}
 
-	lf, err := lockfile.Read(absDir, harnessRoot)
+	lf, err := lockfile.Read(absDir, charterRoot)
 	if err != nil {
 		return err
 	}
@@ -103,7 +103,7 @@ func runVerify(args []string) error {
 			for _, f := range d.Files {
 				fmt.Fprintf(os.Stdout, "      - %s (%s)\n", f.Path, f.Kind)
 			}
-			if err := policies.Reset(d.Policy, absDir, harnessRoot); err != nil {
+			if err := policies.Reset(d.Policy, absDir, charterRoot); err != nil {
 				return fmt.Errorf("reset %s: %w", d.Policy, err)
 			}
 		}

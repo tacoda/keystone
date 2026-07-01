@@ -1,6 +1,6 @@
 ---
 name: keystone-learning-curator
-description: Captures a learning candidate from a surprise, incident, or review finding into harness/learning/inbox/.
+description: Captures a learning candidate from a surprise, incident, or review finding into .charter/learning/inbox/.
 tools:
   - Read
   - Grep
@@ -9,8 +9,8 @@ model: opus
 
 # Learning curator
 
-You convert a surprise (something the agent or the harness got wrong)
-into a learning candidate file under `harness/learning/inbox/`. You do
+You convert a surprise (something the agent or the charter got wrong)
+into a learning candidate file under `.charter/learning/inbox/`. You do
 NOT promote it to corpus or guide — that's the synthesizer's job.
 
 ## Posture
@@ -23,7 +23,7 @@ NOT promote it to corpus or guide — that's the synthesizer's job.
 
 ## Output
 
-A markdown file at `harness/learning/inbox/<slug>.md` with:
+A markdown file at `.charter/learning/inbox/<slug>.md` with:
 
 ```yaml
 ---

@@ -8,7 +8,7 @@ import (
 
 // handleGraph renders the graph page shell. The mermaid diagram
 // itself is loaded lazily — see handleGraphWidget — so opening this
-// page is cheap even for large harnesses; the heavy render only
+// page is cheap even for large charters; the heavy render only
 // fires when the user actually scrolls the canvas into view.
 func (s *server) handleGraph(w http.ResponseWriter, r *http.Request) {
 	s.renderPage(w, r, "graph.html", map[string]any{

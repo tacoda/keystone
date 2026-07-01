@@ -7,22 +7,22 @@ import (
 
 // sseTopic is the SSE `event:` name a watcher publish carries. Each
 // live dashboard widget subscribes to the narrowest topic it cares
-// about. `harness-changed` is the coarse fallback every change
+// about. `charter-changed` is the coarse fallback every change
 // emits, so generic listeners always update.
 type sseTopic string
 
 const (
-	topicHarness     sseTopic = "harness-changed"
-	topicPrimitives  sseTopic = "primitives-changed"
-	topicInbox       sseTopic = "inbox-changed"
-	topicPrune       sseTopic = "prune-changed"
+	topicCharter    sseTopic = "charter-changed"
+	topicPrimitives sseTopic = "primitives-changed"
+	topicInbox      sseTopic = "inbox-changed"
+	topicPrune      sseTopic = "prune-changed"
 )
 
 // topicsForPath classifies a single dirty path into the SSE topics
-// it should emit. The coarse `harness-changed` topic is always
+// it should emit. The coarse `charter-changed` topic is always
 // present, so widgets that don't care which subsystem moved still
 // fire. Multiple narrow topics may also apply — e.g. a touch to
-// `policies/<x>/.keystone/...` is `primitives-changed` (the
+// `policies/<x>/.charter/...` is `primitives-changed` (the
 // primitives a policy ships moved).
 //
 // Paths are matched on forward-slash form so the classification is
@@ -31,19 +31,21 @@ func topicsForPath(projectDir, path string) []sseTopic {
 	rel := relPath(projectDir, path)
 	rel = filepath.ToSlash(rel)
 
-	out := []sseTopic{topicHarness}
+	out := []sseTopic{topicCharter}
 
 	switch {
 	case strings.Contains(rel, "/learning/inbox/") || strings.HasSuffix(rel, "/learning/inbox"):
 		out = append(out, topicInbox, topicPrimitives)
-	case strings.Contains(rel, "/.keystone/policies/") || strings.Contains(rel, "/policies/"):
+	case strings.Contains(rel, "/.charter/policies/") || strings.Contains(rel, "/policies/"):
 		out = append(out, topicPrimitives)
 	case strings.HasSuffix(rel, "/INDEX.json") || strings.HasSuffix(rel, "INDEX.json"):
 		out = append(out, topicPrimitives)
-	case strings.Contains(rel, "/.keystone/harness/") || strings.HasPrefix(rel, ".keystone/harness/"):
-		out = append(out, topicPrimitives)
+	// Specific files under the charter root must match before the generic
+	// charter-dir case below — the lockfile lives at .charter/lockfile.json.
 	case strings.Contains(rel, "/prune") || strings.HasSuffix(rel, "lockfile.json"):
 		out = append(out, topicPrune)
+	case strings.Contains(rel, "/.charter/") || strings.HasPrefix(rel, ".charter/"):
+		out = append(out, topicPrimitives)
 	}
 
 	return out
@@ -60,7 +62,7 @@ func relPath(projectDir, path string) string {
 }
 
 // unionTopics collapses a list of per-path topic slices into a
-// stable, de-duplicated set. `harness-changed` always sorts first;
+// stable, de-duplicated set. `charter-changed` always sorts first;
 // the rest sort alphabetically. Order is for testability — the
 // SSE hub does not care about order.
 func unionTopics(perPath [][]sseTopic) []sseTopic {
@@ -74,9 +76,9 @@ func unionTopics(perPath [][]sseTopic) []sseTopic {
 		return nil
 	}
 	out := make([]sseTopic, 0, len(seen))
-	if _, ok := seen[topicHarness]; ok {
-		out = append(out, topicHarness)
-		delete(seen, topicHarness)
+	if _, ok := seen[topicCharter]; ok {
+		out = append(out, topicCharter)
+		delete(seen, topicCharter)
 	}
 	rest := make([]sseTopic, 0, len(seen))
 	for t := range seen {

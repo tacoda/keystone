@@ -3,7 +3,7 @@
 {{define "main"}}
 <section class="card">
   <h1>prune</h1>
-  <p class="muted">The pruning flywheel finds candidates the harness could lose without giving anything up. Each row gets a one-click prune — the underlying file is deleted, INDEX.json refreshes, the row disappears.</p>
+  <p class="muted">The pruning flywheel finds candidates the charter could lose without giving anything up. Each row gets a one-click prune — the underlying file is deleted, INDEX.json refreshes, the row disappears.</p>
 
   <div class="stats">
     <div class="stat"><div class="label">errors</div><div class="value bad">{{index .Counts "error"}}</div></div>
@@ -24,7 +24,7 @@
           {{else}}<span class="pill" style="background:var(--bg-3);color:var(--muted);">info</span>{{end}}
         </td>
         <td><span class="kind-tag {{.Kind}}">{{.Kind}}</span></td>
-        <td><a href="/harness/primitives/{{.Kind}}/{{.ID}}">{{.ID}}</a></td>
+        <td><a href="/charter/primitives/{{.Kind}}/{{.ID}}">{{.ID}}</a></td>
         <td class="muted">{{.Reason}}</td>
         <td>
           <form hx-post="/web/actions/primitives/delete" hx-confirm="Prune {{.Kind}}/{{.ID}}? Deletes {{.Path}}." hx-disabled-elt="find button">
@@ -38,7 +38,7 @@
     </tbody>
   </table>
   {{else}}
-  <p class="muted">no candidates — the harness is lean.</p>
+  <p class="muted">no candidates — the charter is lean.</p>
   {{end}}
 </section>
 

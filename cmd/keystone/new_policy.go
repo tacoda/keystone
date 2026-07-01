@@ -10,7 +10,7 @@ import (
 
 // runNewPolicy scaffolds a NEW POLICY REPO — a separate directory the
 // author will publish to git. Different from the in-project generators,
-// which write inside an existing harness.
+// which write inside an existing charter.
 func runNewPolicy(args []string) error {
 	dir := "."
 	var positional []string

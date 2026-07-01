@@ -42,11 +42,12 @@ type hookFireOpts struct {
 	event, phase, command, typ, dir string
 }
 
-// runHookFire selects every `kind: hook` bound to the given event and acts on
-// it: computational hooks run their `run:` script (in parallel; any non-zero
-// exit blocks), inferential hooks are emitted as a dispatch manifest for the
-// host orchestrator to spawn. keystone cannot invoke an LLM itself, so the
-// inferential side surfaces *what* to dispatch, not the result.
+// runHookFire selects every primitive subscribed (via `on:`) to the given
+// event and acts on it: computational subscribers run their `run:` script
+// (in parallel; any non-zero exit blocks), inferential ones are emitted as a
+// dispatch manifest for the host orchestrator to spawn. keystone cannot
+// invoke an LLM itself, so the inferential side surfaces *what* to dispatch,
+// not the result. Shared by `keystone signal fire` and the `hook fire` alias.
 func runHookFire(args []string) error {
 	opts, err := parseHookFire(args)
 	if err != nil {
@@ -56,7 +57,7 @@ func runHookFire(args []string) error {
 	if err != nil {
 		return fmt.Errorf("resolve dir: %w", err)
 	}
-	primitives, _, err := primitive.Walk(absDir, config.DefaultHarnessRoot)
+	primitives, _, err := primitive.Walk(absDir, config.DefaultCharterRoot)
 	if err != nil {
 		return err
 	}
@@ -191,12 +192,14 @@ Usage:
 
     keystone hook fire <event> [--phase X] [--command Y] [--type Z] [--dir D]
 
-Dispatches every `+"`kind: hook`"+` bound to <event>. Computational hooks run
-their `+"`run:`"+` script in parallel (any non-zero exit blocks); inferential
-hooks are listed as a dispatch manifest for the host to spawn.
+Dispatches every primitive subscribed (`+"`on:`"+`) to <event>. Computational
+subscribers run their `+"`run:`"+` script in parallel (any non-zero exit blocks);
+inferential ones are listed as a dispatch manifest for the host to spawn.
 
-Framework events: pre-command, post-command, pre-playbook, post-playbook,
-on-gate, pre-verify, post-verify, on-phase-enter, on-phase-exit. Host phases
-(PreToolUse, …) reach this command through the single settings.json bridge.
+<event> is a keystone signal (framework event) or a host phase. Signals are
+open + extensible — see `+"`keystone signal list`"+` for the built-ins and any
+project-declared ones. `+"`keystone signal fire`"+` is the preferred spelling;
+this verb is kept as an alias. Host phases (PreToolUse, …) reach this command
+through the single settings.json bridge.
 `)
 }

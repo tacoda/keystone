@@ -19,8 +19,8 @@ const (
 // RenderGraph builds the primitive-relationship graph and serializes
 // it in the requested format. Edges:
 //
-//   deps:   <p> --deps--> <target>
-//   traces: <p> --traces--> <corpus/target>
+//	deps:   <p> --deps--> <target>
+//	traces: <p> --traces--> <corpus/target>
 //
 // Nodes are kept compact: `<kind>/<id>` is the canonical name; the
 // `kind` value also drives the CSS / Mermaid class so the dashboard

@@ -23,12 +23,12 @@ sensors against the in-progress diff:
 Each sensor returns a structured finding list. Semantic check — runs
 after computational sensors (lint / type / test / build) pass.
 
-Canonical playbook: `.keystone/harness/actions/review.md`. Full
-discipline at `.keystone/harness/guides/process/review.md`.
+Canonical playbook: `.charter/actions/review.md`. Full
+discipline at `.charter/guides/process/review.md`.
 
 ## Run
 
-Open `.keystone/harness/actions/review.md` and execute every activity.
+Open `.charter/actions/review.md` and execute every activity.
 
 ## When to trigger
 

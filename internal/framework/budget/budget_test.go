@@ -30,27 +30,27 @@ func TestEstimate(t *testing.T) {
 
 func TestPortForPath(t *testing.T) {
 	tests := []struct {
-		rel       string
-		harness   string
-		wantPort  string
+		rel      string
+		charter  string
+		wantPort string
 	}{
-		{"harness/guides/process/spec.md", "harness", "guides"},
-		{"harness/corpus/principles/tdd.md", "harness", "corpus"},
-		{"harness/sensors/build.md", "harness", "sensors"},
-		{"harness/actions/spec.md", "harness", "actions"},
-		{"harness/playbooks/task.md", "harness", "playbooks"},
-		{"harness/adapters/claude-code/lifecycle.md", "harness", "adapters"},
-		{"harness/learning/inbox/X.md", "harness", ""},
-		{"harness/archive/X.md", "harness", ""},
-		{"harness/README.md", "harness", ""},
-		{"harness/policies/X/guides/Y.md", "harness", ""}, // policies/ has its own logic; not a port
+		{"charter/guides/process/spec.md", "charter", "guides"},
+		{"charter/corpus/principles/tdd.md", "charter", "corpus"},
+		{"charter/sensors/build.md", "charter", "sensors"},
+		{"charter/actions/spec.md", "charter", "actions"},
+		{"charter/playbooks/task.md", "charter", "playbooks"},
+		{"charter/adapters/claude-code/lifecycle.md", "charter", "adapters"},
+		{"charter/learning/inbox/X.md", "charter", ""},
+		{"charter/archive/X.md", "charter", ""},
+		{"charter/README.md", "charter", ""},
+		{"charter/policies/X/guides/Y.md", "charter", ""}, // policies/ has its own logic; not a port
 		{"custom/guides/X.md", "custom", "guides"},
-		{"other/guides/X.md", "harness", ""}, // wrong harness root
+		{"other/guides/X.md", "charter", ""}, // wrong charter root
 	}
 	for _, tt := range tests {
 		t.Run(tt.rel, func(t *testing.T) {
-			if got := PortForPath(tt.rel, tt.harness); got != tt.wantPort {
-				t.Errorf("PortForPath(%q, %q) = %q, want %q", tt.rel, tt.harness, got, tt.wantPort)
+			if got := PortForPath(tt.rel, tt.charter); got != tt.wantPort {
+				t.Errorf("PortForPath(%q, %q) = %q, want %q", tt.rel, tt.charter, got, tt.wantPort)
 			}
 		})
 	}
@@ -58,10 +58,10 @@ func TestPortForPath(t *testing.T) {
 
 func TestAllocator_Report(t *testing.T) {
 	a := NewAllocator()
-	a.Add("guides", "harness/guides/a.md", 100)
-	a.Add("guides", "harness/guides/b.md", 50)
-	a.Add("guides", "harness/guides/c.md", 200)
-	a.Add("corpus", "harness/corpus/x.md", 1000)
+	a.Add("guides", "charter/guides/a.md", 100)
+	a.Add("guides", "charter/guides/b.md", 50)
+	a.Add("guides", "charter/guides/c.md", 200)
+	a.Add("corpus", "charter/corpus/x.md", 1000)
 
 	cfg := &config.ProjectConfig{
 		Budgets: map[string]config.BudgetSpec{
@@ -102,14 +102,14 @@ func TestAllocator_Report(t *testing.T) {
 	if len(g.TopFiles) != 2 {
 		t.Errorf("expected 2 top files, got %d", len(g.TopFiles))
 	}
-	if g.TopFiles[0].Path != "harness/guides/c.md" || g.TopFiles[0].Tokens != 200 {
+	if g.TopFiles[0].Path != "charter/guides/c.md" || g.TopFiles[0].Tokens != 200 {
 		t.Errorf("top file [0]: %+v", g.TopFiles[0])
 	}
 }
 
 func TestAllocator_NoBudget(t *testing.T) {
 	a := NewAllocator()
-	a.Add("sensors", "harness/sensors/x.md", 500)
+	a.Add("sensors", "charter/sensors/x.md", 500)
 	rep := a.Report(nil, 0)
 	if len(rep) != 1 {
 		t.Fatalf("got %d reports", len(rep))

@@ -10,7 +10,7 @@ import (
 // rule (a glob-scoped directive) and a paired corpus stub the rule
 // cites via `corpus:`.
 func runNewRule(args []string) error {
-	projectDir, harnessRoot, remaining, err := parseDirAndHarnessRoot(args)
+	projectDir, charterRoot, remaining, err := parseDirAndCharterRoot(args)
 	if err != nil {
 		return err
 	}
@@ -24,8 +24,8 @@ func runNewRule(args []string) error {
 
 	ruleRel := filepath.Join("rules", topic, name+".md")
 	corpusRel := filepath.Join("corpus", topic, name+".md")
-	rulePath := filepath.Join(projectDir, harnessRoot, ruleRel)
-	corpusPath := filepath.Join(projectDir, harnessRoot, corpusRel)
+	rulePath := filepath.Join(projectDir, charterRoot, ruleRel)
+	corpusPath := filepath.Join(projectDir, charterRoot, corpusRel)
 
 	title := titleize(name)
 	id := "rules/" + topic + "/" + name
@@ -84,7 +84,7 @@ Back to the rules: [`+"`%s`"+`](%s).
 // only the corpus file; useful when the guide already exists or the
 // corpus stands alone (rare).
 func runNewCorpus(args []string) error {
-	projectDir, harnessRoot, remaining, err := parseDirAndHarnessRoot(args)
+	projectDir, charterRoot, remaining, err := parseDirAndCharterRoot(args)
 	if err != nil {
 		return err
 	}
@@ -97,7 +97,7 @@ func runNewCorpus(args []string) error {
 	}
 	corpusRel := filepath.Join("corpus", topic, name+".md")
 	ruleRel := filepath.Join("rules", topic, name+".md")
-	corpusPath := filepath.Join(projectDir, harnessRoot, corpusRel)
+	corpusPath := filepath.Join(projectDir, charterRoot, corpusRel)
 	title := titleize(name)
 	body := fmt.Sprintf(`# %s — reasoning
 

@@ -11,7 +11,7 @@ import (
 
 func TestRead_MissingReturnsEmpty(t *testing.T) {
 	dir := t.TempDir()
-	lf, err := Read(dir, config.DefaultHarnessRoot)
+	lf, err := Read(dir, config.DefaultCharterRoot)
 	if err != nil {
 		t.Fatalf("Read on missing file: %v", err)
 	}
@@ -40,19 +40,19 @@ func TestWriteRead_Roundtrip(t *testing.T) {
 				ResolvedSHA:   "deadbeef00000000000000000000000000000000",
 				PolicyVersion: "0.2.0",
 				Version:       "0.2.0",
-				Files:         map[string]string{"harness/policies/tacoda-org/guides/x.md": "sha256:abc"},
+				Files:         map[string]string{"charter/policies/tacoda-org/guides/x.md": "sha256:abc"},
 			},
 		},
 	}
-	if err := Write(dir, config.DefaultHarnessRoot, in); err != nil {
+	if err := Write(dir, config.DefaultCharterRoot, in); err != nil {
 		t.Fatalf("Write: %v", err)
 	}
-	rel := RelPath(config.DefaultHarnessRoot)
+	rel := RelPath(config.DefaultCharterRoot)
 	if _, err := os.Stat(filepath.Join(dir, rel)); err != nil {
 		t.Fatalf("expected file at %s: %v", rel, err)
 	}
 
-	out, err := Read(dir, config.DefaultHarnessRoot)
+	out, err := Read(dir, config.DefaultCharterRoot)
 	if err != nil {
 		t.Fatalf("Read: %v", err)
 	}

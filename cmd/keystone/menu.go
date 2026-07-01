@@ -91,7 +91,7 @@ func installMenuFile(assets fs.FS, agent, destDir string) (string, error) {
 	return rel, nil
 }
 
-// mergeMenuSection returns the existing file content with the bracketed harness
+// mergeMenuSection returns the existing file content with the bracketed charter
 // block inserted (or refreshed). The function is pure — no I/O — so it's
 // straightforward to unit-test.
 func mergeMenuSection(existing, bracketed string) string {

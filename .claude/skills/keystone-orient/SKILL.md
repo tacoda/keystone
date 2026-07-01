@@ -13,17 +13,17 @@ model: opus
 # keystone:orient — planning phase
 
 Phase 2 of the six-phase lifecycle. Loads
-`.keystone/harness/corpus/state/CODEBASE_STATE.md`, the matching idioms
+`.charter/corpus/state/CODEBASE_STATE.md`, the matching idioms
 for the touched region from `corpus/idioms/<stack>/`, and the relevant
 process guides. Output is a written plan the agent and user agree on
 before implementation starts.
 
-Canonical playbook: `.keystone/harness/actions/orient.md`. Full
-discipline at `.keystone/harness/guides/process/planning.md`.
+Canonical playbook: `.charter/actions/orient.md`. Full
+discipline at `.charter/guides/process/planning.md`.
 
 ## Run
 
-Open `.keystone/harness/actions/orient.md` and execute every activity.
+Open `.charter/actions/orient.md` and execute every activity.
 
 ## When to trigger
 

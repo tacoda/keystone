@@ -183,8 +183,6 @@ func lintKindFields(p Primitive, add func(FindingSeverity, string)) {
 // the dispatch switch to keep lintKindFields a flat router.
 func lintActionKinds(p Primitive, add func(FindingSeverity, string)) {
 	switch Kind(p.Kind) {
-	case KindHook:
-		lintActionContract(p, add)
 	case KindSensor:
 		lintSensorContract(p, add)
 	case KindTool:
@@ -229,13 +227,14 @@ func lintGuideTier(p Primitive, add func(FindingSeverity, string)) {
 }
 
 // lintToolContract enforces a tool's handler + transport. A tool is an
-// author-defined callable: it needs a `run:` handler and a `transport:` of
-// cli | mcp | plugin (empty defaults to cli).
+// author-defined external callable: it needs a `run:` handler and a
+// `transport:` of cli | http | mcp | plugin (empty defaults to cli). A
+// tool fires on-demand, or as a side-effect when it declares `on:`.
 func lintToolContract(p Primitive, add func(FindingSeverity, string)) {
 	switch p.Transport {
-	case "", "cli", "mcp", "plugin":
+	case "", "cli", "http", "mcp", "plugin":
 	default:
-		add(FindingError, fmt.Sprintf("tool transport %q invalid (cli | mcp | plugin)", p.Transport))
+		add(FindingError, fmt.Sprintf("tool transport %q invalid (cli | http | mcp | plugin)", p.Transport))
 	}
 	if strings.TrimSpace(p.Run) == "" {
 		add(FindingError, "tool missing `run:` — the handler the agent invokes")
@@ -256,29 +255,6 @@ func lintTagsAndGlobs(p Primitive, add func(FindingSeverity, string)) {
 		if strings.TrimSpace(g) == "" {
 			add(FindingError, "globs entry is empty — remove or fix")
 		}
-	}
-}
-
-// lintActionContract enforces the computational/inferential action shape on
-// a sensor or hook. Computational → a `run:` shell command/script.
-// Inferential → an `agent:` to dispatch plus a `returns:` structured-result
-// schema. The two are mutually exclusive. Default mode for both kinds is
-// computational. `add` is the caller's finding accumulator.
-func lintActionContract(p Primitive, add func(FindingSeverity, string)) {
-	if strings.TrimSpace(p.Run) != "" && strings.TrimSpace(p.Agent) != "" {
-		add(FindingError, "`run:` and `agent:` are mutually exclusive — a sensor/hook is computational (run) or inferential (agent), not both")
-	}
-	if p.Mode == "inferential" {
-		if strings.TrimSpace(p.Agent) == "" {
-			add(FindingError, "inferential sensor/hook missing `agent:` — name the agent to dispatch")
-		}
-		if strings.TrimSpace(p.Returns) == "" {
-			add(FindingError, "inferential sensor/hook missing `returns:` — declare the structured-result schema")
-		}
-		return
-	}
-	if strings.TrimSpace(p.Run) == "" {
-		add(FindingError, "computational sensor/hook missing `run:` — the shell command/script to execute")
 	}
 }
 

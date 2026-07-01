@@ -17,7 +17,7 @@ func runNewScaffold(t *testing.T, verb, id, relPath string) (string, string) {
 	if err := runNew([]string{verb, id, "--dir", root}); err != nil {
 		t.Fatalf("keystone new %s %s: %v", verb, id, err)
 	}
-	return root, filepath.Join(root, config.DefaultHarnessRoot, relPath)
+	return root, filepath.Join(root, config.DefaultCharterRoot, relPath)
 }
 
 // parsesAndLintsClean asserts the scaffolded file parses with the expected

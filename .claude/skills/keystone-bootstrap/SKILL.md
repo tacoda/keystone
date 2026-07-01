@@ -1,6 +1,6 @@
 ---
 name: keystone-bootstrap
-description: One-time initial harness scaffold — detect stack, seed state, scaffold idioms, classify sensors, build the globs index.
+description: One-time initial charter scaffold — detect stack, seed state, scaffold idioms, classify sensors, build the globs index.
 tools:
   - Read
   - Grep
@@ -12,20 +12,20 @@ tools:
 model: opus
 ---
 
-# keystone:bootstrap — make the harness specific to your codebase
+# keystone:bootstrap — make the charter specific to your codebase
 
 The first thing to run after `keystone init`. Walks the repo, detects
 the real stack, and replaces every template placeholder under
-`.keystone/harness/corpus/state/` with code-grounded values.
+`.charter/corpus/state/` with code-grounded values.
 
 The canonical playbook is the **bootstrap action** at
-`.keystone/harness/actions/bootstrap.md`. This skill is a thin
+`.charter/actions/bootstrap.md`. This skill is a thin
 trigger that points the agent at it — open the action and execute its
 activities in order.
 
 ## Run
 
-Open `.keystone/harness/actions/bootstrap.md` and execute every activity
+Open `.charter/actions/bootstrap.md` and execute every activity
 listed under `## Activities`. Every activity must land a real file
 change before moving on; narration does not count.
 
@@ -61,7 +61,7 @@ or commands changed, run `keystone project` to regenerate `.claude/`.
 
 Bootstrap is **not** done until:
 
-- `grep -E '<[^>]+>' .keystone/harness/corpus/state/CODEBASE_STATE.md`
+- `grep -E '<[^>]+>' .charter/corpus/state/CODEBASE_STATE.md`
   returns no template placeholders.
 - `last_reconciled` in `CODEBASE_STATE.md` is today's date.
 - `corpus/idioms/<stack>/` and `guides/idioms/<stack>/` exist for

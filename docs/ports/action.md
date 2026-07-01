@@ -6,8 +6,8 @@
 ## Path convention
 
 ```
-harness/actions/<name>.md                                     # project-owned
-harness/policies/<policy>/actions/<name>.md                    # policy-owned (read-only)
+.charter/actions/<name>.md                                   # project-owned
+.charter/policies/<policy>/actions/<name>.md                  # policy-owned (read-only)
 ```
 
 Flat — no topic directory. Actions are global by name across the cascade.
@@ -41,7 +41,7 @@ Same as other ports: project wins by default; among policies, policies nested de
 
 ## Example
 
-See `harness/actions/spec.md` (scaffolded by `keystone init`) for the canonical example — sourcing a spec from a tracker card or authoring inline, writing acceptance criteria, anchoring downstream phases.
+See `.charter/actions/spec.md` (scaffolded by `keystone init`) for the canonical example — sourcing a spec from a tracker card or authoring inline, writing acceptance criteria, anchoring downstream phases.
 
 ## Authoring
 

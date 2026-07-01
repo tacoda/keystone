@@ -105,22 +105,22 @@ func TestValidateSource(t *testing.T) {
 	}
 }
 
-// TestProjectConfig_ResolvedHarnessRoot pins 2.0's fixed-layout
-// contract: the harness path is no longer per-project, and the
-// deprecated HarnessRoot field is ignored when present in keystone.json.
-func TestProjectConfig_ResolvedHarnessRoot(t *testing.T) {
+// TestProjectConfig_ResolvedCharterRoot pins 2.0's fixed-layout
+// contract: the charter path is no longer per-project, and the
+// deprecated CharterRoot field is ignored when present in keystone.json.
+func TestProjectConfig_ResolvedCharterRoot(t *testing.T) {
 	cases := []struct {
 		name string
 		cfg  *ProjectConfig
 	}{
 		{"empty", &ProjectConfig{}},
-		{"legacy-field-ignored", &ProjectConfig{HarnessRoot: "playbook"}},
+		{"legacy-field-ignored", &ProjectConfig{CharterRoot: "playbook"}},
 		{"nil", nil},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			if got := c.cfg.ResolvedHarnessRoot(); got != DefaultHarnessRoot {
-				t.Errorf("ResolvedHarnessRoot() = %q, want %q (fixed at 2.0)", got, DefaultHarnessRoot)
+			if got := c.cfg.ResolvedCharterRoot(); got != DefaultCharterRoot {
+				t.Errorf("ResolvedCharterRoot() = %q, want %q (fixed at 2.0)", got, DefaultCharterRoot)
 			}
 		})
 	}
@@ -139,7 +139,7 @@ func TestWriteReadProjectConfig_Roundtrip(t *testing.T) {
 	in := &ProjectConfig{
 		Version:          SchemaVersion,
 		FrameworkVersion: "1.0.0",
-		HarnessRoot:      "playbook",
+		CharterRoot:      "playbook",
 		Policies: []PolicyNode{
 			{
 				Name:    "acme-org",

@@ -24,7 +24,7 @@ var categories = []Category{
 	{
 		ID:          "agent",
 		Label:       "Agent",
-		Description: "Which AI coding agent(s) will read this harness. Multiple allowed.",
+		Description: "Which AI coding agent(s) will read this charter. Multiple allowed.",
 		Required:    true,
 		MultiSelect: true,
 		Values: []OptionValue{
@@ -61,7 +61,7 @@ var categories = []Category{
 	{
 		ID:          "architecture",
 		Label:       "Architecture preferences",
-		Description: "Opinionated patterns to surface in the harness. Multiple allowed.",
+		Description: "Opinionated patterns to surface in the charter. Multiple allowed.",
 		MultiSelect: true,
 		Values: []OptionValue{
 			{"hexagonal", "Hexagonal / ports and adapters (Cockburn)"},
@@ -111,7 +111,7 @@ var categories = []Category{
 	{
 		ID:          "starter",
 		Label:       "Starter content",
-		Description: "Opt-in opinion packs the installer can drop into harness/. Multiple allowed; skip if you want a blank slate.",
+		Description: "Opt-in opinion packs the installer can drop into charter/. Multiple allowed; skip if you want a blank slate.",
 		MultiSelect: true,
 		Values: []OptionValue{
 			{"universal-principles", "Engineering principles corpus + guides (SOLID, TDD, BDD, naming, error handling, ...)"},

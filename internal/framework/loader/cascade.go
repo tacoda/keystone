@@ -90,7 +90,7 @@ type RequiredGap struct {
 }
 
 func (g RequiredGap) String() string {
-	return fmt.Sprintf("policy %q (%s) requires %s/%s — define it at <harness-root>/%s/%s.md (or in an outer policy)",
+	return fmt.Sprintf("policy %q (%s) requires %s/%s — define it at <charter-root>/%s/%s.md (or in an outer policy)",
 		g.Policy, g.PathContext, g.Port, g.Item, g.Port, g.Item)
 }
 
@@ -121,7 +121,7 @@ type PolicyDrift struct {
 // policies, deeper-nested policies (children in keystone.json) refine the
 // outer policies they're nested in.
 func Verify(installDir string, cfg *config.ProjectConfig, expectedFiles map[string]map[string]string) (*VerifyResult, error) {
-	harnessRoot := cfg.ResolvedHarnessRoot()
+	charterRoot := cfg.ResolvedCharterRoot()
 	res := &VerifyResult{}
 
 	// Walk pre-order: each node carries its breadcrumb path for violation
@@ -129,7 +129,7 @@ func Verify(installDir string, cfg *config.ProjectConfig, expectedFiles map[stri
 	visit := func(node config.PolicyNode, path []string) error {
 		ctx := strings.Join(append(path, node.Name), " > ")
 		exp := expectedFiles[node.Name]
-		drifts, err := policies.Verify(node.Name, installDir, harnessRoot, exp)
+		drifts, err := policies.Verify(node.Name, installDir, charterRoot, exp)
 		if err != nil {
 			return fmt.Errorf("verify policy %q: %w", node.Name, err)
 		}
@@ -145,7 +145,7 @@ func Verify(installDir string, cfg *config.ProjectConfig, expectedFiles map[stri
 				Depth:         len(path),
 				StrictSensors: append([]string{}, node.Strict["sensors"]...),
 			}
-			sensorsPrefix := filepath.ToSlash(filepath.Join(harnessRoot, "policies", node.Name, "sensors")) + "/"
+			sensorsPrefix := filepath.ToSlash(filepath.Join(charterRoot, "policies", node.Name, "sensors")) + "/"
 			for rel := range exp {
 				if strings.HasPrefix(rel, sensorsPrefix) {
 					depthV.VendoredSensors = append(depthV.VendoredSensors, rel)
@@ -157,7 +157,7 @@ func Verify(installDir string, cfg *config.ProjectConfig, expectedFiles map[stri
 		}
 		for port, items := range node.Strict {
 			for _, item := range items {
-				shadowed, err := findShadowing(installDir, harnessRoot, node.Name, port, item)
+				shadowed, err := findShadowing(installDir, charterRoot, node.Name, port, item)
 				if err != nil {
 					return err
 				}
@@ -177,14 +177,14 @@ func Verify(installDir string, cfg *config.ProjectConfig, expectedFiles map[stri
 		// must be satisfied by an outer layer (an ancestor in the policy
 		// tree, or the project). Siblings and descendants do NOT satisfy
 		// required. Missing items are advisory gaps, not errors.
-		m, err := loadInstalledManifest(installDir, harnessRoot, node.Name)
+		m, err := loadInstalledManifest(installDir, charterRoot, node.Name)
 		if err != nil {
 			return fmt.Errorf("load manifest for %q: %w", node.Name, err)
 		}
 		if m != nil {
 			for port, items := range requiredByPort(m.Required) {
 				for _, item := range items {
-					if requiredSatisfied(installDir, harnessRoot, path, port, item) {
+					if requiredSatisfied(installDir, charterRoot, path, port, item) {
 						continue
 					}
 					res.RequiredGaps = append(res.RequiredGaps, RequiredGap{
@@ -217,7 +217,7 @@ func Verify(installDir string, cfg *config.ProjectConfig, expectedFiles map[stri
 	return res, nil
 }
 
-// findShadowing returns the project-layer paths (under <harnessRoot>/<port>/)
+// findShadowing returns the project-layer paths (under <charterRoot>/<port>/)
 // that override a strict item declared by `policy`. Strict is absolute, so
 // any project file with the matching basename is a violation regardless of
 // which policy declared the strict.
@@ -226,8 +226,8 @@ func Verify(installDir string, cfg *config.ProjectConfig, expectedFiles map[stri
 // vendored read-only, and `keystone install` would refuse to write a
 // strict-violating file in the first place. The check is for the
 // project layer's free-form content.
-func findShadowing(installDir, harnessRoot, policy, port, item string) ([]string, error) {
-	root := filepath.Join(installDir, harnessRoot, port)
+func findShadowing(installDir, charterRoot, policy, port, item string) ([]string, error) {
+	root := filepath.Join(installDir, charterRoot, port)
 	want := item + ".md"
 
 	if _, err := os.Stat(root); os.IsNotExist(err) {
@@ -259,11 +259,11 @@ func findShadowing(installDir, harnessRoot, policy, port, item string) ([]string
 }
 
 // loadInstalledManifest reads the vendored keystone-policy.json for `policy`
-// from <installDir>/<harnessRoot>/policies/<policy>/. Returns nil with no
+// from <installDir>/<charterRoot>/policies/<policy>/. Returns nil with no
 // error when the manifest is missing (older installs may omit it); the
 // caller should treat absence as "no required claims to check."
-func loadInstalledManifest(installDir, harnessRoot, policy string) (*manifest.Manifest, error) {
-	policyRoot := filepath.Join(installDir, harnessRoot, "policies", policy)
+func loadInstalledManifest(installDir, charterRoot, policy string) (*manifest.Manifest, error) {
+	policyRoot := filepath.Join(installDir, charterRoot, "policies", policy)
 	if _, err := os.Stat(filepath.Join(policyRoot, manifest.PolicyManifestFile)); err != nil {
 		if os.IsNotExist(err) {
 			return nil, nil
@@ -296,16 +296,16 @@ func requiredByPort(s manifest.StrictSpec) map[string][]string {
 // len(path) is supplied by an outer layer — either by a policy ancestor in
 // the same path, or by the project layer. Siblings and descendants do not
 // satisfy `required`.
-func requiredSatisfied(installDir, harnessRoot string, ancestors []string, port, item string) bool {
+func requiredSatisfied(installDir, charterRoot string, ancestors []string, port, item string) bool {
 	want := item + ".md"
 	// Project layer.
-	projectPath := filepath.Join(installDir, harnessRoot, port, want)
+	projectPath := filepath.Join(installDir, charterRoot, port, want)
 	if _, err := os.Stat(projectPath); err == nil {
 		return true
 	}
 	// Ancestor policies, in order outer → inner.
 	for _, anc := range ancestors {
-		ancPath := filepath.Join(installDir, harnessRoot, "policies", anc, port, want)
+		ancPath := filepath.Join(installDir, charterRoot, "policies", anc, port, want)
 		if _, err := os.Stat(ancPath); err == nil {
 			return true
 		}

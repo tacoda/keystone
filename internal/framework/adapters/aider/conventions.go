@@ -68,7 +68,7 @@ func defaultAiderConfig() string {
 read:
   - CONVENTIONS.md
   - AGENTS.md
-  - .keystone/INDEX.lite.json
+  - .charter/INDEX.lite.json
 `
 }
 

@@ -13,7 +13,7 @@ model: sonnet
 # keystone:new-corpus — scaffold a corpus entry
 
 A **corpus** entry is the long-form reasoning behind a rule. It lives
-at `.keystone/harness/corpus/<topic>/<name>.md` and is opened only when
+at `.charter/corpus/<topic>/<name>.md` and is opened only when
 a guide's `traces:` (or a prose forward-link) points at it.
 
 Most authors use `keystone:new-guide`, which scaffolds both the guide
@@ -31,7 +31,7 @@ Example:
 
 ```
 keystone new corpus idioms/rails/migrations
-# writes .keystone/harness/corpus/idioms/rails/migrations.md
+# writes .charter/corpus/idioms/rails/migrations.md
 ```
 
 ## After scaffolding

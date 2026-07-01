@@ -8,14 +8,14 @@ import (
 	"time"
 )
 
-// fixtureTree writes a minimal harness + .claude layout under t.TempDir
+// fixtureTree writes a minimal charter + .claude layout under t.TempDir
 // and returns the project root.
 func fixtureTree(t *testing.T) string {
 	t.Helper()
 	root := t.TempDir()
 
 	files := map[string]string{
-		"harness/guides/idioms/rails/migrations.md": `---
+		"charter/guides/idioms/rails/migrations.md": `---
 kind: guide
 id: idioms/rails/migrations
 description: Migrations are reversible and small.
@@ -27,15 +27,15 @@ corpus:
 ---
 # body
 `,
-		"harness/guides/README.md": "# README skipped\n",
-		"harness/corpus/idioms/rails/migrations.md": `---
+		"charter/guides/README.md": "# README skipped\n",
+		"charter/corpus/idioms/rails/migrations.md": `---
 kind: corpus
 id: corpus/idioms/rails/migrations
 description: Why migrations stay small.
 ---
 # body
 `,
-		"harness/sensors/drift.md": `---
+		"charter/sensors/drift.md": `---
 kind: sensor
 id: drift
 description: Flag rules whose corpus is missing.
@@ -43,17 +43,17 @@ phase: verify
 ---
 # body
 `,
-		"harness/hooks/build.md": `---
-kind: hook
+		"charter/sensors/build.md": `---
+kind: sensor
 id: build
 description: Build at the verify gate.
 mode: computational
-event: pre-verify
+on: pre-verify
 run: go build ./...
 ---
 # body
 `,
-		"harness/skills/review-code/SKILL.md": `---
+		"charter/skills/review-code/SKILL.md": `---
 kind: skill
 id: review-code
 description: Review a PR for logic, style, security.
@@ -64,7 +64,7 @@ triggers:
 ---
 # body
 `,
-		"harness/agents/cavecrew-reviewer.md": `---
+		"charter/agents/cavecrew-reviewer.md": `---
 kind: agent
 id: cavecrew-reviewer
 description: Compressed diff reviewer.
@@ -75,7 +75,7 @@ tools:
 ---
 # body
 `,
-		"harness/commands/verify.md": `---
+		"charter/commands/verify.md": `---
 kind: command
 id: verify
 description: Slash command for the verify lifecycle step.
@@ -85,7 +85,7 @@ args:
 # body
 `,
 		// File w/ no frontmatter — must be silently skipped.
-		"harness/guides/stub.md": "# no frontmatter\n",
+		"charter/guides/stub.md": "# no frontmatter\n",
 	}
 	for rel, body := range files {
 		abs := filepath.Join(root, rel)
@@ -101,7 +101,7 @@ args:
 
 func TestWalk_FindsAllKindsSkipsReadmesAndNonFM(t *testing.T) {
 	root := fixtureTree(t)
-	primitives, warnings, err := Walk(root, "harness")
+	primitives, warnings, err := Walk(root, "charter")
 	if err != nil {
 		t.Fatalf("Walk err: %v", err)
 	}
@@ -116,7 +116,7 @@ func TestWalk_FindsAllKindsSkipsReadmesAndNonFM(t *testing.T) {
 		"guide/idioms/rails/migrations",
 		"corpus/corpus/idioms/rails/migrations",
 		"sensor/drift",
-		"hook/build",
+		"sensor/build",
 		"skill/review-code",
 		"agent/cavecrew-reviewer",
 		"command/verify",
@@ -133,7 +133,7 @@ func TestWalk_FindsAllKindsSkipsReadmesAndNonFM(t *testing.T) {
 
 func TestBuildAndWrite(t *testing.T) {
 	root := fixtureTree(t)
-	primitives, _, err := Walk(root, "harness")
+	primitives, _, err := Walk(root, "charter")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -155,7 +155,7 @@ func TestBuildAndWrite(t *testing.T) {
 		t.Errorf("ByGlob = %v", idx.ByGlob)
 	}
 
-	out := filepath.Join(root, "harness", "INDEX.json")
+	out := filepath.Join(root, "charter", "INDEX.json")
 	if err := Write(out, idx); err != nil {
 		t.Fatal(err)
 	}

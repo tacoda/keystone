@@ -15,6 +15,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/tacoda/keystone/internal/framework/adapters/agnostic"
 	"github.com/tacoda/keystone/internal/framework/primitive"
 )
 
@@ -27,6 +28,29 @@ type ProjectionResult struct {
 	Unchanged int
 }
 
+// tally records one file outcome.
+func (r *ProjectionResult) tally(wrote bool) {
+	if wrote {
+		r.Wrote++
+	} else {
+		r.Unchanged++
+	}
+}
+
+// writeCharterPointer writes the always-on charter pointer rule,
+// reporting whether the file changed.
+func writeCharterPointer(projectDir string) (bool, error) {
+	dest := filepath.Join(projectDir, RulesDir, "keystone-charter.md")
+	content := buildCharterRule()
+	if prev, _ := os.ReadFile(dest); bytes.Equal(prev, content) {
+		return false, nil
+	}
+	if err := atomicWrite(dest, content); err != nil {
+		return false, fmt.Errorf("write %s: %w", dest, err)
+	}
+	return true, nil
+}
+
 // ProjectRules writes one `.continue/rules/<slug>.md` per idiom guide
 // with non-empty globs. Continue rules are simpler than Cursor's MDC
 // — plain markdown with optional `---` frontmatter naming the rule
@@ -34,6 +58,15 @@ type ProjectionResult struct {
 // understands plus the shim body.
 func ProjectRules(projectDir string, primitives []primitive.Primitive) (ProjectionResult, error) {
 	var out ProjectionResult
+
+	// Always-on charter pointer: directs the agent to CHARTER.md (iron
+	// laws + ambient rules) regardless of which file is in focus.
+	wrote, err := writeCharterPointer(projectDir)
+	if err != nil {
+		return out, err
+	}
+	out.tally(wrote)
+
 	for _, p := range primitives {
 		if primitive.Kind(p.Kind) != primitive.KindGuide || len(p.Globs) == 0 {
 			continue
@@ -78,6 +111,20 @@ func buildContinueRule(p primitive.Primitive) []byte {
 	b.WriteString("---\n\n")
 	fmt.Fprintf(&b, "Full guide: `%s` (read on demand).\n\n", p.Path)
 	b.WriteString("This rule auto-applies in Continue when a touched file matches the globs above. The body below is the high-signal subset (iron law + golden rule + rules + anti-patterns); open the source guide for prose context.\n")
+	return b.Bytes()
+}
+
+// buildCharterRule composes the always-on charter pointer rule for
+// Continue. Body is the shared thin pointer; no globs so it applies
+// broadly.
+func buildCharterRule() []byte {
+	var b bytes.Buffer
+	b.WriteString("---\n")
+	b.WriteString("name: keystone-charter\n")
+	b.WriteString("description: Keystone charter entrypoint — read CHARTER.md first\n")
+	b.WriteString("generated_by: keystone-project\n")
+	b.WriteString("---\n\n")
+	b.WriteString(agnostic.RenderPointer(agnostic.ContinueProfile()))
 	return b.Bytes()
 }
 

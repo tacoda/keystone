@@ -10,12 +10,12 @@ import (
 )
 
 // ProjectConfigFile is the basename of the project-level keystone config,
-// located at the repo root (not inside the harness folder).
+// located at the repo root (not inside the charter folder).
 const ProjectConfigFile = "keystone.json"
 
 // SchemaVersion is the current keystone.json schema version. Bumped
 // when fields are renamed or removed. 2.0 dropped `harness_root` (the
-// layout is now fixed at .keystone/harness/); existing v1 installs are
+// layout is now fixed at .charter/); existing v1 installs are
 // upgraded by `keystone migrate`.
 const SchemaVersion = "2"
 
@@ -29,17 +29,33 @@ const DefaultPolicyHost = "github.com"
 // framework version this project is pinned to, the nested policy tree,
 // and optional per-port budgets.
 //
-// 2.0 note: the harness layout is no longer configurable. Older
+// 2.0 note: the charter layout is no longer configurable. Older
 // installs whose keystone.json carries a `harness_root` field continue
 // to parse cleanly — the field is decoded but ignored. The migrator
 // strips it on its way through.
 type ProjectConfig struct {
 	Version          string                `json:"version"`
 	FrameworkVersion string                `json:"framework_version,omitempty"`
-	HarnessRoot      string                `json:"harness_root,omitempty"` // Deprecated: ignored at 2.0; stripped by `keystone migrate`.
+	CharterRoot      string                `json:"harness_root,omitempty"` // Deprecated: ignored at 2.0; stripped by `keystone migrate`.
 	Policies         []PolicyNode          `json:"policies"`
 	Budgets          map[string]BudgetSpec `json:"budgets,omitempty"`
 	Adapters         []string              `json:"adapters,omitempty"`
+	// Signals are project-defined framework events beyond the built-ins.
+	// A hook may bind to any signal; declaring it here lets lint catch
+	// typos and `keystone signal list` surface it. Firing works without
+	// declaration (any non-host-phase event is a signal).
+	Signals []string `json:"signals,omitempty"`
+}
+
+// HasSignal reports whether name is a known signal for this project —
+// a keystone built-in or a project-declared custom one.
+func (c *ProjectConfig) HasSignal(name string) bool {
+	for _, s := range c.Signals {
+		if s == name {
+			return true
+		}
+	}
+	return false
 }
 
 // Adapter names recognized by `keystone project`. Adding an entry here
@@ -115,16 +131,16 @@ type BudgetSpec struct {
 	MaxTokensPerLoad int `json:"max_tokens_per_load,omitempty"`
 }
 
-// ResolvedHarnessRoot always returns the fixed harness path at 2.0.
+// ResolvedCharterRoot always returns the fixed charter path at 2.0.
 //
-// Deprecated: callers should reference config.DefaultHarnessRoot
+// Deprecated: callers should reference config.DefaultCharterRoot
 // directly. Retained so existing call sites compile while they migrate.
-func (c *ProjectConfig) ResolvedHarnessRoot() string {
-	return DefaultHarnessRoot
+func (c *ProjectConfig) ResolvedCharterRoot() string {
+	return DefaultCharterRoot
 }
 
 // DefaultProjectConfig returns the seed config written by `keystone init`
-// when no keystone.json exists yet. The harness root is no longer a
+// when no keystone.json exists yet. The charter root is no longer a
 // per-project setting at 2.0 — the parameter is retained for back-compat
 // with existing call sites but is dropped from the emitted config.
 func DefaultProjectConfig(_ string) *ProjectConfig {

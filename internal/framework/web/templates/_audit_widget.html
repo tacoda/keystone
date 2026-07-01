@@ -2,7 +2,7 @@
 <section class="audit"
          id="audit-widget"
          hx-get="/web/widgets/audit{{if .Selected}}?session={{.Selected}}{{end}}"
-         hx-trigger="sse:harness-changed"
+         hx-trigger="sse:charter-changed"
          hx-swap="outerHTML">
   <header class="audit-header">
     <h2>audit log</h2>

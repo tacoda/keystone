@@ -20,11 +20,11 @@ type scanRoot struct {
 }
 
 // scanRoots returns the directories the indexer descends, given the
-// configured harness root path. Every canonical primitive lives under
-// <harness-root>/ at 2.0 — the host-native `.claude/` tree is a
+// configured charter root path. Every canonical primitive lives under
+// <charter-root>/ at 2.0 — the host-native `.claude/` tree is a
 // regenerated *projection* of these sources, not a source itself, so
 // the indexer never walks it.
-func scanRoots(harnessRoot string) []scanRoot {
+func scanRoots(charterRoot string) []scanRoot {
 	md := func(rel string) bool {
 		base := filepath.Base(rel)
 		if base == "README.md" {
@@ -32,8 +32,8 @@ func scanRoots(harnessRoot string) []scanRoot {
 		}
 		return strings.HasSuffix(rel, ".md")
 	}
-	// Skills live at <harness-root>/skills/<id>/SKILL.md; evals at
-	// <harness-root>/evals/<id>/EVAL.md. Everything else is a flat .md.
+	// Skills live at <charter-root>/skills/<id>/SKILL.md; evals at
+	// <charter-root>/evals/<id>/EVAL.md. Everything else is a flat .md.
 	matchFor := func(dir string) func(string) bool {
 		switch dir {
 		case "skills":
@@ -55,7 +55,7 @@ func scanRoots(harnessRoot string) []scanRoot {
 	sort.Strings(dirs)
 	roots := make([]scanRoot, 0, len(dirs))
 	for _, dir := range dirs {
-		roots = append(roots, scanRoot{filepath.Join(harnessRoot, dir), matchFor(dir)})
+		roots = append(roots, scanRoot{filepath.Join(charterRoot, dir), matchFor(dir)})
 	}
 	return roots
 }
@@ -65,10 +65,10 @@ func scanRoots(harnessRoot string) []scanRoot {
 // parse warnings (files with frontmatter that failed to decode).
 //
 // Files without frontmatter are silently skipped — the migration step
-// will land canonical frontmatter on every harness file, but the
+// will land canonical frontmatter on every charter file, but the
 // indexer must work on partial installs too.
-func Walk(projectDir, harnessRoot string) (primitives []Primitive, warnings []Warning, err error) {
-	for _, root := range scanRoots(harnessRoot) {
+func Walk(projectDir, charterRoot string) (primitives []Primitive, warnings []Warning, err error) {
+	for _, root := range scanRoots(charterRoot) {
 		abs := filepath.Join(projectDir, root.dir)
 		info, statErr := os.Stat(abs)
 		if statErr != nil {
@@ -123,7 +123,7 @@ func Walk(projectDir, harnessRoot string) (primitives []Primitive, warnings []Wa
 			primitives = append(primitives, Primitive{
 				Frontmatter: fm,
 				Path:        relPath,
-				Provenance:  derivProvenance(relPath, harnessRoot),
+				Provenance:  derivProvenance(relPath, charterRoot),
 			})
 			return nil
 		})
@@ -158,15 +158,16 @@ type Warning struct {
 }
 
 // derivProvenance turns a primitive's repo-relative path into the
-// cascade layer it ships under. Paths inside `<harness>/policies/<name>/`
-// are policy-vendored; anything else under `<harness>/` is project.
+// cascade layer it ships under. Paths inside `<charter>/policies/<name>/`
+// are policy-vendored; anything else under `<charter>/` is project.
 //
-// Examples (with harnessRoot = ".keystone/harness"):
-//   .keystone/harness/guides/process/spec.md            → "project"
-//   .keystone/harness/policies/acme/guides/x.md         → "policy/acme"
-//   .keystone/harness/policies/acme/nested/policies/b/  → "policy/acme" (outermost wins)
-func derivProvenance(relPath, harnessRoot string) string {
-	policiesPrefix := filepath.ToSlash(filepath.Join(harnessRoot, "policies")) + "/"
+// Examples (with charterRoot = ".charter"):
+//
+//	.charter/guides/process/spec.md            → "project"
+//	.charter/policies/acme/guides/x.md         → "policy/acme"
+//	.charter/policies/acme/nested/policies/b/  → "policy/acme" (outermost wins)
+func derivProvenance(relPath, charterRoot string) string {
+	policiesPrefix := filepath.ToSlash(filepath.Join(charterRoot, "policies")) + "/"
 	rel := filepath.ToSlash(relPath)
 	if !strings.HasPrefix(rel, policiesPrefix) {
 		return "project"

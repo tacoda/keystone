@@ -1,8 +1,8 @@
-// Package eval runs harness evals — measurable checks of "did this
-// harness change actually do what we expected?"
+// Package eval runs charter evals — measurable checks of "did this
+// charter change actually do what we expected?"
 //
 // Phase A (this file): static + sensor levels. Static walks the
-// harness through the eval's fixture file set and reports which
+// charter through the eval's fixture file set and reports which
 // primitives would activate; sensor runs declared sensors against
 // the fixture and captures exit codes.
 //
@@ -89,10 +89,10 @@ type Result struct {
 	Duration string   `json:"duration"`
 }
 
-// LoadAll walks the harness, parses every EVAL.md, and pairs each
+// LoadAll walks the charter, parses every EVAL.md, and pairs each
 // with its sibling expected.json (if present).
 func LoadAll(projectDir string) ([]Spec, error) {
-	primitives, _, err := primitive.Walk(projectDir, config.DefaultHarnessRoot)
+	primitives, _, err := primitive.Walk(projectDir, config.DefaultCharterRoot)
 	if err != nil {
 		return nil, err
 	}
@@ -181,7 +181,7 @@ func scanLevels(path string) (level string, levels []string, err error) {
 	return level, levels, nil
 }
 
-// Run executes every spec in `specs` against the harness at
+// Run executes every spec in `specs` against the charter at
 // `projectDir`. Filter (substring of id) narrows the set; empty
 // runs all.
 func Run(ctx context.Context, projectDir string, specs []Spec, filter string) Report {
@@ -230,12 +230,12 @@ func runOne(ctx context.Context, projectDir string, s Spec, level string) Result
 	return r
 }
 
-// runStatic walks the harness, finds rule-class primitives, and
+// runStatic walks the charter, finds rule-class primitives, and
 // checks each touched file against their `globs:`. Pass when every
 // id in RulesFired matches at least one touched file AND every id
 // in RulesSilent matches none.
 func runStatic(projectDir string, s Spec, r *Result) {
-	primitives, _, err := primitive.Walk(projectDir, config.DefaultHarnessRoot)
+	primitives, _, err := primitive.Walk(projectDir, config.DefaultCharterRoot)
 	if err != nil {
 		r.Status = "fail"
 		r.Messages = append(r.Messages, "walk: "+err.Error())
@@ -322,7 +322,7 @@ func matchGlob(pat, path string) bool {
 // shell command in the markdown body; we extract it best-effort
 // from the first fenced code block.
 func runSensors(ctx context.Context, projectDir string, s Spec, r *Result) {
-	primitives, _, err := primitive.Walk(projectDir, config.DefaultHarnessRoot)
+	primitives, _, err := primitive.Walk(projectDir, config.DefaultCharterRoot)
 	if err != nil {
 		r.Status = "fail"
 		r.Messages = append(r.Messages, "walk: "+err.Error())
@@ -435,7 +435,7 @@ func RenderMarkdown(r Report) string {
 
 // EvalsRoot returns the absolute dir holding the evals tree.
 func EvalsRoot(projectDir string) string {
-	return filepath.Join(projectDir, config.DefaultHarnessRoot, "evals")
+	return filepath.Join(projectDir, config.DefaultCharterRoot, "evals")
 }
 
 // EnsureRoot makes sure the evals directory exists. Returns the

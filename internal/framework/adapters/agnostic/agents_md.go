@@ -30,41 +30,48 @@ type ProjectionResult struct {
 
 // ProjectAgentsMD writes AGENTS.md at the repo root. content is the
 // body — typically the same paragraph block CLAUDE.md uses, plus the
-// keystone harness pointer. The projector is idempotent: re-running
+// keystone charter pointer. The projector is idempotent: re-running
 // with the same content is a no-op.
 func ProjectAgentsMD(projectDir, content string) (ProjectionResult, error) {
 	abs := filepath.Join(projectDir, AgentsMDRelPath)
-	body := []byte(content)
+	return writeIfChanged(abs, AgentsMDRelPath, []byte(content))
+}
+
+// writeIfChanged writes body to destAbs atomically, but only when it
+// differs from what's on disk. A trailing newline is ensured. Shared by
+// every single-file projector in this package (AGENTS.md, CHARTER.md).
+func writeIfChanged(destAbs, relPath string, body []byte) (ProjectionResult, error) {
 	if len(body) == 0 || body[len(body)-1] != '\n' {
 		body = append(body, '\n')
 	}
-	prev, _ := os.ReadFile(abs)
+	prev, _ := os.ReadFile(destAbs)
 	if bytes.Equal(prev, body) {
-		return ProjectionResult{Path: AgentsMDRelPath, Wrote: false}, nil
+		return ProjectionResult{Path: relPath, Wrote: false}, nil
 	}
-	if err := atomicWrite(abs, body); err != nil {
-		return ProjectionResult{Path: AgentsMDRelPath}, err
+	if err := atomicWrite(destAbs, body); err != nil {
+		return ProjectionResult{Path: relPath}, err
 	}
-	return ProjectionResult{Path: AgentsMDRelPath, Wrote: true}, nil
+	return ProjectionResult{Path: relPath, Wrote: true}, nil
 }
 
-// DefaultBody returns the canonical AGENTS.md content. Mirrors the
-// keystone-managed CLAUDE.md section so a generic agent gets the same
-// orientation a Claude Code agent does.
+// DefaultBody is the pre-4.0 full-orientation AGENTS.md body. FROZEN:
+// referenced only by the v2.x migrations, which regenerate the host
+// surfaces they knew about. Live projection (4.0+) writes a thin
+// pointer via RenderPointer and the canonical CHARTER.md instead.
 func DefaultBody() string {
 	return `# Agent orientation
 
-This project uses a **keystone harness** — an agent-agnostic framework
+This project uses a **keystone charter** — an agent-agnostic framework
 for guides, sensors, actions, playbooks, and personas. Every
 host-native surface (Claude Code skills, Cursor rules, Aider
 conventions) is projected from the canonical sources under
-` + "`.keystone/harness/`" + `.
+` + "`.charter/`" + `.
 
 ## Read first
 
-` + "`.keystone/INDEX.lite.json`" + ` — cheap discovery (kind + id +
+` + "`.charter/INDEX.lite.json`" + ` — cheap discovery (kind + id +
 description per primitive). Browse this to pick what you need; open
-the full ` + "`.keystone/INDEX.json`" + ` only when you need a primitive's
+the full ` + "`.charter/INDEX.json`" + ` only when you need a primitive's
 path, globs, or triggers.
 
 ## Activate by kind
@@ -97,7 +104,7 @@ To start a unit of work, say **"run task on ` + "`<ticket-id>`" + `"** — runs 
 
 ## Override
 
-Project files at ` + "`.keystone/harness/<kind>/<id>.md`" + ` always win. Among
+Project files at ` + "`.charter/<kind>/<id>.md`" + ` always win. Among
 installed policies, deeper nesting refines outer policies; ` + "`strict:`" + ` is
 absolute.
 `

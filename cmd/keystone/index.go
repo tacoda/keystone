@@ -11,11 +11,11 @@ import (
 	"github.com/tacoda/keystone/internal/framework/primitive"
 )
 
-// runIndex handles `keystone index [--dir <path>] [--harness-root <name>]`.
+// runIndex handles `keystone index [--dir <path>] [--charter-root <name>]`.
 //
-// Walks every canonical primitive location under .keystone/harness/
+// Walks every canonical primitive location under .charter/
 // (guides, actions, corpus, sensors, skills, agents, commands), parses
-// each file's frontmatter, and writes .keystone/INDEX.json describing
+// each file's frontmatter, and writes .charter/INDEX.json describing
 // every primitive. The agent reads this artifact once at session start
 // and opens bodies on demand.
 func runIndex(args []string) error {
@@ -45,9 +45,9 @@ func runIndex(args []string) error {
 	if err != nil {
 		return fmt.Errorf("resolve dir: %w", err)
 	}
-	harnessRoot := config.DefaultHarnessRoot
+	charterRoot := config.DefaultCharterRoot
 
-	primitives, warnings, err := primitive.Walk(absDir, harnessRoot)
+	primitives, warnings, err := primitive.Walk(absDir, charterRoot)
 	if err != nil {
 		return err
 	}
@@ -64,7 +64,7 @@ func runIndex(args []string) error {
 	primitives = composed
 
 	idx := primitive.Build(primitives, time.Now())
-	outPath := filepath.Join(absDir, config.KeystoneDir(harnessRoot), config.IndexName)
+	outPath := filepath.Join(absDir, config.KeystoneDir(charterRoot), config.IndexName)
 	if err := primitive.Write(outPath, idx); err != nil {
 		return err
 	}
@@ -80,7 +80,7 @@ func runIndex(args []string) error {
 	// agents here for first-pass browsing; the full INDEX is opened
 	// only when a path/glob/trigger is needed to activate a primitive.
 	lite := primitive.BuildLite(idx)
-	liteOutPath := filepath.Join(absDir, config.KeystoneDir(harnessRoot), config.IndexLiteName)
+	liteOutPath := filepath.Join(absDir, config.KeystoneDir(charterRoot), config.IndexLiteName)
 	if err := primitive.WriteLite(liteOutPath, lite); err != nil {
 		return err
 	}
@@ -96,29 +96,29 @@ func printIndexUsage(w *os.File) {
 	fmt.Fprint(w, `keystone index — emit the primitive descriptor index
 
 Usage:
-  keystone index [--dir <path>] [--harness-root <path>]
+  keystone index [--dir <path>] [--charter-root <path>]
 
-Walks the harness primitive locations and writes a single descriptor
-artifact at <keystone-dir>/INDEX.json (one level above the harness
-root — `+"`.keystone/INDEX.json`"+` for the default layout):
+Walks the charter primitive locations and writes a single descriptor
+artifact at <keystone-dir>/INDEX.json (one level above the charter
+root — `+"`.charter/INDEX.json`"+` for the default layout):
 
   Framework wrappers:
-    <harness-root>/guides/**/*.md          → kind: guide      (wraps rule)
-    <harness-root>/sensors/*.md            → kind: sensor     (wraps rule)
-    <harness-root>/actions/*.md            → kind: action     (wraps command)
-    <harness-root>/playbooks/*.md          → kind: playbook   (wraps skill)
-    <harness-root>/personas/*.md           → kind: persona    (wraps subagent)
+    <charter-root>/guides/**/*.md          → kind: guide      (wraps rule)
+    <charter-root>/sensors/*.md            → kind: sensor     (wraps rule)
+    <charter-root>/actions/*.md            → kind: action     (wraps command)
+    <charter-root>/playbooks/*.md          → kind: playbook   (wraps skill)
+    <charter-root>/personas/*.md           → kind: persona    (wraps subagent)
 
   Framework standalone:
-    <harness-root>/corpus/**/*.md          → kind: corpus
-    <harness-root>/evals/<id>/EVAL.md      → kind: eval
-    <harness-root>/sources/*.md            → kind: source
+    <charter-root>/corpus/**/*.md          → kind: corpus
+    <charter-root>/evals/<id>/EVAL.md      → kind: eval
+    <charter-root>/sources/*.md            → kind: source
 
   Agent escape hatches:
-    <harness-root>/rules/*.md              → kind: rule
-    <harness-root>/skills/<id>/SKILL.md    → kind: skill
-    <harness-root>/agents/*.md             → kind: subagent
-    <harness-root>/commands/*.md           → kind: command
+    <charter-root>/rules/*.md              → kind: rule
+    <charter-root>/skills/<id>/SKILL.md    → kind: skill
+    <charter-root>/agents/*.md             → kind: subagent
+    <charter-root>/commands/*.md           → kind: command
 
 Files without canonical frontmatter are skipped (pre-migration state);
 files whose frontmatter fails to parse are reported on stderr and the
@@ -130,6 +130,6 @@ match the work in hand.
 
 Flags:
   --dir <path>           Project root (defaults to cwd).
-  --harness-root <path>  Harness directory path (default: .keystone/harness).
+  --charter-root <path>  Charter directory path (default: .charter).
 `)
 }

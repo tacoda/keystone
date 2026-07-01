@@ -13,7 +13,7 @@ import (
 
 // runList handles `keystone list [<kind>] [--tag <tag>]... [--dir <path>]`.
 //
-// Walks the harness, applies composition, and prints one line per
+// Walks the charter, applies composition, and prints one line per
 // matching primitive: `<kind>  <id>  <description>` with optional
 // `[tag1, tag2]` suffix when tags are declared.
 //
@@ -66,7 +66,7 @@ func runList(args []string) error {
 		return fmt.Errorf("resolve dir: %w", err)
 	}
 
-	primitives, warnings, err := primitive.Walk(absDir, config.DefaultHarnessRoot)
+	primitives, warnings, err := primitive.Walk(absDir, config.DefaultCharterRoot)
 	if err != nil {
 		return err
 	}
@@ -153,7 +153,7 @@ func printListUsage(w *os.File) {
 Usage:
   keystone list [<kind>] [--tag <tag>]... [--dir <path>]
 
-Walks the harness, applies composition, and prints one line per
+Walks the charter, applies composition, and prints one line per
 matching primitive (kind / id / description, with declared tags in
 brackets).
 

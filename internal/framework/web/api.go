@@ -101,9 +101,9 @@ func (s *server) apiPrimitiveDetail(w http.ResponseWriter, r *http.Request) {
 	writeError(w, http.StatusNotFound, "no primitive with kind="+kind+" id="+id)
 }
 
-// -- /api/harness/status -----------------------------------------------
+// -- /api/charter/status -----------------------------------------------
 
-func (s *server) apiHarnessStatus(w http.ResponseWriter, r *http.Request) {
+func (s *server) apiCharterStatus(w http.ResponseWriter, r *http.Request) {
 	idx, err := s.buildIndex()
 	if err != nil {
 		writeError(w, http.StatusInternalServerError, err.Error())
@@ -131,4 +131,3 @@ func splitPrimitivePath(urlPath, prefix string) (kind, id string) {
 	}
 	return rest[:slash], rest[slash+1:]
 }
-

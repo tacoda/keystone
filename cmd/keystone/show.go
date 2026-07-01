@@ -14,7 +14,7 @@ import (
 
 // runShow handles `keystone show <kind> <id> [--json] [--dir <path>]`.
 //
-// Walks the harness once, composes the target primitive, and prints
+// Walks the charter once, composes the target primitive, and prints
 // the descriptor plus the cross-references that are implicit in
 // other primitives' frontmatter:
 //
@@ -71,7 +71,7 @@ func runShow(args []string) error {
 		return fmt.Errorf("resolve dir: %w", err)
 	}
 
-	primitives, _, err := primitive.Walk(absDir, config.DefaultHarnessRoot)
+	primitives, _, err := primitive.Walk(absDir, config.DefaultCharterRoot)
 	if err != nil {
 		return err
 	}
@@ -262,7 +262,7 @@ func printShowUsage(w *os.File) {
 Usage:
   keystone show <kind> <id> [--json] [--dir <path>]
 
-Walks the harness once, composes the target primitive, and prints:
+Walks the charter once, composes the target primitive, and prints:
 
   - The target's own descriptor (kind, id, description, path,
     severity, model, tags, host_triggers).

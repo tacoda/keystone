@@ -14,9 +14,9 @@ import (
 
 // workDirRel is where document instances live — tracked in git as
 // durable team memory (filled plans, reviews, ADRs, retros). Routed
-// through config so the standardized harness root is the only place to
+// through config so the standardized charter root is the only place to
 // change the location.
-var workDirRel = filepath.Join(config.KeystoneDir(config.DefaultHarnessRoot), "work")
+var workDirRel = filepath.Join(config.KeystoneDir(config.DefaultCharterRoot), "work")
 
 var gateLineRE = regexp.MustCompile(`(?m)^gate:.*$`)
 
@@ -35,7 +35,7 @@ func runDocument(args []string) error {
 	}
 }
 
-// runDocumentList enumerates document instances under .keystone/work/,
+// runDocumentList enumerates document instances under .charter/work/,
 // printing id, current gate, and path.
 func runDocumentList(args []string) error {
 	dir := "."
@@ -48,7 +48,7 @@ func runDocumentList(args []string) error {
 	}
 	workAbs := filepath.Join(absDir, workDirRel)
 	if _, err := os.Stat(workAbs); os.IsNotExist(err) {
-		fmt.Fprintln(os.Stdout, "no documents — .keystone/work/ does not exist yet")
+		fmt.Fprintln(os.Stdout, "no documents — .charter/work/ does not exist yet")
 		return nil
 	}
 	count := 0
@@ -56,7 +56,7 @@ func runDocumentList(args []string) error {
 		return err
 	}
 	if count == 0 {
-		fmt.Fprintln(os.Stdout, "no documents under .keystone/work/")
+		fmt.Fprintln(os.Stdout, "no documents under .charter/work/")
 	}
 	return nil
 }

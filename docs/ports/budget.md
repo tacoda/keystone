@@ -39,7 +39,7 @@ own tooling.
 The 1.0 estimator is **whitespace-approximate**: token count =
 `len(strings.Fields(content))`. Fast, deterministic, no external
 dependencies. Sufficient for relative comparisons between files and
-ports, and for trend lines as the harness grows.
+ports, and for trend lines as the charter grows.
 
 The whitespace count under-counts compared to real model tokenizers
 (GPT-style BPE, Claude's tokenizer, etc.) by roughly **25–35% on
@@ -54,19 +54,19 @@ budget package's API.
 
 ### `keystone doctor --budget`
 
-Walks every `.md` file under `<harness-root>/`, classifies each by
+Walks every `.md` file under `<charter-root>/`, classifies each by
 port, and renders a per-port breakdown:
 
 ```
 budget: per-port token estimate (whitespace-approximate)
   • actions    2955 / no cap
-        505  harness/actions/policy-audit.md
-        441  harness/actions/README.md
+        505  .charter/actions/policy-audit.md
+        441  .charter/actions/README.md
         ...
   • corpus     30715 / 50000  (61% used)
         ...
   ! guides     18893 / 10000
-        867  harness/guides/process/release.md
+        867  .charter/guides/process/release.md
         ...
   ⚠ 1 port(s) over their declared budget — top contributors above
 ```
@@ -80,7 +80,7 @@ Markers:
 - `ℹ` closing line — no budgets declared in keystone.json.
 
 Files skipped: README at any depth, `learning/`, `archive/`, anything
-under `<harness-root>/policies/`.
+under `<charter-root>/policies/`.
 
 ### `keystone init`
 
@@ -104,7 +104,7 @@ regressions on the first run.
 
 ## What counts toward the budget
 
-Files under `<harness-root>/<port>/...`, where `<port>` is one of:
+Files under `<charter-root>/<port>/...`, where `<port>` is one of:
 
 - `guides`
 - `corpus`
@@ -116,9 +116,9 @@ Files under `<harness-root>/<port>/...`, where `<port>` is one of:
 Files **excluded** from the count:
 
 - `README.md` at any depth — orientation, not loaded by the agent.
-- `<harness-root>/learning/...` — flywheel state, not policy.
-- `<harness-root>/archive/...` — same.
-- `<harness-root>/policies/...` — vendored content; tracked separately in
+- `<charter-root>/learning/...` — flywheel state, not policy.
+- `<charter-root>/archive/...` — same.
+- `<charter-root>/policies/...` — vendored content; tracked separately in
   the policy tree (the cascade picks them up at resolve time).
 
 ## Recommendations
@@ -132,7 +132,7 @@ Files **excluded** from the count:
   it's read but not constantly resident. Looser caps are fine.
 - **Set budgets early.** Pick numbers that match your model's window
   and budget-per-prompt, then tune. The budget block is a forcing
-  function — without it, harness content grows unboundedly.
+  function — without it, charter content grows unboundedly.
 
 ## Future evolution
 

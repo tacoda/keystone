@@ -1,6 +1,6 @@
 ---
 name: keystone-check-drift
-description: Run the drift sensor on the current diff — fast pre-verify check that loaded harness rules still match what the code is doing.
+description: Run the drift sensor on the current diff — fast pre-verify check that loaded charter rules still match what the code is doing.
 tools:
   - Read
   - Bash
@@ -11,18 +11,18 @@ model: sonnet
 
 # keystone:check-drift — fast pre-verify drift check
 
-Compares the in-progress diff against loaded harness rules. Fires
+Compares the in-progress diff against loaded charter rules. Fires
 before the full computational sensor suite — catches the obvious case
 where the agent is implementing something the rules explicitly
 disallow.
 
-Canonical playbook: `.keystone/harness/actions/check-drift.md`. Sensor
-contract at `.keystone/harness/sensors/drift.md`. Full discipline at
-`.keystone/harness/guides/process/implementation.md`.
+Canonical playbook: `.charter/actions/check-drift.md`. Sensor
+contract at `.charter/sensors/drift.md`. Full discipline at
+`.charter/guides/process/implementation.md`.
 
 ## Run
 
-Open `.keystone/harness/actions/check-drift.md` and execute every
+Open `.charter/actions/check-drift.md` and execute every
 activity.
 
 ## When to trigger

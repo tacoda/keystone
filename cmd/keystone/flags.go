@@ -12,9 +12,9 @@ import (
 // for interactively, or left blank (depending on category and TTY).
 type initFlags struct {
 	dir         string
-	reset       bool // --reset: destructive overwrite of an existing harness
+	reset       bool // --reset: destructive overwrite of an existing charter
 	confirm     bool // --i-understand-this-is-destructive: pairs with --reset
-	harnessRoot string
+	charterRoot string
 
 	// selections: category ID → list of chosen labels.
 	// Single-select categories store at most one entry.
@@ -35,7 +35,7 @@ type initFlags struct {
 func parseInitArgs(args []string) (*initFlags, error) {
 	flags := &initFlags{
 		dir:         ".",
-		harnessRoot: config.DefaultHarnessRoot,
+		charterRoot: config.DefaultCharterRoot,
 		selections:  Selections{},
 	}
 
@@ -58,7 +58,7 @@ func parseInitArgs(args []string) (*initFlags, error) {
 
 		case a == "--force" || a == "-force":
 			return nil, fmt.Errorf("--force was removed in 1.0; the default now leaves existing files in place. " +
-				"To destructively rewrite an existing harness, pass --reset --i-understand-this-is-destructive.")
+				"To destructively rewrite an existing charter, pass --reset --i-understand-this-is-destructive.")
 
 		case a == "--policy":
 			// --policy <ref> — repeatable, free-form (not a category).
@@ -71,8 +71,8 @@ func parseInitArgs(args []string) (*initFlags, error) {
 		case strings.HasPrefix(a, "--policy="):
 			flags.policies = append(flags.policies, strings.TrimPrefix(a, "--policy="))
 
-		case a == "--harness-root" || strings.HasPrefix(a, "--harness-root="):
-			return nil, fmt.Errorf("--harness-root was removed in 2.0; the harness layout is fixed at .keystone/harness/")
+		case a == "--charter-root" || strings.HasPrefix(a, "--charter-root="):
+			return nil, fmt.Errorf("--charter-root was removed in 2.0; the charter layout is fixed at .charter/")
 
 		case strings.HasPrefix(a, "--") && strings.Contains(a, "="):
 			// --flag=value form
@@ -117,7 +117,7 @@ func parseInitArgs(args []string) (*initFlags, error) {
 	}
 
 	if flags.reset && !flags.confirm {
-		return nil, fmt.Errorf("--reset is destructive (it removes and rewrites the existing harness). " +
+		return nil, fmt.Errorf("--reset is destructive (it removes and rewrites the existing charter). " +
 			"Re-run with --reset --i-understand-this-is-destructive to confirm.")
 	}
 	if flags.confirm && !flags.reset {

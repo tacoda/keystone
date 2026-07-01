@@ -6,9 +6,9 @@
 ## Path convention
 
 ```
-harness/learning/inbox/<date>-<slug>.md
-harness/learning/triage.md
-harness/archive/<date>-<slug>.md
+.charter/learning/inbox/<date>-<slug>.md
+.charter/learning/triage.md
+.charter/archive/<date>-<slug>.md
 ```
 
 These directories are **always project-owned**. Policies cannot ship flywheel sinks — sinks are project state, not policy.

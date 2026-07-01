@@ -6,8 +6,8 @@
 ## Path convention
 
 ```
-harness/commands/<id>.md                                      # project-owned
-harness/policies/<policy>/commands/<id>.md                     # policy-owned (read-only)
+.charter/commands/<id>.md                                    # project-owned
+.charter/policies/<policy>/commands/<id>.md                   # policy-owned (read-only)
 ```
 
 Flat — commands are global by `id`.
@@ -37,7 +37,7 @@ Project wins; deeper-nested policies refine. `strict.commands: [<id>]` locks abs
 
 ## Example
 
-See `harness/commands/audit.md` — the slash-command wrapper for the audit action.
+See `.charter/commands/audit.md` — the slash-command wrapper for the audit action.
 
 ## Authoring
 

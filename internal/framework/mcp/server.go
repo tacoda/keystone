@@ -1,12 +1,12 @@
 // Package mcp builds the keystone MCP server. The server is a thin
-// wrapper around `internal/framework/primitive` — it walks the harness
+// wrapper around `internal/framework/primitive` — it walks the charter
 // at request time, exposes the primitive index + bodies as MCP tools
 // and resources, and lets host agents (Claude Code, Cursor, Codex,
-// etc.) consult the harness without reading every markdown file.
+// etc.) consult the charter without reading every markdown file.
 //
 // All read paths reuse the same code the CLI runs, so the two
 // interfaces (CLI authoring, MCP runtime dispatch) never disagree on
-// what the harness contains.
+// what the charter contains.
 package mcp
 
 import (
@@ -33,15 +33,15 @@ const Version = "2.0.0"
 // instructions is the short, top-of-server description host agents
 // receive when they `initialize` the server. Intentionally terse —
 // detailed contracts live in `docs/ports/primitive.md`.
-const instructions = `keystone MCP — the harness, served.
+const instructions = `keystone MCP — the charter, served.
 
-The harness lives at .harness/ and is indexed at .harness/INDEX.json.
+The charter lives at .charter/ and is indexed at .charter/INDEX.json.
 Both this server and the keystone CLI read the same files; they never
 disagree.
 
 ## Runtime resolution flow
 
-When a scenario arises, work the harness in stages. Only escalate when
+When a scenario arises, work the charter in stages. Only escalate when
 the previous stage doesn't carry enough information:
 
   1. RULES.   Call keystone_list_primitives kind=guide to find the
@@ -67,24 +67,43 @@ transport: cli | mcp — not a server-side resolution stage.)
   keystone_get_corpus id=<guide-id>
       Follow a guide's corpus: field; return the linked corpus body.
       Use this when a guide's body is not enough to act.
+  keystone_signal_list
+      List signals (framework events a sensor/tool/agent subscribes to
+      via on:) + their subscribers, plus the bridged host phases.
+  keystone_charter_coverage
+      Files a guide governs vs. uncharted (matched by no guide's globs).
+  keystone_explain id=<i> [kind=<k>]
+      Explain a primitive — how it activates, what it links to, where it
+      projects. Use before reading a whole body.
+  keystone_charter_conformance
+      Rubric verdict (CONFORMANT|DRIFTING|NON-CONFORMANT) from objective
+      checks: cascade, frontmatter validity, pairing, coverage.
+
+## Reactions (what fires when)
+
+A signal (framework event) or host phase fires; the reacting primitive
+self-subscribes via on:, like a skill declares triggers:
+  - sensor — a check → verdict (exit/HTTP status); gates.
+  - tool   — an external callable; on-demand, or a side-effect with on:.
+  - agent  — an inferential review → structured returns:.
 
 ## Write tools (each shells out to the keystone binary)
 
   keystone_new_<kind>          Scaffold a new primitive.
-                               <kind> ∈ {guide, sensor, hook, agent,
+                               <kind> ∈ {guide, sensor, agent,
                                          command, skill, playbook, pattern,
                                          posture, tool, corpus, document,
                                          adapter, policy}.
-  keystone_harness_bootstrap   Scaffold the harness (init equivalent).
+  keystone_charter_bootstrap   Scaffold the charter (init equivalent).
   keystone_target_add          Add another agent target.
-  keystone_index_refresh       Rebuild .harness/INDEX.json.
+  keystone_index_refresh       Rebuild .charter/INDEX.json.
   keystone_project_refresh     Regenerate .claude/ host projections.
 
 ## Resources
 
   keystone://index                     — the full INDEX.json
   keystone://primitive/{kind}/{id}     — one primitive body
-  keystone://harness/status            — install audit (layout + counts)
+  keystone://charter/status            — install audit (layout + counts)
 
 Activate by reading the index first, then opening primitive bodies on
 demand. Never read every guide/sensor/command file blindly — let the
@@ -96,10 +115,10 @@ keystone_project_refresh so .claude/ host projections regenerate.
 `
 
 // Options configures the server. Mostly project rooting; everything
-// else is derived from the harness on disk.
+// else is derived from the charter on disk.
 type Options struct {
 	// ProjectDir is the consumer project root (the dir holding
-	// keystone.json + .harness/). Defaults to cwd at server start.
+	// keystone.json + .charter/). Defaults to cwd at server start.
 	ProjectDir string
 }
 
@@ -133,6 +152,7 @@ func New(opts Options) (*server.MCPServer, error) {
 	registerPrompts(s, abs)
 	registerEvalTools(s, abs)
 	registerSearchTool(s, abs)
+	registerCharterViews(s, abs)
 	registerToolPrimitives(s, abs)
 
 	return s, nil
@@ -153,9 +173,9 @@ func Serve(ctx context.Context, opts Options) error {
 func registerTools(s *server.MCPServer, projectDir string) {
 	s.AddTool(
 		mcp.NewTool("keystone_list_primitives",
-			mcp.WithDescription("List harness primitives, optionally filtered by kind, glob, or tag(s). Returns descriptors only — open bodies via keystone_get_primitive. The returned descriptors reflect the COMPOSED view (concern `includes:` already merged into list fields)."),
+			mcp.WithDescription("List charter primitives, optionally filtered by kind, glob, or tag(s). Returns descriptors only — open bodies via keystone_get_primitive. The returned descriptors reflect the COMPOSED view (concern `includes:` already merged into list fields)."),
 			mcp.WithString("kind",
-				mcp.Description("Filter by kind (guide, sensor, hook, agent, command, skill, playbook, pattern, corpus, document, concern, posture, tool, eval). Omit for all."),
+				mcp.Description("Filter by kind (guide, sensor, agent, command, skill, playbook, pattern, corpus, document, concern, posture, tool, eval). Omit for all."),
 			),
 			mcp.WithString("glob",
 				mcp.Description("Filter primitives that declare this glob pattern in their `globs:` frontmatter. Exact-string match on the pattern."),
@@ -224,11 +244,11 @@ func registerTools(s *server.MCPServer, projectDir string) {
 			}
 			if len(source.Corpus) == 0 {
 				body, _ := json.MarshalIndent(map[string]any{
-					"source_kind":  source.Kind,
-					"source_id":    source.ID,
-					"traces":       []string{},
-					"corpus":       []any{},
-					"note":         "this primitive has no traces — no linked corpus",
+					"source_kind": source.Kind,
+					"source_id":   source.ID,
+					"traces":      []string{},
+					"corpus":      []any{},
+					"note":        "this primitive has no traces — no linked corpus",
 				}, "", "  ")
 				return mcp.NewToolResultText(string(body)), nil
 			}
@@ -268,7 +288,7 @@ func registerTools(s *server.MCPServer, projectDir string) {
 			mcp.WithDescription("Return the full body of a single primitive given its kind and id. The body includes the frontmatter and the markdown that follows."),
 			mcp.WithString("kind",
 				mcp.Required(),
-				mcp.Description("Primitive kind (guide, sensor, hook, agent, command, skill, playbook, pattern, corpus, document, concern, posture, tool, eval)."),
+				mcp.Description("Primitive kind (guide, sensor, agent, command, skill, playbook, pattern, corpus, document, concern, posture, tool, eval)."),
 			),
 			mcp.WithString("id",
 				mcp.Required(),
@@ -441,12 +461,12 @@ func buildShowView(primitives []primitive.Primitive, kind, id string) (showView,
 func registerResources(s *server.MCPServer, projectDir string) {
 	s.AddResource(
 		mcp.NewResource("keystone://index",
-			"Harness primitive index",
-			mcp.WithResourceDescription("The full .keystone/INDEX.json — descriptors for every primitive in the harness."),
+			"Charter primitive index",
+			mcp.WithResourceDescription("The full .charter/INDEX.json — descriptors for every primitive in the charter."),
 			mcp.WithMIMEType("application/json"),
 		),
 		func(ctx context.Context, req mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
-			path := filepath.Join(projectDir, kconfig.KeystoneDir(kconfig.DefaultHarnessRoot), kconfig.IndexName)
+			path := filepath.Join(projectDir, kconfig.KeystoneDir(kconfig.DefaultCharterRoot), kconfig.IndexName)
 			data, err := os.ReadFile(path)
 			if err != nil {
 				return nil, fmt.Errorf("read index: %w", err)
@@ -462,9 +482,9 @@ func registerResources(s *server.MCPServer, projectDir string) {
 	)
 
 	s.AddResource(
-		mcp.NewResource("keystone://harness/status",
-			"Harness install status",
-			mcp.WithResourceDescription("Summary of what's installed at .keystone/harness/: primitive count by kind, INDEX.json freshness."),
+		mcp.NewResource("keystone://charter/status",
+			"Charter install status",
+			mcp.WithResourceDescription("Summary of what's installed at .charter/: primitive count by kind, INDEX.json freshness."),
 			mcp.WithMIMEType("application/json"),
 		),
 		func(ctx context.Context, req mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
@@ -523,7 +543,7 @@ func loadIndex(projectDir string) (*primitive.Index, error) {
 	// re-walk is cheap (filesystem-bound) and the alternative would be
 	// stale-data hazards if a primitive was added since the last
 	// `keystone index` run.
-	primitives, _, err := primitive.Walk(projectDir, kconfig.DefaultHarnessRoot)
+	primitives, _, err := primitive.Walk(projectDir, kconfig.DefaultCharterRoot)
 	if err != nil {
 		return nil, err
 	}
@@ -532,7 +552,7 @@ func loadIndex(projectDir string) (*primitive.Index, error) {
 }
 
 func loadPrimitiveBody(projectDir, kind, id string) (primitive.Primitive, string, error) {
-	primitives, _, err := primitive.Walk(projectDir, kconfig.DefaultHarnessRoot)
+	primitives, _, err := primitive.Walk(projectDir, kconfig.DefaultCharterRoot)
 	if err != nil {
 		return primitive.Primitive{}, "", err
 	}

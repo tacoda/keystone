@@ -8,8 +8,8 @@
 // Each sensor has a Runner that consumes a Context and returns a
 // Result. The CLI exit code derives from Result.Block:
 //
-//   Block == false  → exit 0 (advisory or pass)
-//   Block == true   → exit 2 (Claude Code's block-with-message code)
+//	Block == false  → exit 0 (advisory or pass)
+//	Block == true   → exit 2 (Claude Code's block-with-message code)
 //
 // New sensors register themselves via Register() in their own init().
 package sensors

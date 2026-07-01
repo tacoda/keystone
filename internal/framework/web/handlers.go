@@ -119,7 +119,7 @@ func (s *server) handlePrimitivesList(w http.ResponseWriter, r *http.Request) {
 
 // /primitives/<kind>/<id...>
 func (s *server) handlePrimitivesDetail(w http.ResponseWriter, r *http.Request) {
-	kind, id := splitPrimitivePath(r.URL.Path, "/harness/primitives/")
+	kind, id := splitPrimitivePath(r.URL.Path, "/charter/primitives/")
 	if kind == "" || id == "" {
 		http.NotFound(w, r)
 		return

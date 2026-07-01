@@ -42,8 +42,9 @@ type HookProjectionResult struct {
 
 // ProjectHooks installs the single host→keystone bridge into
 // .claude/settings.json: one generic entry per host phase that any
-// `kind: hook` binds to, each running `keystone hook fire <phase>`.
-// keystone then dispatches the matching hooks itself.
+// primitive subscribes to (via `on:`), each running
+// `keystone hook fire <phase>`. keystone then dispatches the matching
+// subscribers itself.
 //
 // This is the deliberate design (see the 3.0 hook layer): hooks are
 // framework-owned and too host-divergent to map individually, so the
@@ -83,14 +84,14 @@ func ProjectHooks(projectDir string, primitives []primitive.Primitive) (HookProj
 // hostPhases returns the distinct host-phase events any deterministically-
 // firing primitive binds to (sorted, deduped) — a `hook`, a computational
 // `guide` (LSP), or a computational `sensor` (gate check), unified via
-// primitive.HookFire. A framework event (pre-verify, on-gate, …) is
-// keystone-fired and never reaches the host, so it is not bridged.
+// primitive.HookFire. A signal (pre-verify, on-gate, …) is keystone-fired
+// and never reaches the host, so it is not bridged — only host phases are.
 func hostPhases(primitives []primitive.Primitive) []string {
 	seen := map[string]bool{}
 	var out []string
 	for _, p := range primitives {
 		event, _, ok := primitive.HookFire(p)
-		if !ok || primitive.IsFrameworkEvent(event) || seen[event] {
+		if !ok || !primitive.IsHostPhase(event) || seen[event] {
 			continue
 		}
 		seen[event] = true

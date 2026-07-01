@@ -52,9 +52,9 @@ func runMigrate(args []string) error {
 }
 
 type migrateFlags struct {
-	dir     string
-	dryRun  bool
-	target  string // explicit version, or "" for default
+	dir    string
+	dryRun bool
+	target string // explicit version, or "" for default
 }
 
 func parseMigrateFlags(args []string) (*migrateFlags, error) {
@@ -294,24 +294,27 @@ func printPlan(w io.Writer, version, dir string, p *migrations.Plan) {
 }
 
 // readAppliedTolerant returns the applied-migrations list from the
-// lockfile, tolerating both 2.0-and-later (.keystone/lockfile.json) and
-// pre-2.0 (harness/keystone.lock.json) locations. On any read error the
-// list comes back empty.
+// lockfile, tolerating every historical location: 4.0 (.charter/
+// lockfile.json), 3.0 (.harness/lockfile.json), 2.0–2.4 (.keystone/
+// lockfile.json), and pre-2.0 (harness/keystone.lock.json). On any read
+// error the list comes back empty.
 //
 // Filesystem-derived fallback: when no lockfile entry is found, the
-// on-disk layout is consulted. A .keystone/harness/ tree without any
-// recorded migrations is treated as an implicit "2.0 applied" so fresh
-// 2.0+ installs don't show a spurious 2.0-pending warning. A bare
-// harness/ at the project root with no .keystone/ leaves applied empty
-// — that IS a pre-2.0 install that hasn't been migrated yet.
+// on-disk layout is consulted. A .keystone/ tree without any recorded
+// migrations is treated as an implicit "2.0 applied" so those installs
+// don't show a spurious 2.0-pending warning. A bare harness/ at the
+// project root leaves applied empty — that IS a pre-2.0 install that
+// hasn't been migrated yet.
 func readAppliedTolerant(absDir string) []string {
 	candidates := []string{
-		// 3.0+ canonical: the lockfile lives at <root>/lockfile.json.
-		filepath.Join(absDir, config.DefaultHarnessRoot, config.LockfileName),
+		// 4.0+ canonical: the lockfile lives at <root>/lockfile.json.
+		filepath.Join(absDir, config.DefaultCharterRoot, config.LockfileName),
+		// 3.0 legacy: the single root was .harness/.
+		filepath.Join(absDir, ".harness", "lockfile.json"),
 		// 2.0–2.4 legacy: under .keystone/.
 		filepath.Join(absDir, ".keystone", "lockfile.json"),
-		// pre-2.0.
-		filepath.Join(absDir, config.DefaultHarnessRoot, "keystone.lock.json"),
+		// pre-2.0: bare harness/ dir with the old lockfile name.
+		filepath.Join(absDir, config.DefaultCharterRoot, "keystone.lock.json"),
 		filepath.Join(absDir, "harness", "keystone.lock.json"),
 	}
 	for _, path := range candidates {
@@ -340,11 +343,11 @@ func readAppliedAt(path string) ([]string, bool) {
 }
 
 func writeApplied(absDir string, applied []string) error {
-	// Write to the lockfile at its current location. Post-3.0 the harness
-	// (and its lockfile) lives at <root>/.harness/; a pre-3.0 install still
-	// has it under .keystone/. The 3.0 Up relocates it before this runs.
-	path := filepath.Join(absDir, config.DefaultHarnessRoot, config.LockfileName)
-	if !dirExists(filepath.Join(absDir, config.DefaultHarnessRoot)) {
+	// Write to the lockfile at its current location. Post-4.0 the charter
+	// (and its lockfile) lives at <root>/.charter/; a pre-3.0 install still
+	// has it under .keystone/. The 3.0/4.0 Up relocates it before this runs.
+	path := filepath.Join(absDir, config.DefaultCharterRoot, config.LockfileName)
+	if !dirExists(filepath.Join(absDir, config.DefaultCharterRoot)) {
 		path = filepath.Join(absDir, ".keystone", "lockfile.json")
 	}
 	lf, err := lockfile.ReadFromPath(path)
@@ -388,13 +391,13 @@ func fileExists(p string) bool {
 // a successful Up or Down run. Errors are reported but not fatal — the
 // structural migration has already landed and is the load-bearing change.
 func regenerateGenerated(absDir string) {
-	harnessRoot := config.DefaultHarnessRoot
-	primitives, _, walkErr := primitive.Walk(absDir, harnessRoot)
+	charterRoot := config.DefaultCharterRoot
+	primitives, _, walkErr := primitive.Walk(absDir, charterRoot)
 	if walkErr != nil {
 		return
 	}
 	idx := primitive.Build(primitives, time.Now())
-	outPath := filepath.Join(absDir, config.KeystoneDir(harnessRoot), config.IndexName)
+	outPath := filepath.Join(absDir, config.KeystoneDir(charterRoot), config.IndexName)
 	if err := primitive.Write(outPath, idx); err != nil {
 		fmt.Fprintf(os.Stderr, "! keystone migrate: index write failed: %v\n", err)
 	} else {
@@ -422,21 +425,21 @@ Usage:
 Subcommands:
   up [<version>]    Apply every pending migration up to <version>
                     (default: latest). Records applied migrations in
-                    .keystone/lockfile.json.
+                    .charter/lockfile.json.
   down [<version>]  Revert migrations newer than <version> (default:
                     one step). Pops entries off the applied list as
                     each Down plan succeeds.
   status            Show current version, applied list, and pending
                     migrations.
 
-With no subcommand, runs ` + "`up`" + ` to the latest version.
+With no subcommand, runs `+"`up`"+` to the latest version.
 
 Iron laws every migration obeys:
   • Edits framework-owned files only (keystone.json schema fields, the
     lockfile, vendored policy manifests, generated INDEX.json /
-    .claude projections, scaffolded harness directory layout).
+    .claude projections, scaffolded charter directory layout).
   • Never edits user-authored primitive content. Frontmatter changes
-    surface through ` + "`keystone lint`" + ` for the user to apply.
+    surface through `+"`keystone lint`"+` for the user to apply.
   • Renames folders and files freely; rewrites the contents of
     framework-owned files only.
   • Prints every step before execution. --dry-run prints without

@@ -27,7 +27,7 @@ func searchCmd() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			primitives, _, err := primitive.Walk(abs, config.DefaultHarnessRoot)
+			primitives, _, err := primitive.Walk(abs, config.DefaultCharterRoot)
 			if err != nil {
 				return err
 			}

@@ -6,8 +6,8 @@
 ## Path convention
 
 ```
-harness/agents/<id>.md                                        # project-owned
-harness/policies/<policy>/agents/<id>.md                       # policy-owned (read-only)
+.charter/agents/<id>.md                                      # project-owned
+.charter/policies/<policy>/agents/<id>.md                     # policy-owned (read-only)
 ```
 
 Flat — subagents are global by `id` across the cascade.
@@ -35,7 +35,7 @@ tools:
 
 Project wins; deeper-nested policies refine. `strict.subagents: [<id>]` locks absolutely.
 
-`keystone project` does not re-author subagents — they ARE the host-native form. A `persona` (wrapper) authored in `harness/personas/` *is* projected to `.claude/agents/<id>.md`; authoring a subagent directly bypasses the wrapper layer.
+`keystone project` does not re-author subagents — they ARE the host-native form. A `persona` (wrapper) authored in `.charter/personas/` *is* projected to `.claude/agents/<id>.md`; authoring a subagent directly bypasses the wrapper layer.
 
 ## Example
 
@@ -43,7 +43,7 @@ Project wins; deeper-nested policies refine. `strict.subagents: [<id>]` locks ab
 ---
 kind: subagent
 id: drift-reviewer
-description: 'Drift reviewer — flags places the current diff drifts from loaded harness rules.'
+description: 'Drift reviewer — flags places the current diff drifts from loaded charter rules.'
 tools:
   - Read
   - Grep
@@ -52,7 +52,7 @@ tools:
 
 # Subagent: drift-reviewer
 
-You compare the diff against guides under `harness/guides/`. Report only
+You compare the diff against guides under `.charter/guides/`. Report only
 deviations; do not propose unrelated improvements.
 ```
 

@@ -153,7 +153,7 @@ func newServer(projectDir string) (*server, error) {
 		primitiveCache: newPrimitiveCache(projectDir),
 	}
 
-	// Watcher rebuilds every cached harness layer on each debounced
+	// Watcher rebuilds every cached charter layer on each debounced
 	// file-change burst. Per-layer dirty matching isn't worth the
 	// complexity: a debounce already collapses bursts, and walks of
 	// the small per-layer trees are cheap relative to per-request
@@ -216,7 +216,7 @@ func (s *server) routes() {
 	// Page routes — 5 sections × tabs. Old single-purpose URLs are
 	// retired in 2.1.1; nothing redirects, nothing aliases.
 	//   / + /observability/*  → metrics, insights, audit, live
-	//   /harness/*            → primitives, policies, investigator, graph
+	//   /charter/*            → primitives, policies, investigator, graph
 	//   /flywheels/*          → overview, inbox, prune
 	//   /quality/*            → verify, evals
 	exact := []routeBinding{
@@ -226,13 +226,15 @@ func (s *server) routes() {
 		{"/observability/metrics", s.handleMetrics},
 		{"/observability/insights", s.handleInsights},
 
-		// Harness.
-		{"/harness", s.handlePrimitivesList},
-		{"/harness/primitives", s.handlePrimitivesList},
-		{"/harness/primitives/new", s.handlePrimitivesNew},
-		{"/harness/policies", s.handlePolicies},
-		{"/harness/investigator", s.handleInvestigator},
-		{"/harness/graph", s.handleGraph},
+		// Charter.
+		{"/charter", s.handlePrimitivesList},
+		{"/charter/primitives", s.handlePrimitivesList},
+		{"/charter/primitives/new", s.handlePrimitivesNew},
+		{"/charter/policies", s.handlePolicies},
+		{"/charter/investigator", s.handleInvestigator},
+		{"/charter/graph", s.handleGraph},
+		{"/charter/coverage", s.handleCoverage},
+		{"/charter/signals", s.handleSignals},
 
 		// Flywheels.
 		{"/flywheels", s.handleFlywheels},
@@ -258,7 +260,7 @@ func (s *server) routes() {
 		// REST API (read-only) exact routes.
 		{"/api/index", s.apiIndex},
 		{"/api/primitives", s.apiPrimitives},
-		{"/api/harness/status", s.apiHarnessStatus},
+		{"/api/charter/status", s.apiCharterStatus},
 		{"/api/metrics", s.apiMetrics},
 		{"/api/search", s.apiSearch},
 		{"/api/evals", s.apiEvals},
@@ -291,7 +293,7 @@ func (s *server) routes() {
 		prefix string
 		h      http.HandlerFunc
 	}{
-		{"/harness/primitives/", s.handlePrimitivesDetail},
+		{"/charter/primitives/", s.handlePrimitivesDetail},
 		{"/api/primitives/", s.apiPrimitiveDetail},
 		{"/web/widgets/kpi/", s.handleKPIWidget},
 	}

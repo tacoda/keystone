@@ -27,14 +27,14 @@ import (
 
 func watchCmd() *cobra.Command {
 	var (
-		dir       string
-		lint      bool
-		project   bool
-		debounce  time.Duration
+		dir      string
+		lint     bool
+		project  bool
+		debounce time.Duration
 	)
 	c := &cobra.Command{
 		Use:   "watch",
-		Short: "Watch .keystone/harness/ and re-run index + project + lint on change",
+		Short: "Watch .charter/ and re-run index + project + lint on change",
 		Long: `Long-running file watcher. Debounces bursts of writes and
 runs the configured pipeline:
 
@@ -49,9 +49,9 @@ fresh INDEX.json via their existing SSE channel.`,
 			if err != nil {
 				return err
 			}
-			root := filepath.Join(abs, config.DefaultHarnessRoot)
+			root := filepath.Join(abs, config.DefaultCharterRoot)
 			if _, err := os.Stat(root); err != nil {
-				return fmt.Errorf("no harness at %s — run `keystone init` first", root)
+				return fmt.Errorf("no charter at %s — run `keystone init` first", root)
 			}
 
 			w, err := fsnotify.NewWatcher()
@@ -70,8 +70,8 @@ fresh INDEX.json via their existing SSE channel.`,
 			fmt.Fprintf(os.Stdout, "▸ watching %s (debounce %s)\n", root, debounce)
 
 			var (
-				mu     sync.Mutex
-				timer  *time.Timer
+				mu      sync.Mutex
+				timer   *time.Timer
 				cancel2 context.CancelFunc
 			)
 			schedule := func() {
@@ -126,7 +126,7 @@ fresh INDEX.json via their existing SSE channel.`,
 
 func relevantEvent(ev fsnotify.Event) bool {
 	base := filepath.Base(ev.Name)
-	if strings.HasPrefix(base, ".") && base != ".keystone" {
+	if strings.HasPrefix(base, ".") && base != filepath.Base(config.DefaultCharterRoot) {
 		return false
 	}
 	if strings.HasSuffix(base, "~") || strings.HasSuffix(base, ".swp") {
@@ -155,20 +155,20 @@ func watchRecursive(w *fsnotify.Watcher, root string) error {
 // edits.
 //
 // Pipeline order:
-//   1. Walk primitives (one disk scan for the whole cycle)
-//   2. Write INDEX.json + INDEX.lite.json
-//   3. (if doProject) project primitives → .claude/* via primitive.Project
-//   4. (if doProject) project agnostic AGENTS.md
-//   5. (if doProject) project claudecode hooks → .claude/settings.json
-//   6. (if doProject) per-host adapters from keystone.json `adapters:` list
-//   7. (if doLint) run primitive.Lint and report
+//  1. Walk primitives (one disk scan for the whole cycle)
+//  2. Write INDEX.json + INDEX.lite.json
+//  3. (if doProject) project primitives → .claude/* via primitive.Project
+//  4. (if doProject) project agnostic AGENTS.md
+//  5. (if doProject) project claudecode hooks → .claude/settings.json
+//  6. (if doProject) per-host adapters from keystone.json `adapters:` list
+//  7. (if doLint) run primitive.Lint and report
 //
 // Every adapter is wired here so a user editing or saving a guide /
 // sensor / persona sees the projection update in one debounce window
 // — no manual `keystone project` invocation needed.
 func runPipeline(ctx context.Context, projectDir string, doLint, doProject bool) {
 	t0 := time.Now()
-	primitives, _, err := primitive.Walk(projectDir, config.DefaultHarnessRoot)
+	primitives, _, err := primitive.Walk(projectDir, config.DefaultCharterRoot)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "✗ walk: %v\n", err)
 		return
@@ -179,7 +179,7 @@ func runPipeline(ctx context.Context, projectDir string, doLint, doProject bool)
 	}
 	primitives = composed
 	idx := primitive.Build(primitives, time.Now())
-	keystoneDir := filepath.Join(projectDir, config.KeystoneDir(config.DefaultHarnessRoot))
+	keystoneDir := filepath.Join(projectDir, config.KeystoneDir(config.DefaultCharterRoot))
 	outPath := filepath.Join(keystoneDir, config.IndexName)
 	if err := primitive.Write(outPath, idx); err != nil {
 		fmt.Fprintf(os.Stderr, "✗ write index: %v\n", err)
@@ -222,9 +222,9 @@ func runPipeline(ctx context.Context, projectDir string, doLint, doProject bool)
 // watch loop — a half-finished cross-host projection is better than
 // the watcher dying on a transient I/O error.
 func runWatchAdapters(projectDir string, primitives []primitive.Primitive) {
-	// Agnostic AGENTS.md — always emitted.
-	if _, err := agnostic.ProjectAgentsMD(projectDir, agnostic.DefaultBody()); err != nil {
-		fmt.Fprintf(os.Stderr, "; ✗ agnostic AGENTS.md: %v", err)
+	// Canonical CHARTER.md + agnostic AGENTS.md pointer — always emitted.
+	if err := writeCharterSurface(projectDir, false); err != nil {
+		fmt.Fprintf(os.Stderr, "; ✗ %v", err)
 	}
 	// Claude Code settings.json — hooks + posture, always emitted
 	// (claude-code is the default host).
@@ -244,7 +244,7 @@ func runWatchAdapters(projectDir string, primitives []primitive.Primitive) {
 		}
 	}
 	if cfg.HasAdapter(config.AdapterAider) {
-		if _, err := aider.ProjectAider(projectDir, agnostic.DefaultBody()); err != nil {
+		if _, err := aider.ProjectAider(projectDir, agnostic.RenderPointer(agnostic.AiderProfile())); err != nil {
 			fmt.Fprintf(os.Stderr, "; ✗ aider: %v", err)
 		}
 	}

@@ -15,7 +15,7 @@ pass/fail per sensor. This is the pre-commit gate persona.
 
 ## Posture
 
-- Run only the sensors declared in `harness/sensors/`. Do not invent
+- Run only the sensors declared in `.charter/sensors/`. Do not invent
   new checks here.
 - Capture exact exit code and failing-line output for each failure.
 - Fail-fast is fine but report every sensor's status, not just the

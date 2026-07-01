@@ -19,7 +19,7 @@ import (
 // tool's `run:` script, passing each declared arg as KEYSTONE_ARG_<NAME>.
 // cli/plugin tools reach the agent through their own transports, not here.
 //
-// Read at startup from the walked harness; a missing harness is a silent
+// Read at startup from the walked charter; a missing charter is a silent
 // no-op (the server still serves its built-in tools).
 func registerToolPrimitives(s *server.MCPServer, projectDir string) {
 	idx, err := loadIndex(projectDir)

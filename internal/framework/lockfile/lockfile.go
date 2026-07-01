@@ -1,12 +1,12 @@
 // Package lockfile reads and writes the per-install state record at
-// <keystone-dir>/lockfile.json — the `.keystone/` umbrella holds the
-// lockfile alongside the harness tree and generated INDEX.json, so both
+// <keystone-dir>/lockfile.json — the `.charter/` umbrella holds the
+// lockfile alongside the charter tree and generated INDEX.json, so both
 // the CLI and keystone-mcp can locate it under one well-known prefix.
 // Pins every installed policy by source ref + resolved SHA + per-file
 // hashes. JSON format.
 //
-// The harness root is configurable (default `.keystone/harness`,
-// overridable per install via the --harness-root flag at
+// The charter root is configurable (default `.charter`,
+// overridable per install via the --charter-root flag at
 // `keystone init`); the lockfile lives one level above it.
 package lockfile
 
@@ -24,14 +24,14 @@ import (
 const Version = 1
 
 // RelPath returns the lockfile's path relative to the install directory:
-// <keystone-dir>/lockfile.json — one level above the harness root.
+// <keystone-dir>/lockfile.json — one level above the charter root.
 // Pass to filepath.Join(installDir, ...) for the absolute path.
-func RelPath(harnessRoot string) string {
-	return filepath.Join(config.KeystoneDir(harnessRoot), config.LockfileName)
+func RelPath(charterRoot string) string {
+	return filepath.Join(config.KeystoneDir(charterRoot), config.LockfileName)
 }
 
 // KeystoneInfo records the install-scoped state: binary version, install
-// date, and agent IDs with menu files installed. The harness root used to
+// date, and agent IDs with menu files installed. The charter root used to
 // live here too as a transitional Phase 2 affordance; at 1.0 keystone.json
 // owns that field instead, so commands resolve it from there.
 type KeystoneInfo struct {
@@ -72,16 +72,16 @@ func (p *PolicyLock) UnmarshalJSON(data []byte) error {
 
 // Lockfile is the root document.
 type Lockfile struct {
-	Version            int                   `json:"version"`
-	Keystone           KeystoneInfo          `json:"keystone"`
-	Policies           map[string]PolicyLock `json:"policies,omitempty"`
-	MigrationsApplied  []string              `json:"migrations_applied,omitempty"`
+	Version           int                   `json:"version"`
+	Keystone          KeystoneInfo          `json:"keystone"`
+	Policies          map[string]PolicyLock `json:"policies,omitempty"`
+	MigrationsApplied []string              `json:"migrations_applied,omitempty"`
 }
 
-// Read loads the lockfile at <installDir>/<harnessRoot>/keystone.lock.json,
+// Read loads the lockfile at <installDir>/<charterRoot>/keystone.lock.json,
 // returning an empty Lockfile (not an error) if the file does not exist.
-func Read(installDir, harnessRoot string) (*Lockfile, error) {
-	rel := RelPath(harnessRoot)
+func Read(installDir, charterRoot string) (*Lockfile, error) {
+	rel := RelPath(charterRoot)
 	path := filepath.Join(installDir, rel)
 	return ReadFromPath(path)
 }
@@ -113,17 +113,17 @@ func ReadFromPath(path string) (*Lockfile, error) {
 }
 
 // Write serializes the lockfile back to disk at
-// <installDir>/<harnessRoot>/keystone.lock.json. Always emits Version =
+// <installDir>/<charterRoot>/keystone.lock.json. Always emits Version =
 // lockfile.Version. Indents for human readability.
-func Write(installDir, harnessRoot string, lf *Lockfile) error {
-	rel := RelPath(harnessRoot)
+func Write(installDir, charterRoot string, lf *Lockfile) error {
+	rel := RelPath(charterRoot)
 	path := filepath.Join(installDir, rel)
 	return WriteToPath(path, lf)
 }
 
 // WriteToPath serializes the lockfile to an explicit absolute path. Used
 // by the migrations CLI when it needs to write to a specific location
-// (typically the canonical 2.0+ path) regardless of the harness-root
+// (typically the canonical 2.0+ path) regardless of the charter-root
 // configured for the install. Creates parent directories as needed.
 func WriteToPath(path string, lf *Lockfile) error {
 	lf.Version = Version

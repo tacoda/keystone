@@ -42,7 +42,7 @@ type Manifest struct {
 	Required    StrictSpec `json:"required,omitempty"`
 }
 
-// Namespace returns the on-disk directory name used inside harness/policies/
+// Namespace returns the on-disk directory name used inside charter/policies/
 // for this policy's content. Always equal to the manifest name.
 func (m *Manifest) Namespace() string {
 	return m.Name
