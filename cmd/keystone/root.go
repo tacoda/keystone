@@ -87,6 +87,7 @@ func init() {
 	rootCmd.AddCommand(documentCmd())
 	rootCmd.AddCommand(hookCmd())
 	rootCmd.AddCommand(signalCmd())
+	rootCmd.AddCommand(charterCmd())
 	rootCmd.AddCommand(projectCmd())
 	rootCmd.AddCommand(migrateCmd())
 	rootCmd.AddCommand(mcpCmd())
@@ -280,6 +281,16 @@ func signalCmd() *cobra.Command {
 		Short:              "Fire or list keystone signals (extensible framework events)",
 		DisableFlagParsing: true,
 		RunE:               runAndForward(runSignal),
+	}
+	return c
+}
+
+func charterCmd() *cobra.Command {
+	c := &cobra.Command{
+		Use:                "charter",
+		Short:              "Inspect the charter (coverage: files no guide governs)",
+		DisableFlagParsing: true,
+		RunE:               runAndForward(runCharter),
 	}
 	return c
 }

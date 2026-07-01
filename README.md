@@ -95,6 +95,8 @@ block and in `guides/process/runtime-resolution.md`.
 | `keystone lint`          | Validate primitive frontmatter; required fields per kind, deps integrity.      |
 | `keystone project`       | Regenerate `.claude/` / `.cursor/` host projections from canonical sources.    |
 | `keystone verify`        | Cascade + policy-drift check.                                                  |
+| `keystone charter coverage` | Which project files no guide governs ("uncharted territory").               |
+| `keystone signal fire\|list` | Fire or list signals (extensible framework events).                        |
 | `keystone migrate`       | Version-to-version charter upgrade (… → 4.0). Idempotent.                                    |
 | `keystone new <kind>`    | Scaffold any of the 13 primitive kinds + adapter + policy.                     |
 | `keystone search <q>`    | Full-text search across every primitive.                                       |
