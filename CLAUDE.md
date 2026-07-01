@@ -67,75 +67,14 @@ keystone hook fire <event>     # dispatch framework hooks bound to an event
 After any primitive add / move / delete: run `keystone index && keystone project`.
 
 <!-- keystone:start -->
-## Keystone harness
+@CHARTER.md
 
-This project uses a **keystone harness**. Its primitives — guides,
-sensors, hooks, agents, commands, skills, playbooks, patterns, corpus,
-documents, concerns, posture, tools — all live under
-[`.harness/`](.harness/). Discover what's available through the index;
-open primitive bodies on demand.
+You **must** read [`CHARTER.md`](CHARTER.md) before doing anything in this repo — it carries the iron laws and the ambient rules that govern the charter. The import above loads it; do not proceed without it.
 
-**Read first:**
-[`.harness/INDEX.lite.json`](.harness/INDEX.lite.json) — the cheap
-discovery surface (kind + id + description only). Browse this to pick
-which primitive you need. Then open the full
-[`.harness/INDEX.json`](.harness/INDEX.json) for that primitive's
-`path` / `globs` / `triggers`, and only open the body itself when you
-decide to activate it.
+## On this host — Claude Code
 
-**Activate by:**
-
-| Kind         | When to open                                                            |
-| ------------ | ----------------------------------------------------------------------- |
-| **guide**    | Touched files match the entry's `globs:`. Inferential → a directive; computational → a host hook (LSP). |
-| **corpus**   | A guide's `corpus:` (or a prose forward-link) points at it — the *why*. |
-| **command**  | User's intent matches `description` + `phase`; a unit of work. Host slash: `/keystone-<id>`. |
-| **playbook** | A composed sequence of commands with human `gates:`.                    |
-| **sensor**   | An inferential review at a gate — dispatched as an agent, returns a `returns:` verdict. |
-| **hook**     | Fires deterministically on an `event:` (host phase or framework event) → `run:` shell or `agent:` dispatch. |
-| **skill**    | Claude Code auto-activates by `triggers:` match.                        |
-| **agent**    | Spawn via the Task tool by `id`. The system prompt is the body.         |
-| **pattern**  | A reusable documentation pattern (Diátaxis) — apply when writing docs.  |
-
-**Lifecycle** — to kick off a unit of work, say "**run task on
-`<ticket-id>`**" (runs the **task** playbook). For any single command,
-ask in natural language ("run verify", "do a review pass") — the
-command's body lives at its INDEX `path`.
-
-**Iron laws** — non-negotiable across every phase. Distilled from
-`guides/process/`; open the linked guide only when the rule is contested
-or ambiguous.
-
-- No proceeding without explicit acceptance criteria. ([`spec`](.harness/guides/process/spec.md))
-- No completion claims without fresh verification — checks must have
-  run this turn, against the post-edit state, with cited tool output.
-  ([`verification`](.harness/guides/process/verification.md),
-  [`self-validation`](.harness/guides/process/self-validation.md))
-- No commits with failing checks. Never `--no-verify`.
-- No AI attribution in commits, PRs, or tracker comments.
-- No silent overwrites of state files.
-- No reading or writing **sensitive files** — `.env*`, `*.pem`, `*.key`,
-  `id_rsa`, `credentials.json`, `secrets/`, anything matching
-  `*secret*`/`*credential*`/`*password*`. Ask the user out-of-band.
-  ([`sensitive-files`](.harness/guides/process/sensitive-files.md))
-- No **dangerous action** without explicit in-turn confirmation —
-  `rm -rf`, `git push --force`, `git reset --hard`, prod DB writes,
-  external comms (Slack/email), system installs, secret rotation. One
-  confirmation, one action. Mode never loosens this.
-  ([`dangerous-actions`](.harness/guides/process/dangerous-actions.md))
-- No invented imports, methods, config keys, or CLI flags. Grep / read
-  the manifest / check `--help` before referencing.
-  ([`grounding`](.harness/guides/process/grounding.md))
-- No "while I'm here" cleanups. Every changed line traces to the
-  request. Style, formatting, renames, file moves get their own commit.
-  ([`surgical-edits`](.harness/guides/process/surgical-edits.md))
-- No accepting a subagent's "done" report as evidence. Read the diff;
-  re-run checks in the parent's turn.
-  ([`subagent-trust`](.harness/guides/process/subagent-trust.md))
-
-**Override** — your project files at `.harness/<kind>/<id>.md`
-always win by default. Among installed policies, policies nested deeper
-in `keystone.json` refine outer policies. A policy can mark an item
-`strict` to make it absolute — nothing else can override a strict
-item.
+- **Subagents** — spawn charter agents (`.charter/agents/`) as subagents via the Task tool for review/scout work.
+- **Slash commands** — charter commands and playbooks surface as `/keystone-<id>`.
+- **Skills** — auto-activate by their `triggers:`.
+- **Hooks** — charter hooks fire automatically on Claude Code lifecycle events.
 <!-- keystone:end -->

@@ -11,7 +11,7 @@ model: opus
 
 # keystone:verify — cascade + drift check
 
-Walks every vendored policy under `.keystone/harness/policies/`,
+Walks every vendored policy under `.charter/policies/`,
 compares per-file hashes to the lockfile, and reports project files
 that shadow strict-locked policy items.
 
@@ -27,7 +27,7 @@ keystone verify
 
 ## When to trigger
 
-- Before committing any harness change — catches accidental shadows of
+- Before committing any charter change — catches accidental shadows of
   strict policy items.
 - After `keystone install` or `keystone policy update` — confirms the
   install is clean.

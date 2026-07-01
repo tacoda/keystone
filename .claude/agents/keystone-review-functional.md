@@ -15,4 +15,4 @@ An agent reads the diff and reports logic, correctness, and behavior issues.
 - **Output** — findings list keyed by file and line, each tagged blocking / nit / note.
 - **State writes** — none.
 
-How the agent is invoked is adapter-specific — sub-agent, separate session, MCP tool, or a checklist prompt — see `harness/adapters/<your-agent>/sensors.md`. The bootstrap action records whether this sensor is available for the project's active adapter.
+How the agent is invoked is adapter-specific — sub-agent, separate session, MCP tool, or a checklist prompt — see `.charter/adapters/<your-agent>/sensors.md`. The bootstrap action records whether this sensor is available for the project's active adapter.

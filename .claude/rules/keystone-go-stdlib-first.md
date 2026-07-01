@@ -7,13 +7,13 @@ globs:
   - "internal/**/*.go"
   - "go.mod"
   - "go.sum"
-source: .harness/guides/idioms/go/stdlib-first.md
+source: .charter/guides/idioms/go/stdlib-first.md
 generated_by: keystone-project
 ---
 
 # Stdlib first — rules
 
-Full guide: `.harness/guides/idioms/go/stdlib-first.md` (read on demand).
+Full guide: `.charter/guides/idioms/go/stdlib-first.md` (read on demand).
 
 ## IRON LAW
 

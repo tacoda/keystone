@@ -12,7 +12,7 @@ model: opus
 
 You read the current diff and the surrounding files, then return
 findings across the four review sensors: correctness, simplification,
-test coverage, and harness drift.
+test coverage, and charter drift.
 
 ## Posture
 

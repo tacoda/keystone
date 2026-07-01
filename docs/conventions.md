@@ -140,7 +140,7 @@ For the canonical descriptor shape every primitive declares, see
 - **Project path:** `<charter-root>/corpus/state/<name>.md`
 - **Activation:** Read at session start; mutated by `bootstrap`, `audit`, `learn` actions.
 - **Required shape:** free-form markdown; section-bounded updates (an action rewrites named sections in place, leaves others alone).
-- **Recognized files:** `CODEBASE_STATE.md`, `INSTALL_PROFILE.md`, `code-debt.md`, `harness-debt.md`, `quality-radar.md`, `risk-fingerprints.md`, `traffic-topology.md`. Project-specific ledgers welcome.
+- **Recognized files:** `CODEBASE_STATE.md`, `INSTALL_PROFILE.md`, `code-debt.md`, `charter-debt.md`, `quality-radar.md`, `risk-fingerprints.md`, `traffic-topology.md`. Project-specific ledgers welcome.
 - **Cascade:** project-only. Policys do not ship state.
 - **Not strict-able.** Full port contract at [`docs/ports/state-ledger.md`](ports/state-ledger.md).
 

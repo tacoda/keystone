@@ -24,7 +24,7 @@ acceptance criteria, out-of-scope list, open questions.
 
 ## Output
 
-A markdown file at `harness/learning/specs/<slug>.md`:
+A markdown file at `.charter/learning/specs/<slug>.md`:
 
 ```markdown
 # <task title>

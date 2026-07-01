@@ -36,7 +36,7 @@ globs:                # optional, documentation-only
 
 ## Cascade behavior
 
-Project wins. Pruning flywheel removes entries when the tool stops running locally (the **harness-debt** sensor flags `failing-sensor` and `empty-shell`).
+Project wins. Pruning flywheel removes entries when the tool stops running locally (the **charter-debt** sensor flags `failing-sensor` and `empty-shell`).
 
 ## Example
 

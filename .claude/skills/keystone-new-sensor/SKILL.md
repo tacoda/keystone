@@ -12,7 +12,7 @@ model: sonnet
 
 # keystone:new-sensor — scaffold a sensor
 
-A **sensor** is an automated check the harness fires inside an action.
+A **sensor** is an automated check the charter fires inside an action.
 Two kinds exist:
 
 - **computational** — deterministic execution (binary, script, library).
@@ -20,7 +20,7 @@ Two kinds exist:
 - **inferential** — produced by agent reasoning. Examples: functional
   review, security review, spec-acceptance walk.
 
-Sensors live at `.keystone/harness/sensors/<name>.md` and declare
+Sensors live at `.charter/sensors/<name>.md` and declare
 `kind:` (`computational` or `inferential`) in frontmatter.
 
 ## Run

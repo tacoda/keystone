@@ -9,7 +9,7 @@ model: sonnet
 # keystone:index — refresh the primitive descriptor index
 
 The agent's session-start path is "read `.keystone/INDEX.json`, then
-open primitive bodies on demand." When canonical harness files change,
+open primitive bodies on demand." When canonical charter files change,
 the index goes stale and the agent's view of what is available diverges
 from what is on disk.
 
@@ -28,7 +28,7 @@ count. Idempotent — safe to run repeatedly.
 
 ## When to trigger
 
-- After authoring or editing any file under `.keystone/harness/`.
+- After authoring or editing any file under `.charter/`.
 - After running `keystone migrate` (the migrator regenerates the index
   automatically, but a re-run is cheap if drift is suspected).
 - Before reading `.keystone/INDEX.json` later in the same session if

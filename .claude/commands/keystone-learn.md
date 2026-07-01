@@ -3,11 +3,11 @@ description: Capture a learning candidate from a surprise, an incident, or a rev
 ---
 # learn
 
-**Capture a learning candidate** from a surprise, an incident, or a review finding. Writes to `harness/learning/inbox/` for later synthesis. Read [`harness/learning/README.md`](learning/README.md).
+**Capture a learning candidate** from a surprise, an incident, or a review finding. Writes to `.charter/learning/inbox/` for later synthesis. Read [`.charter/learning/README.md`](learning/README.md).
 
 ## Activities
 
-Write a candidate to `harness/learning/inbox/<timestamp>-<slug>.md` where:
+Write a candidate to `.charter/learning/inbox/<timestamp>-<slug>.md` where:
 
 - `<timestamp>` is `YYYY-MM-DD-HHMM` in UTC
 - `<slug>` is a short kebab-case description of the insight
@@ -34,7 +34,7 @@ proposed-globs:                       # optional; see below
 
 ## Proposed change
 
-<the smallest harness edit that would prevent the next incident>
+<the smallest charter edit that would prevent the next incident>
 ```
 
 ### `proposed-globs:` — record the paths the lesson came from

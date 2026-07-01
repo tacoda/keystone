@@ -13,7 +13,7 @@ model: sonnet
 # keystone:new-adapter — scaffold a host adapter
 
 An **adapter** is the per-agent bundle that teaches one host how to
-load the harness — three files per agent: `lifecycle.md` (how the host
+load the charter — three files per agent: `lifecycle.md` (how the host
 invokes playbooks and actions), `sensors.md` (how it runs sensors), and
 `activation.md` (the host's menu-file content).
 
@@ -21,7 +21,7 @@ Shipped adapters: `claude-code`, `codex`, `cursor`, `aider`, `cline`,
 `continue`, `goose`, `github-copilot`, `pi`. Add a new one when
 supporting a host not on that list.
 
-Adapters live at `.keystone/harness/adapters/<agent>/`.
+Adapters live at `.charter/adapters/<agent>/`.
 
 ## Run
 
@@ -33,7 +33,7 @@ Example:
 
 ```
 keystone new adapter mistral
-# writes .keystone/harness/adapters/mistral/{activation,lifecycle,sensors}.md
+# writes .charter/adapters/mistral/{activation,lifecycle,sensors}.md
 ```
 
 ## After scaffolding

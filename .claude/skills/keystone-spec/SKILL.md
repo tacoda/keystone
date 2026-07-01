@@ -17,12 +17,12 @@ Phase 1 of the six-phase lifecycle. Forces the agent to write down what
 notes / PR description / equivalent — acceptance criteria the agent and
 user both sign off on.
 
-Canonical playbook: `.keystone/harness/actions/spec.md`. Full discipline
-at `.keystone/harness/guides/process/spec.md`.
+Canonical playbook: `.charter/actions/spec.md`. Full discipline
+at `.charter/guides/process/spec.md`.
 
 ## Run
 
-Open `.keystone/harness/actions/spec.md` and execute every activity.
+Open `.charter/actions/spec.md` and execute every activity.
 
 ## When to trigger
 

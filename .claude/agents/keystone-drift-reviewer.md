@@ -1,6 +1,6 @@
 ---
 name: keystone-drift-reviewer
-description: Drift reviewer — flags places the current diff drifts from loaded harness rules.
+description: Drift reviewer — flags places the current diff drifts from loaded charter rules.
 tools:
   - Read
   - Grep
@@ -10,7 +10,7 @@ model: sonnet
 
 # Drift reviewer
 
-You compare the in-progress diff against the rules the harness has
+You compare the in-progress diff against the rules the charter has
 loaded for this task (the globs-loaded set). Each finding cites the
 rule that the diff violates.
 

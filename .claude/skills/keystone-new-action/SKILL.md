@@ -18,7 +18,7 @@ actions ship with every install: `spec`, `orient`, `verify`, `review`,
 `learn`, `audit`, `bootstrap`, `mode`, `synthesize`, `check-drift`.
 Custom actions for project-specific lifecycle phases live alongside.
 
-Actions live at `.keystone/harness/actions/<name>.md` (flat, no topic
+Actions live at `.charter/actions/<name>.md` (flat, no topic
 directory — actions are global by name across the cascade).
 
 ## Run
@@ -31,7 +31,7 @@ Example:
 
 ```
 keystone new action release-notes
-# writes .keystone/harness/actions/release-notes.md
+# writes .charter/actions/release-notes.md
 ```
 
 ## After scaffolding

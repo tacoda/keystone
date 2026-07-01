@@ -14,15 +14,15 @@ model: opus
 # keystone:synthesize — promote inbox candidates
 
 The Learning flywheel's promotion step. Walks
-`.keystone/harness/learning/inbox/`, promotes `status: accepted`
+`.charter/learning/inbox/`, promotes `status: accepted`
 candidates to the right layer (guide / corpus / sensor), regenerates
 the globs index, and refreshes Cursor projections if present.
 
-Canonical playbook: `.keystone/harness/actions/synthesize.md`.
+Canonical playbook: `.charter/actions/synthesize.md`.
 
 ## Run
 
-Open `.keystone/harness/actions/synthesize.md` and execute every
+Open `.charter/actions/synthesize.md` and execute every
 activity in order. Every promotion is a proposed diff — never overwrite
 silently. After promotions land, run `keystone index` so
 `.keystone/INDEX.json` reflects the new shape.
@@ -30,7 +30,7 @@ silently. After promotions land, run `keystone index` so
 ## When to trigger
 
 - After accepting candidates from `/keystone:learn`.
-- Periodically (weekly) as part of harness hygiene.
+- Periodically (weekly) as part of charter hygiene.
 
 ## Iron law
 

@@ -17,7 +17,7 @@ end-to-end workflow. The shipped `task` playbook orchestrates
 `spec → orient → implementation → check-drift → verify → review`.
 Custom playbooks compose other workflows the same way.
 
-Playbooks live at `.keystone/harness/playbooks/<name>.md`.
+Playbooks live at `.charter/playbooks/<name>.md`.
 
 ## Run
 
@@ -29,7 +29,7 @@ Example:
 
 ```
 keystone new playbook release
-# writes .keystone/harness/playbooks/release.md
+# writes .charter/playbooks/release.md
 ```
 
 ## After scaffolding

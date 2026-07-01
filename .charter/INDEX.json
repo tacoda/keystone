@@ -1,0 +1,1622 @@
+{
+  "version": "2.0",
+  "generated": "2026-07-01T19:26:54Z",
+  "primitives": [
+    {
+      "kind": "agent",
+      "id": "auditor",
+      "description": "Dual-flywheel auditor — captures learning candidates and prunes dead rules from the charter.",
+      "tools": [
+        "Read",
+        "Grep",
+        "Glob",
+        "Bash"
+      ],
+      "model": "opus",
+      "tags": [
+        "audit",
+        "flywheel"
+      ],
+      "path": ".charter/agents/auditor.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "agent",
+      "id": "bootstrap-scout",
+      "description": "Stack detector that seeds the initial charter state from a fresh repo.",
+      "tools": [
+        "Read",
+        "Grep",
+        "Glob",
+        "Bash"
+      ],
+      "model": "sonnet",
+      "tags": [
+        "scaffold",
+        "bootstrap"
+      ],
+      "path": ".charter/agents/bootstrap-scout.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "agent",
+      "id": "charter-debt",
+      "description": "Surfaces debt in the charter itself — content that exists but isn't earning its keep.",
+      "tools": [
+        "Read",
+        "Grep"
+      ],
+      "tags": [
+        "llm-judgment"
+      ],
+      "path": ".charter/agents/charter-debt.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "agent",
+      "id": "code-debt",
+      "description": "Surfaces and categorizes debt in the codebase — the known-suboptimal code the team has chosen to live with, plus the shape of any new deb...",
+      "tools": [
+        "Read",
+        "Grep"
+      ],
+      "tags": [
+        "llm-judgment"
+      ],
+      "path": ".charter/agents/code-debt.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "agent",
+      "id": "code-reviewer",
+      "description": "General code reviewer that runs the four review sensors on the current diff and surfaces findings.",
+      "tools": [
+        "Read",
+        "Grep",
+        "Bash"
+      ],
+      "model": "opus",
+      "tags": [
+        "review",
+        "composition"
+      ],
+      "includes": [
+        "reads-diff"
+      ],
+      "path": ".charter/agents/code-reviewer.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "agent",
+      "id": "debt-reviewer",
+      "description": "Triages the code-debt ledger and recommends which entries to action this cycle.",
+      "tools": [
+        "Read",
+        "Grep",
+        "Bash"
+      ],
+      "model": "sonnet",
+      "tags": [
+        "review",
+        "composition"
+      ],
+      "includes": [
+        "reads-diff"
+      ],
+      "path": ".charter/agents/debt-reviewer.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "agent",
+      "id": "drift-reviewer",
+      "description": "Drift reviewer — flags places the current diff drifts from loaded charter rules.",
+      "tools": [
+        "Read",
+        "Grep",
+        "Bash"
+      ],
+      "model": "sonnet",
+      "tags": [
+        "review",
+        "composition"
+      ],
+      "includes": [
+        "reads-diff"
+      ],
+      "path": ".charter/agents/drift-reviewer.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "agent",
+      "id": "learning-curator",
+      "description": "Captures a learning candidate from a surprise, incident, or review finding into .charter/learning/inbox/.",
+      "tools": [
+        "Read",
+        "Grep"
+      ],
+      "model": "opus",
+      "tags": [
+        "audit",
+        "flywheel",
+        "learning"
+      ],
+      "path": ".charter/agents/learning-curator.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "agent",
+      "id": "mode-switcher",
+      "description": "Pacing-mode coordinator — switches the charter between paired, solo, and autopilot.",
+      "tools": [
+        "Read",
+        "Write"
+      ],
+      "model": "sonnet",
+      "tags": [
+        "mode"
+      ],
+      "path": ".charter/agents/mode-switcher.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "agent",
+      "id": "planner",
+      "description": "Planning scout — loads codebase state and matching idioms for the touched region, then sketches a plan.",
+      "tools": [
+        "Read",
+        "Grep",
+        "Glob"
+      ],
+      "model": "opus",
+      "tags": [
+        "planning"
+      ],
+      "path": ".charter/agents/planner.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "agent",
+      "id": "quality-radar",
+      "description": "Aggregates verification and review sensors into a five-dimension scorecard for the current diff (or the whole codebase, on audit).",
+      "tools": [
+        "Read",
+        "Grep"
+      ],
+      "tags": [
+        "llm-judgment"
+      ],
+      "path": ".charter/agents/quality-radar.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "agent",
+      "id": "review-deployment",
+      "description": "An agent reads the diff and reports deployment considerations — schema migration safety (expand-contract), feature-flag gating, environme...",
+      "tools": [
+        "Read",
+        "Grep"
+      ],
+      "tags": [
+        "llm-judgment"
+      ],
+      "path": ".charter/agents/review-deployment.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "agent",
+      "id": "review-functional",
+      "description": "An agent reads the diff and reports logic, correctness, and behavior issues.",
+      "tools": [
+        "Read",
+        "Grep"
+      ],
+      "tags": [
+        "llm-judgment"
+      ],
+      "path": ".charter/agents/review-functional.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "agent",
+      "id": "review-risk",
+      "description": "An agent reads the diff and reports risk concerns — blast radius, reversibility, hot-spot regions, fan-out and shared-state coupling, irr...",
+      "tools": [
+        "Read",
+        "Grep"
+      ],
+      "tags": [
+        "llm-judgment"
+      ],
+      "path": ".charter/agents/review-risk.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "agent",
+      "id": "review-security",
+      "description": "An agent reads the diff and reports security concerns — injection, auth, secrets, unsafe deserialization, weak crypto, missing authorizat...",
+      "tools": [
+        "Read",
+        "Grep"
+      ],
+      "tags": [
+        "llm-judgment"
+      ],
+      "path": ".charter/agents/review-security.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "agent",
+      "id": "security-reviewer",
+      "description": "Security-focused PR reviewer that hunts OWASP-top-10 patterns and unsafe defaults.",
+      "tools": [
+        "Read",
+        "Grep",
+        "Bash",
+        "Glob"
+      ],
+      "model": "opus",
+      "tags": [
+        "review",
+        "composition"
+      ],
+      "includes": [
+        "reads-diff"
+      ],
+      "path": ".charter/agents/security-reviewer.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "agent",
+      "id": "spec-author",
+      "description": "Captures intent and acceptance criteria for a unit of work — first step on any task.",
+      "tools": [
+        "Read",
+        "Grep",
+        "Write"
+      ],
+      "model": "opus",
+      "tags": [
+        "planning",
+        "spec"
+      ],
+      "path": ".charter/agents/spec-author.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "agent",
+      "id": "synthesizer",
+      "description": "Promotes learning-inbox candidates into the right corpus or guide layer.",
+      "tools": [
+        "Read",
+        "Grep",
+        "Write"
+      ],
+      "model": "opus",
+      "tags": [
+        "audit",
+        "flywheel",
+        "synthesis"
+      ],
+      "path": ".charter/agents/synthesizer.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "agent",
+      "id": "tracker-card-fetcher",
+      "description": "Fetches a tracker card from Jira / Linear / GitHub Issues / Asana via whatever tracker integration the agent has (MCP server, CLI, policy...",
+      "tools": [
+        "Read",
+        "Grep"
+      ],
+      "tags": [
+        "llm-judgment"
+      ],
+      "path": ".charter/agents/tracker-card-fetcher.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "agent",
+      "id": "verifier",
+      "description": "Runs the verification sensors — lint, type-check, test, build, drift, commit-message — and reports the gate.",
+      "tools": [
+        "Read",
+        "Grep",
+        "Bash"
+      ],
+      "model": "sonnet",
+      "tags": [
+        "verification"
+      ],
+      "path": ".charter/agents/verifier.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "command",
+      "id": "audit",
+      "description": "Full dual-flywheel audit.",
+      "path": ".charter/commands/audit.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "command",
+      "id": "bootstrap",
+      "description": "One-time initial charter scaffold.",
+      "path": ".charter/commands/bootstrap.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "command",
+      "id": "check-drift",
+      "description": "Run the drift sensor on the current diff.",
+      "path": ".charter/commands/check-drift.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "command",
+      "id": "debt-review",
+      "description": "Triage the code-debt ledger.",
+      "path": ".charter/commands/debt-review.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "command",
+      "id": "learn",
+      "description": "Capture a learning candidate from a surprise, an incident, or a review finding.",
+      "path": ".charter/commands/learn.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "command",
+      "id": "mode",
+      "description": "Switch the charter pacing mode (paired / solo / autopilot).",
+      "path": ".charter/commands/mode.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "command",
+      "id": "orient",
+      "description": "Enter the planning phase.",
+      "path": ".charter/commands/orient.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "command",
+      "id": "review",
+      "description": "Run the four review sensors on the current diff.",
+      "path": ".charter/commands/review.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "command",
+      "id": "spec",
+      "description": "Capture intent and acceptance criteria for a unit of work.",
+      "path": ".charter/commands/spec.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "command",
+      "id": "synthesize",
+      "description": "Promote learning-inbox candidates into the right corpus or guide layer.",
+      "path": ".charter/commands/synthesize.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "command",
+      "id": "verify",
+      "description": "Run the verification sensors — lint, type-check, test, build, drift, commit-message.",
+      "path": ".charter/commands/verify.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "concern",
+      "id": "reads-diff",
+      "description": "Reusable concern for review personas — declares the tools needed to read a git diff and the section that documents the protocol.",
+      "tools": [
+        "Read",
+        "Grep",
+        "Bash"
+      ],
+      "tags": [
+        "review",
+        "composition"
+      ],
+      "path": ".charter/concerns/reads-diff.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "concern",
+      "id": "scaffolds-primitive",
+      "description": "Reusable concern for keystone-new-* skills — declares the tools needed to scaffold a new primitive at its canonical path and the idempotency invariants every scaffold respects.",
+      "tools": [
+        "Read",
+        "Write",
+        "Edit",
+        "Glob",
+        "Bash"
+      ],
+      "tags": [
+        "scaffold",
+        "composition"
+      ],
+      "path": ".charter/concerns/scaffolds-primitive.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "corpus",
+      "id": "corpus/domain/product-shape",
+      "description": "One-paragraph statement of the product.",
+      "path": ".charter/corpus/domain/product-shape.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "corpus",
+      "id": "corpus/idioms/charter-content/primitive-shape",
+      "description": "Frontmatter, paths, and corpus/guide pairing for charter primitives.",
+      "path": ".charter/corpus/idioms/charter-content/primitive-shape.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "corpus",
+      "id": "corpus/idioms/charter-content/state-files",
+      "description": "How state files are written and what must not be hand-edited.",
+      "path": ".charter/corpus/idioms/charter-content/state-files.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "corpus",
+      "id": "corpus/idioms/go/stdlib-first",
+      "description": "Prefer Go stdlib for primitives that exist there.",
+      "path": ".charter/corpus/idioms/go/stdlib-first.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "corpus",
+      "id": "corpus/process/runtime-resolution",
+      "description": "Why the runtime resolution flow escalates instead of fanning out — staged lookup costs less and keeps decisions auditable.",
+      "path": ".charter/corpus/process/runtime-resolution.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "corpus",
+      "id": "corpus/state/CODEBASE_STATE",
+      "description": "Empirical map of this codebase.",
+      "path": ".charter/corpus/state/CODEBASE_STATE.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "corpus",
+      "id": "corpus/state/GLOBS_INDEX",
+      "description": "Reverse-index of every guide that declares globs: in its frontmatter.",
+      "path": ".charter/corpus/state/GLOBS_INDEX.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "corpus",
+      "id": "corpus/state/INSTALL_PROFILE",
+      "description": "Selections captured by `keystone init`; read by the bootstrap action.",
+      "path": ".charter/corpus/state/INSTALL_PROFILE.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "corpus",
+      "id": "corpus/state/charter-debt",
+      "description": "Paired ledger: [code-debt.",
+      "path": ".charter/corpus/state/charter-debt.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "corpus",
+      "id": "corpus/state/code-debt",
+      "description": "Paired ledger: [charter-debt.",
+      "path": ".charter/corpus/state/code-debt.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "corpus",
+      "id": "corpus/state/quality-radar",
+      "description": "Five-dimension scorecard for the codebase (or for the most recent reviewed diff).",
+      "path": ".charter/corpus/state/quality-radar.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "corpus",
+      "id": "corpus/state/risk-fingerprints",
+      "description": "Per-region risk score based on complexity + coupling + coverage.",
+      "path": ".charter/corpus/state/risk-fingerprints.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "corpus",
+      "id": "corpus/state/traffic-topology",
+      "description": "Where attention concentrates in the codebase.",
+      "path": ".charter/corpus/state/traffic-topology.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "guide",
+      "id": "guides/computational/go-vet",
+      "description": "go vet — suspicious-construct check.",
+      "globs": [
+        "cmd/**/*.go",
+        "internal/**/*.go"
+      ],
+      "mode": "computational",
+      "event": "PostToolUse",
+      "run": "command -v go \u003e/dev/null 2\u003e\u00261 \u0026\u0026 go vet ./... || true",
+      "path": ".charter/guides/computational/go-vet.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "guide",
+      "id": "guides/computational/gofmt",
+      "description": "gofmt — canonical Go formatting.",
+      "globs": [
+        "cmd/**/*.go",
+        "internal/**/*.go"
+      ],
+      "mode": "computational",
+      "event": "PostToolUse",
+      "run": "command -v gofmt \u003e/dev/null 2\u003e\u00261 \u0026\u0026 test -z \"$(gofmt -l cmd internal)\" || true",
+      "path": ".charter/guides/computational/gofmt.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "guide",
+      "id": "guides/computational/gopls",
+      "description": "gopls — Go LSP for in-editor signal.",
+      "globs": [
+        "cmd/**/*.go",
+        "internal/**/*.go"
+      ],
+      "mode": "computational",
+      "event": "PostToolUse",
+      "run": "command -v gopls \u003e/dev/null 2\u003e\u00261 \u0026\u0026 gopls version \u003e/dev/null 2\u003e\u00261 || true",
+      "path": ".charter/guides/computational/gopls.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "guide",
+      "id": "guides/idioms/charter-content/primitive-shape",
+      "description": "Frontmatter, canonical paths, corpus/guide pairing, narrow-only globs.",
+      "globs": [
+        ".charter/**/*.md",
+        "internal/framework/scaffold/templates/**/*.md"
+      ],
+      "tags": [
+        "charter",
+        "authoring"
+      ],
+      "path": ".charter/guides/idioms/charter-content/primitive-shape.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "guide",
+      "id": "guides/idioms/charter-content/state-files",
+      "description": "Authoring rules for .charter/corpus/state/.",
+      "globs": [
+        ".charter/corpus/state/**/*.md",
+        "internal/framework/scaffold/templates/**/corpus/state/**/*.md"
+      ],
+      "tags": [
+        "charter",
+        "state"
+      ],
+      "path": ".charter/guides/idioms/charter-content/state-files.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "guide",
+      "id": "guides/idioms/go/stdlib-first",
+      "description": "Prefer Go stdlib over new third-party deps.",
+      "globs": [
+        "cmd/**/*.go",
+        "internal/**/*.go",
+        "go.mod",
+        "go.sum"
+      ],
+      "tags": [
+        "go",
+        "dependencies"
+      ],
+      "path": ".charter/guides/idioms/go/stdlib-first.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "guide",
+      "id": "process/ci-failure",
+      "description": "What to do when CI fails — on a PR, after a merge, or post-deploy.",
+      "path": ".charter/guides/process/ci-failure.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "guide",
+      "id": "process/context-budget",
+      "description": "How much the agent reads, runs, or spawns before making a change.",
+      "path": ".charter/guides/process/context-budget.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "guide",
+      "id": "process/dangerous-actions",
+      "description": "Operations the agent must confirm with the user before executing — irreversible, broadly-visible, or outside the local workspace.",
+      "tags": [
+        "security",
+        "discipline"
+      ],
+      "path": ".charter/guides/process/dangerous-actions.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "guide",
+      "id": "process/escalation",
+      "description": "When the agent is stuck, when to stop and ask the user — versus when to keep going.",
+      "path": ".charter/guides/process/escalation.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "guide",
+      "id": "process/grounding",
+      "description": "The discipline of verifying that what the agent references — functions, APIs, packages, files, flags — actually exists before invoking it.",
+      "tags": [
+        "discipline"
+      ],
+      "path": ".charter/guides/process/grounding.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "guide",
+      "id": "process/implementation",
+      "description": "The phase where code gets written, test-first.",
+      "path": ".charter/guides/process/implementation.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "guide",
+      "id": "process/modes",
+      "description": "Active mode: paired",
+      "path": ".charter/guides/process/modes.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "guide",
+      "id": "process/planning",
+      "description": "The phase that turns an approved spec into an approved plan, before code is written.",
+      "path": ".charter/guides/process/planning.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "guide",
+      "id": "process/pushback",
+      "description": "The discipline of disagreeing with the user when the user is wrong.",
+      "path": ".charter/guides/process/pushback.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "guide",
+      "id": "process/release",
+      "description": "The phase where the change lands and is announced.",
+      "path": ".charter/guides/process/release.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "guide",
+      "id": "process/review",
+      "description": "The phase that confirms a mechanically-correct change is also the right change.",
+      "path": ".charter/guides/process/review.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "guide",
+      "id": "process/runtime-resolution",
+      "description": "How the agent resolves a scenario — staged escalation from rules to corpus to external sources, asking before applying.",
+      "severity": "must",
+      "path": ".charter/guides/process/runtime-resolution.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "guide",
+      "id": "process/scoping",
+      "description": "How big any single commit, PR, or implementation pass is allowed to get before it must split.",
+      "tags": [
+        "discipline",
+        "workflow"
+      ],
+      "path": ".charter/guides/process/scoping.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "guide",
+      "id": "process/self-validation",
+      "description": "The discipline of refusing to count the agent's own claim as evidence.",
+      "tags": [
+        "discipline",
+        "verification"
+      ],
+      "path": ".charter/guides/process/self-validation.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "guide",
+      "id": "process/sensitive-files",
+      "description": "Files the agent must never read into context, write to, or commit.",
+      "tags": [
+        "security",
+        "discipline"
+      ],
+      "path": ".charter/guides/process/sensitive-files.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "guide",
+      "id": "process/spec",
+      "description": "The phase that captures what needs to happen, before deciding how.",
+      "path": ".charter/guides/process/spec.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "guide",
+      "id": "process/subagent-trust",
+      "description": "The discipline of treating subagent reports as claims to verify, not as evidence to accept.",
+      "tags": [
+        "discipline",
+        "verification"
+      ],
+      "path": ".charter/guides/process/subagent-trust.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "guide",
+      "id": "process/surgical-edits",
+      "description": "Touch only what serves the task.",
+      "tags": [
+        "discipline"
+      ],
+      "path": ".charter/guides/process/surgical-edits.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "guide",
+      "id": "process/verification",
+      "description": "The phase where claims are paired with evidence before commit.",
+      "path": ".charter/guides/process/verification.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "hook",
+      "id": "build",
+      "description": "The project's build / compile / package step.",
+      "mode": "computational",
+      "event": "Stop",
+      "run": "go build ./...",
+      "tags": [
+        "computational"
+      ],
+      "path": ".charter/hooks/build.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "hook",
+      "id": "commit-message",
+      "description": "Validates conventional-commit format and absence of AI attribution.",
+      "mode": "computational",
+      "event": "PreToolUse",
+      "run": "keystone verify --sensor commit-message",
+      "tags": [
+        "computational"
+      ],
+      "path": ".charter/hooks/commit-message.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "hook",
+      "id": "coverage",
+      "description": "Reads test coverage and updates the State layer.",
+      "mode": "computational",
+      "event": "Stop",
+      "run": "true",
+      "tags": [
+        "computational"
+      ],
+      "path": ".charter/hooks/coverage.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "hook",
+      "id": "drift",
+      "description": "Compares the diff (or full codebase, during audit) against loaded guide rules.",
+      "mode": "computational",
+      "event": "PostToolUse",
+      "run": "keystone verify --sensor drift",
+      "tags": [
+        "computational"
+      ],
+      "path": ".charter/hooks/drift.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "hook",
+      "id": "lint",
+      "description": "Surface-level style and pattern checks.",
+      "mode": "computational",
+      "event": "Stop",
+      "run": "go vet ./...",
+      "tags": [
+        "computational"
+      ],
+      "path": ".charter/hooks/lint.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "hook",
+      "id": "risk-fingerprint",
+      "description": "Computes complexity + coupling + coverage patterns per region.",
+      "mode": "computational",
+      "event": "Stop",
+      "run": "true",
+      "tags": [
+        "computational"
+      ],
+      "path": ".charter/hooks/risk-fingerprint.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "hook",
+      "id": "sast",
+      "description": "Static application security testing — pattern-based detection of insecure code in the source tree (SQL injection, command injection, weak...",
+      "mode": "computational",
+      "event": "Stop",
+      "run": "true",
+      "tags": [
+        "computational"
+      ],
+      "path": ".charter/hooks/sast.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "hook",
+      "id": "secret-scan",
+      "description": "Scans the diff (or repo, on audit) for committed secrets — API keys, tokens, private keys, credentials.",
+      "mode": "computational",
+      "event": "PreToolUse",
+      "run": "keystone verify --sensor secret-scan",
+      "tags": [
+        "computational"
+      ],
+      "path": ".charter/hooks/secret-scan.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "hook",
+      "id": "spec-adherence",
+      "description": "Walks the spec's acceptance criteria against the current diff.",
+      "mode": "computational",
+      "event": "Stop",
+      "run": "true",
+      "tags": [
+        "computational"
+      ],
+      "path": ".charter/hooks/spec-adherence.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "hook",
+      "id": "stack-drift",
+      "description": "Detects when the empirical reality of the repo has diverged from what CODEBASESTATE.",
+      "mode": "computational",
+      "event": "Stop",
+      "run": "true",
+      "tags": [
+        "computational"
+      ],
+      "path": ".charter/hooks/stack-drift.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "hook",
+      "id": "state-region",
+      "description": "Read-only.",
+      "mode": "computational",
+      "event": "PostToolUse",
+      "run": "true",
+      "tags": [
+        "computational"
+      ],
+      "path": ".charter/hooks/state-region.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "hook",
+      "id": "test",
+      "description": "The project's test suite.",
+      "mode": "computational",
+      "event": "Stop",
+      "run": "go test ./...",
+      "tags": [
+        "computational"
+      ],
+      "path": ".charter/hooks/test.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "hook",
+      "id": "traffic-topology",
+      "description": "Combines git churn + recency + business criticality into a map of where attention concentrates.",
+      "mode": "computational",
+      "event": "Stop",
+      "run": "true",
+      "tags": [
+        "computational"
+      ],
+      "path": ".charter/hooks/traffic-topology.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "hook",
+      "id": "type-check",
+      "description": "Signature and contract consistency.",
+      "mode": "computational",
+      "event": "Stop",
+      "run": "go vet ./...",
+      "tags": [
+        "computational"
+      ],
+      "path": ".charter/hooks/type-check.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "hook",
+      "id": "vuln-scan",
+      "description": "Scans declared dependencies for known vulnerabilities (CVEs, advisories).",
+      "mode": "computational",
+      "event": "Stop",
+      "run": "true",
+      "tags": [
+        "computational"
+      ],
+      "path": ".charter/hooks/vuln-scan.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "playbook",
+      "id": "task",
+      "description": "End-to-end task workflow.",
+      "model": "opus",
+      "path": ".charter/playbooks/task.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "skill",
+      "id": "keystone:audit",
+      "description": "Full dual-flywheel audit — Learning (capture from review) + Pruning (remove dead rules). Periodic charter hygiene.",
+      "triggers": [
+        "keystone audit",
+        "keystone:audit",
+        "/keystone:audit",
+        "run audit",
+        "audit the charter",
+        "dual flywheel audit"
+      ],
+      "tools": [
+        "Read",
+        "Grep",
+        "Glob",
+        "Bash",
+        "Task"
+      ],
+      "model": "opus",
+      "path": ".charter/skills/keystone-audit/SKILL.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "skill",
+      "id": "keystone:bootstrap",
+      "description": "One-time initial charter scaffold — detect stack, seed state, scaffold idioms, classify sensors, build the globs index.",
+      "triggers": [
+        "keystone bootstrap",
+        "keystone:bootstrap",
+        "/keystone:bootstrap",
+        "run bootstrap",
+        "bootstrap the charter",
+        "bootstrap the keystone charter",
+        "first-time setup"
+      ],
+      "tools": [
+        "Read",
+        "Grep",
+        "Glob",
+        "Bash",
+        "Write",
+        "Edit",
+        "Task"
+      ],
+      "model": "opus",
+      "path": ".charter/skills/keystone-bootstrap/SKILL.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "skill",
+      "id": "keystone:check-drift",
+      "description": "Run the drift sensor on the current diff — fast pre-verify check that loaded charter rules still match what the code is doing.",
+      "triggers": [
+        "keystone check-drift",
+        "keystone:check-drift",
+        "/keystone:check-drift",
+        "check drift",
+        "run drift sensor",
+        "drift check"
+      ],
+      "tools": [
+        "Read",
+        "Bash",
+        "Grep",
+        "Glob"
+      ],
+      "model": "sonnet",
+      "path": ".charter/skills/keystone-check-drift/SKILL.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "skill",
+      "id": "keystone:debt-review",
+      "description": "Triage the code-debt ledger — review the debt sensor's findings and update corpus/state/code-debt.md.",
+      "triggers": [
+        "keystone debt-review",
+        "keystone:debt-review",
+        "/keystone:debt-review",
+        "review code debt",
+        "triage debt ledger",
+        "debt review"
+      ],
+      "tools": [
+        "Read",
+        "Grep",
+        "Glob",
+        "Bash",
+        "Write",
+        "Edit"
+      ],
+      "model": "opus",
+      "path": ".charter/skills/keystone-debt-review/SKILL.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "skill",
+      "id": "keystone:index",
+      "description": "Regenerate .keystone/INDEX.json — the primitive descriptor index every agent reads at session start.",
+      "triggers": [
+        "keystone index",
+        "keystone:index",
+        "/keystone:index",
+        "refresh the keystone index",
+        "regenerate INDEX.json",
+        "reindex primitives"
+      ],
+      "tools": [
+        "Bash"
+      ],
+      "model": "sonnet",
+      "path": ".charter/skills/keystone-index/SKILL.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "skill",
+      "id": "keystone:learn",
+      "description": "Capture a learning candidate (surprise, incident, review finding) into .charter/learning/inbox/ for later synthesis.",
+      "triggers": [
+        "keystone learn",
+        "keystone:learn",
+        "/keystone:learn",
+        "run the learn action",
+        "capture a learning candidate",
+        "log a surprise"
+      ],
+      "tools": [
+        "Read",
+        "Write",
+        "Edit",
+        "Grep",
+        "Glob"
+      ],
+      "model": "opus",
+      "path": ".charter/skills/keystone-learn/SKILL.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "skill",
+      "id": "keystone:mode",
+      "description": "Switch the charter pacing mode (paired / solo / autopilot).",
+      "triggers": [
+        "keystone mode",
+        "keystone:mode",
+        "/keystone:mode",
+        "switch pacing mode",
+        "go autopilot",
+        "go solo",
+        "go paired"
+      ],
+      "tools": [
+        "Read",
+        "Write",
+        "Edit"
+      ],
+      "model": "sonnet",
+      "path": ".charter/skills/keystone-mode/SKILL.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "skill",
+      "id": "keystone:new-action",
+      "description": "Scaffold a new lifecycle action (atomic unit of work) at the canonical path.",
+      "triggers": [
+        "keystone new action",
+        "keystone:new-action",
+        "/keystone:new-action",
+        "add a new action",
+        "scaffold a lifecycle action"
+      ],
+      "tools": [
+        "Read",
+        "Write",
+        "Edit",
+        "Glob",
+        "Bash"
+      ],
+      "model": "sonnet",
+      "tags": [
+        "scaffold",
+        "composition"
+      ],
+      "includes": [
+        "scaffolds-primitive"
+      ],
+      "path": ".charter/skills/keystone-new-action/SKILL.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "skill",
+      "id": "keystone:new-adapter",
+      "description": "Scaffold the per-agent adapter triple (lifecycle, sensors, activation) for a new host.",
+      "triggers": [
+        "keystone new adapter",
+        "keystone:new-adapter",
+        "/keystone:new-adapter",
+        "add a host adapter",
+        "scaffold a new agent target"
+      ],
+      "tools": [
+        "Read",
+        "Write",
+        "Edit",
+        "Glob",
+        "Bash"
+      ],
+      "model": "sonnet",
+      "tags": [
+        "scaffold",
+        "composition"
+      ],
+      "includes": [
+        "scaffolds-primitive"
+      ],
+      "path": ".charter/skills/keystone-new-adapter/SKILL.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "skill",
+      "id": "keystone:new-corpus",
+      "description": "Scaffold a corpus reasoning entry (the *why*) at the canonical path.",
+      "triggers": [
+        "keystone new corpus",
+        "keystone:new-corpus",
+        "/keystone:new-corpus",
+        "add corpus reasoning",
+        "scaffold a corpus entry"
+      ],
+      "tools": [
+        "Read",
+        "Write",
+        "Edit",
+        "Glob",
+        "Bash"
+      ],
+      "model": "sonnet",
+      "tags": [
+        "scaffold",
+        "composition"
+      ],
+      "includes": [
+        "scaffolds-primitive"
+      ],
+      "path": ".charter/skills/keystone-new-corpus/SKILL.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "skill",
+      "id": "keystone:new-guide",
+      "description": "Scaffold a new rule guide + paired corpus stub at the canonical path.",
+      "triggers": [
+        "keystone new guide",
+        "keystone:new-guide",
+        "/keystone:new-guide",
+        "add a new guide",
+        "scaffold a rule guide",
+        "new keystone rule"
+      ],
+      "tools": [
+        "Read",
+        "Write",
+        "Edit",
+        "Glob",
+        "Bash"
+      ],
+      "model": "sonnet",
+      "tags": [
+        "scaffold",
+        "composition"
+      ],
+      "includes": [
+        "scaffolds-primitive"
+      ],
+      "path": ".charter/skills/keystone-new-guide/SKILL.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "skill",
+      "id": "keystone:new-playbook",
+      "description": "Scaffold a new playbook (ordered sequence of actions) at the canonical path.",
+      "triggers": [
+        "keystone new playbook",
+        "keystone:new-playbook",
+        "/keystone:new-playbook",
+        "add a new playbook",
+        "scaffold a workflow"
+      ],
+      "tools": [
+        "Read",
+        "Write",
+        "Edit",
+        "Glob",
+        "Bash"
+      ],
+      "model": "sonnet",
+      "tags": [
+        "scaffold",
+        "composition"
+      ],
+      "includes": [
+        "scaffolds-primitive"
+      ],
+      "path": ".charter/skills/keystone-new-playbook/SKILL.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "skill",
+      "id": "keystone:new-policy",
+      "description": "Scaffold a new policy repo skeleton outside the current project.",
+      "triggers": [
+        "keystone new policy",
+        "keystone:new-policy",
+        "/keystone:new-policy",
+        "bootstrap a policy repo",
+        "scaffold a keystone policy"
+      ],
+      "tools": [
+        "Read",
+        "Write",
+        "Edit",
+        "Glob",
+        "Bash"
+      ],
+      "model": "sonnet",
+      "tags": [
+        "scaffold",
+        "composition"
+      ],
+      "includes": [
+        "scaffolds-primitive"
+      ],
+      "path": ".charter/skills/keystone-new-policy/SKILL.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "skill",
+      "id": "keystone:new-sensor",
+      "description": "Scaffold a new sensor (automated check) at the canonical path.",
+      "triggers": [
+        "keystone new sensor",
+        "keystone:new-sensor",
+        "/keystone:new-sensor",
+        "add a sensor",
+        "scaffold a new check"
+      ],
+      "tools": [
+        "Read",
+        "Write",
+        "Edit",
+        "Glob",
+        "Bash"
+      ],
+      "model": "sonnet",
+      "tags": [
+        "scaffold",
+        "composition"
+      ],
+      "includes": [
+        "scaffolds-primitive"
+      ],
+      "path": ".charter/skills/keystone-new-sensor/SKILL.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "skill",
+      "id": "keystone:orient",
+      "description": "Enter the planning phase — load codebase state + matching idioms for the touched region, then sketch a plan.",
+      "triggers": [
+        "keystone orient",
+        "keystone:orient",
+        "/keystone:orient",
+        "enter planning phase",
+        "orient on this task",
+        "load idioms for the touched region"
+      ],
+      "tools": [
+        "Read",
+        "Grep",
+        "Glob",
+        "Bash",
+        "Task"
+      ],
+      "model": "opus",
+      "path": ".charter/skills/keystone-orient/SKILL.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "skill",
+      "id": "keystone:review",
+      "description": "Run the four review sensors on the current diff (functional, security, risk, deployment).",
+      "triggers": [
+        "keystone review",
+        "keystone:review",
+        "/keystone:review",
+        "review the diff",
+        "run review sensors",
+        "semantic review"
+      ],
+      "tools": [
+        "Read",
+        "Grep",
+        "Glob",
+        "Bash",
+        "Task"
+      ],
+      "model": "opus",
+      "path": ".charter/skills/keystone-review/SKILL.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "skill",
+      "id": "keystone:spec",
+      "description": "Capture intent + acceptance criteria for a unit of work. First action on any task.",
+      "triggers": [
+        "keystone spec",
+        "keystone:spec",
+        "/keystone:spec",
+        "capture acceptance criteria",
+        "spec this task",
+        "what are we building"
+      ],
+      "tools": [
+        "Read",
+        "Write",
+        "Edit",
+        "Grep",
+        "Glob"
+      ],
+      "model": "opus",
+      "path": ".charter/skills/keystone-spec/SKILL.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "skill",
+      "id": "keystone:synthesize",
+      "description": "Promote accepted learning-inbox candidates into the right corpus / guide / sensor layer, then refresh INDEX.json.",
+      "triggers": [
+        "keystone synthesize",
+        "keystone:synthesize",
+        "/keystone:synthesize",
+        "run synthesize",
+        "promote learning candidates",
+        "promote inbox to guides"
+      ],
+      "tools": [
+        "Read",
+        "Write",
+        "Edit",
+        "Grep",
+        "Glob",
+        "Bash"
+      ],
+      "model": "opus",
+      "path": ".charter/skills/keystone-synthesize/SKILL.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "skill",
+      "id": "keystone:verify",
+      "description": "Check vendored policies for drift and the strict cascade for project-layer violations.",
+      "triggers": [
+        "keystone verify",
+        "keystone:verify",
+        "/keystone:verify",
+        "verify the charter cascade",
+        "audit policy drift",
+        "check strict violations"
+      ],
+      "tools": [
+        "Read",
+        "Bash",
+        "Grep",
+        "Glob"
+      ],
+      "model": "opus",
+      "path": ".charter/skills/keystone-verify/SKILL.md",
+      "provenance": "project"
+    }
+  ],
+  "by_kind": {
+    "agent": [
+      "auditor",
+      "bootstrap-scout",
+      "charter-debt",
+      "code-debt",
+      "code-reviewer",
+      "debt-reviewer",
+      "drift-reviewer",
+      "learning-curator",
+      "mode-switcher",
+      "planner",
+      "quality-radar",
+      "review-deployment",
+      "review-functional",
+      "review-risk",
+      "review-security",
+      "security-reviewer",
+      "spec-author",
+      "synthesizer",
+      "tracker-card-fetcher",
+      "verifier"
+    ],
+    "command": [
+      "audit",
+      "bootstrap",
+      "check-drift",
+      "debt-review",
+      "learn",
+      "mode",
+      "orient",
+      "review",
+      "spec",
+      "synthesize",
+      "verify"
+    ],
+    "concern": [
+      "reads-diff",
+      "scaffolds-primitive"
+    ],
+    "corpus": [
+      "corpus/domain/product-shape",
+      "corpus/idioms/charter-content/primitive-shape",
+      "corpus/idioms/charter-content/state-files",
+      "corpus/idioms/go/stdlib-first",
+      "corpus/process/runtime-resolution",
+      "corpus/state/CODEBASE_STATE",
+      "corpus/state/GLOBS_INDEX",
+      "corpus/state/INSTALL_PROFILE",
+      "corpus/state/charter-debt",
+      "corpus/state/code-debt",
+      "corpus/state/quality-radar",
+      "corpus/state/risk-fingerprints",
+      "corpus/state/traffic-topology"
+    ],
+    "guide": [
+      "guides/computational/go-vet",
+      "guides/computational/gofmt",
+      "guides/computational/gopls",
+      "guides/idioms/charter-content/primitive-shape",
+      "guides/idioms/charter-content/state-files",
+      "guides/idioms/go/stdlib-first",
+      "process/ci-failure",
+      "process/context-budget",
+      "process/dangerous-actions",
+      "process/escalation",
+      "process/grounding",
+      "process/implementation",
+      "process/modes",
+      "process/planning",
+      "process/pushback",
+      "process/release",
+      "process/review",
+      "process/runtime-resolution",
+      "process/scoping",
+      "process/self-validation",
+      "process/sensitive-files",
+      "process/spec",
+      "process/subagent-trust",
+      "process/surgical-edits",
+      "process/verification"
+    ],
+    "hook": [
+      "build",
+      "commit-message",
+      "coverage",
+      "drift",
+      "lint",
+      "risk-fingerprint",
+      "sast",
+      "secret-scan",
+      "spec-adherence",
+      "stack-drift",
+      "state-region",
+      "test",
+      "traffic-topology",
+      "type-check",
+      "vuln-scan"
+    ],
+    "playbook": [
+      "task"
+    ],
+    "skill": [
+      "keystone:audit",
+      "keystone:bootstrap",
+      "keystone:check-drift",
+      "keystone:debt-review",
+      "keystone:index",
+      "keystone:learn",
+      "keystone:mode",
+      "keystone:new-action",
+      "keystone:new-adapter",
+      "keystone:new-corpus",
+      "keystone:new-guide",
+      "keystone:new-playbook",
+      "keystone:new-policy",
+      "keystone:new-sensor",
+      "keystone:orient",
+      "keystone:review",
+      "keystone:spec",
+      "keystone:synthesize",
+      "keystone:verify"
+    ]
+  },
+  "by_glob": {
+    ".charter/**/*.md": [
+      "guide/guides/idioms/charter-content/primitive-shape"
+    ],
+    ".charter/corpus/state/**/*.md": [
+      "guide/guides/idioms/charter-content/state-files"
+    ],
+    "cmd/**/*.go": [
+      "guide/guides/computational/go-vet",
+      "guide/guides/computational/gofmt",
+      "guide/guides/computational/gopls",
+      "guide/guides/idioms/go/stdlib-first"
+    ],
+    "go.mod": [
+      "guide/guides/idioms/go/stdlib-first"
+    ],
+    "go.sum": [
+      "guide/guides/idioms/go/stdlib-first"
+    ],
+    "internal/**/*.go": [
+      "guide/guides/computational/go-vet",
+      "guide/guides/computational/gofmt",
+      "guide/guides/computational/gopls",
+      "guide/guides/idioms/go/stdlib-first"
+    ],
+    "internal/framework/scaffold/templates/**/*.md": [
+      "guide/guides/idioms/charter-content/primitive-shape"
+    ],
+    "internal/framework/scaffold/templates/**/corpus/state/**/*.md": [
+      "guide/guides/idioms/charter-content/state-files"
+    ]
+  }
+}

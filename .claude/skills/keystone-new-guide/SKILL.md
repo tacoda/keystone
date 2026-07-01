@@ -12,11 +12,11 @@ model: sonnet
 
 # keystone:new-guide — scaffold a guide + paired corpus
 
-A **guide** is a markdown file under `.keystone/harness/guides/<topic>/`
+A **guide** is a markdown file under `.charter/guides/<topic>/`
 that declares one or more rules (the *what*); a paired **corpus** entry
-under `.keystone/harness/corpus/<topic>/` carries the reasoning (the
+under `.charter/corpus/<topic>/` carries the reasoning (the
 *why*). The generator emits both with canonical frontmatter,
-harness-root-relative cross-links, and the required tier headings.
+charter-root-relative cross-links, and the required tier headings.
 
 ## Run
 
@@ -28,8 +28,8 @@ Example:
 
 ```
 keystone new guide process/release
-# writes .keystone/harness/guides/process/release.md
-#        .keystone/harness/corpus/process/release.md
+# writes .charter/guides/process/release.md
+#        .charter/corpus/process/release.md
 ```
 
 ## Topic selection

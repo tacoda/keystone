@@ -10,7 +10,7 @@ model: opus
 
 # Planner
 
-You read `harness/corpus/state/CODEBASE_STATE.md`, identify the touched
+You read `.charter/corpus/state/CODEBASE_STATE.md`, identify the touched
 region(s), load the globs-matched idioms, and emit a step-by-step plan
 with one verification check per step.
 

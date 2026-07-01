@@ -22,7 +22,7 @@ State ledgers are mostly free-form markdown with optional frontmatter. The frame
 | `CODEBASE_STATE.md`    | Empirical map of the codebase: language, frameworks, libs, db, CI, sensor commands.       | `bootstrap`        |
 | `INSTALL_PROFILE.md`   | Selections captured by `keystone init` + link to the lockfile.                            | `keystone init`    |
 | `code-debt.md`         | Known code-quality debt items: shape, hotspot files, planned fixes.                       | `audit`            |
-| `harness-debt.md`      | Harness-quality debt: stale rules, missing pairs, drift candidates.                       | `audit`, `learn`   |
+| `charter-debt.md`      | Harness-quality debt: stale rules, missing pairs, drift candidates.                       | `audit`, `learn`   |
 | `quality-radar.md`     | Per-area quality signal (test coverage, error rate, time-to-recover, etc.).               | `audit`            |
 | `risk-fingerprints.md` | Files/areas that are high-risk to change — change blast radius notes.                     | `audit`            |
 | `traffic-topology.md`  | How traffic flows through the system (services, queues, sync vs async, fan-out, fan-in).  | `audit`, optional. |
@@ -33,7 +33,7 @@ Project-specific ledgers (e.g. `corpus/state/glossary.md`) follow the same shape
 
 - **Idempotent.** Each action that writes a ledger reads the current state, merges or updates in place, and rewrites. Conflicts that can't be auto-merged are surfaced to the user.
 - **Section-bounded.** Updates are scoped to declared headings — a `bootstrap` re-run replaces the `## Sensors` section but leaves the `## Glossary` section untouched.
-- **No drift sensor required.** State ledgers are expected to drift from any "ideal" content; they reflect reality. The `drift` sensor doesn't flag them; the `harness-debt` sensor does, but only for ledgers the charter itself owns (CODEBASE_STATE, harness-debt, etc.).
+- **No drift sensor required.** State ledgers are expected to drift from any "ideal" content; they reflect reality. The `drift` sensor doesn't flag them; the `charter-debt` sensor does, but only for ledgers the charter itself owns (CODEBASE_STATE, charter-debt, etc.).
 
 ## Cascade behavior
 
@@ -86,4 +86,4 @@ project-specific by design.
 
 - The agent at session start (ambient context).
 - `bootstrap`, `audit`, `learn` actions (read + update).
-- `keystone doctor` — `harness-debt.md` is one of its inputs.
+- `keystone doctor` — `charter-debt.md` is one of its inputs.

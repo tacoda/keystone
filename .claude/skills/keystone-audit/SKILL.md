@@ -1,6 +1,6 @@
 ---
 name: keystone-audit
-description: Full dual-flywheel audit — Learning (capture from review) + Pruning (remove dead rules). Periodic harness hygiene.
+description: Full dual-flywheel audit — Learning (capture from review) + Pruning (remove dead rules). Periodic charter hygiene.
 tools:
   - Read
   - Grep
@@ -16,7 +16,7 @@ The Pruning flywheel's main entry point, paired with one Learning
 sweep. Walks the corpus + guides looking for stale, dead, or unused
 content; proposes archive moves with a one-line reason per item.
 
-Canonical playbook: `.keystone/harness/actions/audit.md`. Read it for
+Canonical playbook: `.charter/actions/audit.md`. Read it for
 the 12-category Pruning checklist (stale rules, dead idioms,
 placeholders, failing sensors, empty shells, uncited policies,
 unresolved gaps, drifted state, strict-cascade violations, required-item
@@ -24,10 +24,10 @@ gaps, risk fingerprint, traffic topology).
 
 ## Run
 
-Open `.keystone/harness/actions/audit.md` and execute every section.
+Open `.charter/actions/audit.md` and execute every section.
 Output is one report with Learn / Prune sections, each listing concrete
-proposed harness edits. Pruning diffs land in
-`.keystone/harness/corpus/state/harness-debt.md`.
+proposed charter edits. Pruning diffs land in
+`.charter/corpus/state/charter-debt.md`.
 
 ## When to trigger
 
