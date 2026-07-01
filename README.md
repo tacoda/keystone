@@ -192,7 +192,8 @@ dependencies.
 ## License
 
 MIT. See [`LICENSE`](LICENSE). Contributions welcome — see
-[`CONTRIBUTING.md`](CONTRIBUTING.md).
+[`CONTRIBUTING.md`](CONTRIBUTING.md). Project + charter-amendment
+governance is in [`GOVERNANCE.md`](GOVERNANCE.md).
 
 ---
 
