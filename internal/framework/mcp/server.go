@@ -72,6 +72,9 @@ transport: cli | mcp — not a server-side resolution stage.)
       via on:) + their subscribers, plus the bridged host phases.
   keystone_charter_coverage
       Files a guide governs vs. uncharted (matched by no guide's globs).
+  keystone_explain id=<i> [kind=<k>]
+      Explain a primitive — how it activates, what it links to, where it
+      projects. Use before reading a whole body.
 
 ## Reactions (what fires when)
 

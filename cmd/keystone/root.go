@@ -88,6 +88,7 @@ func init() {
 	rootCmd.AddCommand(hookCmd())
 	rootCmd.AddCommand(signalCmd())
 	rootCmd.AddCommand(charterCmd())
+	rootCmd.AddCommand(explainCmd())
 	rootCmd.AddCommand(projectCmd())
 	rootCmd.AddCommand(migrateCmd())
 	rootCmd.AddCommand(mcpCmd())
@@ -291,6 +292,16 @@ func charterCmd() *cobra.Command {
 		Short:              "Inspect the charter (coverage: files no guide governs)",
 		DisableFlagParsing: true,
 		RunE:               runAndForward(runCharter),
+	}
+	return c
+}
+
+func explainCmd() *cobra.Command {
+	c := &cobra.Command{
+		Use:                "explain",
+		Short:              "Explain a primitive — how it activates, what it links to, changes",
+		DisableFlagParsing: true,
+		RunE:               runAndForward(runExplain),
 	}
 	return c
 }

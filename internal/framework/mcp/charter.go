@@ -19,6 +19,38 @@ import (
 func registerCharterViews(s *server.MCPServer, projectDir string) {
 	registerSignalListTool(s, projectDir)
 	registerCoverageTool(s, projectDir)
+	registerExplainTool(s, projectDir)
+}
+
+// registerExplainTool explains a primitive — how it activates, what it
+// links to, where it projects — so an agent can understand a skill,
+// command, sensor, guide, etc. without reading its whole body.
+func registerExplainTool(s *server.MCPServer, projectDir string) {
+	s.AddTool(
+		mcp.NewTool("keystone_explain",
+			mcp.WithDescription("Explain a primitive by id: its kind, how/when it activates (a guide's globs, a sensor's on:, a skill's triggers, …), what it links to, and where it projects. Optionally narrow by kind."),
+			mcp.WithString("id", mcp.Required(), mcp.Description("Primitive id (e.g. 'keystone:verify', 'guides/idioms/go/stdlib-first').")),
+			mcp.WithString("kind", mcp.Description("Narrow to this kind when an id is shared across kinds.")),
+		),
+		func(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+			id, err := req.RequireString("id")
+			if err != nil {
+				return mcp.NewToolResultError(err.Error()), nil
+			}
+			kind := req.GetString("kind", "")
+			prims, _, err := primitive.Walk(projectDir, kconfig.DefaultCharterRoot)
+			if err != nil {
+				return mcp.NewToolResultError(err.Error()), nil
+			}
+			for _, p := range prims {
+				if charter.Matches(p, id, kind) {
+					body, _ := json.MarshalIndent(charter.Explain(p), "", "  ")
+					return mcp.NewToolResultText(string(body)), nil
+				}
+			}
+			return mcp.NewToolResultError("no primitive with id " + id), nil
+		},
+	)
 }
 
 // registerSignalListTool lists the signals a hook/sensor/tool/agent may
