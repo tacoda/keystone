@@ -1188,25 +1188,46 @@
 </head>
 <body>
 
-<header class="topbar">
-  <div class="brand">
-    <div class="brand-row">
-      <span class="brand-logo-wrap"><img src="keystone_logo.png" alt="Keystone" class="brand-logo" width="512" height="512"></span>
-      <h1>Keystone</h1>
-    </div>
-  </div>
-  <nav class="topnav">
-    <a href="#what">What it does</a>
-    <a href="#features">Features</a>
-    <a href="#install">Install</a>
-    <a href="guide.html">Guide</a>
-    <a href="docs.html">Reference</a>
-    <a href="https://github.com/tacoda/keystone" target="_blank" rel="noopener">GitHub ↗</a>
-    <a class="cta" href="#install">Get started</a>
-  </nav>
-</header>
+<button class="menu-toggle" aria-label="Toggle navigation">☰ Menu</button>
 
-<main class="landing">
+<div class="app">
+
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="brand-row">
+        <span class="brand-logo-wrap"><img src="keystone_logo.png" alt="Keystone" class="brand-logo" width="512" height="512"></span>
+        <h1>Keystone</h1>
+      </div>
+      <p>the agent charter framework</p>
+      <p>v4.0.0</p>
+    </div>
+
+    <nav>
+      <div class="nav-group">
+        <span class="nav-label">Overview</span>
+        <a class="nav-link" href="#why-keystone">Three big wins</a>
+        <a class="nav-link" href="#what">What it does</a>
+        <a class="nav-link" href="#features">Features</a>
+        <a class="nav-link" href="#install">Get started</a>
+      </div>
+
+      <div class="nav-group">
+        <span class="nav-label">Elsewhere</span>
+        <a class="nav-link" href="guide.html">Guide</a>
+        <a class="nav-link" href="docs.html">Reference</a>
+        <a class="nav-link" href="https://github.com/tacoda/keystone" target="_blank" rel="noopener">GitHub <span class="ext">↗</span></a>
+      </div>
+    </nav>
+
+    <div class="sidebar-foot">
+      <a href="guide.html">Guide ↗</a>
+      <a href="docs.html">Reference ↗</a>
+      <a href="https://github.com/tacoda/keystone" target="_blank" rel="noopener">GitHub ↗</a>
+      <a href="https://github.com/tacoda/keystone/blob/main/CHANGELOG.md" target="_blank" rel="noopener">Changelog ↗</a>
+    </div>
+  </aside>
+
+<main class="content">
 
   <!-- ============ HERO ============ -->
   <section class="hero">
@@ -1424,7 +1445,16 @@
 
 </main>
 
+</div>
+
 <script>
+  // ---------- Mobile nav toggle ----------
+  (function(){
+    var t = document.querySelector('.menu-toggle');
+    var s = document.getElementById('sidebar');
+    if (t && s) { t.addEventListener('click', function(){ s.classList.toggle('open'); }); }
+  })();
+
   // ---------- Terminal hero animation ----------
   // Decorative loops for the hero terminal: a rotating spark glyph and an
   // elapsed-seconds counter. No SPA router on the landing — single page.
