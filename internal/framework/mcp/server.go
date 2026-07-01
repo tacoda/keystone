@@ -67,6 +67,19 @@ transport: cli | mcp — not a server-side resolution stage.)
   keystone_get_corpus id=<guide-id>
       Follow a guide's corpus: field; return the linked corpus body.
       Use this when a guide's body is not enough to act.
+  keystone_signal_list
+      List signals (framework events a sensor/tool/agent subscribes to
+      via on:) + their subscribers, plus the bridged host phases.
+  keystone_charter_coverage
+      Files a guide governs vs. uncharted (matched by no guide's globs).
+
+## Reactions (what fires when)
+
+A signal (framework event) or host phase fires; the reacting primitive
+self-subscribes via on:, like a skill declares triggers:
+  - sensor — a check → verdict (exit/HTTP status); gates.
+  - tool   — an external callable; on-demand, or a side-effect with on:.
+  - agent  — an inferential review → structured returns:.
 
 ## Write tools (each shells out to the keystone binary)
 
@@ -133,6 +146,7 @@ func New(opts Options) (*server.MCPServer, error) {
 	registerPrompts(s, abs)
 	registerEvalTools(s, abs)
 	registerSearchTool(s, abs)
+	registerCharterViews(s, abs)
 	registerToolPrimitives(s, abs)
 
 	return s, nil

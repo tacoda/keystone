@@ -233,6 +233,8 @@ func (s *server) routes() {
 		{"/charter/policies", s.handlePolicies},
 		{"/charter/investigator", s.handleInvestigator},
 		{"/charter/graph", s.handleGraph},
+		{"/charter/coverage", s.handleCoverage},
+		{"/charter/signals", s.handleSignals},
 
 		// Flywheels.
 		{"/flywheels", s.handleFlywheels},

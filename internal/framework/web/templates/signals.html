@@ -1,0 +1,30 @@
+{{define "signals.html"}}{{template "layout" .}}{{end}}
+{{define "title"}}signals{{end}}
+{{define "main"}}
+<section class="card">
+  <h1>signals</h1>
+  <p class="muted">A <strong>signal</strong> is a keystone framework event — the extensible, higher-level counterpart to a host hook phase. A primitive subscribes via <code>on:</code> (a <code>sensor</code> checks, a <code>tool</code> fires a side-effect, an <code>agent</code> reviews). Fire with <code>keystone signal fire &lt;name&gt;</code>.</p>
+  <table>
+    <thead><tr><th>signal</th><th>kind</th><th>subscribers</th></tr></thead>
+    <tbody>
+      {{range .Signals}}
+      <tr>
+        <td><code>{{.Name}}</code></td>
+        <td class="muted">{{if .Builtin}}built-in{{else}}custom{{end}}</td>
+        <td>
+          {{if .Subscribers}}
+            {{range .Subscribers}}<code>{{.}}</code> {{end}}
+          {{else}}<span class="muted">— none</span>{{end}}
+        </td>
+      </tr>
+      {{end}}
+    </tbody>
+  </table>
+</section>
+
+<section class="card">
+  <h2>host phases</h2>
+  <p class="muted">Fired by the host, not keystone — bridged into <code>.claude/settings.json</code>. These are a closed set; anything else in <code>on:</code> is a signal.</p>
+  <p>{{range .HostPhases}}<code>{{.}}</code> {{end}}</p>
+</section>
+{{end}}

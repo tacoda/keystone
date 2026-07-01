@@ -55,6 +55,8 @@ func TestRouter_NewSectionURLs(t *testing.T) {
 		"/charter/policies",
 		"/charter/investigator",
 		"/charter/graph",
+		"/charter/coverage",
+		"/charter/signals",
 		"/flywheels",
 		"/flywheels/inbox",
 		"/flywheels/prune",

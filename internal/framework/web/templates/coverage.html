@@ -1,0 +1,31 @@
+{{define "coverage.html"}}{{template "layout" .}}{{end}}
+{{define "title"}}coverage{{end}}
+{{define "main"}}
+<section class="card">
+  <h1>charter coverage</h1>
+  <p class="muted">Which project files a guide governs, and which are <em>uncharted</em> — matched by no guide's globs, so the agent runs there with no ambient rule. Generated, vendored, and hidden trees are skipped.</p>
+  {{if .Error}}
+  <p class="muted">coverage error: {{.Error}}</p>
+  {{else}}
+  <div class="kpi-strip" aria-label="coverage headline">
+    <div class="kpi"><span class="kpi-value">{{.Pct}}%</span><span class="kpi-label">governed</span></div>
+    <div class="kpi"><span class="kpi-value">{{.Governed}}</span><span class="kpi-label">governed files</span></div>
+    <div class="kpi"><span class="kpi-value">{{.Uncharted}}</span><span class="kpi-label">uncharted</span></div>
+    <div class="kpi"><span class="kpi-value">{{.Total}}</span><span class="kpi-label">scanned</span></div>
+  </div>
+  {{if .Regions}}
+  <h2>uncharted regions</h2>
+  <table>
+    <thead><tr><th>region</th><th>uncharted files</th></tr></thead>
+    <tbody>
+      {{range .Regions}}
+      <tr><td><code>{{.Name}}</code></td><td>{{.Count}}</td></tr>
+      {{end}}
+    </tbody>
+  </table>
+  {{else}}
+  <p class="muted">every scanned file is governed by a guide.</p>
+  {{end}}
+  {{end}}
+</section>
+{{end}}
