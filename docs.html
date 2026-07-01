@@ -1,0 +1,2094 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Keystone Reference — the agent charter framework. v4.0.0.</title>
+<meta name="description" content="Keystone reference documentation. The agent charter framework: 13 primitive kinds, signals, the resolution contract, the cascade, CLI, MCP server, dashboard, governance, and migration — v4.0.0.">
+<link rel="canonical" href="https://www.tacoda.dev/keystone/docs.html">
+
+<!-- Open Graph -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://www.tacoda.dev/keystone/docs.html">
+<meta property="og:title" content="Keystone Reference — the agent charter framework. v4.0.0.">
+<meta property="og:description" content="Keystone reference documentation. The agent charter framework: 13 primitive kinds, signals, the resolution contract, the cascade, CLI, MCP server, dashboard, governance, and migration — v4.0.0.">
+<meta property="og:image" content="https://www.tacoda.dev/keystone/keystone_logo.png">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Keystone Reference — the agent charter framework. v4.0.0.">
+<meta name="twitter:description" content="Keystone reference documentation. The agent charter framework: 13 primitive kinds, signals, the resolution contract, the cascade, CLI, MCP server, dashboard, governance, and migration — v4.0.0.">
+<meta name="twitter:image" content="https://www.tacoda.dev/keystone/keystone_logo.png">
+
+<link rel="icon" type="image/png" href="keystone_logo.png">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;600&family=IBM+Plex+Sans:wght@300;400;600&display=swap');
+
+  :root {
+    --bg: #0d0f14;
+    --surface: #13161d;
+    --surface2: #1a1e28;
+    --surface3: #21263214;
+    --border: #252a38;
+    --border-bright: #2f3548;
+    --accent: #4ade9a;
+    --accent2: #60a5fa;
+    --accent3: #f59e0b;
+    --accent4: #e879a0;
+    --accent5: #a78bfa;
+    --text: #e2e8f0;
+    --text-dim: #94a3b8;
+    --muted: #64748b;
+    --mono: 'IBM Plex Mono', monospace;
+    --sans: 'IBM Plex Sans', sans-serif;
+    --sidebar-w: 280px;
+    --ease: cubic-bezier(.22,.61,.36,1);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body { height: 100%; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-weight: 300;
+    line-height: 1.6;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a { color: var(--accent2); text-decoration: none; border-bottom: 1px dotted var(--accent2); transition: color .15s var(--ease), border-color .15s var(--ease); }
+  a:hover { color: var(--accent); border-bottom-color: var(--accent); }
+
+  code { font-family: var(--mono); font-size: 0.85em; color: var(--accent); background: var(--surface2); padding: 1px 6px; border-radius: 2px; }
+
+  /* ------------- App shell ------------- */
+  .app { display: flex; min-height: 100vh; }
+
+  .sidebar {
+    width: var(--sidebar-w);
+    flex: 0 0 var(--sidebar-w);
+    background: linear-gradient(180deg, #0b0d12 0%, #0d0f14 100%);
+    border-right: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    padding: 28px 22px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+
+  .sidebar::-webkit-scrollbar { width: 6px; }
+  .sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  .brand {
+    border-left: 3px solid var(--accent);
+    padding: 4px 0 4px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .brand-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .brand-logo-wrap {
+    position: relative;
+    display: inline-block;
+    width: 28px;
+    height: 28px;
+    flex-shrink: 0;
+    border-radius: 4px;
+    overflow: hidden;
+    /* After the drop settles, idle-float subtly. The drop has fill `both`
+       so it settles at translateY(0); the float picks up from there. */
+    animation: keystone-logo-float 4s ease-in-out 0.65s infinite;
+  }
+  .brand-logo {
+    width: 28px;
+    height: 28px;
+    border-radius: 4px;
+    display: block;
+    animation: keystone-logo-drop 0.65s var(--ease) both;
+  }
+  /* Light bar sweeps across the keystone every 2s — sleek-and-shiny vibe.
+     The keystone PNG is used as a mask so the shine only paints over the
+     opaque part of the logo, never on the transparent surround. */
+  .brand-logo-wrap::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: linear-gradient(
+      65deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.0) 38%,
+      rgba(255, 255, 255, 0.7) 50%,
+      rgba(255, 255, 255, 0.0) 62%,
+      transparent 100%
+    );
+    background-size: 300% 100%;
+    background-repeat: no-repeat;
+    background-position: -20% 50%;
+    -webkit-mask-image: url(keystone_logo.png);
+            mask-image: url(keystone_logo.png);
+    -webkit-mask-size: 100% 100%;
+            mask-size: 100% 100%;
+    -webkit-mask-position: center;
+            mask-position: center;
+    -webkit-mask-repeat: no-repeat;
+            mask-repeat: no-repeat;
+    pointer-events: none;
+    animation: keystone-logo-shine 2s ease-in-out 0.65s infinite;
+  }
+  /* …and a sparkle pops in the top-right corner exactly when the shine
+     hits it. Cued to the same 2s cycle, peak timed to overlap the shine's
+     leading edge at the top-right. Shaped as a 4-point star via clip-path
+     with thin, ✨-style rays. */
+  .brand-logo-wrap::before {
+    content: '';
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    width: 18px;
+    height: 18px;
+    background: #fff;
+    /* Thin-rayed 4-point star — inner corners pulled close to center
+       so the rays are sleek, like the ✨ emoji. */
+    clip-path: polygon(
+      50% 0%,
+      54% 46%,
+      100% 50%,
+      54% 54%,
+      50% 100%,
+      46% 54%,
+      0% 50%,
+      46% 46%
+    );
+    /* Multi-layer drop-shadow gives a bright, shiny halo that hugs the
+       star's actual shape (drop-shadow respects clip-path, unlike
+       box-shadow). */
+    filter:
+      drop-shadow(0 0 4px rgba(255, 255, 255, 1))
+      drop-shadow(0 0 10px rgba(255, 255, 255, 0.7))
+      drop-shadow(0 0 18px rgba(255, 255, 255, 0.35));
+    transform: scale(0) rotate(-20deg);
+    opacity: 0;
+    pointer-events: none;
+    z-index: 2;
+    animation: keystone-logo-sparkle 2s ease-out 0.65s infinite;
+  }
+  @keyframes keystone-logo-drop {
+    0%   { transform: translateY(-48px); opacity: 0; }
+    65%  { transform: translateY(5px);   opacity: 1; }
+    85%  { transform: translateY(-2px);  opacity: 1; }
+    100% { transform: translateY(0);     opacity: 1; }
+  }
+  @keyframes keystone-logo-float {
+    0%, 100% { transform: translateY(0);    }
+    50%      { transform: translateY(-3px); }
+  }
+  /* Background-position animation slides the gradient stripe across.
+     At 0% the bright band is just off the right edge; at 25% it has
+     traversed and exited to the left. Then idle for the remainder. */
+  @keyframes keystone-logo-shine {
+    0%   { background-position: -20% 50%; }
+    25%  { background-position: 120% 50%; }
+    100% { background-position: 120% 50%; }
+  }
+  /* Sparkle peaks at ~8% of the cycle — the moment the shine's leading
+     edge arrives at the top-right corner of the keystone. A small rotation
+     during the twinkle so the 4-point star feels alive, not pasted on. */
+  @keyframes keystone-logo-sparkle {
+    0%, 4%    { transform: scale(0)    rotate(-20deg); opacity: 0; }
+    8%        { transform: scale(1.5)  rotate(0deg);   opacity: 1; }
+    14%       { transform: scale(1.15) rotate(12deg);  opacity: 0.9; }
+    20%       { transform: scale(0.5)  rotate(24deg);  opacity: 0.35; }
+    28%, 100% { transform: scale(0)    rotate(30deg);  opacity: 0; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .brand-logo { animation: none; }
+    .brand-logo-wrap { animation: none; }
+    .brand-logo-wrap::after,
+    .brand-logo-wrap::before { animation: none; opacity: 0; }
+  }
+  .brand h1 {
+    font-family: var(--mono);
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--accent);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+  .brand p {
+    color: var(--muted);
+    font-family: var(--mono);
+    font-size: 0.66rem;
+    letter-spacing: 0.08em;
+    margin-top: 0;
+    line-height: 1.5;
+  }
+
+  nav { display: flex; flex-direction: column; gap: 18px; }
+
+  .nav-group { display: flex; flex-direction: column; gap: 2px; }
+  .nav-label {
+    font-family: var(--mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 0 12px 6px;
+  }
+
+  .nav-link {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    color: var(--text-dim);
+    padding: 7px 12px 7px 14px;
+    border-left: 2px solid transparent;
+    border-bottom: none;
+    border-radius: 0 2px 2px 0;
+    letter-spacing: 0.02em;
+    transition: color .18s var(--ease), background .18s var(--ease), border-color .18s var(--ease), padding-left .18s var(--ease);
+  }
+  .nav-link:hover {
+    color: var(--text);
+    background: rgba(74,222,154,0.04);
+    border-left-color: var(--border-bright);
+    border-bottom: none;
+    padding-left: 16px;
+  }
+  .nav-link.active {
+    color: var(--accent);
+    background: rgba(74,222,154,0.08);
+    border-left-color: var(--accent);
+  }
+  .nav-link .badge {
+    font-family: var(--mono);
+    font-size: 0.55rem;
+    letter-spacing: 0.12em;
+    color: var(--accent3);
+    background: rgba(245,158,11,0.10);
+    border: 1px solid rgba(245,158,11,0.25);
+    padding: 1px 6px;
+    border-radius: 2px;
+  }
+  .nav-link .ext { color: var(--muted); font-size: 0.7rem; }
+
+  .sidebar-foot {
+    margin-top: auto;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .sidebar-foot a {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    color: var(--muted);
+    border-bottom: none;
+    padding: 3px 14px;
+    letter-spacing: 0.06em;
+    transition: color .15s var(--ease);
+  }
+  .sidebar-foot a:hover { color: var(--accent); }
+
+  /* ------------- Content ------------- */
+  .content {
+    flex: 1;
+    min-width: 0;
+    padding: 56px 48px 40px;
+    max-width: 980px;
+    width: 100%;
+  }
+
+  .page { display: none; animation: pageIn .28s var(--ease); }
+  .page.active { display: block; }
+
+  @keyframes pageIn {
+    from { opacity: 0; transform: translateY(4px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .page { animation: none; }
+    * { transition: none !important; }
+  }
+
+  /* Section header */
+  .page-head {
+    margin-bottom: 36px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid var(--border);
+  }
+  .page-head .crumb {
+    font-family: var(--mono);
+    font-size: 0.66rem;
+    letter-spacing: 0.2em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  .page-head h1 {
+    font-family: var(--sans);
+    font-size: 1.7rem;
+    font-weight: 600;
+    color: var(--text);
+    letter-spacing: -0.01em;
+    margin-bottom: 10px;
+  }
+  .page-head p.tagline {
+    color: var(--text-dim);
+    font-size: 0.95rem;
+    line-height: 1.7;
+    max-width: 720px;
+  }
+
+  /* Hero-title color-cycle: italicized "any" in the introduction title cycles
+     through the five accent colors with a soft underline glow. Same posture
+     as the pipeline-pulse but on a single element instead of moving across
+     a row of phases. 5 colors × 1.2s per stop = 6s loop. */
+  .hero-any {
+    font-style: italic;
+    font-weight: 600;
+    color: var(--accent);
+    text-shadow: 0 0 0 transparent;
+    display: inline-block; /* needed so transform shakes the glyph */
+    animation: hero-any-cycle 6s ease-in-out infinite;
+  }
+  .hero-any:hover {
+    animation:
+      hero-any-cycle 6s ease-in-out infinite,
+      hero-any-shake 0.45s ease-in-out infinite;
+  }
+  .hero-any.rev { animation-direction: reverse; }
+  .hero-any.rev:hover {
+    animation:
+      hero-any-cycle 6s ease-in-out infinite reverse,
+      hero-any-shake 0.45s ease-in-out infinite;
+  }
+  @keyframes hero-any-cycle {
+    0%, 100% { color: var(--accent);  text-shadow: 0 0 18px rgba(74, 222, 154, 0.45); }
+    20%      { color: var(--accent2); text-shadow: 0 0 18px rgba(96, 165, 250, 0.45); }
+    40%      { color: var(--accent3); text-shadow: 0 0 18px rgba(245, 158, 11, 0.45); }
+    60%      { color: var(--accent4); text-shadow: 0 0 18px rgba(232, 121, 160, 0.45); }
+    80%      { color: var(--accent5); text-shadow: 0 0 18px rgba(167, 139, 250, 0.45); }
+  }
+  @keyframes hero-any-shake {
+    0%, 100% { transform: translate(0, 0)      rotate(0deg);     }
+    20%      { transform: translate(-1.5px, 1px)  rotate(-2.5deg); }
+    40%      { transform: translate( 1.5px, -1px) rotate( 2.5deg); }
+    60%      { transform: translate(-1px, -1px)   rotate(-1.5deg); }
+    80%      { transform: translate( 1px,  1px)   rotate( 1.5deg); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .hero-any, .hero-any:hover { animation: none; }
+  }
+
+  /* Section labels */
+  .section-label {
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 32px 0 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* Definition block */
+  .definition {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent2);
+    padding: 22px 26px;
+    margin-bottom: 20px;
+    border-radius: 2px;
+    transition: border-color .25s var(--ease);
+  }
+  .definition:hover { border-left-color: var(--accent); }
+  .definition p {
+    font-size: 0.95rem;
+    line-height: 1.8;
+    color: var(--text);
+    margin-bottom: 10px;
+  }
+  .definition p:last-child { margin-bottom: 0; }
+  .definition strong { color: var(--accent2); font-weight: 600; }
+
+  /* Code blocks */
+  pre.code {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent3);
+    border-radius: 2px;
+    padding: 16px 20px;
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    color: var(--text);
+    line-height: 1.7;
+    overflow-x: auto;
+    margin-bottom: 16px;
+  }
+  pre.code .prompt { color: var(--muted); user-select: none; }
+  pre.code .comment { color: var(--muted); }
+  pre.code .kw { color: var(--accent5); }
+  pre.code code { background: transparent; padding: 0; color: inherit; font-size: inherit; }
+
+  /* Install method */
+  .install-method { margin-bottom: 28px; }
+  .install-method h3 {
+    font-family: var(--mono);
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .install-method h3::before { content: '▸'; color: var(--accent); }
+  .install-method p {
+    font-size: 0.85rem;
+    color: var(--muted);
+    margin-bottom: 10px;
+    line-height: 1.7;
+  }
+
+  /* Action grid */
+  .action-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .action-grid.three { grid-template-columns: 1fr 1fr 1fr; }
+  .action-grid.four { grid-template-columns: 1fr 1fr 1fr 1fr; }
+
+  .action {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 18px 20px;
+    border-radius: 2px;
+    transition: border-color .25s var(--ease), transform .25s var(--ease), background .25s var(--ease), box-shadow .25s var(--ease);
+  }
+  .action:hover {
+    border-color: var(--border-bright);
+    transform: translateY(-3px);
+    background: var(--surface2);
+    box-shadow: 0 8px 20px -10px rgba(0, 0, 0, 0.55);
+  }
+
+  .action-tag {
+    font-family: var(--mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 2px;
+    display: inline-block;
+    margin-bottom: 10px;
+    background: var(--surface2);
+    color: var(--muted);
+  }
+  .action h3 {
+    font-family: var(--mono);
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: var(--text);
+  }
+  .action h3 .when {
+    font-size: 0.65rem;
+    color: var(--muted);
+    font-weight: 400;
+    margin-left: 8px;
+    letter-spacing: 0.05em;
+  }
+  .action p {
+    font-size: 0.78rem;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+  .action p code { font-size: 0.78em; }
+
+  /* Layer table */
+  .layer-header {
+    display: grid;
+    grid-template-columns: 130px 1fr 180px 180px;
+    gap: 0;
+    margin-bottom: 2px;
+  }
+  .layer-header span {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 8px 16px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+  }
+  .layers { display: grid; gap: 2px; margin-bottom: 20px; }
+  .layer {
+    display: grid;
+    grid-template-columns: 130px 1fr 180px 180px;
+    gap: 0;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    transition: border-color .2s var(--ease);
+  }
+  .layer:hover { border-color: var(--border-bright); }
+  .layer-cell {
+    padding: 14px 16px;
+    font-size: 0.83rem;
+    border-right: 1px solid var(--border);
+  }
+  .layer-cell:last-child { border-right: none; }
+  .layer-name { font-family: var(--mono); font-weight: 600; font-size: 0.8rem; }
+  .layer-desc { color: var(--muted); font-size: 0.8rem; line-height: 1.6; }
+  .layer-author { color: var(--muted); font-size: 0.78rem; }
+  .layer-act { font-family: var(--mono); font-size: 0.72rem; color: var(--muted); }
+
+  .l1 .layer-name { color: var(--accent); }
+  .l2 .layer-name { color: var(--accent2); }
+  .l3 .layer-name { color: var(--accent3); }
+  .l4 .layer-name { color: var(--accent4); }
+  .l5 .layer-name { color: var(--accent5); }
+
+  /* Phase pipeline */
+  .pipeline {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 4px;
+    margin-bottom: 16px;
+  }
+  .phase {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    padding: 12px 10px;
+    text-align: center;
+    transition: transform .2s var(--ease), border-color .2s var(--ease);
+  }
+  .phase:hover { transform: translateY(-1px); border-color: var(--border-bright); }
+  .phase .phase-num {
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    color: var(--muted);
+    letter-spacing: 0.15em;
+    display: block;
+    margin-bottom: 4px;
+  }
+  .phase .phase-name {
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    color: var(--text);
+    font-weight: 600;
+  }
+  .phase.p1 { border-top: 2px solid var(--accent);  --phase-color: 74, 222, 154; }
+  .phase.p2 { border-top: 2px solid var(--accent2); --phase-color: 96, 165, 250; }
+  .phase.p3 { border-top: 2px solid var(--accent3); --phase-color: 245, 158, 11; }
+  .phase.p4 { border-top: 2px solid var(--accent4); --phase-color: 232, 121, 160; }
+  .phase.p5 { border-top: 2px solid var(--accent5); --phase-color: 167, 139, 250; }
+  .phase.p6 { border-top: 2px solid var(--accent);  --phase-color: 74, 222, 154; }
+
+  /* Pulse the pipeline in order, with a slight overlap so movement reads
+     as a wave traveling left-to-right. Six phases × 0.6s each = 3.6s loop. */
+  @keyframes pipeline-pulse {
+    0%, 100% {
+      box-shadow: 0 0 0 0 rgba(var(--phase-color), 0);
+      background: var(--surface);
+    }
+    35% {
+      box-shadow: 0 0 24px 2px rgba(var(--phase-color), 0.55);
+      background: rgba(var(--phase-color), 0.10);
+    }
+    70% {
+      box-shadow: 0 0 0 0 rgba(var(--phase-color), 0);
+      background: var(--surface);
+    }
+  }
+  .pipeline .phase {
+    animation: pipeline-pulse 3.6s ease-in-out infinite;
+  }
+  .pipeline .phase.p1 { animation-delay: 0.0s; }
+  .pipeline .phase.p2 { animation-delay: 0.6s; }
+  .pipeline .phase.p3 { animation-delay: 1.2s; }
+  .pipeline .phase.p4 { animation-delay: 1.8s; }
+  .pipeline .phase.p5 { animation-delay: 2.4s; }
+  .pipeline .phase.p6 { animation-delay: 3.0s; }
+  @media (prefers-reduced-motion: reduce) {
+    .pipeline .phase { animation: none; }
+  }
+  .phase-desc {
+    font-size: 0.82rem;
+    color: var(--muted);
+    line-height: 1.7;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent2);
+    padding: 16px 20px;
+    border-radius: 2px;
+  }
+
+  /* Flywheels */
+  .flywheels {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+  .flywheel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    padding: 22px 24px;
+    transition: border-color .25s var(--ease), transform .25s var(--ease), box-shadow .25s var(--ease);
+  }
+  .flywheel:hover {
+    border-color: var(--border-bright);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px -10px rgba(0, 0, 0, 0.55);
+  }
+  .flywheel h3 {
+    font-family: var(--mono);
+    font-size: 0.82rem;
+    font-weight: 600;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .fw-learn-h { color: var(--accent); }
+  .fw-prune-h { color: var(--accent4); }
+  .loop { display: flex; flex-direction: column; gap: 0; }
+  .loop-step {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .loop-step:last-child { border-bottom: none; }
+  .loop-num {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    color: var(--muted);
+    min-width: 24px;
+    padding-top: 2px;
+  }
+  .loop-text {
+    font-size: 0.8rem;
+    color: var(--muted);
+    line-height: 1.55;
+  }
+  .loop-text strong { color: var(--text); font-weight: 600; }
+
+  /* Agents table */
+  .agents-table { display: grid; gap: 2px; }
+  .agent-row {
+    display: grid;
+    grid-template-columns: 220px 130px 1fr;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    transition: border-color .2s var(--ease);
+  }
+  .agent-row:hover { border-color: var(--border-bright); }
+  .agent-row.head span {
+    background: var(--surface2);
+    color: var(--muted);
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+  .agent-row span {
+    padding: 10px 14px;
+    border-right: 1px solid var(--border);
+    font-size: 0.8rem;
+  }
+  .agent-row span:last-child { border-right: none; }
+  .agent-name { font-family: var(--mono); color: var(--text); font-weight: 600; }
+  .agent-status {
+    font-family: var(--mono);
+    font-size: 0.7rem !important;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .agent-status.real { color: var(--accent); }
+  .agent-status.gaps { color: var(--accent3); }
+  .agent-status.fallback { color: var(--muted); }
+  .agent-menu { font-family: var(--mono); color: var(--muted); font-size: 0.76rem !important; }
+
+  /* Tree */
+  .tree {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    padding: 24px 28px;
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    line-height: 1.95;
+    overflow-x: auto;
+  }
+  .tree-line {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    white-space: nowrap;
+  }
+  .tree-structure { color: var(--muted); user-select: none; }
+  .tree-dir { color: var(--text); font-weight: 600; }
+  .tree-file { color: var(--muted); }
+  .tree-annotation { font-size: 0.66rem; margin-left: 8px; }
+  .ann-1 { color: rgba(74,222,154,0.55); }
+  .ann-2 { color: rgba(96,165,250,0.55); }
+  .ann-3 { color: rgba(245,158,11,0.55); }
+  .ann-4 { color: rgba(232,121,160,0.55); }
+  .ann-5 { color: rgba(167,139,250,0.55); }
+  .ann-default { color: var(--muted); opacity: 0.7; }
+
+  /* Terminal hero */
+  .hero-term { margin-bottom: 36px; }
+  .term {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+    box-shadow: 0 24px 48px -28px rgba(0,0,0,.7);
+    transition: border-color .25s var(--ease), transform .35s var(--ease);
+  }
+  .term:hover { border-color: var(--border-bright); }
+  .term-bar {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 12px 16px;
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+  }
+  .term-bar .dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--border-bright);
+  }
+  .term-bar .dot.d1 { background: #e879a0; }
+  .term-bar .dot.d2 { background: #f59e0b; }
+  .term-bar .dot.d3 { background: #4ade9a; }
+  .term-bar .tlabel {
+    margin-left: 8px;
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    color: var(--muted);
+    letter-spacing: 0.04em;
+  }
+  .term-body {
+    padding: 22px 22px 26px;
+    font-family: var(--mono);
+    font-size: 0.82rem;
+    line-height: 1.95;
+    color: var(--text);
+    overflow-x: auto;
+  }
+  .term-body .pr  { color: var(--accent3); }
+  .term-body .ok  { color: var(--accent); }
+  .term-body .ar  { color: var(--accent2); }
+  .term-body .dim { color: var(--muted); }
+  .term-body .huh {
+    display: block;
+    white-space: pre;
+    line-height: 1.35;
+    margin: 8px 0 10px;
+    color: var(--muted);
+    font-size: 0.78rem;
+  }
+  .term-body .huh .hcur { color: var(--accent3); font-weight: 600; }
+  .term-body .huh .hsel { color: var(--text); }
+  .term-body .cursor {
+    display: inline-block;
+    width: 8px;
+    height: 14px;
+    background: var(--accent);
+    vertical-align: middle;
+    margin-left: 2px;
+    animation: blink 1s steps(2,end) infinite;
+  }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  /* CTA cards */
+  .cta-card {
+    background:
+      linear-gradient(180deg, rgba(232,121,160,0.06), rgba(167,139,250,0.04)),
+      var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent4);
+    padding: 26px 30px;
+    border-radius: 2px;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 20px;
+    transition: border-color .25s var(--ease), transform .25s var(--ease), box-shadow .25s var(--ease);
+  }
+  .cta-card:hover { transform: translateY(-3px); border-color: var(--border-bright); border-left-color: var(--accent4); box-shadow: 0 10px 24px -12px rgba(0, 0, 0, 0.55); }
+  .cta-card.alt {
+    background:
+      linear-gradient(180deg, rgba(74,222,154,0.06), rgba(96,165,250,0.04)),
+      var(--surface);
+    border-left: 3px solid var(--accent);
+  }
+  .cta-card.alt:hover { border-left-color: var(--accent); }
+  .cta-card::before {
+    content: '';
+    position: absolute;
+    top: 0; right: 0;
+    width: 160px; height: 160px;
+    background: radial-gradient(circle at top right, rgba(232,121,160,0.18), transparent 70%);
+    pointer-events: none;
+  }
+  .cta-card.alt::before {
+    background: radial-gradient(circle at top right, rgba(74,222,154,0.18), transparent 70%);
+  }
+  .cta-headline {
+    font-family: var(--mono);
+    font-size: 0.95rem;
+    margin-bottom: 12px;
+    letter-spacing: 0.02em;
+    position: relative;
+  }
+  .cta-card .cta-headline { color: var(--accent4); }
+  .cta-card.alt .cta-headline { color: var(--accent); }
+  .cta-body {
+    font-size: 0.9rem;
+    line-height: 1.75;
+    margin-bottom: 18px;
+    color: var(--text);
+    position: relative;
+    max-width: 720px;
+  }
+  .cta-list {
+    list-style: none;
+    margin: 0 0 20px 0;
+    padding: 0;
+    position: relative;
+  }
+  .cta-list li {
+    font-size: 0.85rem;
+    line-height: 1.65;
+    padding: 5px 0;
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+  }
+  .cta-list .il-tag {
+    flex: 0 0 auto;
+    font-family: var(--mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--accent5);
+    padding: 4px 10px;
+    border-radius: 2px;
+    min-width: 150px;
+    text-align: center;
+  }
+  .cta-card.alt .cta-list .il-tag { color: var(--accent); }
+  .cta-buttons {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    position: relative;
+  }
+  .cta-btn {
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    letter-spacing: 0.1em;
+    padding: 11px 22px;
+    border-radius: 2px;
+    text-transform: uppercase;
+    border-bottom: none !important;
+    transition: background .18s var(--ease), color .18s var(--ease), transform .18s var(--ease);
+  }
+  .cta-btn:hover { transform: translateY(-1px); }
+  .cta-primary {
+    background: var(--accent4);
+    color: var(--bg);
+    border: 1px solid var(--accent4);
+  }
+  .cta-primary:hover {
+    background: transparent;
+    color: var(--accent4);
+  }
+  .cta-card.alt .cta-primary {
+    background: var(--accent);
+    color: var(--bg);
+    border-color: var(--accent);
+  }
+  .cta-card.alt .cta-primary:hover {
+    background: transparent;
+    color: var(--accent);
+  }
+  .cta-secondary {
+    background: transparent;
+    color: var(--accent5);
+    border: 1px solid var(--accent5);
+  }
+  .cta-secondary:hover {
+    background: rgba(167,139,250,0.1);
+    color: var(--accent5);
+  }
+
+  /* Iron law list */
+  .iron-list {
+    list-style: none;
+    padding-left: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .iron-list li {
+    padding: 12px 16px;
+    border-left: 3px solid var(--accent3);
+    background: var(--surface2);
+    border-radius: 2px;
+    font-size: 0.83rem;
+    line-height: 1.6;
+    color: var(--text);
+  }
+  .iron-list li strong {
+    color: var(--accent3);
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    margin-right: 8px;
+  }
+  .iron-list li .ver {
+    color: var(--accent3);
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+    margin-left: 6px;
+    opacity: 0.7;
+  }
+
+  /* Mermaid */
+  .mermaid-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    padding: 24px 20px;
+    margin-bottom: 20px;
+    overflow-x: auto;
+    transition: border-color .2s var(--ease);
+  }
+  .mermaid-wrap:hover { border-color: var(--border-bright); }
+  .mermaid-wrap .mermaid { text-align: center; min-height: 50px; }
+  .mermaid-caption {
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    text-align: center;
+  }
+
+  /* Page footer */
+  .page-foot {
+    margin-top: 64px;
+    padding-top: 22px;
+    border-top: 1px solid var(--border);
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    color: var(--muted);
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .page-foot a {
+    color: var(--muted);
+    border-bottom: none;
+    transition: color .15s var(--ease);
+  }
+  .page-foot a:hover { color: var(--accent); }
+  .page-foot .built a { color: var(--accent); border-bottom: 1px dotted var(--border-bright); }
+  .page-foot .built a:hover { color: var(--accent); border-bottom-color: var(--accent); }
+
+  /* Mobile menu toggle */
+  .menu-toggle {
+    display: none;
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    z-index: 50;
+    background: var(--surface);
+    color: var(--accent);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    padding: 10px 12px;
+    cursor: pointer;
+    transition: background .15s var(--ease), border-color .15s var(--ease);
+  }
+  .menu-toggle:hover { background: var(--surface2); border-color: var(--accent); }
+
+  /* Inline lists in pages */
+  ol.steps {
+    list-style: none;
+    counter-reset: step;
+    padding-left: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  ol.steps li {
+    counter-increment: step;
+    padding: 14px 18px 14px 64px;
+    position: relative;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    background: var(--surface);
+    transition: border-color .2s var(--ease);
+  }
+  ol.steps li:hover { border-color: var(--border-bright); }
+  ol.steps li::before {
+    content: counter(step, decimal-leading-zero) ' →';
+    position: absolute;
+    left: 16px;
+    top: 14px;
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    color: var(--accent);
+    letter-spacing: 0.15em;
+    font-weight: 600;
+  }
+  ol.steps li strong { display: block; color: var(--text); font-size: 0.88rem; margin-bottom: 4px; }
+  ol.steps li p { font-size: 0.8rem; color: var(--muted); line-height: 1.6; }
+
+  /* Responsive */
+  @media (max-width: 980px) {
+    :root { --sidebar-w: 240px; }
+    .content { padding: 48px 32px 32px; }
+    .action-grid, .action-grid.three, .action-grid.four,
+    .flywheels { grid-template-columns: 1fr 1fr; }
+    .pipeline { grid-template-columns: repeat(3, 1fr); }
+    .agent-row { grid-template-columns: 180px 110px 1fr; }
+    .layer-header, .layer { grid-template-columns: 110px 1fr 130px 130px; }
+  }
+  @media (max-width: 720px) {
+    .app { flex-direction: column; }
+    .sidebar {
+      width: 100%;
+      flex: 0 0 auto;
+      height: auto;
+      max-height: 70vh;
+      position: fixed;
+      inset: 0 0 auto 0;
+      z-index: 40;
+      transform: translateY(-100%);
+      transition: transform .28s var(--ease);
+      border-right: none;
+      border-bottom: 1px solid var(--border);
+    }
+    .sidebar.open { transform: translateY(0); }
+    .content { padding: 64px 18px 24px; max-width: 100%; }
+    .menu-toggle { display: inline-flex; align-items: center; gap: 6px; }
+    .action-grid, .action-grid.three, .action-grid.four,
+    .flywheels { grid-template-columns: 1fr; }
+    .pipeline { grid-template-columns: repeat(2, 1fr); }
+    .agent-row { grid-template-columns: 1fr; }
+    .agent-row span { border-right: none; border-bottom: 1px solid var(--border); }
+    .layer-header, .layer { grid-template-columns: 100px 1fr; }
+    .layer-cell:nth-child(3), .layer-cell:nth-child(4),
+    .layer-header span:nth-child(3), .layer-header span:nth-child(4) { display: none; }
+    .term-body { font-size: 0.72rem; padding: 16px 14px 18px; }
+    .term-body .huh { font-size: 0.66rem; }
+    .cta-list li { flex-direction: column; align-items: flex-start; gap: 6px; }
+    .cta-list .il-tag { min-width: 0; }
+    .page-head h1 { font-size: 1.4rem; }
+  }
+</style>
+</head>
+<body>
+
+<button class="menu-toggle" aria-label="Toggle navigation">☰ Menu</button>
+
+<div class="app">
+
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="brand-row">
+        <span class="brand-logo-wrap"><img src="keystone_logo.png" alt="Keystone" class="brand-logo" width="512" height="512"></span>
+        <h1>Keystone</h1>
+      </div>
+      <p>the agent charter framework</p>
+      <p>reference · v4.0.0</p>
+    </div>
+
+    <nav>
+      <div class="nav-group">
+        <span class="nav-label">Concepts</span>
+        <a class="nav-link" href="#overview">Overview</a>
+        <a class="nav-link" href="#charter-vs-harness">Charter vs. harness</a>
+        <a class="nav-link" href="#contract">Resolution contract</a>
+        <a class="nav-link" href="#projection">Projection</a>
+        <a class="nav-link" href="#cascade">The cascade</a>
+        <a class="nav-link" href="#provenance">Provenance</a>
+      </div>
+
+      <div class="nav-group">
+        <span class="nav-label">Primitive kinds</span>
+        <a class="nav-link" href="#primitives">The 13 kinds</a>
+        <a class="nav-link" href="#guide">guide</a>
+        <a class="nav-link" href="#sensor">sensor</a>
+        <a class="nav-link" href="#agent">agent</a>
+        <a class="nav-link" href="#command">command</a>
+        <a class="nav-link" href="#skill">skill</a>
+        <a class="nav-link" href="#playbook">playbook</a>
+        <a class="nav-link" href="#corpus">corpus</a>
+        <a class="nav-link" href="#document">document</a>
+        <a class="nav-link" href="#concern">concern</a>
+        <a class="nav-link" href="#posture">posture</a>
+        <a class="nav-link" href="#tool">tool</a>
+        <a class="nav-link" href="#eval">eval</a>
+        <a class="nav-link" href="#pattern">pattern</a>
+      </div>
+
+      <div class="nav-group">
+        <span class="nav-label">Signals</span>
+        <a class="nav-link" href="#signals">The signal model</a>
+      </div>
+
+      <div class="nav-group">
+        <span class="nav-label">Surfaces</span>
+        <a class="nav-link" href="#cli">CLI</a>
+        <a class="nav-link" href="#mcp">MCP server</a>
+        <a class="nav-link" href="#dashboard">Dashboard</a>
+      </div>
+
+      <div class="nav-group">
+        <span class="nav-label">Operate</span>
+        <a class="nav-link" href="#governance">Governance</a>
+        <a class="nav-link" href="#migration">Migration 3.0 → 4.0</a>
+      </div>
+
+      <div class="nav-group">
+        <span class="nav-label">Elsewhere</span>
+        <a class="nav-link" href="index.html">Home</a>
+        <a class="nav-link" href="guide.html">Guide</a>
+        <a class="nav-link" href="https://github.com/tacoda/keystone/blob/main/CHANGELOG.md" target="_blank" rel="noopener">Changelog <span class="ext">↗</span></a>
+      </div>
+    </nav>
+
+    <div class="sidebar-foot">
+      <a href="https://github.com/tacoda/keystone" target="_blank" rel="noopener">GitHub ↗</a>
+      <a href="https://github.com/tacoda/keystone/releases" target="_blank" rel="noopener">Releases ↗</a>
+      <a href="https://github.com/tacoda/keystone/discussions" target="_blank" rel="noopener">Discussions ↗</a>
+      <a href="https://github.com/tacoda/keystone/blob/main/LICENSE" target="_blank" rel="noopener">MIT License ↗</a>
+    </div>
+  </aside>
+
+  <main class="content">
+
+  <!-- ===================== OVERVIEW ===================== -->
+  <section id="overview" class="page" data-title="Reference — Overview">
+    <div class="page-head">
+      <div class="crumb">Concepts · Keystone v4.0.0</div>
+      <h1>Reference for <em class="hero-any">any</em> charter.</h1>
+      <p class="tagline">
+        Keystone is the agent charter framework. A <strong>charter</strong> is the authored standards that constrain a coding agent; keystone is the model layer over host primitives that authors, validates, and projects that charter to every host. This is the complete reference: the concepts, the 13 primitive kinds, signals, and every surface. For an introduction see the <a href="index.html">home page</a>; for a task-oriented walkthrough see the <a href="guide.html">guide</a>.
+      </p>
+    </div>
+
+    <div class="definition" style="border-left-color: var(--accent3);">
+      <p style="margin: 0;"><strong style="color: var(--accent3); font-size: 1.05em;">v4.0.0 — the charter rebrand.</strong> Keystone is the <em>agent charter framework</em>, not a harness. The artifact moved from <code>.harness/</code> to <strong><code>.charter/</code></strong> and was renamed throughout; <code>CHARTER.md</code> is the single canonical agent entrypoint. Framework events became extensible <strong>signals</strong>, and the <code>hook</code> primitive kind was <strong>retired</strong> — reactions self-subscribe via <code>on:</code>. There are now <strong>13 primitive kinds</strong> (was 14). <code>keystone migrate up</code> carries a 3.0 install to 4.0.</p>
+    </div>
+
+    <div class="definition">
+      <p><strong>What keystone is.</strong> keystone is the model layer over host primitives: each kind adds validations, associations, and cross-host projection the bare host file lacks. Canonical source lives at <code>.charter/</code>; on <code>keystone project</code> it is rendered into host-native paths (<code>.claude/rules/</code>, <code>.claude/skills/</code>, <code>.claude/agents/</code>, <code>.claude/commands/</code>, <code>.cursor/rules/</code>, <code>AGENTS.md</code>, …).</p>
+      <p><strong>The tools are optional at runtime.</strong> The charter is markdown on disk. An agent that reads <code>.charter/INDEX.json</code> plus the primitive bodies it points at can operate the charter without keystone installed. The CLI helps you author and maintain; the MCP server gives the agent structured access; the dashboard gives you a local operator view. None are runtime dependencies.</p>
+    </div>
+
+    <div class="section-label">Canonical layout</div>
+    <div class="tree">
+      <div class="tree-line"><span class="tree-dir">.charter/</span><span class="tree-annotation ann-1">— the charter root (DefaultCharterRoot)</span></div>
+      <div class="tree-line"><span class="tree-structure">├─</span> <span class="tree-dir">guides/</span><span class="tree-annotation ann-default">domain · idioms · process · principles · computational</span></div>
+      <div class="tree-line"><span class="tree-structure">├─</span> <span class="tree-dir">corpus/</span><span class="tree-annotation ann-default">reasoning · state ledgers</span></div>
+      <div class="tree-line"><span class="tree-structure">├─</span> <span class="tree-dir">sensors/</span><span class="tree-annotation ann-2">checks (folds in the retired hooks/)</span></div>
+      <div class="tree-line"><span class="tree-structure">├─</span> <span class="tree-dir">agents/ commands/ skills/ playbooks/</span></div>
+      <div class="tree-line"><span class="tree-structure">├─</span> <span class="tree-dir">tools/ postures/ concerns/ patterns/ evals/</span></div>
+      <div class="tree-line"><span class="tree-structure">├─</span> <span class="tree-dir">work/</span><span class="tree-annotation ann-4">document instances (not indexed)</span></div>
+      <div class="tree-line"><span class="tree-structure">├─</span> <span class="tree-dir">learning/inbox/</span><span class="tree-annotation ann-5">amendment candidates</span></div>
+      <div class="tree-line"><span class="tree-structure">├─</span> <span class="tree-file">INDEX.json</span><span class="tree-annotation ann-3">generated descriptor index</span></div>
+      <div class="tree-line"><span class="tree-structure">└─</span> <span class="tree-file">lockfile.json</span><span class="tree-annotation ann-3">generated install state</span></div>
+      <div class="tree-line" style="margin-top:8px;"><span class="tree-file">CHARTER.md</span><span class="tree-annotation ann-1">canonical agent entrypoint (repo root)</span></div>
+      <div class="tree-line"><span class="tree-file">keystone.json</span><span class="tree-annotation ann-default">project config + policies + signals (repo root)</span></div>
+    </div>
+
+    <div class="page-foot">
+      <span>Keystone v4.0.0 reference</span>
+      <span><a href="index.html">Home</a> · <a href="guide.html">Guide</a></span>
+    </div>
+  </section>
+
+  <!-- ===================== CHARTER VS HARNESS ===================== -->
+  <section id="charter-vs-harness" class="page" data-title="Charter vs. harness">
+    <div class="page-head">
+      <div class="crumb">Concepts</div>
+      <h1>Charter vs. harness</h1>
+      <p class="tagline">The distinction that names the tool. A <strong>harness</strong> is the engine that runs the model; a <strong>charter</strong> is the authored standards that constrain it. Keystone manages the charter.</p>
+    </div>
+
+    <div class="action-grid">
+      <div class="action">
+        <span class="action-tag">Charter</span>
+        <h3>The authored standards</h3>
+        <p>The rules, reasoning, checks, workflows, and postures an author writes to constrain a coding agent. Lives at <code>.charter/</code>. Your <code>CLAUDE.md</code>, a pre-commit hook you authored, a review SOP — all charter.</p>
+      </div>
+      <div class="action">
+        <span class="action-tag">Harness</span>
+        <h3>The engine that runs it</h3>
+        <p>The machinery that executes the model — Claude Code, the orchestrator, the runner, the process that fires a hook. Mechanism, not policy.</p>
+      </div>
+    </div>
+
+    <div class="section-label">The test (load-bearing)</div>
+    <div class="definition" style="border-left-color: var(--accent);">
+      <p><strong>Authorship, not executability.</strong> A pre-commit hook <em>executes</em> and is still <strong>charter</strong>, because you authored it to state a standard. The runner that fires that hook is the <strong>harness</strong>.</p>
+      <p style="font-family: var(--mono); font-size: 0.9rem; color: var(--accent);">Author the spec → charter. Be the engine → harness.</p>
+      <p>Say it that sharply or "charter" collapses back into "harness." The orchestrator resolves cleanly: it <em>runs</em>, so it's <strong>harness</strong> (machinery); the process it enforces is <em>authored</em>, so that's <strong>charter</strong>. Mechanism vs. policy — the same split that puts Claude Code in the harness but your <code>CLAUDE.md</code> in the charter.</p>
+    </div>
+
+    <div class="page-foot"><span>Concepts</span><span><a href="#contract">Resolution contract →</a></span></div>
+  </section>
+
+  <!-- ===================== RESOLUTION CONTRACT ===================== -->
+  <section id="contract" class="page" data-title="Resolution contract">
+    <div class="page-head">
+      <div class="crumb">Concepts</div>
+      <h1>The resolution contract: rules → corpus → ask</h1>
+      <p class="tagline">The runtime resolution flow — encoded in the MCP server's <code>instructions</code> block and in <code>guides/process/runtime-resolution.md</code>. When a scenario arises, the agent works the charter in stages, escalating only when the previous stage doesn't carry enough information.</p>
+    </div>
+
+    <ol class="steps">
+      <li><strong>Rules.</strong><p>Find applicable guides via <code>INDEX.json</code>, filtered by touched-files globs and phase. Project wins by default; policies refine via nesting in <code>keystone.json</code>; <code>strict</code> items lock absolutely.</p></li>
+      <li><strong>Corpus.</strong><p>When a guide's body isn't enough to act, follow its <code>corpus:</code> field to the linked reasoning — the <em>why</em>. Corpus is opt-in; it is never auto-loaded.</p></li>
+      <li><strong>Contradictions → ask.</strong><p>Any contradiction between rules and corpus triggers the agent to ask the user to resolve it. The server returns data; the agent reasons about conflicts.</p></li>
+    </ol>
+
+    <div class="definition">
+      <p><strong>External-system access is a tool, not a resolution stage.</strong> Reaching an outside system is done through a <code>kind: tool</code> primitive (transport <code>cli | http | mcp | plugin</code>) — it is not one of the three resolution stages.</p>
+    </div>
+
+    <div class="mermaid-wrap">
+      <p class="mermaid-caption">The three-stage resolution contract</p>
+      <div class="mermaid">
+flowchart LR
+  S[Scenario] --> R[1 · Rules<br/>guides via INDEX.json]
+  R -->|body enough?| DONE[Act]
+  R -->|body too terse| C[2 · Corpus<br/>follow corpus:]
+  C -->|no conflict| DONE
+  C -->|rules ⚔ corpus| A[3 · Ask<br/>user resolves]
+  A --> DONE
+      </div>
+    </div>
+
+    <div class="page-foot"><span>Concepts</span><span><a href="#projection">Projection →</a></span></div>
+  </section>
+
+  <!-- ===================== PROJECTION ===================== -->
+  <section id="projection" class="page" data-title="Projection">
+    <div class="page-head">
+      <div class="crumb">Concepts</div>
+      <h1>Projection</h1>
+      <p class="tagline">Rendering the charter into a host agent's native paths via <code>keystone project</code>.</p>
+    </div>
+
+    <div class="definition">
+      <p><strong>Canonical source is <code>.charter/</code>; projected files are generated — do not hand-edit them.</strong> Projection lowers each keystone primitive to the host-native surface: <code>.claude/rules/</code>, <code>.claude/skills/</code>, <code>.claude/agents/</code>, <code>.claude/commands/</code>, <code>.cursor/rules/</code>, <code>AGENTS.md</code>, and the like. One canonical primitive can map to many host mechanisms — that one-to-many mapping is the framework's value.</p>
+      <p><strong>Thin pointers.</strong> In 4.0, <code>CHARTER.md</code> is the single canonical agent entrypoint (full orientation). Every host file — <code>CLAUDE.md</code>, <code>AGENTS.md</code>, <code>CONVENTIONS.md</code>, Cursor/Continue rules — is a thin pointer to it: Claude Code via a native <code>@CHARTER.md</code> import, others via an imperative "read CHARTER.md" plus a per-host <strong>capability delta</strong> (subagents / slash commands / skills / hooks).</p>
+    </div>
+
+    <div class="mermaid-wrap">
+      <p class="mermaid-caption">One canonical source, many host projections</p>
+      <div class="mermaid">
+flowchart TB
+  C[".charter/ (canonical)"] -->|keystone project| P{Projection}
+  P --> CC[".claude/ · CLAUDE.md → @CHARTER.md"]
+  P --> CU[".cursor/rules/"]
+  P --> AG["AGENTS.md · CONVENTIONS.md"]
+  P --> CO[".continue/rules/"]
+      </div>
+    </div>
+
+    <div class="page-foot"><span>Concepts</span><span><a href="#cascade">The cascade →</a></span></div>
+  </section>
+
+  <!-- ===================== CASCADE ===================== -->
+  <section id="cascade" class="page" data-title="The cascade">
+    <div class="page-head">
+      <div class="crumb">Concepts</div>
+      <h1>The cascade</h1>
+      <p class="tagline">How a primitive resolves when the project and vendored policies both define one at the same canonical path. The resolver is pure: exactly one file loads per <code>(kind, id)</code>.</p>
+    </div>
+
+    <ol class="steps">
+      <li><strong>Project wins by default.</strong><p>The project's <code>.charter/&lt;kind&gt;/&lt;id&gt;</code> always wins. The repo's authors have final say over their own charter.</p></li>
+      <li><strong>Nested policies refine outer ones.</strong><p>Among vendored policies, a policy nested deeper in <code>keystone.json</code> refines the outer policy it is nested in.</p></li>
+      <li><strong>Strict locks absolutely.</strong><p>A <code>strict.&lt;kind&gt;: [&lt;id&gt;]</code> declaration on any tree node makes that item absolute — nothing else can override it, not the project, not any other policy. <code>keystone verify</code> reports a violation if any layer attempts to shadow a strict item.</p></li>
+    </ol>
+
+    <div class="definition">
+      <p><strong>The framework never composes overlapping primitives.</strong> Exactly one file wins; its frontmatter is what's read. For guides specifically: an override does <em>not</em> inherit the base's <code>globs:</code> — if a project guide overrides a policy guide and only the policy had globs, the override loads under its own (possibly absent) globs.</p>
+    </div>
+
+    <div class="mermaid-wrap">
+      <p class="mermaid-caption">Project always wins by default; deeper-nested policies refine outer; strict locks</p>
+      <div class="mermaid">
+flowchart TB
+  STRICT["strict.&lt;kind&gt;: [id] — absolute lock"]:::s
+  PROJ["Project .charter/ — wins by default"]:::p
+  POL2["Policy (nested deeper) — refines"]:::a
+  POL1["Policy (outer) — base"]:::b
+  STRICT --> PROJ --> POL2 --> POL1
+  classDef s fill:#1a1e28,stroke:#f59e0b;
+  classDef p fill:#1a1e28,stroke:#4ade9a;
+  classDef a fill:#1a1e28,stroke:#60a5fa;
+  classDef b fill:#1a1e28,stroke:#a78bfa;
+      </div>
+    </div>
+
+    <div class="page-foot"><span>Concepts</span><span><a href="#provenance">Provenance →</a></span></div>
+  </section>
+
+  <!-- ===================== PROVENANCE ===================== -->
+  <section id="provenance" class="page" data-title="Provenance">
+    <div class="page-head">
+      <div class="crumb">Concepts</div>
+      <h1>Provenance</h1>
+      <p class="tagline">Every primitive carries a provenance the walker derives from its path — where it came from, and who ratified it.</p>
+    </div>
+
+    <div class="definition">
+      <p><strong>Path-derived provenance.</strong> <code>project</code> for the repo's own charter; <code>policy/&lt;name&gt;</code> for a vendored policy layer. <code>keystone charter show --effective</code> renders the resolved cascade and annotates what each winner overrides.</p>
+    </div>
+
+    <div class="layers">
+      <div class="layer-header"><span>Layer</span><span>Role</span><span>Pinning</span><span>Boundary</span></div>
+      <div class="layer l1">
+        <div class="layer-cell layer-name">project</div>
+        <div class="layer-cell layer-desc">The repo's own charter. Wins by default; authors have final say.</div>
+        <div class="layer-cell layer-author">git-tracked</div>
+        <div class="layer-cell layer-act">edit freely</div>
+      </div>
+      <div class="layer l3">
+        <div class="layer-cell layer-name">policy/&lt;name&gt;</div>
+        <div class="layer-cell layer-desc">Vendored fragments. Pinned by version and content hash; drift-reset by <code>keystone verify</code>.</div>
+        <div class="layer-cell layer-author">vendored</div>
+        <div class="layer-cell layer-act">hash-verified</div>
+      </div>
+      <div class="layer l4">
+        <div class="layer-cell layer-name">strict</div>
+        <div class="layer-cell layer-desc">A policy's <code>strict:</code> declarations. The ratification boundary between org/team policy and a project.</div>
+        <div class="layer-cell layer-author">policy-declared</div>
+        <div class="layer-cell layer-act">locks absolutely</div>
+      </div>
+    </div>
+
+    <div class="definition">
+      <p><strong>Amendment records provide human-readable provenance.</strong> <code>type: amendment</code> documents (or ADRs for architectural changes) name who proposed and ratified a change and why — alongside the path-derived provenance for tools. Policies are the ratification boundary: pinned by version and content hash, drift-reset by <code>keystone verify</code>; <code>strict:</code> declarations lock items absolutely.</p>
+    </div>
+
+    <div class="page-foot"><span>Concepts</span><span><a href="#primitives">The 13 primitive kinds →</a></span></div>
+  </section>
+
+  <!-- ===================== PRIMITIVES OVERVIEW ===================== -->
+  <section id="primitives" class="page" data-title="The 13 primitive kinds">
+    <div class="page-head">
+      <div class="crumb">Primitive kinds</div>
+      <h1>The 13 primitive kinds</h1>
+      <p class="tagline"><code>.charter/</code> holds 13 primitive kinds. Every primitive declares <code>kind</code>, <code>id</code>, and <code>description</code> in frontmatter, plus per-kind fields (<code>globs</code>, <code>phase</code>, <code>triggers</code>, <code>tier</code>, <code>mode</code>, <code>on</code>, <code>run</code>, <code>agent</code>, <code>returns</code>, <code>tools</code>, <code>corpus</code>, <code>includes</code>, …). The walker emits one <code>.charter/INDEX.json</code>; agents read the index first and open bodies only when their activation conditions match.</p>
+    </div>
+
+    <div class="definition" style="border-left-color: var(--accent3);">
+      <p style="margin:0;"><strong style="color: var(--accent3);">The <code>hook</code> kind is retired.</strong> In 4.0 there are 13 kinds, not 14. What was a hook is now a <code>sensor</code> (or a <code>tool</code>) that self-subscribes to a signal or host phase via <code>on:</code>. See <a href="#signals">Signals</a>.</p>
+    </div>
+
+    <div class="layers">
+      <div class="layer-header"><span>Kind</span><span>What it is</span><span>Activation</span><span>Projects to</span></div>
+      <div class="layer l1"><div class="layer-cell layer-name"><a href="#guide" style="color:inherit;border:none;">guide</a></div><div class="layer-cell layer-desc">Ambient, glob-scoped directive.</div><div class="layer-cell layer-author">topic + globs</div><div class="layer-cell layer-act">.claude/rules/ (or LSP)</div></div>
+      <div class="layer l2"><div class="layer-cell layer-name"><a href="#sensor" style="color:inherit;border:none;">sensor</a></div><div class="layer-cell layer-desc">A check reacting to a signal or phase (<code>on:</code>). Gates.</div><div class="layer-cell layer-author">on: (signal/phase)</div><div class="layer-cell layer-act">host bridge / dispatch</div></div>
+      <div class="layer l3"><div class="layer-cell layer-name"><a href="#agent" style="color:inherit;border:none;">agent</a></div><div class="layer-cell layer-desc">A role spawned as a subagent.</div><div class="layer-cell layer-author">Task tool by id</div><div class="layer-cell layer-act">.claude/agents/</div></div>
+      <div class="layer l4"><div class="layer-cell layer-name"><a href="#command" style="color:inherit;border:none;">command</a></div><div class="layer-cell layer-desc">A unit of work / lifecycle step.</div><div class="layer-cell layer-author">intent + phase</div><div class="layer-cell layer-act">.claude/commands/</div></div>
+      <div class="layer l5"><div class="layer-cell layer-name"><a href="#skill" style="color:inherit;border:none;">skill</a></div><div class="layer-cell layer-desc">A single composed capability.</div><div class="layer-cell layer-author">triggers: match</div><div class="layer-cell layer-act">.claude/skills/</div></div>
+      <div class="layer l1"><div class="layer-cell layer-name"><a href="#playbook" style="color:inherit;border:none;">playbook</a></div><div class="layer-cell layer-desc">A composed sequence of commands with <code>gates:</code>.</div><div class="layer-cell layer-author">invoked as workflow</div><div class="layer-cell layer-act">via skill wrapper</div></div>
+      <div class="layer l2"><div class="layer-cell layer-name"><a href="#corpus" style="color:inherit;border:none;">corpus</a></div><div class="layer-cell layer-desc">The reasoning / why, loaded on demand.</div><div class="layer-cell layer-author">guide corpus: link</div><div class="layer-cell layer-act">not projected</div></div>
+      <div class="layer l3"><div class="layer-cell layer-name"><a href="#document" style="color:inherit;border:none;">document</a></div><div class="layer-cell layer-desc">A governed output (plan / review / adr / retro / feature).</div><div class="layer-cell layer-author">keystone document</div><div class="layer-cell layer-act">.charter/work/</div></div>
+      <div class="layer l4"><div class="layer-cell layer-name"><a href="#concern" style="color:inherit;border:none;">concern</a></div><div class="layer-cell layer-desc">A composition mixin.</div><div class="layer-cell layer-author">includes:</div><div class="layer-cell layer-act">inlined at project</div></div>
+      <div class="layer l5"><div class="layer-cell layer-name"><a href="#posture" style="color:inherit;border:none;">posture</a></div><div class="layer-cell layer-desc">Tool/permission posture.</div><div class="layer-cell layer-author">ambient</div><div class="layer-cell layer-act">settings.json</div></div>
+      <div class="layer l1"><div class="layer-cell layer-name"><a href="#tool" style="color:inherit;border:none;">tool</a></div><div class="layer-cell layer-desc">An author-defined external callable (cli | http | mcp | plugin).</div><div class="layer-cell layer-author">on-demand / on:</div><div class="layer-cell layer-act">MCP / host config</div></div>
+      <div class="layer l2"><div class="layer-cell layer-name"><a href="#eval" style="color:inherit;border:none;">eval</a></div><div class="layer-cell layer-desc">The eval harness.</div><div class="layer-cell layer-author">keystone eval run</div><div class="layer-cell layer-act">not projected</div></div>
+      <div class="layer l3"><div class="layer-cell layer-name"><a href="#pattern" style="color:inherit;border:none;">pattern</a></div><div class="layer-cell layer-desc">A reusable documentation pattern (Diátaxis), in prose.</div><div class="layer-cell layer-author">applied when writing docs</div><div class="layer-cell layer-act">not projected</div></div>
+    </div>
+
+    <div class="page-foot"><span>Primitive kinds</span><span><a href="#guide">guide →</a></span></div>
+  </section>
+
+  <!-- ===================== GUIDE ===================== -->
+  <section id="guide" class="page" data-title="guide">
+    <div class="page-head">
+      <div class="crumb">Primitive kinds</div>
+      <h1><code>guide</code></h1>
+      <p class="tagline">The rules the agent must follow — the <em>what</em> and <em>what not</em>. Reasoning lives in the paired corpus file.</p>
+    </div>
+
+    <div class="section-label">Activation</div>
+    <div class="definition">
+      <p><strong>Ambient by default</strong> — every guide in the resolved cascade is loaded into the agent's context at session start. Activation has two gates, topic first, then globs:</p>
+    </div>
+    <div class="layers">
+      <div class="layer-header"><span>Topic</span><span>Default activation</span><span></span><span></span></div>
+      <div class="layer l1"><div class="layer-cell layer-name">guides/domain/</div><div class="layer-cell layer-desc" style="grid-column: span 3;">Ambient — every action.</div></div>
+      <div class="layer l2"><div class="layer-cell layer-name">guides/idioms/&lt;stack&gt;/</div><div class="layer-cell layer-desc" style="grid-column: span 3;">Ambient, lazy by region — only when the touched region's stack matches.</div></div>
+      <div class="layer l3"><div class="layer-cell layer-name">guides/process/</div><div class="layer-cell layer-desc" style="grid-column: span 3;">On phase entry — only when the agent enters the matching phase.</div></div>
+      <div class="layer l4"><div class="layer-cell layer-name">guides/computational/</div><div class="layer-cell layer-desc" style="grid-column: span 3;">Editor / LSP / on-save — driven by the underlying tool, not the framework.</div></div>
+      <div class="layer l5"><div class="layer-cell layer-name">guides/principles/</div><div class="layer-cell layer-desc" style="grid-column: span 3;">Ambient — every action. (Universal principles ship under policies/.)</div></div>
+    </div>
+
+    <div class="section-label">Globs — narrows, never broadens</div>
+    <div class="definition">
+      <p><code>globs:</code> is an optional frontmatter list that <strong>narrows</strong> a guide's activation. It can only remove a guide from activation; it never expands it. The invariant:</p>
+      <pre class="code"><code>activates ⇔ (topic default fires) ∧ (globs match, or no globs declared)</code></pre>
+      <p>Globs reference real code regions. The <strong>bootstrap</strong> command seeds initial globs from the region map in <code>corpus/state/CODEBASE_STATE.md</code>. Globs that match no files are a learning signal, not a feature. On <code>guides/computational/</code> entries, <code>globs:</code> is documentation, not enforcement — the actual tool reads its own config; divergence is flagged by the <code>stack-drift</code> sensor.</p>
+    </div>
+
+    <div class="section-label">Required shape</div>
+    <pre class="code"><code><span class="kw">---</span>
+<span class="kw">globs:</span>               <span class="comment"># optional; narrows only</span>
+  - "src/billing/**"
+  - "!src/billing/legacy/**"
+<span class="kw">---</span>
+# &lt;Name&gt; — rules
+
+&lt;one-sentence framing of what this guide governs&gt;
+
+## IRON LAW(S)
+&lt;non-negotiable rules; omit when nothing qualifies&gt;
+
+## GOLDEN RULE
+&lt;strong, explicit standards; omit when nothing qualifies&gt;
+
+## RULES
+&lt;regular rules — the default tier; most directives live here&gt;
+
+For reasoning, see [`corpus/&lt;topic&gt;/&lt;name&gt;.md`](corpus/&lt;topic&gt;/&lt;name&gt;.md).</code></pre>
+    <div class="definition">
+      <p><strong>Key frontmatter:</strong> <code>globs:</code> (optional, narrows), <code>kind:</code> on computational guides. Unrecognized keys are ignored; bare-content guides are valid. <strong>Forward-link to corpus</strong> is required when a paired corpus file exists (charter-root-relative path). <strong>Length:</strong> short — a guide is rules; long-form belongs in corpus.</p>
+    </div>
+
+    <div class="section-label">Cascade &amp; projects to</div>
+    <div class="definition">
+      <p>Project wins by default; deeper-nested policies refine; <code>strict.guides: [&lt;name&gt;]</code> locks. Exactly one file loads per <code>&lt;topic&gt;/&lt;name&gt;</code> — the winner's <code>globs:</code> is the only one consulted. <strong>Projects to:</strong> an inferential guide → a <code>.claude/rules/</code> shim; a computational guide → a host hook (LSP-style check).</p>
+    </div>
+
+    <div class="page-foot"><span>guide</span><span><a href="#sensor">sensor →</a></span></div>
+  </section>
+
+  <!-- ===================== SENSOR ===================== -->
+  <section id="sensor" class="page" data-title="sensor">
+    <div class="page-head">
+      <div class="crumb">Primitive kinds</div>
+      <h1><code>sensor</code></h1>
+      <p class="tagline">A check that reacts to a signal or host phase via <code>on:</code>. Sensors <strong>gate</strong>. In 4.0 the sensor kind folds in the retired <code>hook</code> kind — reactions self-subscribe.</p>
+    </div>
+
+    <div class="action-grid">
+      <div class="action">
+        <span class="action-tag">Computational</span>
+        <h3>A check → verdict</h3>
+        <p>A <code>run:</code> shell invocation whose exit / HTTP status is the verdict. Exit 0 = pass; non-zero = fail (capture stderr).</p>
+      </div>
+      <div class="action">
+        <span class="action-tag">Inferential</span>
+        <h3>An agent review → schema</h3>
+        <p>Dispatched as an agent review that emits a structured <code>returns:</code> verdict. Keystone cannot invoke an LLM itself, so it emits a dispatch manifest the host spawns.</p>
+      </div>
+    </div>
+
+    <div class="section-label">Activation</div>
+    <div class="definition">
+      <p>A sensor subscribes to a <strong>signal or host phase via <code>on:</code></strong> (host phases like <code>PreToolUse</code>, <code>Stop</code> are a closed set bridged into the host; any other <code>on:</code> value is a signal). Fire manually with <code>keystone signal fire &lt;name&gt;</code>. See <a href="#signals">Signals</a>.</p>
+    </div>
+
+    <div class="section-label">Required shape</div>
+    <pre class="code"><code><span class="kw">---</span>
+<span class="kw">kind:</span> &lt;computational | drift | coverage | ...&gt;
+<span class="comment"># plus on: to self-subscribe to a signal / host phase</span>
+<span class="kw">---</span>
+
+# Sensor: &lt;name&gt;
+
+&lt;one-sentence description&gt;
+
+## Command
+&lt;the shell invocation; may be templated with project variables&gt;
+
+## Interpretation
+&lt;how to parse output; what constitutes pass / fail / warning&gt;
+
+## Remediation
+&lt;what the agent should do on failure&gt;</code></pre>
+    <div class="definition">
+      <p><strong>Key frontmatter:</strong> <code>kind:</code> (required — open set, documented values in <code>docs/conventions.md</code>), <code>on:</code> (signal or host phase), plus <code>run:</code> (computational) or <code>agent:</code> + <code>returns:</code> (inferential). H1 title <code>#&nbsp;Sensor:&nbsp;&lt;name&gt;</code>; Command / Interpretation / Remediation required.</p>
+    </div>
+
+    <div class="section-label">Cascade &amp; projects to</div>
+    <div class="definition">
+      <p>Project wins by default; deeper-nested policies refine; <code>strict.sensors: [&lt;id&gt;]</code> locks. <strong>Projects to:</strong> a host bridge entry per host phase (the host calls <code>keystone signal fire &lt;phase&gt;</code> and keystone dispatches + owns blocking), or an agent dispatch manifest the host spawns for inferential sensors.</p>
+    </div>
+
+    <div class="page-foot"><span>sensor</span><span><a href="#agent">agent →</a></span></div>
+  </section>
+
+  <!-- ===================== AGENT ===================== -->
+  <section id="agent" class="page" data-title="agent">
+    <div class="page-head">
+      <div class="crumb">Primitive kinds</div>
+      <h1><code>agent</code></h1>
+      <p class="tagline">A role spawned as a subagent. The body is the subagent's system prompt.</p>
+    </div>
+    <div class="section-label">Activation</div>
+    <div class="definition"><p>Spawned via the host's Task tool by <code>id</code>. An inferential <a href="#sensor">sensor</a> dispatches an agent as its reviewer; an <a href="#agent">agent</a> can also be invoked directly as a role.</p></div>
+    <div class="section-label">Key frontmatter</div>
+    <div class="definition"><p><code>kind: agent</code>, <code>id</code>, <code>description</code>; optional <code>tools:</code> (the tool allowlist the subagent runs with) and <code>returns:</code> (a structured verdict schema when the agent is used as a review). The body is the system prompt.</p></div>
+    <div class="section-label">Cascade &amp; projects to</div>
+    <div class="definition"><p>Project wins by default; deeper-nested policies refine; <code>strict.agents: [&lt;id&gt;]</code> locks. <strong>Projects to:</strong> the host's native agents directory (e.g. <code>.claude/agents/&lt;id&gt;.md</code>).</p></div>
+    <div class="page-foot"><span>agent</span><span><a href="#command">command →</a></span></div>
+  </section>
+
+  <!-- ===================== COMMAND ===================== -->
+  <section id="command" class="page" data-title="command">
+    <div class="page-head">
+      <div class="crumb">Primitive kinds</div>
+      <h1><code>command</code></h1>
+      <p class="tagline">A unit of work / lifecycle step. The atomic building block a playbook composes.</p>
+    </div>
+    <div class="section-label">Activation</div>
+    <div class="definition"><p>The user's intent matches the command's <code>description</code> + <code>phase</code>. Projected as a host slash command (e.g. <code>/keystone-&lt;id&gt;</code>).</p></div>
+    <div class="section-label">Key frontmatter</div>
+    <div class="definition"><p><code>kind: command</code>, <code>id</code>, <code>description</code>; optional <code>phase:</code> to bind the command to a lifecycle phase. The body is the work the agent performs when the command runs.</p></div>
+    <div class="section-label">Cascade &amp; projects to</div>
+    <div class="definition"><p>Project wins by default; deeper-nested policies refine; <code>strict.commands: [&lt;id&gt;]</code> locks. Exactly one file loads per id. <strong>Projects to:</strong> the host's native commands directory (e.g. <code>.claude/commands/&lt;id&gt;.md</code> → <code>/keystone-&lt;id&gt;</code>).</p></div>
+    <div class="page-foot"><span>command</span><span><a href="#skill">skill →</a></span></div>
+  </section>
+
+  <!-- ===================== SKILL ===================== -->
+  <section id="skill" class="page" data-title="skill">
+    <div class="page-head">
+      <div class="crumb">Primitive kinds</div>
+      <h1><code>skill</code></h1>
+      <p class="tagline">A single composed capability, surfaced as a host-native skill. <code>skill</code> is the agent-native primitive; framework authors usually reach for <a href="#playbook">playbook</a> (which wraps it).</p>
+    </div>
+    <div class="section-label">Activation</div>
+    <div class="definition"><p>Host-native auto-activation. The host substring-matches the user's input against the skill's <code>triggers:</code> and loads its body — no slash command required.</p></div>
+    <div class="section-label">Required shape</div>
+    <pre class="code"><code><span class="kw">---</span>
+<span class="kw">kind:</span> skill
+<span class="kw">id:</span> &lt;stable id, conventionally `&lt;namespace&gt;:&lt;name&gt;`&gt;
+<span class="kw">description:</span> 'One sentence — what this skill does.'
+<span class="kw">triggers:</span>
+  - &lt;phrase the user might type&gt;
+  - &lt;slash command form&gt;
+<span class="kw">---</span>
+
+# &lt;Skill Name&gt;
+
+&lt;body — what the agent should do when this skill activates&gt;</code></pre>
+    <div class="definition"><p><strong>Key frontmatter:</strong> <code>kind: skill</code>, <code>id</code> (conventionally namespaced, e.g. <code>keystone:audit</code>), <code>triggers:</code> (required, non-empty list). <strong>Projects to:</strong> the host's native skills directory (e.g. <code>.claude/skills/&lt;slug&gt;/SKILL.md</code>). Cascade: <code>strict.skills: [&lt;id&gt;]</code> locks.</p></div>
+    <div class="page-foot"><span>skill</span><span><a href="#playbook">playbook →</a></span></div>
+  </section>
+
+  <!-- ===================== PLAYBOOK ===================== -->
+  <section id="playbook" class="page" data-title="playbook">
+    <div class="page-head">
+      <div class="crumb">Primitive kinds</div>
+      <h1><code>playbook</code></h1>
+      <p class="tagline">A composed sequence of commands with human <code>gates:</code>. References <a href="#command">commands</a> by name.</p>
+    </div>
+    <div class="section-label">Required shape</div>
+    <pre class="code"><code># Playbook: &lt;name&gt;
+
+&lt;one-sentence description&gt;
+
+## Sequence
+1. **&lt;command-name&gt;** — &lt;why this step&gt;
+2. **&lt;command-name&gt;** — &lt;why this step&gt;
+
+## Halt conditions
+&lt;when the playbook stops early — e.g., a sensor in a step returns fail&gt;</code></pre>
+    <div class="definition"><p><strong>Shape:</strong> H1 title <code># Playbook: &lt;name&gt;</code> (required); <strong>Sequence</strong> (each step names an existing command); <strong>Halt conditions</strong> (what stops the playbook between steps). No frontmatter required. If a referenced command is missing from the cascade, <code>keystone verify</code> reports a broken reference at install time.</p></div>
+    <div class="section-label">Cascade &amp; projects to</div>
+    <div class="definition"><p>Project wins by default; deeper-nested policies refine; <code>strict.playbooks: [&lt;name&gt;]</code> locks. Exactly one file per <code>&lt;name&gt;</code>. <strong>Projects to:</strong> the host via a skill wrapper.</p></div>
+    <div class="page-foot"><span>playbook</span><span><a href="#corpus">corpus →</a></span></div>
+  </section>
+
+  <!-- ===================== CORPUS ===================== -->
+  <section id="corpus" class="page" data-title="corpus">
+    <div class="page-head">
+      <div class="crumb">Primitive kinds</div>
+      <h1><code>corpus</code></h1>
+      <p class="tagline">The reasoning / <em>why</em>, loaded on demand. Corpus carries the depth a guide cannot.</p>
+    </div>
+    <div class="section-label">Activation</div>
+    <div class="definition"><p>A guide's <code>corpus:</code> field (or a prose forward-link) points at it. Corpus is opt-in — never auto-loaded. It is the second stage of the <a href="#contract">resolution contract</a>.</p></div>
+    <div class="section-label">Required shape</div>
+    <pre class="code"><code># &lt;Name&gt; — reasoning
+
+&lt;long-form explanation of why the rule exists&gt;
+
+## Anti-patterns
+&lt;failure modes the rule guards against&gt;
+
+## References
+&lt;links to source material — papers, books, posts&gt;
+
+Back to the rules: [`guides/&lt;topic&gt;/&lt;name&gt;.md`](../../guides/&lt;topic&gt;/&lt;name&gt;.md).</code></pre>
+    <div class="definition"><p><strong>Shape:</strong> H1 <code># &lt;Name&gt; — reasoning</code>; no frontmatter required; back-link to the guide is required when a paired guide file exists; long-form welcomed. Cascade: <code>strict.corpus: [&lt;name&gt;]</code> locks; exactly one file per <code>&lt;topic&gt;/&lt;name&gt;</code>. <strong>Not projected</strong> — corpus is agent-read on demand.</p></div>
+    <div class="page-foot"><span>corpus</span><span><a href="#document">document →</a></span></div>
+  </section>
+
+  <!-- ===================== DOCUMENT ===================== -->
+  <section id="document" class="page" data-title="document">
+    <div class="page-head">
+      <div class="crumb">Primitive kinds</div>
+      <h1><code>document</code></h1>
+      <p class="tagline">A governed output — plan / review / adr / retro / feature / amendment. Instances are tracked, not indexed.</p>
+    </div>
+    <div class="section-label">Activation &amp; lifecycle</div>
+    <div class="definition"><p>Document instances live under <code>.charter/work/</code> and are driven by the <code>keystone document</code> subcommand, which lists work documents and promotes them through gate-validated transitions. The walker skips <code>work/</code>, so instances are not indexed as primitives. Amendment records use <code>type: amendment</code> (see <a href="#governance">Governance</a>).</p></div>
+    <div class="section-label">Key frontmatter</div>
+    <div class="definition"><p><code>kind: document</code>, <code>id</code>, <code>description</code>, plus a <code>type:</code> (plan / review / adr / retro / feature / amendment) and the gate schema the transitions validate against. <strong>Projects to:</strong> instances written under <code>.charter/work/</code>.</p></div>
+    <div class="page-foot"><span>document</span><span><a href="#concern">concern →</a></span></div>
+  </section>
+
+  <!-- ===================== CONCERN ===================== -->
+  <section id="concern" class="page" data-title="concern">
+    <div class="page-head">
+      <div class="crumb">Primitive kinds</div>
+      <h1><code>concern</code></h1>
+      <p class="tagline">A composition mixin — shared frontmatter or body fragments other primitives include.</p>
+    </div>
+    <div class="section-label">Activation</div>
+    <div class="definition"><p>Pulled in by another primitive's <code>includes:</code>. A concern is not activated on its own; it composes into its includers at project time.</p></div>
+    <div class="section-label">Key frontmatter</div>
+    <div class="definition"><p><code>kind: concern</code>, <code>id</code>, <code>description</code>. The body is the reusable fragment. <strong>Projects to:</strong> inlined into each including primitive's projection (not a standalone host file).</p></div>
+    <div class="page-foot"><span>concern</span><span><a href="#posture">posture →</a></span></div>
+  </section>
+
+  <!-- ===================== POSTURE ===================== -->
+  <section id="posture" class="page" data-title="posture">
+    <div class="page-head">
+      <div class="crumb">Primitive kinds</div>
+      <h1><code>posture</code></h1>
+      <p class="tagline">Tool/permission posture — the allow / ask / deny stance projected into the host's settings.</p>
+    </div>
+    <div class="section-label">Activation</div>
+    <div class="definition"><p>Ambient — a posture is part of the resolved cascade and shapes the host's permission surface at project time.</p></div>
+    <div class="section-label">Key frontmatter</div>
+    <div class="definition"><p><code>kind: posture</code>, <code>id</code>, <code>description</code>, plus the allow / ask / deny permission declarations. <strong>Projects to:</strong> the host's <code>settings.json</code> (e.g. <code>.claude/settings.json</code>).</p></div>
+    <div class="page-foot"><span>posture</span><span><a href="#tool">tool →</a></span></div>
+  </section>
+
+  <!-- ===================== TOOL ===================== -->
+  <section id="tool" class="page" data-title="tool">
+    <div class="page-head">
+      <div class="crumb">Primitive kinds</div>
+      <h1><code>tool</code></h1>
+      <p class="tagline">An author-defined external callable. On-demand by default, or a signal-fired side-effect when it declares <code>on:</code>. In 4.0 the tool kind gained an <code>http</code> transport and an <code>on:</code> field.</p>
+    </div>
+    <div class="section-label">Transports</div>
+    <div class="layers">
+      <div class="layer-header"><span>Transport</span><span>Reaches an external system by …</span><span></span><span></span></div>
+      <div class="layer l1"><div class="layer-cell layer-name">cli</div><div class="layer-cell layer-desc" style="grid-column: span 3;">Shelling out to a command-line invocation.</div></div>
+      <div class="layer l2"><div class="layer-cell layer-name">http</div><div class="layer-cell layer-desc" style="grid-column: span 3;">An HTTP request (new in 4.0).</div></div>
+      <div class="layer l3"><div class="layer-cell layer-name">mcp</div><div class="layer-cell layer-desc" style="grid-column: span 3;">Registering as a tool on keystone's MCP server.</div></div>
+      <div class="layer l4"><div class="layer-cell layer-name">plugin</div><div class="layer-cell layer-desc" style="grid-column: span 3;">A host plugin callable.</div></div>
+    </div>
+    <div class="section-label">Activation</div>
+    <div class="definition"><p><strong>On-demand</strong> by default — reached as the external-system access path of the resolution contract (a tool, not a resolution stage). When it declares <code>on:</code>, it becomes a <strong>signal-fired side-effect</strong> — self-subscribing to a signal or host phase exactly like a sensor.</p></div>
+    <div class="section-label">Key frontmatter</div>
+    <div class="definition"><p><code>kind: tool</code>, <code>id</code>, <code>description</code>, <code>transport:</code> (<code>cli | http | mcp | plugin</code>), and optional <code>on:</code> (signal / host phase for a side-effect). <strong>Projects to:</strong> <code>mcp</code> tools auto-register on keystone's MCP server; others project into host config as appropriate.</p></div>
+    <div class="page-foot"><span>tool</span><span><a href="#eval">eval →</a></span></div>
+  </section>
+
+  <!-- ===================== EVAL ===================== -->
+  <section id="eval" class="page" data-title="eval">
+    <div class="page-head">
+      <div class="crumb">Primitive kinds</div>
+      <h1><code>eval</code></h1>
+      <p class="tagline">The eval harness — declared checks the charter runs against itself, with baseline regression diffs.</p>
+    </div>
+    <div class="section-label">Activation</div>
+    <div class="definition"><p>Run with <code>keystone eval run</code> (static + sensor levels). <code>--baseline &lt;git-ref&gt;</code> materializes the ref in a git worktree, runs both sides, and diffs results into a regression report.</p></div>
+    <div class="section-label">Key frontmatter</div>
+    <div class="definition"><p><code>kind: eval</code>, <code>id</code>, <code>description</code>, plus the eval definition (<code>expected.json</code> and an optional <code>fixture/</code> alongside the <code>EVAL.md</code>). <strong>Not projected</strong> — evals run through the CLI / MCP eval surface.</p></div>
+    <div class="page-foot"><span>eval</span><span><a href="#pattern">pattern →</a></span></div>
+  </section>
+
+  <!-- ===================== PATTERN ===================== -->
+  <section id="pattern" class="page" data-title="pattern">
+    <div class="page-head">
+      <div class="crumb">Primitive kinds</div>
+      <h1><code>pattern</code></h1>
+      <p class="tagline">A reusable documentation pattern (Diátaxis), in prose — applied when writing docs.</p>
+    </div>
+    <div class="section-label">Activation</div>
+    <div class="definition"><p>Applied by the author when writing documentation — a pattern is guidance for shaping prose (tutorial / how-to / reference / explanation), not a runtime-activated primitive.</p></div>
+    <div class="section-label">Key frontmatter</div>
+    <div class="definition"><p><code>kind: pattern</code>, <code>id</code>, <code>description</code>. The body is the documentation pattern itself. <strong>Not projected</strong> — patterns are author-facing.</p></div>
+    <div class="page-foot"><span>pattern</span><span><a href="#signals">Signals →</a></span></div>
+  </section>
+
+  <!-- ===================== SIGNALS ===================== -->
+  <section id="signals" class="page" data-title="Signals">
+    <div class="page-head">
+      <div class="crumb">Signals</div>
+      <h1>The signal model</h1>
+      <p class="tagline">A <strong>signal</strong> is a keystone framework event the host can't see — the extensible, higher-level counterpart to a host hook phase. It is the 4.0 anchor that let the <code>hook</code> primitive kind retire.</p>
+    </div>
+
+    <div class="definition" style="border-left-color: var(--accent);">
+      <p><strong>Host phases are a closed set; signals are open.</strong> Host phases (<code>PreToolUse</code>, <code>Stop</code>, …) are bridged into the host and cannot be extended. <strong>Any other <code>on:</code> value is a signal</strong> — so projects define their own. Declare custom signals in <code>keystone.json</code> under <code>signals:</code>, and fire them with <code>keystone signal fire &lt;name&gt;</code> (<code>keystone signal list</code> to discover). The <code>hook fire</code> verb is kept as a back-compat alias.</p>
+    </div>
+
+    <div class="section-label">Subscription — reactions self-subscribe via <code>on:</code></div>
+    <div class="definition">
+      <p>A primitive subscribes to a signal via <code>on:</code>, the same way a <a href="#skill">skill</a> declares <code>triggers:</code>. When the signal fires, the subscriber reacts. Three kinds react:</p>
+    </div>
+    <div class="action-grid three">
+      <div class="action">
+        <span class="action-tag" style="color: var(--accent2);">sensor</span>
+        <h3>check → verdict</h3>
+        <p>Runs a check; its exit / HTTP status is the verdict. Gates.</p>
+      </div>
+      <div class="action">
+        <span class="action-tag" style="color: var(--accent);">tool</span>
+        <h3>side-effect</h3>
+        <p>Fires an external callable (transport <code>cli | http | mcp | plugin</code>). On-demand, or a side-effect when it declares <code>on:</code>.</p>
+      </div>
+      <div class="action">
+        <span class="action-tag" style="color: var(--accent5);">agent</span>
+        <h3>review → returns</h3>
+        <p>Runs an inferential review that emits a structured <code>returns:</code> verdict.</p>
+      </div>
+    </div>
+
+    <div class="mermaid-wrap">
+      <p class="mermaid-caption">Signal fires → subscribers self-selected by their on: value react</p>
+      <div class="mermaid">
+flowchart LR
+  HP["Host phase (closed set)<br/>PreToolUse · Stop · …"] --> BR[Host bridge]
+  CS["Custom signal (open)<br/>keystone.json signals:"] -->|keystone signal fire| DISP{Dispatch by on:}
+  BR --> DISP
+  DISP --> SE["sensor · check → verdict"]
+  DISP --> TL["tool · side-effect"]
+  DISP --> AG["agent · review → returns"]
+      </div>
+    </div>
+
+    <div class="section-label">Built-in signals &amp; custom</div>
+    <div class="definition">
+      <p><strong>Built-in signals</strong> are the framework lifecycle events (the counterparts to the earlier framework hook events — around commands, playbooks, gates, and verification). <strong>Custom signals</strong> are project-defined: add a name under <code>signals:</code> in <code>keystone.json</code>, then fire it.</p>
+      <pre class="code"><span class="prompt">$</span> keystone signal list              <span class="comment"># discover available signals</span>
+<span class="prompt">$</span> keystone signal fire pre-verify     <span class="comment"># fire a built-in or custom signal</span>
+<span class="prompt">$</span> keystone hook fire pre-verify       <span class="comment"># back-compat alias for signal fire</span></pre>
+    </div>
+
+    <div class="page-foot"><span>Signals</span><span><a href="#cli">CLI →</a></span></div>
+  </section>
+
+  <!-- ===================== CLI ===================== -->
+  <section id="cli" class="page" data-title="CLI">
+    <div class="page-head">
+      <div class="crumb">Surfaces</div>
+      <h1>CLI</h1>
+      <p class="tagline">One Go binary. Every command has <code>--help</code>; <code>keystone completion bash|zsh|fish</code> for shell autocomplete.</p>
+    </div>
+
+    <div class="agents-table">
+      <div class="agent-row head"><span>Verb</span><span>Group</span><span>What it does</span></div>
+      <div class="agent-row"><span class="agent-name">init</span><span class="agent-status real">scaffold</span><span>Minimum-friction scaffold. One question (agent target) or zero with <code>--agent</code>.</span></div>
+      <div class="agent-row"><span class="agent-name">index</span><span class="agent-status real">build</span><span>Walk <code>.charter/</code>, emit <code>INDEX.json</code>.</span></div>
+      <div class="agent-row"><span class="agent-name">lint</span><span class="agent-status real">build</span><span>Validate primitive frontmatter; required fields per kind, deps integrity.</span></div>
+      <div class="agent-row"><span class="agent-name">project</span><span class="agent-status real">build</span><span>Regenerate <code>.claude/</code> / <code>.cursor/</code> host projections from canonical sources.</span></div>
+      <div class="agent-row"><span class="agent-name">verify</span><span class="agent-status real">check</span><span>Cascade + policy-drift check.</span></div>
+      <div class="agent-row"><span class="agent-name">charter coverage</span><span class="agent-status gaps">charter</span><span>Which project files no guide governs ("uncharted territory").</span></div>
+      <div class="agent-row"><span class="agent-name">charter show [--effective]</span><span class="agent-status gaps">charter</span><span>Charter roster; <code>--effective</code> resolves the post-cascade winning set.</span></div>
+      <div class="agent-row"><span class="agent-name">charter conformance</span><span class="agent-status gaps">charter</span><span>Rubric — does the repo conform to its charter? (cascade / validity / pairing / coverage → CONFORMANT | DRIFTING | NON-CONFORMANT)</span></div>
+      <div class="agent-row"><span class="agent-name">explain &lt;id&gt;</span><span class="agent-status gaps">charter</span><span>Explain a primitive — how it activates, what it links to, where it projects, plus uncommitted changes.</span></div>
+      <div class="agent-row"><span class="agent-name">signal fire|list</span><span class="agent-status gaps">signals</span><span>Fire or list signals (extensible framework events). <code>hook fire</code> is a back-compat alias.</span></div>
+      <div class="agent-row"><span class="agent-name">migrate</span><span class="agent-status real">upgrade</span><span>Version-to-version charter upgrade (… → 4.0). Idempotent.</span></div>
+      <div class="agent-row"><span class="agent-name">new &lt;kind&gt;</span><span class="agent-status real">scaffold</span><span>Scaffold any of the 13 primitive kinds + adapter + policy.</span></div>
+      <div class="agent-row"><span class="agent-name">search &lt;q&gt;</span><span class="agent-status real">discover</span><span>Full-text search across every primitive.</span></div>
+      <div class="agent-row"><span class="agent-name">graph</span><span class="agent-status real">discover</span><span>Render the primitive-relationship graph (Mermaid or DOT).</span></div>
+      <div class="agent-row"><span class="agent-name">watch</span><span class="agent-status real">build</span><span>fsnotify loop: index + project + lint on change.</span></div>
+      <div class="agent-row"><span class="agent-name">snapshot</span><span class="agent-status real">safety</span><span>Save / list / restore tarballs of <code>.charter/</code> for safe experiments.</span></div>
+      <div class="agent-row"><span class="agent-name">eval run</span><span class="agent-status real">quality</span><span>Run static + sensor evals. <code>--baseline &lt;ref&gt;</code> for regression diffs.</span></div>
+      <div class="agent-row"><span class="agent-name">policy</span><span class="agent-status real">policies</span><span>Add / update / remove vendored policies.</span></div>
+      <div class="agent-row"><span class="agent-name">mcp serve|install</span><span class="agent-status real">mcp</span><span>Launch the MCP server over stdio; or write the host agent's MCP config.</span></div>
+      <div class="agent-row"><span class="agent-name">web serve</span><span class="agent-status real">dashboard</span><span>Open the localhost dashboard.</span></div>
+    </div>
+
+    <div class="page-foot"><span>Surfaces</span><span><a href="#mcp">MCP server →</a></span></div>
+  </section>
+
+  <!-- ===================== MCP ===================== -->
+  <section id="mcp" class="page" data-title="MCP server">
+    <div class="page-head">
+      <div class="crumb">Surfaces</div>
+      <h1>MCP server</h1>
+      <p class="tagline">Same binary, separate verb. <code>keystone mcp install --agent claude-code</code> writes <code>.mcp.json</code>; the host launches the server on session start. For opencode it writes the server into <code>opencode.json</code>'s <code>mcp</code> key as a <code>local</code> (stdio) server.</p>
+    </div>
+
+    <div class="section-label">Tool surface</div>
+    <div class="action-grid">
+      <div class="action"><span class="action-tag">Read</span><h3>Inspect the charter</h3><p><code>keystone_list_primitives</code>, <code>keystone_get_primitive</code>, <code>keystone_get_corpus</code>.</p></div>
+      <div class="action"><span class="action-tag">Search</span><h3>Find</h3><p><code>keystone_search</code>.</p></div>
+      <div class="action"><span class="action-tag">Eval</span><h3>Run &amp; report</h3><p><code>keystone_eval_list</code>, <code>keystone_eval_run</code>, <code>keystone_eval_report</code>, <code>keystone_eval_baseline</code>.</p></div>
+      <div class="action"><span class="action-tag">Write</span><h3>Author</h3><p><code>keystone_new_&lt;kind&gt;</code> for every kind, plus <code>keystone_charter_bootstrap</code>, <code>keystone_target_add</code>, <code>keystone_index_refresh</code>, <code>keystone_project_refresh</code>.</p></div>
+      <div class="action"><span class="action-tag" style="color: var(--accent3);">4.0 additions</span><h3>Signals &amp; charter</h3><p><code>keystone_signal_list</code>, <code>keystone_charter_coverage</code>, <code>keystone_charter_conformance</code>, <code>keystone_explain</code>.</p></div>
+    </div>
+
+    <div class="section-label">Resource surface</div>
+    <pre class="code"><code>keystone://index                       <span class="comment"># full INDEX.json</span>
+keystone://primitive/{kind}/{id}       <span class="comment"># one body</span>
+keystone://charter/status              <span class="comment"># install audit</span>
+skill://list · skill://{name}/SKILL.md <span class="comment"># auto-discovery</span></code></pre>
+
+    <div class="section-label">Prompt surface</div>
+    <div class="definition"><p><code>keystone_bootstrap</code>, <code>keystone_task</code>, <code>keystone_audit</code>, <code>keystone_learn</code>.</p></div>
+
+    <div class="page-foot"><span>Surfaces</span><span><a href="#dashboard">Dashboard →</a></span></div>
+  </section>
+
+  <!-- ===================== DASHBOARD ===================== -->
+  <section id="dashboard" class="page" data-title="Dashboard">
+    <div class="page-head">
+      <div class="crumb">Surfaces</div>
+      <h1>Dashboard</h1>
+      <p class="tagline"><code>keystone web serve --port 4773</code> (the default — KEYS on a phone keypad). Localhost-only; same binary; reuses the same data model as the CLI and MCP server. SSE push at <code>/events</code> swaps fragments when files in <code>.charter/</code> change; the REST API under <code>/api/</code> is read-only.</p>
+    </div>
+
+    <div class="action-grid three">
+      <div class="action"><h3>home</h3><p>Counts by kind.</p></div>
+      <div class="action"><h3>metrics</h3><p>Primitive counts, lint stats, freshness, index health.</p></div>
+      <div class="action"><h3>insights</h3><p>Suggested actions to improve charter performance.</p></div>
+      <div class="action"><h3>primitives</h3><p>Table with kind + glob filter; detail page with cross-references.</p></div>
+      <div class="action"><h3>coverage</h3><p>Uncharted territory — files no guide governs. (4.0)</p></div>
+      <div class="action"><h3>signals</h3><p>Declared signals and their subscribers. (4.0)</p></div>
+      <div class="action"><h3>policies</h3><p>List + add / remove.</p></div>
+      <div class="action"><h3>investigator</h3><p>Primitives grouped by cascade layer, with search.</p></div>
+      <div class="action"><h3>verify</h3><p>One-click <code>keystone verify</code> + result pane.</p></div>
+      <div class="action"><h3>prune</h3><p>Lint findings + heuristics (orphan corpus, empty bodies, duplicate descriptions) with per-row prune.</p></div>
+      <div class="action"><h3>inbox</h3><p>Walk learning candidates, accept / reject.</p></div>
+      <div class="action"><h3>flywheels</h3><p>Copy-paste invocations for learn / synthesize / audit.</p></div>
+      <div class="action"><h3>evals</h3><p>Declared evals + run button + report fragment.</p></div>
+      <div class="action"><h3>search</h3><p>HTMX-live full-text across the charter.</p></div>
+      <div class="action"><h3>graph</h3><p>Mermaid-rendered dependency graph.</p></div>
+    </div>
+
+    <div class="page-foot"><span>Surfaces</span><span><a href="#governance">Governance →</a></span></div>
+  </section>
+
+  <!-- ===================== GOVERNANCE ===================== -->
+  <section id="governance" class="page" data-title="Governance">
+    <div class="page-head">
+      <div class="crumb">Operate</div>
+      <h1>Governance</h1>
+      <p class="tagline">Project + charter-amendment governance. A charter is authored standards; changing it is an <em>amendment</em>, and amendments follow a defined pipeline rather than ad-hoc edits.</p>
+    </div>
+
+    <div class="section-label">The amendment flywheel</div>
+    <ol class="steps">
+      <li><strong>Propose.</strong><p>A surprise, incident, or review finding is captured as a learning candidate under <code>.charter/learning/inbox/</code> (<code>keystone learn</code>).</p></li>
+      <li><strong>Synthesize.</strong><p>Accepted candidates are promoted into the right layer — a guide, corpus entry, sensor, or tool (<code>keystone synthesize</code>).</p></li>
+      <li><strong>Ratify.</strong><p>A maintainer accepts the promotion in review. The change lands in <code>.charter/</code> and is indexed.</p></li>
+      <li><strong>Record.</strong><p>Material amendments are recorded as a governed document with <code>type: amendment</code> (or an ADR for architectural ones), so the charter's evolution is human-readable, not just reconstructable from git.</p></li>
+    </ol>
+    <div class="definition"><p>This is the same flywheel the tool ships (<code>learn → synthesize</code>); governance names it as the charter's amendment process. ADR 0009 records the 4.0 amendments.</p></div>
+
+    <div class="section-label">Provenance &amp; ratification</div>
+    <div class="definition">
+      <p>Every primitive carries a <strong>provenance</strong> the walker derives from its path: <code>project</code> for the repo's own charter, <code>policy/&lt;name&gt;</code> for a vendored policy layer. <code>keystone charter show --effective</code> renders the resolved cascade and annotates what each winner overrides.</p>
+      <ul style="margin: 8px 0 0; padding-left: 22px; line-height: 1.8; font-size: 0.92rem; color: var(--text-dim);">
+        <li><strong>Project layer</strong> wins by default — the repo's authors have final say over their own charter.</li>
+        <li><strong>Policies</strong> are vendored, <strong>pinned by version and content hash</strong>, and <strong>drift-reset by <code>keystone verify</code></strong>. A policy's <code>strict:</code> declarations lock items absolutely — the ratification boundary between an org/team policy and a project.</li>
+        <li><strong>Amendment records</strong> (<code>type: amendment</code> documents / ADRs) name who proposed and ratified a change and why.</li>
+      </ul>
+    </div>
+
+    <div class="section-label">Roles &amp; decision-making</div>
+    <div class="definition">
+      <p><strong>Maintainers</strong> merge changes, cut releases, and ratify charter amendments. <strong>Contributors</strong> — anyone who opens an issue or PR. <strong>Users</strong> — feedback is a first-class input to amendments. Decision-making runs on <strong>lazy consensus</strong> (silence is assent), maintainer approval + a green Code Health gate to merge, and maintainer escalation on unresolved disagreement (recorded as an ADR). Breaking changes to the charter contract (on-disk layout or frontmatter schema) ship in a major release with a migration and an ADR.</p>
+    </div>
+
+    <div class="page-foot"><span>Operate</span><span><a href="#migration">Migration →</a></span></div>
+  </section>
+
+  <!-- ===================== MIGRATION ===================== -->
+  <section id="migration" class="page" data-title="Migration 3.0 → 4.0">
+    <div class="page-head">
+      <div class="crumb">Operate</div>
+      <h1>Migration: 3.0 → 4.0</h1>
+      <p class="tagline">4.0 is the charter rebrand. Run <code>keystone migrate up</code> once — it carries a 3.0 install to 4.0. Idempotent; safe to re-run. Back up first via <code>keystone snapshot save --label pre-4.0</code>.</p>
+    </div>
+
+    <div class="section-label">What the migration does</div>
+    <div class="iron-list">
+      <li><strong>RENAME</strong> <code>.harness/ → .charter/</code> and <code>HARNESS.md → CHARTER.md</code>. Rewrites <code>keystone.json</code> references.</li>
+      <li><strong>FOLD</strong> <code>hooks/</code> into <code>sensors/</code>: <code>kind: hook → sensor</code>, <code>event: → on:</code> (frontmatter only). The <code>hook</code> primitive kind is retired.</li>
+      <li><strong>DROP</strong> the vestigial <code>context.json</code>.</li>
+      <li><strong>REBUILD</strong> the index and regenerate host projections.</li>
+      <li><strong>BACK-COMPAT</strong> <code>event:</code> still parses as an alias for <code>on:</code>; <code>keystone hook fire</code> is kept as an alias for <code>keystone signal fire</code>.</li>
+    </div>
+
+    <div class="section-label">Run it</div>
+    <pre class="code"><span class="prompt">$</span> keystone snapshot save --label pre-4.0   <span class="comment"># back up .charter/ (.harness/) first</span>
+<span class="prompt">$</span> keystone migrate up                       <span class="comment"># carry the install to 4.0 — idempotent</span>
+<span class="prompt">$</span> go install ./cmd/keystone                 <span class="comment"># refresh the binary the host hooks call</span></pre>
+
+    <div class="section-label">The 3.0 → 4.0 vocabulary shift</div>
+    <div class="layers">
+      <div class="layer-header"><span>3.0</span><span>4.0</span><span>Note</span><span></span></div>
+      <div class="layer l4"><div class="layer-cell layer-name">.harness/</div><div class="layer-cell layer-desc">.charter/</div><div class="layer-cell layer-author" style="grid-column: span 2;">charter root (DefaultCharterRoot)</div></div>
+      <div class="layer l4"><div class="layer-cell layer-name">HARNESS.md</div><div class="layer-cell layer-desc">CHARTER.md</div><div class="layer-cell layer-author" style="grid-column: span 2;">single canonical agent entrypoint</div></div>
+      <div class="layer l4"><div class="layer-cell layer-name">kind: hook</div><div class="layer-cell layer-desc">kind: sensor</div><div class="layer-cell layer-author" style="grid-column: span 2;">hook kind retired; folded into sensors</div></div>
+      <div class="layer l4"><div class="layer-cell layer-name">event:</div><div class="layer-cell layer-desc">on:</div><div class="layer-cell layer-author" style="grid-column: span 2;">self-subscription; event: kept as alias</div></div>
+      <div class="layer l4"><div class="layer-cell layer-name">context.json</div><div class="layer-cell layer-desc">—</div><div class="layer-cell layer-author" style="grid-column: span 2;">dropped</div></div>
+      <div class="layer l4"><div class="layer-cell layer-name">14 kinds</div><div class="layer-cell layer-desc">13 kinds</div><div class="layer-cell layer-author" style="grid-column: span 2;">hook removed</div></div>
+    </div>
+
+    <div class="page-foot"><span>Keystone v4.0.0 reference</span><span><a href="index.html">Home</a> · <a href="guide.html">Guide</a> · <a href="https://github.com/tacoda/keystone/blob/main/CHANGELOG.md" target="_blank" rel="noopener">Changelog ↗</a></span></div>
+  </section>
+
+  </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>
+  // ---------- Mermaid configuration ----------
+  if (window.mermaid) {
+    mermaid.initialize({
+      startOnLoad: false,
+      theme: 'base',
+      themeVariables: {
+        background: '#13161d',
+        primaryColor: '#1a1e28',
+        primaryTextColor: '#e2e8f0',
+        primaryBorderColor: '#252a38',
+        lineColor: '#64748b',
+        secondaryColor: '#1a1e28',
+        tertiaryColor: '#13161d',
+        clusterBkg: '#0d0f14',
+        clusterBorder: '#252a38',
+        edgeLabelBackground: '#0d0f14',
+        fontFamily: 'IBM Plex Mono, monospace',
+        fontSize: '13px'
+      },
+      flowchart: { curve: 'basis', padding: 18, htmlLabels: true }
+    });
+  }
+
+  // ---------- SPA router ----------
+  (function(){
+    var pages = document.querySelectorAll('.page');
+    var links = document.querySelectorAll('.nav-link');
+    var menuToggle = document.querySelector('.menu-toggle');
+    var sidebar = document.getElementById('sidebar');
+    var renderedMermaid = new Set();
+
+    function setActive(id) {
+      var found = false;
+      pages.forEach(function(p){
+        if (p.id === id) { p.classList.add('active'); found = true; }
+        else p.classList.remove('active');
+      });
+      if (!found) {
+        // fallback to overview
+        document.getElementById('overview').classList.add('active');
+        id = 'overview';
+      }
+      links.forEach(function(a){
+        var href = a.getAttribute('href') || '';
+        a.classList.toggle('active', href === '#' + id);
+      });
+      // Render any mermaid in the now-active page once
+      var page = document.getElementById(id);
+      if (page && window.mermaid) {
+        var nodes = page.querySelectorAll('.mermaid');
+        var pending = [];
+        nodes.forEach(function(n){
+          if (!renderedMermaid.has(n)) pending.push(n);
+        });
+        if (pending.length) {
+          try {
+            mermaid.run({ nodes: pending });
+            pending.forEach(function(n){ renderedMermaid.add(n); });
+          } catch(e) { /* mermaid may throw on already-rendered nodes; ignore */ }
+        }
+      }
+      // Scroll content to top on section change
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      // Close mobile sidebar
+      if (sidebar) sidebar.classList.remove('open');
+      // Update document title
+      var pageEl = document.getElementById(id);
+      var title = pageEl && pageEl.dataset && pageEl.dataset.title ? pageEl.dataset.title : '';
+      document.title = title ? ('Keystone Reference — ' + title) : 'Keystone Reference';
+    }
+
+    function routeFromHash() {
+      var hash = (location.hash || '').replace(/^#/, '');
+      if (!hash) hash = 'overview';
+      setActive(hash);
+    }
+
+    window.addEventListener('hashchange', routeFromHash);
+    routeFromHash();
+
+    // Mobile menu toggle
+    if (menuToggle && sidebar) {
+      menuToggle.addEventListener('click', function(){
+        sidebar.classList.toggle('open');
+      });
+    }
+  })();
+</script>
+
+</body>
+</html>
