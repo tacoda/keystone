@@ -222,9 +222,9 @@ func runPipeline(ctx context.Context, projectDir string, doLint, doProject bool)
 // watch loop — a half-finished cross-host projection is better than
 // the watcher dying on a transient I/O error.
 func runWatchAdapters(projectDir string, primitives []primitive.Primitive) {
-	// Agnostic AGENTS.md — always emitted.
-	if _, err := agnostic.ProjectAgentsMD(projectDir, agnostic.DefaultBody()); err != nil {
-		fmt.Fprintf(os.Stderr, "; ✗ agnostic AGENTS.md: %v", err)
+	// Canonical CHARTER.md + agnostic AGENTS.md pointer — always emitted.
+	if err := writeCharterSurface(projectDir, false); err != nil {
+		fmt.Fprintf(os.Stderr, "; ✗ %v", err)
 	}
 	// Claude Code settings.json — hooks + posture, always emitted
 	// (claude-code is the default host).
@@ -244,7 +244,7 @@ func runWatchAdapters(projectDir string, primitives []primitive.Primitive) {
 		}
 	}
 	if cfg.HasAdapter(config.AdapterAider) {
-		if _, err := aider.ProjectAider(projectDir, agnostic.DefaultBody()); err != nil {
+		if _, err := aider.ProjectAider(projectDir, agnostic.RenderPointer(agnostic.AiderProfile())); err != nil {
 			fmt.Fprintf(os.Stderr, "; ✗ aider: %v", err)
 		}
 	}

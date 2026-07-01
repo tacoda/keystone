@@ -34,23 +34,30 @@ type ProjectionResult struct {
 // with the same content is a no-op.
 func ProjectAgentsMD(projectDir, content string) (ProjectionResult, error) {
 	abs := filepath.Join(projectDir, AgentsMDRelPath)
-	body := []byte(content)
+	return writeIfChanged(abs, AgentsMDRelPath, []byte(content))
+}
+
+// writeIfChanged writes body to destAbs atomically, but only when it
+// differs from what's on disk. A trailing newline is ensured. Shared by
+// every single-file projector in this package (AGENTS.md, CHARTER.md).
+func writeIfChanged(destAbs, relPath string, body []byte) (ProjectionResult, error) {
 	if len(body) == 0 || body[len(body)-1] != '\n' {
 		body = append(body, '\n')
 	}
-	prev, _ := os.ReadFile(abs)
+	prev, _ := os.ReadFile(destAbs)
 	if bytes.Equal(prev, body) {
-		return ProjectionResult{Path: AgentsMDRelPath, Wrote: false}, nil
+		return ProjectionResult{Path: relPath, Wrote: false}, nil
 	}
-	if err := atomicWrite(abs, body); err != nil {
-		return ProjectionResult{Path: AgentsMDRelPath}, err
+	if err := atomicWrite(destAbs, body); err != nil {
+		return ProjectionResult{Path: relPath}, err
 	}
-	return ProjectionResult{Path: AgentsMDRelPath, Wrote: true}, nil
+	return ProjectionResult{Path: relPath, Wrote: true}, nil
 }
 
-// DefaultBody returns the canonical AGENTS.md content. Mirrors the
-// keystone-managed CLAUDE.md section so a generic agent gets the same
-// orientation a Claude Code agent does.
+// DefaultBody is the pre-4.0 full-orientation AGENTS.md body. FROZEN:
+// referenced only by the v2.x migrations, which regenerate the host
+// surfaces they knew about. Live projection (4.0+) writes a thin
+// pointer via RenderPointer and the canonical CHARTER.md instead.
 func DefaultBody() string {
 	return `# Agent orientation
 

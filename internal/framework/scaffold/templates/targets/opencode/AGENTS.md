@@ -1,52 +1,10 @@
-## Keystone charter
+# Charter
 
-This project uses a **keystone charter**. Its primitives — guides,
-sensors, hooks, agents, commands, skills, playbooks, patterns, corpus,
-documents, concerns, posture, tools — all live under
-[`.charter/`](.charter/). Discover what's available through the index;
-open primitive bodies on demand.
+You **must** read [`CHARTER.md`](CHARTER.md) now, before doing anything in this repo. It carries the iron laws and the ambient rules that govern the charter; they apply whether or not this file restates them. Do not proceed without loading it.
 
-**Read first:**
-[`.charter/INDEX.json`](.charter/INDEX.json) — one entry per primitive,
-each with `kind`, `id`, `description`, and `path`. Open `path` only when
-you decide to activate the primitive.
+## On this host — opencode
 
-opencode also reads projected primitives directly from `.opencode/`:
-skills (`.opencode/skills/`), subagents (`.opencode/agents/`), commands
-(`.opencode/commands/`), and rules (`.opencode/rules/`, loaded via the
-`instructions` array in `opencode.json`). These are regenerated from
-`.charter/` by `keystone project` — edit the charter source, never the
-projection.
-
-**Activate by:**
-
-| Kind         | When to open                                                            |
-| ------------ | ----------------------------------------------------------------------- |
-| **guide**    | Touched files match the entry's `globs:` (or no globs declared). Inferential → a directive; computational → a host hook. |
-| **corpus**   | A guide's `corpus:` (or a prose forward-link) points at it — the *why*. |
-| **command**  | User's intent matches `description` + `phase`; a unit of work. Host slash: `/keystone-<id>`. |
-| **playbook** | A composed sequence of commands with human `gates:`.                    |
-| **sensor**   | An inferential review at a gate — dispatched as an agent, returns a `returns:` verdict. |
-| **hook**     | Fires deterministically on an `event:` → `run:` shell or `agent:` dispatch. |
-| **skill**    | Auto-activates by `triggers:` match.                                    |
-| **agent**    | Spawn by `id`; the system prompt is the body.                           |
-| **pattern**  | A reusable documentation pattern (Diátaxis) — apply when writing docs.  |
-
-**Lifecycle** — to kick off a unit of work, say "**run task on
-`<ticket-id>`**" (runs the **task** playbook). For any single command,
-ask in natural language ("run verify", "do a review pass"), or invoke its
-projected slash command — the command's body lives at its INDEX `path`.
-
-**Iron laws** — non-negotiable across every phase:
-
-- No proceeding without explicit acceptance criteria.
-- No completion claims without fresh verification — checks must have run
-  this turn, against the post-edit state, with cited output.
-- No commits with failing checks. Never `--no-verify`.
-- No AI attribution in commits, PRs, or tracker comments.
-- No silent overwrites of state files.
-
-**Override** — your project files at `.charter/<kind>/<id>.md` always win
-by default. Among installed policies, policies nested deeper in
-`keystone.json` refine outer policies. A policy can mark an item `strict`
-to make it absolute — nothing else can override a strict item.
+- **Subagents** — spawn charter agents (`.charter/agents/`) as subagents for review/scout work.
+- **Slash commands** — charter commands and playbooks surface as `/keystone-<id>`.
+- **Skills** — auto-activate by their `triggers:`.
+- **No automatic hooks** — run the checks a hook would fire (lint, type-check, test, build) yourself before claiming done.

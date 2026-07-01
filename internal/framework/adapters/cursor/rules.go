@@ -19,6 +19,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/tacoda/keystone/internal/framework/adapters/agnostic"
 	"github.com/tacoda/keystone/internal/framework/primitive"
 )
 
@@ -31,12 +32,45 @@ type ProjectionResult struct {
 	Unchanged int // files whose content was already correct
 }
 
+// tally records one file outcome.
+func (r *ProjectionResult) tally(wrote bool) {
+	if wrote {
+		r.Wrote++
+	} else {
+		r.Unchanged++
+	}
+}
+
+// writeCharterPointer writes the always-apply charter pointer rule,
+// reporting whether the file changed.
+func writeCharterPointer(projectDir string) (bool, error) {
+	dest := filepath.Join(projectDir, RulesDir, "keystone-charter.mdc")
+	content := buildCharterMDC()
+	if prev, _ := os.ReadFile(dest); bytes.Equal(prev, content) {
+		return false, nil
+	}
+	if err := atomicWrite(dest, content); err != nil {
+		return false, fmt.Errorf("write %s: %w", dest, err)
+	}
+	return true, nil
+}
+
 // ProjectRules writes one `.cursor/rules/<slug>.mdc` per idiom guide
 // with non-empty globs. The slug matches the Claude Code rule shim
 // slug so the two host surfaces stay aligned (same name → same
 // concept across hosts). Re-runs are idempotent.
 func ProjectRules(projectDir string, primitives []primitive.Primitive) (ProjectionResult, error) {
 	var out ProjectionResult
+
+	// Always-apply charter pointer: Cursor loads this on every turn, so
+	// the agent is always directed to CHARTER.md (iron laws + ambient
+	// rules). The per-guide rules below carry the scoped detail.
+	wrote, err := writeCharterPointer(projectDir)
+	if err != nil {
+		return out, err
+	}
+	out.tally(wrote)
+
 	for _, p := range primitives {
 		if primitive.Kind(p.Kind) != primitive.KindGuide || len(p.Globs) == 0 {
 			continue
@@ -93,6 +127,20 @@ func buildMDC(p primitive.Primitive) []byte {
 	b.WriteString("---\n\n")
 	fmt.Fprintf(&b, "Full guide: `%s` (read on demand).\n\n", p.Path)
 	b.WriteString("This rule auto-applies in Cursor when a touched file matches the globs above. The body below is the high-signal subset (iron law + golden rule + rules + anti-patterns); open the source guide for prose context.\n")
+	return b.Bytes()
+}
+
+// buildCharterMDC composes the always-apply charter pointer rule. Body
+// is the shared thin pointer (imperative "read CHARTER.md" + Cursor's
+// capability delta); frontmatter sets alwaysApply so it loads every turn.
+func buildCharterMDC() []byte {
+	var b bytes.Buffer
+	b.WriteString("---\n")
+	b.WriteString("description: Keystone charter entrypoint — read CHARTER.md first\n")
+	b.WriteString("alwaysApply: true\n")
+	b.WriteString("generated_by: keystone-project\n")
+	b.WriteString("---\n\n")
+	b.WriteString(agnostic.RenderPointer(agnostic.CursorProfile()))
 	return b.Bytes()
 }
 

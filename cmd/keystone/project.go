@@ -90,15 +90,10 @@ func runProject(args []string) error {
 		fmt.Fprintf(os.Stderr, "keystone project: read keystone.json: %v\n", cfgErr)
 	}
 
-	// Agnostic surface: AGENTS.md is always projected so every coding
-	// agent (Aider, Cline, Cursor, OpenCode, Roo, generic readers) gets
-	// the same orientation Claude Code does.
-	ares, err := agnostic.ProjectAgentsMD(absDir, agnostic.DefaultBody())
-	if err != nil {
-		return fmt.Errorf("agnostic AGENTS.md: %w", err)
-	}
-	if ares.Wrote {
-		fmt.Fprintf(os.Stdout, "  wrote: %s\n", ares.Path)
+	// Canonical entrypoint (CHARTER.md) + the always-on AGENTS.md
+	// pointer. Every other host file is a thin pointer to CHARTER.md.
+	if err := writeCharterSurface(absDir, true); err != nil {
+		return err
 	}
 
 	// Claude Code adapter: hooks + posture regions in .claude/settings.json.
@@ -119,7 +114,7 @@ func runProject(args []string) error {
 				cres.Wrote, cres.Unchanged)
 		}
 		if cfg.HasAdapter(config.AdapterAider) {
-			ares, err := aider.ProjectAider(absDir, agnostic.DefaultBody())
+			ares, err := aider.ProjectAider(absDir, agnostic.RenderPointer(agnostic.AiderProfile()))
 			if err != nil {
 				return fmt.Errorf("aider: %w", err)
 			}
@@ -151,6 +146,29 @@ func runProject(args []string) error {
 
 // projectClaudeCode emits the two Claude Code settings.json regions: the
 // managed hooks block and the posture-derived permissions block.
+// writeCharterSurface emits the always-on entrypoint surface: the
+// canonical CHARTER.md plus the thin AGENTS.md pointer to it. Shared by
+// `keystone project`, `keystone init`, and the watch loop so the three
+// never drift. When verbose, prints a "wrote:" line per changed file.
+func writeCharterSurface(projectDir string, verbose bool) error {
+	cres, err := agnostic.ProjectCharterMD(projectDir)
+	if err != nil {
+		return fmt.Errorf("CHARTER.md: %w", err)
+	}
+	ares, err := agnostic.ProjectAgentsMD(projectDir, agnostic.RenderPointer(agnostic.GenericProfile()))
+	if err != nil {
+		return fmt.Errorf("agnostic AGENTS.md: %w", err)
+	}
+	if verbose {
+		for _, r := range []agnostic.ProjectionResult{cres, ares} {
+			if r.Wrote {
+				fmt.Fprintf(os.Stdout, "  wrote: %s\n", r.Path)
+			}
+		}
+	}
+	return nil
+}
+
 func projectClaudeCode(absDir string, primitives []primitive.Primitive) error {
 	hres, err := claudecode.ProjectHooks(absDir, primitives)
 	if err != nil {

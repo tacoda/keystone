@@ -83,7 +83,8 @@ readable for back-compat.
 ## Status
 - **Phase 1 — DONE.** README, GLOSSARY.md (new), CLAUDE.md, CONTRIBUTING.md, docs/** swept.
 - **Phase 2 — DONE.** Full code rename; `go build/vet/test` all green; gofmt clean. 266 files renamed, 40 modified. Fixed along the way: frozen migrations to literal historical paths, restored migrate.go legacy detection, topics.go classifier ordering bug (lockfile under `.charter/`), stale `.keystone` runtime refs (mcp INDEX path, audit dir, snapshot target, watcher), `context.json` removed, `.charter-snapshots` rename.
-- **Phase 2b / 3 / 4 / 5 / 6 — pending.**
+- **Phase 2b — DONE.** Canonical root `CHARTER.md` (agnostic.CharterBody/ProjectCharterMD) + `HostProfile` + `RenderPointer` (per-host capability delta). project.go/watch.go/init.go emit CHARTER.md + thin AGENTS.md/aider pointers; cursor+continue emit always-apply charter-pointer rules; all 11 `targets/*` seed templates converted to thin pointers (claude-code uses `@CHARTER.md` import). Tests added; build/vet/test green. Decision: skills/commands/agents still project natively (unchanged); vocab rename dropped (kept community names).
+- **Phase 3 / F / 4 / 5 / 6 — pending.**
 
 ## Phases
 
@@ -143,6 +144,14 @@ Adversarial pass for rename fallout: stale path strings, broken `go:embed`, dead
 `.harness` literals, adapter output paths, doc links.
 - Verify: `go test ./...`, `keystone verify`, `keystone index` diff sane,
   `pre_commit_code_health_safeguard` / `analyze_change_set` no regression.
+
+### Phase F — 4.0 charter features (all four, user-approved)
+Additive, each its own slice. Land after the rebrand core (2b/3), before release.
+- **F1 — Charter coverage** (`keystone charter coverage`): report files/dirs no guide governs ("uncharted territory"). Reuses glob machinery. + dashboard page.
+- **F2 — Effective charter view** (`keystone charter show --effective`): materialize the fully-resolved post-cascade charter (project + nested policies + strict). Surfaces existing loader output. + dashboard page.
+- **F3 — Charter amendments + provenance**: first-class human-readable record of charter evolution + who authored/ratified each fragment, hash-pinned. Ties to learning flywheel + AAIF GOVERNANCE story.
+- **F4 — Charter conformance score**: fold evals + quality-radar into one charter-adherence score. Define criteria sharply first (avoid vanity metric).
+- Each: tests + `keystone verify` clean + code-health no regression.
 
 ### Phase 5 — Release 4.0.0
 Tag push → GoReleaser. **No `gh release create`.** CHANGELOG 4.0.0 entry: breaking
