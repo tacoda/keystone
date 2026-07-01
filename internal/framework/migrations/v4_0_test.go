@@ -84,6 +84,32 @@ func TestV4_Up_FoldsHooksToSensors(t *testing.T) {
 	}
 }
 
+// TestV4_FoldHookText_FrontmatterOnly pins the fix for the two fold
+// bugs: rewrites hit the frontmatter only (body `event:` survives), and
+// a `hooks/` id is repointed to `sensors/`.
+func TestV4_FoldHookText_FrontmatterOnly(t *testing.T) {
+	in := "---\nkind: hook\nid: hooks/lint\ndescription: d\nmode: computational\nevent: Stop\nrun: go vet ./...\n---\n" +
+		"# lint\n\nThis hook fires on an `event:` — the body mentions event: on purpose.\n\n```yaml\nevent: PreToolUse\n```\n"
+	out := foldHookText(in)
+
+	// Frontmatter rewritten.
+	for _, want := range []string{"kind: sensor", "id: sensors/lint", "on: Stop"} {
+		if !strings.Contains(out, want) {
+			t.Errorf("frontmatter missing %q\n%s", want, out)
+		}
+	}
+	if strings.Contains(out, "kind: hook") || strings.Contains(out, "id: hooks/") {
+		t.Errorf("stale frontmatter remained:\n%s", out)
+	}
+	// Body untouched — the prose + example `event:` must survive verbatim.
+	if !strings.Contains(out, "the body mentions event: on purpose") {
+		t.Errorf("body prose `event:` was corrupted:\n%s", out)
+	}
+	if !strings.Contains(out, "event: PreToolUse") {
+		t.Errorf("body example `event:` was corrupted:\n%s", out)
+	}
+}
+
 func TestV4_Up_Idempotent(t *testing.T) {
 	tmp := seed30Install(t)
 	runV4(t, tmp, planUp_4_0)

@@ -6,6 +6,8 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
+
+	"github.com/tacoda/keystone/internal/framework/primitive"
 )
 
 // Version 4.0 — the harness→charter rename. Keystone is the charter
@@ -55,9 +57,14 @@ func planUp_4_0(absDir string) (*Plan, error) {
 	return p, nil
 }
 
+// planDown_4_0 reverses the root rename. Down is best-effort (like 3.0):
+// it does NOT un-fold sensors back into hooks — a folded sensor is
+// indistinguishable from a hand-authored one — nor restore context.json.
+// Reversing the .charter/ → .harness/ move is enough to get back on a
+// 3.0-compatible layout; re-running Up re-folds idempotently.
 func planDown_4_0(absDir string) (*Plan, error) {
 	p := &Plan{}
-	p.Add("rename the charter root .charter/ → .harness/ (reverse 4.0)", func(absDir string) error {
+	p.Add("rename the charter root .charter/ → .harness/ (reverse 4.0; fold + context.json not reversed)", func(absDir string) error {
 		return renameRoot_4_0(absDir, charterRoot_4_0, legacyRoot_4_0)
 	})
 	return p, nil
@@ -93,28 +100,50 @@ func foldHooksToSensors_4_0(charterAbs string) error {
 	return nil
 }
 
-// foldOneHook_4_0 rewrites one hook file to a sensor and moves it.
+// foldOneHook_4_0 rewrites one hook file to a sensor and moves it. The
+// rewrites (kind: hook → sensor, event: → on:, id: hooks/… → sensors/…)
+// apply to the FRONTMATTER ONLY — never the markdown body, so prose or
+// example YAML that mentions `event:` is left untouched.
 func foldOneHook_4_0(hooksDir, sensorsDir, name string) error {
 	src := filepath.Join(hooksDir, name)
 	dst := filepath.Join(sensorsDir, name)
-	if _, err := os.Stat(dst); err == nil {
-		return fmt.Errorf("fold hook %s: %s already exists — resolve by hand", name, dst)
-	}
 	data, err := os.ReadFile(src)
 	if err != nil {
 		return err
 	}
-	out := reHookKind_4_0.ReplaceAllString(string(data), "${1}kind: sensor")
-	out = reEventKey_4_0.ReplaceAllString(out, "${1}on:")
+	out := foldHookText(string(data))
+	// Idempotent clobber: an identical dst means a prior run wrote it but
+	// crashed before removing src — finish the move rather than erroring.
+	if existing, rerr := os.ReadFile(dst); rerr == nil {
+		if string(existing) != out {
+			return fmt.Errorf("fold hook %s: %s already exists with different content — resolve by hand", name, dst)
+		}
+		return os.Remove(src)
+	}
 	if err := os.WriteFile(dst, []byte(out), 0o644); err != nil {
 		return err
 	}
 	return os.Remove(src)
 }
 
+// foldHookText applies the hook→sensor frontmatter rewrites, leaving the
+// body untouched. If there's no frontmatter block, returns the input
+// unchanged (nothing safe to rewrite).
+func foldHookText(text string) string {
+	fm, body, ok := primitive.SplitFrontmatter(text)
+	if !ok {
+		return text
+	}
+	fm = reHookKind_4_0.ReplaceAllString(fm, "${1}kind: sensor")
+	fm = reEventKey_4_0.ReplaceAllString(fm, "${1}on:")
+	fm = reHookID_4_0.ReplaceAllString(fm, "${1}id: sensors/")
+	return "---\n" + fm + "\n---" + body
+}
+
 var (
 	reHookKind_4_0 = regexp.MustCompile(`(?m)^(\s*)kind:\s*hook\s*$`)
 	reEventKey_4_0 = regexp.MustCompile(`(?m)^(\s*)event:`)
+	reHookID_4_0   = regexp.MustCompile(`(?m)^(\s*)id:\s*hooks/`)
 )
 
 // renameRoot_4_0 moves src→dst under absDir. Idempotent: a no-op once
