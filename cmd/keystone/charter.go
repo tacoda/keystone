@@ -25,9 +25,160 @@ func runCharter(args []string) error {
 		return nil
 	case "coverage":
 		return runCharterCoverage(args[1:])
+	case "show":
+		return runCharterShow(args[1:])
 	default:
-		return fmt.Errorf("unknown charter subcommand %q (use: coverage)", args[0])
+		return fmt.Errorf("unknown charter subcommand %q (use: coverage | show)", args[0])
 	}
+}
+
+// showOpts is the parsed `charter show` invocation.
+type showOpts struct {
+	dir       string
+	kind      string
+	effective bool
+}
+
+// runCharterShow renders the charter roster. With --effective it
+// resolves the cascade — one winning primitive per id (project wins,
+// then policies in order) — annotating anything it shadows. Without it,
+// every layer's primitive is listed.
+func runCharterShow(args []string) error {
+	opts := parseShowOpts(args)
+	absDir, err := filepath.Abs(opts.dir)
+	if err != nil {
+		return fmt.Errorf("resolve dir: %w", err)
+	}
+	prims, _, err := primitive.Walk(absDir, config.DefaultCharterRoot)
+	if err != nil {
+		return fmt.Errorf("walk charter: %w", err)
+	}
+	entries := rosterEntries(prims, opts)
+	printRoster(entries, opts.effective)
+	return nil
+}
+
+func parseShowOpts(args []string) showOpts {
+	opts := showOpts{dir: "."}
+	for i := 0; i < len(args); i++ {
+		switch args[i] {
+		case "--effective":
+			opts.effective = true
+		case "--dir":
+			if i+1 < len(args) {
+				opts.dir = args[i+1]
+				i++
+			}
+		case "--kind":
+			if i+1 < len(args) {
+				opts.kind = args[i+1]
+				i++
+			}
+		}
+	}
+	return opts
+}
+
+// rosterEntry is one line of the roster: the winning primitive plus the
+// layers it shadows (empty unless --effective resolved an override).
+type rosterEntry struct {
+	p       primitive.Primitive
+	shadows []string
+}
+
+// rosterEntries filters by --kind and, when effective, collapses each id
+// to its cascade winner (project over policy) recording what it shadows.
+func rosterEntries(prims []primitive.Primitive, opts showOpts) []rosterEntry {
+	kept := filterByKind(prims, opts.kind)
+	if !opts.effective {
+		out := make([]rosterEntry, 0, len(kept))
+		for _, p := range kept {
+			out = append(out, rosterEntry{p: p})
+		}
+		return out
+	}
+	return resolveEffective(kept)
+}
+
+func filterByKind(prims []primitive.Primitive, kind string) []primitive.Primitive {
+	if kind == "" {
+		return prims
+	}
+	var out []primitive.Primitive
+	for _, p := range prims {
+		if p.Kind == kind {
+			out = append(out, p)
+		}
+	}
+	return out
+}
+
+// resolveEffective collapses same-id primitives to their cascade winner
+// (project over policy), preserving first-seen order.
+func resolveEffective(prims []primitive.Primitive) []rosterEntry {
+	byID := map[string]*rosterEntry{}
+	var order []string
+	for _, p := range prims {
+		key := p.Kind + "/" + p.ID
+		if e, ok := byID[key]; ok {
+			mergeCascade(e, p)
+			continue
+		}
+		byID[key] = &rosterEntry{p: p}
+		order = append(order, key)
+	}
+	out := make([]rosterEntry, 0, len(order))
+	for _, k := range order {
+		out = append(out, *byID[k])
+	}
+	return out
+}
+
+// mergeCascade resolves a same-id conflict into e: the project layer
+// wins over any policy; the loser is recorded as shadowed.
+func mergeCascade(e *rosterEntry, p primitive.Primitive) {
+	if e.p.Provenance != "project" && p.Provenance == "project" {
+		e.shadows = append(e.shadows, e.p.Provenance)
+		e.p = p
+		return
+	}
+	e.shadows = append(e.shadows, p.Provenance)
+}
+
+// printRoster prints entries grouped by kind, sorted, with provenance.
+func printRoster(entries []rosterEntry, effective bool) {
+	label := "charter roster"
+	if effective {
+		label = "effective charter (post-cascade)"
+	}
+	fmt.Fprintf(os.Stdout, "%s — %d primitive(s)\n", label, len(entries))
+	byKind := map[string][]rosterEntry{}
+	for _, e := range entries {
+		byKind[e.p.Kind] = append(byKind[e.p.Kind], e)
+	}
+	kinds := make([]string, 0, len(byKind))
+	for k := range byKind {
+		kinds = append(kinds, k)
+	}
+	sort.Strings(kinds)
+	for _, k := range kinds {
+		fmt.Fprintf(os.Stdout, "\n%s\n", k)
+		for _, e := range byKind[k] {
+			printRosterLine(e)
+		}
+	}
+}
+
+func printRosterLine(e rosterEntry) {
+	src := ""
+	if e.p.Provenance != "" && e.p.Provenance != "project" {
+		src = "  [" + e.p.Provenance + "]"
+	}
+	shadow := ""
+	if len(e.shadows) > 0 {
+		shadow = "  (overrides " + strings.Join(e.shadows, ", ") + ")"
+	}
+	fmt.Fprintf(os.Stdout, "  %-40s %s%s%s\n", e.p.ID, e.p.Description, src, shadow)
 }
 
 // runCharterCoverage reports which files in the project a guide governs
@@ -43,12 +194,18 @@ func runCharterCoverage(args []string) error {
 	if err != nil {
 		return err
 	}
-	total, governed, uncharted, err := scanCoverage(absDir, globs)
+	res, err := scanCoverage(absDir, globs)
 	if err != nil {
 		return err
 	}
-	printCoverage(total, governed, uncharted)
+	printCoverage(res)
 	return nil
+}
+
+// coverageResult is the outcome of a coverage scan.
+type coverageResult struct {
+	total, governed int
+	uncharted       []string
 }
 
 // collectGuideGlobs returns every glob any guide claims, after cascade
@@ -83,8 +240,9 @@ func positiveGlobs(gs []string) []string {
 // scanCoverage walks project source files, classifying each as governed
 // (matched by ≥1 guide glob) or uncharted. Generated/vendored/hidden
 // trees are skipped — coverage is about the source an agent edits.
-func scanCoverage(absDir string, globs []string) (total, governed int, uncharted []string, err error) {
-	err = filepath.WalkDir(absDir, func(path string, d fs.DirEntry, walkErr error) error {
+func scanCoverage(absDir string, globs []string) (coverageResult, error) {
+	var r coverageResult
+	err := filepath.WalkDir(absDir, func(path string, d fs.DirEntry, walkErr error) error {
 		if walkErr != nil {
 			return nil // skip unreadable entries, don't abort
 		}
@@ -99,15 +257,15 @@ func scanCoverage(absDir string, globs []string) (total, governed int, uncharted
 			return nil
 		}
 		rel = filepath.ToSlash(rel)
-		total++
+		r.total++
 		if anyGlobMatches(globs, rel) {
-			governed++
+			r.governed++
 		} else {
-			uncharted = append(uncharted, rel)
+			r.uncharted = append(r.uncharted, rel)
 		}
 		return nil
 	})
-	return total, governed, uncharted, err
+	return r, err
 }
 
 // skipCoverageDir reports whether a directory is out of scope for
@@ -135,19 +293,19 @@ func anyGlobMatches(globs []string, rel string) bool {
 
 // printCoverage renders the summary + uncharted regions grouped by their
 // top-level directory (most-uncharted first).
-func printCoverage(total, governed int, uncharted []string) {
+func printCoverage(r coverageResult) {
 	pct := 100
-	if total > 0 {
-		pct = governed * 100 / total
+	if r.total > 0 {
+		pct = r.governed * 100 / r.total
 	}
 	fmt.Fprintf(os.Stdout, "Charter coverage — %d files, %d governed, %d uncharted (%d%% governed)\n",
-		total, governed, len(uncharted), pct)
-	if len(uncharted) == 0 {
+		r.total, r.governed, len(r.uncharted), pct)
+	if len(r.uncharted) == 0 {
 		fmt.Fprintln(os.Stdout, "\nEvery scanned file is governed by a guide.")
 		return
 	}
 	counts := map[string]int{}
-	for _, rel := range uncharted {
+	for _, rel := range r.uncharted {
 		counts[topSegment(rel)]++
 	}
 	fmt.Fprintln(os.Stdout, "\nUncharted regions (no guide globs match):")
@@ -184,10 +342,15 @@ func printCharterUsage(w *os.File) {
 
 Usage:
 
-    keystone charter coverage [--dir D]   # files no guide governs (uncharted territory)
+    keystone charter coverage [--dir D]              # files no guide governs (uncharted territory)
+    keystone charter show [--effective] [--kind K] [--dir D]   # the charter roster
 
 Coverage walks the project's source files and reports which are matched
 by a guide's globs and which are uncharted — where the agent runs with
 no ambient rule. Generated/vendored/hidden trees are skipped.
+
+Show lists the charter's primitives grouped by kind. With --effective it
+resolves the cascade — one winning primitive per id (project wins, then
+policies in order) — and annotates anything a winner overrides.
 `)
 }

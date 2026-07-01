@@ -96,6 +96,7 @@ block and in `guides/process/runtime-resolution.md`.
 | `keystone project`       | Regenerate `.claude/` / `.cursor/` host projections from canonical sources.    |
 | `keystone verify`        | Cascade + policy-drift check.                                                  |
 | `keystone charter coverage` | Which project files no guide governs ("uncharted territory").               |
+| `keystone charter show`  | Charter roster; `--effective` resolves the post-cascade winning set.           |
 | `keystone signal fire\|list` | Fire or list signals (extensible framework events).                        |
 | `keystone migrate`       | Version-to-version charter upgrade (… → 4.0). Idempotent.                                    |
 | `keystone new <kind>`    | Scaffold any of the 13 primitive kinds + adapter + policy.                     |
