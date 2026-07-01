@@ -1,6 +1,6 @@
 # Keystone Charter Rebrand — Plan (v4.0.0)
 
-**Positioning:** Keystone is **the coding-agent charter manager** — *constraint
+**Positioning:** Keystone is **the agent charter framework** — *constraint
 engineering at the repository level*. It is **not a harness.** A harness is the
 engine (Claude Code, the orchestrator, the runner). Keystone manages the
 **charter**: the authored standards that constrain whatever harness runs, so
@@ -60,7 +60,7 @@ means *Keystone's authored artifact*, it becomes **charter**.
 | `harness-content` guides/idioms | `charter-content` |
 | `harness-debt` sensor | `charter-debt` |
 | MCP tagline "the harness, served" | "the charter, served" |
-| README tagline "the agent harness framework" | "the coding-agent charter manager" |
+| README tagline "the agent harness framework" | "the agent charter framework" |
 | **STAYS "harness":** "coding agents and other harnesses", "the harness runs/applies", host-engine references | unchanged |
 
 Unchanged (product, not artifact): **Keystone**, `keystone` binary,
@@ -84,13 +84,22 @@ readable for back-compat.
 - **Phase 1 — DONE.** README, GLOSSARY.md (new), CLAUDE.md, CONTRIBUTING.md, docs/** swept.
 - **Phase 2 — DONE.** Full code rename; `go build/vet/test` all green; gofmt clean. 266 files renamed, 40 modified. Fixed along the way: frozen migrations to literal historical paths, restored migrate.go legacy detection, topics.go classifier ordering bug (lockfile under `.charter/`), stale `.keystone` runtime refs (mcp INDEX path, audit dir, snapshot target, watcher), `context.json` removed, `.charter-snapshots` rename.
 - **Phase 2b — DONE.** Canonical root `CHARTER.md` (agnostic.CharterBody/ProjectCharterMD) + `HostProfile` + `RenderPointer` (per-host capability delta). project.go/watch.go/init.go emit CHARTER.md + thin AGENTS.md/aider pointers; cursor+continue emit always-apply charter-pointer rules; all 11 `targets/*` seed templates converted to thin pointers (claude-code uses `@CHARTER.md` import). Tests added; build/vet/test green. Decision: skills/commands/agents still project natively (unchanged); vocab rename dropped (kept community names).
-- **Phase 3 / F / 4 / 5 / 6 — pending.**
+- **Phase 3 — DONE.** v4.0 migration (`.harness`→`.charter`, drop context.json, fold hooks→sensors, rebuild INDEX) + dogfood migrated + re-projected; `keystone verify` clean.
+- **Phase F5 (signals + retire hook kind) — DONE.** Signals (extensible framework events, `on:` self-subscription); `hook` kind removed → sensor(check)/tool(side-effect)/agent(review); `keystone signal fire|list`; tool gains `http` transport + `on:`; docs 14→13 kinds. Green + gate passed.
+- **Phase F1 (charter coverage) — DONE.** `keystone charter coverage` + `primitive.MatchPath` doublestar matcher (tested). Green; String-Heavy smell accepted (inherent to CLI path code).
+- **Phase F2 (effective charter view) — DONE.** `keystone charter show [--effective|--kind]`; cascade resolution via Walk provenance; tested; gate passed.
+- **Phase MCP+Dashboard (user-requested) — DONE.** Fixed dashboard bugs (stale `/harness/` route links → 404s; SSE topic `harness-changed`→`charter-changed` mismatch → dead live-updates). Extracted shared `internal/framework/charter` pkg (Coverage/Effective/Signals) used by CLI+web+MCP. Added dashboard **Coverage** + **Signals** pages (+ nav); MCP `keystone_signal_list` + `keystone_charter_coverage` tools; MCP instructions describe signals + sensor/tool/agent reactions; hook kind removed from kind lists. Tested; gate green (charter-pkg String-Heavy accepted).
+- **Phase F3 (amendments + provenance + GOVERNANCE) — DONE.** GOVERNANCE.md (roles, decision-making, charter-amendment flywheel, provenance/hash-pin model, growth path) + ADR 0009 recording the 4.0 amendments (dogfoods the process). Amendments/provenance realized by existing machinery (flywheel, `Provenance`, hash-pinned policies, `charter show --effective`).
+- **Phase Explain (user-requested) — DONE.** `keystone explain <id> [--kind]` explains any primitive (kind, activation, links, projection) + flags uncommitted changes; MCP `keystone_explain` tool; shared `charter.Explain`/`charter.Matches`. Covers all 13 kinds.
+- **Phase F4 (conformance rubric) — DONE.** `keystone charter conformance` — sharp rubric (cascade/validity/pairing/coverage → CONFORMANT|DRIFTING|NON-CONFORMANT), not a vanity number; shared CLI+MCP; dogfood CONFORMANT. Guide↔sensor pairing dropped (no objective link; backlinks are the future path).
+- **Phase 4 (bug-hunt + full verify) — DONE.** Build/vet/test green, verify + lint clean, conformance CONFORMANT, CodeScene branch review (no regressions; string-heavy accepted). Bugs caught + fixed: empty `hooks/` in fresh init; **critical migration bugs** (event-rewrite hit the body → now frontmatter-only; folded id `hooks/`→`sensors/`; idempotent clobber; Down documented). Migrations in place; CHANGELOG 4.0.0 written; docs + positioning updated ("the agent charter framework"; charter/constraint engineering). Deferred (low/4.1): gitDirty monorepo edge, projection always-writes (cosmetic), host-phase-typo lint.
+- **Phase 5 (release 4.0.0) / 6 (gh-pages) — pending.**
 
 ## Phases
 
 ### Phase 1 — Docs + lexicon + positioning (user's "start with README")
 Prose only. README, CHANGELOG, CONTRIBUTING, CONVENTIONS, `docs/**`, AGENTS.md,
-CLAUDE.md. Lead positioning with "the coding-agent charter manager / constraint
+CLAUDE.md. Lead positioning with "the agent charter framework / constraint
 engineering." Write **`GLOSSARY.md`** defining charter, harness, the authorship
 test. Apply naming map to prose; keep "harness" where it means the engine.
 - Verify: remaining `rg -i harness` hits are all engine-meaning (manual read).
