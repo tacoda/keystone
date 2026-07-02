@@ -11,13 +11,13 @@
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://www.tacoda.dev/keystone/">
 <meta property="og:title" content="Keystone — the agent charter framework. The discipline your AI agents won't drift from.">
-<meta property="og:description" content="Author one versioned charter — guides, sensors, signals, policies. It projects to whatever harness runs, so agents stay on-rails, per repo. Agent-agnostic. One source of truth.">
+<meta property="og:description" content="Author one versioned charter — guides, sensors, signals, policies. It projects to whatever harness runs, so agents stay on-rails, per repo. Harness-agnostic. One source of truth.">
 <meta property="og:image" content="https://www.tacoda.dev/keystone/keystone_logo.png">
 
 <!-- Twitter Card -->
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Keystone — the agent charter framework. The discipline your AI agents won't drift from.">
-<meta name="twitter:description" content="Author one versioned charter — guides, sensors, signals, policies. It projects to whatever harness runs, so agents stay on-rails, per repo. Agent-agnostic. One source of truth.">
+<meta name="twitter:description" content="Author one versioned charter — guides, sensors, signals, policies. It projects to whatever harness runs, so agents stay on-rails, per repo. Harness-agnostic. One source of truth.">
 <meta name="twitter:image" content="https://www.tacoda.dev/keystone/keystone_logo.png">
 
 <link rel="icon" type="image/png" href="keystone_logo.png">
@@ -1166,6 +1166,7 @@
   }
 
   @media (max-width: 980px) {
+    :root { --sidebar-w: 240px; }
     .action-grid, .action-grid.three, .action-grid.four,
     .flywheels { grid-template-columns: 1fr 1fr; }
     .feat-grid { grid-template-columns: 1fr 1fr; }
@@ -1173,9 +1174,23 @@
     .hero-copy h1 { font-size: 2.1rem; }
   }
   @media (max-width: 720px) {
-    .topbar { padding: 12px 16px; flex-wrap: wrap; }
-    .topnav a { padding: 7px 10px; }
-    .landing { padding: 40px 18px 24px; }
+    .app { flex-direction: column; }
+    .sidebar {
+      width: 100%;
+      flex: 0 0 auto;
+      height: auto;
+      max-height: 70vh;
+      position: fixed;
+      inset: 0 0 auto 0;
+      z-index: 40;
+      transform: translateY(-100%);
+      transition: transform .28s var(--ease);
+      border-right: none;
+      border-bottom: 1px solid var(--border);
+    }
+    .sidebar.open { transform: translateY(0); }
+    .content { padding: 64px 18px 24px; max-width: 100%; }
+    .menu-toggle { display: inline-flex; align-items: center; gap: 6px; }
     .action-grid, .action-grid.three, .action-grid.four,
     .flywheels, .feat-grid { grid-template-columns: 1fr; }
     .hero-copy h1 { font-size: 1.8rem; }
@@ -1280,7 +1295,7 @@
       Coding agents <strong>drift</strong> — they lose the thread, ignore
       conventions, and reinvent what the codebase already decided. And every
       repository is unique: its stack, its idioms, its hard rules. Teams have
-      had no <strong>per-repo, agent-agnostic</strong> way to encode the
+      had no <strong>per-repo, harness-agnostic</strong> way to encode the
       discipline that agents actually follow — so the same corrections get
       re-typed into every session, every host, every clone.
     </p>
@@ -1300,7 +1315,7 @@
         grows with your project.</p>
     </div>
     <div class="action">
-      <span class="action-tag">Agent-agnostic</span>
+      <span class="action-tag">Harness-agnostic</span>
       <h3>Shared project standards</h3>
       <p><strong>One source of truth for every agent</strong> — not a pile of
         conflicting per-agent folders (<code>.claude/</code>,
@@ -1331,7 +1346,7 @@
       A <strong>harness</strong> is the engine that runs the model — Claude
       Code, Cursor, Codex, opencode, an orchestrator. Keystone is <em>not</em>
       a harness; it manages the <strong>charter</strong> the harness obeys.
-      Author the spec → charter. Be the engine → harness.
+      You author the charter; the harness you run consumes and applies it.
     </p>
   </div>
 
@@ -1365,7 +1380,7 @@
       </div>
     </div>
     <div class="flywheel">
-      <h3 class="fw-prune-h">Agent-agnostic &amp; team-scalable</h3>
+      <h3 class="fw-prune-h">Harness-agnostic &amp; team-scalable</h3>
       <div class="loop">
         <div class="loop-step"><span class="loop-num">01</span><span class="loop-text"><strong>Works across hosts.</strong> Claude Code, Cursor, Codex, opencode — write once, project everywhere.</span></div>
         <div class="loop-step"><span class="loop-num">02</span><span class="loop-text"><strong>Org rules ship as policies.</strong> Vendored charter fragments, pinned by version and hash-verified, drift-reset on <code>keystone verify</code>.</span></div>
@@ -1440,7 +1455,7 @@
 
   <footer class="page-foot">
     <span>Keystone — the agent charter framework · MIT License</span>
-    <span class="built">Author the spec → charter. Be the engine → <a href="guide.html">harness</a>.</span>
+    <span class="built">You author the charter; the <a href="guide.html">harness</a> you run consumes and applies it.</span>
   </footer>
 
 </main>
