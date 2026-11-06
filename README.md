@@ -76,10 +76,10 @@ replaces a file it didn't write. Pass `--overwrite` when you want it to.
 
 ### Hooks and permissions
 
-A hook runs through a bridge in each host's own hook config. On Claude Code
-and opencode, a failing check blocks the tool call, and so does an error
-before the checks run. Keystone writes bridges for Cursor and Copilot too,
-but I haven't verified that a failure blocks there yet.
+A hook runs through a bridge in each host's own hook config: Claude Code,
+Cursor, Copilot, Codex, and opencode. A failing check blocks the tool call,
+and so does an error before the checks run. I've run that on Claude Code;
+for the other four it's what each host's hook docs specify.
 
 Permission rules use Claude Code syntax, `Bash(go test:*)`. Keystone writes
 them to Claude Code unchanged, translates them for Cursor and Codex, and

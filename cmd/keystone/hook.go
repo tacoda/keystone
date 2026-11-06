@@ -91,6 +91,7 @@ func fireHooks(args []string) error {
 	emitInferentialManifest(inf, opts)
 	failures := runComputationalHooks(absDir, comp, opts, hostPayload(opts))
 	if failures == 0 {
+		printHostResponse(os.Stdout, opts)
 		return nil
 	}
 	return fmt.Errorf("hook fire %s: %d hook(s) failed", opts.event, failures)
@@ -215,7 +216,7 @@ func runComputationalHooks(absDir string, hooks []primitive.Primitive, opts hook
 			failures++
 			fmt.Fprintf(os.Stderr, "✗ hook %s: %v\n%s\n", r.id, r.err, r.out)
 		} else {
-			fmt.Fprintf(os.Stdout, "✓ hook %s\n", r.id)
+			fmt.Fprintf(humanOut(opts), "✓ hook %s\n", r.id)
 		}
 	}
 	return failures
@@ -254,6 +255,42 @@ func hookContext(opts hookFireOpts) (context.Context, context.CancelFunc) {
 	return context.WithCancel(context.Background())
 }
 
+// humanOut is where hook fire writes for people. Called by a host bridge
+// (--host), that is stderr: hosts read stdout as the hook's answer (Cursor
+// and Codex parse it as JSON, Claude Code adds a prompt hook's stdout to
+// the context).
+func humanOut(opts hookFireOpts) io.Writer {
+	if opts.host != "" {
+		return os.Stderr
+	}
+	return os.Stdout
+}
+
+// hostAllow is the JSON a host expects on stdout from a passing hook, by
+// host and Claude Code event name; "" means print nothing. Cursor blocks a
+// permission event on missing or invalid JSON; Codex needs JSON from Stop.
+func hostAllow(host, event string) string {
+	switch host {
+	case "cursor":
+		switch event {
+		case "PreToolUse":
+			return `{"permission":"allow"}`
+		case "UserPromptSubmit":
+			return `{"continue":true}`
+		}
+		return `{}`
+	case "codex":
+		return `{}`
+	}
+	return ""
+}
+
+func printHostResponse(w io.Writer, opts hookFireOpts) {
+	if out := hostAllow(opts.host, opts.event); out != "" {
+		fmt.Fprintln(w, out)
+	}
+}
+
 func hookEnv(opts hookFireOpts) []string {
 	return []string{
 		"KEYSTONE_EVENT=" + opts.event,
@@ -271,7 +308,8 @@ func emitInferentialManifest(hooks []primitive.Primitive, opts hookFireOpts) {
 	if len(hooks) == 0 {
 		return
 	}
-	fmt.Fprintf(os.Stdout, "dispatch (%s) — spawn these agents in parallel:\n", opts.event)
+	w := humanOut(opts)
+	fmt.Fprintf(w, "dispatch (%s) — spawn these agents in parallel:\n", opts.event)
 	for _, h := range hooks {
 		// A hook names its agent via `agent:`; an inferential sensor IS the
 		// agent (its body projects to .claude/agents/<id>), so it dispatches
@@ -280,7 +318,7 @@ func emitInferentialManifest(hooks []primitive.Primitive, opts hookFireOpts) {
 		if agent == "" {
 			agent = h.ID
 		}
-		fmt.Fprintf(os.Stdout, "  - agent: %s  (%s %s, returns: %s)\n", agent, h.Kind, h.ID, h.Returns)
+		fmt.Fprintf(w, "  - agent: %s  (%s %s, returns: %s)\n", agent, h.Kind, h.ID, h.Returns)
 	}
 }
 

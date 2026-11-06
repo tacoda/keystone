@@ -77,6 +77,6 @@ Project files in `.agents/` win over installed policies (`.keystone/policies/`).
 - **GitHub Copilot** — loads rules, skills, commands, subagents by itself.
 - **Continue** — loads rules, skills, commands by itself; open subagents from `.agents/` yourself; does **not** run hooks — run the checks in `.agents/hooks/` yourself before claiming done.
 - **opencode** — loads skills, commands, subagents by itself; open rules from `.agents/` yourself.
-- **Codex** — loads skills, subagents by itself; open rules, commands from `.agents/` yourself; does **not** run hooks — run the checks in `.agents/hooks/` yourself before claiming done.
+- **Codex** — loads skills, subagents by itself; open rules, commands from `.agents/` yourself.
 - **Aider** — open rules, skills, commands, subagents from `.agents/` yourself; does **not** run hooks — run the checks in `.agents/hooks/` yourself before claiming done.
 <!-- keystone:end -->

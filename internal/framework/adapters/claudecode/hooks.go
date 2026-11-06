@@ -77,11 +77,21 @@ func ProjectHooks(projectDir string, primitives []primitive.Primitive) (HookProj
 // every user-authored hook — including ones on the same phase — is kept.
 // Pure: no I/O. existing may be empty (first run).
 func MergeHooks(existing []byte, phases []string) ([]byte, error) {
-	out, _, _, err := mergeHooks(existing, phases)
+	return MergeHooksFor(existing, phases, "claude-code")
+}
+
+// MergeHooksFor is MergeHooks for any host whose hook file has the Claude
+// Code shape (Codex's .codex/hooks.json): each bridge passes --host host.
+func MergeHooksFor(existing []byte, phases []string, host string) ([]byte, error) {
+	out, _, _, err := mergeHooksFor(existing, phases, host)
 	return out, err
 }
 
 func mergeHooks(existing []byte, phases []string) (out []byte, added, removed int, err error) {
+	return mergeHooksFor(existing, phases, "claude-code")
+}
+
+func mergeHooksFor(existing []byte, phases []string, host string) (out []byte, added, removed int, err error) {
 	settings := map[string]any{}
 	if len(bytes.TrimSpace(existing)) > 0 {
 		if err := json.Unmarshal(existing, &settings); err != nil {
@@ -89,7 +99,7 @@ func mergeHooks(existing []byte, phases []string) (out []byte, added, removed in
 		}
 	}
 	removed = stripManagedHooks(settings)
-	added = injectBridges(settings, phases)
+	added = injectBridges(settings, phases, host)
 	out, err = marshalSettings(settings)
 	return out, added, removed, err
 }
@@ -119,7 +129,7 @@ func hostPhases(primitives []primitive.Primitive) []string {
 
 // injectBridges writes one bridge entry per host phase, each running
 // `keystone hook fire <phase>`. Returns the count of phases bridged.
-func injectBridges(settings map[string]any, phases []string) int {
+func injectBridges(settings map[string]any, phases []string, host string) int {
 	if len(phases) == 0 {
 		return 0
 	}
@@ -129,17 +139,15 @@ func injectBridges(settings map[string]any, phases []string) int {
 	}
 	for _, phase := range phases {
 		groups, _ := hooksMap[phase].([]any) // user groups on this phase stay
-		hooksMap[phase] = append(groups, map[string]any{
-			"matcher": "",
-			"hooks": []any{
-				map[string]any{
-					"type":          "command",
-					"shell":         "bash",
-					"command":       "keystone hook fire " + phase + " --host claude-code || exit 2", // a missing or old binary still blocks
-					"statusMessage": HookEntryStatusPrefix + "bridge:" + phase,
-				},
-			},
-		})
+		entry := map[string]any{
+			"type":          "command",
+			"command":       "keystone hook fire " + phase + " --host " + host + " || exit 2", // a missing or old binary still blocks
+			"statusMessage": HookEntryStatusPrefix + "bridge:" + phase,
+		}
+		if host == "claude-code" {
+			entry["shell"] = "bash" // Claude Code's key; Codex runs commands through a shell
+		}
+		hooksMap[phase] = append(groups, map[string]any{"matcher": "", "hooks": []any{entry}})
 	}
 	settings["hooks"] = hooksMap
 	return len(phases)

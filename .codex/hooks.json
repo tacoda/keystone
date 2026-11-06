@@ -1,0 +1,40 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "hooks": [
+          {
+            "command": "keystone hook fire PostToolUse --host codex || exit 2",
+            "statusMessage": "keystone:bridge:PostToolUse",
+            "type": "command"
+          }
+        ],
+        "matcher": ""
+      }
+    ],
+    "PreToolUse": [
+      {
+        "hooks": [
+          {
+            "command": "keystone hook fire PreToolUse --host codex || exit 2",
+            "statusMessage": "keystone:bridge:PreToolUse",
+            "type": "command"
+          }
+        ],
+        "matcher": ""
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "command": "keystone hook fire Stop --host codex || exit 2",
+            "statusMessage": "keystone:bridge:Stop",
+            "type": "command"
+          }
+        ],
+        "matcher": ""
+      }
+    ]
+  }
+}

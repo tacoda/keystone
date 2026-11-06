@@ -48,7 +48,7 @@ func TestAgentsMD_Content(t *testing.T) {
 		"## Constraints", "**rule** (`.agents/rules/`)", "## Capabilities", "**subagent** (`.agents/agents/`)",
 		"## Rules that apply everywhere", "`.agents/rules/process/spec.md` — Capture intent first.",
 		"## Iron laws", "## On each host",
-		"- **Codex** — loads skills, subagents by itself; open rules, commands from `.agents/` yourself; does **not** run hooks",
+		"- **Codex** — loads skills, subagents by itself; open rules, commands from `.agents/` yourself",
 		"- **Aider** — open rules, skills, commands, subagents from `.agents/` yourself; does **not** run hooks",
 	} {
 		if !strings.Contains(md, want) {

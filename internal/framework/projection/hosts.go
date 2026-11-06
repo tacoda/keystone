@@ -196,6 +196,7 @@ func OpenCode() Profile {
 func Codex() Profile {
 	return Profile{
 		Host:        "codex",
+		Hooks:       codexHooks,
 		Permissions: codexPermissions,
 		Rules: map[primitive.Kind]Rule{
 			skillK:    native,

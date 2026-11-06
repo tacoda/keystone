@@ -62,11 +62,11 @@ host hook bridges call the installed `keystone`.
   supports (native, link, shim, or an `AGENTS.md` entry). `link_mode:
   copy` replaces symlinks. Gaps (hooks a host can't run, permission rules
   it can't enforce) are reported by `keystone project` and in `AGENTS.md`.
-- **Hook bridges** for Claude Code, Cursor, Copilot, and opencode. A
-  failing host-event hook exits 2, which blocks on Claude Code and
-  opencode (Cursor and Copilot are unverified, see `docs/hosts.md`); errors
-  before the hooks run, a missing binary, and a timeout (50s) fail the
-  same way. The bridge finds
+- **Hook bridges** for Claude Code, Cursor, Copilot, Codex, and opencode.
+  A failing host-event hook exits 2, which each host's docs define as a
+  block; errors before the hooks run, a missing binary, and a timeout
+  (50s) fail the same way. On a pass, the bridge prints what the host
+  parses (JSON for Cursor and Codex) and keeps its own lines on stderr. The bridge finds
   the charter from any subdirectory and passes the host's event JSON on
   stdin.
 - **Permission translation.** Claude-syntax rules go to Claude Code as

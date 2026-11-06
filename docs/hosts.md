@@ -21,7 +21,7 @@ or index/report instead of shim).
 | Host | Root | Rules | Skills | Commands | Subagents | Hooks | Permissions | Tools (MCP) |
 |---|---|---|---|---|---|---|---|---|
 | claude-code | shim `CLAUDE.md` (`@AGENTS.md`) | shim `.claude/rules/` | symlink `.claude/skills/` | shim `.claude/commands/` | shim `.claude/agents/` | shim `.claude/settings.json` | shim `.claude/settings.json` | shim `.mcp.json` |
-| codex | native | index | native | index | shim `.codex/agents/*.toml` | report (bridge format unverified) | shim `.codex/rules/*.rules` + report | shim `.codex/config.toml` |
+| codex | native | index | native | index | shim `.codex/agents/*.toml` | merge `.codex/hooks.json` (trust it in `/hooks`) | shim `.codex/rules/*.rules` + report | shim `.codex/config.toml` |
 | cursor | native | shim `.cursor/rules/*.mdc` | native | shim `.cursor/skills/` (user-invoked) | shim `.cursor/agents/` | shim `.cursor/hooks.json` | shim `.cursor/cli.json` + report | shim `.cursor/mcp.json` |
 | github-copilot | native | shim `.github/instructions/` | native | shim `.github/prompts/` | shim `.github/agents/` | shim `.github/hooks/` | report (no repo file) | shim `.mcp.json` |
 | opencode | native | index | native | shim `.opencode/commands/` | shim `.opencode/agents/` | shim `.opencode/plugins/` | report (pending an order-preserving merge) | shim `opencode.json` |
@@ -133,15 +133,24 @@ to save always-loaded context. Skills are byte-identical, so they link.
   Unverified for Claude Code rule, command, and subagent files, and for
   Cursor, Copilot, opencode, Cline, Goose, Pi. Continue CLI likely skips
   symlinked skill dirs (`Dirent.isDirectory()`), so Continue gets copies.
-- Whether Copilot maps PascalCase event names from `.claude/settings.json`.
+- Copilot CLI also reads `.claude/settings.json` hooks and runs every
+  entry from every source, so with Claude Code enabled each check runs
+  twice there (docs.github.com/en/copilot/reference/hooks-configuration).
+  Whether it maps the PascalCase event names is unverified.
 - Duplicate-name handling when a host sees the same skill in two directories.
 - Cline workflow, subagent, and hook file formats.
 - opencode v2 changes.
-- Cursor hooks: whether `failClosed` is a real key, whether exit 2 blocks,
-  and whether keystone's plain-text stdout must be the host's deny JSON.
-  Until confirmed, the Cursor bridge may be written and still not block.
-  The Copilot claim that a non-zero `preToolUse` exit denies the call is
-  also unverified.
+- Settled from the hosts' docs (2026-11-06), not yet by a run in each
+  host: Cursor's `failClosed` is real and exit 2 blocks; on exit 0 a
+  permission event must print valid JSON, so the bridge prints
+  `{"permission":"allow"}` and sends its own lines to stderr
+  (cursor.com/docs/agent/hooks). Copilot denies `preToolUse` on exit 2 or
+  any non-zero exit, but a timeout fails open. Codex reads
+  `.codex/hooks.json` in the Claude Code shape, blocks on exit 2, needs
+  JSON from `Stop`, and runs project hooks only after the user trusts them
+  (developers.openai.com/codex/hooks). opencode installs
+  `@opencode-ai/plugin` for project tools by itself (its source,
+  v1.19.5), and a throw in `tool.execute.before` blocks the tool.
 - Cursor `Read(...)` / `Write(...)` glob semantics. Keystone translates
   only project-relative paths; Claude's `/`, `//`, and `~/` anchors are
   reported instead.

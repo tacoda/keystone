@@ -137,3 +137,18 @@ func TestHookContext_BoundsHostPhases(t *testing.T) {
 		t.Error("keystone-fired signals run unbounded")
 	}
 }
+
+func TestHostAllow(t *testing.T) {
+	for _, c := range []struct{ host, event, want string }{
+		{"cursor", "PreToolUse", `{"permission":"allow"}`},
+		{"cursor", "UserPromptSubmit", `{"continue":true}`},
+		{"cursor", "Stop", `{}`},
+		{"codex", "Stop", `{}`},
+		{"claude-code", "PreToolUse", ""},
+		{"github-copilot", "PreToolUse", ""},
+	} {
+		if got := hostAllow(c.host, c.event); got != c.want {
+			t.Errorf("%s/%s = %q, want %q", c.host, c.event, got, c.want)
+		}
+	}
+}

@@ -89,7 +89,7 @@ func doubleFireWarning(hosts []Profile) []Warning {
 	if !claude || !copilot {
 		return nil
 	}
-	return []Warning{{Host: "github-copilot", Message: "also reads .claude/settings.json hooks — a hook may run twice there (harmless for checks; unverified whether Copilot maps the event names)"}}
+	return []Warning{{Host: "github-copilot", Message: "Copilot CLI also runs the hooks in .claude/settings.json, so each check runs twice there (harmless for checks, slower)"}}
 }
 
 // claudeHooks merges the bridges into .claude/settings.json, keeping every
@@ -98,6 +98,28 @@ func claudeHooks(phases []string) (Output, []string) {
 	return Output{Dest: ".claude/settings.json", Strategy: Merge, MergeFn: func(prev []byte) ([]byte, error) {
 		return claudecode.MergeHooks(prev, phases)
 	}}, nil
+}
+
+// codexEvents are the Claude Code events Codex also fires (developers.openai.com/codex/hooks).
+var codexEvents = map[string]string{
+	"PreToolUse": "PreToolUse", "PostToolUse": "PostToolUse", "UserPromptSubmit": "UserPromptSubmit",
+	"Stop": "Stop", "SubagentStop": "SubagentStop", "PreCompact": "PreCompact",
+	"SessionStart": "SessionStart", "SessionEnd": "SessionEnd",
+}
+
+// codexHooks merges the bridges into .codex/hooks.json, which has the Claude
+// Code shape. Codex runs project hooks only once the user trusts them
+// (/hooks), and only when the project .codex/ layer is trusted.
+func codexHooks(phases []string) (Output, []string) {
+	var supported []string
+	for _, p := range phases {
+		if _, ok := codexEvents[p]; ok {
+			supported = append(supported, p)
+		}
+	}
+	return Output{Dest: ".codex/hooks.json", Strategy: Merge, MergeFn: func(prev []byte) ([]byte, error) {
+		return claudecode.MergeHooksFor(prev, supported, "codex")
+	}}, missingEvents(phases, codexEvents)
 }
 
 var cursorEvents = map[string]string{

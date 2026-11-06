@@ -19,7 +19,8 @@ func TestHookBridges_PerHost(t *testing.T) {
 	assertContains(t, root, ".github/hooks/keystone.json", `"agentStop"`, `"bash": "keystone hook fire Stop --host github-copilot || exit 2"`)
 	assertContains(t, root, ".opencode/plugins/keystone.js", `"session.idle"`, "keystone hook fire Stop --host opencode < ${new Response(JSON.stringify(input))}")
 	reported := reportedHosts(pr.Outputs, "hook")
-	for _, h := range []string{"continue", "codex", "cline", "goose", "pi", "aider"} {
+	assertContains(t, root, ".codex/hooks.json", `"Stop"`, "keystone hook fire Stop --host codex || exit 2")
+	for _, h := range []string{"continue", "cline", "goose", "pi", "aider"} {
 		if !reported[h] {
 			t.Errorf("%s has no bridge and must be reported", h)
 		}
@@ -61,7 +62,7 @@ func TestHookBridges_Warnings(t *testing.T) {
 		msgs = append(msgs, w.Host+": "+w.Message)
 	}
 	all := strings.Join(msgs, "\n")
-	for _, want := range []string{"cursor: no host event for Notification", "github-copilot: also reads .claude/settings.json hooks"} {
+	for _, want := range []string{"cursor: no host event for Notification", "github-copilot: Copilot CLI also runs the hooks in .claude/settings.json"} {
 		if !strings.Contains(all, want) {
 			t.Errorf("warnings missing %q:\n%s", want, all)
 		}
