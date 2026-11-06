@@ -4,7 +4,7 @@ Articulated by John Gossman at Microsoft in 2005 for WPF and Silverlight; a refi
 
 The pattern now dominates client-side architectures with reactive UI frameworks: SwiftUI, Vue, Knockout, modern Android (Jetpack), and any system where the UI re-renders automatically when state changes.
 
-> **Rules extracted:** [`guides/mvvm.md`](../guides/mvvm.md). This file holds the full reasoning, anti-patterns, and references.
+> **Rules extracted:** [`rules/architecture/mvvm.md`](../../rules/architecture/mvvm.md). This file holds the full reasoning, anti-patterns, and references.
 
 ## The three roles
 

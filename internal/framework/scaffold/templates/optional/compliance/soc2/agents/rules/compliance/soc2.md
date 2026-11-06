@@ -1,7 +1,7 @@
 # SOC 2 (Service Organization Control 2) — rules
 
-The rules from [`corpus/soc2.md`](../corpus/soc2.md).
-Loaded ambient; enforced by the [drift sensor](../../../sensors/drift.md). The corpus file holds the full reasoning, anti-patterns, and references.
+The rules from [`references/compliance/soc2.md`](../../references/compliance/soc2.md).
+Loaded ambient; enforced by the [drift hook](../../hooks/drift.md). The reference file holds the full reasoning, anti-patterns, and references.
 
 ## IRON LAW
 
@@ -17,4 +17,4 @@ Loaded ambient; enforced by the [drift sensor](../../../sensors/drift.md). The c
 
 ---
 
-Traces to: [`corpus/soc2.md`](../corpus/soc2.md).
+Traces to: [`references/compliance/soc2.md`](../../references/compliance/soc2.md).

@@ -2,7 +2,7 @@
 
 Detect failures as close to their source as possible, and stop. Articulated by Jim Shore in "Fail Fast" (*IEEE Software*, 2004), formalizing a discipline that had circulated in the Smalltalk and Lisp communities for decades. The opposite of fail-fast is **fail-slow**: a corrupted state propagates through layers of "tolerant" code until it surfaces somewhere far from the cause.
 
-> **Rules extracted:** [`guides/principles/fail-fast.md`](../../guides/principles/fail-fast.md). This file holds the full reasoning, anti-patterns, and references.
+> **Rules extracted:** [`rules/principles/fail-fast.md`](../../rules/principles/fail-fast.md). This file holds the full reasoning, anti-patterns, and references.
 
 ## The principle
 

@@ -7,8 +7,8 @@ model: sonnet
 # Mode switcher
 
 You change the charter pacing mode. Read the current mode from
-`.agents/references/state/mode.md`, validate the requested target, and
-write the new mode file.
+`.agents/rules/process/modes.md`, validate the requested target, and
+update its `**Active mode:**` line.
 
 ## Posture
 

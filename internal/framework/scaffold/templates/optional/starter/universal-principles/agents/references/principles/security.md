@@ -4,9 +4,9 @@ Foundational design principles for systems that are secure by construction, not 
 
 Stack-specific countermeasures (parameterized queries, CSRF tokens, output encoding, dependency pinning) belong in `../idioms/<stack>/`. The principles below are what those countermeasures *instantiate*.
 
-> **Rules extracted:** [`guides/principles/security.md`](../../guides/principles/security.md). This file holds the full reasoning, anti-patterns, and references.
+> **Rules extracted:** [`rules/principles/security.md`](../../rules/principles/security.md). This file holds the full reasoning, anti-patterns, and references.
 
-> **Rules extracted:** [`guides/principles/security.md`](../../guides/principles/security.md). This file holds the full reasoning, anti-patterns, and references.
+> **Rules extracted:** [`rules/principles/security.md`](../../rules/principles/security.md). This file holds the full reasoning, anti-patterns, and references.
 
 ## The eight Saltzer-Schroeder principles
 

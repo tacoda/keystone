@@ -4,7 +4,7 @@ A web application that loads **once**, then updates the page in place via JavaSc
 
 The SPA's promise: a *desktop-class* interactive experience inside the browser, with state preserved across navigations and a single bundle that handles the whole UI. The cost: the browser becomes a heavyweight runtime, the network becomes a critical path, and the back button — a feature you got for free in 1996 — is now your responsibility to implement.
 
-> **Rules extracted:** [`guides/spa.md`](../guides/spa.md). This file holds the full reasoning, anti-patterns, and references.
+> **Rules extracted:** [`rules/architecture/spa.md`](../../rules/architecture/spa.md). This file holds the full reasoning, anti-patterns, and references.
 
 ## Defining properties
 

@@ -5,7 +5,7 @@ description: 'Per-region risk score based on complexity + coupling + coverage.'
 ---
 # Risk Fingerprints
 
-> **Template.** The **bootstrap** or **audit** action will populate this from code metrics + coverage. Until then, leave as-is or fill in by hand.
+> **Template.** The **bootstrap** or **audit** command will populate this from code metrics + coverage. Until then, leave as-is or fill in by hand.
 
 Per-region risk score based on complexity + coupling + coverage. Identifies the parts of the codebase most likely to harbor defects under change.
 
@@ -33,7 +33,7 @@ Score:
 ## How to use it
 
 - **Critical regions** → prioritize for refactor or coverage backfill before further feature work.
-- **High regions** → review every change carefully; the **review** action should pay extra attention.
+- **High regions** → review every change carefully; the **review** command should pay extra attention.
 - **Medium / low regions** → standard review.
 
 ## Pairing with traffic topology

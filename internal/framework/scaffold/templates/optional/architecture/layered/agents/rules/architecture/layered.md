@@ -1,7 +1,7 @@
 # Layered Architecture — rules
 
-The rules from [`corpus/layered.md`](../corpus/layered.md).
-Loaded ambient; enforced by the [drift sensor](../../../sensors/drift.md). The corpus file holds the full reasoning, anti-patterns, and references.
+The rules from [`references/architecture/layered.md`](../../references/architecture/layered.md).
+Loaded ambient; enforced by the [drift hook](../../hooks/drift.md). The reference file holds the full reasoning, anti-patterns, and references.
 
 ## IRON LAW
 
@@ -16,4 +16,4 @@ Loaded ambient; enforced by the [drift sensor](../../../sensors/drift.md). The c
 
 ---
 
-Traces to: [`corpus/layered.md`](../corpus/layered.md).
+Traces to: [`references/architecture/layered.md`](../../references/architecture/layered.md).

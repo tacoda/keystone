@@ -2,19 +2,19 @@
 kind: hook
 mode: computational
 event: pre-verify
-run: '# TODO: wire the stack-drift command (see corpus/state/CODEBASE_STATE.md)'
+run: '# TODO: wire the stack-drift command (see .agents/references/state/CODEBASE_STATE.md)'
 id: stack-drift
 description: 'Detects when the empirical reality of the repo has diverged from what CODEBASESTATE.'
 ---
-# Sensor: stack-drift
+# Hook: stack-drift
 
-Detects when the empirical reality of the repo has diverged from what `CODEBASE_STATE.md` records. Re-running bootstrap is **not** the answer — bootstrap is a one-time initial scaffold. When this sensor flags drift, it's a trigger for **audit** to reconcile the relevant parts.
+Detects when the empirical reality of the repo has diverged from what `CODEBASE_STATE.md` records. Re-running bootstrap is **not** the answer — bootstrap is a one-time initial scaffold. When this hook flags drift, it's a trigger for **audit** to reconcile the relevant parts.
 
 - **Trigger** — **audit** (full sweep) and on-demand when a change touches a region whose stack signals look off.
 - **Inputs** — `.agents/references/state/CODEBASE_STATE.md` (declared stacks, regions, tool commands) and the actual repo (`package.json`, `go.mod`, `pyproject.toml`, `Gemfile`, `Cargo.toml`, `requirements.txt`, `build.gradle`, language file extensions per region).
 - **Exit condition** — every declared stack and region has been compared against the repo and either matches or has a drift entry.
 - **Output** — per-divergence row: declared value, observed value, recommended reconciliation.
-- **State writes** — none directly. Findings feed the [charter-debt sensor](charter-debt.md) as `drifted-state` items; **audit**'s Pruning flywheel turns them into ledger entries.
+- **State writes** — none directly. Findings feed the [charter-debt hook](charter-debt.md) as `drifted-state` items; **audit**'s Pruning flywheel turns them into ledger entries.
 
 ## What counts as drift
 
@@ -31,6 +31,6 @@ Detects when the empirical reality of the repo has diverged from what `CODEBASE_
 - A stack adopting a new framework within itself (e.g., a TypeScript project switching from Jest to Vitest). That's a tool-command change, not stack drift; bootstrap doesn't need to re-run, the relevant tool entry just gets updated by **audit**.
 - Adding a new directory under an existing region. Region map drift only fires for *top-level* changes.
 
-## Why no rebootstrap action
+## Why no rebootstrap command
 
-[`bootstrap`](../commands/bootstrap.md) is a one-time initial seed of state, idioms, and sensor classification. Re-running it would either overwrite human edits or no-op against existing content — neither is useful. Stack drift is an **incremental** problem the **audit** action is built for: reconcile only the parts that drifted, leave the rest alone.
+[`bootstrap`](../commands/bootstrap.md) is a one-time initial seed of state, idioms, and hook classification. Re-running it would either overwrite human edits or no-op against existing content, and neither is useful. Stack drift is an **incremental** problem the **audit** command is built for: reconcile only the parts that drifted, leave the rest alone.

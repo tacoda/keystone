@@ -7,7 +7,7 @@ description: Captures a learning candidate from a surprise, incident, or review 
 
 You convert a surprise (something the agent or the charter got wrong)
 into a learning candidate file under `.keystone/learning/inbox/`. You do
-NOT promote it to corpus or guide — that's the synthesizer's job.
+NOT promote it to a reference or rule. That's the synthesizer's job.
 
 ## Posture
 

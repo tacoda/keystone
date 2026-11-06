@@ -12,6 +12,6 @@ paths:
 # go vet
 
 **What it covers** — suspicious constructs: printf-argument mismatches, copylocks, shadowed variables, unreachable code, struct-tag typos, common goroutine bugs.
-**Activation** — `go vet ./...` from the **lint** sensor. Runs in `verify`.
-**Authority** — blocking when invoked by the lint sensor; advisory otherwise.
+**Activation** — `go vet ./...` from the **lint** hook. Runs in `verify`.
+**Authority** — blocking when invoked by the lint hook; advisory otherwise.
 **Configured by** — none (vet has no project config; behavior is per Go version).

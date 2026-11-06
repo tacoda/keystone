@@ -9,7 +9,7 @@ The phase where the change lands and is announced.
 
 ## Entry condition
 
-The verification phase gate has passed. All sensors are green with fresh evidence. The diff is ready to commit.
+The verification phase gate has passed. All hooks are green with fresh evidence. The diff is ready to commit.
 
 ## IRON LAWS
 
@@ -19,7 +19,7 @@ Commit messages, PR descriptions, and tracker tickets do not mention Claude, an 
 
 **NO COMMITS WITH FAILING PRE-COMMIT CHECKS.**
 
-If the verification phase reported any sensor failure, the commit does not happen. CI is a backstop, not a substitute.
+If the verification phase reported any hook failure, the commit does not happen. CI is a backstop, not a substitute.
 
 ## Activities
 
@@ -69,9 +69,9 @@ Title under 70 characters. Body links to the tracker ticket and explains the **w
 
 ### 5. Capture learnings
 
-Invoke the **learn** action. If during the work the agent encountered a situation not covered by the corpus and made a judgment call, the reasoning gets captured to `.keystone/learning/inbox/` for the next **synthesize** cycle.
+Invoke the **learn** command. If during the work the agent encountered a situation not covered by the references and made a judgment call, the reasoning gets captured to `.keystone/learning/inbox/` for the next **synthesize** cycle.
 
-This is the **Learning flywheel** kicking. Skipping it means the corpus never grows from this commit's lessons.
+This is the **Learning flywheel** kicking. Skipping it means the references never grow from this commit's lessons.
 
 ### 6. Release artifacts (when cutting a release)
 
@@ -85,11 +85,11 @@ For a release commit:
 
 ### 7. CD pipeline integration
 
-The corpus assumes a CI pipeline runs on every PR (sensors as a backstop) and, ideally, a CD pipeline triggers deploys on merge or tag.
+The charter assumes a CI pipeline runs on every PR (hooks as a backstop) and, ideally, a CD pipeline triggers deploys on merge or tag.
 
 - **CI exists, CD exists** → merge / tag is the release. The agent confirms the pipeline ran and reports its status in the PR.
 - **CI exists, CD does not** → merge gates the change; deploy is a separate step the user owns. The agent should call out which step deploys.
-- **Neither exists** → the charter still works for code quality, but release surfaces a warning: shipping without CI is a known gap. Recommend wiring at least lint + test into CI before relying on the **verify** action's evidence.
+- **Neither exists** → the charter still works for code quality, but release surfaces a warning: shipping without CI is a known gap. Recommend wiring at least lint + test into CI before relying on the **verify** command's evidence.
 
 The pipeline configuration files (`.github/workflows/*`, `.gitlab-ci.yml`, `.circleci/config.yml`, etc.) are project state. Reference them from `state/CODEBASE_STATE.md` so the agent knows where deploy logic lives.
 
@@ -105,9 +105,9 @@ If the change is incident-recovery work, a blameless postmortem follows:
 
 Saved to `docs/postmortems/YYYY-MM-DD-<slug>.md`.
 
-## Sensors
+## Hooks
 
-Release runs final-pass sensors:
+Release runs final-pass hooks:
 
 - **Commit message validator** — conventional format, no AI attribution.
 - **Lint, test** — final pass on the staged change, not the working tree.
@@ -118,8 +118,8 @@ To exit release:
 
 1. The commit landed cleanly (no `--no-verify`).
 2. The PR (if any) was opened with body and test plan.
-3. The **learn** action ran and any captures landed in `learning/inbox/`.
-4. State files updated by the **verify** action are committed.
+3. The **learn** command ran and any captures landed in `.keystone/learning/inbox/`.
+4. State files updated by the **verify** command are committed.
 
 ## Artifacts
 

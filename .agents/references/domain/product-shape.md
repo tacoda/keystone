@@ -5,7 +5,7 @@ description: 'One-paragraph statement of the product.'
 ---
 # Product Shape
 
-> **Template.** Replace with your project's actual content. The **bootstrap** action will offer to fill this in from your README, manifest, and git history.
+> **Template.** Replace with your project's actual content. The **bootstrap** command will offer to fill this in from your README, manifest, and git history.
 
 ## What this project is
 

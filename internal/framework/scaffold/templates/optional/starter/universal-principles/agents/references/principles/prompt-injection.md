@@ -2,7 +2,7 @@
 
 A coding agent's instructions, capabilities, and data flow through the same channel: text. The agent has no native ability to distinguish "instructions from the user" from "data the agent is reading" — both arrive as tokens. Prompt injection is the class of attack that exploits this: an attacker arranges for the agent to read content that *contains instructions*, expecting the agent to confuse them with directives from its principals.
 
-> **Rules extracted:** [`guides/principles/prompt-injection.md`](../../guides/principles/prompt-injection.md).
+> **Rules extracted:** [`rules/principles/prompt-injection.md`](../../rules/principles/prompt-injection.md).
 
 ## What it asks of you
 
@@ -37,4 +37,4 @@ The defense literature is asymmetric. Detection is hard (the attack uses natural
 
 ---
 
-Forward link: [`guides/principles/prompt-injection.md`](../../guides/principles/prompt-injection.md). See also: [`security-threats.md`](security-threats.md), [`secrets-management.md`](secrets-management.md).
+Forward link: [`rules/principles/prompt-injection.md`](../../rules/principles/prompt-injection.md). See also: [`security-threats.md`](security-threats.md), [`secrets-management.md`](secrets-management.md).

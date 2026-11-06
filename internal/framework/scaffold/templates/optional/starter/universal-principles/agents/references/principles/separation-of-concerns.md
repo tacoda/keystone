@@ -2,7 +2,7 @@
 
 Different aspects of a system should be addressed in different parts of the system. Coined by Edsger W. Dijkstra in "On the role of scientific thought" (1974): one should focus attention upon some aspect, and pull it apart from the rest, because the human mind cannot deal with the system as a whole at once.
 
-> **Rules extracted:** [`guides/principles/separation-of-concerns.md`](../../guides/principles/separation-of-concerns.md). This file holds the full reasoning, anti-patterns, and references.
+> **Rules extracted:** [`rules/principles/separation-of-concerns.md`](../../rules/principles/separation-of-concerns.md). This file holds the full reasoning, anti-patterns, and references.
 
 ## The principle
 

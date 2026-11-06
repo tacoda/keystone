@@ -1,7 +1,7 @@
 # GDPR (General Data Protection Regulation) — rules
 
-The rules from [`corpus/gdpr.md`](../corpus/gdpr.md).
-Loaded ambient; enforced by the [drift sensor](../../../sensors/drift.md). The corpus file holds the full reasoning, anti-patterns, and references.
+The rules from [`references/compliance/gdpr.md`](../../references/compliance/gdpr.md).
+Loaded ambient; enforced by the [drift hook](../../hooks/drift.md). The reference file holds the full reasoning, anti-patterns, and references.
 
 ## IRON LAW
 
@@ -16,4 +16,4 @@ Loaded ambient; enforced by the [drift sensor](../../../sensors/drift.md). The c
 
 ---
 
-Traces to: [`corpus/gdpr.md`](../corpus/gdpr.md).
+Traces to: [`references/compliance/gdpr.md`](../../references/compliance/gdpr.md).

@@ -19,7 +19,7 @@ Full rule: `.agents/rules/idioms/charter-content/state-files.md` (read on demand
 
 ## GOLDEN RULE
 
-- `CODEBASE_STATE.md`: hand-edits OK, but keep section anchors (`## Tool commands`, `## Sensors`, `## Stacks`, `## Frameworks & libraries`, `## Regions`, `## CI`). `last_reconciled` in frontmatter bumps on every meaningful change.
+- `CODEBASE_STATE.md`: hand-edits OK, but keep section anchors (`## Tool commands`, `## Hooks`, `## Stacks`, `## Frameworks & libraries`, `## Regions`, `## CI`). `last_reconciled` in frontmatter bumps on every meaningful change.
 - `code-debt.md` / `charter-debt.md`: edit during `debt-review` / `audit`. Each entry names the trigger, the impact, and the next step.
 - `INSTALL_PROFILE.md`: append-only. `keystone init` re-runs are additive; do not strip prior selections.
 

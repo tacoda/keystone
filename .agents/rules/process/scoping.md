@@ -24,9 +24,9 @@ How big any single commit, PR, or implementation pass is allowed to get before i
 - **Aim to make every commit independently revertable.** Two intertwined changes in one commit make the revert worse than the original problem. See [[rollback]].
 - **Aim to push pre-work up to its own PR.** Renames, type cleanups, dependency bumps that *enable* the real change should land first, alone, and green.
 
-## Sensors
+## Hooks
 
-- The **commit-message sensor** does not enforce scope (it cannot tell intent from size). Scope is enforced at the review phase by reviewers reading the diff, and by the agent self-checking before staging.
+- The **commit-message hook** does not enforce scope (it cannot tell intent from size). Scope is enforced at the review phase by reviewers reading the diff, and by the agent self-checking before staging.
 
 ## Pacing modes
 

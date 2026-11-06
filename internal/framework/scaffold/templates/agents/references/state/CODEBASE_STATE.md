@@ -5,13 +5,13 @@ description: 'Empirical map of this codebase.'
 ---
 # Codebase State
 
-> **Template.** The **bootstrap** action will populate this from your project. Until then, fill in by hand or run bootstrap.
+> **Template.** The **bootstrap** command will populate this from your project. Until then, fill in by hand or run bootstrap.
 
-Empirical map of this codebase. Updated by the **verify**, **learn**, and **audit** actions.
+Empirical map of this codebase. Updated by the **verify**, **learn**, and **audit** commands.
 
 ## Tool commands
 
-The commands each sensor invokes. Filled in by **bootstrap** from your manifest / config files. `(none)` is a valid value when a project doesn't have that tool.
+The commands each hook invokes. Filled in by **bootstrap** from your manifest / config files. `(none)` is a valid value when a project doesn't have that tool.
 
 | Tool | Command |
 |---|---|
@@ -31,11 +31,11 @@ Severity thresholds (used by vuln-scan and sast):
 | vuln_scan | `<low \| medium \| high \| critical>` (default: high) |
 | sast | `<info \| warning \| error>` (default: error) |
 
-## Sensors
+## Hooks
 
-Inventory of sensors wired up for this project. Filled in by **bootstrap**. A sensor's row is omitted when it does not apply (no tracker, no spec workflow, adapter cannot run sub-agents, etc.).
+Inventory of hooks wired up for this project. Filled in by **bootstrap**. A hook's row is omitted when it does not apply (no tracker, no spec workflow, host cannot run subagents, etc.).
 
-| Sensor | Kind | Status |
+| Hook | Kind | Status |
 |---|---|---|
 | lint | computational | `<wired \| (none)>` |
 | type-check | computational | `<wired \| (none)>` |
@@ -61,9 +61,9 @@ Inventory of sensors wired up for this project. Filled in by **bootstrap**. A se
 | review-risk | inferential | `<wired \| (none)>` |
 | review-deployment | inferential | `<wired \| (none)>` |
 
-## Guides
+## Rules
 
-Inferential guides (markdown rules) are activated by directory — see `.agents/rules/`. The table below tracks **computational guides** the bootstrap action detected. Filled in by **bootstrap**.
+An inferential rule applies when a touched file matches its `paths:`, or everywhere without them. See `.agents/rules/`. The table below tracks the **computational rules** the bootstrap command detected. Filled in by **bootstrap**.
 
 | Tool | Kind | What it covers | Activation |
 |---|---|---|---|

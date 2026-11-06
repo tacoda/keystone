@@ -5,19 +5,19 @@ description: 'Five-dimension scorecard for the codebase (or for the most recent 
 ---
 # Quality Radar
 
-> **Template.** The **audit** or **review** action will populate this from the underlying sensors. Until then, leave as-is or fill in by hand.
+> **Template.** The **audit** or **review** command will populate this from the underlying hooks. Until then, leave as-is or fill in by hand.
 
-Five-dimension scorecard for the codebase (or for the most recent reviewed diff). Captured periodically by the [quality-radar sensor](../../agents/quality-radar.md).
+Five-dimension scorecard for the codebase (or for the most recent reviewed diff). Captured periodically by the [quality-radar subagent](../../agents/quality-radar.md).
 
 ## Latest scorecard
 
 | Dimension | Score | Trend vs. last | Citations |
 |---|---|---|---|
-| Type safety | `<green|yellow|red>` | `<→|↑|↓>` | `<sensor + finding refs>` |
-| Test quality | `<green|yellow|red>` | `<→|↑|↓>` | `<sensor + finding refs>` |
-| Readability | `<green|yellow|red>` | `<→|↑|↓>` | `<sensor + finding refs>` |
-| Security | `<green|yellow|red>` | `<→|↑|↓>` | `<sensor + finding refs>` |
-| Performance | `<green|yellow|red>` | `<→|↑|↓>` | `<sensor + finding refs>` |
+| Type safety | `<green|yellow|red>` | `<→|↑|↓>` | `<hook + finding refs>` |
+| Test quality | `<green|yellow|red>` | `<→|↑|↓>` | `<hook + finding refs>` |
+| Readability | `<green|yellow|red>` | `<→|↑|↓>` | `<hook + finding refs>` |
+| Security | `<green|yellow|red>` | `<→|↑|↓>` | `<hook + finding refs>` |
+| Performance | `<green|yellow|red>` | `<→|↑|↓>` | `<hook + finding refs>` |
 
 ## How to use it
 
@@ -40,4 +40,4 @@ Append a new dated section per audit pass. Do not overwrite — trend matters mo
 
 ## Scoring conventions
 
-Per-dimension thresholds live in [`harness/sensors/quality-radar.md`](../../agents/quality-radar.md). If your project needs different thresholds (e.g., a research codebase where coverage drops are expected), edit the sensor and document the deviation here.
+Per-dimension thresholds live in [`.agents/agents/quality-radar.md`](../../agents/quality-radar.md). If your project needs different thresholds (e.g., a research codebase where coverage drops are expected), edit the subagent and document the deviation here.

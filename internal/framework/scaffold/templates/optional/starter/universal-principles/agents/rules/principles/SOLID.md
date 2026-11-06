@@ -1,7 +1,7 @@
 # SOLID — rules
 
-The non-negotiable and strongly-preferred rules from [`corpus/principles/SOLID.md`](../../corpus/principles/SOLID.md).
-Loaded ambient; enforced by the [drift sensor](../../sensors/drift.md). The corpus file holds the full reasoning, anti-patterns, and references.
+The non-negotiable and strongly-preferred rules from [`references/principles/SOLID.md`](../../references/principles/SOLID.md).
+Loaded ambient; enforced by the [drift hook](../../hooks/drift.md). The reference file holds the full reasoning, anti-patterns, and references.
 
 ## IRON LAW
 
@@ -9,4 +9,4 @@ Loaded ambient; enforced by the [drift sensor](../../sensors/drift.md). The corp
 
 ---
 
-Traces to: [`corpus/principles/SOLID.md`](../../corpus/principles/SOLID.md).
+Traces to: [`references/principles/SOLID.md`](../../references/principles/SOLID.md).

@@ -1,7 +1,7 @@
 # Separation of Concerns — rules
 
-The non-negotiable and strongly-preferred rules from [`corpus/principles/separation-of-concerns.md`](../../corpus/principles/separation-of-concerns.md).
-Loaded ambient; enforced by the [drift sensor](../../sensors/drift.md). The corpus file holds the full reasoning, anti-patterns, and references.
+The non-negotiable and strongly-preferred rules from [`references/principles/separation-of-concerns.md`](../../references/principles/separation-of-concerns.md).
+Loaded ambient; enforced by the [drift hook](../../hooks/drift.md). The reference file holds the full reasoning, anti-patterns, and references.
 
 ## GOLDEN RULE
 
@@ -10,4 +10,4 @@ Loaded ambient; enforced by the [drift sensor](../../sensors/drift.md). The corp
 
 ---
 
-Traces to: [`corpus/principles/separation-of-concerns.md`](../../corpus/principles/separation-of-concerns.md).
+Traces to: [`references/principles/separation-of-concerns.md`](../../references/principles/separation-of-concerns.md).

@@ -98,13 +98,13 @@ status: approved
 
 A task without AC has no verification gate, no review gate, and no done condition. Refuse to leave the spec phase until the AC are written and the user has approved them.
 
-## Sensors
+## Hooks
 
 Spec runs:
 
 - **Tracker-card fetcher** — if a card ID is provided, fetches via the agent's tracker integration. Read-only.
 
-The binding (how to invoke the **spec** action and which sensors run) lives in `.keystone/hosts/<your-agent>/lifecycle.md`.
+The **spec** command starts this phase. `AGENTS.md` says which hosts run hooks.
 
 ## Gate condition
 

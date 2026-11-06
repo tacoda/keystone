@@ -1,6 +1,6 @@
 # MVC idiom rules
 
-Per-concern rules for working in an MVC codebase. Loaded ambient; enforced by the [drift sensor](../../../sensors/drift.md). Reasoning, anti-patterns, and review checklists live in [`corpus/idioms/mvc/`](../../../corpus/idioms/mvc/).
+Per-concern rules for working in an MVC codebase. Loaded ambient; enforced by the [drift hook](../../../hooks/drift.md). Reasoning, anti-patterns, and review checklists live in [`references/idioms/mvc/`](../../../references/idioms/mvc).
 
 ## Files
 

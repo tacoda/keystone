@@ -5,14 +5,14 @@ returns: review-findings
 id: review-risk
 description: 'An agent reads the diff and reports risk concerns — blast radius, reversibility, hot-spot regions, fan-out and shared-state coupling, irr...'
 ---
-# Sensor: review-risk
+# Hook: review-risk
 
 An agent reads the diff and reports risk concerns — blast radius, reversibility, hot-spot regions, fan-out and shared-state coupling, irreversible side effects.
 
 - **Trigger** — **review** (review phase).
-- **Inputs** — the diff, the spec, `corpus/state/risk-fingerprints.md` (if present), and any region-relevant context.
+- **Inputs** — the diff, the spec, `.agents/references/state/risk-fingerprints.md` (if present), and any region-relevant context.
 - **Exit condition** — no blocking findings, or the user explicitly accepts the residual risk.
 - **Output** — findings list keyed by file and line, each tagged blocking / nit / note, with the risk dimension referenced (blast radius, reversibility, coupling, side effect).
 - **State writes** — none.
 
-How the agent is invoked is adapter-specific — sub-agent, separate session, MCP tool, or a checklist prompt — see `.keystone/hosts/<your-agent>/sensors.md`. The bootstrap action records whether this sensor is available for the project's active adapter.
+How the agent is invoked is adapter-specific: sub-agent, separate session, MCP tool, or a checklist prompt. See the host's entry in the `AGENTS.md` keystone block. The bootstrap command records whether this hook is available for the project's active adapter.

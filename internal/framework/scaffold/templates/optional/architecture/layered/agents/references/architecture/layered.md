@@ -2,7 +2,7 @@
 
 The default architecture of most enterprise applications written between 1995 and today: code is organized into horizontal layers, each calling only the layer beneath it. Articulated formally in Martin Fowler's *Patterns of Enterprise Application Architecture* (2003) and earlier by Buschmann et al. in *Pattern-Oriented Software Architecture* (1996). Older than [[hexagonal]] and [[clean-architecture]]; the **parent pattern** they reformed.
 
-> **Rules extracted:** [`guides/layered.md`](../guides/layered.md). This file holds the full reasoning, anti-patterns, and references.
+> **Rules extracted:** [`rules/architecture/layered.md`](../../rules/architecture/layered.md). This file holds the full reasoning, anti-patterns, and references.
 
 ## The canonical layers
 

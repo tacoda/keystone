@@ -1,7 +1,7 @@
 # Postel's Law (The Robustness Principle) — rules
 
-The non-negotiable and strongly-preferred rules from [`corpus/principles/postels-law.md`](../../corpus/principles/postels-law.md).
-Loaded ambient; enforced by the [drift sensor](../../sensors/drift.md). The corpus file holds the full reasoning, anti-patterns, and references.
+The non-negotiable and strongly-preferred rules from [`references/principles/postels-law.md`](../../references/principles/postels-law.md).
+Loaded ambient; enforced by the [drift hook](../../hooks/drift.md). The reference file holds the full reasoning, anti-patterns, and references.
 
 ## IRON LAW
 
@@ -15,4 +15,4 @@ Loaded ambient; enforced by the [drift sensor](../../sensors/drift.md). The corp
 
 ---
 
-Traces to: [`corpus/principles/postels-law.md`](../../corpus/principles/postels-law.md).
+Traces to: [`references/principles/postels-law.md`](../../references/principles/postels-law.md).

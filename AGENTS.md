@@ -40,7 +40,7 @@ Open the one that fits the phase you are in.
 - `.agents/rules/process/pushback.md` — The discipline of disagreeing with the user when the user is wrong.
 - `.agents/rules/process/release.md` — The phase where the change lands and is announced.
 - `.agents/rules/process/review.md` — The phase that confirms a mechanically-correct change is also the right change.
-- `.agents/rules/process/runtime-resolution.md` — How the agent resolves a scenario — staged escalation from rules to corpus to external sources, asking before applying.
+- `.agents/rules/process/runtime-resolution.md` — How the agent resolves a scenario: staged escalation from rules to references to external sources, asking before applying.
 - `.agents/rules/process/scoping.md` — How big any single commit, PR, or implementation pass is allowed to get before it must split.
 - `.agents/rules/process/self-validation.md` — The discipline of refusing to count the agent's own claim as evidence.
 - `.agents/rules/process/sensitive-files.md` — Files the agent must never read into context, write to, or commit.

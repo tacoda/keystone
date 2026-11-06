@@ -2,7 +2,7 @@
 
 Robert C. Martin's synthesis of Hexagonal (Cockburn), Onion (Palermo), DCI, and BCE into a single layered scheme. Articulated in "The Clean Architecture" (cleancoder.com, 2012) and *Clean Architecture* (Prentice Hall, 2017). The recurring drawing — concentric circles with arrows pointing inward — names four layers; the **Dependency Rule** is the load-bearing principle.
 
-> **Rules extracted:** [`guides/clean-architecture.md`](../guides/clean-architecture.md). This file holds the full reasoning, anti-patterns, and references.
+> **Rules extracted:** [`rules/architecture/clean-architecture.md`](../../rules/architecture/clean-architecture.md). This file holds the full reasoning, anti-patterns, and references.
 
 ## The four layers, outermost to innermost
 

@@ -4,7 +4,7 @@
 
 The quotation is famous; the full sentence is rarely cited. Knuth is **not** saying "do not optimize." He is saying: do not optimize *before measurement*, do not optimize *the wrong code*, and do not pay simplicity costs for performance you have no evidence you need.
 
-> **Rules extracted:** [`guides/principles/premature-optimization.md`](../../guides/principles/premature-optimization.md). This file holds the full reasoning, anti-patterns, and references.
+> **Rules extracted:** [`rules/principles/premature-optimization.md`](../../rules/principles/premature-optimization.md). This file holds the full reasoning, anti-patterns, and references.
 
 ## The principle
 

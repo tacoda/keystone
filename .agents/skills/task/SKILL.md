@@ -17,16 +17,16 @@ The agent walks through each phase below in order. After each phase, **pause for
 1. **spec** — read [`spec.md`](../../commands/spec.md). Author the spec, restate intent, list acceptance criteria, list non-goals, flag uncertainty. Save it. **Gate:** explicit user acceptance.
 2. **orient** — read [`orient.md`](../../commands/orient.md). Read `CODEBASE_STATE.md`, load idioms for the touched region, sketch a plan. **Gate:** explicit user acceptance of the plan.
 3. **implementation** — read [`.agents/rules/process/implementation.md`](../../rules/process/implementation.md). Make the changes inside the loaded idioms. Iron law: surgical edits only — touch what the spec requires.
-4. **check-drift** — read [`check-drift.md`](../../commands/check-drift.md). Fast diff-vs-guides comparison before running heavyweight sensors.
-5. **verify** — read [`verify.md`](../../commands/verify.md). Run lint, type-check, test, build, drift, commit-message sensors in this turn. Iron law: no completion claims without fresh evidence.
+4. **check-drift** — read [`check-drift.md`](../../commands/check-drift.md). Fast diff-vs-rules comparison before running heavyweight hooks.
+5. **verify** — read [`verify.md`](../../commands/verify.md). Run the lint, type-check, test, build, drift, and commit-message hooks in this turn. Iron law: no completion claims without fresh evidence.
 6. **review** — read [`review.md`](../../commands/review.md). Run functional / security / risk / deployment review (parallel sub-agents if supported) plus spec-adherence against the acceptance criteria.
-7. **learn** *(conditional)* — if something surprising came up during the task, read [`learn.md`](../../commands/learn.md) and capture it to `learning/inbox/`. Otherwise skip.
+7. **learn** *(conditional)* — if something surprising came up during the task, read [`learn.md`](../../commands/learn.md) and capture it to `.keystone/learning/inbox/`. Otherwise skip.
 
 ## Iron laws (carry across every phase)
 
 - **No proceeding without explicit acceptance criteria.** The spec gate is real.
-- **No completion claims without fresh verification evidence.** Sensors must run this turn.
-- **No commits with failing sensors.** Never `--no-verify`.
+- **No completion claims without fresh verification evidence.** Hooks must run this turn.
+- **No commits with failing hooks.** Never `--no-verify`.
 - **No AI attribution** in commits, PRs, or tracker comments.
 - **No silent overwrites** of state files.
 
@@ -36,6 +36,6 @@ Read [`.agents/rules/process/modes.md`](../../rules/process/modes.md) to learn t
 
 ## When *not* to use task
 
-- One-off questions or short edits that don't need a spec. Skip directly to the relevant action.
+- One-off questions or short edits that don't need a spec. Skip directly to the relevant command.
 - The very first session on a new project. Run [`bootstrap.md`](../../commands/bootstrap.md) first so `CODEBASE_STATE.md` exists.
 - Periodic charter hygiene. Use [`audit.md`](../../commands/audit.md) instead.

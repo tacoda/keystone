@@ -2,7 +2,7 @@
 
 Every routine, every class, every module has obligations and guarantees that should be stated as plainly as its name. Articulated by Bertrand Meyer in *Object-Oriented Software Construction* (1988; 2nd ed., 1997) and embodied in the Eiffel language. Even in languages without first-class contract support, the discipline shapes how you write code.
 
-> **Rules extracted:** [`guides/principles/design-by-contract.md`](../../guides/principles/design-by-contract.md). This file holds the full reasoning, anti-patterns, and references.
+> **Rules extracted:** [`rules/principles/design-by-contract.md`](../../rules/principles/design-by-contract.md). This file holds the full reasoning, anti-patterns, and references.
 
 ## The contract
 

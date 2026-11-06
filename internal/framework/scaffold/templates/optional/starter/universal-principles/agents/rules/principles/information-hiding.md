@@ -1,7 +1,7 @@
 # Information Hiding — rules
 
-The non-negotiable and strongly-preferred rules from [`corpus/principles/information-hiding.md`](../../corpus/principles/information-hiding.md).
-Loaded ambient; enforced by the [drift sensor](../../sensors/drift.md). The corpus file holds the full reasoning, anti-patterns, and references.
+The non-negotiable and strongly-preferred rules from [`references/principles/information-hiding.md`](../../references/principles/information-hiding.md).
+Loaded ambient; enforced by the [drift hook](../../hooks/drift.md). The reference file holds the full reasoning, anti-patterns, and references.
 
 ## GOLDEN RULE
 
@@ -10,4 +10,4 @@ Loaded ambient; enforced by the [drift sensor](../../sensors/drift.md). The corp
 
 ---
 
-Traces to: [`corpus/principles/information-hiding.md`](../../corpus/principles/information-hiding.md).
+Traces to: [`references/principles/information-hiding.md`](../../references/principles/information-hiding.md).

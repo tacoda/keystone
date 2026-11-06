@@ -2,7 +2,7 @@
 
 A log is a record of what the system did, written for a future reader who is trying to understand a past failure. Logs that cannot be searched, cannot be trusted, or cannot be safely retained are worse than no logs — they cost storage, mislead investigations, and create liability. The discipline of logging is the discipline of producing records that are *useful*, *honest*, and *safe to keep*.
 
-> **Rules extracted:** [`guides/principles/logging.md`](../../guides/principles/logging.md).
+> **Rules extracted:** [`rules/principles/logging.md`](../../rules/principles/logging.md).
 
 ## What it asks of you
 
@@ -38,4 +38,4 @@ The level discipline (most language-specific style guides) is about producing si
 
 ---
 
-Forward link: [`guides/principles/logging.md`](../../guides/principles/logging.md). See also: [`observability.md`](observability.md), [`secrets-management.md`](secrets-management.md).
+Forward link: [`rules/principles/logging.md`](../../rules/principles/logging.md). See also: [`observability.md`](observability.md), [`secrets-management.md`](secrets-management.md).

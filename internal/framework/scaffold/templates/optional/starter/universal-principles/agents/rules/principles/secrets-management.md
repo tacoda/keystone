@@ -1,7 +1,7 @@
 # Secrets Management — rules
 
-The non-negotiable and strongly-preferred rules from [`corpus/principles/secrets-management.md`](../../corpus/principles/secrets-management.md).
-Loaded ambient; enforced by the [drift sensor](../../sensors/drift.md). The corpus file holds the full reasoning, anti-patterns, and references.
+The non-negotiable and strongly-preferred rules from [`references/principles/secrets-management.md`](../../references/principles/secrets-management.md).
+Loaded ambient; enforced by the [drift hook](../../hooks/drift.md). The reference file holds the full reasoning, anti-patterns, and references.
 
 ## IRON LAWS
 
@@ -11,4 +11,4 @@ Loaded ambient; enforced by the [drift sensor](../../sensors/drift.md). The corp
 
 ---
 
-Traces to: [`corpus/principles/secrets-management.md`](../../corpus/principles/secrets-management.md).
+Traces to: [`references/principles/secrets-management.md`](../../references/principles/secrets-management.md).

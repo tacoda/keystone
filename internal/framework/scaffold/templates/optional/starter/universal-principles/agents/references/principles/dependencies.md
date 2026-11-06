@@ -2,7 +2,7 @@
 
 Every dependency added to a project is a permanent decision with permanent cost. Code you do not own runs in your build, in your CI, in your binary, and — at runtime — in your users' processes. Treating dependency selection as the same kind of decision as writing a function, rather than as the kind of decision as picking an API to expose, is the root of supply-chain risk.
 
-> **Rules extracted:** [`guides/principles/dependencies.md`](../../guides/principles/dependencies.md).
+> **Rules extracted:** [`rules/principles/dependencies.md`](../../rules/principles/dependencies.md).
 
 ## What it asks of you
 
@@ -39,4 +39,4 @@ Lockfiles exist because semver is a *promise*, and promises are *broken*. A pack
 
 ---
 
-Forward link: [`guides/principles/dependencies.md`](../../guides/principles/dependencies.md).
+Forward link: [`rules/principles/dependencies.md`](../../rules/principles/dependencies.md).

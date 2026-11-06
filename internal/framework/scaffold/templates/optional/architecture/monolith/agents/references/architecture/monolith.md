@@ -4,7 +4,7 @@ A single deployable application, organized internally into **strongly-bounded mo
 
 The phrase emphasizes both halves. *Monolith* — one deployable, one process, one database (or carefully shared persistence), the in-process calls fast and reliable. *Modular* — the internal module boundaries are real, enforced by language features or code review, and respected by every team.
 
-> **Rules extracted:** [`guides/monolith.md`](../guides/monolith.md). This file holds the full reasoning, anti-patterns, and references.
+> **Rules extracted:** [`rules/architecture/monolith.md`](../../rules/architecture/monolith.md). This file holds the full reasoning, anti-patterns, and references.
 
 ## What "modular" requires
 

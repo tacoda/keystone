@@ -4,7 +4,7 @@ Three guidelines that, taken together, describe what *good* object-oriented desi
 
 These are the operational counterparts to [[SOLID]]: SOLID names the principles; these name the moves you actually make at the keyboard.
 
-> **Rules extracted:** [`guides/principles/object-oriented-design.md`](../../guides/principles/object-oriented-design.md). This file holds the full reasoning, anti-patterns, and references.
+> **Rules extracted:** [`rules/principles/object-oriented-design.md`](../../rules/principles/object-oriented-design.md). This file holds the full reasoning, anti-patterns, and references.
 
 ## Tell, don't ask
 

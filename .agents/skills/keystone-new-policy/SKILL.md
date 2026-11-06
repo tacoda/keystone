@@ -11,8 +11,8 @@ metadata:
 
 A **policy** is a separately-versioned charter fragment that consumer
 projects pin in their `keystone.json` (e.g. an org-wide policy that
-ships strict guides). This generator writes a fresh policy repo
-skeleton — manifest, charter directory layout, README — that you then
+ships strict rules). This generator writes a fresh policy repo
+skeleton (manifest, one directory per kind, README) that you then
 populate and publish.
 
 Unlike the other generators, `keystone new policy` writes to
@@ -31,14 +31,14 @@ Example:
 
 ```
 keystone new policy acme-policies
-# writes ./acme-policies/{keystone-policy.json, .agents/, README.md, ...}
+# writes ./acme-policies/{keystone-policy.json, README.md, rules/, hooks/, ...}
 ```
 
 ## After scaffolding
 
 1. Fill in `keystone-policy.json` — name, version, required port
    declarations, strict locks.
-2. Author the policy's `.agents/` content — guides, sensors, etc.
+2. Author the policy's content: rules, hooks, and so on.
 3. Initialize git and push to a host so consumers can pin the source.
 4. Consumers add the policy via `keystone policy add <owner>/<repo>@<version>`.
 

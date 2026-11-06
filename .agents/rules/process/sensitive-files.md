@@ -18,7 +18,7 @@ If a file matches a pattern below, the agent does not open it, paste it, or pass
 
 ## The list
 
-Default patterns the charter treats as sensitive. The **bootstrap** action augments these by scanning `.gitignore` and `.git/info/exclude` for further candidates, and records the final list in `corpus/state/CODEBASE_STATE.md`.
+Default patterns the charter treats as sensitive. The **bootstrap** command augments these by scanning `.gitignore` and `.git/info/exclude` for further candidates, and records the final list in `.agents/references/state/CODEBASE_STATE.md`.
 
 - `.env`, `.env.*` — environment files
 - `*.pem`, `*.key`, `*.p12`, `*.pfx` — private keys and certificates
@@ -40,12 +40,12 @@ Default patterns the charter treats as sensitive. The **bootstrap** action augme
 ## GOLDEN RULE
 
 - **Aim to keep secrets out of the repo entirely.** Workload identity (IAM roles, OIDC) beats long-lived keys. See [[secrets-management]].
-- **Aim to fail loud on accidental sensitive reads.** If an agent action somehow pulls one in, the next sensor pass should flag it — drift sensor and commit-message sensor both consult this list.
+- **Aim to fail loud on accidental sensitive reads.** If an agent action somehow pulls one in, the next hook pass should flag it: the drift hook and the commit-message hook both consult this list.
 
-## Sensors
+## Hooks
 
-- The [drift sensor](../../hooks/drift.md) reads this list and flags any diff that adds a path matching a sensitive pattern.
-- The [commit-message sensor](../../hooks/commit-message.md) blocks commits that touch matching paths.
+- The [drift hook](../../hooks/drift.md) reads this list and flags any diff that adds a path matching a sensitive pattern.
+- The [commit-message hook](../../hooks/commit-message.md) blocks commits that touch matching paths.
 
 ## Anti-patterns
 

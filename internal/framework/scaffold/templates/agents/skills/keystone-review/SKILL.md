@@ -1,22 +1,22 @@
 ---
 name: keystone-review
-description: 'Run the four review sensors on the current diff (functional, security, risk, deployment). Triggers: keystone review; keystone:review; /keystone:review; review the diff; run review sensors; semantic review.'
+description: 'Run the four review hooks on the current diff (functional, security, risk, deployment). Triggers: keystone review; keystone:review; /keystone:review; review the diff; run review hooks; semantic review.'
 ---
 
 # keystone:review — semantic review of the current diff
 
 Phase 5 of the six-phase lifecycle. Fires the four inferential review
-sensors against the in-progress diff:
+hooks against the in-progress diff:
 
 - **review-functional** — does the change implement the spec?
 - **review-security** — auth, input validation, secrets, injection.
 - **review-risk** — blast radius, data integrity, observability.
 - **review-deployment** — migrations, rollback, config, infra deps.
 
-Each sensor returns a structured finding list. Semantic check — runs
-after computational sensors (lint / type / test / build) pass.
+Each hook returns a structured finding list. Semantic check — runs
+after computational hooks (lint / type / test / build) pass.
 
-Canonical playbook: `.agents/commands/review.md`. Full
+Canonical command: `.agents/commands/review.md`. Full
 discipline at `.agents/rules/process/review.md`.
 
 ## Run

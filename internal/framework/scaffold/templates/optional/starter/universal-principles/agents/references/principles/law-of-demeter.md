@@ -2,7 +2,7 @@
 
 Each unit should have only limited knowledge about other units: only units "closely related" to the current one. Articulated by Karl Lieberherr, Ian Holland, and Arthur Riel at Northeastern University in 1988, while working on the Demeter Project — a tool for adaptive programming that needed a formal coupling rule. Also called the **Principle of Least Knowledge**, or informally, *"don't talk to strangers."*
 
-> **Rules extracted:** [`guides/principles/law-of-demeter.md`](../../guides/principles/law-of-demeter.md). This file holds the full reasoning, anti-patterns, and references.
+> **Rules extracted:** [`rules/principles/law-of-demeter.md`](../../rules/principles/law-of-demeter.md). This file holds the full reasoning, anti-patterns, and references.
 
 ## The formal rule
 

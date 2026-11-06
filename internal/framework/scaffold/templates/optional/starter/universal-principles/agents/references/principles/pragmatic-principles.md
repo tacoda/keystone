@@ -2,7 +2,7 @@
 
 Four guidelines articulated by Andrew Hunt and David Thomas in *The Pragmatic Programmer* (1999; 20th Anniversary Edition, 2019). Each is a heuristic about *change*: code spends most of its life being modified, and these principles bias the work toward modifications that are cheap, local, and safe.
 
-> **Rules extracted:** [`guides/principles/pragmatic-principles.md`](../../guides/principles/pragmatic-principles.md). This file holds the full reasoning, anti-patterns, and references.
+> **Rules extracted:** [`rules/principles/pragmatic-principles.md`](../../rules/principles/pragmatic-principles.md). This file holds the full reasoning, anti-patterns, and references.
 
 ## DRY — Don't Repeat Yourself
 

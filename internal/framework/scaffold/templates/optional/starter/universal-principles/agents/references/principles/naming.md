@@ -6,7 +6,7 @@ A name is a promise. A reader who knows nothing about the implementation should 
 
 This file is short by design — naming has fewer principles than rules of thumb. The principles are stable; the rules of thumb belong in `../idioms/<stack>/` since the conventions are language-specific.
 
-> **Rules extracted:** [`guides/principles/naming.md`](../../guides/principles/naming.md). This file holds the full reasoning, anti-patterns, and references.
+> **Rules extracted:** [`rules/principles/naming.md`](../../rules/principles/naming.md). This file holds the full reasoning, anti-patterns, and references.
 
 ## What a name has to do
 

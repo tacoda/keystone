@@ -2,7 +2,7 @@
 
 A deploy is one half of a change; the other half is the path back. Changes that ship without a rehearsed way home assume nothing will go wrong — an assumption the historical record does not support. The discipline of rollback is the discipline of building the return path *with* the change, not *after* the change has failed.
 
-> **Rules extracted:** [`guides/principles/rollback.md`](../../guides/principles/rollback.md).
+> **Rules extracted:** [`rules/principles/rollback.md`](../../rules/principles/rollback.md).
 
 ## What it asks of you
 
@@ -36,4 +36,4 @@ The blue-green pattern (Fowler 2010) is the same idea at the infrastructure leve
 
 ---
 
-Forward link: [`guides/principles/rollback.md`](../../guides/principles/rollback.md). See also: [`migrations.md`](migrations.md), [`modern-software-engineering.md`](modern-software-engineering.md).
+Forward link: [`rules/principles/rollback.md`](../../rules/principles/rollback.md). See also: [`migrations.md`](migrations.md), [`modern-software-engineering.md`](modern-software-engineering.md).

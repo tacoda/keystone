@@ -1,16 +1,16 @@
 ---
 name: keystone-synthesize
-description: 'Promote accepted learning-inbox candidates into the right corpus / guide / sensor layer, then refresh INDEX.json. Triggers: keystone synthesize; keystone:synthesize; /keystone:synthesize; run synthesize; promote learning candidates; promote inbox to guides.'
+description: 'Promote accepted learning-inbox candidates into the right reference / rule / hook layer, then refresh INDEX.json. Triggers: keystone synthesize; keystone:synthesize; /keystone:synthesize; run synthesize; promote learning candidates; promote inbox to rules.'
 ---
 
 # keystone:synthesize — promote inbox candidates
 
 The Learning flywheel's promotion step. Walks
 `.keystone/learning/inbox/`, promotes `status: accepted`
-candidates to the right layer (guide / corpus / sensor), regenerates
+candidates to the right layer (rule / reference / hook), regenerates
 the globs index, and refreshes Cursor projections if present.
 
-Canonical playbook: `.agents/commands/synthesize.md`.
+Canonical command: `.agents/commands/synthesize.md`.
 
 ## Run
 

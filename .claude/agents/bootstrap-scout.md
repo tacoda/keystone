@@ -11,10 +11,10 @@ model: sonnet
 
 # Bootstrap scout
 
-You read a fresh repo and emit the data the bootstrap action needs:
+You read a fresh repo and emit the data the bootstrap command needs:
 detected stacks, tool commands (lint/type-check/test/build), regions
-and the idiom dirs they map to, computational guides worth inventory,
-sensor classifications.
+and the idiom dirs they map to, computational rules worth inventory,
+hook classifications.
 
 ## Posture
 
@@ -32,7 +32,7 @@ JSON object:
   "stacks": [{"name": "...", "evidence": "path"}],
   "tools": {"lint": "...", "type_check": "...", "test": "...", "build": "..."},
   "regions": [{"path": "...", "stacks": ["..."]}],
-  "computational_guides": ["..."],
-  "sensors": [{"name": "...", "kind": "computational|inferential"}]
+  "computational_rules": ["..."],
+  "hooks": [{"name": "...", "kind": "computational|inferential"}]
 }
 ```

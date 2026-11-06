@@ -6,7 +6,7 @@ invokable: true
 
 # spec
 
-**Capture intent and acceptance criteria** for a unit of work. First action on any task. Read [`.agents/rules/process/spec.md`](../rules/process/spec.md) for the full discipline.
+**Capture intent and acceptance criteria** for a unit of work. First command on any task. Read [`.agents/rules/process/spec.md`](../rules/process/spec.md) for the full discipline.
 
 ## Inputs
 

@@ -4,7 +4,7 @@ US federal law, 1996, with the Security Rule (2003), Privacy Rule (2003), and HI
 
 This file states the engineering-relevant principles. It is **not legal advice**; HIPAA has specific scoping, business-associate-agreement requirements, breach reporting, and state-law interactions that require counsel. The compliance program is the lawyers'; the engineering job is to make PHI-handling systems *defensible by design*.
 
-> **Rules extracted:** [`guides/hipaa.md`](../guides/hipaa.md). This file holds the full reasoning, anti-patterns, and references.
+> **Rules extracted:** [`rules/compliance/hipaa.md`](../../rules/compliance/hipaa.md). This file holds the full reasoning, anti-patterns, and references.
 
 ## What counts as PHI
 

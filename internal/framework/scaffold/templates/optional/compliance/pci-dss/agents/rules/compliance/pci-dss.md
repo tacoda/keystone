@@ -1,7 +1,7 @@
 # PCI DSS (Payment Card Industry Data Security Standard) — rules
 
-The rules from [`corpus/pci-dss.md`](../corpus/pci-dss.md).
-Loaded ambient; enforced by the [drift sensor](../../../sensors/drift.md). The corpus file holds the full reasoning, anti-patterns, and references.
+The rules from [`references/compliance/pci-dss.md`](../../references/compliance/pci-dss.md).
+Loaded ambient; enforced by the [drift hook](../../hooks/drift.md). The reference file holds the full reasoning, anti-patterns, and references.
 
 ## IRON LAW
 
@@ -17,4 +17,4 @@ Loaded ambient; enforced by the [drift sensor](../../../sensors/drift.md). The c
 
 ---
 
-Traces to: [`corpus/pci-dss.md`](../corpus/pci-dss.md).
+Traces to: [`references/compliance/pci-dss.md`](../../references/compliance/pci-dss.md).

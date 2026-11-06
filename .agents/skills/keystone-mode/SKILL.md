@@ -14,7 +14,7 @@ Toggles how often the agent stops to ask. Three modes:
 - **solo** — agent runs through phases, asks at unclear forks.
 - **autopilot** — agent runs end-to-end; asks only on hard blockers.
 
-Canonical playbook: `.agents/commands/mode.md`. Mode definitions
+Canonical command: `.agents/commands/mode.md`. Mode definitions
 live in `.agents/rules/process/modes.md`.
 
 ## Run

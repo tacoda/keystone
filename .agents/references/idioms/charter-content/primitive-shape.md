@@ -1,40 +1,37 @@
 ---
 kind: reference
 id: corpus/idioms/charter-content/primitive-shape
-description: 'Frontmatter, paths, and corpus/guide pairing for charter primitives.'
+description: 'Frontmatter, paths, and reference/rule pairing for charter primitives.'
 ---
 # Primitive shape
 
 Every charter primitive is one markdown file (or a SKILL.md inside a slug folder for skills). The agent reads the frontmatter to decide *what kind* of primitive it is and *when* to activate it; the body holds the content. Shape mistakes silently downgrade a primitive to "noise the agent skips."
 
-> **Rules extracted:** [`guides/idioms/charter-content/primitive-shape.md`](../../../rules/idioms/charter-content/primitive-shape.md).
+> **Rules extracted:** [`rules/idioms/charter-content/primitive-shape.md`](../../../rules/idioms/charter-content/primitive-shape.md).
 
 ## Canonical paths
 
 | Kind | Path |
 |---|---|
-| action | `.agents/commands/<id>.md` |
-| playbook | `.agents/skills/<id>/SKILL.md` |
-| guide | `.agents/rules/<topic>/<id>.md` |
-| corpus | `.agents/references/<topic>/<id>.md` |
-| sensor | `.agents/hooks/<id>.md` |
-| persona | `.agents/agents/<id>.md` |
-| skill | `.agents/skills/<slug>/SKILL.md` |
-| subagent | `.agents/agents/<id>.md` |
+| rule | `.agents/rules/<topic>/<name>.md` |
+| reference | `.agents/references/<topic>/<name>.md` |
+| hook | `.agents/hooks/<id>.md` |
+| permission | `.agents/permissions/<id>.md` |
+| eval | `.agents/evals/<id>/` |
+| skill | `.agents/skills/<name>/SKILL.md` |
 | command | `.agents/commands/<id>.md` |
-| rule | `.agents/rules/<id>.md` |
-| computational | `.agents/rules/computational/<tool>.md` |
-| adapter | `.keystone/hosts/<agent>/{lifecycle,sensors,activation}.md` |
+| subagent | `.agents/agents/<id>.md` |
+| tool | `.agents/tools/<id>.md` |
+| document | `.agents/documents/<id>.md` |
 
 Off-path content is invisible to `keystone index` and never lands in `INDEX.json`.
 
 ## Frontmatter
 
-Required on every primitive:
+Required on every primitive. Keystone infers `kind` from the folder, so `kind:` is optional:
 
 ```yaml
 ---
-kind: <one of the twelve kinds>
 id: <stable id used in INDEX.json>
 description: 'One sentence. Used by the agent to decide whether to open the body.'
 ---
@@ -42,35 +39,30 @@ description: 'One sentence. Used by the agent to decide whether to open the body
 
 Optional, kind-specific:
 
-- `globs:` — list of fileset patterns. **Narrow-only**: globs can only narrow ambient activation, never broaden it.
-- `severity:` — `must` / `should`. Defaults to `should`. Used on guides where deviation triggers a sensor-grade complaint.
-- `triggers:` — list of strings the host matches against user input (skills only).
-- `tools:` — tool allowlist for the persona's subagent (personas only).
-- `provenance:` — set automatically by `keystone index` to `project` or `policy`; do not hand-edit.
+- `paths:`: list of fileset patterns on a rule. A rule with `paths:` applies only when a touched file matches. The 4.x `globs:` still parses.
+- `severity:`: `must` / `should`. Defaults to `should`. Used on rules where deviation triggers a hook-grade complaint.
+- `triggers:`: a 4.x skill key. Hosts match a skill on its `description`, so move trigger phrases there.
+- `tools:`: tool allowlist for a subagent (subagents only).
+- `provenance:`: set automatically by `keystone index` to `project` or `policy`; do not hand-edit.
 
-## Pair convention (corpus ↔ guide)
+## Pair convention (reference ↔ rule)
 
-A guide carries rules. The matching corpus carries the *why*. They share a topic + name:
+A rule carries the directives. The matching reference carries the *why*. They share a topic + name:
 
-- `guides/idioms/go/stdlib-first.md` (rules)
-- `corpus/idioms/go/stdlib-first.md` (reasoning)
+- `rules/idioms/go/stdlib-first.md` (directives)
+- `references/idioms/go/stdlib-first.md` (reasoning)
 
-The guide links to the corpus in its body; the corpus links back. Either side existing without the other is a structural smell flagged by the **charter-debt** sensor.
+The rule links to the reference in its body; the reference links back. Either side existing without the other is a structural smell flagged by the **charter-debt** subagent.
 
-## Narrow-only globs
+## Paths scoping
 
-A guide with `globs:` activates only when:
-
-1. Its ambient activation rule says yes (e.g., idiom guide for a stack region), AND
-2. At least one touched file matches a glob.
-
-A guide without `globs:` activates per its topic default (ambient). Globs can never *force* a guide to activate outside its topic. This is the contract pointer-style adapters (Claude Code, Codex, Aider) rely on to keep loaded-rule sets small.
+A rule with `paths:` applies only when at least one touched file matches a pattern. A rule without `paths:` applies everywhere. `paths:` can only narrow where a rule applies, never widen it. Hosts with path-scoped rule files (Claude Code, Cursor, Copilot, Continue, Cline) load the rule through a shim, which keeps loaded-rule sets small.
 
 ## Anti-patterns
 
 - A primitive at an off-canonical path (e.g., `.agents/notes/foo.md`). `keystone index` skips it.
-- A guide with `globs:` it copy-pasted from another guide and never narrowed.
-- A corpus entry without a guide partner (or vice versa) — orphan reasoning / orphan rules.
+- A rule with `paths:` it copy-pasted from another rule and never narrowed.
+- A reference without a rule partner (or vice versa): orphan reasoning / orphan rules.
 - Hand-edits to `INDEX.json` or `GLOBS_INDEX.md` — both are regenerated; the edit is lost on next `keystone index` / `synthesize`.
 - A `description:` written as a placeholder (`'TODO'`, `'description'`). The agent uses it to gate body loading; a useless description gets the primitive ignored.
 
@@ -78,8 +70,8 @@ A guide without `globs:` activates per its topic default (ambient). Globs can ne
 
 - Frontmatter present? `kind`, `id`, `description` all real?
 - File at the canonical path for its `kind`?
-- If a guide declares `globs:`, do the patterns reference paths that exist?
-- Paired corpus / guide both present?
+- If a rule declares `paths:`, do the patterns reference paths that exist?
+- Paired reference / rule both present?
 - `keystone index` re-run after the change?
 
-**Traces to:** the keystone framework's primitive-resolution contract (see `corpus/process/runtime-resolution.md` and `.agents/README.md`).
+**Traces to:** the keystone framework's primitive-resolution contract (see `references/process/runtime-resolution.md` and `.agents/README.md`).

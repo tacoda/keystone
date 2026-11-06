@@ -4,7 +4,7 @@ Components communicate by publishing and consuming **events** — immutable fact
 
 The shared shape: a producer says *X happened*; one or more consumers react. The producer does not know who is listening. The consumer does not know who emitted.
 
-> **Rules extracted:** [`guides/event-driven.md`](../guides/event-driven.md). This file holds the full reasoning, anti-patterns, and references.
+> **Rules extracted:** [`rules/architecture/event-driven.md`](../../rules/architecture/event-driven.md). This file holds the full reasoning, anti-patterns, and references.
 
 ## Fowler's four event-driven patterns
 

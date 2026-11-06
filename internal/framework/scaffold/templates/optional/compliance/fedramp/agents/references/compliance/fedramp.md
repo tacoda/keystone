@@ -6,7 +6,7 @@ If a cloud service is consumed by a federal agency, it must hold a current FedRA
 
 This file states the engineering-relevant principles. It is **not legal advice**; the program is run with a 3PAO (Third Party Assessment Organization), legal counsel, and (often) a dedicated federal compliance team.
 
-> **Rules extracted:** [`guides/fedramp.md`](../guides/fedramp.md). This file holds the full reasoning, anti-patterns, and references.
+> **Rules extracted:** [`rules/compliance/fedramp.md`](../../rules/compliance/fedramp.md). This file holds the full reasoning, anti-patterns, and references.
 
 ## Impact levels
 
@@ -33,7 +33,7 @@ FedRAMP draws controls from NIST SP 800-53 Rev. 5. The control families relevant
 - **SI — System and Information Integrity.** Flaw remediation, malicious code protection, monitoring, integrity verification.
 - **SR — Supply Chain Risk Management.** SBOMs, provenance, vendor risk.
 
-Most of these map directly to engineering principles already in this corpus; FedRAMP enforces them at a level of **evidence and rigor** higher than other regimes.
+Most of these map directly to engineering principles already in these references; FedRAMP enforces them at a level of **evidence and rigor** higher than other regimes.
 
 ## The hard parts
 

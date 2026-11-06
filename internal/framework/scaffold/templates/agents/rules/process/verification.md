@@ -21,42 +21,42 @@ The verification phase exists to make this IRON LAW operable.
 
 ## Activities
 
-### 1. Invoke the verify action
+### 1. Invoke the verify command
 
-The **verify** action runs every verification sensor (see Sensors). It also reads the diff and proposes updates to `state/` for any code regions the diff touched.
+The **verify** command runs every verification hook (see Hooks). It also reads the diff and proposes updates to `state/` for any code regions the diff touched.
 
-The agent invokes the action, then reads its full output — not the summary. Stale evidence is not evidence.
+The agent invokes the command, then reads its full output, not the summary. Stale evidence is not evidence.
 
-The binding for your agent lives in `.keystone/hosts/<your-agent>/lifecycle.md`. Agents that cannot autonomously run shell sensors degrade this action into a checklist + commands surfaced to the human; see the adapter for the exact contract.
+`AGENTS.md` says which hosts run hooks. On a host that does not, run the checks in `.agents/hooks/` yourself, or surface the commands to the human.
 
 ### 2. Confirm or fix
 
-- **Sensors pass** → proceed to the gate.
-- **Sensors fail** → return to the implementation phase. Do not "fix forward" inside verification.
+- **Hooks pass** → proceed to the gate.
+- **Hooks fail** → return to the implementation phase. Do not "fix forward" inside verification.
 
 Semantic review (spec adherence, review-agent findings, PR comments) moves to the **review phase** next. Verification is now mechanical only.
 
 ### 3. State updates
 
-Where the **verify** action proposed state-layer diffs, the user reviews and accepts or edits per the scaffolding safety contract. State updates land in this phase, not after the commit.
+Where the **verify** command proposed state-layer diffs, the user reviews and accepts or edits per the scaffolding safety contract. State updates land in this phase, not after the commit.
 
-## Sensors
+## Hooks
 
-Verification sensors gate the commit:
+Verification hooks gate the commit:
 
-| Sensor | What it proves |
+| Hook | What it proves |
 |---|---|
 | Lint | Surface-level style and pattern violations are clean. |
 | Type-check | Signatures and contracts are consistent. |
 | Test runner | All tests pass; 0 failures. |
 | Build | The change compiles / packages. |
 | Drift | No loaded rule is violated by the diff. |
-| State proposal | Sensors that update state produced their diff for human review. |
+| State proposal | Hooks that update state produced their diff for human review. |
 | Commit-message | The proposed commit message is conventional and free of AI attribution. |
 
 Full contracts (triggers, inputs, exit conditions, outputs, state writes) live in each hook file under `.agents/hooks/`.
 
-A sensor that *runs* and *exits successfully* is evidence. A sensor that was run before any edit since is **stale evidence** and does not count.
+A hook that *runs* and *exits successfully* is evidence. A hook that was run before any edit since is **stale evidence** and does not count.
 
 ## Claim → required evidence
 
@@ -74,10 +74,10 @@ A sensor that *runs* and *exits successfully* is evidence. A sensor that was run
 
 To exit verification:
 
-1. Every applicable sensor exited successfully **in this turn**.
-2. State-layer diffs proposed by the **verify** action were accepted or edited.
+1. Every applicable hook exited successfully **in this turn**.
+2. State-layer diffs proposed by the **verify** command were accepted or edited.
 
-Only then: proceed to the **review** action.
+Only then: proceed to the **review** command.
 
 ## Artifacts
 

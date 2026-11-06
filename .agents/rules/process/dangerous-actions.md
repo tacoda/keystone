@@ -28,7 +28,7 @@ Authorization granted once does not extend to the next invocation. Each occurren
 | **Network exposure** | Opening ports, deploying, rotating secrets, changing DNS, modifying IAM |
 | **Account state** | OAuth grants, API key creation, paying invoices, accepting ToS |
 
-The **bootstrap** action specializes this list: it records which integrations are wired (Slack MCP, Linear, GitHub PR write, infra tooling) and which dangerous paths are reachable from this project.
+The **bootstrap** command specializes this list: it records which integrations are wired (Slack MCP, Linear, GitHub PR write, infra tooling) and which dangerous paths are reachable from this project.
 
 ## RULES
 

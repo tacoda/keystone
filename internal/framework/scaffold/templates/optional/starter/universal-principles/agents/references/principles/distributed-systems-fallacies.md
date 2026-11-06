@@ -4,7 +4,7 @@ Eight assumptions that everyone writing distributed code makes implicitly, all o
 
 This file states the fallacies; the operational practices for each — retries, timeouts, circuit breakers, multi-region failover, observability — belong in `../idioms/<stack>/` and in [[observability]].
 
-> **Rules extracted:** [`guides/principles/distributed-systems-fallacies.md`](../../guides/principles/distributed-systems-fallacies.md). This file holds the full reasoning, anti-patterns, and references.
+> **Rules extracted:** [`rules/principles/distributed-systems-fallacies.md`](../../rules/principles/distributed-systems-fallacies.md). This file holds the full reasoning, anti-patterns, and references.
 
 ## The eight fallacies
 

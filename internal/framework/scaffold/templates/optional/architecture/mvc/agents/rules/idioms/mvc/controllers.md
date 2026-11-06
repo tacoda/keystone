@@ -1,7 +1,7 @@
 # Controllers — rules
 
-The rules from [`corpus/idioms/mvc/controllers.md`](../../../corpus/idioms/mvc/controllers.md).
-Loaded ambient; enforced by the [drift sensor](../../../sensors/drift.md).
+The rules from [`references/idioms/mvc/controllers.md`](../../../references/idioms/mvc/controllers.md).
+Loaded ambient; enforced by the [drift hook](../../../hooks/drift.md).
 
 ## IRON LAW
 
@@ -16,4 +16,4 @@ Loaded ambient; enforced by the [drift sensor](../../../sensors/drift.md).
 
 ---
 
-Traces to: [`corpus/idioms/mvc/controllers.md`](../../../corpus/idioms/mvc/controllers.md).
+Traces to: [`references/idioms/mvc/controllers.md`](../../../references/idioms/mvc/controllers.md).

@@ -1,6 +1,6 @@
 # Rollback — rules
 
-The non-negotiable and strongly-preferred rules from [`corpus/principles/rollback.md`](../../corpus/principles/rollback.md). Loaded ambient; enforced at planning and release.
+The non-negotiable and strongly-preferred rules from [`references/principles/rollback.md`](../../references/principles/rollback.md). Loaded ambient; enforced at planning and release.
 
 ## GOLDEN RULE
 
@@ -25,11 +25,11 @@ A `## Rollback` section naming:
 2. The exact rollback command(s) — `git revert <sha>`, `kubectl rollout undo`, `flipper disable <flag>`, etc. Bootstrap records the project's tooling.
 3. The expected user impact during rollback.
 
-## Sensors
+## Hooks
 
-- The **commit-message sensor** does not enforce a rollback section directly. The review phase confirms it for changes that touch listed risky paths.
-- **Bootstrap** detects the feature-flag system (LaunchDarkly, GrowthBook, Unleash, Flipper, Statsig, custom config) and records the toggle command in `corpus/state/CODEBASE_STATE.md`. If none is wired, the rollback rule notes "no flag system available — risky changes ship in their own deploy with a documented revert."
+- The **commit-message hook** does not enforce a rollback section directly. The review phase confirms it for changes that touch listed risky paths.
+- **Bootstrap** detects the feature-flag system (LaunchDarkly, GrowthBook, Unleash, Flipper, Statsig, custom config) and records the toggle command in `references/state/CODEBASE_STATE.md`. If none is wired, the rollback rule notes "no flag system available — risky changes ship in their own deploy with a documented revert."
 
 ---
 
-Traces to: [`corpus/principles/rollback.md`](../../corpus/principles/rollback.md). See also: [[migrations]], [[modern-software-engineering]], [[scoping]], [[ci-failure]].
+Traces to: [`references/principles/rollback.md`](../../references/principles/rollback.md). See also: [[migrations]], [[modern-software-engineering]], [[scoping]], [[ci-failure]].

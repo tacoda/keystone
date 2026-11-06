@@ -1,11 +1,11 @@
 ---
 kind: command
 id: synthesize
-description: 'Promote learning-inbox candidates into the right corpus or guide layer.'
+description: 'Promote learning-inbox candidates into the right reference or rule layer.'
 ---
 # synthesize
 
-**Promote learning-inbox candidates into the right corpus or guide layer.** Read [`.keystone/learning/README.md`](../../.keystone/learning/README.md).
+**Promote learning-inbox candidates into the right reference or rule layer.** Read [`.keystone/learning/README.md`](../../.keystone/learning/README.md).
 
 ## Activities
 
@@ -16,13 +16,13 @@ For each file in `.keystone/learning/inbox/`:
    - Universal principle → `.agents/references/principles/<name>.md` and `.agents/rules/principles/<name>.md`
    - Stack idiom → `.agents/references/idioms/<stack>/<name>.md` and `.agents/rules/idioms/<stack>/<name>.md`
    - Process rule → `.agents/rules/process/<name>.md`
-   - Sensor → `.agents/hooks/<name>.md`
-3. **Author the corpus and guide pair.** Corpus explains the *why*; guide states the rule.
-4. **Propose `globs:` for the guide.** If the candidate carries `proposed-globs:`, use those as the starting point. Otherwise, infer from the evidence: regional surprise → narrow globs that match the touched region (consult `corpus/state/CODEBASE_STATE.md`'s region map); cross-cutting surprise → no `globs:`. Always show the proposed `globs:` to the user as part of the guide-write diff — it is part of the rule, not a side detail.
+   - Hook → `.agents/hooks/<name>.md`
+3. **Author the reference and rule pair.** The reference explains the *why*; the rule states the directive.
+4. **Propose `paths:` for the rule.** If the candidate carries `proposed-globs:`, use those as the starting point. Otherwise, infer from the evidence: regional surprise → narrow globs that match the touched region (consult the region map in `.agents/references/state/CODEBASE_STATE.md`); cross-cutting surprise → no `paths:`. Always show the proposed `paths:` to the user as part of the rule-write diff. It is part of the rule, not a side detail.
 5. **Choose the rule tier.** Default: regular rule. Iron law / golden rule only when deviation is genuinely non-negotiable.
 6. **Move the candidate** from `inbox/` to `promoted/` (kept), or `rejected/` (with a one-line reason in the moved file).
-7. **Regenerate `.agents/references/state/GLOBS_INDEX.md`** if any guide was written with `globs:`. Walk every guide, invert the globs, replace the `## Index` table (same procedure as **bootstrap** step 6).
-8. **Regenerate Cursor projections** if `.cursor/rules/` exists. For each newly promoted guide that declares `globs:`, write `.cursor/rules/keystone-<topic>-<name>.mdc` mirroring the guide's globs and pointing at the source guide. For any guide whose `globs:` changed during this synthesize, rewrite the corresponding `.mdc`. Delete any `.cursor/rules/keystone-*.mdc` whose guide no longer exists or no longer declares `globs:`.
+7. **Regenerate `.agents/references/state/GLOBS_INDEX.md`** if any rule was written with `paths:`. Walk every rule, invert the `paths:`, replace the `## Index` table (same procedure as **bootstrap** step 6).
+8. **Regenerate host projections.** Run `keystone index && keystone project`. The project step rewrites each host's rule files, such as `.cursor/rules/*.mdc`, and removes the ones whose rule is gone.
 
 ## Iron law
 
@@ -30,7 +30,7 @@ For each file in `.keystone/learning/inbox/`:
 
 ## Gate
 
-Synthesize is where the charter changes shape. Show the user every promotion and removal before applying. The `globs:` value on every promoted guide is part of that diff — never silently default it. After synthesize writes to `guides/` or `GLOBS_INDEX.md`, the active session has stale rules in context — recommend a context reset.
+Synthesize is where the charter changes shape. Show the user every promotion and removal before applying. The `paths:` value on every promoted rule is part of that diff. Never silently default it. After synthesize writes to `rules/` or `GLOBS_INDEX.md`, the active session has stale rules in context. Recommend a context reset.
 
 ## Index refresh
 

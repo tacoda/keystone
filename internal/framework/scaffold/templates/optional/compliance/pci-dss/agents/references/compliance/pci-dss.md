@@ -4,7 +4,7 @@ A contractual standard, not a law. Maintained by the PCI Security Standards Coun
 
 This file states the engineering-relevant principles. It is **not legal advice**; PCI DSS has merchant levels, attestation requirements, and audit obligations that require a QSA (Qualified Security Assessor) to navigate.
 
-> **Rules extracted:** [`guides/pci-dss.md`](../guides/pci-dss.md). This file holds the full reasoning, anti-patterns, and references.
+> **Rules extracted:** [`rules/compliance/pci-dss.md`](../../rules/compliance/pci-dss.md). This file holds the full reasoning, anti-patterns, and references.
 
 ## The 12 high-level requirements
 

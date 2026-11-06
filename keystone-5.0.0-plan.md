@@ -773,3 +773,21 @@ agent loads. 5.0 measures the load.
   skills (templates and this repo) still use 4.x terms (`corpus/state/`,
   "sensor", "guide"). Scaffold READMEs, docs, and the fresh-install link
   check are clean.
+- Phase 8.4: done. The bodies of every shipped command, hook, skill,
+  subagent, rule, reference, and optional starter (templates and this repo,
+  284 files) use 5.0 terms and paths; ids, `name:`, and `corpus:` entries
+  are unchanged (identity). Pointers to the removed per-host docs now point
+  to the `AGENTS.md` host lines. 19 links that were broken in 4.x starter
+  packs are fixed. A fresh install has 0 broken links; lint and verify are
+  clean. 83 remaining hits are ids, book titles, ordinary English, eval
+  level values, and historical ledger rows.
+- Phase 9 additions from 8.4:
+  10. `keystone verify --sensor <id>` keeps the 4.x flag name (hooks run
+      `keystone verify --sensor drift`); add `--hook`, keep `--sensor` as an
+      alias.
+  11. `keystone new policy` writes a `corpus/` folder and a README listing
+      `guides/`, `sensors/`, `playbooks/` (pairs with item 1).
+  12. `spec-author` writes `.keystone/learning/specs/`; the `spec` command
+      says `docs/specs/`. Pick one.
+  13. Stale comments: `cmd/keystone/conditional.go:22`,
+      `internal/framework/scaffold/embed.go` (`targets/`, `charter/`).

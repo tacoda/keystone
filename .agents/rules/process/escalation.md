@@ -9,17 +9,17 @@ When the agent is stuck, when to stop and ask the user — versus when to keep g
 
 ## GOLDEN RULE
 
-- **Aim to stop after three failed attempts at the same objective.** Three iterations on the same failing sensor, the same red test, or the same compile error without making it green is a signal that the model of the problem is wrong. Stop, report what was tried, and hand back to the user. Different errors after each attempt count as progress; the same error three times does not.
+- **Aim to stop after three failed attempts at the same objective.** Three iterations on the same failing hook, the same red test, or the same compile error without making it green is a signal that the model of the problem is wrong. Stop, report what was tried, and hand back to the user. Different errors after each attempt count as progress; the same error three times does not.
 - **Aim to escalate early when the cost of being wrong is high.** Security, data integrity, prod state — escalate at the first hint of uncertainty, not after three attempts.
 - **Aim to escalate with a recommendation, not a question.** "I think A because X — should I do A?" beats "what should I do?"
 
 ## RULES
 
-- **Stop on contradictory rules.** Two guides say opposite things → surface the conflict, do not pick.
+- **Stop on contradictory rules.** Two rules say opposite things → surface the conflict, do not pick.
 - **Stop on ambiguous acceptance criteria.** A criterion that admits two readings is not a criterion; return to spec.
 - **Stop on a non-trivial-consequences decision with no clear winner.** Two equally plausible designs → the user decides.
 - **Stop when a [[dangerous-actions|dangerous action]] is the only path forward.** Confirm before, not after.
-- **Stop when the codebase contradicts state.** If `corpus/state/CODEBASE_STATE.md` says one thing and the code says another, do not assume which is right.
+- **Stop when the codebase contradicts state.** If `.agents/references/state/CODEBASE_STATE.md` says one thing and the code says another, do not assume which is right.
 
 ## What "stop and report" looks like
 

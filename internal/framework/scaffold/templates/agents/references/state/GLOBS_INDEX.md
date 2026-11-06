@@ -1,36 +1,33 @@
 ---
 kind: reference
 id: corpus/state/GLOBS_INDEX
-description: 'Reverse-index of every guide that declares globs: in its frontmatter.'
+description: 'Reverse-index of every rule that declares paths: in its frontmatter.'
 ---
 # Globs Index
 
-> **Generated.** The **bootstrap** action seeds this from the region map in `CODEBASE_STATE.md`; **synthesize** and **audit** regenerate it whenever a guide's `globs:` frontmatter changes. **Do not edit by hand** — manual edits are overwritten on the next regeneration.
+> **Generated.** The **bootstrap** command seeds this from the region map in `CODEBASE_STATE.md`; **synthesize** and **audit** regenerate it whenever a rule's `paths:` frontmatter changes. **Do not edit by hand**: manual edits are overwritten on the next regeneration.
 
-Reverse-index of every guide that declares `globs:` in its frontmatter. Pointer-style adapters (Claude Code, Codex, Aider, Continue, etc.) read this in their action playbooks to gate idiom loading on the touched-files set without re-walking the tree.
+Reverse-index of every rule that declares `paths:` in its frontmatter. The **orient** command reads it to load only the rules that match the touched files, without walking the tree again.
 
-Guides without `globs:` are not listed here — they activate ambient per their topic default.
+Rules without `paths:` are not listed here. They apply everywhere.
 
 ## Index
 
-| Glob pattern | Guides claiming it |
+| Path pattern | Rules claiming it |
 |---|---|
 | `<pattern>` | `<.agents/rules/<topic>/<name>.md>` |
 
 ## How it's regenerated
 
-1. Walk every guide under `.agents/rules/` and `.keystone/policies/*/guides/`.
-2. For each guide, read its frontmatter and collect each entry in `globs:` (if present).
-3. Invert: for each glob pattern, list the guides that claim it.
+1. Walk every rule under `.agents/rules/` and `.keystone/policies/*/rules/`.
+2. For each rule, read its frontmatter and collect each entry in `paths:` (if present).
+3. Invert: for each path pattern, list the rules that claim it.
 4. Sort patterns by path-prefix for stable diffs.
 5. Replace the **Index** table above; touch nothing else.
 
 ## Consumers
 
-| Adapter | How it uses the index |
+| Host | How it uses the index |
 |---|---|
-| Claude Code | `orient` reads the index to load only the idiom guides whose globs match touched files. |
-| Codex | Same as Claude Code, via `.keystone/hosts/codex/activation.md`. |
-| Aider / Cline / Continue / Goose / Pi | Same pointer-style pattern; per-adapter `activation.md` describes the lookup. |
-| Cursor | Does not read this file — it uses native `globs:` on `.cursor/rules/*.mdc`. |
-| `_generic` | Does not read this file — falls back to topic defaults. |
+| Any host | The **orient** command reads the index to load only the rules whose `paths:` match touched files. |
+| Claude Code, Cursor, Copilot, Continue, Cline | Also load each rule with `paths:` natively, through the shim `keystone project` writes. |

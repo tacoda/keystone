@@ -4,7 +4,7 @@ Test names are sentences; tests are examples of behavior; the words you choose a
 
 This file states the BDD principles; mechanical practice belongs in `../idioms/<stack>/`. Companion to [[tdd]] — most BDD practitioners are doing TDD; the difference is what the tests *say*, not when they get written.
 
-> **Rules extracted:** [`guides/principles/bdd.md`](../../guides/principles/bdd.md). This file holds the full reasoning, anti-patterns, and references.
+> **Rules extracted:** [`rules/principles/bdd.md`](../../rules/principles/bdd.md). This file holds the full reasoning, anti-patterns, and references.
 
 ## Why the renaming matters
 

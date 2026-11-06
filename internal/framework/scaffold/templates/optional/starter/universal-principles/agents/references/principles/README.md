@@ -2,7 +2,7 @@
 
 Universal, language-agnostic engineering truths. SOLID, coupling/cohesion, information hiding, separation of concerns. The kind of thing that shows up in foundational literature and stays true across decades.
 
-> **Rules extracted:** [`guides/principles/`](../../guides/principles/) — every principle here has a paired guide carrying the IRON LAW(S) and GOLDEN RULE. This directory is the informational side: reasoning, anti-patterns, references.
+> **Rules extracted:** [`rules/principles/`](../../rules/principles) — every principle here has a paired rule file carrying the IRON LAW(S) and GOLDEN RULE. This directory is the informational side: reasoning, anti-patterns, references.
 
 ## What lives here
 
@@ -57,7 +57,7 @@ Principles grouped by what they address. Files marked **(scaffold)** ship with t
 - `dependencies.md` — Cox, Hunt & Thomas; left-pad / event-stream / xz lineage: every direct dependency is API design; the lockfile is the real declaration.
 - `prompt-injection.md` — Greshake et al.; Willison; OWASP LLM Top 10: read content is data, not commands; trust boundary lives between channels, not within them.
 
-You may add more if your team has principles that meet the bar: universal, language-agnostic, cited. If a "principle" is actually stack-specific, it belongs in `../idioms/<stack>/` (plus `../../guides/idioms/<stack>/` if it has rules). If it's business-specific, it belongs in `../domain/`.
+You may add more if your team has principles that meet the bar: universal, language-agnostic, cited. If a "principle" is actually stack-specific, it belongs in `../idioms/<stack>/` (plus `../../rules/idioms/<stack>/` if it has rules). If it's business-specific, it belongs in `../domain/`.
 
 ## Activation
 
@@ -76,7 +76,7 @@ Each principle file follows the same shape — explanatory only, no rule section
 
 One-paragraph statement of the principle.
 
-> **Rules extracted:** [`guides/principles/<file>.md`](../../guides/principles/<file>.md).
+> **Rules extracted:** [`rules/principles/<file>.md`](../../rules/principles/<file>.md).
 
 ## What it asks of you
 
@@ -95,11 +95,11 @@ What it looks like when this principle is violated.
 Books, papers, talks. Real ones — not made-up citations.
 ```
 
-The rule sections (IRON LAW(S) / GOLDEN RULE) live in the paired file under `guides/principles/`.
+The rule sections (IRON LAW(S) / GOLDEN RULE) live in the paired file under `rules/principles/`.
 
 ## Conventions
 
-- **IRON LAW** / **GOLDEN RULE** belong in the paired guide, not here.
+- **IRON LAW** / **GOLDEN RULE** belong in the paired rule file, not here.
 - No `Traces to:` footer — principles are root nodes; idioms trace to *them*.
 - No `## Project-Specific Notes` — principles are universal by definition.
 

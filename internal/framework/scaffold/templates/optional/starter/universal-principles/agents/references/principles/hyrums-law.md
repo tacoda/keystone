@@ -4,7 +4,7 @@
 
 Coined at Google by Hyrum Wright, codifying a pattern that anyone who has tried to change a popular API has felt. The contract you wrote is what *you* promised; the contract that exists is everything any caller can observe and has, somewhere, started depending on. The two are not the same.
 
-> **Rules extracted:** [`guides/principles/hyrums-law.md`](../../guides/principles/hyrums-law.md). This file holds the full reasoning, anti-patterns, and references.
+> **Rules extracted:** [`rules/principles/hyrums-law.md`](../../rules/principles/hyrums-law.md). This file holds the full reasoning, anti-patterns, and references.
 
 ## The principle
 

@@ -4,17 +4,17 @@ description: Triage the code-debt ledger.
 
 # debt-review
 
-**Triage the code-debt ledger.** Read [`.agents/hooks/code-debt.md`](../agents/code-debt.md) and [`.agents/references/state/code-debt.md`](../references/state/code-debt.md).
+**Triage the code-debt ledger.** Read [`.agents/agents/code-debt.md`](../agents/code-debt.md) and [`.agents/references/state/code-debt.md`](../references/state/code-debt.md).
 
-For **charter debt** (stale rules, placeholder bootstrap, empty idiom dirs, uncited policies), use the [`audit`](audit.md) action — its Pruning flywheel writes to `corpus/state/charter-debt.md`.
+For **charter debt** (stale rules, placeholder bootstrap, empty idiom dirs, uncited policies), use the [`audit`](audit.md) command. Its Pruning flywheel writes to `.agents/references/state/charter-debt.md`.
 
 ## Activities
 
-1. **Run the code-debt sensor.** Walk the codebase for markers and complexity hotspots; produce the candidate list.
+1. **Run the code-debt subagent.** Walk the codebase for markers and complexity hotspots; produce the candidate list.
 2. **Triage `discovery` items.** For each, propose: a category (deliberate / drift / shortcut), a severity, an owner, and a revisit trigger. If you can't propose all four, leave the item as `discovery` with a note explaining why.
 3. **Re-score existing items.** Compare ledger entries against the code. Items whose region is no longer present, or whose severity has dropped to nothing the diff or plan would notice, become `stale`.
 4. **Prune `stale` items.** Delete them from the ledger. Do not archive.
-5. **Propose the diff** to `corpus/state/code-debt.md` and let the user accept or edit. No silent writes.
+5. **Propose the diff** to `.agents/references/state/code-debt.md` and let the user accept or edit. No silent writes.
 
 ## When to invoke
 

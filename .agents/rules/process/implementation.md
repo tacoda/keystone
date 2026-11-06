@@ -58,18 +58,18 @@ If the plan has 3+ tasks, dispatch each in a fresh subagent (if your agent suppo
 
 ### 7. Check drift
 
-After meaningful edits, invoke the **check-drift** action. It compares the changes against loaded principles, idioms, and domain invariants. Findings are surfaced, not blocking; the verification phase is where they harden.
+After meaningful edits, invoke the **check-drift** command. It compares the changes against loaded principles, idioms, and domain invariants. Findings are surfaced, not blocking; the verification phase is where they harden.
 
-## Sensors
+## Hooks
 
-Implementation runs sensors continuously, not just at exit:
+Implementation runs hooks continuously, not just at exit:
 
 - **Lint** — catches surface-level violations early.
 - **Type-check** — catches signature drift as it happens.
 - **Test runner** — runs after each green to confirm the TDD loop is still on the rails.
-- **Drift sensor** — invoked by the **check-drift** action.
+- **Drift hook** — invoked by the **check-drift** command.
 
-These sensors do not gate the phase by themselves; the verification phase is where the gate hardens. They run during implementation as a fast feedback loop, *when the agent can drive them autonomously*. Agents that can only suggest commands fall back to surfacing the command for the human to run — see `.keystone/hosts/<your-agent>/sensors.md`.
+These hooks do not gate the phase by themselves; the verification phase is where the gate hardens. They run during implementation as a fast feedback loop, *when the agent can drive them autonomously*. Agents that can only suggest commands surface each command for the human to run. `AGENTS.md` says which hosts run hooks.
 
 ## Gate condition
 
@@ -77,7 +77,7 @@ To exit implementation:
 
 1. All tests written for the change pass.
 2. The change matches the approved plan. Deviations are recorded in the plan as inline updates.
-3. The **check-drift** action ran in this turn with no IRON LAW violations.
+3. The **check-drift** command ran in this turn with no IRON LAW violations.
 
 The verification phase will run the harder gates.
 

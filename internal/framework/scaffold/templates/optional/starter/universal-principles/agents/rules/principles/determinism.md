@@ -1,6 +1,6 @@
 # Determinism — rules
 
-The non-negotiable and strongly-preferred rules from [`corpus/principles/determinism.md`](../../corpus/principles/determinism.md). Loaded ambient; enforced at implementation and verification.
+The non-negotiable and strongly-preferred rules from [`references/principles/determinism.md`](../../references/principles/determinism.md). Loaded ambient; enforced at implementation and verification.
 
 ## GOLDEN RULE
 
@@ -20,11 +20,11 @@ The non-negotiable and strongly-preferred rules from [`corpus/principles/determi
 - **No environment leakage.** A test that sets `os.environ['X']` cleans up. A test that reads it from the surrounding shell is environment-dependent.
 - **No reused test data between cases.** Each test seeds its own state.
 
-## Sensors
+## Hooks
 
-- The **test sensor** flags tests that have been retried within the same run as flaky candidates (when the runner supports retry annotations).
-- **Bootstrap** records the time-mocking library, the seeded-random pattern, and the test-isolation library (`pytest-freezer`, `vitest.useFakeTimers`, `quicktime`, etc.) in `corpus/state/CODEBASE_STATE.md`.
+- The **test hook** flags tests that have been retried within the same run as flaky candidates (when the runner supports retry annotations).
+- **Bootstrap** records the time-mocking library, the seeded-random pattern, and the test-isolation library (`pytest-freezer`, `vitest.useFakeTimers`, `quicktime`, etc.) in `references/state/CODEBASE_STATE.md`.
 
 ---
 
-Traces to: [`corpus/principles/determinism.md`](../../corpus/principles/determinism.md). See also: [[testing-patterns]], [[tdd]], [[ci-failure]].
+Traces to: [`references/principles/determinism.md`](../../references/principles/determinism.md). See also: [[testing-patterns]], [[tdd]], [[ci-failure]].

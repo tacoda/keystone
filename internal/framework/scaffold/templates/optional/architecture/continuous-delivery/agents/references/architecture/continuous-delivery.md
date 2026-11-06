@@ -4,7 +4,7 @@ The software is **always in a releasable state.** Every commit on the main branc
 
 Continuous Delivery is a *practice* — but it is also an **architectural** choice in the sense that it constrains every other architectural choice. A codebase architected without CD in mind cannot adopt CD without significant restructuring. It belongs in the architecture catalog because choosing it shapes every layer.
 
-> **Rules extracted:** [`guides/continuous-delivery.md`](../guides/continuous-delivery.md). This file holds the full reasoning, anti-patterns, and references.
+> **Rules extracted:** [`rules/architecture/continuous-delivery.md`](../../rules/architecture/continuous-delivery.md). This file holds the full reasoning, anti-patterns, and references.
 
 ## The core claim
 

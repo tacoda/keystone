@@ -6,7 +6,7 @@ A SOC 2 report is **the de facto contract requirement** for B2B SaaS in North Am
 
 This file states the engineering-relevant principles. It is **not legal or audit advice**; the program is run with auditors and is itself an organizational discipline.
 
-> **Rules extracted:** [`guides/soc2.md`](../guides/soc2.md). This file holds the full reasoning, anti-patterns, and references.
+> **Rules extracted:** [`rules/compliance/soc2.md`](../../rules/compliance/soc2.md). This file holds the full reasoning, anti-patterns, and references.
 
 ## Type I vs. Type II
 

@@ -16,18 +16,18 @@ The discipline of refusing to count the agent's own claim as evidence. Operation
 
 ## GOLDEN RULE
 
-- **Aim to re-run sensors after every edit, not after every claim.** The freshness boundary is the *edit*, not the *statement*.
+- **Aim to re-run hooks after every edit, not after every claim.** The freshness boundary is the *edit*, not the *statement*.
 - **Aim to cite the tool output, not the tool name.** "Lint passes" is a claim; "`eslint .` exited 0 with 0 errors at HH:MM" is evidence.
 
 ## Why this is agent-specific
 
 A coding agent generates text continuously. The agent's own previous output is in the context window, and the agent will read it back as if it were external. This produces a closed loop: the agent says "the tests pass," then later reads that message and concludes "the tests pass," with no actual test runner involvement. The behavior is not deception — it is the absence of an external check.
 
-The remedy is to anchor evidence to *tool output*, not to *text in the conversation*. The verification IRON LAW does this at the phase level; this guide does it at the within-phase level.
+The remedy is to anchor evidence to *tool output*, not to *text in the conversation*. The verification IRON LAW does this at the phase level; this rule does it at the within-phase level.
 
-## Sensors
+## Hooks
 
-The **verify** action surfaces fresh evidence; re-invoking it after any edit is the operational form of this rule.
+The **verify** command surfaces fresh evidence; re-invoking it after any edit is the operational form of this rule.
 
 ## Anti-patterns
 

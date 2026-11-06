@@ -20,7 +20,7 @@ Any of:
 
 ### 1. Fetch the failure
 
-Pull the failing log from CI directly — never guess from the job name. Bootstrap records the command in `corpus/state/CODEBASE_STATE.md`:
+Pull the failing log from CI directly, and never guess from the job name. Bootstrap records the command in `.agents/references/state/CODEBASE_STATE.md`:
 
 - GitHub Actions: `gh run view <id> --log-failed`
 - GitLab: `glab ci view <id>`
@@ -30,7 +30,7 @@ Pull the failing log from CI directly — never guess from the job name. Bootstr
 
 ### 2. Reproduce locally
 
-Run the same sensor command locally that CI ran. If the failure does not reproduce:
+Run the same hook command locally that CI ran. If the failure does not reproduce:
 
 - Compare environment (Node/Python/Go version, OS, env vars).
 - Check for non-determinism — see [[determinism]]. A test that passes locally and fails in CI is usually non-deterministic, not "CI is broken."
@@ -42,7 +42,7 @@ A failure that only reproduces in CI is still a failure. Do not merge around it.
 
 Diagnose the *root cause*, not the surface. A test that passes after a retry has not been fixed; it has been ignored.
 
-- **Real failure** → fix the code or the test. Re-invoke the **verify** action.
+- **Real failure** → fix the code or the test. Re-invoke the **verify** command.
 - **Flaky test** → quarantine with an explicit tracker card for the fix; do not silently `pytest --rerun`. See [[determinism]].
 - **Infra/runner issue** → file a tracker card; do not silently rerun until green.
 
@@ -63,7 +63,7 @@ If CD ran and a deploy failed:
 
 ## GOLDEN RULE
 
-- **Aim never to merge around a failing check.** Disabling a check, marking it non-required, or using admin-merge to bypass CI is a [[dangerous-actions|dangerous action]] requiring explicit confirmation. Builds on the existing IRON LAW "no commits with failing sensors" — CI is the same sensors at the pipeline level.
+- **Aim never to merge around a failing check.** Disabling a check, marking it non-required, or using admin-merge to bypass CI is a [[dangerous-actions|dangerous action]] requiring explicit confirmation. Builds on the existing IRON LAW "no commits with failing checks": CI runs the same checks at the pipeline level.
 - **Aim to revert before debugging on `main`.** A reverted main lets the team keep working while the cause is investigated.
 
 ## RULES

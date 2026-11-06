@@ -2,7 +2,7 @@
 
 The oldest GUI architecture pattern still in use. Introduced by Trygve Reenskaug at Xerox PARC in 1978 ("Models-Views-Controllers," internal note) and refined for Smalltalk-80, where it became the canonical pattern for building interactive applications. Forty-plus years later, MVC's vocabulary is everywhere — Rails, Django, ASP.NET, Spring MVC, iOS — though every framework that claims MVC implements it slightly differently.
 
-> **Rules extracted:** [`guides/mvc.md`](../guides/mvc.md). This file holds the full reasoning, anti-patterns, and references.
+> **Rules extracted:** [`rules/architecture/mvc.md`](../../rules/architecture/mvc.md). This file holds the full reasoning, anti-patterns, and references.
 
 ## The three roles
 

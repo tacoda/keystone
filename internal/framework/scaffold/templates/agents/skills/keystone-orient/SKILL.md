@@ -7,11 +7,11 @@ description: 'Enter the planning phase — load codebase state + matching idioms
 
 Phase 2 of the six-phase lifecycle. Loads
 `.agents/references/state/CODEBASE_STATE.md`, the matching idioms
-for the touched region from `corpus/idioms/<stack>/`, and the relevant
-process guides. Output is a written plan the agent and user agree on
+for the touched region from `.agents/references/idioms/<stack>/`, and the relevant
+process rules. Output is a written plan the agent and user agree on
 before implementation starts.
 
-Canonical playbook: `.agents/commands/orient.md`. Full
+Canonical command: `.agents/commands/orient.md`. Full
 discipline at `.agents/rules/process/planning.md`.
 
 ## Run

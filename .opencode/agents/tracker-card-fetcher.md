@@ -3,7 +3,7 @@ description: Fetches a tracker card from Jira / Linear / GitHub Issues / Asana v
 mode: subagent
 ---
 
-# Sensor: tracker-card-fetcher
+# Subagent: tracker-card-fetcher
 
 Fetches a tracker card from Jira / Linear / GitHub Issues / Asana via whatever tracker integration the agent has (MCP server, CLI, policy), if one is referenced.
 

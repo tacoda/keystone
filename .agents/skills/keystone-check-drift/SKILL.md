@@ -1,6 +1,6 @@
 ---
 name: keystone-check-drift
-description: 'Run the drift sensor on the current diff — fast pre-verify check that loaded charter rules still match what the code is doing. Triggers: keystone check-drift; keystone:check-drift; /keystone:check-drift; check drift; run drift sensor; drift check.'
+description: 'Run the drift hook on the current diff — fast pre-verify check that loaded charter rules still match what the code is doing. Triggers: keystone check-drift; keystone:check-drift; /keystone:check-drift; check drift; run drift hook; drift check.'
 allowed-tools: Read Bash Grep Glob
 metadata:
   model: sonnet
@@ -9,11 +9,11 @@ metadata:
 # keystone:check-drift — fast pre-verify drift check
 
 Compares the in-progress diff against loaded charter rules. Fires
-before the full computational sensor suite — catches the obvious case
+before the full computational hook suite. It catches the obvious case
 where the agent is implementing something the rules explicitly
 disallow.
 
-Canonical playbook: `.agents/commands/check-drift.md`. Sensor
+Canonical command: `.agents/commands/check-drift.md`. Hook
 contract at `.agents/hooks/drift.md`. Full discipline at
 `.agents/rules/process/implementation.md`.
 

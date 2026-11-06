@@ -9,7 +9,7 @@ The phase that confirms a mechanically-correct change is also the *right* change
 
 ## Entry condition
 
-The verification phase gate passed. Mechanical sensors are green with fresh evidence. The diff exists and is ready for review.
+The verification phase gate passed. Mechanical hooks are green with fresh evidence. The diff exists and is ready for review.
 
 ## Activities
 
@@ -21,7 +21,7 @@ Find the spec file — most recent under `docs/specs/` matching the task. If the
 
 Spawn every available review agent (named `review-*`) in parallel on the current diff. The default set is `review-functional`, `review-security`, `review-risk`, and `review-deployment`; teams may add more (`review-performance`, `review-accessibility`, project-specific reviewers).
 
-Where review agents live, and how they are spawned, is agent-specific — see `.keystone/hosts/<your-agent>/lifecycle.md`. Agents that do not support sub-agent parallelism collapse this into sequential review passes.
+Where review agents live, and how they are spawned, depends on the host. Agents that do not support sub-agent parallelism collapse this into sequential review passes.
 
 Each agent returns a numbered list of findings, graded:
 - **blocker** — must be fixed before release.
@@ -35,7 +35,7 @@ Walk through the spec's `## Acceptance criteria`. For each:
 - Is it met by the diff?
 - Is there evidence (a test, an output, a manual verification)?
 
-A criterion not met is a blocker, regardless of how clean the sensors are.
+A criterion not met is a blocker, regardless of how clean the hooks are.
 
 ### 4. Peer review (when a PR exists)
 
@@ -43,7 +43,7 @@ If the diff is in a PR, the agent can:
 
 - Summarize the diff for human reviewers, with the tracker card linked.
 - Address comments as they arrive: propose fix, apply with confirmation, mark thread resolved.
-- Re-invoke the **verify** action after each comment-driven change (locked: fresh evidence per turn).
+- Re-invoke the **verify** command after each comment-driven change (locked: fresh evidence per turn).
 
 ### 5. Combine findings
 
@@ -59,7 +59,7 @@ Merge review-agent findings, spec-adherence gaps, and PR comments into a single 
 ### 6. Resolve
 
 For each finding:
-- **blocker** → return to implementation. Re-invoke the **verify** action after the fix.
+- **blocker** → return to implementation. Re-invoke the **verify** command after the fix.
 - **major** → fix in this PR, or open a follow-up tracker card and link it from the spec.
 - **minor** → defer or fix; the user decides.
 
@@ -67,9 +67,9 @@ For each finding:
 
 If the team archives review findings, write to `docs/reviews/<spec-slug>.md`. Useful during postmortems and audits.
 
-## Sensors
+## Hooks
 
-Review runs semantic sensors (the review agents — see `sensors.md`). The mechanical sensors do not re-run here by default; they already gated verification. They re-run only if implementation re-opens.
+Review runs the four review checks (`review-functional`, `review-security`, `review-risk`, `review-deployment`). The mechanical hooks do not re-run here by default; they already gated verification. They re-run only if implementation re-opens.
 
 ## Gate condition
 

@@ -2,7 +2,7 @@
 
 Articulated by Jeffrey Palermo in a four-part series on jeffreypalermo.com (2008). A direct descendant of [[hexagonal]] and a sibling of [[clean-architecture]] — all three share the same load-bearing rule (dependencies point inward) but differ in how they name and slice the inside. The onion's distinctive emphasis: **the domain model is the absolute center**, and *application services* sit between the model and the outside world as a separate ring.
 
-> **Rules extracted:** [`guides/onion-architecture.md`](../guides/onion-architecture.md). This file holds the full reasoning, anti-patterns, and references.
+> **Rules extracted:** [`rules/architecture/onion-architecture.md`](../../rules/architecture/onion-architecture.md). This file holds the full reasoning, anti-patterns, and references.
 
 ## The rings, outermost to innermost
 

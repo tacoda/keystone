@@ -4,7 +4,7 @@ Also called **Ports and Adapters.** Articulated by Alistair Cockburn in "Hexagon
 
 The hexagon shape in Cockburn's drawings is incidental — what matters is that the inside is a regular polygon: every direction is equal, and the *number* of sides matches the number of ways the application is driven or driven. The application does not know whether it is being driven by HTTP, gRPC, a CLI, a test, or a queue. The application does not know whether persistence is Postgres, an in-memory store, or a fake.
 
-> **Rules extracted:** [`guides/hexagonal.md`](../guides/hexagonal.md). This file holds the full reasoning, anti-patterns, and references.
+> **Rules extracted:** [`rules/architecture/hexagonal.md`](../../rules/architecture/hexagonal.md). This file holds the full reasoning, anti-patterns, and references.
 
 ## The structure
 

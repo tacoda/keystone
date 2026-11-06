@@ -2,7 +2,7 @@
 
 How a system fails is part of what the system *is*. Articulated formally by Barbara Liskov and Alan Snyder in "Exception Handling in CLU" (1979), refined by Bjarne Stroustrup and Herb Sutter into the **exception-safety guarantees**, and pushed in a different direction by Joe Armstrong's *let it crash* discipline in Erlang. [[fail-fast]] says *when* to fail; this file says *how to propagate* failure correctly once you have decided to.
 
-> **Rules extracted:** [`guides/principles/error-handling.md`](../../guides/principles/error-handling.md). This file holds the full reasoning, anti-patterns, and references.
+> **Rules extracted:** [`rules/principles/error-handling.md`](../../rules/principles/error-handling.md). This file holds the full reasoning, anti-patterns, and references.
 
 ## The first distinction: expected vs. exceptional
 

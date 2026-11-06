@@ -2,7 +2,7 @@
 
 Write a failing test, make it pass, then improve the code — repeat. Articulated by Kent Beck in *Test-Driven Development: By Example* (2002), drawing on practice from the Smalltalk and Extreme Programming communities. Beck's central, often-missed claim: **TDD is primarily a design discipline, not a testing one.** The tests are a byproduct; the value is the pressure the act of writing tests first puts on the design.
 
-> **Rules extracted:** [`guides/principles/tdd.md`](../../guides/principles/tdd.md). This file holds the full reasoning, anti-patterns, and references.
+> **Rules extracted:** [`rules/principles/tdd.md`](../../rules/principles/tdd.md). This file holds the full reasoning, anti-patterns, and references.
 
 ## The loop
 

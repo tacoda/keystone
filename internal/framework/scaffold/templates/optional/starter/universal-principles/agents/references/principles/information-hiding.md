@@ -2,7 +2,7 @@
 
 Modules should be characterized by the design decisions they hide from the rest of the system. Articulated by David L. Parnas in "On the Criteria To Be Used in Decomposing Systems into Modules" (*Communications of the ACM*, 1972) — the foundational paper for modularity in modern software.
 
-> **Rules extracted:** [`guides/principles/information-hiding.md`](../../guides/principles/information-hiding.md). This file holds the full reasoning, anti-patterns, and references.
+> **Rules extracted:** [`rules/principles/information-hiding.md`](../../rules/principles/information-hiding.md). This file holds the full reasoning, anti-patterns, and references.
 
 ## The principle
 

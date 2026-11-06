@@ -2,7 +2,7 @@
 
 Software engineering is the application of an empirical, scientific approach to finding efficient, economic solutions to practical problems in software. Articulated by David Farley in *Modern Software Engineering: Doing What Works to Build Better Software Faster* (2021), the discipline rests on two pillars: being **experts at learning** and **experts at managing complexity**. Every other principle in this layer instantiates one or both.
 
-> **Rules extracted:** [`guides/principles/modern-software-engineering.md`](../../guides/principles/modern-software-engineering.md). This file holds the full reasoning, anti-patterns, and references.
+> **Rules extracted:** [`rules/principles/modern-software-engineering.md`](../../rules/principles/modern-software-engineering.md). This file holds the full reasoning, anti-patterns, and references.
 
 ## The two pillars
 

@@ -6,12 +6,12 @@ description: 'Full dual-flywheel audit — Learning (capture from review) + Prun
 # keystone:audit — periodic dual-flywheel review
 
 The Pruning flywheel's main entry point, paired with one Learning
-sweep. Walks the corpus + guides looking for stale, dead, or unused
+sweep. Walks the references + rules looking for stale, dead, or unused
 content; proposes archive moves with a one-line reason per item.
 
-Canonical playbook: `.agents/commands/audit.md`. Read it for
+Canonical command: `.agents/commands/audit.md`. Read it for
 the 12-category Pruning checklist (stale rules, dead idioms,
-placeholders, failing sensors, empty shells, uncited policies,
+placeholders, failing hooks, empty shells, uncited policies,
 unresolved gaps, drifted state, strict-cascade violations, required-item
 gaps, risk fingerprint, traffic topology).
 
@@ -30,5 +30,5 @@ proposed charter edits. Pruning diffs land in
 
 ## Asymmetry
 
-Guides churn often; corpus rarely. Audit reflects that — guide proposals
-are routine, corpus proposals are rare and load-bearing.
+Rules churn often; references rarely. Audit reflects that: rule proposals
+are routine, reference proposals are rare and load-bearing.

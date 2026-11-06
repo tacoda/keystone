@@ -2,7 +2,7 @@
 
 Simplicity is the value behind nearly every other principle in this layer. Stated most directly by Edsger Dijkstra: *simplicity is a prerequisite for reliability.* You cannot reason about, test, secure, or safely change what you cannot hold in your head. This file is about simplicity as a **value**; [[simple-design]] is about Kent Beck's mechanics for achieving it.
 
-> **Rules extracted:** [`guides/principles/simplicity.md`](../../guides/principles/simplicity.md). This file holds the full reasoning, anti-patterns, and references.
+> **Rules extracted:** [`rules/principles/simplicity.md`](../../rules/principles/simplicity.md). This file holds the full reasoning, anti-patterns, and references.
 
 ## The canonical statements
 

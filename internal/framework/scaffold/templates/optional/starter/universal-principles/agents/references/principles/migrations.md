@@ -2,7 +2,7 @@
 
 A schema migration changes the *shape* of state that survives the deploy. The deploy itself is finite; the state is permanent. Migrations that treat schema as code — atomically, with rollback by `git revert` — are migrations that lose data. The discipline of migrations is the discipline of separating the *change in the schema* from the *change in the code that uses it*.
 
-> **Rules extracted:** [`guides/principles/migrations.md`](../../guides/principles/migrations.md).
+> **Rules extracted:** [`rules/principles/migrations.md`](../../rules/principles/migrations.md).
 
 ## What it asks of you
 
@@ -37,4 +37,4 @@ The "blue-green deploy + migration" pattern fails when a migration is not backwa
 
 ---
 
-Forward link: [`guides/principles/migrations.md`](../../guides/principles/migrations.md).
+Forward link: [`rules/principles/migrations.md`](../../rules/principles/migrations.md).

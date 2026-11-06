@@ -6,7 +6,7 @@ last_reviewed: 2026-06-18
 ---
 # Code Debt Ledger
 
-Populated by the **audit** and **debt-review** actions from the [code-debt sensor](../../agents/code-debt.md). Hand-edits during those actions are OK.
+Populated by the **audit** and **debt-review** commands from the [code-debt subagent](../../agents/code-debt.md). Hand-edits during those commands are OK.
 
 Paired ledger: [`charter-debt.md`](charter-debt.md) — debt in the charter itself. Tracked separately on purpose.
 
@@ -18,11 +18,11 @@ The known debt this codebase carries. One row per item. The point of the ledger 
 |---|---|---|---|---|---|---|
 | `<DEBT-001>` | `<path:line or region>` | `<deliberate|drift|shortcut|discovery>` | `<load-bearing|noisy|stale>` | `<name or team>` | `<event or date>` | `<one line>` |
 
-(No entries yet. The **code-debt** sensor wires up once `grep` over the diff finds debt markers; sweep with **debt-review** to triage.)
+(No entries yet. The **code-debt** subagent wires up once `grep` over the diff finds debt markers; sweep with **debt-review** to triage.)
 
 ## Categories
 
-See [`../../sensors/code-debt.md`](../../agents/code-debt.md) for category and severity definitions. Keep them consistent — the planning phase reads this table verbatim.
+See [`.agents/agents/code-debt.md`](../../agents/code-debt.md) for category and severity definitions. Keep them consistent, because the planning phase reads this table verbatim.
 
 ## How to use it
 

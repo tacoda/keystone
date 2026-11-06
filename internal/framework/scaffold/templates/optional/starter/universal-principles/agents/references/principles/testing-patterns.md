@@ -4,7 +4,7 @@ How to build a test suite that stays useful for years. [[tdd]] states the loop; 
 
 The central commitment of this file is **Chicago-style** (classicist) testing: prefer real objects over test doubles wherever possible, and **mock only at the actual boundaries** of your system. The arguments for this position were made by Beck in the original TDD practice and articulated in detail by Martin Fowler in "Mocks Aren't Stubs" (2007); the contrasting London school is described in [[tdd]].
 
-> **Rules extracted:** [`guides/principles/testing-patterns.md`](../../guides/principles/testing-patterns.md). This file holds the full reasoning, anti-patterns, and references.
+> **Rules extracted:** [`rules/principles/testing-patterns.md`](../../rules/principles/testing-patterns.md). This file holds the full reasoning, anti-patterns, and references.
 
 ## Mock only at actual boundaries
 

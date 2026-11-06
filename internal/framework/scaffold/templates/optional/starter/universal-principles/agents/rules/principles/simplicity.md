@@ -1,7 +1,7 @@
 # Simplicity — rules
 
-The non-negotiable and strongly-preferred rules from [`corpus/principles/simplicity.md`](../../corpus/principles/simplicity.md).
-Loaded ambient; enforced by the [drift sensor](../../sensors/drift.md). The corpus file holds the full reasoning, anti-patterns, and references.
+The non-negotiable and strongly-preferred rules from [`references/principles/simplicity.md`](../../references/principles/simplicity.md).
+Loaded ambient; enforced by the [drift hook](../../hooks/drift.md). The reference file holds the full reasoning, anti-patterns, and references.
 
 ## IRON LAW
 
@@ -15,4 +15,4 @@ Loaded ambient; enforced by the [drift sensor](../../sensors/drift.md). The corp
 
 ---
 
-Traces to: [`corpus/principles/simplicity.md`](../../corpus/principles/simplicity.md).
+Traces to: [`references/principles/simplicity.md`](../../references/principles/simplicity.md).

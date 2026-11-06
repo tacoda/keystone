@@ -5,7 +5,7 @@ returns: review-findings
 id: spec-adherence
 description: 'Walks the spec''s acceptance criteria against the current diff.'
 ---
-# Sensor: spec-adherence
+# Hook: spec-adherence
 
 Walks the spec's acceptance criteria against the current diff.
 

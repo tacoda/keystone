@@ -6,7 +6,7 @@ run: '# TODO: wire the commit-message check'
 id: commit-message
 description: 'Validates conventional-commit format and absence of AI attribution.'
 ---
-# Sensor: commit-message
+# Hook: commit-message
 
 Validates conventional-commit format and absence of AI attribution.
 

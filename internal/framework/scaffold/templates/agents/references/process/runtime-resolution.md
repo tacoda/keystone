@@ -10,15 +10,15 @@ noisy, and unauditable.
 
 ## Why escalate instead of fanning out
 
-A naive approach is "load every rule, every corpus entry, every
+A naive approach is "load every rule, every reference, every
 external source for the touched files." The result:
 
-- **Context blowout.** Even modest projects have dozens of guides and
-  many more corpus entries. Loading them all on every scenario fills
+- **Context blowout.** Even modest projects have dozens of rules and
+  many more references. Loading them all on every scenario fills
   the agent's window with content that doesn't apply.
-- **Noise crowds out signal.** Five corpus entries scrolling past one
+- **Noise crowds out signal.** Five references scrolling past one
   iron-law rule means the iron law gets weighted less in the agent's
-  reasoning. The signal is the rule; corpus is supporting evidence,
+  reasoning. The signal is the rule; references are supporting evidence,
   not equal voice.
 - **External APIs are slow and rate-limited.** Linear, Confluence,
   team wikis all carry latency and quota. Fanning out on every
@@ -34,7 +34,7 @@ the previous stage suffice?" answer.
 
 ## Anti-patterns
 
-- **Loading corpus by default.** Corpus is the *why*, not the *what*.
+- **Loading references by default.** A reference is the *why*, not the *what*.
   Opening it for every rule pollutes context with reasoning the agent
   doesn't need to act.
 - **Querying external sources without a rule prompt.** Sources exist
@@ -54,4 +54,4 @@ the previous stage suffice?" answer.
   (information hiding) and chapter 10 (defining errors out of
   existence) inform why staged retrieval beats firehose retrieval.
 
-Back to the rules: [`guides/process/runtime-resolution.md`](../../rules/process/runtime-resolution.md).
+Back to the rules: [`rules/process/runtime-resolution.md`](../../rules/process/runtime-resolution.md).

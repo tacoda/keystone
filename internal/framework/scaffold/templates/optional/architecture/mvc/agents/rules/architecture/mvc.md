@@ -1,7 +1,7 @@
 # Model-View-Controller (MVC) — rules
 
-The rules from [`corpus/mvc.md`](../corpus/mvc.md).
-Loaded ambient; enforced by the [drift sensor](../../../sensors/drift.md). The corpus file holds the full reasoning, anti-patterns, and references.
+The rules from [`references/architecture/mvc.md`](../../references/architecture/mvc.md).
+Loaded ambient; enforced by the [drift hook](../../hooks/drift.md). The reference file holds the full reasoning, anti-patterns, and references.
 
 ## IRON LAW
 
@@ -16,4 +16,4 @@ Loaded ambient; enforced by the [drift sensor](../../../sensors/drift.md). The c
 
 ---
 
-Traces to: [`corpus/mvc.md`](../corpus/mvc.md).
+Traces to: [`references/architecture/mvc.md`](../../references/architecture/mvc.md).

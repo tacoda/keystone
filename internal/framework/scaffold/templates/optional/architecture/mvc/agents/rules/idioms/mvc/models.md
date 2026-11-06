@@ -1,7 +1,7 @@
 # Models — rules
 
-The rules from [`corpus/idioms/mvc/models.md`](../../../corpus/idioms/mvc/models.md).
-Loaded ambient; enforced by the [drift sensor](../../../sensors/drift.md).
+The rules from [`references/idioms/mvc/models.md`](../../../references/idioms/mvc/models.md).
+Loaded ambient; enforced by the [drift hook](../../../hooks/drift.md).
 
 ## IRON LAW
 
@@ -16,4 +16,4 @@ Loaded ambient; enforced by the [drift sensor](../../../sensors/drift.md).
 
 ---
 
-Traces to: [`corpus/idioms/mvc/models.md`](../../../corpus/idioms/mvc/models.md).
+Traces to: [`references/idioms/mvc/models.md`](../../../references/idioms/mvc/models.md).

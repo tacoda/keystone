@@ -10,7 +10,7 @@ Phase 1 of the six-phase lifecycle. Forces the agent to write down what
 notes / PR description / equivalent — acceptance criteria the agent and
 user both sign off on.
 
-Canonical playbook: `.agents/commands/spec.md`. Full discipline
+Canonical command: `.agents/commands/spec.md`. Full discipline
 at `.agents/rules/process/spec.md`.
 
 ## Run

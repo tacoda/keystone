@@ -1,7 +1,7 @@
 # Hexagonal Architecture — rules
 
-The rules from [`corpus/hexagonal.md`](../corpus/hexagonal.md).
-Loaded ambient; enforced by the [drift sensor](../../../sensors/drift.md). The corpus file holds the full reasoning, anti-patterns, and references.
+The rules from [`references/architecture/hexagonal.md`](../../references/architecture/hexagonal.md).
+Loaded ambient; enforced by the [drift hook](../../hooks/drift.md). The reference file holds the full reasoning, anti-patterns, and references.
 
 ## IRON LAW
 
@@ -16,4 +16,4 @@ Loaded ambient; enforced by the [drift sensor](../../../sensors/drift.md). The c
 
 ---
 
-Traces to: [`corpus/hexagonal.md`](../corpus/hexagonal.md).
+Traces to: [`references/architecture/hexagonal.md`](../../references/architecture/hexagonal.md).

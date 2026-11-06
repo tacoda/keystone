@@ -1,6 +1,6 @@
 {
   "version": "5.0",
-  "generated": "2026-11-06T15:49:45Z",
+  "generated": "2026-11-06T15:57:07Z",
   "primitives": [
     {
       "kind": "command",
@@ -19,7 +19,7 @@
     {
       "kind": "command",
       "id": "check-drift",
-      "description": "Run the drift sensor on the current diff.",
+      "description": "Run the drift hook on the current diff.",
       "path": ".agents/commands/check-drift.md",
       "provenance": "project"
     },
@@ -54,7 +54,7 @@
     {
       "kind": "command",
       "id": "review",
-      "description": "Run the four review sensors on the current diff.",
+      "description": "Run the four review subagents on the current diff.",
       "path": ".agents/commands/review.md",
       "provenance": "project"
     },
@@ -68,14 +68,14 @@
     {
       "kind": "command",
       "id": "synthesize",
-      "description": "Promote learning-inbox candidates into the right corpus or guide layer.",
+      "description": "Promote learning-inbox candidates into the right reference or rule layer.",
       "path": ".agents/commands/synthesize.md",
       "provenance": "project"
     },
     {
       "kind": "command",
       "id": "verify",
-      "description": "Run the verification sensors — lint, type-check, test, build, drift, commit-message.",
+      "description": "Run the verification hooks: lint, type-check, test, build, drift, commit-message.",
       "path": ".agents/commands/verify.md",
       "provenance": "project"
     },
@@ -121,7 +121,7 @@
     {
       "kind": "hook",
       "id": "drift",
-      "description": "Compares the diff (or full codebase, during audit) against loaded guide rules.",
+      "description": "Compares the diff (or full codebase, during audit) against loaded rules.",
       "mode": "computational",
       "event": "PostToolUse",
       "run": "keystone verify --sensor drift",
@@ -284,7 +284,7 @@
     {
       "kind": "reference",
       "id": "corpus/idioms/charter-content/primitive-shape",
-      "description": "Frontmatter, paths, and corpus/guide pairing for charter primitives.",
+      "description": "Frontmatter, paths, and reference/rule pairing for charter primitives.",
       "path": ".agents/references/idioms/charter-content/primitive-shape.md",
       "provenance": "project"
     },
@@ -319,14 +319,14 @@
     {
       "kind": "reference",
       "id": "corpus/state/GLOBS_INDEX",
-      "description": "Reverse-index of every guide that declares globs: in its frontmatter.",
+      "description": "Reverse-index of every rule that declares paths: in its frontmatter.",
       "path": ".agents/references/state/GLOBS_INDEX.md",
       "provenance": "project"
     },
     {
       "kind": "reference",
       "id": "corpus/state/INSTALL_PROFILE",
-      "description": "Selections captured by `keystone init`; read by the bootstrap action.",
+      "description": "Selections captured by `keystone init`; read by the bootstrap command.",
       "path": ".agents/references/state/INSTALL_PROFILE.md",
       "provenance": "project"
     },
@@ -541,7 +541,7 @@
     {
       "kind": "rule",
       "id": "process/runtime-resolution",
-      "description": "How the agent resolves a scenario — staged escalation from rules to corpus to external sources, asking before applying.",
+      "description": "How the agent resolves a scenario: staged escalation from rules to references to external sources, asking before applying.",
       "severity": "must",
       "path": ".agents/rules/process/runtime-resolution.md",
       "provenance": "project"
@@ -658,7 +658,7 @@
     {
       "kind": "skill",
       "id": "keystone-bootstrap",
-      "description": "One-time initial charter scaffold — detect stack, seed state, scaffold idioms, classify sensors, build the globs index. Triggers: keystone bootstrap; keystone:bootstrap; /keystone:bootstrap; run bootstrap; bootstrap the charter; bootstrap the keystone charter; first-time setup.",
+      "description": "One-time initial charter scaffold — detect stack, seed state, scaffold idioms, classify hooks, build the globs index. Triggers: keystone bootstrap; keystone:bootstrap; /keystone:bootstrap; run bootstrap; bootstrap the charter; bootstrap the keystone charter; first-time setup.",
       "metadata": {
         "model": "opus"
       },
@@ -678,7 +678,7 @@
     {
       "kind": "skill",
       "id": "keystone-check-drift",
-      "description": "Run the drift sensor on the current diff — fast pre-verify check that loaded charter rules still match what the code is doing. Triggers: keystone check-drift; keystone:check-drift; /keystone:check-drift; check drift; run drift sensor; drift check.",
+      "description": "Run the drift hook on the current diff — fast pre-verify check that loaded charter rules still match what the code is doing. Triggers: keystone check-drift; keystone:check-drift; /keystone:check-drift; check drift; run drift hook; drift check.",
       "metadata": {
         "model": "sonnet"
       },
@@ -695,7 +695,7 @@
     {
       "kind": "skill",
       "id": "keystone-debt-review",
-      "description": "Triage the code-debt ledger — review the debt sensor's findings and update corpus/state/code-debt.md. Triggers: keystone debt-review; keystone:debt-review; /keystone:debt-review; review code debt; triage debt ledger; debt review.",
+      "description": "Triage the code-debt ledger — review the code-debt findings and update .agents/references/state/code-debt.md. Triggers: keystone debt-review; keystone:debt-review; /keystone:debt-review; review code debt; triage debt ledger; debt review.",
       "metadata": {
         "model": "opus"
       },
@@ -728,7 +728,7 @@
     {
       "kind": "skill",
       "id": "keystone-learn",
-      "description": "Capture a learning candidate (surprise, incident, review finding) into .keystone/learning/inbox/ for later synthesis. Triggers: keystone learn; keystone:learn; /keystone:learn; run the learn action; capture a learning candidate; log a surprise.",
+      "description": "Capture a learning candidate (surprise, incident, review finding) into .keystone/learning/inbox/ for later synthesis. Triggers: keystone learn; keystone:learn; /keystone:learn; run the learn command; capture a learning candidate; log a surprise.",
       "metadata": {
         "model": "opus"
       },
@@ -849,7 +849,7 @@
     {
       "kind": "skill",
       "id": "keystone-review",
-      "description": "Run the four review sensors on the current diff (functional, security, risk, deployment). Triggers: keystone review; keystone:review; /keystone:review; review the diff; run review sensors; semantic review.",
+      "description": "Run the four review subagents on the current diff (functional, security, risk, deployment). Triggers: keystone review; keystone:review; /keystone:review; review the diff; run review subagents; semantic review.",
       "metadata": {
         "model": "opus"
       },
@@ -885,7 +885,7 @@
     {
       "kind": "skill",
       "id": "keystone-synthesize",
-      "description": "Promote accepted learning-inbox candidates into the right corpus / guide / sensor layer, then refresh INDEX.json. Triggers: keystone synthesize; keystone:synthesize; /keystone:synthesize; run synthesize; promote learning candidates; promote inbox to guides.",
+      "description": "Promote accepted learning-inbox candidates into the right reference / rule / hook layer, then refresh INDEX.json. Triggers: keystone synthesize; keystone:synthesize; /keystone:synthesize; run synthesize; promote learning candidates; promote inbox to rules.",
       "metadata": {
         "model": "opus"
       },
@@ -996,7 +996,7 @@
     {
       "kind": "subagent",
       "id": "code-reviewer",
-      "description": "General code reviewer that runs the four review sensors on the current diff and surfaces findings.",
+      "description": "General code reviewer that runs the four review checks on the current diff and surfaces findings.",
       "tools": [
         "Read",
         "Grep",
@@ -1095,7 +1095,7 @@
     {
       "kind": "subagent",
       "id": "quality-radar",
-      "description": "Aggregates verification and review sensors into a five-dimension scorecard for the current diff (or the whole codebase, on audit).",
+      "description": "Aggregates verification hooks and review subagents into a five-dimension scorecard for the current diff (or the whole codebase, on audit).",
       "tools": [
         "Read",
         "Grep"
@@ -1200,7 +1200,7 @@
     {
       "kind": "subagent",
       "id": "synthesizer",
-      "description": "Promotes learning-inbox candidates into the right corpus or guide layer.",
+      "description": "Promotes learning-inbox candidates into the right reference or rule layer.",
       "tools": [
         "Read",
         "Grep",
@@ -1232,7 +1232,7 @@
     {
       "kind": "subagent",
       "id": "verifier",
-      "description": "Runs the verification sensors — lint, type-check, test, build, drift, commit-message — and reports the gate.",
+      "description": "Runs the verification hooks (lint, type-check, test, build, drift, commit-message) and reports the gate.",
       "tools": [
         "Read",
         "Grep",

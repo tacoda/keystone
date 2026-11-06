@@ -8,7 +8,7 @@ mode: computational
 event: Stop
 run: "true"
 ---
-# Sensor: spec-adherence
+# Hook: spec-adherence
 
 Walks the spec's acceptance criteria against the current diff.
 

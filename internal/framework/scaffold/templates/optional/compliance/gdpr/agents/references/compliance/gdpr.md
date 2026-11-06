@@ -4,7 +4,7 @@ EU regulation 2016/679, in force since May 2018. Governs the processing of perso
 
 This file states the engineering-relevant principles. It is **not legal advice**; the regulation has scope, exceptions, and remedies that require legal counsel to apply correctly to a specific business. The compliance program is the lawyers' deliverable; what the engineering team owns is *making the system compliant by design*.
 
-> **Rules extracted:** [`guides/gdpr.md`](../guides/gdpr.md). This file holds the full reasoning, anti-patterns, and references.
+> **Rules extracted:** [`rules/compliance/gdpr.md`](../../rules/compliance/gdpr.md). This file holds the full reasoning, anti-patterns, and references.
 
 ## The engineering-relevant principles
 

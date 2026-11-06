@@ -1,6 +1,6 @@
 # Dependencies — rules
 
-The non-negotiable and strongly-preferred rules from [`corpus/principles/dependencies.md`](../../corpus/principles/dependencies.md). Loaded ambient; enforced at planning, implementation, and review.
+The non-negotiable and strongly-preferred rules from [`references/principles/dependencies.md`](../../references/principles/dependencies.md). Loaded ambient; enforced at planning, implementation, and review.
 
 ## GOLDEN RULE
 
@@ -16,14 +16,14 @@ The non-negotiable and strongly-preferred rules from [`corpus/principles/depende
 - **Lockfile changes are review-visible.** A diff that touches a lockfile but not its manifest is suspicious — investigate.
 - **No transitive dependency added directly.** If the agent finds it needs a package only because another package needs it, pin the *direct* dependency, not the transitive.
 - **No `--force`, `--legacy-peer-deps`, or version-resolution bypass flags** to make an install succeed. The error is the signal.
-- **Removed code → removed dependency.** When the last call site disappears, the dependency goes too. The drift sensor watches for orphans.
+- **Removed code → removed dependency.** When the last call site disappears, the dependency goes too. The drift hook watches for orphans.
 - **Security advisories block the release phase.** If `npm audit`, `pip-audit`, `bundle audit`, `cargo audit`, or `govulncheck` reports a high-severity vulnerability on a touched dependency, fix it before merge.
 
-## Sensors
+## Hooks
 
-- **Bootstrap** records the package manager and inserts the install / upgrade / audit commands into `corpus/state/CODEBASE_STATE.md`.
-- The **drift sensor** flags new direct dependencies introduced by the diff so the review phase can confirm they were approved at planning.
+- **Bootstrap** records the package manager and inserts the install / upgrade / audit commands into `references/state/CODEBASE_STATE.md`.
+- The **drift hook** flags new direct dependencies introduced by the diff so the review phase can confirm they were approved at planning.
 
 ---
 
-Traces to: [`corpus/principles/dependencies.md`](../../corpus/principles/dependencies.md). See also: [[secrets-management]], [[scoping]].
+Traces to: [`references/principles/dependencies.md`](../../references/principles/dependencies.md). See also: [[secrets-management]], [[scoping]].

@@ -2,7 +2,7 @@
 
 A controller is a **translator** — it takes input from outside the system, asks the model to do something, and picks a view to render. If a controller is computing business rules, those rules have leaked from the model.
 
-> **Rules extracted:** [`guides/idioms/mvc/controllers.md`](../../../guides/idioms/mvc/controllers.md).
+> **Rules extracted:** [`rules/idioms/mvc/controllers.md`](../../../rules/idioms/mvc/controllers.md).
 
 ## What belongs in a controller
 
@@ -36,4 +36,4 @@ A healthy controller has **under ~10 actions** — usually the standard REST set
 - [ ] No SQL or raw query construction in the controller — that's the model's job.
 - [ ] The controller picks a view; the view does not pick a model.
 
-**Traces to:** [`corpus/principles/mvc.md`](../../principles/mvc.md), [`corpus/principles/separation-of-concerns.md`](../../principles/separation-of-concerns.md).
+**Traces to:** [`references/architecture/mvc.md`](../../architecture/mvc.md), [`references/principles/separation-of-concerns.md`](../../principles/separation-of-concerns.md).

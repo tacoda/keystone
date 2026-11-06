@@ -13,7 +13,7 @@ tags:
 ---
 # Stdlib first — rules
 
-The rules from [`corpus/idioms/go/stdlib-first.md`](../../../references/idioms/go/stdlib-first.md).
+The rules from [`references/idioms/go/stdlib-first.md`](../../../references/idioms/go/stdlib-first.md).
 
 ## IRON LAW
 

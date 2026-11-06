@@ -2,7 +2,7 @@
 
 A view's job is **rendering**. Show the user what the model says. Receive the user's gestures and forward them to the controller. Views should be the dumbest layer in the stack.
 
-> **Rules extracted:** [`guides/idioms/mvc/views.md`](../../../guides/idioms/mvc/views.md).
+> **Rules extracted:** [`rules/idioms/mvc/views.md`](../../../rules/idioms/mvc/views.md).
 
 ## What belongs in a view
 
@@ -41,4 +41,4 @@ A view-model is worth the extra type when:
 - [ ] Conditional rendering reads a precomputed flag, not raw model state.
 - [ ] Views work against a stable presenter or view-model, not an ORM entity.
 
-**Traces to:** [`corpus/principles/mvc.md`](../../principles/mvc.md), [`corpus/principles/information-hiding.md`](../../principles/information-hiding.md).
+**Traces to:** [`references/architecture/mvc.md`](../../architecture/mvc.md), [`references/principles/information-hiding.md`](../../principles/information-hiding.md).

@@ -4,7 +4,7 @@ Two units of work that may run at the same time, on the same data, are a source 
 
 The deeper truth: most concurrency bugs are not bugs *in* concurrent code. They are bugs of **design** — a shared mutable thing nobody noticed was shared, or noticed but did not protect. Concurrency principles are mostly about removing shared mutable state, not about synchronizing it.
 
-> **Rules extracted:** [`guides/principles/concurrency.md`](../../guides/principles/concurrency.md). This file holds the full reasoning, anti-patterns, and references.
+> **Rules extracted:** [`rules/principles/concurrency.md`](../../rules/principles/concurrency.md). This file holds the full reasoning, anti-patterns, and references.
 
 ## The forces
 

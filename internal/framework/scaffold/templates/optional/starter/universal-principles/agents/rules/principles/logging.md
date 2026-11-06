@@ -1,6 +1,6 @@
 # Logging — rules
 
-The non-negotiable and strongly-preferred rules from [`corpus/principles/logging.md`](../../corpus/principles/logging.md). Loaded ambient. Sibling of [[observability]] — observability is the why; logging is one of the hows.
+The non-negotiable and strongly-preferred rules from [`references/principles/logging.md`](../../references/principles/logging.md). Loaded ambient. Sibling of [[observability]] — observability is the why; logging is one of the hows.
 
 ## IRON LAW
 
@@ -23,11 +23,11 @@ Tokens, passwords, session cookies, API keys, full credit-card numbers, governme
 - **Sample high-volume logs.** A log line that fires a million times an hour is noise. Sample, or remove.
 - **Errors carry the cause chain.** A re-raised exception that drops the original is a debugger's enemy. Use `raise ... from`, `Error.cause`, `errors.Wrap`, depending on the language.
 
-## Sensors
+## Hooks
 
-- The **drift sensor** flags `print(`, `console.log(`, `fmt.Println(`, `dbg!(` and the project-specific equivalents recorded by bootstrap.
-- **Bootstrap** records the logger (e.g., `structlog`, `pino`, `slog`, `tracing`, Monolog) and any PII-redaction middleware in `corpus/state/CODEBASE_STATE.md`.
+- The **drift hook** flags `print(`, `console.log(`, `fmt.Println(`, `dbg!(` and the project-specific equivalents recorded by bootstrap.
+- **Bootstrap** records the logger (e.g., `structlog`, `pino`, `slog`, `tracing`, Monolog) and any PII-redaction middleware in `references/state/CODEBASE_STATE.md`.
 
 ---
 
-Traces to: [`corpus/principles/logging.md`](../../corpus/principles/logging.md). See also: [[observability]], [[secrets-management]], [[sensitive-files]].
+Traces to: [`references/principles/logging.md`](../../references/principles/logging.md). See also: [[observability]], [[secrets-management]], [[sensitive-files]].

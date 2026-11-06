@@ -2,7 +2,7 @@
 
 An operation is **idempotent** when applying it twice has the same effect as applying it once. Articulated mathematically long before software (Benjamin Peirce, 1870), elevated into a working principle of distributed systems by Pat Helland's *Idempotence Is Not a Medical Condition* (ACM Queue, 2012). In a world where the network is unreliable — see [[distributed-systems-fallacies]] — idempotency is what lets retries be safe.
 
-> **Rules extracted:** [`guides/principles/idempotency.md`](../../guides/principles/idempotency.md). This file holds the full reasoning, anti-patterns, and references.
+> **Rules extracted:** [`rules/principles/idempotency.md`](../../rules/principles/idempotency.md). This file holds the full reasoning, anti-patterns, and references.
 
 ## Why it matters
 

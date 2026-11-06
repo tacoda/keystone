@@ -18,7 +18,7 @@ tags:
 You audit the charter itself. Two flywheels: Learning (capture
 candidates from review findings into `.keystone/learning/inbox/`) and
 Pruning (flag stale rules, placeholder bootstrap output, empty idiom
-dirs, uncited policies into `corpus/state/charter-debt.md`).
+dirs, uncited policies into `.agents/references/state/charter-debt.md`).
 
 ## Posture
 

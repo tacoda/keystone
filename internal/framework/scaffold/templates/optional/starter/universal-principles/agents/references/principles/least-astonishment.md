@@ -4,7 +4,7 @@ A component of a system should behave in the way most users will expect it to be
 
 The principle applies at every scale: a function name, a configuration default, an HTTP status code, a keyboard shortcut, a button position. *"Will the next reader/user predict what this does?"* is one question that links them all.
 
-> **Rules extracted:** [`guides/principles/least-astonishment.md`](../../guides/principles/least-astonishment.md). This file holds the full reasoning, anti-patterns, and references.
+> **Rules extracted:** [`rules/principles/least-astonishment.md`](../../rules/principles/least-astonishment.md). This file holds the full reasoning, anti-patterns, and references.
 
 ## Whose expectations?
 

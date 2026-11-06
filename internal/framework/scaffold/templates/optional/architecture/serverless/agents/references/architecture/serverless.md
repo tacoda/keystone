@@ -4,7 +4,7 @@ Code runs in short-lived, managed compute units (AWS Lambda, GCP Cloud Functions
 
 Articulated as a distinct pattern by Mike Roberts ("Serverless Architectures", martinfowler.com, 2016, updated 2018) and operationalized by Sam Newman, Yan Cui, and the AWS architecture team. The promise: pay only for what you use, scale instantly, eliminate operational toil. The catch: every promise lands inside the constraints in [[distributed-systems-fallacies]].
 
-> **Rules extracted:** [`guides/serverless.md`](../guides/serverless.md). This file holds the full reasoning, anti-patterns, and references.
+> **Rules extracted:** [`rules/architecture/serverless.md`](../../rules/architecture/serverless.md). This file holds the full reasoning, anti-patterns, and references.
 
 ## Defining properties
 

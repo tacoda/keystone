@@ -4,7 +4,7 @@ A style in which a system is built as a suite of **small, independently-deployab
 
 The promise is real; the cost is high. Microservices trade the complexity of a large codebase for the complexity of a distributed system — and the second complexity is materially harder than the first. Choose this architecture only if the value of independent deploy and team autonomy exceeds the cost of operating a distributed system at scale. See [[distributed-systems-fallacies]].
 
-> **Rules extracted:** [`guides/microservices.md`](../guides/microservices.md). This file holds the full reasoning, anti-patterns, and references.
+> **Rules extracted:** [`rules/architecture/microservices.md`](../../rules/architecture/microservices.md). This file holds the full reasoning, anti-patterns, and references.
 
 ## What "microservice" actually means
 

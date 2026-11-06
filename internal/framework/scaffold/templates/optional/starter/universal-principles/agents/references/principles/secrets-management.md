@@ -4,9 +4,9 @@ A *secret* is any value whose disclosure breaks the security model — credentia
 
 This file states the principles. Stack-specific mechanisms (AWS Secrets Manager, HashiCorp Vault, GCP Secret Manager, Kubernetes external-secrets, sealed-secrets, sops, etc.) belong in `../idioms/<stack>/`. Companion to [[security]] (IRON LAW: NO SECRETS IN SOURCE) and to [[security-threats]] (the threat class that secrets-management defends against).
 
-> **Rules extracted:** [`guides/principles/secrets-management.md`](../../guides/principles/secrets-management.md). This file holds the full reasoning, anti-patterns, and references.
+> **Rules extracted:** [`rules/principles/secrets-management.md`](../../rules/principles/secrets-management.md). This file holds the full reasoning, anti-patterns, and references.
 
-> **Rules extracted:** [`guides/principles/secrets-management.md`](../../guides/principles/secrets-management.md). This file holds the full reasoning, anti-patterns, and references.
+> **Rules extracted:** [`rules/principles/secrets-management.md`](../../rules/principles/secrets-management.md). This file holds the full reasoning, anti-patterns, and references.
 
 ## The lifecycle
 

@@ -1,7 +1,7 @@
 # Testing Patterns — rules
 
-The non-negotiable and strongly-preferred rules from [`corpus/principles/testing-patterns.md`](../../corpus/principles/testing-patterns.md).
-Loaded ambient; enforced by the [drift sensor](../../sensors/drift.md). The corpus file holds the full reasoning, anti-patterns, and references.
+The non-negotiable and strongly-preferred rules from [`references/principles/testing-patterns.md`](../../references/principles/testing-patterns.md).
+Loaded ambient; enforced by the [drift hook](../../hooks/drift.md). The reference file holds the full reasoning, anti-patterns, and references.
 
 ## IRON LAWS
 
@@ -19,4 +19,4 @@ Loaded ambient; enforced by the [drift sensor](../../sensors/drift.md). The corp
 
 ---
 
-Traces to: [`corpus/principles/testing-patterns.md`](../../corpus/principles/testing-patterns.md).
+Traces to: [`references/principles/testing-patterns.md`](../../references/principles/testing-patterns.md).

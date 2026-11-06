@@ -6,7 +6,7 @@ disable-model-invocation: true
 
 # bootstrap
 
-**One-time initial charter scaffold.** Detect the project's stack, seed `corpus/state/`, scaffold idiom directories with code-grounded globs, inventory computational guides, classify sensors, and generate the globs index. Run once per project.
+**One-time initial charter scaffold.** Detect the project's stack, seed `.agents/references/state/`, scaffold idiom directories with code-grounded `paths:`, inventory computational rules, classify hooks, and generate the globs index. Run once per project.
 
 ## Activities
 
@@ -16,27 +16,13 @@ Every activity below produces a concrete file write. Detecting, narrating, or su
 2. **Seed `.agents/references/state/CODEBASE_STATE.md`.** Propose an edit that replaces every template placeholder with real values:
    - Detected stacks
    - Tool commands (lint / type-check / test / build / coverage) — actual commands, not placeholders
-   - Region map (top-level directories → which stacks they hold) — this becomes the source of truth for the globs in step 3
+   - Region map (top-level directories → which stacks they hold). This becomes the source of truth for the `paths:` in step 3
    - CI platform (GitHub Actions / GitLab CI / etc.)
-3. **Seed stack idioms with globs.** For each detected stack, scaffold `.agents/references/idioms/<stack>/` and the paired `.agents/rules/idioms/<stack>/`. The guides directory gets a `README.md` describing the stack, and each seeded guide's frontmatter declares `globs:` derived from the region map written in step 2 — the globs reflect real code paths, not invented patterns. Populate idiom files as patterns emerge; new files inherit the region's globs unless they cover a sub-tree (in which case narrow them).
-4. **Inventory computational guides.** Record LSP, formatter, and editor enforcement (`.editorconfig`, pre-commit hooks, etc.) under `.agents/rules/computational/`. Each entry records `globs:` set to the paths the tool actually covers (read from its config file) — this lets the **stack-drift** sensor compare documented vs. effective configuration.
-5. **Classify sensors.** For each sensor in `.agents/hooks/`, propose an edit to `CODEBASE_STATE.md` recording whether this adapter can run it. Inferential sensors (`review-functional`, `review-security`, `review-risk`, `review-deployment`, `spec-adherence`) and computational sensors get separate sections.
-6. **Generate `.agents/references/state/GLOBS_INDEX.md`.** Walk every guide under `.agents/rules/` and `.keystone/policies/*/guides/`, read each guide's `globs:` frontmatter, and write the reverse-index (glob pattern → list of guides claiming it). Touch only the `## Index` table; preserve everything else. The index ships with an empty `<pattern>` placeholder row — bootstrap replaces it with real data. Pointer-style adapters (Claude Code, Codex, Aider) read this index to gate idiom loading on the touched-files set.
-7. **Project to per-adapter rule surfaces.** For each guide with `globs:` declared, produce the agent-specific projection:
-   - **Cursor** (if `.cursor/rules/` exists in the install) — write `.cursor/rules/keystone-<topic>-<name>.mdc` for every guide that declares `globs:`. The `<topic>-<name>` slug comes from the guide's path under `.agents/rules/` (e.g. `guides/idioms/typescript/hooks.md` → `keystone-idioms-typescript-hooks.mdc`). The `.mdc` frontmatter mirrors the guide's `globs:`; the body is a single-line pointer at the source guide. Guides without `globs:` get no `.mdc`.
-   - **Pointer-style adapters** (Claude Code, Codex, Aider, Cline, Continue, Goose, Pi) — `GLOBS_INDEX.md` from step 6 *is* the projection. No per-guide file is written; each adapter's `orient` playbook reads the index.
-   - **`_generic`** — skip. This adapter does not honor `globs:` and falls back to topic defaults.
-
-   Each `.cursor/rules/keystone-<topic>-<name>.mdc` looks like:
-
-   ```mdc
-   ---
-   description: <guide topic> — <guide name>
-   globs: <copied verbatim from the guide's globs:>
-   ---
-
-   Rules from `.agents/rules/<topic>/<name>.md`. Read the guide for the full ruleset.
-   ```
+3. **Seed stack idioms with `paths:`.** For each detected stack, scaffold `.agents/references/idioms/<stack>/` and the paired `.agents/rules/idioms/<stack>/`. The rules directory gets a `README.md` describing the stack. Each seeded rule's frontmatter declares `paths:` derived from the region map written in step 2. The paths reflect real code paths, not invented patterns. Populate idiom files as patterns emerge; new files inherit the region's `paths:` unless they cover a sub-tree (in which case narrow them).
+4. **Inventory computational rules.** Record LSP, formatter, and editor enforcement (`.editorconfig`, pre-commit hooks, etc.) under `.agents/rules/computational/`. Each entry records `paths:` set to the paths the tool actually covers (read from its config file). The **stack-drift** hook uses these to compare documented vs. effective configuration.
+5. **Classify hooks.** For each hook in `.agents/hooks/`, propose an edit to `CODEBASE_STATE.md` recording whether this host can run it. Inferential hooks (`review-functional`, `review-security`, `review-risk`, `review-deployment`, `spec-adherence`) and computational hooks get separate sections.
+6. **Generate `.agents/references/state/GLOBS_INDEX.md`.** Walk every rule under `.agents/rules/` and `.keystone/policies/*/rules/`. Read each rule's `paths:` frontmatter, and write the reverse-index (path pattern → list of rules claiming it). Touch only the `## Index` table; preserve everything else. The index ships with an empty `<pattern>` placeholder row, and bootstrap replaces it with real data.
+7. **Project to each host.** Run `keystone index && keystone project`. The project step writes each host's rule files from each rule's `paths:`, such as `.cursor/rules/*.mdc` and `.claude/rules/`. On a host with no path-scoped rule format, the agent finds each rule in `.keystone/INDEX.lite.json`.
 
 ## Iron law
 
@@ -49,12 +35,12 @@ Before claiming bootstrap is done, verify empirically:
 - `grep -E '<[^>]+>' .agents/references/state/CODEBASE_STATE.md` returns no template placeholders.
 - The `last_reconciled` front-matter value in `CODEBASE_STATE.md` is today's date.
 - `.agents/references/idioms/<stack>/` exists for each detected stack.
-- `.agents/rules/idioms/<stack>/` exists, paired with each corpus folder above.
-- Every seeded `.agents/rules/idioms/<stack>/*.md` declares `globs:` in its frontmatter, and those globs reference paths that actually exist in the repo.
-- `.agents/references/state/GLOBS_INDEX.md` exists and its `## Index` table lists at least one row per seeded idiom guide (or is explicitly empty if no guides declare `globs:` yet).
-- If `.cursor/rules/` exists in the install, every guide listed in `GLOBS_INDEX.md` has a matching `.cursor/rules/keystone-<topic>-<name>.mdc`. (No orphans either direction.)
+- `.agents/rules/idioms/<stack>/` exists, paired with each reference folder above.
+- Every seeded `.agents/rules/idioms/<stack>/*.md` declares `paths:` in its frontmatter, and those patterns match paths that actually exist in the repo.
+- `.agents/references/state/GLOBS_INDEX.md` exists and its `## Index` table lists at least one row per seeded idiom rule (or is explicitly empty if no rules declare `paths:` yet).
+- `keystone project` ran after the last rule write, and `keystone verify` passes.
 
-If any check fails, the action is not done — return to the corresponding activity.
+If any check fails, the command is not done. Return to the corresponding activity.
 
 ## Context-only questions
 
@@ -71,7 +57,7 @@ of the user during bootstrap:
   preference (paired / solo / autopilot)?
 - **In-flight migrations** — anything mid-port (framework upgrade,
   monolith → services, language change)? Record in
-  `corpus/state/CODEBASE_STATE.md` so the agent doesn't surprise the
+  `.agents/references/state/CODEBASE_STATE.md` so the agent doesn't surprise the
   user with rules that contradict the migration plan.
 - **Code-state assessment** — known debt, deprecated subsystems,
   do-not-touch areas. Different from "what exists" — closer to "what
@@ -83,4 +69,4 @@ These are the only items worth a prompt. Detect everything else.
 
 ## Index refresh
 
-After every state-file write + every idiom-guide / corpus seed, run `keystone index` so `.keystone/INDEX.json` reflects the new primitives. The `keystone:index` skill wraps the CLI invocation. If skills, subagents, or commands were added, also run `keystone project` to regenerate `.claude/` host projections.
+After every state-file write + every idiom rule / reference seed, run `keystone index` so `.keystone/INDEX.json` reflects the new primitives. The `keystone-index` skill wraps the CLI invocation. If skills, subagents, or commands were added, also run `keystone project` to regenerate `.claude/` host projections.

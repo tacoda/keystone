@@ -2,7 +2,7 @@
 
 Two complementary forces that determine whether a system is changeable. Introduced by Larry Constantine and Edward Yourdon in *Structured Design* (1979); the vocabulary predates object-orientation and applies regardless of paradigm.
 
-> **Rules extracted:** [`guides/principles/coupling-cohesion.md`](../../guides/principles/coupling-cohesion.md). This file holds the full reasoning, anti-patterns, and references.
+> **Rules extracted:** [`rules/principles/coupling-cohesion.md`](../../rules/principles/coupling-cohesion.md). This file holds the full reasoning, anti-patterns, and references.
 
 ## The forces
 

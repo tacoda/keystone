@@ -1,6 +1,6 @@
 ---
 name: keystone-bootstrap
-description: 'One-time initial charter scaffold — detect stack, seed state, scaffold idioms, classify sensors, build the globs index. Triggers: keystone bootstrap; keystone:bootstrap; /keystone:bootstrap; run bootstrap; bootstrap the charter; bootstrap the keystone charter; first-time setup.'
+description: 'One-time initial charter scaffold — detect stack, seed state, scaffold idioms, classify hooks, build the globs index. Triggers: keystone bootstrap; keystone:bootstrap; /keystone:bootstrap; run bootstrap; bootstrap the charter; bootstrap the keystone charter; first-time setup.'
 ---
 
 # keystone:bootstrap — make the charter specific to your codebase
@@ -9,9 +9,9 @@ The first thing to run after `keystone init`. Walks the repo, detects
 the real stack, and replaces every template placeholder under
 `.agents/references/state/` with code-grounded values.
 
-The canonical playbook is the **bootstrap action** at
+The canonical procedure is the **bootstrap command** at
 `.agents/commands/bootstrap.md`. This skill is a thin
-trigger that points the agent at it — open the action and execute its
+trigger that points the agent at it. Open the command and execute its
 activities in order.
 
 ## Run
@@ -20,19 +20,19 @@ Open `.agents/commands/bootstrap.md` and execute every activity
 listed under `## Activities`. Every activity must land a real file
 change before moving on; narration does not count.
 
-A short summary of the work, copied from the action:
+A short summary of the work, copied from the command:
 
 1. Detect the stack (`package.json`, `go.mod`, `pyproject.toml`, …).
-2. Seed `corpus/state/CODEBASE_STATE.md` with real tool commands +
+2. Seed `.agents/references/state/CODEBASE_STATE.md` with real tool commands +
    region map.
-3. Scaffold `corpus/idioms/<stack>/` + paired `guides/idioms/<stack>/`
-   with `globs:` derived from the region map.
-4. Inventory `guides/computational/` from `.editorconfig`, LSP config,
+3. Scaffold `.agents/references/idioms/<stack>/` + paired `.agents/rules/idioms/<stack>/`
+   with `paths:` derived from the region map.
+4. Inventory `.agents/rules/computational/` from `.editorconfig`, LSP config,
    formatter configs.
-5. Classify every sensor under `sensors/` as runnable or not for the
+5. Classify every hook under `.agents/hooks/` as runnable or not for the
    selected adapter.
-6. Build `corpus/state/GLOBS_INDEX.md` — the reverse index from
-   glob → guides.
+6. Build `.agents/references/state/GLOBS_INDEX.md`: the reverse index from
+   glob → rules.
 7. Project rules to the agent's native surface (`.cursor/rules/`,
    `.claude/skills/`, or the index-driven path for pointer-style
    adapters).
@@ -55,10 +55,10 @@ Bootstrap is **not** done until:
 - `grep -E '<[^>]+>' .agents/references/state/CODEBASE_STATE.md`
   returns no template placeholders.
 - `last_reconciled` in `CODEBASE_STATE.md` is today's date.
-- `corpus/idioms/<stack>/` and `guides/idioms/<stack>/` exist for
+- `.agents/references/idioms/<stack>/` and `.agents/rules/idioms/<stack>/` exist for
   each detected stack.
-- Every seeded idiom guide declares real `globs:`.
-- `corpus/state/GLOBS_INDEX.md` lists at least one row per seeded
-  guide (or is explicitly empty).
+- Every seeded idiom rule declares real `paths:`.
+- `.agents/references/state/GLOBS_INDEX.md` lists at least one row per seeded
+  rule (or is explicitly empty).
 
-See the action for the full check list.
+See the command for the full check list.

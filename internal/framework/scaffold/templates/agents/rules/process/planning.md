@@ -9,7 +9,7 @@ The phase that turns an approved spec into an approved plan, before code is writ
 
 ## Entry condition
 
-An **approved spec** exists in `docs/specs/` with explicit acceptance criteria. If not, return to the spec phase first (invoke the **spec** action).
+An **approved spec** exists in `docs/specs/` with explicit acceptance criteria. If not, return to the spec phase first (invoke the **spec** command).
 
 The spec carries the task's tracker card reference (if any) in its frontmatter. Every artifact written in this phase carries that same reference forward.
 
@@ -24,13 +24,13 @@ Long sessions drift. Before starting fresh work, check whether the current sessi
 - **Session past ~45 minutes of active work** → compact or summarize, if the agent supports it.
 - **Three concurrent worktrees** is a soft ceiling. Beyond that, attention divides faster than parallelism saves time.
 
-If a discovery from this session is worth keeping, write it to a corpus file or `.keystone/learning/inbox/` *before* clearing.
+If a discovery from this session is worth keeping, write it to a reference file or `.keystone/learning/inbox/` *before* clearing.
 
-The specific context-clear / compaction primitives for your agent live in `.keystone/hosts/<your-agent>/activation.md`.
+Use your host's own context-clear and compaction commands.
 
 ### 2. Orient
 
-Invoke the **orient** action. It identifies the touched region, lazy-loads matching idioms, surfaces ambient invariants and open `state/` notes for the region. The agent reads what applies before reading anything else.
+Invoke the **orient** command. It identifies the touched region, lazy-loads matching idioms, surfaces ambient invariants and open `state/` notes for the region. The agent reads what applies before reading anything else.
 
 ### 3. Frame the work
 
@@ -59,14 +59,14 @@ The plan is a numbered list of steps with verifiable success criteria per step. 
 
 Plan saved to `docs/plans/YYYY-MM-DD-<topic>.md`. If the plan has 3+ tasks, the implementation phase will dispatch each via the subagent-per-task pattern.
 
-## Sensors
+## Hooks
 
-Planning runs read-only sensors:
+Planning runs read-only hooks:
 
-- **State-region sensor** — reads `state/CODEBASE_STATE.md` to surface what is known about the touched region (idioms loaded, coverage, active migrations).
-- **Drift sensor (preview)** — flags discrepancies between corpus claims and codebase for the region. Findings inform the plan; they do not block it.
+- **State-region hook** — reads `state/CODEBASE_STATE.md` to surface what is known about the touched region (idioms loaded, coverage, active migrations).
+- **Drift hook (preview)** — flags discrepancies between reference claims and codebase for the region. Findings inform the plan; they do not block it.
 
-No verification sensors run here — there is no code yet.
+No verification hooks run here, because there is no code yet.
 
 ## Gate condition
 

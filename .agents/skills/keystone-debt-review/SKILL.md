@@ -1,6 +1,6 @@
 ---
 name: keystone-debt-review
-description: 'Triage the code-debt ledger — review the debt sensor''s findings and update corpus/state/code-debt.md. Triggers: keystone debt-review; keystone:debt-review; /keystone:debt-review; review code debt; triage debt ledger; debt review.'
+description: 'Triage the code-debt ledger — review the code-debt findings and update .agents/references/state/code-debt.md. Triggers: keystone debt-review; keystone:debt-review; /keystone:debt-review; review code debt; triage debt ledger; debt review.'
 allowed-tools: Read Grep Glob Bash Write Edit
 metadata:
   model: opus
@@ -8,13 +8,13 @@ metadata:
 
 # keystone:debt-review — triage the code-debt ledger
 
-Reads the code-debt sensor's latest findings and reconciles them against
+Reads the code-debt subagent's latest findings and reconciles them against
 `.agents/references/state/code-debt.md`. Each finding gets one of:
 keep (still real), close (resolved), defer (not now), or escalate
-(promote to charter-debt or a guide).
+(promote to charter-debt or a rule).
 
-Canonical playbook: `.agents/commands/debt-review.md`. Sensor
-contract at `.agents/hooks/code-debt.md`.
+Canonical command: `.agents/commands/debt-review.md`. Subagent
+contract at `.agents/agents/code-debt.md`.
 
 ## Run
 

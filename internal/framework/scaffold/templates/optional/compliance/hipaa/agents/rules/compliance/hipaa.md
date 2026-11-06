@@ -1,7 +1,7 @@
 # HIPAA (Health Insurance Portability and Accountability Act) — rules
 
-The rules from [`corpus/hipaa.md`](../corpus/hipaa.md).
-Loaded ambient; enforced by the [drift sensor](../../../sensors/drift.md). The corpus file holds the full reasoning, anti-patterns, and references.
+The rules from [`references/compliance/hipaa.md`](../../references/compliance/hipaa.md).
+Loaded ambient; enforced by the [drift hook](../../hooks/drift.md). The reference file holds the full reasoning, anti-patterns, and references.
 
 ## IRON LAW
 
@@ -16,4 +16,4 @@ Loaded ambient; enforced by the [drift sensor](../../../sensors/drift.md). The c
 
 ---
 
-Traces to: [`corpus/hipaa.md`](../corpus/hipaa.md).
+Traces to: [`references/compliance/hipaa.md`](../../references/compliance/hipaa.md).

@@ -1,7 +1,7 @@
 # Views — rules
 
-The rules from [`corpus/idioms/mvc/views.md`](../../../corpus/idioms/mvc/views.md).
-Loaded ambient; enforced by the [drift sensor](../../../sensors/drift.md).
+The rules from [`references/idioms/mvc/views.md`](../../../references/idioms/mvc/views.md).
+Loaded ambient; enforced by the [drift hook](../../../hooks/drift.md).
 
 ## IRON LAW
 
@@ -16,4 +16,4 @@ Loaded ambient; enforced by the [drift sensor](../../../sensors/drift.md).
 
 ---
 
-Traces to: [`corpus/idioms/mvc/views.md`](../../../corpus/idioms/mvc/views.md).
+Traces to: [`references/idioms/mvc/views.md`](../../../references/idioms/mvc/views.md).

@@ -6,11 +6,11 @@ last_reconciled: 2026-06-18
 ---
 # Codebase State
 
-Empirical map of this codebase. Updated by the **verify**, **learn**, and **audit** actions.
+Empirical map of this codebase. Updated by the **verify**, **learn**, and **audit** commands.
 
 ## Tool commands
 
-The commands each sensor invokes. `(none)` means the project doesn't currently wire that tool.
+The commands each hook invokes. `(none)` means the project doesn't currently wire that tool.
 
 | Tool | Command |
 |---|---|
@@ -30,11 +30,11 @@ Severity thresholds (used by vuln-scan and sast):
 | vuln_scan | `high` (default) |
 | sast | `error` (default) |
 
-## Sensors
+## Hooks
 
-Inventory of sensors wired up for this project. A sensor's row is omitted when it does not apply.
+Inventory of hooks wired up for this project. A hook's row is omitted when it does not apply.
 
-| Sensor | Kind | Status |
+| Hook | Kind | Status |
 |---|---|---|
 | lint | computational | wired |
 | type-check | computational | wired |
@@ -60,9 +60,9 @@ Inventory of sensors wired up for this project. A sensor's row is omitted when i
 | review-risk | inferential | wired |
 | review-deployment | inferential | wired |
 
-## Guides
+## Rules
 
-Inferential guides (markdown rules) are activated by directory — see `.agents/rules/`. The table below tracks **computational guides** the bootstrap action detected.
+An inferential rule applies when a touched file matches its `paths:`, or everywhere without them. See `.agents/rules/`. The table below tracks the **computational rules** the bootstrap command detected.
 
 | Tool | Kind | What it covers | Activation |
 |---|---|---|---|
@@ -119,7 +119,7 @@ A "region" is a directory or set of directories with shared conventions.
 
 ### `.agents/`
 - **Idioms:** `.agents/references/idioms/charter-content/` (primary)
-- **Coverage:** n/a (validated structurally by `keystone verify` + the drift / charter-debt sensors)
+- **Coverage:** n/a (validated structurally by `keystone verify` + the drift hook and the charter-debt subagent)
 - **Last reconciled:** 2026-06-18
 - **Active migrations:** Keystone 2.0 cleanup
 
@@ -131,7 +131,7 @@ GitHub Actions. Single workflow `.github/workflows/release.yml` — release-only
 
 - **Pacing mode:** paired (active — see `.agents/rules/process/modes.md`).
 - **Testing posture:** TDD — write failing test, get review, smallest impl that turns at least one new test green.
-- **Code review:** sensor-driven on diff (`review` action runs the four review sensors).
+- **Code review:** subagent-driven on diff (the `review` command runs the four review subagents).
 - **Compliance scope:** none. No SOX/HIPAA/SOC 2 starter rules apply.
 
 ## Aspirational notes

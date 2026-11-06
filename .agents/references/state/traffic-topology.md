@@ -5,7 +5,7 @@ description: 'Where attention concentrates in the codebase.'
 ---
 # Traffic Topology
 
-> **Template.** The **bootstrap** or **audit** action will populate this from `git log` and your codebase. Until then, leave it as-is or fill in by hand.
+> **Template.** The **bootstrap** or **audit** command will populate this from `git log` and your codebase. Until then, leave it as-is or fill in by hand.
 
 Where attention concentrates in the codebase. Combines git churn + recency + business criticality.
 

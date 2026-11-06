@@ -6,7 +6,7 @@ The catalog has two parts: the **OWASP Top 10** (the canonical web-application v
 
 Threat rankings shift; the underlying categories are durable. Each entry below names the Saltzer-Schroeder principle it most directly violates, so the catalog stays anchored to first principles even as the ranking churns.
 
-> **Rules extracted:** [`guides/principles/security-threats.md`](../../guides/principles/security-threats.md). This file holds the full reasoning, anti-patterns, and references.
+> **Rules extracted:** [`rules/principles/security-threats.md`](../../rules/principles/security-threats.md). This file holds the full reasoning, anti-patterns, and references.
 
 ## OWASP Top 10 (2021)
 

@@ -1,7 +1,7 @@
 # Single-Page Application (SPA) — rules
 
-The rules from [`corpus/spa.md`](../corpus/spa.md).
-Loaded ambient; enforced by the [drift sensor](../../../sensors/drift.md). The corpus file holds the full reasoning, anti-patterns, and references.
+The rules from [`references/architecture/spa.md`](../../references/architecture/spa.md).
+Loaded ambient; enforced by the [drift hook](../../hooks/drift.md). The reference file holds the full reasoning, anti-patterns, and references.
 
 ## IRON LAW
 
@@ -17,4 +17,4 @@ Loaded ambient; enforced by the [drift sensor](../../../sensors/drift.md). The c
 
 ---
 
-Traces to: [`corpus/spa.md`](../corpus/spa.md).
+Traces to: [`references/architecture/spa.md`](../../references/architecture/spa.md).

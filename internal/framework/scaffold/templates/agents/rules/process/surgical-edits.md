@@ -30,10 +30,10 @@ Human reviewers cannot review 600 lines of mixed work with the same care they br
 
 The remedy is to draw a hard boundary: *the diff serves the request*. If something else needs to be done, it gets its own request.
 
-## Sensors
+## Hooks
 
-- The **drift sensor** flags changes outside the touched region as candidates for review.
-- The **scoping rule** (see [[scoping]]) catches the size symptom; this guide catches the cause.
+- The **drift hook** flags changes outside the touched region as candidates for review.
+- The **scoping rule** (see [[scoping]]) catches the size symptom; this rule catches the cause.
 
 ## Anti-patterns
 

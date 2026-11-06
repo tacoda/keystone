@@ -29,10 +29,10 @@ A coding agent's training data includes millions of codebases. Patterns from one
 
 The remedy is mechanical: before any reference, grep the codebase, read the import, read the binary's help, read the schema. The check costs a tool call; the bug from skipping it costs a debugger session and a reverted PR.
 
-## Sensors
+## Hooks
 
-- The **type-check sensor** catches a large class of grounding failures (wrong function signature, wrong type, undefined import). Type-check failures during implementation are a grounding warning, not just a syntax warning.
-- The **drift sensor** flags imports that do not match the manifest, when the bootstrap action has wired this up.
+- The **type-check hook** catches a large class of grounding failures (wrong function signature, wrong type, undefined import). Type-check failures during implementation are a grounding warning, not just a syntax warning.
+- The **drift hook** flags imports that do not match the manifest, when the bootstrap command has wired this up.
 
 ## Anti-patterns
 

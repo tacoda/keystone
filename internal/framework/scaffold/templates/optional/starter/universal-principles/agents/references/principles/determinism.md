@@ -2,7 +2,7 @@
 
 A deterministic test gives the same answer every time given the same input. A non-deterministic test gives different answers under different ambient conditions — and is therefore not a test of the code, but a test of *the code plus the conditions*. Flaky tests are the most common operational cost of a non-deterministic suite, but the deeper cost is loss of trust: once one test is known to flake, every red is suspect.
 
-> **Rules extracted:** [`guides/principles/determinism.md`](../../guides/principles/determinism.md).
+> **Rules extracted:** [`rules/principles/determinism.md`](../../rules/principles/determinism.md).
 
 ## What it asks of you
 
@@ -37,4 +37,4 @@ The "test pyramid" (Cohn, 2009) is a determinism argument as much as a speed arg
 
 ---
 
-Forward link: [`guides/principles/determinism.md`](../../guides/principles/determinism.md). See also: [`testing-patterns.md`](testing-patterns.md), [`tdd.md`](tdd.md).
+Forward link: [`rules/principles/determinism.md`](../../rules/principles/determinism.md). See also: [`testing-patterns.md`](testing-patterns.md), [`tdd.md`](tdd.md).

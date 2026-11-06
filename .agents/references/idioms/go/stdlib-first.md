@@ -7,7 +7,7 @@ description: 'Prefer Go stdlib for primitives that exist there.'
 
 One-paragraph statement: Reach for Go's standard library before adding a dependency. The stdlib covers file I/O, path manipulation, JSON/YAML (via `gopkg.in/yaml.v3` — already vendored), HTTP, templating, regexp, and goroutine primitives. New direct deps are added only when the stdlib lacks the capability or the alternative is materially smaller / safer for the surface this CLI needs.
 
-> **Rules extracted:** [`guides/idioms/go/stdlib-first.md`](../../../rules/idioms/go/stdlib-first.md).
+> **Rules extracted:** [`rules/idioms/go/stdlib-first.md`](../../../rules/idioms/go/stdlib-first.md).
 
 ## How to apply
 

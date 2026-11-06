@@ -9,7 +9,7 @@ description: 'Active mode: paired'
 
 How the agent paces work. Orthogonal to the four phases — modes change *how* phases run, not *what* happens in them.
 
-Set by invoking the **mode** action with `<paired|solo|autopilot>`. The `**Active mode:**` line above is the source of truth and is updated in place. The binding for your agent lives in `.keystone/hosts/<your-agent>/lifecycle.md`. Agents that don't have a notion of autonomy levels may ignore modes entirely.
+Set by invoking the **mode** command with `<paired|solo|autopilot>`. The `**Active mode:**` line above is the source of truth and is updated in place. Agents that don't have a notion of autonomy levels may ignore modes entirely.
 
 ## paired
 
@@ -58,10 +58,10 @@ Three things are mode-invariant:
 
 **A MODE NEVER OVERRIDES A SAFETY RULE.**
 
-If a mode would skip a sensor, skip a gate, or bypass the scaffolding safety contract — that is the mode being wrong, not the safety rule. Modes change the conversational pace. They do not change what makes the work correct.
+If a mode would skip a hook, skip a gate, or bypass the scaffolding safety contract, then the mode is wrong, not the safety rule. Modes change the conversational pace. They do not change what makes the work correct.
 
 ## Switching modes mid-task
 
-Allowed. Invoking the **mode** action with a new value takes effect on the next phase boundary. The current phase finishes in the current mode; the next phase enters the new one.
+Allowed. Invoking the **mode** command with a new value takes effect on the next phase boundary. The current phase finishes in the current mode; the next phase enters the new one.
 
 A common pattern: start in paired for planning, switch to solo for implementation, return to paired for verification.

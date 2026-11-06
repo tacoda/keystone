@@ -1,6 +1,6 @@
 # Migrations — rules
 
-The non-negotiable and strongly-preferred rules from [`corpus/principles/migrations.md`](../../corpus/principles/migrations.md). Loaded ambient; enforced at planning and review.
+The non-negotiable and strongly-preferred rules from [`references/principles/migrations.md`](../../references/principles/migrations.md). Loaded ambient; enforced at planning and review.
 
 ## GOLDEN RULE
 
@@ -17,13 +17,13 @@ The non-negotiable and strongly-preferred rules from [`corpus/principles/migrati
 - **No `DROP COLUMN`, `DROP TABLE`, `ALTER TYPE`** in the same PR as application code that no longer uses the column/table/type. Wait one release cycle minimum.
 - **No data migrations inside a schema migration.** Schema migrations are DDL; data migrations are jobs. They have different failure modes and different rollback paths.
 - **Long-running migrations run out-of-band.** Anything that holds a lock long enough to be noticeable by callers runs as a job, not as part of the deploy.
-- **Every migration has a tracked end-state.** Active migrations live in `corpus/state/migrations/active/<NAME>.md` until contract is done; then move to `completed/`.
+- **Every migration has a tracked end-state.** Active migrations live in `references/state/migrations/active/<NAME>.md` until contract is done; then move to `completed/`.
 
-## Sensors
+## Hooks
 
-- The **drift sensor** flags migration files in a PR that also contains application code referencing the changed columns.
-- **Bootstrap** detects the migration tool (Alembic, Knex, Rails, Goose, Diesel, Flyway, sqitch, atlas, dbmate, etc.) and writes its commands into `corpus/state/CODEBASE_STATE.md`.
+- The **drift hook** flags migration files in a PR that also contains application code referencing the changed columns.
+- **Bootstrap** detects the migration tool (Alembic, Knex, Rails, Goose, Diesel, Flyway, sqitch, atlas, dbmate, etc.) and writes its commands into `references/state/CODEBASE_STATE.md`.
 
 ---
 
-Traces to: [`corpus/principles/migrations.md`](../../corpus/principles/migrations.md). See also: [[rollback]], [[scoping]].
+Traces to: [`references/principles/migrations.md`](../../references/principles/migrations.md). See also: [[rollback]], [[scoping]].

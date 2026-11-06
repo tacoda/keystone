@@ -1,7 +1,7 @@
 # Continuous Delivery — rules
 
-The rules from [`corpus/continuous-delivery.md`](../corpus/continuous-delivery.md).
-Loaded ambient; enforced by the [drift sensor](../../../sensors/drift.md). The corpus file holds the full reasoning, anti-patterns, and references.
+The rules from [`references/architecture/continuous-delivery.md`](../../references/architecture/continuous-delivery.md).
+Loaded ambient; enforced by the [drift hook](../../hooks/drift.md). The reference file holds the full reasoning, anti-patterns, and references.
 
 ## IRON LAW
 
@@ -17,4 +17,4 @@ Loaded ambient; enforced by the [drift sensor](../../../sensors/drift.md). The c
 
 ---
 
-Traces to: [`corpus/continuous-delivery.md`](../corpus/continuous-delivery.md).
+Traces to: [`references/architecture/continuous-delivery.md`](../../references/architecture/continuous-delivery.md).

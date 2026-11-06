@@ -4,7 +4,7 @@
 
 Stated by Jon Postel in RFC 760 (1980) and codified in RFC 1122 (1989) for Internet protocol design. The most quoted heuristic for **interoperability** in networked systems. Also the most argued-about — its modern critique is part of the principle, and applying it well means knowing where each half stops.
 
-> **Rules extracted:** [`guides/principles/postels-law.md`](../../guides/principles/postels-law.md). This file holds the full reasoning, anti-patterns, and references.
+> **Rules extracted:** [`rules/principles/postels-law.md`](../../rules/principles/postels-law.md). This file holds the full reasoning, anti-patterns, and references.
 
 ## The two halves
 

@@ -5,7 +5,7 @@ description: 'Paired ledger: [code-debt.'
 ---
 # Charter Debt Ledger
 
-> **Template.** The **audit** action's Pruning flywheel populates this from the [charter-debt sensor](../../hooks/charter-debt.md). Until then, leave as-is or fill in by hand.
+> **Template.** The **audit** command's Pruning flywheel populates this from the [charter-debt hook](../../hooks/charter-debt.md). Until then, leave as-is or fill in by hand.
 
 Paired ledger: [`code-debt.md`](code-debt.md) — debt in the codebase. Tracked separately on purpose.
 
@@ -25,7 +25,7 @@ See [`.agents/hooks/charter-debt.md`](../../hooks/charter-debt.md) for category 
 
 - **Before any task** → if the touched region has a `load-bearing` charter-debt item, address it first (the agent will be operating on bad guidance otherwise).
 - **During audit** → triage `placeholder` and `failing-sensor` items as `load-bearing` by default; they're the most likely to mislead.
-- **During synthesize** → before promoting an inbox item into a guide, check that no `stale-rule` already covers the topic. Adding a new rule next to a stale one compounds the noise.
+- **During synthesize** → before promoting an inbox item into a rule, check that no `stale-rule` already covers the topic. Adding a new rule next to a stale one compounds the noise.
 
 ## Pruning
 

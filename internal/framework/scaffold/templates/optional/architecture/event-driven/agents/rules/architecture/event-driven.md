@@ -1,7 +1,7 @@
 # Event-Driven Architecture — rules
 
-The rules from [`corpus/event-driven.md`](../corpus/event-driven.md).
-Loaded ambient; enforced by the [drift sensor](../../../sensors/drift.md). The corpus file holds the full reasoning, anti-patterns, and references.
+The rules from [`references/architecture/event-driven.md`](../../references/architecture/event-driven.md).
+Loaded ambient; enforced by the [drift hook](../../hooks/drift.md). The reference file holds the full reasoning, anti-patterns, and references.
 
 ## IRON LAW
 
@@ -16,4 +16,4 @@ Loaded ambient; enforced by the [drift sensor](../../../sensors/drift.md). The c
 
 ---
 
-Traces to: [`corpus/event-driven.md`](../corpus/event-driven.md).
+Traces to: [`references/architecture/event-driven.md`](../../references/architecture/event-driven.md).

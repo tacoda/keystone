@@ -1,7 +1,7 @@
 # Premature Optimization — rules
 
-The non-negotiable and strongly-preferred rules from [`corpus/principles/premature-optimization.md`](../../corpus/principles/premature-optimization.md).
-Loaded ambient; enforced by the [drift sensor](../../sensors/drift.md). The corpus file holds the full reasoning, anti-patterns, and references.
+The non-negotiable and strongly-preferred rules from [`references/principles/premature-optimization.md`](../../references/principles/premature-optimization.md).
+Loaded ambient; enforced by the [drift hook](../../hooks/drift.md). The reference file holds the full reasoning, anti-patterns, and references.
 
 ## IRON LAW
 
@@ -15,4 +15,4 @@ Loaded ambient; enforced by the [drift sensor](../../sensors/drift.md). The corp
 
 ---
 
-Traces to: [`corpus/principles/premature-optimization.md`](../../corpus/principles/premature-optimization.md).
+Traces to: [`references/principles/premature-optimization.md`](../../references/principles/premature-optimization.md).

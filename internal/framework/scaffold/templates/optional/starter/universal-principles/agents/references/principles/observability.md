@@ -4,7 +4,7 @@ A system is **observable** when you can answer new questions about its behavior 
 
 Observability is not a tool, a vendor, or a "three pillars" architecture. It is a **property** of the system: how readily the system reveals what it is doing.
 
-> **Rules extracted:** [`guides/principles/observability.md`](../../guides/principles/observability.md). This file holds the full reasoning, anti-patterns, and references.
+> **Rules extracted:** [`rules/principles/observability.md`](../../rules/principles/observability.md). This file holds the full reasoning, anti-patterns, and references.
 
 ## Monitoring vs. observability
 

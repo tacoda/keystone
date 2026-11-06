@@ -2,7 +2,7 @@
 
 Five class- and module-level design principles, articulated by Robert C. Martin in the 1990s and consolidated in *Agile Software Development: Principles, Patterns, and Practices* (2002). Applied together, they keep software changeable.
 
-> **Rules extracted:** [`guides/principles/SOLID.md`](../../guides/principles/SOLID.md). This file holds the full reasoning, anti-patterns, and references.
+> **Rules extracted:** [`rules/principles/SOLID.md`](../../rules/principles/SOLID.md). This file holds the full reasoning, anti-patterns, and references.
 
 ## The five
 

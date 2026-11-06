@@ -2,7 +2,7 @@
 
 A disciplined technique for restructuring an existing body of code, **altering its internal structure without changing its external behavior**. Articulated by Martin Fowler in *Refactoring: Improving the Design of Existing Code* (1999; 2nd ed., 2018), building on practice in the Smalltalk community and Ward Cunningham's work. Refactoring is not "cleanup"; it is a sequence of named, small, behavior-preserving transformations applied for a reason.
 
-> **Rules extracted:** [`guides/principles/refactoring.md`](../../guides/principles/refactoring.md). This file holds the full reasoning, anti-patterns, and references.
+> **Rules extracted:** [`rules/principles/refactoring.md`](../../rules/principles/refactoring.md). This file holds the full reasoning, anti-patterns, and references.
 
 ## The discipline
 

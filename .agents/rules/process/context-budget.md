@@ -9,11 +9,11 @@ How much the agent reads, runs, or spawns before making a change. Counterpart to
 
 ## RULES
 
-- **Read what is relevant to the touched region.** The orient action lazy-loads by region precisely so the agent does not load the whole codebase. Honor it.
+- **Read what is relevant to the touched region.** The orient command lazy-loads by region precisely so the agent does not load the whole codebase. Honor it.
 - **Grep before reading.** A single `grep` that returns three files is cheaper than reading thirty files looking for the same information.
 - **Stop reading when the question is answered.** Reading "to be thorough" past the point of confidence wastes context.
 - **Bound exploratory reads to a budget.** Default: ≤10 files for orientation, ≤5 files for a follow-up. Bootstrap may tune.
-- **Use sensors before reading.** The state-region sensor exists so the agent does not re-derive what is already recorded.
+- **Use hooks before reading.** The state-region hook exists so the agent does not re-derive what is already recorded.
 
 ## GOLDEN RULE
 
@@ -27,9 +27,9 @@ A coding agent has a finite context window and a finite attention budget within 
 
 The cost of getting this wrong is mostly invisible: the user sees a slower response, a larger token bill, a vaguer answer. The corrective is structural — budgets, grep-first, lazy-by-region.
 
-## Sensors
+## Hooks
 
-- The **state-region sensor** runs at the start of planning so the agent reads recorded knowledge before deriving it.
+- The **state-region hook** runs at the start of planning so the agent reads recorded knowledge before deriving it.
 
 ## Anti-patterns
 

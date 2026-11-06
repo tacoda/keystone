@@ -2,7 +2,7 @@
 
 In MVC, the model is the **domain object** — state, behavior, validity rules. Not a row. The model owns its invariants; the controller asks it to do things; the view shows what it says.
 
-> **Rules extracted:** [`guides/idioms/mvc/models.md`](../../../guides/idioms/mvc/models.md).
+> **Rules extracted:** [`rules/idioms/mvc/models.md`](../../../rules/idioms/mvc/models.md).
 
 ## What belongs on the model
 
@@ -21,7 +21,7 @@ In MVC, the model is the **domain object** — state, behavior, validity rules. 
 
 A model that is mostly getters and setters with no behavior is **anemic**. The business logic has leaked into controllers ("fat controller") or helpers ("util ghetto"). The cure is to push logic back onto the model. Ask: *if I were reading this code with no framework context, where would I expect this rule to live?* That's almost always the model.
 
-See [[corpus/principles/object-oriented-design]] (tell-don't-ask).
+See [[references/principles/object-oriented-design]] (tell-don't-ask).
 
 ## How to apply
 
@@ -37,4 +37,4 @@ See [[corpus/principles/object-oriented-design]] (tell-don't-ask).
 - [ ] No HTTP / rendering / view concepts in model methods.
 - [ ] Validation is on the model.
 
-**Traces to:** [`corpus/principles/mvc.md`](../../principles/mvc.md), [`corpus/principles/object-oriented-design.md`](../../principles/object-oriented-design.md).
+**Traces to:** [`references/architecture/mvc.md`](../../architecture/mvc.md), [`references/principles/object-oriented-design.md`](../../principles/object-oriented-design.md).

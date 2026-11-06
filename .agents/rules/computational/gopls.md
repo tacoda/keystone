@@ -13,5 +13,5 @@ paths:
 
 **What it covers** — type errors, unused imports / variables, refactor hints, completions, hover docs, jump-to-definition, on-save formatting (delegates to gofmt).
 **Activation** — LSP in the editor; the Serena integration in this repo (`.serena/`) drives semantic symbol queries on top of gopls.
-**Authority** — advisory in real time, blocking once the same error surfaces through `go build ./...` (type-check sensor).
+**Authority** — advisory in real time, blocking once the same error surfaces through `go build ./...` (type-check hook).
 **Configured by** — none in this repo (defaults). Per-editor settings live outside the repo.

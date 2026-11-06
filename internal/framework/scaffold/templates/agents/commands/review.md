@@ -1,17 +1,17 @@
 ---
 kind: command
 id: review
-description: 'Run the four review sensors on the current diff.'
+description: 'Run the four review hooks on the current diff.'
 ---
 # review
 
-**Run the four review sensors on the current diff.** Semantic check, post-verify. Read [`.agents/rules/process/review.md`](../rules/process/review.md).
+**Run the four review hooks on the current diff.** Semantic check, post-verify. Read [`.agents/rules/process/review.md`](../rules/process/review.md).
 
 ## Activities
 
-Run the four review sensors. If the agent supports parallel sub-agents (Claude Code, etc.), spawn them concurrently — **one sub-agent per sensor, all in a single message** — and combine their findings. Agents without sub-agent parallelism run the sensors sequentially.
+Run the four review hooks. If the agent supports parallel subagents (Claude Code, etc.), spawn them concurrently: **one subagent per hook, all in a single message**. Then combine their findings. Agents without subagent parallelism run the hooks sequentially.
 
-| Sensor | Doc |
+| Hook | Doc |
 |---|---|
 | review-functional | [`.agents/hooks/review-functional.md`](../hooks/review-functional.md) |
 | review-security | [`.agents/hooks/review-security.md`](../hooks/review-security.md) |
@@ -22,7 +22,7 @@ Also run **spec-adherence** ([`.agents/hooks/spec-adherence.md`](../hooks/spec-a
 
 ## Output
 
-Single combined finding list, grouped by sensor, with severity tags.
+Single combined finding list, grouped by hook, with severity tags.
 
 ## Gate
 

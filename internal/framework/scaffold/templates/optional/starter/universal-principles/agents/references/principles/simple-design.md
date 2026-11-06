@@ -2,7 +2,7 @@
 
 A design is "simple" not when it is small, but when it carries no weight it does not need. Articulated by Kent Beck in *Extreme Programming Explained* (1999) as four rules, applied in priority order, and extended in *Tidy First?* (2023) with the disposition of making the next change cheap before making it.
 
-> **Rules extracted:** [`guides/principles/simple-design.md`](../../guides/principles/simple-design.md). This file holds the full reasoning, anti-patterns, and references.
+> **Rules extracted:** [`rules/principles/simple-design.md`](../../rules/principles/simple-design.md). This file holds the full reasoning, anti-patterns, and references.
 
 ## The four rules of simple design
 
