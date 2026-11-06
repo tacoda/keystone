@@ -1,0 +1,26 @@
+{
+  "hooks": {
+    "agentStop": [
+      {
+        "bash": "keystone hook fire Stop --host github-copilot || exit 2",
+        "timeoutSec": 120,
+        "type": "command"
+      }
+    ],
+    "postToolUse": [
+      {
+        "bash": "keystone hook fire PostToolUse --host github-copilot || exit 2",
+        "timeoutSec": 120,
+        "type": "command"
+      }
+    ],
+    "preToolUse": [
+      {
+        "bash": "keystone hook fire PreToolUse --host github-copilot || exit 2",
+        "timeoutSec": 120,
+        "type": "command"
+      }
+    ]
+  },
+  "version": 1
+}

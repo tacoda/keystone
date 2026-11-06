@@ -716,3 +716,24 @@ agent loads. 5.0 measures the load.
   and the largest files; `keystone allocate` prints each host's
   always-loaded tier against the `always_loaded` cap. The measurement lives
   in `budget.MeasureProject`, shared by the CLI, MCP, and dashboard.
+- Phase 7: done.
+  - Migration: v5.0 Up moves each unedited 4.x scaffold skill
+    (`keystone-new-guide|corpus|sensor|playbook|command|action`; unedited
+    = only a SKILL.md whose sha256 matches a shipped version, 22 versions
+    from git history) to `.keystone/archive/5.0/skills/`; an edited one
+    stays (iron law 2). Down returns them first. Their 4.x `.claude/`
+    projections are already recorded as owned, so `keystone project`
+    prunes them. Up/down round trip and idempotent re-run are covered.
+  - Tools: `keystone tool run|list` and package `toolrun` (shared with the
+    MCP server, which now also rejects a missing required argument).
+    `cli` and `plugin` tools are listed in AGENTS.md with their
+    `keystone tool run` command; a `plugin` tool is also an opencode
+    custom tool (`.opencode/tools/<id>.ts`, format from the opencode docs).
+    Unverified: whether opencode installs `@opencode-ai/plugin` for
+    project tools by itself.
+  - Dogfood: `adapters` adds opencode, codex, github-copilot; `project`
+    wrote 88 files with no refusal and re-runs unchanged; `verify` clean,
+    `lint` clean, `charter conformance` CONFORMANT.
+  - Not done here: republishing keystone's own policy repos in 5.0 shape
+    (separate repos; 4.x policy trees keep loading through the legacy
+    folder and kind mapping).

@@ -22,7 +22,7 @@ The sources live in `.agents/`; keystone's index and state live in `.keystone/`.
 - **skill** (`.agents/skills/`) — activates when its description matches the task.
 - **command** (`.agents/commands/`) — a unit of work the user asks for by name.
 - **subagent** (`.agents/agents/`) — a role you delegate to.
-- **tool** (`.agents/tools/`) — a callable, served by the keystone MCP server.
+- **tool** (`.agents/tools/`) — a callable you run: through the keystone MCP server or `keystone tool run` (listed below).
 - **document** (`.agents/documents/`) — a template for governed output; instances live in `.keystone/work/`.
 
 ## Rules that apply everywhere
@@ -74,6 +74,9 @@ Project files in `.agents/` win over installed policies (`.keystone/policies/`).
 
 - **Claude Code** — loads rules, hooks (inferential), skills, commands, subagents by itself.
 - **Cursor** — loads rules, skills, commands, subagents by itself.
+- **GitHub Copilot** — loads rules, skills, commands, subagents by itself.
 - **Continue** — loads rules, skills, commands by itself; open subagents from `.agents/` yourself; does **not** run hooks — run the checks in `.agents/hooks/` yourself before claiming done.
+- **opencode** — loads skills, commands, subagents by itself; open rules from `.agents/` yourself.
+- **Codex** — loads skills, subagents by itself; open rules, commands from `.agents/` yourself; does **not** run hooks — run the checks in `.agents/hooks/` yourself before claiming done.
 - **Aider** — open rules, skills, commands, subagents from `.agents/` yourself; does **not** run hooks — run the checks in `.agents/hooks/` yourself before claiming done.
 <!-- keystone:end -->

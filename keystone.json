@@ -5,6 +5,9 @@
     "claude-code",
     "cursor",
     "aider",
-    "continue"
+    "continue",
+    "opencode",
+    "codex",
+    "github-copilot"
   ]
 }
