@@ -12,7 +12,7 @@ import (
 
 // sources is every host-specific location allocate reads (docs/hosts.md).
 var sources = []func(*scan) error{
-	claudeAndCursor, cursorRules, copilot, clineAndWindsurf, continueFiles, opencodeFiles, claudeSettings,
+	claudeAndCursor, cursorRules, copilot, clineAndWindsurf, continueFiles, opencodeFiles, claudeSettings, rootFiles,
 }
 
 func claudeAndCursor(s *scan) error {

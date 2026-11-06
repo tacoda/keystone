@@ -654,3 +654,15 @@ agent loads. 5.0 measures the load.
   tool on its host) needs a list; a Claude hook with a matcher stays in
   settings.json; a moved Claude hook now blocks on any non-zero exit.
   Fixture test covers every source family and the round trip.
+- Phase 6b.2: done. `keystone allocate` also reads the root files
+  (`CLAUDE.md`, `AGENTS.md`, `GEMINI.md`, `.goosehints`), splits them at
+  `## `, and proposes moving each section that need not load every session:
+  a backticked file-extension pattern (`*.go`, `src/**/*.tsx`) → path-scoped
+  rule; 3+ numbered steps → command; a line pairing "before you commit /
+  always run" with a backticked command → hook on Stop; a "why/background/
+  architecture" heading or 300+ words → reference. Iron-law, never, and
+  security headings stay, as do the preamble and keystone's managed block.
+  The report gives each root file's always-loaded size and the tokens each
+  move saves. Two false positives from this repo's CLAUDE.md shaped the
+  heuristics: the cue and command must share a line, and folder patterns
+  (`.claude/*`) do not scope a rule.

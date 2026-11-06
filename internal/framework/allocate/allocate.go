@@ -21,6 +21,7 @@ type Item struct {
 	Target  string         // project-relative .agents/ path; "" when it stays
 	Content []byte         // the converted file
 	Note    string         // what changed in conversion, or why it stays
+	Tokens  int            // always-loaded tokens the move saves (root-file sections)
 }
 
 // Moves reports whether the item has a target in .agents/.

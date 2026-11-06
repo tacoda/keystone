@@ -177,3 +177,72 @@ func assertFile(t *testing.T, root, rel string, wants ...string) {
 		}
 	}
 }
+
+const bloatedClaude = `# Project
+
+Intro stays.
+
+<!-- keystone:start -->
+@AGENTS.md
+<!-- keystone:end -->
+
+## Iron laws
+
+- Never push to main.
+
+## Go style
+
+Applies to ` + "`**/*.go`" + ` files. Wrap errors.
+
+## Release steps
+
+1. Bump the version.
+2. Tag it.
+3. Push the tag.
+
+## Checks
+
+Before you commit, run ` + "`make lint`" + `.
+
+## Why we use Postgres
+
+Because.
+
+## Tone
+
+Be brief.
+`
+
+// TestPlan_RootFileSections — each section lands at the kind that loads on
+// demand; iron laws, plain directives, and keystone's block stay.
+func TestPlan_RootFileSections(t *testing.T) {
+	root := seed(t, map[string]string{"CLAUDE.md": bloatedClaude})
+	items, err := Plan(root, nil, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	got := placements(items)
+	for src, want := range map[string]string{
+		"CLAUDE.md § Go style":            "rule .agents/rules/go-style.md",
+		"CLAUDE.md § Release steps":       "command .agents/commands/release-steps.md",
+		"CLAUDE.md § Checks":              "hook .agents/hooks/checks.md",
+		"CLAUDE.md § Why we use Postgres": "reference .agents/references/why-we-use-postgres.md",
+	} {
+		if got[src] != want {
+			t.Errorf("%s → %q, want %q", src, got[src], want)
+		}
+	}
+	if len(got) != 4 {
+		t.Errorf("iron laws and plain directives must stay: %v", got)
+	}
+	totals := RootTotals(root, items)
+	if len(totals) != 1 || totals[0].Saved == 0 || totals[0].Saved >= totals[0].Tokens {
+		t.Errorf("totals = %+v", totals)
+	}
+	if _, err := Apply(root, items); err != nil {
+		t.Fatal(err)
+	}
+	assertFile(t, root, ".agents/rules/go-style.md", "paths:\n  - '**/*.go'")
+	assertFile(t, root, ".agents/hooks/checks.md", "run: make lint", "event: Stop")
+	assertLintClean(t, root)
+}

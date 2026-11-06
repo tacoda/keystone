@@ -32,8 +32,9 @@ func runAllocate(args []string) error {
 	if err != nil {
 		return err
 	}
+	printRootTotals(os.Stdout, allocate.RootTotals(absDir, items))
 	if len(items) == 0 {
-		fmt.Fprintln(os.Stdout, "✓ keystone allocate — nothing to move: no host-specific setup outside keystone's own projections")
+		fmt.Fprintln(os.Stdout, "✓ keystone allocate — nothing to move: no host-specific setup outside keystone's projections, and no root-file section that loads better on demand")
 		return nil
 	}
 	printAllocation(os.Stdout, items)
@@ -59,12 +60,28 @@ func printAllocation(w io.Writer, items []allocate.Item) {
 	}
 }
 
+func printRootTotals(w io.Writer, totals []allocate.RootTotal) {
+	for _, t := range totals {
+		if t.Tokens == 0 {
+			continue
+		}
+		fmt.Fprintf(w, "  %s: ~%d tokens of your content loaded every session", t.File, t.Tokens)
+		if t.Saved > 0 {
+			fmt.Fprintf(w, "; the moves below save ~%d", t.Saved)
+		}
+		fmt.Fprintln(w)
+	}
+}
+
 func printItem(w io.Writer, it allocate.Item) {
 	if !it.Moves() {
 		fmt.Fprintf(w, "  ! %s — %s\n", it.Source, it.Note)
 		return
 	}
 	fmt.Fprintf(w, "  %s → %s %s\n", it.Source, it.Kind, it.Target)
+	if it.Tokens > 0 {
+		fmt.Fprintf(w, "      saves ~%d always-loaded tokens\n", it.Tokens)
+	}
 	if it.Note != "" {
 		fmt.Fprintf(w, "      %s\n", it.Note)
 	}
@@ -90,7 +107,13 @@ func printAllocateUsage(w io.Writer) {
 Usage:
     keystone allocate [--apply] [--dir <path>]
 
-Reads every host-specific setup — .claude/ skills, agents, commands, rules,
+Reads the root files (CLAUDE.md, AGENTS.md, GEMINI.md, .goosehints) and
+proposes moving each section that need not load every session: a section
+naming file patterns becomes a path-scoped rule, a numbered procedure a
+command, a "before you commit, run X" line a hook, long reasoning a
+reference. Iron laws, security, and keystone's managed block stay.
+
+Also reads every host-specific setup — .claude/ skills, agents, commands, rules,
 settings.json permissions and hooks; .cursor/rules and .cursorrules;
 Copilot instructions, prompts, and agents; .clinerules, .windsurfrules;
 .continue/; .opencode/ — and reports, per item, the 5.0 kind and the
