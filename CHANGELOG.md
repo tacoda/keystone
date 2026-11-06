@@ -2,6 +2,18 @@
 
 All notable changes to keystone are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); the project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.0.2] — 2026-11-06
+
+### Fixed
+
+- CLI help described 4.x. `index`, `project`, `show`, `charter`,
+  `explain`, `eval`, and `verify` now use the 5.0 kinds and folders;
+  `project --help` documents `--overwrite`, and `index --help` no longer
+  lists a `--charter-root` flag it never parsed.
+- `init` options and the per-host capability-gap warnings drop 4.x names
+  and point at `AGENTS.md`, `keystone project`, and
+  `.agents/references/hosts/` instead of the removed per-host docs.
+
 ## [5.0.1] — 2026-11-06
 
 ### Fixed
