@@ -6,7 +6,7 @@ tags:
   - computational
 mode: computational
 event: PreToolUse
-run: keystone verify --sensor secret-scan
+run: keystone verify --hook secret-scan
 ---
 # Hook: secret-scan
 

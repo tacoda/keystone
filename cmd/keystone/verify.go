@@ -18,7 +18,7 @@ import (
 	"github.com/tacoda/keystone/internal/framework/sensors"
 )
 
-// runVerify handles `keystone verify [--dir <path>] [--sensor <id>]`.
+// runVerify handles `keystone verify [--dir <path>] [--hook <id>]`.
 //
 // Default mode: walks the policy tree from keystone.json, checks each
 // vendored policy for drift against the lockfile, and reports any
@@ -26,7 +26,7 @@ import (
 // Exits non-zero on any violation; drift alone exits zero but is
 // reported and reset.
 //
-// --sensor <id> mode: bypasses the policy cascade entirely and runs
+// --hook <id> mode (4.x: --sensor): bypasses the policy cascade entirely and runs
 // one keystone-owned sensor. The sensor reads Claude Code's hook
 // protocol JSON from stdin when present (tool_input.file_path,
 // tool_input.content, command). Exit codes follow the hook protocol:
@@ -106,7 +106,8 @@ func runVerify(args []string) error {
 // parseVerifyArgs reads `keystone verify` flags; help=true means usage was printed.
 func parseVerifyArgs(args []string) (dir, sensorID string, help bool, err error) {
 	dir = "."
-	help, err = parseFlags(args, map[string]*string{"--dir": &dir, "--sensor": &sensorID}, nil,
+	// --sensor is the 4.x spelling of --hook; both stay.
+	help, err = parseFlags(args, map[string]*string{"--dir": &dir, "--hook": &sensorID, "--sensor": &sensorID}, nil,
 		func() { printVerifyUsage(os.Stdout) })
 	return dir, sensorID, help, err
 }
@@ -168,7 +169,7 @@ func printVerifyUsage(w *os.File) {
 
 Usage:
   keystone verify [--dir <path>]
-  keystone verify --sensor <id> [--dir <path>]
+  keystone verify --hook <id> [--dir <path>]
 
 Default mode: reads keystone.json + the lockfile, then:
   - Walks every vendored policy and compares per-file hashes to the
@@ -177,7 +178,7 @@ Default mode: reads keystone.json + the lockfile, then:
   - Walks each policy's strict items and reports project-layer files
     that shadow them.
 
---sensor mode: runs one keystone-owned sensor and exits with a Claude
+--hook mode: runs one keystone-owned hook check and exits with a Claude
 Code hook protocol code. Reads tool_input fields (file_path, content,
 command) from stdin JSON when present. Sensors that wrap external
 tools (build, test, lint, vuln-scan) aren't routed here — wire those
@@ -190,14 +191,15 @@ Exit codes (default mode):
   0  drift only — drifted policies were reset; user re-installs to recover
   1  any strict violation
 
-Exit codes (--sensor mode):
+Exit codes (--hook mode):
   0  pass / advisory
   2  block with sensor message on stderr (Claude Code hook block)
   1  internal error or unknown sensor
 
 Flags:
   --dir <path>      Project root (defaults to cwd).
-  --sensor <id>     Run one sensor instead of the policy cascade.
+  --hook <id>       Run one hook check instead of the policy cascade.
+                    (--sensor is the 4.x spelling.)
 `, ids)
 }
 
@@ -233,7 +235,7 @@ func runOneSensor(projectDir, sensorID string) error {
 			// directly (go test, gofmt, govulncheck) or are LLM-judgment
 			// sensors invoked through an action. The hook should pass
 			// quietly so the user isn't spammed with non-blocking warnings.
-			fmt.Fprintf(os.Stderr, "keystone verify --sensor %q: no keystone-owned runner (registered: %s). Skipping.\n",
+			fmt.Fprintf(os.Stderr, "keystone verify --hook %q: no keystone-owned runner (registered: %s). Skipping.\n",
 				sensorID, strings.Join(sensors.IDs(), ", "))
 			return nil
 		}

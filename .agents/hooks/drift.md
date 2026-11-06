@@ -6,7 +6,7 @@ tags:
   - computational
 mode: computational
 event: PostToolUse
-run: keystone verify --sensor drift
+run: keystone verify --hook drift
 ---
 # Hook: drift
 

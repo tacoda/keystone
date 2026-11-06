@@ -24,7 +24,7 @@ acceptance criteria, out-of-scope list, open questions.
 
 ## Output
 
-A markdown file at `.keystone/learning/specs/<slug>.md`:
+A markdown file at `docs/specs/<slug>.md`:
 
 ```markdown
 # <task title>

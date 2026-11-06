@@ -18,8 +18,8 @@ import (
 // The embedded path always uses literal `agents/` as the third segment; the
 // destination uses the consumer's configured charterRoot (default ".agents").
 //
-// `agent` is excluded because the agent-specific bundle is already handled by
-// the `targets/` copy in init.go.
+// `agent` is excluded: the chosen agents become keystone.json `adapters`,
+// and `keystone project` writes their host files.
 //
 // Missing optional roots are silently skipped — the directory is only present
 // for categories the project chose to maintain content for.

@@ -6,7 +6,7 @@ tags:
   - computational
 mode: computational
 event: PreToolUse
-run: keystone verify --sensor commit-message
+run: keystone verify --hook commit-message
 ---
 # Hook: commit-message
 

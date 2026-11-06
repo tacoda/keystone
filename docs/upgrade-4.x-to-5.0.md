@@ -74,6 +74,13 @@ The 5.0 bridges fail closed. If `keystone` is missing or fails before the
 checks run, Claude Code and Copilot block the tool call instead of letting it
 through.
 
+That includes an old binary meeting new hooks: it rejects a flag it doesn't
+know, the check fails, and the agent can't run any tool, including the
+install that would fix it. If that happens, install the 5.0 binary
+yourself. In Claude Code, type `! go install
+github.com/tacoda/keystone/cmd/keystone@latest` (or install the release
+binary), and the hooks pass again.
+
 ## 3. The conflict that stops the migration
 
 The migration stops before it moves anything when two files map to the same
