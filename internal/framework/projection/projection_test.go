@@ -75,7 +75,7 @@ func TestPlan_ClaudeCode(t *testing.T) {
 		got[o.Dest] = o.Strategy
 	}
 	want := map[string]Strategy{
-		".claude/skills/deploy":               Symlink,
+		".claude/skills/deploy":      Symlink,
 		".claude/rules/go-style.md":  Shim,
 		".claude/commands/verify.md": Shim,
 		".claude/agents/reviewer.md": Shim,
@@ -202,8 +202,8 @@ func TestApply_CopyModeAndDrift(t *testing.T) {
 		t.Errorf("fresh copy drifted: %v", d)
 	}
 	write(t, root, map[string]string{
-		".claude/skills/deploy/SKILL.md":      "edited\n",
-		".claude/commands/verify.md": "edited\n",
+		".claude/skills/deploy/SKILL.md": "edited\n",
+		".claude/commands/verify.md":     "edited\n",
 	})
 	if d := Check(root, outs, LinkCopy); len(d) != 2 {
 		t.Errorf("want 2 drifts (edited copy + edited shim), got %v", d)

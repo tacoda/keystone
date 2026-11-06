@@ -83,6 +83,7 @@ func init() {
 	rootCmd.AddCommand(indexCmd())
 	rootCmd.AddCommand(lintCmd())
 	rootCmd.AddCommand(allocateCmd())
+	rootCmd.AddCommand(budgetCmd())
 	rootCmd.AddCommand(listCmd())
 	rootCmd.AddCommand(showCmd())
 	rootCmd.AddCommand(documentCmd())
@@ -227,6 +228,15 @@ func indexCmd() *cobra.Command {
 		RunE:               runAndForward(runIndex),
 	}
 	return c
+}
+
+func budgetCmd() *cobra.Command {
+	return &cobra.Command{
+		Use:                "budget",
+		Short:              "Report the context each host loads (always and on demand) against keystone.json caps",
+		DisableFlagParsing: true,
+		RunE:               runAndForward(runBudget),
+	}
 }
 
 func allocateCmd() *cobra.Command {

@@ -28,7 +28,7 @@
     },
     "budgets": {
       "type": "object",
-      "description": "Optional per-port context-budget caps. Phase 5 wires these into keystone doctor --budget.",
+      "description": "Optional context-budget caps, checked by keystone budget and keystone verify. Keys: always_loaded (each host's always-loaded tier), a kind (rule, reference, skill, …: max_tokens caps that kind's on-demand total, max_tokens_per_load any one file), or a 4.x key (guides, corpus, …), which maps to its kind.",
       "additionalProperties": {
         "type": "object",
         "properties": {

@@ -66,7 +66,7 @@ func TestHosts_ShimFormats(t *testing.T) {
 		".codex/agents/reviewer.toml":                   {`name = "reviewer"`, `developer_instructions = "# Reviewer"`},
 		".clinerules/go-style.md":                       {"paths:", "- gofmt"},
 		".pi/prompts/verify.md":                         {"description: Verify."},
-		".cline/skills/deploy/scripts/run.sh":                    {"echo run"},
+		".cline/skills/deploy/scripts/run.sh":           {"echo run"},
 	} {
 		data, err := os.ReadFile(filepath.Join(root, dest))
 		if err != nil {

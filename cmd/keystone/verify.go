@@ -94,7 +94,7 @@ func runVerify(args []string) error {
 		return fmt.Errorf("strict cascade is violated")
 	}
 
-	if err := checkProjectionDrift(absDir); err != nil {
+	if err := checkCharter(absDir); err != nil {
 		return err
 	}
 	if !res.HasDrift() {
@@ -109,6 +109,26 @@ func parseVerifyArgs(args []string) (dir, sensorID string, help bool, err error)
 	help, err = parseFlags(args, map[string]*string{"--dir": &dir, "--sensor": &sensorID}, nil,
 		func() { printVerifyUsage(os.Stdout) })
 	return dir, sensorID, help, err
+}
+
+// checkCharter runs verify's charter checks: budget caps, then host
+// projection drift.
+func checkCharter(absDir string) error {
+	if err := checkBudgetCaps(absDir); err != nil {
+		return err
+	}
+	return checkProjectionDrift(absDir)
+}
+
+// checkBudgetCaps fails when the charter exceeds a keystone.json budget
+// cap, naming each file and overage.
+func checkBudgetCaps(absDir string) error {
+	r, err := measureBudget(absDir)
+	if err != nil {
+		return err
+	}
+	printViolations(os.Stdout, r.Violations)
+	return budgetError(r)
 }
 
 // checkProjectionDrift fails when a host projection no longer matches the

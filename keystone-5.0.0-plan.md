@@ -696,3 +696,17 @@ agent loads. 5.0 measures the load.
   I believe collides with Claude Code's built-in `/review`. The shipped
   commands also duplicate the shipped `keystone-*` skills one for one
   (`audit` / `keystone-audit`, …); decide whether to keep both.
+- Phase 6c.1: done. `keystone budget [--json]` measures what each host
+  loads: always (root files — AGENTS.md everywhere, CLAUDE.md on Claude
+  Code, the lite index on Aider — plus each skill, command, and subagent
+  listing and each pathless rule the host loads by itself, decided from the
+  host profile) and on demand (rule, reference, skill, command, subagent,
+  tool, document bodies, per kind and largest first). Caps in
+  `keystone.json` `budgets`: `always_loaded`, a kind (`max_tokens` for the
+  kind's total, `max_tokens_per_load` per file), or a 4.x key mapped to its
+  kind; two keys for one kind keep the stricter. `keystone verify` and
+  `keystone budget` fail on an exceeded cap, naming the file and overage
+  and pointing at `keystone allocate`. `init` and `doctor` print the
+  per-host summary. The 4.x per-port Allocator is removed: on 5.0 it
+  counted nothing, because its port names were the 4.x folders. Plan text
+  corrected: the estimate is a word count, not bytes/4.

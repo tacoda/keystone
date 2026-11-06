@@ -10,7 +10,6 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/tacoda/keystone/internal/framework/budget"
 	"github.com/tacoda/keystone/internal/framework/config"
 	"github.com/tacoda/keystone/internal/framework/loader"
 	"github.com/tacoda/keystone/internal/framework/lockfile"
@@ -139,108 +138,16 @@ func runDoctor(args []string) error {
 	return nil
 }
 
-// runBudgetReport walks the charter, estimates per-file token use, and
-// renders the per-port breakdown vs the budgets declared in keystone.json.
-// Always informational — over-budget ports print a warning but never
-// set a non-zero exit. Projects that want stricter enforcement can wrap
-// `keystone doctor --budget` in a script that greps for the warning marker.
-func runBudgetReport(projectDir, charterRoot string) error {
-	alloc, err := walkCharterBudget(projectDir, charterRoot)
+// runBudgetReport prints the context budget summary. Always informational
+// in doctor — an exceeded cap prints but never sets a non-zero exit;
+// `keystone verify` and `keystone budget` enforce caps.
+func runBudgetReport(projectDir, _ string) error {
+	r, err := measureBudget(projectDir)
 	if err != nil {
 		return err
 	}
-	cfg, _ := config.ReadProjectConfig(projectDir) // nil cfg = no budgets
-
-	reps := alloc.Report(cfg, 5)
-	if len(reps) == 0 {
-		fmt.Fprintf(os.Stdout, "  no markdown content under %s/ — nothing to count\n", charterRoot)
-		return nil
-	}
-
-	overBudget := 0
-	fmt.Fprintln(os.Stdout, "  budget: per-port token estimate (whitespace-approximate)")
-	for _, r := range reps {
-		marker := "•"
-		budgetCol := "no cap"
-		if r.MaxTokens > 0 {
-			budgetCol = fmt.Sprintf("%d / %d", r.Tokens, r.MaxTokens)
-			if r.IsOverBudget() {
-				marker = "!"
-				overBudget++
-			} else {
-				budgetCol += fmt.Sprintf("  (%d%% used)", 100*r.Tokens/r.MaxTokens)
-			}
-		} else {
-			budgetCol = fmt.Sprintf("%d tokens", r.Tokens)
-		}
-		fmt.Fprintf(os.Stdout, "    %s %-10s %s\n", marker, r.Port, budgetCol)
-		for _, f := range r.TopFiles {
-			fmt.Fprintf(os.Stdout, "        %5d  %s\n", f.Tokens, f.Path)
-		}
-	}
-	if overBudget > 0 {
-		fmt.Fprintf(os.Stdout, "  ⚠ %d port(s) over their declared budget — top contributors above\n", overBudget)
-	} else if anyBudgetDeclared(cfg) {
-		fmt.Fprintln(os.Stdout, "  ✓ every port with a declared budget is within cap")
-	} else {
-		fmt.Fprintln(os.Stdout, "  ℹ no budgets declared in keystone.json — add a `budgets` block to enforce caps")
-	}
+	printBudgetSummary(os.Stdout, r)
 	return nil
-}
-
-// walkCharterBudget scans every .md file under <charterRoot>/, classifies
-// it by port (skipping non-port paths like README, learning/, archive/),
-// estimates its tokens, and records the result in an Allocator.
-func walkCharterBudget(projectDir, charterRoot string) (*budget.Allocator, error) {
-	alloc := budget.NewAllocator()
-	root := filepath.Join(projectDir, charterRoot)
-	skip := filepath.FromSlash(config.PoliciesDir)
-
-	err := filepath.WalkDir(root, func(p string, d fs.DirEntry, err error) error {
-		if err != nil {
-			if os.IsNotExist(err) {
-				return nil
-			}
-			return err
-		}
-		rel, _ := filepath.Rel(projectDir, p)
-		rel = filepath.ToSlash(rel)
-		if d.IsDir() {
-			if strings.HasPrefix(rel, filepath.ToSlash(skip)) {
-				return filepath.SkipDir
-			}
-			return nil
-		}
-		if filepath.Ext(p) != ".md" {
-			return nil
-		}
-		port := budget.PortForPath(rel, charterRoot)
-		if port == "" {
-			return nil
-		}
-		body, err := os.ReadFile(p)
-		if err != nil {
-			return err
-		}
-		alloc.Add(port, rel, budget.Estimate(body))
-		return nil
-	})
-	return alloc, err
-}
-
-// anyBudgetDeclared reports whether cfg.Budgets has any non-zero
-// MaxTokens entry — used to decide between the "no budgets declared"
-// and "everything within cap" closing messages.
-func anyBudgetDeclared(cfg *config.ProjectConfig) bool {
-	if cfg == nil {
-		return false
-	}
-	for _, spec := range cfg.Budgets {
-		if spec.MaxTokens > 0 || spec.MaxTokensPerLoad > 0 {
-			return true
-		}
-	}
-	return false
 }
 
 func printDoctorUsage(w *os.File) {
