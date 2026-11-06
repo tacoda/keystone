@@ -38,7 +38,7 @@ hook that calls it is the constraint.
 
 | 4.x kind | 5.0 kind | Canonical path | Standard it maps to |
 |---|---|---|---|
-| `guide` | **rule** | `.agents/rules/<id>.md` | Claude rules, Cursor rules, Copilot instructions, Continue rules, nested `AGENTS.md` |
+| `guide` | **rule** (`globs:` becomes `paths:`) | `.agents/rules/<id>.md` | Claude rules, Cursor rules, Copilot instructions, Continue rules, nested `AGENTS.md` |
 | `corpus` | **reference** | `.agents/references/<id>.md` | none (keystone extension: the "why" behind a rule) |
 | `sensor` (computational) | **hook** `type: command` | `.agents/hooks/<id>.md` | host hook events (`PreToolUse`, `Stop`, ...) |
 | `sensor` (inferential) | **hook** `type: agent` or `type: prompt` | `.agents/hooks/<id>.md` | Claude prompt/agent hooks; elsewhere bridged via `keystone hook fire` |
@@ -89,7 +89,7 @@ because that is what every host reads.
   the iron laws, always-on rules, the constraint/capability table, and a
   pointer to `.keystone/INDEX.lite.json`.
 - Plain Markdown, no frontmatter, per the spec.
-- Optional: rules whose `globs:` resolve to exactly one directory may also emit
+- Optional: rules whose `paths:` resolve to exactly one directory may also emit
   a nested `<dir>/AGENTS.md` (opt-in, `keystone.json "nestedAgentsMd": true`).
   Off by default because glob-to-directory mapping is lossy.
 
@@ -144,23 +144,12 @@ Rules for links and shims:
   `deny` permission or a blocking hook, `keystone project` prints it and
   `AGENTS.md` lists it as "not enforced on <host>". It never drops it quietly.
 
-### Host matrix (to verify in Phase 0)
+### Host matrix
 
-Hosts with templates today: claude-code, codex, cursor, github-copilot,
-opencode, aider, continue, cline, goose, pi, plus `_generic`. Each cell below
-is my current understanding, **not verified**. Phase 0 replaces it with a
-sourced table in `docs/compatibility.md`.
-
-| Host | Root file | Rules | Skills | Commands | Subagents | Hooks | Permissions |
-|---|---|---|---|---|---|---|---|
-| claude-code | `CLAUDE.md` shim (`@AGENTS.md`) | shim `.claude/rules/` | symlink `.claude/skills/` | symlink `.claude/commands/` | symlink `.claude/agents/` | shim `settings.json` | shim `settings.json` |
-| codex | native `AGENTS.md` | via `AGENTS.md` | native `.agents/skills/`? | ? | ? | ? | shim `config.toml`? |
-| cursor | native `AGENTS.md` | shim `.cursor/rules/*.mdc` | ? | shim `.cursor/commands/`? | ? | shim `.cursor/hooks.json`? | shim CLI permissions? |
-| github-copilot | native `AGENTS.md` | shim `.github/instructions/` | ? | shim `.github/prompts/` | shim `.github/agents/`? | ? | ? |
-| opencode | native `AGENTS.md` | via `AGENTS.md` | native or `.opencode/skills/` | shim `.opencode/command/` | shim `.opencode/agent/` | plugin? | shim `opencode.json` |
-| aider | shim `.aider.conf.yml` read list | via read list | unsupported | unsupported | unsupported | unsupported | unsupported |
-| continue | shim rule pointer | shim `.continue/rules/` | ? | ? | unsupported | unsupported | ? |
-| cline, goose, pi | `AGENTS.md`? | ? | ? | ? | ? | ? | ? |
+Verified in Phase 0. The sourced matrix, the strategy per cell, and the
+findings that shaped the design live in [`docs/hosts.md`](docs/hosts.md).
+Strategies there add two to the four above: **index** (listed in `AGENTS.md`,
+opened on demand) and **report** (a constraint the host cannot enforce).
 
 Out of scope unless you add it: new hosts (Gemini CLI, Windsurf, Amp, Zed).
 The matrix makes adding one a profile entry plus golden files.
@@ -176,7 +165,7 @@ Work on `feat/5.0-standard-vocabulary`, one PR per phase or pair of phases.
 ### Phase 0: Research and decision lock
 
 - Verify the host matrix against each host's current docs (Context7 or the
-  official docs). Record source URL and date per cell in `docs/compatibility.md`.
+  official docs). Record source URL and date per cell in `docs/hosts.md`.
 - Pin the Agent Skills spec version and the `AGENTS.md` spec version we
   conform to. Record which hosts read `.agents/skills/` today.
 - Write **ADR 0010: constraints and capabilities**. It records the split, the
@@ -282,7 +271,8 @@ Work on `feat/5.0-standard-vocabulary`, one PR per phase or pair of phases.
 - Installed policies: bump the policy manifest schema. The resolver refuses a
   4.x-shaped policy with a clear message. Republish keystone's own policies in
   5.0 shape.
-- Dogfood: migrate this repo, `keystone index && keystone project`, commit.
+- Dogfood: migrate this repo, add `opencode` (and `codex`, `github-copilot`)
+  to `keystone.json` `adapters`, `keystone index && keystone project`, commit.
 - Verify: up/down round-trip test on a 4.x fixture; idempotent re-run test;
   `keystone verify` clean; `keystone charter conformance` CONFORMANT.
 
@@ -290,7 +280,7 @@ Work on `feat/5.0-standard-vocabulary`, one PR per phase or pair of phases.
 
 - `README.md`, `GLOSSARY.md` (constraints vs capabilities, kind table, the
   "agent vs subagent" note), `CONVENTIONS.md`, `CONTRIBUTING.md`, `docs/**`,
-  `docs/compatibility.md`, and every rule under `.agents/rules/charter-content/`.
+  `docs/hosts.md`, and every rule under `.agents/rules/charter-content/`.
 - `docs/upgrade-4.x-to-5.0.md`: what moves, what folds, what to review in the
   migration report, how to choose `linkMode`.
 - `CHANGELOG.md` 5.0.0 entry with every breaking change listed.
@@ -353,4 +343,4 @@ Work on `feat/5.0-standard-vocabulary`, one PR per phase or pair of phases.
 
 ## Status
 
-- Phase 0: pending.
+- Phase 0: done pending ADR 0010 ratification. Matrix in `docs/hosts.md`.
