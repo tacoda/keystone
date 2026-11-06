@@ -1,14 +1,6 @@
 ---
-kind: skill
-id: keystone:index
-description: Regenerate .charter/INDEX.json — the primitive descriptor index every agent reads at session start.
-triggers:
-  - keystone index
-  - keystone:index
-  - /keystone:index
-  - refresh the keystone index
-  - regenerate INDEX.json
-  - reindex primitives
+name: keystone-index
+description: 'Regenerate .charter/INDEX.json — the primitive descriptor index every agent reads at session start. Triggers: keystone index; keystone:index; /keystone:index; refresh the keystone index; regenerate INDEX.json; reindex primitives.'
 ---
 
 # keystone:index — refresh the primitive descriptor index

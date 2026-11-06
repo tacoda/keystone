@@ -1,24 +1,10 @@
 ---
-kind: skill
-id: keystone:new-policy
-description: Scaffold a new policy repo skeleton outside the current project.
-triggers:
-  - keystone new policy
-  - keystone:new-policy
-  - /keystone:new-policy
-  - bootstrap a policy repo
-  - scaffold a keystone policy
-model: sonnet
-tools:
-  - Read
-  - Write
-  - Edit
-  - Glob
-  - Bash
-includes:
-  - scaffolds-primitive
-tags:
-  - scaffold
+name: keystone-new-policy
+description: 'Scaffold a new policy repo skeleton outside the current project. Triggers: keystone new policy; keystone:new-policy; /keystone:new-policy; bootstrap a policy repo; scaffold a keystone policy.'
+allowed-tools: Read Write Edit Glob Bash
+metadata:
+  model: sonnet
+  tags: scaffold,composition
 ---
 
 # keystone:new-policy — scaffold a policy repo

@@ -1,6 +1,6 @@
 ---
 name: keystone-debt-review
-description: "Triage the code-debt ledger — review the debt sensor's findings and update corpus/state/code-debt.md."
+description: "Triage the code-debt ledger — review the debt sensor's findings and update corpus/state/code-debt.md. Triggers: keystone debt-review; keystone:debt-review; /keystone:debt-review; review code debt; triage debt ledger; debt review."
 tools:
   - Read
   - Grep

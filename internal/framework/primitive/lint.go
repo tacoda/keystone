@@ -136,7 +136,7 @@ func lintKindAndMode(p Primitive, known map[Kind]bool, add func(FindingSeverity,
 	if strings.TrimSpace(p.Kind) == "" {
 		add(FindingError, "missing required field `kind`")
 	} else if Kind(p.Kind) == KindConcern {
-		add(FindingWarning, "concern is retired in 5.0 — `keystone migrate` inlines it into its consumers")
+		add(FindingWarning, "concern is retired in 5.0 — `keystone lint --fix` inlines it into its consumers; then delete it")
 	} else if !known[Kind(p.Kind)] {
 		add(FindingError, fmt.Sprintf("unknown kind %q (allowed: %s)", p.Kind, knownKindList()))
 	}
@@ -166,6 +166,8 @@ func lintKindFields(p Primitive, add func(FindingSeverity, string)) {
 	switch Kind(p.Kind) {
 	case KindRule:
 		lintGuideKind(p, add)
+	case KindSkill:
+		lintSkillSpec(p, add)
 	case KindSubagent:
 		if len(p.Tools) == 0 {
 			add(FindingError, "subagent missing `tools:` — declare the tool allow-list explicitly")

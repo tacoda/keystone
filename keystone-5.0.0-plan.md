@@ -418,3 +418,14 @@ agent loads. 5.0 measures the load.
   CodeScene: `v5_0.go` String-Heavy / Primitive Obsession accepted (path-moving
   code; same acceptance as the 4.0 CLI path code); every other file stable or
   improved.
+- Phase 2b: done. Spec fields parse (`name` → ID, `allowed-tools` → Tools,
+  `metadata.model/tags` → Model/Tags), so spec-shaped and 4.x skills yield
+  the same descriptor. Lint: spec violations are errors (name charset/length,
+  name ≠ dir, description > 1024, compatibility > 500); missing `name` and
+  non-spec keys warn. `keystone lint --fix` rewrites project skills to spec
+  shape (triggers folded into description, or metadata when over 1024) and
+  inlines retired concerns into any `includes:` consumer; bodies untouched,
+  every rewrite printed. Dogfood: 20 skills + 4 subagents fixed, both
+  concerns deleted, lint at 0 warnings; scaffold templates and `keystone new
+  skill` emit spec shape. Found for Phase 4: the Claude skill projection
+  writes `tools:`, but Claude Code's skill key is `allowed-tools`.

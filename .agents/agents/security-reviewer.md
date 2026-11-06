@@ -5,12 +5,12 @@ description: Security-focused PR reviewer that hunts OWASP-top-10 patterns and u
 tools:
   - Read
   - Grep
+  - Bash
   - Glob
 model: opus
-includes:
-  - reads-diff
 tags:
   - review
+  - composition
 ---
 
 # Security reviewer

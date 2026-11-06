@@ -55,41 +55,46 @@ func Parse(fileContents string) (Frontmatter, bool, error) {
 // method, so decoding into it doesn't recurse. Kept at package scope to
 // keep UnmarshalYAML itself small.
 type fmShadow struct {
-	Kind         string        `yaml:"kind"`
-	ID           string        `yaml:"id"`
-	Description  string        `yaml:"description"`
-	Paths        []string      `yaml:"paths"`
-	Globs        []string      `yaml:"globs"` // 4.x alias for `paths:`
-	Phase        string        `yaml:"phase"`
-	Triggers     []string      `yaml:"triggers"`
-	Tools        []string      `yaml:"tools"`
-	Model        string        `yaml:"model"`
-	Args         yaml.Node     `yaml:"args"`
-	Corpus       []string      `yaml:"corpus"`
-	Deps         []string      `yaml:"deps"`
-	Severity     string        `yaml:"severity"`
-	Tier         string        `yaml:"tier"`
-	Tags         []string      `yaml:"tags"`
-	Includes     []string      `yaml:"includes"`
-	HostTriggers []HostTrigger `yaml:"host_triggers"`
-	Produces     []string      `yaml:"produces"`
-	Consumes     []string      `yaml:"consumes"`
-	Stop         string        `yaml:"stop"`
-	Gates        []string      `yaml:"gates"`
-	Gate         string        `yaml:"gate"`
-	Type         string        `yaml:"type"`
-	ProducedBy   string        `yaml:"produced_by"`
-	Supersedes   []string      `yaml:"supersedes"`
-	Mode         string        `yaml:"mode"`
-	Event        string        `yaml:"event"`
-	On           string        `yaml:"on"` // 4.x alias for `event:`
-	Run          string        `yaml:"run"`
-	Transport    string        `yaml:"transport"`
-	Agent        string        `yaml:"agent"`
-	Returns      string        `yaml:"returns"`
-	Allow        []string      `yaml:"allow"`
-	Ask          []string      `yaml:"ask"`
-	Deny         []string      `yaml:"deny"`
+	Kind          string            `yaml:"kind"`
+	ID            string            `yaml:"id"`
+	Description   string            `yaml:"description"`
+	Name          string            `yaml:"name"`
+	License       string            `yaml:"license"`
+	Compatibility string            `yaml:"compatibility"`
+	Metadata      map[string]string `yaml:"metadata"`
+	AllowedTools  string            `yaml:"allowed-tools"`
+	Paths         []string          `yaml:"paths"`
+	Globs         []string          `yaml:"globs"` // 4.x alias for `paths:`
+	Phase         string            `yaml:"phase"`
+	Triggers      []string          `yaml:"triggers"`
+	Tools         []string          `yaml:"tools"`
+	Model         string            `yaml:"model"`
+	Args          yaml.Node         `yaml:"args"`
+	Corpus        []string          `yaml:"corpus"`
+	Deps          []string          `yaml:"deps"`
+	Severity      string            `yaml:"severity"`
+	Tier          string            `yaml:"tier"`
+	Tags          []string          `yaml:"tags"`
+	Includes      []string          `yaml:"includes"`
+	HostTriggers  []HostTrigger     `yaml:"host_triggers"`
+	Produces      []string          `yaml:"produces"`
+	Consumes      []string          `yaml:"consumes"`
+	Stop          string            `yaml:"stop"`
+	Gates         []string          `yaml:"gates"`
+	Gate          string            `yaml:"gate"`
+	Type          string            `yaml:"type"`
+	ProducedBy    string            `yaml:"produced_by"`
+	Supersedes    []string          `yaml:"supersedes"`
+	Mode          string            `yaml:"mode"`
+	Event         string            `yaml:"event"`
+	On            string            `yaml:"on"` // 4.x alias for `event:`
+	Run           string            `yaml:"run"`
+	Transport     string            `yaml:"transport"`
+	Agent         string            `yaml:"agent"`
+	Returns       string            `yaml:"returns"`
+	Allow         []string          `yaml:"allow"`
+	Ask           []string          `yaml:"ask"`
+	Deny          []string          `yaml:"deny"`
 }
 
 func (f *Frontmatter) UnmarshalYAML(value *yaml.Node) error {
@@ -99,8 +104,14 @@ func (f *Frontmatter) UnmarshalYAML(value *yaml.Node) error {
 	}
 	k, _ := NormalizeKind(s.Kind) // 4.x kind names map to 5.0 kinds
 	f.Kind = string(k)
-	f.ID = s.ID
+	f.ID = firstNonEmpty(s.ID, s.Name) // spec skills carry `name`, not `id`
 	f.Description = s.Description
+	f.Name = s.Name
+	f.License = s.License
+	f.Compatibility = s.Compatibility
+	f.Metadata = s.Metadata
+	f.AllowedTools = s.AllowedTools
+	f.Keys = mappingKeys(value)
 	f.Paths = s.Paths
 	if len(f.Paths) == 0 {
 		f.Paths = s.Globs
@@ -133,12 +144,41 @@ func (f *Frontmatter) UnmarshalYAML(value *yaml.Node) error {
 	f.Allow = s.Allow
 	f.Ask = s.Ask
 	f.Deny = s.Deny
+	f.applySpecFallbacks()
 	args, err := decodeArgsNode(s.Args)
 	if err != nil {
 		return err
 	}
 	f.Args = args
 	return nil
+}
+
+// applySpecFallbacks fills keystone fields from their Agent Skills spec
+// spellings when the keystone spelling is absent.
+func (f *Frontmatter) applySpecFallbacks() {
+	if len(f.Tools) == 0 && f.AllowedTools != "" {
+		f.Tools = strings.Fields(f.AllowedTools)
+	}
+	if f.Model == "" {
+		f.Model = f.Metadata["model"]
+	}
+	if len(f.Tags) == 0 && f.Metadata["tags"] != "" {
+		for _, t := range strings.Split(f.Metadata["tags"], ",") {
+			f.Tags = append(f.Tags, strings.TrimSpace(t))
+		}
+	}
+}
+
+// mappingKeys returns the top-level keys of a YAML mapping, in order.
+func mappingKeys(node *yaml.Node) []string {
+	if node.Kind != yaml.MappingNode {
+		return nil
+	}
+	keys := make([]string, 0, len(node.Content)/2)
+	for i := 0; i < len(node.Content); i += 2 {
+		keys = append(keys, node.Content[i].Value)
+	}
+	return keys
 }
 
 // firstNonEmpty returns the first non-empty string, else "".

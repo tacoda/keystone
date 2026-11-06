@@ -1,14 +1,6 @@
 ---
-kind: skill
-id: keystone:debt-review
-description: Triage the code-debt ledger — review the debt sensor's findings and update corpus/state/code-debt.md.
-triggers:
-  - keystone debt-review
-  - keystone:debt-review
-  - /keystone:debt-review
-  - review code debt
-  - triage debt ledger
-  - debt review
+name: keystone-debt-review
+description: 'Triage the code-debt ledger — review the debt sensor''s findings and update corpus/state/code-debt.md. Triggers: keystone debt-review; keystone:debt-review; /keystone:debt-review; review code debt; triage debt ledger; debt review.'
 ---
 
 # keystone:debt-review — triage the code-debt ledger

@@ -1,6 +1,6 @@
 ---
 name: keystone-new-corpus
-description: Scaffold a corpus reasoning entry (the *why*) at the canonical path.
+description: "Scaffold a corpus reasoning entry (the *why*) at the canonical path. Triggers: keystone new corpus; keystone:new-corpus; /keystone:new-corpus; add corpus reasoning; scaffold a corpus entry."
 tools:
   - Read
   - Write

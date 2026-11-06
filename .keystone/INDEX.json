@@ -1,6 +1,6 @@
 {
   "version": "5.0",
-  "generated": "2026-11-06T05:26:25Z",
+  "generated": "2026-11-06T05:33:32Z",
   "primitives": [
     {
       "kind": "command",
@@ -77,40 +77,6 @@
       "id": "verify",
       "description": "Run the verification sensors — lint, type-check, test, build, drift, commit-message.",
       "path": ".agents/commands/verify.md",
-      "provenance": "project"
-    },
-    {
-      "kind": "concern",
-      "id": "reads-diff",
-      "description": "Reusable concern for review personas — declares the tools needed to read a git diff and the section that documents the protocol.",
-      "tools": [
-        "Read",
-        "Grep",
-        "Bash"
-      ],
-      "tags": [
-        "review",
-        "composition"
-      ],
-      "path": ".agents/concerns/reads-diff.md",
-      "provenance": "project"
-    },
-    {
-      "kind": "concern",
-      "id": "scaffolds-primitive",
-      "description": "Reusable concern for keystone-new-* skills — declares the tools needed to scaffold a new primitive at its canonical path and the idempotency invariants every scaffold respects.",
-      "tools": [
-        "Read",
-        "Write",
-        "Edit",
-        "Glob",
-        "Bash"
-      ],
-      "tags": [
-        "scaffold",
-        "composition"
-      ],
-      "path": ".agents/concerns/scaffolds-primitive.md",
       "provenance": "project"
     },
     {
@@ -650,16 +616,11 @@
     },
     {
       "kind": "skill",
-      "id": "keystone:audit",
-      "description": "Full dual-flywheel audit — Learning (capture from review) + Pruning (remove dead rules). Periodic charter hygiene.",
-      "triggers": [
-        "keystone audit",
-        "keystone:audit",
-        "/keystone:audit",
-        "run audit",
-        "audit the charter",
-        "dual flywheel audit"
-      ],
+      "id": "keystone-audit",
+      "description": "Full dual-flywheel audit — Learning (capture from review) + Pruning (remove dead rules). Periodic charter hygiene. Triggers: keystone audit; keystone:audit; /keystone:audit; run audit; audit the charter; dual flywheel audit.",
+      "metadata": {
+        "model": "opus"
+      },
       "tools": [
         "Read",
         "Grep",
@@ -673,17 +634,11 @@
     },
     {
       "kind": "skill",
-      "id": "keystone:bootstrap",
-      "description": "One-time initial charter scaffold — detect stack, seed state, scaffold idioms, classify sensors, build the globs index.",
-      "triggers": [
-        "keystone bootstrap",
-        "keystone:bootstrap",
-        "/keystone:bootstrap",
-        "run bootstrap",
-        "bootstrap the charter",
-        "bootstrap the keystone charter",
-        "first-time setup"
-      ],
+      "id": "keystone-bootstrap",
+      "description": "One-time initial charter scaffold — detect stack, seed state, scaffold idioms, classify sensors, build the globs index. Triggers: keystone bootstrap; keystone:bootstrap; /keystone:bootstrap; run bootstrap; bootstrap the charter; bootstrap the keystone charter; first-time setup.",
+      "metadata": {
+        "model": "opus"
+      },
       "tools": [
         "Read",
         "Grep",
@@ -699,16 +654,11 @@
     },
     {
       "kind": "skill",
-      "id": "keystone:check-drift",
-      "description": "Run the drift sensor on the current diff — fast pre-verify check that loaded charter rules still match what the code is doing.",
-      "triggers": [
-        "keystone check-drift",
-        "keystone:check-drift",
-        "/keystone:check-drift",
-        "check drift",
-        "run drift sensor",
-        "drift check"
-      ],
+      "id": "keystone-check-drift",
+      "description": "Run the drift sensor on the current diff — fast pre-verify check that loaded charter rules still match what the code is doing. Triggers: keystone check-drift; keystone:check-drift; /keystone:check-drift; check drift; run drift sensor; drift check.",
+      "metadata": {
+        "model": "sonnet"
+      },
       "tools": [
         "Read",
         "Bash",
@@ -721,16 +671,11 @@
     },
     {
       "kind": "skill",
-      "id": "keystone:debt-review",
-      "description": "Triage the code-debt ledger — review the debt sensor's findings and update corpus/state/code-debt.md.",
-      "triggers": [
-        "keystone debt-review",
-        "keystone:debt-review",
-        "/keystone:debt-review",
-        "review code debt",
-        "triage debt ledger",
-        "debt review"
-      ],
+      "id": "keystone-debt-review",
+      "description": "Triage the code-debt ledger — review the debt sensor's findings and update corpus/state/code-debt.md. Triggers: keystone debt-review; keystone:debt-review; /keystone:debt-review; review code debt; triage debt ledger; debt review.",
+      "metadata": {
+        "model": "opus"
+      },
       "tools": [
         "Read",
         "Grep",
@@ -745,16 +690,11 @@
     },
     {
       "kind": "skill",
-      "id": "keystone:index",
-      "description": "Regenerate .keystone/INDEX.json — the primitive descriptor index every agent reads at session start.",
-      "triggers": [
-        "keystone index",
-        "keystone:index",
-        "/keystone:index",
-        "refresh the keystone index",
-        "regenerate INDEX.json",
-        "reindex primitives"
-      ],
+      "id": "keystone-index",
+      "description": "Regenerate .keystone/INDEX.json — the primitive descriptor index every agent reads at session start. Triggers: keystone index; keystone:index; /keystone:index; refresh the keystone index; regenerate INDEX.json; reindex primitives.",
+      "metadata": {
+        "model": "sonnet"
+      },
       "tools": [
         "Bash"
       ],
@@ -764,16 +704,11 @@
     },
     {
       "kind": "skill",
-      "id": "keystone:learn",
-      "description": "Capture a learning candidate (surprise, incident, review finding) into .charter/learning/inbox/ for later synthesis.",
-      "triggers": [
-        "keystone learn",
-        "keystone:learn",
-        "/keystone:learn",
-        "run the learn action",
-        "capture a learning candidate",
-        "log a surprise"
-      ],
+      "id": "keystone-learn",
+      "description": "Capture a learning candidate (surprise, incident, review finding) into .charter/learning/inbox/ for later synthesis. Triggers: keystone learn; keystone:learn; /keystone:learn; run the learn action; capture a learning candidate; log a surprise.",
+      "metadata": {
+        "model": "opus"
+      },
       "tools": [
         "Read",
         "Write",
@@ -787,17 +722,11 @@
     },
     {
       "kind": "skill",
-      "id": "keystone:mode",
-      "description": "Switch the charter pacing mode (paired / solo / autopilot).",
-      "triggers": [
-        "keystone mode",
-        "keystone:mode",
-        "/keystone:mode",
-        "switch pacing mode",
-        "go autopilot",
-        "go solo",
-        "go paired"
-      ],
+      "id": "keystone-mode",
+      "description": "Switch the charter pacing mode (paired / solo / autopilot). Triggers: keystone mode; keystone:mode; /keystone:mode; switch pacing mode; go autopilot; go solo; go paired.",
+      "metadata": {
+        "model": "sonnet"
+      },
       "tools": [
         "Read",
         "Write",
@@ -809,15 +738,12 @@
     },
     {
       "kind": "skill",
-      "id": "keystone:new-action",
-      "description": "Scaffold a new lifecycle action (atomic unit of work) at the canonical path.",
-      "triggers": [
-        "keystone new action",
-        "keystone:new-action",
-        "/keystone:new-action",
-        "add a new action",
-        "scaffold a lifecycle action"
-      ],
+      "id": "keystone-new-action",
+      "description": "Scaffold a new lifecycle action (atomic unit of work) at the canonical path. Triggers: keystone new action; keystone:new-action; /keystone:new-action; add a new action; scaffold a lifecycle action.",
+      "metadata": {
+        "model": "sonnet",
+        "tags": "scaffold,composition"
+      },
       "tools": [
         "Read",
         "Write",
@@ -829,24 +755,18 @@
       "tags": [
         "scaffold",
         "composition"
-      ],
-      "includes": [
-        "scaffolds-primitive"
       ],
       "path": ".agents/skills/keystone-new-action/SKILL.md",
       "provenance": "project"
     },
     {
       "kind": "skill",
-      "id": "keystone:new-adapter",
-      "description": "Scaffold the per-agent adapter triple (lifecycle, sensors, activation) for a new host.",
-      "triggers": [
-        "keystone new adapter",
-        "keystone:new-adapter",
-        "/keystone:new-adapter",
-        "add a host adapter",
-        "scaffold a new agent target"
-      ],
+      "id": "keystone-new-adapter",
+      "description": "Scaffold the per-agent adapter triple (lifecycle, sensors, activation) for a new host. Triggers: keystone new adapter; keystone:new-adapter; /keystone:new-adapter; add a host adapter; scaffold a new agent target.",
+      "metadata": {
+        "model": "sonnet",
+        "tags": "scaffold,composition"
+      },
       "tools": [
         "Read",
         "Write",
@@ -858,24 +778,18 @@
       "tags": [
         "scaffold",
         "composition"
-      ],
-      "includes": [
-        "scaffolds-primitive"
       ],
       "path": ".agents/skills/keystone-new-adapter/SKILL.md",
       "provenance": "project"
     },
     {
       "kind": "skill",
-      "id": "keystone:new-corpus",
-      "description": "Scaffold a corpus reasoning entry (the *why*) at the canonical path.",
-      "triggers": [
-        "keystone new corpus",
-        "keystone:new-corpus",
-        "/keystone:new-corpus",
-        "add corpus reasoning",
-        "scaffold a corpus entry"
-      ],
+      "id": "keystone-new-corpus",
+      "description": "Scaffold a corpus reasoning entry (the *why*) at the canonical path. Triggers: keystone new corpus; keystone:new-corpus; /keystone:new-corpus; add corpus reasoning; scaffold a corpus entry.",
+      "metadata": {
+        "model": "sonnet",
+        "tags": "scaffold,composition"
+      },
       "tools": [
         "Read",
         "Write",
@@ -887,25 +801,18 @@
       "tags": [
         "scaffold",
         "composition"
-      ],
-      "includes": [
-        "scaffolds-primitive"
       ],
       "path": ".agents/skills/keystone-new-corpus/SKILL.md",
       "provenance": "project"
     },
     {
       "kind": "skill",
-      "id": "keystone:new-guide",
-      "description": "Scaffold a new rule guide + paired corpus stub at the canonical path.",
-      "triggers": [
-        "keystone new guide",
-        "keystone:new-guide",
-        "/keystone:new-guide",
-        "add a new guide",
-        "scaffold a rule guide",
-        "new keystone rule"
-      ],
+      "id": "keystone-new-guide",
+      "description": "Scaffold a new rule guide + paired corpus stub at the canonical path. Triggers: keystone new guide; keystone:new-guide; /keystone:new-guide; add a new guide; scaffold a rule guide; new keystone rule.",
+      "metadata": {
+        "model": "sonnet",
+        "tags": "scaffold,composition"
+      },
       "tools": [
         "Read",
         "Write",
@@ -917,24 +824,18 @@
       "tags": [
         "scaffold",
         "composition"
-      ],
-      "includes": [
-        "scaffolds-primitive"
       ],
       "path": ".agents/skills/keystone-new-guide/SKILL.md",
       "provenance": "project"
     },
     {
       "kind": "skill",
-      "id": "keystone:new-playbook",
-      "description": "Scaffold a new playbook (ordered sequence of actions) at the canonical path.",
-      "triggers": [
-        "keystone new playbook",
-        "keystone:new-playbook",
-        "/keystone:new-playbook",
-        "add a new playbook",
-        "scaffold a workflow"
-      ],
+      "id": "keystone-new-playbook",
+      "description": "Scaffold a new playbook (ordered sequence of actions) at the canonical path. Triggers: keystone new playbook; keystone:new-playbook; /keystone:new-playbook; add a new playbook; scaffold a workflow.",
+      "metadata": {
+        "model": "sonnet",
+        "tags": "scaffold,composition"
+      },
       "tools": [
         "Read",
         "Write",
@@ -946,24 +847,18 @@
       "tags": [
         "scaffold",
         "composition"
-      ],
-      "includes": [
-        "scaffolds-primitive"
       ],
       "path": ".agents/skills/keystone-new-playbook/SKILL.md",
       "provenance": "project"
     },
     {
       "kind": "skill",
-      "id": "keystone:new-policy",
-      "description": "Scaffold a new policy repo skeleton outside the current project.",
-      "triggers": [
-        "keystone new policy",
-        "keystone:new-policy",
-        "/keystone:new-policy",
-        "bootstrap a policy repo",
-        "scaffold a keystone policy"
-      ],
+      "id": "keystone-new-policy",
+      "description": "Scaffold a new policy repo skeleton outside the current project. Triggers: keystone new policy; keystone:new-policy; /keystone:new-policy; bootstrap a policy repo; scaffold a keystone policy.",
+      "metadata": {
+        "model": "sonnet",
+        "tags": "scaffold,composition"
+      },
       "tools": [
         "Read",
         "Write",
@@ -975,24 +870,18 @@
       "tags": [
         "scaffold",
         "composition"
-      ],
-      "includes": [
-        "scaffolds-primitive"
       ],
       "path": ".agents/skills/keystone-new-policy/SKILL.md",
       "provenance": "project"
     },
     {
       "kind": "skill",
-      "id": "keystone:new-sensor",
-      "description": "Scaffold a new sensor (automated check) at the canonical path.",
-      "triggers": [
-        "keystone new sensor",
-        "keystone:new-sensor",
-        "/keystone:new-sensor",
-        "add a sensor",
-        "scaffold a new check"
-      ],
+      "id": "keystone-new-sensor",
+      "description": "Scaffold a new sensor (automated check) at the canonical path. Triggers: keystone new sensor; keystone:new-sensor; /keystone:new-sensor; add a sensor; scaffold a new check.",
+      "metadata": {
+        "model": "sonnet",
+        "tags": "scaffold,composition"
+      },
       "tools": [
         "Read",
         "Write",
@@ -1005,24 +894,16 @@
         "scaffold",
         "composition"
       ],
-      "includes": [
-        "scaffolds-primitive"
-      ],
       "path": ".agents/skills/keystone-new-sensor/SKILL.md",
       "provenance": "project"
     },
     {
       "kind": "skill",
-      "id": "keystone:orient",
-      "description": "Enter the planning phase — load codebase state + matching idioms for the touched region, then sketch a plan.",
-      "triggers": [
-        "keystone orient",
-        "keystone:orient",
-        "/keystone:orient",
-        "enter planning phase",
-        "orient on this task",
-        "load idioms for the touched region"
-      ],
+      "id": "keystone-orient",
+      "description": "Enter the planning phase — load codebase state + matching idioms for the touched region, then sketch a plan. Triggers: keystone orient; keystone:orient; /keystone:orient; enter planning phase; orient on this task; load idioms for the touched region.",
+      "metadata": {
+        "model": "opus"
+      },
       "tools": [
         "Read",
         "Grep",
@@ -1036,16 +917,11 @@
     },
     {
       "kind": "skill",
-      "id": "keystone:review",
-      "description": "Run the four review sensors on the current diff (functional, security, risk, deployment).",
-      "triggers": [
-        "keystone review",
-        "keystone:review",
-        "/keystone:review",
-        "review the diff",
-        "run review sensors",
-        "semantic review"
-      ],
+      "id": "keystone-review",
+      "description": "Run the four review sensors on the current diff (functional, security, risk, deployment). Triggers: keystone review; keystone:review; /keystone:review; review the diff; run review sensors; semantic review.",
+      "metadata": {
+        "model": "opus"
+      },
       "tools": [
         "Read",
         "Grep",
@@ -1059,16 +935,11 @@
     },
     {
       "kind": "skill",
-      "id": "keystone:spec",
-      "description": "Capture intent + acceptance criteria for a unit of work. First action on any task.",
-      "triggers": [
-        "keystone spec",
-        "keystone:spec",
-        "/keystone:spec",
-        "capture acceptance criteria",
-        "spec this task",
-        "what are we building"
-      ],
+      "id": "keystone-spec",
+      "description": "Capture intent + acceptance criteria for a unit of work. First action on any task. Triggers: keystone spec; keystone:spec; /keystone:spec; capture acceptance criteria; spec this task; what are we building.",
+      "metadata": {
+        "model": "opus"
+      },
       "tools": [
         "Read",
         "Write",
@@ -1082,16 +953,11 @@
     },
     {
       "kind": "skill",
-      "id": "keystone:synthesize",
-      "description": "Promote accepted learning-inbox candidates into the right corpus / guide / sensor layer, then refresh INDEX.json.",
-      "triggers": [
-        "keystone synthesize",
-        "keystone:synthesize",
-        "/keystone:synthesize",
-        "run synthesize",
-        "promote learning candidates",
-        "promote inbox to guides"
-      ],
+      "id": "keystone-synthesize",
+      "description": "Promote accepted learning-inbox candidates into the right corpus / guide / sensor layer, then refresh INDEX.json. Triggers: keystone synthesize; keystone:synthesize; /keystone:synthesize; run synthesize; promote learning candidates; promote inbox to guides.",
+      "metadata": {
+        "model": "opus"
+      },
       "tools": [
         "Read",
         "Write",
@@ -1106,16 +972,11 @@
     },
     {
       "kind": "skill",
-      "id": "keystone:verify",
-      "description": "Check vendored policies for drift and the strict cascade for project-layer violations.",
-      "triggers": [
-        "keystone verify",
-        "keystone:verify",
-        "/keystone:verify",
-        "verify the charter cascade",
-        "audit policy drift",
-        "check strict violations"
-      ],
+      "id": "keystone-verify",
+      "description": "Check vendored policies for drift and the strict cascade for project-layer violations. Triggers: keystone verify; keystone:verify; /keystone:verify; verify the charter cascade; audit policy drift; check strict violations.",
+      "metadata": {
+        "model": "opus"
+      },
       "tools": [
         "Read",
         "Bash",
@@ -1130,6 +991,9 @@
       "kind": "skill",
       "id": "task",
       "description": "End-to-end task workflow.",
+      "metadata": {
+        "model": "opus"
+      },
       "model": "opus",
       "path": ".agents/skills/task/SKILL.md",
       "provenance": "project"
@@ -1212,9 +1076,6 @@
         "review",
         "composition"
       ],
-      "includes": [
-        "reads-diff"
-      ],
       "path": ".agents/agents/code-reviewer.md",
       "provenance": "project"
     },
@@ -1232,9 +1093,6 @@
         "review",
         "composition"
       ],
-      "includes": [
-        "reads-diff"
-      ],
       "path": ".agents/agents/debt-reviewer.md",
       "provenance": "project"
     },
@@ -1251,9 +1109,6 @@
       "tags": [
         "review",
         "composition"
-      ],
-      "includes": [
-        "reads-diff"
       ],
       "path": ".agents/agents/drift-reviewer.md",
       "provenance": "project"
@@ -1391,9 +1246,6 @@
         "review",
         "composition"
       ],
-      "includes": [
-        "reads-diff"
-      ],
       "path": ".agents/agents/security-reviewer.md",
       "provenance": "project"
     },
@@ -1477,10 +1329,6 @@
       "synthesize",
       "verify"
     ],
-    "concern": [
-      "reads-diff",
-      "scaffolds-primitive"
-    ],
     "hook": [
       "build",
       "commit-message",
@@ -1541,25 +1389,25 @@
       "process/verification"
     ],
     "skill": [
-      "keystone:audit",
-      "keystone:bootstrap",
-      "keystone:check-drift",
-      "keystone:debt-review",
-      "keystone:index",
-      "keystone:learn",
-      "keystone:mode",
-      "keystone:new-action",
-      "keystone:new-adapter",
-      "keystone:new-corpus",
-      "keystone:new-guide",
-      "keystone:new-playbook",
-      "keystone:new-policy",
-      "keystone:new-sensor",
-      "keystone:orient",
-      "keystone:review",
-      "keystone:spec",
-      "keystone:synthesize",
-      "keystone:verify",
+      "keystone-audit",
+      "keystone-bootstrap",
+      "keystone-check-drift",
+      "keystone-debt-review",
+      "keystone-index",
+      "keystone-learn",
+      "keystone-mode",
+      "keystone-new-action",
+      "keystone-new-adapter",
+      "keystone-new-corpus",
+      "keystone-new-guide",
+      "keystone-new-playbook",
+      "keystone-new-policy",
+      "keystone-new-sensor",
+      "keystone-orient",
+      "keystone-review",
+      "keystone-spec",
+      "keystone-synthesize",
+      "keystone-verify",
       "task"
     ],
     "subagent": [
@@ -1598,25 +1446,25 @@
       "command/spec",
       "command/synthesize",
       "command/verify",
-      "skill/keystone:audit",
-      "skill/keystone:bootstrap",
-      "skill/keystone:check-drift",
-      "skill/keystone:debt-review",
-      "skill/keystone:index",
-      "skill/keystone:learn",
-      "skill/keystone:mode",
-      "skill/keystone:new-action",
-      "skill/keystone:new-adapter",
-      "skill/keystone:new-corpus",
-      "skill/keystone:new-guide",
-      "skill/keystone:new-playbook",
-      "skill/keystone:new-policy",
-      "skill/keystone:new-sensor",
-      "skill/keystone:orient",
-      "skill/keystone:review",
-      "skill/keystone:spec",
-      "skill/keystone:synthesize",
-      "skill/keystone:verify",
+      "skill/keystone-audit",
+      "skill/keystone-bootstrap",
+      "skill/keystone-check-drift",
+      "skill/keystone-debt-review",
+      "skill/keystone-index",
+      "skill/keystone-learn",
+      "skill/keystone-mode",
+      "skill/keystone-new-action",
+      "skill/keystone-new-adapter",
+      "skill/keystone-new-corpus",
+      "skill/keystone-new-guide",
+      "skill/keystone-new-playbook",
+      "skill/keystone-new-policy",
+      "skill/keystone-new-sensor",
+      "skill/keystone-orient",
+      "skill/keystone-review",
+      "skill/keystone-spec",
+      "skill/keystone-synthesize",
+      "skill/keystone-verify",
       "skill/task",
       "subagent/auditor",
       "subagent/bootstrap-scout",

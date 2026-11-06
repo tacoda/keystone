@@ -1,6 +1,6 @@
 ---
 name: keystone-orient
-description: Enter the planning phase — load codebase state + matching idioms for the touched region, then sketch a plan.
+description: "Enter the planning phase — load codebase state + matching idioms for the touched region, then sketch a plan. Triggers: keystone orient; keystone:orient; /keystone:orient; enter planning phase; orient on this task; load idioms for the touched region."
 tools:
   - Read
   - Grep

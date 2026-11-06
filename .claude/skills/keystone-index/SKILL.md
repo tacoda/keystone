@@ -1,6 +1,6 @@
 ---
 name: keystone-index
-description: Regenerate .keystone/INDEX.json — the primitive descriptor index every agent reads at session start.
+description: "Regenerate .keystone/INDEX.json — the primitive descriptor index every agent reads at session start. Triggers: keystone index; keystone:index; /keystone:index; refresh the keystone index; regenerate INDEX.json; reindex primitives."
 tools:
   - Bash
 model: sonnet

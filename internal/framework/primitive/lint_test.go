@@ -60,7 +60,7 @@ func TestLint_RetiredKindIsUnknown(t *testing.T) {
 // lint warns (with the fix) instead of failing the tree.
 func TestLint_ConcernWarnsUntilMigrated(t *testing.T) {
 	fs := Lint([]Primitive{{Frontmatter: Frontmatter{Kind: "concern", ID: "x", Description: "d"}}})
-	if !find(t, fs, FindingWarning, "keystone migrate") {
+	if !find(t, fs, FindingWarning, "keystone lint --fix") {
 		t.Errorf("expected migrate warning, got %v", fs)
 	}
 	if find(t, fs, FindingError, "") {

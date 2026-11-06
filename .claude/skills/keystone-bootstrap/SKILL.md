@@ -1,6 +1,6 @@
 ---
 name: keystone-bootstrap
-description: One-time initial charter scaffold — detect stack, seed state, scaffold idioms, classify sensors, build the globs index.
+description: "One-time initial charter scaffold — detect stack, seed state, scaffold idioms, classify sensors, build the globs index. Triggers: keystone bootstrap; keystone:bootstrap; /keystone:bootstrap; run bootstrap; bootstrap the charter; bootstrap the keystone charter; first-time setup."
 tools:
   - Read
   - Grep

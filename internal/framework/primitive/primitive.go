@@ -196,6 +196,21 @@ type Frontmatter struct {
 	ID          string `yaml:"id"          json:"id"`
 	Description string `yaml:"description" json:"description"`
 
+	// Agent Skills spec fields (https://agentskills.io/specification). A
+	// spec-shaped SKILL.md sets `name` (→ ID), `allowed-tools` (→ Tools),
+	// and `metadata` (model/tags → Model/Tags), so it yields the same
+	// descriptor as the keystone shape. Name and AllowedTools stay out of
+	// INDEX.json because ID and Tools already carry them.
+	Name          string            `yaml:"name,omitempty"          json:"-"`
+	License       string            `yaml:"license,omitempty"       json:"license,omitempty"`
+	Compatibility string            `yaml:"compatibility,omitempty" json:"compatibility,omitempty"`
+	Metadata      map[string]string `yaml:"metadata,omitempty"      json:"metadata,omitempty"`
+	AllowedTools  string            `yaml:"allowed-tools,omitempty" json:"-"`
+
+	// Keys lists the top-level frontmatter keys as authored, so lint can
+	// tell a spec-shaped skill from one carrying keystone-only keys.
+	Keys []string `yaml:"-" json:"-"`
+
 	// Paths scopes a rule to the files it governs (glob list). The YAML
 	// key is `paths:`, the key Claude Code and Cline read; the 4.x key
 	// `globs:` is accepted as an alias.

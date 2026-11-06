@@ -1,6 +1,6 @@
 ---
 name: keystone-verify
-description: Check vendored policies for drift and the strict cascade for project-layer violations.
+description: "Check vendored policies for drift and the strict cascade for project-layer violations. Triggers: keystone verify; keystone:verify; /keystone:verify; verify the charter cascade; audit policy drift; check strict violations."
 tools:
   - Read
   - Bash

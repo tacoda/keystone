@@ -1,8 +1,8 @@
 ---
-kind: playbook
-id: task
-description: 'End-to-end task workflow.'
-model: opus
+name: task
+description: End-to-end task workflow.
+metadata:
+  model: opus
 ---
 # task
 

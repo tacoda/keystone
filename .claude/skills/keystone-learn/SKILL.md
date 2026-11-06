@@ -1,6 +1,6 @@
 ---
 name: keystone-learn
-description: Capture a learning candidate (surprise, incident, review finding) into .charter/learning/inbox/ for later synthesis.
+description: "Capture a learning candidate (surprise, incident, review finding) into .charter/learning/inbox/ for later synthesis. Triggers: keystone learn; keystone:learn; /keystone:learn; run the learn action; capture a learning candidate; log a surprise."
 tools:
   - Read
   - Write

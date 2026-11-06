@@ -1,21 +1,9 @@
 ---
-kind: skill
-id: keystone:review
-description: Run the four review sensors on the current diff (functional, security, risk, deployment).
-triggers:
-  - keystone review
-  - keystone:review
-  - /keystone:review
-  - review the diff
-  - run review sensors
-  - semantic review
-model: opus
-tools:
-  - Read
-  - Grep
-  - Glob
-  - Bash
-  - Task
+name: keystone-review
+description: 'Run the four review sensors on the current diff (functional, security, risk, deployment). Triggers: keystone review; keystone:review; /keystone:review; review the diff; run review sensors; semantic review.'
+allowed-tools: Read Grep Glob Bash Task
+metadata:
+  model: opus
 ---
 
 # keystone:review — semantic review of the current diff

@@ -1,6 +1,6 @@
 ---
 name: keystone-mode
-description: Switch the charter pacing mode (paired / solo / autopilot).
+description: "Switch the charter pacing mode (paired / solo / autopilot). Triggers: keystone mode; keystone:mode; /keystone:mode; switch pacing mode; go autopilot; go solo; go paired."
 tools:
   - Read
   - Write

@@ -67,3 +67,28 @@ func TestNewTool_ScaffoldsCleanCallable(t *testing.T) {
 		t.Errorf("tool scaffold missing transport/run: %+v", fm)
 	}
 }
+
+// TestNewSkill_ScaffoldsSpecShape — a new skill is Agent Skills spec-valid:
+// `name` matches the directory and no keystone-only keys are written.
+func TestNewSkill_ScaffoldsSpecShape(t *testing.T) {
+	root, _ := runNewScaffold(t, "skill", "deploy-app", "skills/deploy-app/SKILL.md")
+	prims, _, err := primitive.Walk(root, config.DefaultAgentsRoot)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(prims) != 1 {
+		t.Fatalf("walk found %d primitive(s), want 1", len(prims))
+	}
+	p := prims[0]
+	if got := p.Kind + "/" + p.Name + "/" + p.ID; got != "skill/deploy-app/deploy-app" {
+		t.Errorf("kind/name/id = %s, want skill/deploy-app/deploy-app", got)
+	}
+	if primitive.NeedsSpecFix(p) {
+		t.Errorf("scaffold is not in spec shape: keys %v", p.Keys)
+	}
+	for _, f := range primitive.Lint(prims) {
+		if f.Severity == primitive.FindingError {
+			t.Errorf("scaffold lints with error: %s", f)
+		}
+	}
+}

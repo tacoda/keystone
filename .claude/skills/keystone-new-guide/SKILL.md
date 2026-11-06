@@ -1,6 +1,6 @@
 ---
 name: keystone-new-guide
-description: Scaffold a new rule guide + paired corpus stub at the canonical path.
+description: "Scaffold a new rule guide + paired corpus stub at the canonical path. Triggers: keystone new guide; keystone:new-guide; /keystone:new-guide; add a new guide; scaffold a rule guide; new keystone rule."
 tools:
   - Read
   - Write

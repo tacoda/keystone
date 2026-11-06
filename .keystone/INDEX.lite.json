@@ -1,6 +1,6 @@
 {
   "version": "5.0",
-  "generated": "2026-11-06T05:26:25Z",
+  "generated": "2026-11-06T05:33:32Z",
   "primitives": [
     {
       "category": "constraint",
@@ -389,116 +389,116 @@
     {
       "category": "capability",
       "kind": "skill",
-      "id": "keystone:audit",
-      "description": "Full dual-flywheel audit — Learning (capture from review) + Pruning (remove dead rules). Periodic charter hygiene."
+      "id": "keystone-audit",
+      "description": "Full dual-flywheel audit — Learning (capture from review) + Pruning (remove dead rules). Periodic charter hygiene. Triggers: keystone audit; keystone:audit; /keystone:audit; run audit; audit the charter; dual flywheel audit."
     },
     {
       "category": "capability",
       "kind": "skill",
-      "id": "keystone:bootstrap",
-      "description": "One-time initial charter scaffold — detect stack, seed state, scaffold idioms, classify sensors, build the globs index."
+      "id": "keystone-bootstrap",
+      "description": "One-time initial charter scaffold — detect stack, seed state, scaffold idioms, classify sensors, build the globs index. Triggers: keystone bootstrap; keystone:bootstrap; /keystone:bootstrap; run bootstrap; bootstrap the charter; bootstrap the keystone charter; first-time setup."
     },
     {
       "category": "capability",
       "kind": "skill",
-      "id": "keystone:check-drift",
-      "description": "Run the drift sensor on the current diff — fast pre-verify check that loaded charter rules still match what the code is doing."
+      "id": "keystone-check-drift",
+      "description": "Run the drift sensor on the current diff — fast pre-verify check that loaded charter rules still match what the code is doing. Triggers: keystone check-drift; keystone:check-drift; /keystone:check-drift; check drift; run drift sensor; drift check."
     },
     {
       "category": "capability",
       "kind": "skill",
-      "id": "keystone:debt-review",
-      "description": "Triage the code-debt ledger — review the debt sensor's findings and update corpus/state/code-debt.md."
+      "id": "keystone-debt-review",
+      "description": "Triage the code-debt ledger — review the debt sensor's findings and update corpus/state/code-debt.md. Triggers: keystone debt-review; keystone:debt-review; /keystone:debt-review; review code debt; triage debt ledger; debt review."
     },
     {
       "category": "capability",
       "kind": "skill",
-      "id": "keystone:index",
-      "description": "Regenerate .keystone/INDEX.json — the primitive descriptor index every agent reads at session start."
+      "id": "keystone-index",
+      "description": "Regenerate .keystone/INDEX.json — the primitive descriptor index every agent reads at session start. Triggers: keystone index; keystone:index; /keystone:index; refresh the keystone index; regenerate INDEX.json; reindex primitives."
     },
     {
       "category": "capability",
       "kind": "skill",
-      "id": "keystone:learn",
-      "description": "Capture a learning candidate (surprise, incident, review finding) into .charter/learning/inbox/ for later synthesis."
+      "id": "keystone-learn",
+      "description": "Capture a learning candidate (surprise, incident, review finding) into .charter/learning/inbox/ for later synthesis. Triggers: keystone learn; keystone:learn; /keystone:learn; run the learn action; capture a learning candidate; log a surprise."
     },
     {
       "category": "capability",
       "kind": "skill",
-      "id": "keystone:mode",
-      "description": "Switch the charter pacing mode (paired / solo / autopilot)."
+      "id": "keystone-mode",
+      "description": "Switch the charter pacing mode (paired / solo / autopilot). Triggers: keystone mode; keystone:mode; /keystone:mode; switch pacing mode; go autopilot; go solo; go paired."
     },
     {
       "category": "capability",
       "kind": "skill",
-      "id": "keystone:new-action",
-      "description": "Scaffold a new lifecycle action (atomic unit of work) at the canonical path."
+      "id": "keystone-new-action",
+      "description": "Scaffold a new lifecycle action (atomic unit of work) at the canonical path. Triggers: keystone new action; keystone:new-action; /keystone:new-action; add a new action; scaffold a lifecycle action."
     },
     {
       "category": "capability",
       "kind": "skill",
-      "id": "keystone:new-adapter",
-      "description": "Scaffold the per-agent adapter triple (lifecycle, sensors, activation) for a new host."
+      "id": "keystone-new-adapter",
+      "description": "Scaffold the per-agent adapter triple (lifecycle, sensors, activation) for a new host. Triggers: keystone new adapter; keystone:new-adapter; /keystone:new-adapter; add a host adapter; scaffold a new agent target."
     },
     {
       "category": "capability",
       "kind": "skill",
-      "id": "keystone:new-corpus",
-      "description": "Scaffold a corpus reasoning entry (the *why*) at the canonical path."
+      "id": "keystone-new-corpus",
+      "description": "Scaffold a corpus reasoning entry (the *why*) at the canonical path. Triggers: keystone new corpus; keystone:new-corpus; /keystone:new-corpus; add corpus reasoning; scaffold a corpus entry."
     },
     {
       "category": "capability",
       "kind": "skill",
-      "id": "keystone:new-guide",
-      "description": "Scaffold a new rule guide + paired corpus stub at the canonical path."
+      "id": "keystone-new-guide",
+      "description": "Scaffold a new rule guide + paired corpus stub at the canonical path. Triggers: keystone new guide; keystone:new-guide; /keystone:new-guide; add a new guide; scaffold a rule guide; new keystone rule."
     },
     {
       "category": "capability",
       "kind": "skill",
-      "id": "keystone:new-playbook",
-      "description": "Scaffold a new playbook (ordered sequence of actions) at the canonical path."
+      "id": "keystone-new-playbook",
+      "description": "Scaffold a new playbook (ordered sequence of actions) at the canonical path. Triggers: keystone new playbook; keystone:new-playbook; /keystone:new-playbook; add a new playbook; scaffold a workflow."
     },
     {
       "category": "capability",
       "kind": "skill",
-      "id": "keystone:new-policy",
-      "description": "Scaffold a new policy repo skeleton outside the current project."
+      "id": "keystone-new-policy",
+      "description": "Scaffold a new policy repo skeleton outside the current project. Triggers: keystone new policy; keystone:new-policy; /keystone:new-policy; bootstrap a policy repo; scaffold a keystone policy."
     },
     {
       "category": "capability",
       "kind": "skill",
-      "id": "keystone:new-sensor",
-      "description": "Scaffold a new sensor (automated check) at the canonical path."
+      "id": "keystone-new-sensor",
+      "description": "Scaffold a new sensor (automated check) at the canonical path. Triggers: keystone new sensor; keystone:new-sensor; /keystone:new-sensor; add a sensor; scaffold a new check."
     },
     {
       "category": "capability",
       "kind": "skill",
-      "id": "keystone:orient",
-      "description": "Enter the planning phase — load codebase state + matching idioms for the touched region, then sketch a plan."
+      "id": "keystone-orient",
+      "description": "Enter the planning phase — load codebase state + matching idioms for the touched region, then sketch a plan. Triggers: keystone orient; keystone:orient; /keystone:orient; enter planning phase; orient on this task; load idioms for the touched region."
     },
     {
       "category": "capability",
       "kind": "skill",
-      "id": "keystone:review",
-      "description": "Run the four review sensors on the current diff (functional, security, risk, deployment)."
+      "id": "keystone-review",
+      "description": "Run the four review sensors on the current diff (functional, security, risk, deployment). Triggers: keystone review; keystone:review; /keystone:review; review the diff; run review sensors; semantic review."
     },
     {
       "category": "capability",
       "kind": "skill",
-      "id": "keystone:spec",
-      "description": "Capture intent + acceptance criteria for a unit of work. First action on any task."
+      "id": "keystone-spec",
+      "description": "Capture intent + acceptance criteria for a unit of work. First action on any task. Triggers: keystone spec; keystone:spec; /keystone:spec; capture acceptance criteria; spec this task; what are we building."
     },
     {
       "category": "capability",
       "kind": "skill",
-      "id": "keystone:synthesize",
-      "description": "Promote accepted learning-inbox candidates into the right corpus / guide / sensor layer, then refresh INDEX.json."
+      "id": "keystone-synthesize",
+      "description": "Promote accepted learning-inbox candidates into the right corpus / guide / sensor layer, then refresh INDEX.json. Triggers: keystone synthesize; keystone:synthesize; /keystone:synthesize; run synthesize; promote learning candidates; promote inbox to guides."
     },
     {
       "category": "capability",
       "kind": "skill",
-      "id": "keystone:verify",
-      "description": "Check vendored policies for drift and the strict cascade for project-layer violations."
+      "id": "keystone-verify",
+      "description": "Check vendored policies for drift and the strict cascade for project-layer violations. Triggers: keystone verify; keystone:verify; /keystone:verify; verify the charter cascade; audit policy drift; check strict violations."
     },
     {
       "category": "capability",
@@ -625,18 +625,6 @@
       "kind": "subagent",
       "id": "verifier",
       "description": "Runs the verification sensors — lint, type-check, test, build, drift, commit-message — and reports the gate."
-    },
-    {
-      "category": "",
-      "kind": "concern",
-      "id": "reads-diff",
-      "description": "Reusable concern for review personas — declares the tools needed to read a git diff and the section that documents the protocol."
-    },
-    {
-      "category": "",
-      "kind": "concern",
-      "id": "scaffolds-primitive",
-      "description": "Reusable concern for keystone-new-* skills — declares the tools needed to scaffold a new primitive at its canonical path and the idempotency invariants every scaffold respects."
     }
   ]
 }

@@ -1,6 +1,6 @@
 ---
 name: keystone-new-action
-description: Scaffold a new lifecycle action (atomic unit of work) at the canonical path.
+description: "Scaffold a new lifecycle action (atomic unit of work) at the canonical path. Triggers: keystone new action; keystone:new-action; /keystone:new-action; add a new action; scaffold a lifecycle action."
 tools:
   - Read
   - Write

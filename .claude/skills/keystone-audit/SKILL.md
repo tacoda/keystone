@@ -1,6 +1,6 @@
 ---
 name: keystone-audit
-description: Full dual-flywheel audit — Learning (capture from review) + Pruning (remove dead rules). Periodic charter hygiene.
+description: "Full dual-flywheel audit — Learning (capture from review) + Pruning (remove dead rules). Periodic charter hygiene. Triggers: keystone audit; keystone:audit; /keystone:audit; run audit; audit the charter; dual flywheel audit."
 tools:
   - Read
   - Grep

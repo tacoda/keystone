@@ -1,13 +1,6 @@
 ---
-kind: skill
-id: keystone:new-command
-description: Scaffold a new lifecycle action (atomic unit of work) at the canonical path.
-triggers:
-  - keystone new command
-  - keystone:new-command
-  - /keystone:new-command
-  - add a new command
-  - scaffold a lifecycle action
+name: keystone-new-command
+description: 'Scaffold a new lifecycle action (atomic unit of work) at the canonical path. Triggers: keystone new command; keystone:new-command; /keystone:new-command; add a new command; scaffold a lifecycle action.'
 ---
 
 # keystone:new-command — scaffold a command

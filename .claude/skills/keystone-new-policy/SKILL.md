@@ -1,6 +1,6 @@
 ---
 name: keystone-new-policy
-description: Scaffold a new policy repo skeleton outside the current project.
+description: "Scaffold a new policy repo skeleton outside the current project. Triggers: keystone new policy; keystone:new-policy; /keystone:new-policy; bootstrap a policy repo; scaffold a keystone policy."
 tools:
   - Read
   - Write

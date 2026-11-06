@@ -1,13 +1,6 @@
 ---
-kind: skill
-id: keystone:new-playbook
-description: Scaffold a new playbook (ordered sequence of actions) at the canonical path.
-triggers:
-  - keystone new playbook
-  - keystone:new-playbook
-  - /keystone:new-playbook
-  - add a new playbook
-  - scaffold a workflow
+name: keystone-new-playbook
+description: 'Scaffold a new playbook (ordered sequence of actions) at the canonical path. Triggers: keystone new playbook; keystone:new-playbook; /keystone:new-playbook; add a new playbook; scaffold a workflow.'
 ---
 
 # keystone:new-playbook — scaffold a playbook

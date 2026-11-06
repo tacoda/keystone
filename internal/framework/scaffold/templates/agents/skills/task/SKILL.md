@@ -1,7 +1,6 @@
 ---
-kind: playbook
-id: task
-description: 'End-to-end task workflow.'
+name: task
+description: End-to-end task workflow.
 ---
 # task
 

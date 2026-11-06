@@ -1,20 +1,9 @@
 ---
-kind: skill
-id: keystone:mode
-description: Switch the charter pacing mode (paired / solo / autopilot).
-triggers:
-  - keystone mode
-  - keystone:mode
-  - /keystone:mode
-  - switch pacing mode
-  - go autopilot
-  - go solo
-  - go paired
-model: sonnet
-tools:
-  - Read
-  - Write
-  - Edit
+name: keystone-mode
+description: 'Switch the charter pacing mode (paired / solo / autopilot). Triggers: keystone mode; keystone:mode; /keystone:mode; switch pacing mode; go autopilot; go solo; go paired.'
+allowed-tools: Read Write Edit
+metadata:
+  model: sonnet
 ---
 
 # keystone:mode — switch pacing mode

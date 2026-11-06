@@ -1,25 +1,10 @@
 ---
-kind: skill
-id: keystone:new-guide
-description: Scaffold a new rule guide + paired corpus stub at the canonical path.
-triggers:
-  - keystone new guide
-  - keystone:new-guide
-  - /keystone:new-guide
-  - add a new guide
-  - scaffold a rule guide
-  - new keystone rule
-model: sonnet
-tools:
-  - Read
-  - Write
-  - Edit
-  - Glob
-  - Bash
-includes:
-  - scaffolds-primitive
-tags:
-  - scaffold
+name: keystone-new-guide
+description: 'Scaffold a new rule guide + paired corpus stub at the canonical path. Triggers: keystone new guide; keystone:new-guide; /keystone:new-guide; add a new guide; scaffold a rule guide; new keystone rule.'
+allowed-tools: Read Write Edit Glob Bash
+metadata:
+  model: sonnet
+  tags: scaffold,composition
 ---
 
 # keystone:new-guide — scaffold a guide + paired corpus

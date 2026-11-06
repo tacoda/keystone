@@ -1,13 +1,6 @@
 ---
-kind: skill
-id: keystone:new-corpus
-description: Scaffold a corpus reasoning entry (the *why*) at the canonical path.
-triggers:
-  - keystone new corpus
-  - keystone:new-corpus
-  - /keystone:new-corpus
-  - add corpus reasoning
-  - scaffold a corpus entry
+name: keystone-new-corpus
+description: 'Scaffold a corpus reasoning entry (the *why*) at the canonical path. Triggers: keystone new corpus; keystone:new-corpus; /keystone:new-corpus; add corpus reasoning; scaffold a corpus entry.'
 ---
 
 # keystone:new-corpus — scaffold a corpus entry

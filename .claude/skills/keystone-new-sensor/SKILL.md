@@ -1,6 +1,6 @@
 ---
 name: keystone-new-sensor
-description: Scaffold a new sensor (automated check) at the canonical path.
+description: "Scaffold a new sensor (automated check) at the canonical path. Triggers: keystone new sensor; keystone:new-sensor; /keystone:new-sensor; add a sensor; scaffold a new check."
 tools:
   - Read
   - Write

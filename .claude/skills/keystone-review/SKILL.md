@@ -1,6 +1,6 @@
 ---
 name: keystone-review
-description: Run the four review sensors on the current diff (functional, security, risk, deployment).
+description: "Run the four review sensors on the current diff (functional, security, risk, deployment). Triggers: keystone review; keystone:review; /keystone:review; review the diff; run review sensors; semantic review."
 tools:
   - Read
   - Grep

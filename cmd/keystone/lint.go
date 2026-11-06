@@ -16,30 +16,11 @@ import (
 // runs Lint(), prints findings, and exits non-zero on any error-level
 // finding. Warnings are reported but never block the exit.
 func runLint(args []string) error {
-	dir := "."
-	verbose := false
-	for i := 0; i < len(args); i++ {
-		a := args[i]
-		switch {
-		case a == "--help" || a == "-h":
-			printLintUsage(os.Stdout)
-			return nil
-		case a == "--dir":
-			if i+1 >= len(args) {
-				return fmt.Errorf("flag %s requires a value", a)
-			}
-			dir = args[i+1]
-			i++
-		case strings.HasPrefix(a, "--dir="):
-			dir = strings.TrimPrefix(a, "--dir=")
-		case a == "--verbose" || a == "-v":
-			verbose = true
-		case strings.HasPrefix(a, "-"):
-			return fmt.Errorf("unknown flag %s", a)
-		default:
-			return fmt.Errorf("unexpected positional argument %q", a)
-		}
+	opts, help, err := parseLintArgs(args)
+	if err != nil || help {
+		return err
 	}
+	dir, verbose, fix := opts.dir, opts.verbose, opts.fix
 
 	absDir, err := filepath.Abs(dir)
 	if err != nil {
@@ -53,6 +34,11 @@ func runLint(args []string) error {
 	}
 	for _, w := range warnings {
 		fmt.Fprintf(os.Stderr, "keystone lint: %s: %s\n", w.Path, w.Message)
+	}
+	if fix {
+		if primitives, err = applyLintFixes(absDir, charterRoot, primitives); err != nil {
+			return err
+		}
 	}
 
 	findings := primitive.Lint(primitives)
@@ -83,6 +69,53 @@ func runLint(args []string) error {
 	return fmt.Errorf("lint failed")
 }
 
+type lintOpts struct {
+	dir          string
+	verbose, fix bool
+}
+
+// parseLintArgs reads `keystone lint` flags; help=true means usage was printed.
+func parseLintArgs(args []string) (opts lintOpts, help bool, err error) {
+	opts.dir = "."
+	for i := 0; i < len(args); i++ {
+		a := args[i]
+		switch {
+		case a == "--help" || a == "-h":
+			printLintUsage(os.Stdout)
+			return opts, true, nil
+		case a == "--dir":
+			if i+1 >= len(args) {
+				return opts, false, fmt.Errorf("flag %s requires a value", a)
+			}
+			opts.dir = args[i+1]
+			i++
+		case strings.HasPrefix(a, "--dir="):
+			opts.dir = strings.TrimPrefix(a, "--dir=")
+		case a == "--verbose" || a == "-v":
+			opts.verbose = true
+		case a == "--fix":
+			opts.fix = true
+		case strings.HasPrefix(a, "-"):
+			return opts, false, fmt.Errorf("unknown flag %s", a)
+		default:
+			return opts, false, fmt.Errorf("unexpected positional argument %q", a)
+		}
+	}
+	return opts, false, nil
+}
+
+// applyLintFixes runs the --fix rewrites, then re-walks so the findings
+// below describe the fixed tree.
+func applyLintFixes(absDir, charterRoot string, primitives []primitive.Primitive) ([]primitive.Primitive, error) {
+	n, err := fixFrontmatter(absDir, primitives)
+	if err != nil {
+		return nil, err
+	}
+	fmt.Fprintf(os.Stdout, "▸ keystone lint --fix rewrote %d file(s)\n", n)
+	fixed, _, err := primitive.Walk(absDir, charterRoot)
+	return fixed, err
+}
+
 func kindCount(ps []primitive.Primitive) int {
 	seen := map[string]bool{}
 	for _, p := range ps {
@@ -95,7 +128,7 @@ func printLintUsage(w *os.File) {
 	fmt.Fprint(w, `keystone lint — validate primitive frontmatter
 
 Usage:
-  keystone lint [--dir <path>] [--verbose]
+  keystone lint [--dir <path>] [--verbose] [--fix]
 
 Walks every canonical primitive under .agents/, checks each
 file's frontmatter against the canonical schema, and reports any
@@ -105,16 +138,25 @@ Hard errors (block exit):
   - missing kind / id / description
   - unknown kind value
   - duplicate (kind, id) across the charter
-  - empty globs entry
-  - skill missing triggers, subagent missing tools
+  - empty paths entry
+  - subagent missing tools
+  - SKILL.md name invalid or not matching its directory; description
+    over 1024 or compatibility over 500 characters (Agent Skills spec)
 
 Warnings (reported with --verbose; never block):
   - description still says "TODO"
   - id contains characters outside [A-Za-z0-9-:_/.]
   - deps[] / traces[] entries that do not resolve
+  - SKILL.md without name, or with keys outside the Agent Skills spec
+  - concern (retired in 5.0)
 
 Flags:
   --dir <path>    Project root (defaults to cwd).
   --verbose, -v   Show warnings in addition to errors.
+  --fix           Rewrite project SKILL.md frontmatter into Agent Skills
+                  spec shape (name, triggers folded into description,
+                  tools → allowed-tools, model/tags → metadata), and
+                  inline retired concerns (includes:) into their
+                  consumers. Bodies are untouched; every rewrite is printed.
 `)
 }

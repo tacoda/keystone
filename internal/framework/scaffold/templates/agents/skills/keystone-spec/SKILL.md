@@ -1,14 +1,6 @@
 ---
-kind: skill
-id: keystone:spec
-description: Capture intent + acceptance criteria for a unit of work. First action on any task.
-triggers:
-  - keystone spec
-  - keystone:spec
-  - /keystone:spec
-  - capture acceptance criteria
-  - spec this task
-  - what are we building
+name: keystone-spec
+description: 'Capture intent + acceptance criteria for a unit of work. First action on any task. Triggers: keystone spec; keystone:spec; /keystone:spec; capture acceptance criteria; spec this task; what are we building.'
 ---
 
 # keystone:spec — capture intent + AC

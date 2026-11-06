@@ -1,13 +1,6 @@
 ---
-kind: skill
-id: keystone:new-adapter
-description: Scaffold the per-agent adapter triple (lifecycle, sensors, activation) for a new host.
-triggers:
-  - keystone new adapter
-  - keystone:new-adapter
-  - /keystone:new-adapter
-  - add a host adapter
-  - scaffold a new agent target
+name: keystone-new-adapter
+description: 'Scaffold the per-agent adapter triple (lifecycle, sensors, activation) for a new host. Triggers: keystone new adapter; keystone:new-adapter; /keystone:new-adapter; add a host adapter; scaffold a new agent target.'
 ---
 
 # keystone:new-adapter — scaffold a host adapter

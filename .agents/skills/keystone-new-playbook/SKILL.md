@@ -1,24 +1,10 @@
 ---
-kind: skill
-id: keystone:new-playbook
-description: Scaffold a new playbook (ordered sequence of actions) at the canonical path.
-triggers:
-  - keystone new playbook
-  - keystone:new-playbook
-  - /keystone:new-playbook
-  - add a new playbook
-  - scaffold a workflow
-model: sonnet
-tools:
-  - Read
-  - Write
-  - Edit
-  - Glob
-  - Bash
-includes:
-  - scaffolds-primitive
-tags:
-  - scaffold
+name: keystone-new-playbook
+description: 'Scaffold a new playbook (ordered sequence of actions) at the canonical path. Triggers: keystone new playbook; keystone:new-playbook; /keystone:new-playbook; add a new playbook; scaffold a workflow.'
+allowed-tools: Read Write Edit Glob Bash
+metadata:
+  model: sonnet
+  tags: scaffold,composition
 ---
 
 # keystone:new-playbook — scaffold a playbook

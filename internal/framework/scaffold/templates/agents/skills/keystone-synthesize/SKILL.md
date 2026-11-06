@@ -1,14 +1,6 @@
 ---
-kind: skill
-id: keystone:synthesize
-description: Promote accepted learning-inbox candidates into the right corpus / guide / sensor layer, then refresh INDEX.json.
-triggers:
-  - keystone synthesize
-  - keystone:synthesize
-  - /keystone:synthesize
-  - run synthesize
-  - promote learning candidates
-  - promote inbox to guides
+name: keystone-synthesize
+description: 'Promote accepted learning-inbox candidates into the right corpus / guide / sensor layer, then refresh INDEX.json. Triggers: keystone synthesize; keystone:synthesize; /keystone:synthesize; run synthesize; promote learning candidates; promote inbox to guides.'
 ---
 
 # keystone:synthesize — promote inbox candidates

@@ -1,24 +1,10 @@
 ---
-kind: skill
-id: keystone:new-corpus
-description: Scaffold a corpus reasoning entry (the *why*) at the canonical path.
-triggers:
-  - keystone new corpus
-  - keystone:new-corpus
-  - /keystone:new-corpus
-  - add corpus reasoning
-  - scaffold a corpus entry
-model: sonnet
-tools:
-  - Read
-  - Write
-  - Edit
-  - Glob
-  - Bash
-includes:
-  - scaffolds-primitive
-tags:
-  - scaffold
+name: keystone-new-corpus
+description: 'Scaffold a corpus reasoning entry (the *why*) at the canonical path. Triggers: keystone new corpus; keystone:new-corpus; /keystone:new-corpus; add corpus reasoning; scaffold a corpus entry.'
+allowed-tools: Read Write Edit Glob Bash
+metadata:
+  model: sonnet
+  tags: scaffold,composition
 ---
 
 # keystone:new-corpus — scaffold a corpus entry

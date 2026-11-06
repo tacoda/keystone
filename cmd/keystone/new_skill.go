@@ -83,13 +83,11 @@ func runNewSkill(args []string) error {
 	}
 	diskName := strings.ReplaceAll(id, ":", "-")
 	path := filepath.Join(projectDir, charterRoot, "skills", diskName, "SKILL.md")
+	// Agent Skills spec frontmatter: `name` must match the directory, and
+	// the description is the activation contract (what it does + when).
 	body := fmt.Sprintf(`---
-kind: skill
-id: %s
-description: TODO — one-line description; surfaced in INDEX.json.
-triggers:
-  - %s
-  - /%s
+name: %s
+description: TODO — what this skill does and when to use it (max 1024 characters).
 ---
 
 # %s
@@ -107,7 +105,7 @@ If the skill wraps a shell command, show the exact invocation:
 
 - Bullet one.
 - Bullet two.
-`, id, id, id, id)
+`, diskName, id)
 	return writeSkeleton(path, body)
 }
 
