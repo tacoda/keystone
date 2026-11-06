@@ -2,7 +2,7 @@
 
 All notable changes to keystone are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); the project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [5.0.0] — Unreleased
+## [5.0.0] — 2026-11-06
 
 Major release: **constraints and capabilities**. The charter splits into
 two halves with the names the ecosystem already uses. Constraints limit,
