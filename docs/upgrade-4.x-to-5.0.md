@@ -117,8 +117,8 @@ To apply them:
    has no `triggers:` field, and hosts match on the description.
 
 5.0 retires `concern`. A concern's fields merged into the primitives that
-included it. Copy those fields into each primitive, then delete the concern.
-Lint warns until you do.
+included it. `keystone lint --fix` writes those fields into each of them and
+drops `includes:`. Then delete the concern. Lint warns until you do.
 
 ## 5. Choose how hosts get skills
 

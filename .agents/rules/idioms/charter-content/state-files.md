@@ -4,19 +4,19 @@ id: guides/idioms/charter-content/state-files
 description: 'Authoring rules for .agents/references/state/.'
 paths:
   - ".agents/references/state/**/*.md"
-  - "internal/framework/scaffold/templates/**/corpus/state/**/*.md"
+  - "internal/framework/scaffold/templates/agents/references/state/**/*.md"
 tags:
   - charter
   - state
 ---
 # State files — rules
 
-The rules from [`corpus/idioms/charter-content/state-files.md`](../../../references/idioms/charter-content/state-files.md).
+The rules from [`references/idioms/charter-content/state-files.md`](../../../references/idioms/charter-content/state-files.md).
 
 ## IRON LAW
 
-- **No silent overwrites.** Every state-file write goes through the agent's edit primitive so the user sees the diff. Sensors that update state must surface their diff for review.
-- **Do not hand-edit derived sections.** The `## Index` table in `GLOBS_INDEX.md` is regenerated. `quality-radar.md`, `risk-fingerprints.md`, `traffic-topology.md` are sensor snapshots — replace whole-file via the sensor, never patch.
+- **No silent overwrites.** Every state-file write goes through the agent's edit primitive so the user sees the diff. Hooks and subagents that update state must surface their diff for review.
+- **Do not hand-edit derived sections.** The `## Index` table in `GLOBS_INDEX.md` is regenerated. `quality-radar.md`, `risk-fingerprints.md`, `traffic-topology.md` are snapshots — replace the whole file through the hook or subagent that writes it, never patch.
 
 ## GOLDEN RULE
 
@@ -26,6 +26,6 @@ The rules from [`corpus/idioms/charter-content/state-files.md`](../../../referen
 
 ## Anti-patterns
 
-- Mutating `CODEBASE_STATE.md` from a sensor without a visible diff.
-- Removing section headers when editing state files — downstream sensors and the agent's section-anchored reads break.
+- Mutating `CODEBASE_STATE.md` from a hook without a visible diff.
+- Removing section headers when editing state files — downstream hooks and the agent's section-anchored reads break.
 - Hand-editing `INDEX.json` or `GLOBS_INDEX.md`'s `## Index` table.

@@ -50,6 +50,20 @@
         "copy"
       ],
       "description": "How `keystone project` reaches a host that reads the canonical format at another path: per-entry relative symlinks, or copies. Default: symlink, except copy on Windows."
+    },
+    "adapters": {
+      "type": "array",
+      "description": "Hosts keystone projects to: claude-code (always included), cursor, github-copilot, continue, opencode, codex, cline, goose, pi, aider. An unknown name is a warning, not an error.",
+      "items": {
+        "type": "string"
+      }
+    },
+    "signals": {
+      "type": "array",
+      "description": "Project-defined signals (events keystone fires itself) beyond the built-ins.",
+      "items": {
+        "type": "string"
+      }
     }
   },
   "required": [

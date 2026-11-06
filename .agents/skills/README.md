@@ -23,5 +23,5 @@ keystone new skill <id>
 Scaffolds `skills/<id>/SKILL.md` with canonical frontmatter. Fill in the
 body to teach the agent how to do the thing.
 
-See [`docs/ports/primitive.md`](../../docs/ports/primitive.md) for the
+See [`docs/kinds/README.md`](../../docs/kinds/README.md) for the
 full descriptor shape.

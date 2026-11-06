@@ -1,6 +1,6 @@
 ---
 name: charter-content-primitive-shape
-description: Frontmatter, canonical paths, corpus/guide pairing, narrow-only globs.
+description: 'Frontmatter, canonical paths, rule/reference pairing, paths: scoping.'
 globs:
   - .agents/**/*.md
   - internal/framework/scaffold/templates/**/*.md
@@ -14,23 +14,23 @@ Full rule: `.agents/rules/idioms/charter-content/primitive-shape.md` (read on de
 ## IRON LAW
 
 - **Every primitive declares `kind`, `id`, and `description` in frontmatter.** No exceptions. `keystone index` ignores files that don't.
-- **Every primitive lives at the canonical path for its kind** (table in the corpus). Off-path content is invisible.
-- **`globs:` narrows, never broadens.** A guide with globs activates only when its ambient rule already said yes AND a touched file matches. Globs cannot force a guide to fire outside its topic.
+- **Every primitive lives at the canonical path for its kind** (table in the reference). Off-path content is invisible.
+- **`paths:` scopes a rule to the files it governs.** A rule with `paths:` applies only when a touched file matches. A rule without `paths:` applies everywhere. Write `paths:`, not the 4.x `globs:`.
 - **No hand-edits to generated files.** `INDEX.json` and the `## Index` table in `GLOBS_INDEX.md` are regenerated; manual edits are overwritten.
 
 
 ## GOLDEN RULE
 
-- New guide → write the paired corpus entry in the same change. Either side alone is a smell the **charter-debt** sensor flags.
-- After any primitive add / move / delete → run `keystone index` so `INDEX.json` reflects the new shape. If the primitive is a skill / subagent / command, also run `keystone project` so `.claude/` regenerates.
-- A guide's `description:` reads like a one-line answer to "should I open this file right now?" — the agent uses it as a gate.
+- New rule → write the paired reference in the same change. Either side alone is a smell the **charter-debt** subagent flags.
+- After any primitive add / move / delete → run `keystone index` so `INDEX.json` reflects the new shape. Then run `keystone project` so the host files (`.claude/`, `AGENTS.md`, and the other enabled hosts) regenerate.
+- A rule's `description:` reads like a one-line answer to "should I open this file right now?" — the agent uses it as a gate.
 - Use the same `id:` value as the path slug (e.g., `id: guides/idioms/go/stdlib-first` for `guides/idioms/go/stdlib-first.md`). Aliases hide intent.
-- `severity: must` only when deviation actually warrants a sensor-grade complaint. Default to `should` and let the corpus carry the reasoning.
+- `severity: must` only when deviation actually warrants a hook-grade complaint. Default to `should` and let the reference carry the reasoning.
 
 
 ## Anti-patterns
 
 - Placeholder `description:` (`'TODO'`, `'description'`, copy-paste from another primitive).
-- A guide with `globs:` patterns that match no real files (typically copy-pasted from a different stack).
-- A corpus file with no paired guide, or a guide whose body has no corpus link.
+- A rule with `paths:` patterns that match no real files (typically copy-pasted from a different stack).
+- A reference with no paired rule, or a rule whose body has no reference link.
 - A new primitive that lands without a `keystone index` run — `.keystone/INDEX.json` silently drifts until the next agent session that reads it.

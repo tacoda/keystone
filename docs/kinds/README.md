@@ -1,220 +1,102 @@
-# Port: Primitive
+# Primitives
 
-**Activation:** This port is not a runtime port — it is the *shape* every other port-typed file shares. The agent never "activates a primitive"; it activates a rule, an action, a skill, etc. The primitive shape is what makes those activations cheap.
-**Purpose:** One canonical frontmatter schema across every charter file. Lets the agent read a single `.keystone/INDEX.json` of descriptors and open bodies only on activation, instead of reading every markdown file to discover what is there.
+<!-- voice-register: informational -->
+<!-- voice-english: ste -->
 
-Every other port doc in this directory — `guide.md`, `action.md`, `corpus.md`, `sensor.md`, `adapter.md`, `playbook.md` — refines this shape with its own required fields and activation rules. When those docs and this one disagree on a shared field, **this doc wins**.
+A primitive is one typed unit of the charter: one Markdown file under `.agents/`, or one folder for a skill. Each primitive has YAML frontmatter and a body. The frontmatter is the descriptor that keystone indexes. The agent reads the descriptors first and opens a body only when that primitive applies. This page covers what every kind shares. Each kind has its own page for the fields and behavior that only it has.
 
-## Wrap doctrine
+## The two categories
 
-Primitives split into two layers. Framework primitives wrap agent
-primitives the way an ORM wraps SQL: the framework primitive is the
-canonical authoring surface, the agent primitive is the raw
-host-native equivalent kept as an escape hatch.
+Every kind belongs to one of two categories. A **constraint** limits, gates, or checks what the agent does. A **capability** adds something the agent can do. `keystone list`, `INDEX.lite.json`, and `AGENTS.md` show constraints first.
 
-| Framework (encouraged) | wraps    | Agent (escape hatch)    | Projection target              |
-| ---------------------- | -------- | ----------------------- | ------------------------------ |
-| `guide`                | conceptual | `rule`                | (none — INDEX-only)            |
-| `sensor`               | conceptual | `rule`                | (none — INDEX-only)            |
-| `action`               | projects | `command`               | `.claude/commands/<id>.md`     |
-| `playbook`             | projects | `skill`                 | `.claude/skills/<id>/SKILL.md` |
-| `persona`              | projects | `subagent`              | `.claude/agents/<id>.md`       |
+| Kind | Category | Folder | Page |
+|---|---|---|---|
+| `rule` | constraint | `.agents/rules/` | [rule.md](rule.md) |
+| `reference` | constraint | `.agents/references/` | [reference.md](reference.md) |
+| `hook` | constraint | `.agents/hooks/` | [hook.md](hook.md) |
+| `permission` | constraint | `.agents/permissions/` | [permission.md](permission.md) |
+| `eval` | constraint | `.agents/evals/<id>/EVAL.md` | [eval.md](eval.md) |
+| `skill` | capability | `.agents/skills/<id>/SKILL.md` | [skill.md](skill.md) |
+| `command` | capability | `.agents/commands/` | [command.md](command.md) |
+| `subagent` | capability | `.agents/agents/` | [subagent.md](subagent.md) |
+| `tool` | capability | `.agents/tools/` | [tool.md](tool.md) |
+| `document` | capability | `.agents/documents/` | [document.md](document.md) |
 
-Framework standalone (no wrap relationship): `corpus`, `eval`, `source`.
+Keystone knows only these ten kinds. `keystone lint` reports any other kind as an error, except the retired `concern`, which gets a warning until you inline it with `keystone lint --fix`.
 
-Mechanics:
+## Kind comes from the folder
 
-- **Projection wraps** (`action`, `playbook`, `persona`) compile to
-  the same host path as their agent counterpart via `keystone
-  project`. Same id on both layers → projection collision → lint
-  error. Pick one authoring layer per id.
-- **Conceptual wraps** (`guide`, `sensor`) share the agent's "rule"
-  semantics but carry richer structure (severity, globs, paired
-  corpus, sensor kind). The wrap is INDEX-level; no file projection.
-  The agent reads them as authoritative-rule via `INDEX.json`.
+Keystone reads the kind from the first folder under `.agents/`. A file in `.agents/hooks/` is a hook, so you can leave `kind:` out. If you write `kind:`, keystone uses it. The same rule applies inside a vendored policy tree under `.keystone/policies/`.
 
-Default authoring path is the framework primitive (`keystone new
-persona`, not `keystone new subagent`). Reach for the agent escape
-hatch only when extending what the host already understands and the
-framework shape adds nothing.
+Skills and evals are folders. The indexer reads `SKILL.md` in each skill folder and `EVAL.md` in each eval folder. In the other kind folders, it reads every `.md` file except `README.md`.
 
-## Why a shared shape
+## Shared frontmatter
 
-`keystone-mcp` already factors charter content into typed primitives (`ContextDoc{kind, id, severity, source, …}`) and exposes a *descriptor* surface (`keystone_list_topics`) separate from body content. The agent reads descriptors; bodies stay cold until needed.
-
-The static charter can give the agent the same affordance without a server: every file declares the same descriptor in frontmatter, the generator emits a single `.keystone/INDEX.json`, and the menu file (`CLAUDE.md`, `AGENTS.md`, `.cursor/rules/keystone.mdc`) instructs the agent to read the index first and open bodies only on activation.
-
-Same source of truth (markdown). Far less reading per session. Primitives instead of prose wherever the host supports them.
-
-## Canonical frontmatter
-
-Every charter file ships this frontmatter block. Per-kind required and optional fields are listed under [Required by kind](#required-by-kind).
+You can set these fields on every kind. The full list is the `Frontmatter` struct in `internal/framework/primitive/primitive.go`. The per-kind JSON Schema is `docs/schemas/primitive.schema.json`, with one `$defs` entry per kind.
 
 ```yaml
 ---
-# Identity (every kind)
-kind: guide | sensor | action | playbook | persona | corpus | eval | source | rule | skill | subagent | command
-id: <stable-slug>            # globally unique within kind; survives renames
-description: <one line>      # surfaced in INDEX.json; agent reads this without opening the body
-
-# Activation — any subset; absent = the kind's default activation
-globs: [...]                 # gitignore-style; narrows by code path
-phase: bootstrap | orient | implement | verify | learn | synthesize | audit
-triggers: [...]              # natural-language cues (skills, slash commands)
-tools: [...]                 # subagents only — tool allow-list
-args: [...]                  # commands only — declared parameters
-
-# Relationships
-traces: [<corpus-id>, ...]   # forward links to reasoning corpus
-deps:   [<primitive-id>, ...]# other primitives this one references
-
-# Authority (rules only)
-severity: must | should | may   # replaces H2-tier parsing
-tier:     iron | golden | regular  # optional human label, derived from severity
+id: process/verification          # stable id; the join key in the index
+description: The phase where claims are paired with evidence before commit.
+tags: [process]                   # optional, kebab-case
+corpus: [process/verification]    # optional: references this primitive cites
+supersedes: [process/old-verify]  # optional: ids this primitive replaces
 ---
 ```
 
-Fields not listed for a kind are ignored by the indexer but valid in the file (forward-compat).
+- **`id`** names the primitive. If you leave it out, `keystone lint` reports an error. Use letters, digits, and `-`, `:`, `_`, `/`, `.`. A spec-shaped skill sets `name:` instead, and keystone uses that value as the id.
+- **`description`** must be present. Write one line. The agent reads it in the index to decide whether to open the body. If the agent must read the body to know what the file does, fix the description.
+- **`tags`** is an optional list for `keystone list --tag`. Lint requires kebab-case.
+- **`corpus`** lists the references that hold the reasoning. The agent opens them on demand.
+- **`supersedes`** names the older primitives that this one replaces.
 
-### Identity
+Other fields belong to one kind, and each kind page describes its own fields:
 
-- **`kind`** — required. One of the values above. Unknown kinds fail `keystone lint`.
-- **`id`** — required. Stable slug, globally unique within `kind`. Use `<topic>/<name>` for rules/corpus to mirror the path; flat slugs for actions/skills/subagents/commands/sensors. The id survives file moves; the indexer uses it as the join key.
-- **`description`** — required. One sentence. This is what the agent sees in `INDEX.json` before deciding whether to open the body. If the agent must read the body to know what the file does, the description is wrong.
+| Kind | Its own fields |
+|---|---|
+| `rule` | `paths:`, `mode:`, `run:`, `severity:`, `tier:` |
+| `hook` | `event:`, `mode:`, `run:`, `agent:`, `returns:` |
+| `permission` | `allow:`, `ask:`, `deny:` |
+| `skill` | `name:`, `license:`, `compatibility:`, `allowed-tools:`, `metadata:` |
+| `command` | `phase:`, `args:`, `tools:`, `model:`, `produces:`, `consumes:`, `stop:` |
+| `subagent` | `tools:`, `model:` |
+| `tool` | `transport:`, `run:`, `event:` |
+| `document` | `type:`, `gates:`, `gate:`, `produced_by:` |
 
-### Activation
+## The index
 
-These fields collectively answer "when does the agent open this body?" Absence is meaningful: an omitted field falls back to the kind's default (documented in that kind's port doc).
+`keystone index` walks `.agents/` and writes two files under `.keystone/`. The write is atomic, so an agent never reads a partial file.
 
-- **`globs`** — gitignore-style list (`bmatcuk/doublestar/v4` semantics). Repo-relative POSIX. `!`-prefixed entries exclude. Empty list (`globs: []`) is a parse error — omit the key instead. Globs **narrow** activation; they never expand it. See `guide.md` for the touched-files set per action.
-- **`phase`** — one of the lifecycle phases. Used by actions to declare when in the workflow they fit; used by sensors/guides to declare when they evaluate.
-- **`triggers`** — list of natural-language phrases. Skills and slash commands use this; the host agent (Claude Code's skill mechanism, Cursor's mode triggers) matches user phrasing against the list. Plain strings, no regex.
-- **`tools`** — subagent allow-list. Mirrors Claude Code's `.claude/agents/*.md` `tools:` field. The primitive shape simply makes the field declared instead of implicit.
-- **`args`** — slash commands. Each entry is `{name, type, required, description}`. The host's command UI surfaces these.
+- **`INDEX.json`** holds the full descriptor of each primitive, plus its `path` and `provenance`. It also has three lookup maps: `by_kind`, `by_category`, and `by_path`. `by_path` maps each `paths:` glob to the primitives it scopes.
+- **`INDEX.lite.json`** holds only `category`, `kind`, `id`, and `description` for each primitive. Entries sort by category (constraints first), then kind, then id. Read this file first when you want the whole charter in one view.
 
-### Relationships
+The index version is `5.0`. The index holds descriptors only, never bodies. To read a body, the agent opens the file at `path`.
 
-These fields are how the indexer (and the agent) builds a sparse graph across primitives without reading bodies.
+After you add, move, or delete a primitive, run `keystone index`. Or run `keystone watch` in a side terminal, and it re-indexes on every save under `.agents/`.
 
-- **`traces`** — forward links from a rule to its corpus reasoning. Replaces the prose `For reasoning, see [...]` footer as the *machine-readable* source; the footer stays as the human-readable rendering. Indexer enforces referential integrity.
-- **`deps`** — anything else this primitive references: sensors an action runs, subagents it spawns, skills it consults, other rules it depends on. Form: `<kind>/<id>`.
+## Hosts
 
-### Authority
+Hosts read primitives in different ways: some read `.agents/` directly, and some need a linked or translated copy. So `keystone project` writes what each host needs, and [`docs/hosts.md`](../hosts.md) gives the strategy per host and kind. Always edit the source in `.agents/`, never the projected file.
 
-Rules only.
+## Override
 
-- **`severity`** — `must` | `should` | `may`. Replaces the H2-tier parsing (`## IRON LAW(S)` / `## GOLDEN RULE` / `## RULES`). Frontmatter wins; the H2 sections remain as human-readable rendering but the parser no longer reads them. `keystone migrate-frontmatter` lifts the tier into severity for existing 1.0.x installs.
-- **`tier`** — optional human label. `iron` ↔ `must`, `golden` ↔ `should`, `regular` ↔ `may`. The indexer ignores it; authors keep it for readability.
+Project files in `.agents/` override installed policies in `.keystone/policies/`. Among policies, a policy nested deeper in `keystone.json` refines the outer one. To lock an item so that nothing overrides it, list it under `strict:` in the policy.
 
-## Required by kind
+## 4.x names
 
-Bodies are unchanged markdown. Only the descriptor surface differs per kind.
+Keystone still reads a 4.x tree. It maps the old names when it parses each file, and `keystone lint` warns on each one. `keystone lint --fix` rewrites the keys in place, and `keystone migrate` moves the folders.
 
-| Kind       | Required frontmatter                                                                           | Default activation                                              |
-| ---------- | ---------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
-| `rule`     | `kind`, `id`, `description`, `severity`                                                        | Ambient by topic + `globs` filter (see `guide.md`)              |
-| `action`   | `kind`, `id`, `description`, `phase`                                                           | Invoked by name (projects to `command`)                         |
-| `corpus`   | `kind`, `id`, `description`                                                                    | On-demand via a guide's `traces`                                |
-| `skill`    | `kind`, `id`, `description`, `triggers`                                                        | Host-native trigger match (e.g. Claude Code skill auto-load)    |
-| `playbook` | `kind`, `id`, `description`, `triggers`                                                        | Host-native trigger match (projects to `skill`)                 |
-| `subagent` | `kind`, `id`, `description`, `tools`                                                           | Invoked by name via host's Task/agent mechanism                 |
-| `persona`  | `kind`, `id`, `description`, `tools`                                                           | Invoked by name via host's Task/agent mechanism (projects to `subagent`) |
-| `command`  | `kind`, `id`, `description`, `args`                                                            | Host slash-command invocation                                   |
-| `sensor`   | `kind`, `id`, `description`, `phase`                                                           | Per-phase, narrowed by `globs`                                  |
+| 4.x name | 5.0 name |
+|---|---|
+| kind `guide`, folder `guides/` | `rule`, `rules/` |
+| kind `corpus`, folder `corpus/` | `reference`, `references/` |
+| kind `sensor`, folder `sensors/` | `hook`, `hooks/` |
+| kind `posture`, folder `posture/` | `permission`, `permissions/` |
+| kind `agent` | `subagent` |
+| kind `playbook` or `pattern` | `skill` |
+| key `globs:` | `paths:` |
+| key `on:` | `event:` |
 
-## `.keystone/INDEX.json`
+Keystone 5.0 retires the `concern` kind. Lint warns on it, and `keystone lint --fix` inlines each concern into the primitives that include it.
 
-The indexer (`keystone index`) walks every primitive file under `.agents/` and `.claude/`, parses frontmatter, and emits a single artifact:
-
-```json
-{
-  "version": "1.1",
-  "generated": "<iso8601>",
-  "primitives": [
-    {
-      "kind": "rule",
-      "id": "idioms/rails/migrations",
-      "path": ".agents/rules/idioms/rails/migrations.md",
-      "description": "Migrations are reversible and small.",
-      "globs": ["db/migrate/**"],
-      "severity": "must",
-      "traces": ["corpus/idioms/rails/migrations"]
-    },
-    {
-      "kind": "action",
-      "id": "verify",
-      "path": ".agents/commands/verify.md",
-      "description": "Run pre-commit + spawn review agents on current diff.",
-      "phase": "verify",
-      "deps": ["sensor/lint", "subagent/code-reviewer"]
-    },
-    {
-      "kind": "skill",
-      "id": "review-code",
-      "path": ".claude/skills/review-code/SKILL.md",
-      "description": "Review a PR for logic, style, security.",
-      "triggers": ["review this PR", "code review", "/review"]
-    }
-  ],
-  "by_kind": { "rule": ["..."], "action": ["..."] },
-  "by_glob": { "db/migrate/**": ["rule/idioms/rails/migrations"] }
-}
-```
-
-Entries are descriptors only — no body content. `path` is the only body pointer the agent needs. `GLOBS_INDEX.md` (shipped in 1.0.4) becomes a human-readable projection of the `by_glob` map.
-
-## Adapter projections
-
-For hosts that have a native primitive, keystone *emits* the projection from the canonical file so the agent loads through its own machinery:
-
-| Host             | Primitive            | Projection                                                       |
-| ---------------- | -------------------- | ---------------------------------------------------------------- |
-| Claude Code      | Skill                | `.claude/skills/<id>/SKILL.md`                                   |
-| Claude Code      | Subagent             | `.claude/agents/<id>.md`                                         |
-| Claude Code      | Slash command        | `.claude/commands/<id>.md`                                       |
-| Cursor           | Rule with globs      | `.cursor/rules/keystone-<id>.mdc` (shipped in 1.0.4)             |
-| Codex / Aider …  | Pointer              | `AGENTS.md` instructs the agent to read `INDEX.json`             |
-
-MCP prompts are deliberately not a primitive kind — they require an MCP
-server plus a client-side UI for the human to pick from, neither of
-which the CLI-driven charter can guarantee. Human-triggered templated
-workflows belong to slash commands; agent-self-triggered patterns
-belong to skills.
-
-Projections are *generated*, never hand-edited. `keystone project` regenerates them from the canonical primitives. When a primitive lives natively in `.claude/` (skills, subagents, commands), the canonical file *is* the host's native file — keystone owns its frontmatter shape so the file is simultaneously a valid Claude Code primitive and a valid INDEX entry. No duplication.
-
-## Cascade behavior
-
-The primitive shape inherits the cascade rules already documented per kind (`guide.md`, `action.md`, `corpus.md`). The shared frontmatter does not change override semantics:
-
-1. Project's file at the canonical path always wins by default.
-2. Among policies, policies nested deeper in `keystone.json` refine outer policies.
-3. A `strict.<kind>: [<id>]` declaration locks the primitive absolutely.
-
-Exactly one file loads per `(kind, id)`.
-
-## Linting and verification
-
-`keystone lint` enforces:
-
-- Required frontmatter per kind (see table above).
-- `kind` is one of the known values.
-- `id` is unique within `kind`.
-- Every `deps` / `traces` reference resolves to a primitive that exists.
-- `globs` parse cleanly (no `globs: []`).
-- `severity` and `tier` agree when both are present.
-
-`keystone verify` (existing cascade verifier) additionally requires `.keystone/INDEX.json` to be newer than every primitive file — stale indexes fail the check, and `bootstrap` / `synthesize` / `learn` actions are responsible for calling `keystone index` on their way out.
-
-## Authoring
-
-```
-keystone new <kind> <id>
-```
-
-Scaffolds a primitive of the given kind with canonical frontmatter pre-populated. Replaces today's `keystone new guide` / `keystone new corpus` / `keystone new action` with one dispatch (the kind-specific scaffolds remain, dispatched by `<kind>`).
-
-## Out of scope
-
-- **MCP prompts as a primitive kind.** Prompts require an MCP server *and* a client-side UI for a human to pick one; the CLI charter has neither guarantee. Use slash commands (human-triggered) or skills (agent-self-triggered) instead. A keystone-mcp deployment that wants to ship templated prompts can keep them in an MCP-specific location outside the canonical charter contract.
-- **Runtime dispatch.** No `keystone serve`, no `keystone get|list|exec`. The CLI authors and maintains the charter; the agent reads the artifacts directly.
+`keystone new` refuses the 4.x kind names and prints the 5.0 name. To add a primitive, run `keystone new <kind> <name>`.

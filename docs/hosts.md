@@ -21,31 +21,31 @@ or index/report instead of shim).
 | Host | Root | Rules | Skills | Commands | Subagents | Hooks | Permissions | Tools (MCP) |
 |---|---|---|---|---|---|---|---|---|
 | claude-code | shim `CLAUDE.md` (`@AGENTS.md`) | shim `.claude/rules/` | symlink `.claude/skills/` | shim `.claude/commands/` | shim `.claude/agents/` | shim `.claude/settings.json` | shim `.claude/settings.json` | shim `.mcp.json` |
-| codex | native | index | native | index | shim `.codex/agents/*.toml` | shim `.codex/hooks.json` | shim `.codex/rules/*.rules` + report | shim `.codex/config.toml` |
+| codex | native | index | native | index | shim `.codex/agents/*.toml` | report (bridge format unverified) | shim `.codex/rules/*.rules` + report | shim `.codex/config.toml` |
 | cursor | native | shim `.cursor/rules/*.mdc` | native | shim `.cursor/skills/` (user-invoked) | shim `.cursor/agents/` | shim `.cursor/hooks.json` | shim `.cursor/cli.json` + report | shim `.cursor/mcp.json` |
 | github-copilot | native | shim `.github/instructions/` | native | shim `.github/prompts/` | shim `.github/agents/` | shim `.github/hooks/` | report (no repo file) | shim `.mcp.json` |
-| opencode | native | index | native | shim `.opencode/commands/` | shim `.opencode/agents/` | shim `.opencode/plugins/` | shim `opencode.json` | shim `opencode.json` |
-| continue | native (IDE: root only) | shim `.continue/rules/` | shim (copy) `.claude/skills/` | shim `.continue/prompts/` | index | report | report (user-level only) | shim `.continue/mcpServers/` |
+| opencode | native | index | native | shim `.opencode/commands/` | shim `.opencode/agents/` | shim `.opencode/plugins/` | report (pending an order-preserving merge) | shim `opencode.json` |
+| continue | native (IDE: root only) | shim `.continue/rules/` | shim (copy) `.continue/skills/` | shim `.continue/prompts/` | index | report | report (user-level only) | shim `.continue/mcpServers/` |
 | cline | native | shim (copy) `.clinerules/` | shim (copy) `.cline/skills/` | index (format unverified) | index (format unverified) | report (format unverified) | report | report (global only) |
-| goose | native | index | native | index | native `.agents/agents/` | shim `.agents/plugins/keystone/hooks/hooks.json` | report (global only) | report (global only) |
-| pi | native | index | native | shim `.pi/prompts/` | index (none) | shim `.pi/extensions/` | report (none) | shim `.pi/mcp.json` |
-| aider | shim `.aider.conf.yml` `read:` | index | index | index | index | partial: `lint-cmd` / `test-cmd` | report (none) | report (none) |
+| goose | native | index | native | index | shim `.goose/agents/` | report (bridge format unverified) | report (global only) | report (global only) |
+| pi | native | index | native | shim `.pi/prompts/` | index (none) | report (bridge format unverified) | report (none) | shim `.pi/mcp.json` |
+| aider | shim `.aider.conf.yml` `read:` | index | index | index | index | report | report (none) | report (none) |
 
 ## Findings that shape the design
 
 1. **Rule frontmatter uses `paths:`.** Claude Code reads only `paths` from
    `.claude/rules/*.md` and silently ignores other keys. Cline uses `paths` too.
-   With `paths` as the canonical key, Claude Code gets a symlink and Cline a
-   plain copy, with no format change for either.
+   With `paths` as the canonical key, Claude Code and Cline read the same
+   rule shim format.
 2. **Several hosts read more than one skills directory.** Cursor, Copilot,
    opencode, and Goose read both `.agents/skills/` and `.claude/skills/`. If
    Keystone links `.claude/skills/` for Claude Code, those hosts may load each
    skill twice. How each host dedupes is unverified. The projection planner
-   therefore computes the **smallest set of paths** that reaches every enabled
-   host exactly once, and the Phase 9 smoke test checks for duplicates.
+   writes nothing for a host that already reads a primitive's location, and
+   `keystone project` warns when a host sees one primitive at two paths.
 3. **Copilot reads `.claude/settings.json` hooks.** If both `claude-code` and
-   `github-copilot` are enabled, a hook can fire twice. The same planner rule
-   applies.
+   `github-copilot` are enabled, a hook can fire twice. `keystone project`
+   warns about it.
 4. **Hook failure defaults differ.** A crashing Cursor hook fails open unless
    it sets `failClosed: true`. A crashing Copilot `preToolUse` command fails
    closed. Keystone sets `failClosed: true` on every blocking Cursor hook.
@@ -54,9 +54,8 @@ or index/report instead of shim).
    check itself. Codex runs project hooks, rules, and config only in trusted
    projects.
 6. **Repo-level permissions are often missing.** Copilot, Continue, Goose,
-   Cline, Pi, and Aider have no committed allow/deny file. On hosts that do
-   have blocking hooks (Copilot, Pi), Keystone can enforce `deny` rules through
-   a `preToolUse` hook bridge. On the rest the rule is reported.
+   Cline, Pi, and Aider have no committed allow/deny file. Keystone reports
+   each rule on these hosts.
 7. **Permission evaluation order differs.** Claude Code: deny, then ask, then
    allow. Codex: most restrictive wins. opencode: **last match wins**, so the
    shim must write `deny` patterns last. Cursor CLI has no `ask`.

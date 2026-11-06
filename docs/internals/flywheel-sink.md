@@ -1,74 +1,71 @@
-# Port: Flywheel sink
+# Flywheel sinks
 
-**Activation:** Write-only. Lifecycle actions write into these directories — `learn` files candidates into `learning/inbox/`, `audit` moves retired content into `archive/`.
-**Purpose:** Storage destinations for the Learning and Pruning flywheels. The Learning flywheel files new rule candidates; the Pruning flywheel removes retired guides and corpus.
+<!-- voice-register: informational -->
+<!-- voice-english: ste -->
+
+The flywheel sinks are where the two charter flywheels store their output. The learning flywheel files rule candidates in `.keystone/learning/`, and the pruning flywheel moves retired primitives to `.keystone/archive/`. Only commands write to these folders, and the agent doesn't read them during normal work. You review what lands there.
 
 ## Path convention
 
 ```
-.keystone/learning/inbox/<date>-<slug>.md
-.keystone/learning/triage.md
-.keystone/archive/<date>-<slug>.md
+.keystone/learning/inbox/<timestamp>-<slug>.md
+.keystone/learning/promoted/
+.keystone/learning/rejected/
+.keystone/learning/wishlist.md
+.keystone/archive/<original path under .agents/>
 ```
 
-These directories are **always project-owned**. Policies cannot ship flywheel sinks — sinks are project state, not policy.
+Your project always owns these folders. A policy can't ship a sink, because a sink is project state.
+
+## Who writes what
+
+- **`learn`** writes a candidate to `learning/inbox/`.
+- **`synthesize`** classifies each candidate as a rule, a reference, or both. It promotes an accepted candidate into `.agents/rules/` or `.agents/references/`, then moves the inbox file to `learning/promoted/`. A rejected candidate moves to `learning/rejected/` with the reason.
+- **`audit`** walks the inbox and finds stale rules and references. It moves each retired file to `archive/`, then runs `keystone index`.
+- **`wishlist.md`** is a list of known gaps that the team keeps by hand.
 
 ## Required shape
 
-- **`learning/inbox/<entry>.md`** — written by `learn`.
-  ```markdown
-  ---
-  status: new | reviewed | accepted | rejected
-  ---
-
-  # Candidate rule: <one-line summary>
-
-  <proposed rule>
-
-  ## Evidence
-  <observations that prompted the candidate>
-  ```
-
-- **`learning/triage.md`** — index. Lists inbox entries by status with one-line summaries. Maintained by the agent during `learn`.
-
-- **`archive/<entry>.md`** — written by `audit` when a guide or corpus file is retired.
-  ```markdown
-  ---
-  archived_from: <original-path>
-  reason: <one-sentence reason for retirement>
-  ---
-
-  <the original content, preserved>
-  ```
-
-## Cascade behavior
-
-**Not part of the cascade.** These are write-only sinks; nothing reads them at cascade-resolution time. They exist to capture the flywheel's output for human review.
-
-## Drift behavior
-
-`keystone doctor` reports:
-- inbox entries older than a configurable threshold still in `status: new` (triage backlog).
-- archive entries whose `archived_from` path still exists elsewhere in the cascade (incomplete retirement).
-
-## Example
+An inbox entry, as `learn` writes it:
 
 ```markdown
 ---
-status: new
+captured_at: <ISO datetime>
+captured_by: <command / agent>
+confidence: <high | medium | low>
+candidate_kind: <rule | information | both>
+suggested_target: <rules/... | references/...>
 ---
 
-# Candidate rule: branch names follow `<type>/<ticket>-<slug>`
+# <One-line title>
 
-Git branches use a prefix (`feat/`, `fix/`, `chore/`) followed by a tracker ID
-and a kebab-case slug. Observed three times this week; no existing guide.
-
-## Evidence
-- PR #412 — branch `add-thing` (no prefix); reviewer requested rename.
-- PR #418 — branch `johnson/login` (author-prefixed); inconsistent with #412.
-- PR #421 — followed the proposed pattern; merged without comment.
+## What happened
+## The judgment call
+## Suggested rule (if any)
+## Suggested information (if any)
 ```
+
+An archived file keeps its original content under a header that `audit` adds:
+
+```markdown
+---
+archived_at: <ISO date>
+archived_by: <command / human>
+reason: <factually-wrong | aspirationally-stale | domain-stale | process-stale | strategy-shift>
+replaced_by: <path to new file, or "(none)">
+---
+```
+
+The archive mirrors the original path under `.agents/`. For the full format, read `.keystone/learning/README.md` and `.keystone/archive/README.md`.
+
+## Cascade behavior
+
+The sinks aren't part of the cascade, so nothing reads them when keystone resolves the charter. Keystone doesn't index them either, because they sit outside `.agents/`.
+
+## Archive written by migration
+
+`keystone migrate` also writes to the archive. Its `v5_0` step moves each unedited 4.x scaffold skill to `.keystone/archive/5.0/skills/`. Those skills are `keystone-new-guide`, `-corpus`, `-sensor`, `-playbook`, `-command`, and `-action`. If you edited one, it stays in `.agents/skills/`. To move the archived skills back, run `keystone migrate down`.
 
 ## Authoring
 
-Sinks are written by actions, not authored by users directly. No `keystone new` generator.
+Let the commands write the sinks, and don't write them by hand. The exception is `wishlist.md`, which you keep yourself. There is no `keystone new` generator for a sink.

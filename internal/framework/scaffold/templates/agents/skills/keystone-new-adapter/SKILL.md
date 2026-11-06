@@ -39,4 +39,4 @@ keystone new adapter mistral
 4. Run `keystone index` to refresh the descriptor surface.
 
 Full port contract:
-[`docs/ports/adapter.md`](../../../docs/ports/adapter.md).
+[`docs/internals/host-docs.md`](../../../docs/internals/host-docs.md).

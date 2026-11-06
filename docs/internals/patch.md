@@ -1,96 +1,42 @@
-# Port: Patch
+# Patch (retired)
 
-**Activation:** Invoked explicitly by `keystone patch [<dir>]`. Patches are not loaded ambient — they exist to bring an install forward when the binary upgrades.
-**Purpose:** Versioned forward-only changes the framework applies when its expected shape evolves — either to config files (`keystone.json`, lockfile) or to the prose it scaffolded (READMEs, sensor/action playbooks). The rules content the user authored stays in their git.
+<!-- voice-register: informational -->
+<!-- voice-english: ste -->
 
-## Path convention
-
-Inside the framework repo:
+Keystone 2.1 retired `keystone patch`, and `keystone migrate` replaced it. The binary keeps `patch` as a hidden command, so your old scripts get a pointer instead of "unknown command". The command takes any arguments, prints the `migrate` subcommands, and exits 0. It changes nothing, so replace each call with `keystone migrate`.
 
 ```
-internal/framework/scaffold/templates/patches/<version>/<NNN>-<slug>.json
+⚠ `keystone patch` was retired in 2.1.
+  Use `keystone migrate` for forward and backward version transforms:
+    keystone migrate up      apply pending migrations
+    keystone migrate down    roll back the most recent migration
+    keystone migrate status  show applied + pending
 ```
 
-Embedded into the binary; surfaced to consumers via `keystone patch`. No user-side patches at 1.0 (a future minor may add per-project patches under `<charter-root>/patches/`).
+The stub is `patchCmd` in `cmd/keystone/root.go`.
 
-## Required shape
+## What to use instead
 
-A patch is a JSON file with a list of idempotent operations:
-
-```json
-{
-  "id": "001-bump-keystone-json-schema",
-  "description": "Add the harness_root field to keystone.json",
-  "operations": [
-    {
-      "type": "frontmatter_set",
-      "path": "keystone.json",
-      "key": "harness_root",
-      "value": "harness"
-    }
-  ]
-}
-```
-
-The full schema is at [`../schemas/patch.json.schema.json`](../schemas/patch.json.schema.json).
-
-## Operations
-
-| Type              | What it does                                                          | Idempotent when                              |
-| ----------------- | --------------------------------------------------------------------- | -------------------------------------------- |
-| `add_file`        | Create a file if absent.                                              | Target present with matching content.        |
-| `frontmatter_set` | Set a YAML frontmatter key if absent.                                 | Key already present (any value).             |
-| `ensure_section`  | Append a heading + body if the heading isn't already in the file.     | Heading already present.                     |
-| `replace_block`   | Exact-string swap.                                                    | Replacement already present.                 |
-| `move_file`       | Relocate one file. Conflicts on diverged destination content.         | Source missing or destination matches.       |
-| `move_dir`        | Relocate every file under a directory tree.                           | Source missing or destination tree matches.  |
-| `delete_file`     | Remove one file.                                                      | Target already absent.                       |
-| `delete_dir`      | Remove an empty directory.                                            | Target already absent.                       |
-
-Conflicts are surfaced but never auto-resolved — a diverged file means the consumer has customized in a way the patch doesn't know about, and a human has to merge.
-
-## How `keystone patch` walks them
-
-1. Reads the install's recorded `keystone_version` (from `<charter-root>/keystone.lock.json`).
-2. Lists every patch whose version directory is strictly greater than the recorded version, sorted by `(version asc, filename asc)`.
-3. For each patch: plans every operation, previews changes (or applies them with `--apply`), then bumps `keystone_version` to that patch's version after the whole patch succeeds.
-4. Conflicts halt the patch run for that version directory — the user resolves, re-runs.
-
-## Scope at 1.0
-
-Patches at 1.0 cover **config-schema bumps** and **framework-scaffolded scaffold updates** — never the rules content the user authored:
-
-- ✅ Add/rename a field in `keystone.json`.
-- ✅ Update the lockfile schema (with a corresponding `Version` bump in `internal/framework/lockfile/`).
-- ✅ Move a generated file (`INSTALL_PROFILE.md`) to a new location.
-- ✅ Update framework-scaffolded scaffold prose — the READMEs under `.agents/`, sensor playbooks (`.agents/hooks/*.md`), and action playbooks (`.agents/commands/*.md`) that ship from `keystone init`. These describe how the charter works; they are framework prose that happens to live in the user's tree.
-- ❌ Edit the rules content the user authored — anything they wrote into a guide body, a corpus entry, a domain invariant, or a custom adapter override. That's in their git; they own it.
-
-The bright line is **scaffold prose vs. user rules**: the framework owns the prose it scaffolded; the user owns the rules they wrote. `replace_block` failures (exact-match mismatch) surface user customizations as conflicts so they never get clobbered silently.
-
-The 0.x notion of patches as wholesale content-rewriting "migrations" is still dead. The runner supports content-write operations; their use post-1.0 is bounded by the scaffold/rules line above.
-
-## Authoring a patch
-
-1. Land your config-schema change in the framework code.
-2. Add a patch under `templates/patches/<new-version>/<NNN>-<slug>.json` that produces the same outcome via idempotent operations.
-3. Verify with `keystone patch --dry-run` against a fixture install at the previous version.
-4. Note the patch in `CHANGELOG.md` under the version's `### Patches` section.
-
-There is no `keystone new patch` generator — patches are infrequent, framework-author authored, and best written by hand against the schema.
-
-## CLI
+To upgrade an install, run `keystone migrate`. Add `--dry-run` first if you want to see every step. The registry is in `internal/framework/migrations/`, one file per version (`v5_0.go` moves a 4.x tree to `.agents/` and `.keystone/`).
 
 ```
-keystone patch [<dir>] [--apply|-y] [--dry-run] [--from <version>] [--harness-root <name>]
+keystone migrate                    # up to the latest version
+keystone migrate up [<version>]
+keystone migrate down [<version>]   # default: the previous version
+keystone migrate status             # applied and pending
 ```
 
-- `--apply` / `-y` — apply every non-conflict change without prompting.
-- `--dry-run` — preview every change; write nothing.
-- `--from <version>` — override the recorded `keystone_version` (escape hatch for fixture installs and bisecting).
+Both `up` and `down` take `--dir <path>` and `--dry-run`. The lockfile field `migrations_applied` in `.keystone/lockfile.json` records which migrations ran.
 
-`keystone migrate` (the 0.x name) prints a one-line rename notice and exits non-zero. Anyone with that command in CI scripts gets a clear pointer to the new name.
+## What a migration may change
 
-## Read by
+The package comment in `migrations.go` sets six iron laws. In short:
 
-- `keystone patch` — the runner (see `internal/framework/patch/`).
+1. A migration edits only framework-owned files: `keystone.json`, the lockfile, vendored policy manifests, the index, projections, and the scaffolded layout.
+2. It never edits a file you wrote, and that includes its frontmatter. `keystone lint` reports frontmatter that no longer fits the schema.
+3. A migration may move or rename files and folders, because a move doesn't change content.
+4. A migration prints every step before it runs. `--dry-run` prints and writes nothing.
+5. If a migration finds an unexpected state, it stops and names the conflict. It doesn't try to recover.
+6. After every `up` runs, every command works with no further steps. Until then, each command warns you about pending migrations and still runs.
+
+Each migration has an `up` and a `down` plan, and each step must be safe to run twice.

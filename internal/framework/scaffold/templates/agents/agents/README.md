@@ -24,5 +24,5 @@ Scaffolds `agents/<id>.md` with canonical frontmatter. Fill in the
 system prompt body — `tools:` declares the allow-list the host enforces
 when this subagent runs.
 
-See [`docs/ports/primitive.md`](../../docs/ports/primitive.md) for the
+See [`docs/kinds/README.md`](../../docs/kinds/README.md) for the
 full descriptor shape.

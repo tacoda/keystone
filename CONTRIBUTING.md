@@ -5,8 +5,8 @@ once, then file issues / open PRs.
 
 ## What keystone is
 
-Keystone is the **charter framework**. The charter — a tree
-of typed primitives at `.agents/` — is the product. A **harness** is
+Keystone is the **agent charter framework**. The charter, a tree
+of typed primitives at `.agents/`, is the product. A **harness** is
 the engine that runs the model (Claude Code, the orchestrator, the
 runner); Keystone is not a harness, it manages the charter that
 constrains one. The CLI and the MCP server are tooling that helps you
@@ -62,13 +62,15 @@ internal/framework/
   manifest/                    # keystone-policy.json (per-policy)
   patch/                       # patch op model + apply
   policies/                    # vendored-policy install/verify/reset
-  primitive/                   # canonical primitive types + walker + indexer + linter + projection
+  primitive/                   # canonical primitive types + walker + indexer + linter
+  projection/                  # per-host profiles; writes host files from .agents/
   scaffold/                    # embedded templates (init writes from here)
   mcp/                         # Go MCP server (tools, prompts, resources, adapters)
   web/                         # localhost dashboard + REST API + SSE push
-  budget/                      # token estimates per port
+  budget/                      # token estimates per host and per kind
 docs/
-  ports/                       # one .md per port / kind contract
+  kinds/                       # one .md per primitive kind contract
+  internals/                   # budget, patch, state ledger, flywheel sink, host docs
   conventions.md               # the cross-cutting layout + rules
 ```
 
@@ -96,19 +98,21 @@ docs/
 The bar is higher than adding a tool or a command. Before opening a
 PR:
 
-1. Update `docs/ports/primitive.md` with the new `kind` row.
-2. Add the constant + entry in `internal/framework/primitive/primitive.go`.
-3. Extend `walk.go` with the scan root.
-4. Decide projection target (if any) and add to `project.go`.
-5. Write a generator in `cmd/keystone/new_<kind>.go`.
-6. Add a `keystone:new-<kind>` skill.
-7. Update the menu templates so the dashboard + agent know about the
-   new kind.
+1. Update `docs/kinds/README.md` with the new `kind` row.
+2. Add the constant, its category, and its folder in
+   `internal/framework/primitive/primitive.go`.
+3. Decide how each host gets it (if at all) in
+   `internal/framework/projection/hosts.go`.
+4. Write a generator and wire it into `cmd/keystone/new.go`.
+5. Add the kind to the `keystone-new` skill.
+6. Add the kind to the dashboard's kind lists in
+   `internal/framework/web/`.
 
-There are 13 kinds (the `hook` kind was retired at 4.0 — a reaction is a
-`sensor` (check), a `tool` (side-effect), or an `agent` (review) that
-self-subscribes to a signal or host phase via `on:`). Pick the kind by
-what the primitive *is*, not how it fires.
+There are 10 kinds in two categories. Constraints are `rule`, `reference`,
+`hook`, `permission`, and `eval`. Capabilities are `skill`, `command`,
+`subagent`, `tool`, and `document`. A hook, tool, or subagent names what
+fires it with `event:`. Pick the kind by what the primitive *is*, not
+how it fires.
 
 ## Filing issues
 
@@ -130,7 +134,7 @@ what the primitive *is*, not how it fires.
 
 ## Releases
 
-Tag-driven via goreleaser. Maintainers run `git tag v2.x.y && git
+Tag-driven via goreleaser. Maintainers run `git tag v5.x.y && git
 push --tags`; CI does the rest. No `gh release create`.
 
 ## License

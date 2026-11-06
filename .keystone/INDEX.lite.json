@@ -1,6 +1,6 @@
 {
   "version": "5.0",
-  "generated": "2026-11-06T15:22:37Z",
+  "generated": "2026-11-06T15:40:33Z",
   "primitives": [
     {
       "category": "constraint",
@@ -192,7 +192,7 @@
       "category": "constraint",
       "kind": "rule",
       "id": "guides/idioms/charter-content/primitive-shape",
-      "description": "Frontmatter, canonical paths, corpus/guide pairing, narrow-only globs."
+      "description": "Frontmatter, canonical paths, rule/reference pairing, paths: scoping."
     },
     {
       "category": "constraint",

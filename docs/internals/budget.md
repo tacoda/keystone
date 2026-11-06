@@ -1,153 +1,60 @@
-# Port: Budget
+# Context budget
 
-**Activation:** Read at session start (the agent's ambient load is the sum of every port's tokens) and on demand by `keystone doctor --budget`.
-**Purpose:** Make context-window consumption legible. Per-port caps in `keystone.json` make budget regressions visible the moment they happen.
+<!-- voice-register: informational -->
+<!-- voice-english: ste -->
 
-## Where budgets live
+The context budget measures how much charter text an agent loads, per host. It splits the load into two tiers: what loads every session and what loads on demand. Caps in `keystone.json` turn a regression into a failed `keystone verify`. The count is an estimate, not a tokenizer count. Use it to compare files and to set caps, but don't use it to predict cost.
 
-Budgets are declared in `keystone.json` under an optional `budgets`
-block:
+The code lives in `internal/framework/budget/` (`load.go`, `caps.go`, `budget.go`) and `cmd/keystone/budget.go`.
+
+## The two tiers
+
+**Always loaded** is per host, because each host reads different files by itself. The tier has three parts:
+
+- **Root files.** Every host reads `AGENTS.md`. Claude Code also reads `CLAUDE.md`. Aider also reads `.keystone/INDEX.lite.json` through `.aider.conf.yml`.
+- **Listings.** For each skill, command, and subagent that the host loads by itself, the host lists its name and description. The budget counts the id and the description, not the body.
+- **Pathless rules.** A rule with no `paths:` that the host loads by itself costs its whole body.
+
+The host profile in `internal/framework/projection` decides which kinds a host loads by itself. If the profile gives a kind the `index` or `report` strategy, the agent opens that primitive from `.agents/` when it applies. So that primitive doesn't count toward the host's always-loaded tier.
+
+**On demand** is the same for every host you enable, because every host can reach `.agents/`. It counts the full body of each rule, reference, skill, command, subagent, tool, and document. The report gives a total per kind and lists the largest files first.
+
+## The estimate
+
+`budget.Estimate` counts whitespace-separated words. It's fast and deterministic, and it needs no tokenizer. Real tokenizers count about 1.35 times more on English prose. Every surface prints this caveat. If you need a closer figure, multiply the count by 1.35.
+
+## Caps
+
+To set caps, add a `budgets` object to `keystone.json`:
 
 ```json
-{
-  "version": "1",
-  "harness_root": "harness",
-  "policies": [],
-  "budgets": {
-    "guides":    { "max_tokens": 10000 },
-    "corpus":    { "max_tokens": 50000 },
-    "sensors":   { "max_tokens": 5000 },
-    "adapters":  { "max_tokens": 20000 }
-  }
+"budgets": {
+  "always_loaded": { "max_tokens": 4000 },
+  "reference":     { "max_tokens": 50000, "max_tokens_per_load": 3000 }
 }
 ```
 
-Each entry is a `BudgetSpec`:
+You can use three forms of key:
 
-| Field                  | Meaning                                                                                 |
-| ---------------------- | --------------------------------------------------------------------------------------- |
-| `max_tokens`           | Cap on total tokens loaded from this port. 0 (or omitted) means no cap.                 |
-| `max_tokens_per_load`  | Per-load cap for on-demand content (corpus). Currently informational; Phase 6 enforces. |
+| Key | `max_tokens` caps | `max_tokens_per_load` caps |
+|---|---|---|
+| `always_loaded` | each host's always-loaded tier | not used |
+| a kind (`rule`, `reference`, …) | that kind's on-demand total | each file of that kind |
+| a 4.x key (`guides`, `corpus`, `sensors`, `actions`, `playbooks`) | the mapped kind's total | each file of the mapped kind |
 
-Budgets are advisory: doctor never exits non-zero just because a port
-is over its cap. Projects that want strict enforcement wrap the doctor
-output in CI scripts, or upgrade specific warnings to errors via their
-own tooling.
+A plural kind (`rules`) and a 4.x kind name (`guide`) map to the same kind. Keystone ignores the 4.x `adapters` key and any other key it can't map. If two keys map to one kind, the stricter value of each field wins. To leave a field uncapped, set it to 0 or leave it out.
 
-## Estimator
+## Where it runs
 
-The 1.0 estimator is **whitespace-approximate**: token count =
-`len(strings.Fields(content))`. Fast, deterministic, no external
-dependencies. Sufficient for relative comparisons between files and
-ports, and for trend lines as the charter grows.
+- **`keystone budget [--json] [--dir <path>]`** prints both tiers. For each host, it shows the three largest entries; for the on-demand tier, the five largest. If the charter goes over a cap, it names the scope, the file, the count, and the overage. Then it exits non-zero.
+- **`keystone verify`** measures the same report. If the charter goes over any cap, verify fails.
+- **`keystone init`** and **`keystone doctor`** print one line per host for the always-loaded tier, plus any exceeded cap. These two only report. They don't fail on a cap.
+- **`keystone allocate`** prints each host's always-loaded tier against the `always_loaded` cap.
+- **MCP `keystone_budget`** returns the report as JSON. Use it when you want an agent to check the budget.
+- **The dashboard** shows it at `/charter/budget`: exceeded caps, the always-loaded tier per host, the on-demand tier per kind, and the largest files.
 
-The whitespace count under-counts compared to real model tokenizers
-(GPT-style BPE, Claude's tokenizer, etc.) by roughly **25–35% on
-English prose**. Multiply by ~1.35 if you want a conservative
-"real-tokenizer" estimate.
+All of these call `budget.MeasureProject`. It measures every host in `keystone.json` `adapters`, plus Claude Code, which it always measures. Without a `keystone.json`, it measures Claude Code with no caps.
 
-A future `--tokenizer=tiktoken` opt-in at install time (PLAN §6 open
-question 4) will swap in a more accurate count without changing the
-budget package's API.
+## When a cap fails
 
-## CLI surfaces
-
-### `keystone doctor --budget`
-
-Walks every `.md` file under `<charter-root>/`, classifies each by
-port, and renders a per-port breakdown:
-
-```
-budget: per-port token estimate (whitespace-approximate)
-  • actions    2955 / no cap
-        505  .agents/commands/policy-audit.md
-        441  .agents/commands/README.md
-        ...
-  • corpus     30715 / 50000  (61% used)
-        ...
-  ! guides     18893 / 10000
-        867  .agents/rules/process/release.md
-        ...
-  ⚠ 1 port(s) over their declared budget — top contributors above
-```
-
-Markers:
-
-- `•` port within its declared cap, or no cap declared.
-- `!` port over its declared cap; top 5 contributors printed.
-- `⚠` closing line — at least one port over budget.
-- `✓` closing line — every declared budget within cap.
-- `ℹ` closing line — no budgets declared in keystone.json.
-
-Files skipped: README at any depth, `learning/`, `archive/`, anything
-under `<charter-root>/policies/`.
-
-### `keystone init`
-
-After scaffolding, init prints the ambient load:
-
-```
-▸ ambient load: 39209 tokens across 6 port(s)
-    actions    2955
-    adapters   15685
-    corpus     3548
-    guides     11767
-    playbooks  634
-    sensors    4620
-  (run `keystone doctor --budget` later for top contributors per port)
-```
-
-If `keystone.json` already has a budgets block (e.g. when re-running
-init in an existing project), per-line `(cap N, X% used)` or
-`(over budget by N)` suffixes appear so the user catches budget
-regressions on the first run.
-
-## What counts toward the budget
-
-Files under `<charter-root>/<port>/...`, where `<port>` is one of:
-
-- `guides`
-- `corpus`
-- `sensors`
-- `actions`
-- `playbooks`
-- `adapters`
-
-Files **excluded** from the count:
-
-- `README.md` at any depth — orientation, not loaded by the agent.
-- `<charter-root>/learning/...` — flywheel state, not policy.
-- `<charter-root>/archive/...` — same.
-- `<charter-root>/policies/...` — vendored content; tracked separately in
-  the policy tree (the cascade picks them up at resolve time).
-
-## Recommendations
-
-- **Guides + adapters are loaded ambient** (every session). Keep their
-  caps tight; over-budget here directly hits every session's context
-  window.
-- **Corpus is on-demand**. Total can be large; what matters is
-  `max_tokens_per_load`, which Phase 6 will enforce per-paired-corpus.
-- **Sensors are invoked**. Their markdown describes how to invoke;
-  it's read but not constantly resident. Looser caps are fine.
-- **Set budgets early.** Pick numbers that match your model's window
-  and budget-per-prompt, then tune. The budget block is a forcing
-  function — without it, charter content grows unboundedly.
-
-## Future evolution
-
-- **Real tokenizer opt-in** (`--tokenizer=tiktoken` at init) — PLAN §6
-  open question 4. The budget package's API stays stable; only the
-  estimator implementation swaps.
-- **Per-policy attribution** — the report currently lumps policy
-  content under its port. A future split would let users see how much
-  budget each individual policy consumes.
-- **CI-friendly output mode** — `--format=json` so projects can pipe
-  the breakdown into custom enforcement logic.
-
-## Read by
-
-- `keystone init` (`reportAmbientLoad` in `cmd/keystone/init.go`).
-- `keystone doctor --budget` (`runBudgetReport` in
-  `cmd/keystone/doctor.go`).
-- `internal/framework/budget/` — the estimator and Allocator.
+If the always-loaded tier is over its cap, run `keystone allocate`. It finds sections of `CLAUDE.md` and `AGENTS.md` that can move into primitives that load on demand. If a kind's total or one file is over its cap, split or trim the files the report lists first.

@@ -76,5 +76,5 @@ fragments) can ship them. Org policies often bundle evals alongside
 their guides so consumers can verify the policy's contract is met
 locally.
 
-See [`docs/ports/primitive.md`](../../docs/ports/primitive.md) for
+See [`docs/kinds/README.md`](../../docs/kinds/README.md) for
 the canonical descriptor shape.

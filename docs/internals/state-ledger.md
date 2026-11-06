@@ -1,89 +1,58 @@
-# Port: State ledger
+# State ledgers
 
-**Activation:** Read at session start (state ledgers are loaded ambient alongside guides); updated by specific actions (`bootstrap`, `audit`, `learn`).
-**Purpose:** Project-specific state the agent reads to ground itself and writes to keep current. Mutable corpus.
+<!-- voice-register: informational -->
+<!-- voice-english: ste -->
 
-State ledgers are how the charter remembers what it knows about the project — language, frameworks, sensor commands, debt items, risk fingerprints, traffic topology. Guides and corpus describe rules and reasoning; state ledgers describe **this project, right now**.
+State ledgers record what is true about this project right now: its stack, its debt, its risky areas. Rules say what should be true, and references say why, but a state ledger says what is. Commands write the ledgers, and you can edit them too. Because each ledger is a reference, the agent opens it on demand.
 
 ## Path convention
 
 ```
-<charter-root>/corpus/state/<name>.md
+.agents/references/state/<name>.md
+.agents/references/state/migrations/active/<NAME>.md
+.agents/references/state/migrations/completed/<NAME>.md
 ```
 
-State lives under `corpus/state/` (a reserved subdirectory of the corpus port). Policys **do not** ship state ledgers — state is per-project by definition.
+The ledgers live in the reserved `state/` folder under `.agents/references/`. Policies don't ship state ledgers, because state belongs to one project.
 
 ## Required shape
 
-State ledgers are mostly free-form markdown with optional frontmatter. The framework recognizes specific ledgers by filename:
+Each ledger is Markdown with reference frontmatter (`kind: reference`, `id`, `description`), so `keystone index` lists it in `.keystone/INDEX.json`. The body is free-form. The scaffold ships these ledgers:
 
-| Filename               | Purpose                                                                                   | Written by         |
-| ---------------------- | ----------------------------------------------------------------------------------------- | ------------------ |
-| `CODEBASE_STATE.md`    | Empirical map of the codebase: language, frameworks, libs, db, CI, sensor commands.       | `bootstrap`        |
-| `INSTALL_PROFILE.md`   | Selections captured by `keystone init` + link to the lockfile.                            | `keystone init`    |
-| `code-debt.md`         | Known code-quality debt items: shape, hotspot files, planned fixes.                       | `audit`            |
-| `charter-debt.md`      | Harness-quality debt: stale rules, missing pairs, drift candidates.                       | `audit`, `learn`   |
-| `quality-radar.md`     | Per-area quality signal (test coverage, error rate, time-to-recover, etc.).               | `audit`            |
-| `risk-fingerprints.md` | Files/areas that are high-risk to change — change blast radius notes.                     | `audit`            |
-| `traffic-topology.md`  | How traffic flows through the system (services, queues, sync vs async, fan-out, fan-in).  | `audit`, optional. |
+| File | Purpose | Written by |
+|---|---|---|
+| `CODEBASE_STATE.md` | The map of the codebase: stack, regions, which idioms apply, coverage. | `bootstrap` |
+| `INSTALL_PROFILE.md` | The choices made at `keystone init`, with a link to the lockfile. | `keystone init` |
+| `GLOBS_INDEX.md` | A reverse index of every rule that declares `paths:`. Don't edit it by hand. | `bootstrap`, `synthesize`, `audit` |
+| `code-debt.md` | Known debt in the codebase. | `debt-review`, `audit` |
+| `charter-debt.md` | Debt in the charter itself: stale rules, missing pairs. | `audit` |
+| `quality-radar.md` | A five-dimension scorecard. | `audit`, `review` |
+| `risk-fingerprints.md` | Complexity, coupling, and coverage patterns per region. | `bootstrap` |
+| `traffic-topology.md` | Churn, recency, and business criticality per region. | `bootstrap` |
 
-Project-specific ledgers (e.g. `corpus/state/glossary.md`) follow the same shape; the agent reads whatever is present.
+The `migrations/active/` folder tracks in-flight work such as expand-contract changes and deprecations. When that work finishes, its record moves to `migrations/completed/`.
+
+Add your own ledger in the same folder, and the agent reads it like the others.
+
+## Activation
+
+The agent opens ledgers on demand, like any reference. But one command always reads them: at the start of planning, `orient` loads `CODEBASE_STATE.md` and any active migration for the touched region. Other commands and hooks read a ledger only when they need it, the way the `risk-fingerprint` hook reads `risk-fingerprints.md`.
 
 ## Update semantics
 
-- **Idempotent.** Each action that writes a ledger reads the current state, merges or updates in place, and rewrites. Conflicts that can't be auto-merged are surfaced to the user.
-- **Section-bounded.** Updates are scoped to declared headings — a `bootstrap` re-run replaces the `## Sensors` section but leaves the `## Glossary` section untouched.
-- **No drift sensor required.** State ledgers are expected to drift from any "ideal" content; they reflect reality. The `drift` sensor doesn't flag them; the `charter-debt` sensor does, but only for ledgers the charter itself owns (CODEBASE_STATE, charter-debt, etc.).
+- **Diff, then confirm.** An agent proposes a ledger change as a diff, and you accept or edit it. No agent overwrites a state file without that step.
+- **Drift is normal.** A ledger follows the code, so it changes whenever the code changes.
 
 ## Cascade behavior
 
-State ledgers are not part of the strict-cascade resolution. They live at the project layer only — policies never ship state. The agent reads them by exact filename.
-
-## Example
-
-```markdown
-# Codebase State
-
-Empirical map of this project. Updated by the **bootstrap** action; safe
-to edit by hand. Re-run bootstrap to refresh from the codebase.
-
-## Stack
-
-- Language: Go 1.25
-- Framework: stdlib HTTP + chi router
-- Test framework: stdlib testing + testify
-- CI: GitHub Actions (`.github/workflows/release.yml`)
-
-## Sensors
-
-| Sensor      | Command           | Notes                              |
-| ----------- | ----------------- | ---------------------------------- |
-| lint        | `go vet ./...`    |                                    |
-| type-check  | `go build ./...`  | Compiler is the type checker.      |
-| test        | `go test ./...`   | Plus `-race` in CI.                |
-| sast        | `gosec ./...`     | Opt-in; not run on every commit.   |
-
-## Idioms
-
-- Workhorses in `internal/framework/...`, CLI in `cmd/keystone/`.
-- Embed templates via `go:embed`; never duplicate them in tests.
-```
+State ledgers live only in the project. Since no policy ships one, the strict cascade doesn't apply to them.
 
 ## Authoring
 
-State ledgers are written by actions, not by users directly. To add a
-new state ledger:
+To add a ledger:
 
-1. Write the markdown by hand under `corpus/state/<name>.md`.
-2. Update the relevant action (or write a new one) to read + update it.
-3. Document the ledger's shape in `CODEBASE_STATE.md` so the agent
-   knows it exists.
+1. Write `.agents/references/state/<name>.md` with reference frontmatter.
+2. Update the command that should read or write it.
+3. Run `keystone index`.
 
-There is no `keystone new state-ledger` generator — state shape is
-project-specific by design.
-
-## Read by
-
-- The agent at session start (ambient context).
-- `bootstrap`, `audit`, `learn` actions (read + update).
-- `keystone doctor` — `charter-debt.md` is one of its inputs.
+There is no `keystone new` generator for a state ledger, because its shape is specific to the project.
