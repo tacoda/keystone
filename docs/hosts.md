@@ -20,7 +20,7 @@ or index/report instead of shim).
 
 | Host | Root | Rules | Skills | Commands | Subagents | Hooks | Permissions | Tools (MCP) |
 |---|---|---|---|---|---|---|---|---|
-| claude-code | shim `CLAUDE.md` (`@AGENTS.md`) | symlink `.claude/rules/` | symlink `.claude/skills/` | symlink `.claude/commands/` | symlink `.claude/agents/` | shim `.claude/settings.json` | shim `.claude/settings.json` | shim `.mcp.json` |
+| claude-code | shim `CLAUDE.md` (`@AGENTS.md`) | shim `.claude/rules/` | symlink `.claude/skills/` | shim `.claude/commands/` | shim `.claude/agents/` | shim `.claude/settings.json` | shim `.claude/settings.json` | shim `.mcp.json` |
 | codex | native | index | native | index | shim `.codex/agents/*.toml` | shim `.codex/hooks.json` | shim `.codex/rules/*.rules` + report | shim `.codex/config.toml` |
 | cursor | native | shim `.cursor/rules/*.mdc` | native | shim `.cursor/skills/` (user-invoked) | shim `.cursor/agents/` | shim `.cursor/hooks.json` | shim `.cursor/cli.json` + report | shim `.cursor/mcp.json` |
 | github-copilot | native | shim `.github/instructions/` | native | shim `.github/prompts/` | shim `.github/agents/` | shim `.github/hooks/` | report (no repo file) | shim `.mcp.json` |
@@ -91,6 +91,12 @@ Hosts:
 - goose: https://block.github.io/goose/docs/ (`using-goosehints`, `using-skills`, `custom-agents`, `hooks`, `goose-permissions`). Repo now at github.com/aaif-goose/goose.
 - pi: https://github.com/earendil-works/pi (`packages/coding-agent/docs/`: `configuration`, `skills`, `prompt-templates`, `extensions`, `security`, `mcp`)
 - aider: https://aider.chat/docs/ (`usage/conventions`, `config/aider_conf`, `usage/lint-test`)
+
+Phase 3 correction to the claude-code row: rules, commands, and subagents
+are shims, not symlinks. Claude Code subagents require `name:` (canonical
+subagents carry `id:`), commands map `args:` to `argument-hint:`, and rule
+shims keep only the iron-law / golden-rule / rules / anti-pattern sections
+to save always-loaded context. Skills are byte-identical, so they link.
 
 ## Open verification items
 

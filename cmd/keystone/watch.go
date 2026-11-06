@@ -193,7 +193,7 @@ func runPipeline(ctx context.Context, projectDir string, doLint, doProject bool)
 	fmt.Fprintf(os.Stdout, "✓ %s (%d primitives", rel, len(idx.Primitives))
 
 	if doProject {
-		if _, err := primitive.Project(projectDir, primitives); err != nil {
+		if _, err := projectHosts(projectDir, primitives, nil); err != nil {
 			fmt.Fprintf(os.Stderr, "; ✗ project: %v", err)
 		} else {
 			fmt.Fprint(os.Stdout, ", projections refreshed")

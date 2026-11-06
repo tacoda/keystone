@@ -203,34 +203,14 @@ func indexAndProject(projectDir, charterRoot string) error {
 		fmt.Fprintf(os.Stdout, "  wrote: %s (%d primitive(s))\n", rel, len(primitives))
 	}
 
-	results, err := primitive.Project(projectDir, primitives)
-	if err != nil {
+	if _, err := projectHosts(projectDir, primitives, os.Stdout); err != nil {
 		return fmt.Errorf("project primitives: %w", err)
 	}
-	printProjectionResults(projectDir, results)
 
 	// Always-on entrypoint surface: canonical CHARTER.md + AGENTS.md
 	// pointer. Written before target templates are copied (skip-if-
 	// exists) so a fresh install ships them.
 	return writeCharterSurface(projectDir, true)
-}
-
-// printProjectionResults logs each host-native file the projector wrote
-// and a one-line summary count.
-func printProjectionResults(projectDir string, results []primitive.ProjectionResult) {
-	wrote := 0
-	for _, r := range results {
-		if r.Action != "wrote" {
-			continue
-		}
-		if rel, e := filepath.Rel(projectDir, r.Dest); e == nil {
-			fmt.Fprintf(os.Stdout, "  wrote: %s\n", rel)
-		}
-		wrote++
-	}
-	if wrote > 0 {
-		fmt.Fprintf(os.Stdout, "  projected %d primitive(s) to host-native paths\n", wrote)
-	}
 }
 
 // initializeLockfile creates <charterRoot>/keystone.lock.json if it doesn't

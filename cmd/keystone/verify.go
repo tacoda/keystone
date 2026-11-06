@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/tacoda/keystone/internal/framework/primitive"
+	"github.com/tacoda/keystone/internal/framework/projection"
 	"io"
 	"os"
 	"path/filepath"
@@ -33,35 +35,9 @@ import (
 //	2  block with the sensor's Message rendered to stderr
 //	1  internal error
 func runVerify(args []string) error {
-	dir := "."
-	sensorID := ""
-	for i := 0; i < len(args); i++ {
-		a := args[i]
-		switch {
-		case a == "--help" || a == "-h":
-			printVerifyUsage(os.Stdout)
-			return nil
-		case a == "--dir":
-			if i+1 >= len(args) {
-				return fmt.Errorf("flag %s requires a value", a)
-			}
-			dir = args[i+1]
-			i++
-		case strings.HasPrefix(a, "--dir="):
-			dir = strings.TrimPrefix(a, "--dir=")
-		case a == "--sensor":
-			if i+1 >= len(args) {
-				return fmt.Errorf("flag %s requires a value", a)
-			}
-			sensorID = args[i+1]
-			i++
-		case strings.HasPrefix(a, "--sensor="):
-			sensorID = strings.TrimPrefix(a, "--sensor=")
-		case strings.HasPrefix(a, "-"):
-			return fmt.Errorf("unknown flag %s", a)
-		default:
-			return fmt.Errorf("unexpected positional argument %q", a)
-		}
+	dir, sensorID, help, err := parseVerifyArgs(args)
+	if err != nil || help {
+		return err
 	}
 
 	if sensorID != "" {
@@ -118,10 +94,42 @@ func runVerify(args []string) error {
 		return fmt.Errorf("strict cascade is violated")
 	}
 
+	if err := checkProjectionDrift(absDir); err != nil {
+		return err
+	}
 	if !res.HasDrift() {
 		fmt.Fprintf(os.Stdout, "✓ keystone verify clean — no drift, no strict violations (%s)\n", absDir)
 	}
 	return nil
+}
+
+// parseVerifyArgs reads `keystone verify` flags; help=true means usage was printed.
+func parseVerifyArgs(args []string) (dir, sensorID string, help bool, err error) {
+	dir = "."
+	help, err = parseFlags(args, map[string]*string{"--dir": &dir, "--sensor": &sensorID}, nil,
+		func() { printVerifyUsage(os.Stdout) })
+	return dir, sensorID, help, err
+}
+
+// checkProjectionDrift fails when a host projection no longer matches the
+// charter: a missing output, a link pointing elsewhere, or a shim or copy
+// edited by hand. `keystone project` repairs all three.
+func checkProjectionDrift(absDir string) error {
+	prims, _, err := primitive.Walk(absDir, config.DefaultAgentsRoot)
+	if err != nil {
+		return err
+	}
+	composed, _ := primitive.Compose(prims)
+	outs, _, mode := planHosts(absDir, composed)
+	drifts := projection.Check(absDir, outs, mode)
+	if len(drifts) == 0 {
+		return nil
+	}
+	fmt.Fprintf(os.Stdout, "✗ %d host projection(s) drifted from the charter:\n", len(drifts))
+	for _, d := range drifts {
+		fmt.Fprintf(os.Stdout, "  • %s: %s\n", d.Dest, d.Problem)
+	}
+	return fmt.Errorf("projection drift — run `keystone project`")
 }
 
 func printVerifyUsage(w *os.File) {

@@ -408,7 +408,7 @@ func regenerateGenerated(absDir string) {
 	} else {
 		fmt.Fprintf(os.Stdout, "  wrote: %s (%d primitive(s))\n", relTo(absDir, outPath), len(primitives))
 	}
-	if _, err := primitive.Project(absDir, primitives); err != nil {
+	if _, err := projectHosts(absDir, primitives, nil); err != nil {
 		fmt.Fprintf(os.Stderr, "! keystone migrate: projection failed: %v\n", err)
 	}
 }

@@ -22,7 +22,9 @@
     "policies": {
       "type": "array",
       "description": "Ordered list of policy nodes. Among policies, policies nested deeper refine the outer policies they're nested in. The project layer always wins by default; a policy's `strict` declarations are the only thing that locks an item against the project.",
-      "items": { "$ref": "#/$defs/policyNode" }
+      "items": {
+        "$ref": "#/$defs/policyNode"
+      }
     },
     "budgets": {
       "type": "object",
@@ -30,14 +32,30 @@
       "additionalProperties": {
         "type": "object",
         "properties": {
-          "max_tokens":          { "type": "integer", "minimum": 0 },
-          "max_tokens_per_load": { "type": "integer", "minimum": 0 }
+          "max_tokens": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "max_tokens_per_load": {
+            "type": "integer",
+            "minimum": 0
+          }
         },
         "additionalProperties": false
       }
+    },
+    "link_mode": {
+      "enum": [
+        "symlink",
+        "copy"
+      ],
+      "description": "How `keystone project` reaches a host that reads the canonical format at another path: per-entry relative symlinks, or copies. Default: symlink, except copy on Windows."
     }
   },
-  "required": ["version", "policies"],
+  "required": [
+    "version",
+    "policies"
+  ],
   "additionalProperties": false,
   "$defs": {
     "policyNode": {
@@ -61,16 +79,24 @@
           "description": "Per-port lock list. A strict item is absolute — nothing else (project, sibling policies, descendant policies) can override it. Key is the port name (e.g. \"guides\", \"sensors\"); value is a list of item basenames (no .md extension).",
           "additionalProperties": {
             "type": "array",
-            "items": { "type": "string" }
+            "items": {
+              "type": "string"
+            }
           }
         },
         "children": {
           "type": "array",
           "description": "Child policies nested under this one. For non-strict items, the children (deeper-nested) refine this parent; for strict items declared anywhere in the tree, no layer can override.",
-          "items": { "$ref": "#/$defs/policyNode" }
+          "items": {
+            "$ref": "#/$defs/policyNode"
+          }
         }
       },
-      "required": ["name", "source", "version"],
+      "required": [
+        "name",
+        "source",
+        "version"
+      ],
       "additionalProperties": false
     }
   }

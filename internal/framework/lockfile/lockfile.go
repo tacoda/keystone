@@ -71,6 +71,10 @@ type Lockfile struct {
 	Keystone          KeystoneInfo          `json:"keystone"`
 	Policies          map[string]PolicyLock `json:"policies,omitempty"`
 	MigrationsApplied []string              `json:"migrations_applied,omitempty"`
+	// Projections lists every host path `keystone project` created
+	// (repo-relative, sorted). Prune removes only these; anything else
+	// under a host directory belongs to the user.
+	Projections []string `json:"projections,omitempty"`
 }
 
 // Read loads the lockfile at <installDir>/.keystone/lockfile.json,

@@ -66,19 +66,12 @@ func runProject(args []string) error {
 	}
 	primitives = composed
 
-	results, err := primitive.Project(absDir, primitives)
+	res, err := projectHosts(absDir, primitives, os.Stdout)
 	if err != nil {
 		return err
 	}
-
-	wrote := 0
-	for _, r := range results {
-		if r.Action == "wrote" {
-			fmt.Fprintf(os.Stdout, "  wrote: %s\n", r.Dest)
-			wrote++
-		}
-	}
-	fmt.Fprintf(os.Stdout, "✓ keystone project — projected %d primitive(s)\n", wrote)
+	fmt.Fprintf(os.Stdout, "✓ keystone project — %d written, %d unchanged, %d pruned\n",
+		len(res.Wrote), len(res.Unchanged), len(res.Pruned))
 
 	// Run host adapters. Each adapter projects the host-specific
 	// surface (hooks → .claude/settings.json, .cursor/rules/, etc.).

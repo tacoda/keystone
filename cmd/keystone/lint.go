@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"github.com/tacoda/keystone/internal/framework/config"
 	"github.com/tacoda/keystone/internal/framework/primitive"
@@ -77,31 +76,10 @@ type lintOpts struct {
 // parseLintArgs reads `keystone lint` flags; help=true means usage was printed.
 func parseLintArgs(args []string) (opts lintOpts, help bool, err error) {
 	opts.dir = "."
-	for i := 0; i < len(args); i++ {
-		a := args[i]
-		switch {
-		case a == "--help" || a == "-h":
-			printLintUsage(os.Stdout)
-			return opts, true, nil
-		case a == "--dir":
-			if i+1 >= len(args) {
-				return opts, false, fmt.Errorf("flag %s requires a value", a)
-			}
-			opts.dir = args[i+1]
-			i++
-		case strings.HasPrefix(a, "--dir="):
-			opts.dir = strings.TrimPrefix(a, "--dir=")
-		case a == "--verbose" || a == "-v":
-			opts.verbose = true
-		case a == "--fix":
-			opts.fix = true
-		case strings.HasPrefix(a, "-"):
-			return opts, false, fmt.Errorf("unknown flag %s", a)
-		default:
-			return opts, false, fmt.Errorf("unexpected positional argument %q", a)
-		}
-	}
-	return opts, false, nil
+	help, err = parseFlags(args, map[string]*string{"--dir": &opts.dir},
+		map[string]*bool{"--verbose": &opts.verbose, "-v": &opts.verbose, "--fix": &opts.fix},
+		func() { printLintUsage(os.Stdout) })
+	return opts, help, err
 }
 
 // applyLintFixes runs the --fix rewrites, then re-walks so the findings

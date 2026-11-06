@@ -439,3 +439,24 @@ agent loads. 5.0 measures the load.
   fixed (73 + 64 files, at most 2 lines each); 8 placeholder hooks quoted
   `run: "true"`.
 - **Phase 2 complete.**
+- Phase 3: done. `internal/framework/projection`: pure `Plan` over host
+  `Profile`s (per-kind `Rule` with strategy + dest + link target, and the
+  dirs each host already `Reads`), `Apply`, `Check`. A host that already
+  reads a primitive's location gets no output; a host that sees one
+  primitive at two paths gets a warning. Ownership recorded in lockfile
+  `projections`; never overwrites an unowned path; prunes only owned paths
+  (guarded: local, outside `.agents/` and `.keystone/`). First 5.0 run
+  adopts 4.x `keystone-*` entries so stale ones prune. `link_mode`
+  (`symlink` | `copy`, copy default on Windows). `keystone verify` fails on
+  projection drift. Claude Code profile: skills symlinked per entry, rules /
+  commands / subagents / inferential hooks shimmed (hosts.md corrected).
+  Dogfood: `.claude/skills/*` are now links; stale `keystone-task` pruned.
+  User skills now project under their own name (`/deploy`, not
+  `/keystone-deploy`) — CHANGELOG item. The Phase 2 `tools:` vs
+  `allowed-tools` finding is moot for skills (links carry spec frontmatter).
+  Known gap, not fixed here: `docs/schemas/keystone.json.schema.json` sets
+  `additionalProperties: false` but lacks `adapters` and `signals`.
+  CodeScene: String-Heavy / Primitive Obsession in `projection` accepted
+  (path code, as in Phase 2); `verify`/`lint`/`project` CLI got simpler via
+  a shared `parseFlags`. Claude Code picked up the linked skills live in the
+  session that built this (symlinked skill dirs confirmed working).

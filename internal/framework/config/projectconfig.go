@@ -45,6 +45,11 @@ type ProjectConfig struct {
 	// typos and `keystone signal list` surface it. Firing works without
 	// declaration (any non-host-phase event is a signal).
 	Signals []string `json:"signals,omitempty"`
+	// LinkMode picks how `keystone project` reaches a host that reads the
+	// canonical format at another path: "symlink" (per-entry relative
+	// links) or "copy". Empty means symlink, except copy on Windows, where
+	// symlinks need Developer Mode.
+	LinkMode string `json:"link_mode,omitempty"`
 }
 
 // HasSignal reports whether name is a known signal for this project —
