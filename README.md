@@ -126,7 +126,7 @@ writes `.mcp.json`; the host launches the server on session start.
 Tool surface:
 
 - **Read** — `keystone_list_primitives`, `keystone_get_primitive`,
-  `keystone_get_corpus`
+  `keystone_get_reference`
 - **Search** — `keystone_search`
 - **Eval** — `keystone_eval_list`, `keystone_eval_run`, `keystone_eval_report`,
   `keystone_eval_baseline`

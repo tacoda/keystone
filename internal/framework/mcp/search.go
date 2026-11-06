@@ -17,7 +17,7 @@ import (
 func registerSearchTool(s *server.MCPServer, projectDir string) {
 	s.AddTool(
 		mcp.NewTool("keystone_search",
-			mcp.WithDescription("Search every primitive (id, description, globs, traces, body) for a substring. Returns ranked hits w/ excerpt + match location. Use this before falling through to corpus or external sources — often the answer is already in the charter."),
+			mcp.WithDescription("Search every primitive (id, description, paths, traces, body) for a substring. Returns ranked hits w/ excerpt + match location. Use this before falling through to references or external sources — often the answer is already in the charter."),
 			mcp.WithString("query",
 				mcp.Required(),
 				mcp.Description("Free-form search string. Case-insensitive substring match."),

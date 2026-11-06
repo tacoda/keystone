@@ -3,7 +3,7 @@
 {{define "main"}}
 <section class="card">
   <h1>signals</h1>
-  <p class="muted">A <strong>signal</strong> is a keystone framework event — the extensible, higher-level counterpart to a host hook phase. A primitive subscribes via <code>on:</code> (a <code>sensor</code> checks, a <code>tool</code> fires a side-effect, an <code>agent</code> reviews). Fire with <code>keystone signal fire &lt;name&gt;</code>.</p>
+  <p class="muted">A <strong>signal</strong> is a keystone framework event — the extensible, higher-level counterpart to a host hook phase. A primitive subscribes via <code>event:</code> (a <code>hook</code> checks, a <code>tool</code> fires a side-effect, a <code>subagent</code> reviews). Fire with <code>keystone signal fire &lt;name&gt;</code>.</p>
   <table>
     <thead><tr><th>signal</th><th>kind</th><th>subscribers</th></tr></thead>
     <tbody>

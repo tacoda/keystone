@@ -102,8 +102,8 @@ func (s *server) collectInsights(primitives []primitive.Primitive) []Insight {
 	if len(orphans) > 0 {
 		out = append(out, Insight{
 			ID: "corpus.orphan", Severity: "low",
-			Title:      "corpus entries without a referrer",
-			Detail:     "These corpus files aren't reached by any rule's `traces:`. Either link them or prune.",
+			Title:      "references no rule links",
+			Detail:     "These references aren't linked from any rule's `corpus:`. Either link them or prune.",
 			Action:     "review /flywheels/prune",
 			ActionLink: "/flywheels/prune",
 		})
@@ -129,18 +129,18 @@ func (s *server) collectInsights(primitives []primitive.Primitive) []Insight {
 		case ratio > 0.6:
 			out = append(out, Insight{
 				ID: "severity.over-iron", Severity: "low",
-				Title:      "more than 60% of guides are severity: must",
+				Title:      "more than 60% of rules are severity: must",
 				Detail:     "When everything is iron-law, nothing is. Demote routine rules to `should` so the agent can tell signal from boilerplate.",
-				Action:     "/charter/primitives?kind=guide",
-				ActionLink: "/charter/primitives?kind=guide",
+				Action:     "/charter/primitives?kind=rule",
+				ActionLink: "/charter/primitives?kind=rule",
 			})
 		case ratio < 0.05 && totalGuides > 10:
 			out = append(out, Insight{
 				ID: "severity.under-iron", Severity: "low",
-				Title:      "<5% of guides are severity: must",
+				Title:      "<5% of rules are severity: must",
 				Detail:     "If no rules are iron-law, the agent has no clear non-negotiables. Promote a handful (security, data-loss prevention, etc.).",
-				Action:     "/charter/primitives?kind=guide",
-				ActionLink: "/charter/primitives?kind=guide",
+				Action:     "/charter/primitives?kind=rule",
+				ActionLink: "/charter/primitives?kind=rule",
 			})
 		}
 	}

@@ -9,23 +9,16 @@
     <div class="row">
       <label>kind
         <select name="kind" required>
-          <optgroup label="framework abstractions (use first)">
-            {{range .FrameworkKinds}}<option value="{{.}}">{{.}}</option>{{end}}
+          <optgroup label="constraints — limit, gate, or check">
+            {{range .ConstraintKinds}}<option value="{{.}}">{{.}}</option>{{end}}
           </optgroup>
-          <optgroup label="agent abstractions (extend host primitives)">
-            {{range .AgentKinds}}<option value="{{.}}">{{.}}</option>{{end}}
+          <optgroup label="capabilities — add what the agent can do">
+            {{range .CapabilityKinds}}<option value="{{.}}">{{.}}</option>{{end}}
           </optgroup>
         </select>
       </label>
       <label>id
         <input type="text" name="id" required placeholder="process/release or keystone:demo">
-      </label>
-      <label>sensor kind (sensors only)
-        <select name="sensor_kind">
-          <option value="">—</option>
-          <option value="computational">computational</option>
-          <option value="inferential">inferential</option>
-        </select>
       </label>
       <button class="btn" type="submit">scaffold</button>
       <span id="pnsp" class="htmx-indicator muted"><span class="spinner" aria-hidden="true"></span>scaffolding…</span>

@@ -47,7 +47,7 @@
   <dl>
     <dt>error</dt><dd>lint hard errors — missing required frontmatter, unknown kind, duplicate ids, skill without triggers, subagent without tools.</dd>
     <dt>warning</dt><dd>lint warnings (TODO descriptions, unresolved deps/traces) and duplicate descriptions across primitives.</dd>
-    <dt>info</dt><dd>not-referenced corpus entries (no rule's <code>traces:</code> points at them), empty-body files (≤ 200 bytes).</dd>
+    <dt>info</dt><dd>unreferenced references (no rule's <code>corpus:</code> links them), empty-body files (≤ 200 bytes).</dd>
   </dl>
   <p class="muted">Effectiveness signals ("rule was applied but had no impact") need session telemetry the runtime doesn't capture yet. Once those land, this page surfaces them too.</p>
 </section>

@@ -11,10 +11,8 @@ import (
 func (s *server) handlePrimitivesNew(w http.ResponseWriter, r *http.Request) {
 	s.renderPage(w, r, "primitive_new.html", map[string]any{
 		"ProjectDir": s.projectDir,
-		// Framework abstractions are shown first (user is encouraged to
-		// reach for these); agent abstractions are the extension surface.
-		"FrameworkKinds": []string{"guide", "corpus", "sensor", "action", "playbook"},
-		"AgentKinds":     []string{"rule", "skill", "subagent", "command"},
+		"ConstraintKinds": []string{"rule", "reference", "hook", "permission", "eval"},
+		"CapabilityKinds": []string{"skill", "command", "subagent", "tool", "document"},
 	})
 }
 

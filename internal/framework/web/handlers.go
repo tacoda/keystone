@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"slices"
 	"sort"
 	"strings"
 
@@ -103,15 +104,13 @@ func (s *server) handlePrimitivesList(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	kind := r.URL.Query().Get("kind")
-	glob := r.URL.Query().Get("glob")
-	tags := r.URL.Query()["tag"] // multi-value query param: ?tag=a&tag=b
-	filtered := filterPrimitives(primitives, kind, glob, tags)
+	f := filterFromQuery(r)
+	filtered := filterPrimitives(primitives, f)
 	s.renderPage(w, r, "primitives.html", map[string]any{
 		"ProjectDir": s.projectDir,
 		"Primitives": filtered,
 		"Total":      len(primitives),
-		"Filter":     map[string]any{"kind": kind, "glob": glob, "tags": tags},
+		"Filter":     map[string]any{"kind": f.kind, "category": f.category, "paths": f.path, "tags": f.tags},
 		"Kinds":      uniqueKinds(primitives),
 		"AllTags":    uniqueTags(primitives),
 	})
@@ -152,17 +151,14 @@ func (s *server) handlePrimitivesDetail(w http.ResponseWriter, r *http.Request) 
 // -- HTMX fragments ---------------------------------------------------
 
 // handlePrimitivesFragment returns just the table-body partial.
-// Wired to the kind/glob filter form via hx-get on input change.
+// Wired to the kind/category/paths filter form via hx-get on input change.
 func (s *server) handlePrimitivesFragment(w http.ResponseWriter, r *http.Request) {
 	primitives, err := s.loadPrimitives()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	kind := r.URL.Query().Get("kind")
-	glob := r.URL.Query().Get("glob")
-	tags := r.URL.Query()["tag"]
-	filtered := filterPrimitives(primitives, kind, glob, tags)
+	filtered := filterPrimitives(primitives, filterFromQuery(r))
 	s.render(w, "_primitives_table.html", map[string]any{
 		"Primitives": filtered,
 	})
@@ -170,29 +166,45 @@ func (s *server) handlePrimitivesFragment(w http.ResponseWriter, r *http.Request
 
 // -- helpers ----------------------------------------------------------
 
-func filterPrimitives(in []primitive.Primitive, kind, glob string, tags []string) []primitive.Primitive {
+// primitiveFilter is the dashboard's list filter; an empty field matches all.
+type primitiveFilter struct {
+	kind, category, path string
+	tags                 []string
+}
+
+// filterFromQuery reads ?kind=&category=&paths=&tag= (`glob` is the 4.x
+// name for paths).
+func filterFromQuery(r *http.Request) primitiveFilter {
+	q := r.URL.Query()
+	path := q.Get("paths")
+	if path == "" {
+		path = q.Get("glob")
+	}
+	return primitiveFilter{kind: q.Get("kind"), category: q.Get("category"), path: path, tags: q["tag"]}
+}
+
+func (f primitiveFilter) match(p primitive.Primitive) bool {
+	if f.kind != "" && !primitive.IsKind(p.Kind, f.kind) {
+		return false
+	}
+	if f.category != "" && string(primitive.CategoryOf(primitive.Kind(p.Kind))) != f.category {
+		return false
+	}
+	if f.path != "" && !slices.Contains(p.Paths, f.path) {
+		return false
+	}
+	return len(f.tags) == 0 || hasAllTagsWeb(p.Tags, f.tags)
+}
+
+// filterPrimitives returns the matches, constraints first.
+func filterPrimitives(in []primitive.Primitive, f primitiveFilter) []primitive.Primitive {
 	out := in[:0:0]
 	for _, p := range in {
-		if kind != "" && !primitive.IsKind(p.Kind, kind) {
-			continue
+		if f.match(p) {
+			out = append(out, p)
 		}
-		if glob != "" {
-			match := false
-			for _, g := range p.Paths {
-				if g == glob {
-					match = true
-					break
-				}
-			}
-			if !match {
-				continue
-			}
-		}
-		if len(tags) > 0 && !hasAllTagsWeb(p.Tags, tags) {
-			continue
-		}
-		out = append(out, p)
 	}
+	primitive.SortByCategory(out)
 	return out
 }
 

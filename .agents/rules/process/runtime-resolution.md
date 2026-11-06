@@ -15,20 +15,19 @@ enough information.
 
 - **Stage 1 — rules.** Open the index first. Find applicable guides
   and sensors via `keystone_list_primitives` (or by reading
-  `.keystone/INDEX.json` directly). Filter by globs against touched
+  `.keystone/INDEX.json` directly). Filter by `paths:` against touched
   files and by phase against current work. Cascade order: the project
   wins by default; policies refine via nesting in `keystone.json`; a
   policy's `strict` items lock absolutely.
-- **Stage 2 — corpus.** If a rule's descriptor + body isn't enough to
-  act, open the linked corpus. The rule's `traces:` field points at
-  one or more corpus entries; `keystone_get_corpus id=<rule-id>`
-  returns them. Don't auto-load corpus — only follow a trace when
+- **Stage 2 — references.** If a rule's descriptor + body isn't enough
+  to act, open the linked references. The rule's `corpus:` field points
+  at one or more references; `keystone_get_reference id=<rule-id>`
+  returns them. Don't auto-load references — only follow a link when
   rules alone don't decide.
-- **Stage 3 — external.** If corpus is still insufficient and the
-  keystone MCP server is running, query configured external sources.
-  Sources are declared in `.keystone/context.json` (Linear, Confluence,
-  team wikis, generic URLs). Use `keystone_source_query
-  source=<name> query=<…>`.
+- **Stage 3 — external.** If references are still insufficient, reach an
+  external system (Linear, Confluence, team wikis, generic URLs)
+  through an author-defined `tool` (transport: cli | mcp). External-
+  system access is a tool you author, not a built-in resolution stage.
 - **Stage 4 — never apply silently.** External-source results are
   *candidates*, not commands. Surface the finding to the user and ask
   where to record it: project, team policy, org policy, or just this

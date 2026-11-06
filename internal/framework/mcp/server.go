@@ -28,50 +28,61 @@ import (
 
 // Version is stamped into the MCP `serverInfo` block. Bumped on every
 // notable surface change.
-const Version = "2.0.0"
+const Version = "3.0.0" // 5.0: constraint/capability kinds, keystone_get_reference
 
 // instructions is the short, top-of-server description host agents
 // receive when they `initialize` the server. Intentionally terse —
 // detailed contracts live in `docs/ports/primitive.md`.
 const instructions = `keystone MCP — the charter, served.
 
-The charter lives at .agents/ and is indexed at .keystone/INDEX.json.
-Both this server and the keystone CLI read the same files; they never
-disagree.
+The charter's sources live in .agents/ and are indexed at
+.keystone/INDEX.json. This server and the keystone CLI read the same
+files; they never disagree.
+
+## Two categories
+
+Constraints limit, gate, or check what the agent does:
+  rule        applies when a touched file matches its paths: (or everywhere)
+  reference   the reasoning behind a rule, opened on demand
+  hook        a check that runs on an event; a non-zero exit blocks
+  permission  allow / ask / deny tool rules
+  eval        a test that the charter changes agent behavior
+
+Capabilities add things the agent can do:
+  skill       Agent Skills SKILL.md; activates when its description matches
+  command     a unit of work the user asks for by name
+  subagent    a role the agent delegates to
+  tool        an author-defined callable (transport: mcp is served here)
+  document    a template for governed output
 
 ## Runtime resolution flow
 
 When a scenario arises, work the charter in stages. Only escalate when
-the previous stage doesn't carry enough information:
+the previous stage does not carry enough information:
 
-  1. RULES.   Call keystone_list_primitives kind=guide to find the
-              applicable directives for the touched files / phase.
-              Cascade: project wins by default; policies refine via
-              nesting in keystone.json; strict items lock absolutely.
-  2. CORPUS.  If a guide's body is too terse, call keystone_get_corpus
-              id=<guide-id> to open the linked reasoning (its corpus:
-              field). Corpus is opt-in — never auto-loaded.
-  3. CONFLICTS. Any contradiction between rules and corpus triggers a
-              question to the user. The server returns data; the agent
-              reasons about contradictions.
-
-(External-system access is a tool — author a kind: tool with
-transport: cli | mcp — not a server-side resolution stage.)
+  1. RULES.      Call keystone_list_primitives kind=rule to find the rules
+                 for the touched files and phase. Cascade: the project
+                 wins by default; policies refine; strict items are absolute.
+  2. REFERENCES. If a rule's body is too terse, call
+                 keystone_get_reference id=<rule-id> to open the reasoning
+                 it links (its corpus: field). Never auto-loaded.
+  3. CONFLICTS.  A contradiction between a rule and its reference is a
+                 question for the user. The server returns data; the agent
+                 reasons about contradictions.
 
 ## Read tools
 
-  keystone_list_primitives [kind=<k>] [glob=<g>]
+  keystone_list_primitives [kind=<k>|category=<c>] [paths=<p>] [tags=…]
       Filter the index. Returns descriptors only.
   keystone_get_primitive kind=<k> id=<i>
       Returns one primitive's full body.
-  keystone_get_corpus id=<guide-id>
-      Follow a guide's corpus: field; return the linked corpus body.
-      Use this when a guide's body is not enough to act.
+  keystone_get_reference id=<rule-id>
+      Follow a rule's corpus: field; return the linked reference bodies.
   keystone_signal_list
-      List signals (framework events a sensor/tool/agent subscribes to
-      via on:) + their subscribers, plus the bridged host phases.
+      List signals (events a hook, tool, or subagent subscribes to via
+      event:) and their subscribers, plus the bridged host events.
   keystone_charter_coverage
-      Files a guide governs vs. uncharted (matched by no guide's globs).
+      Files a rule governs vs. uncharted (matched by no rule's paths:).
   keystone_explain id=<i> [kind=<k>]
       Explain a primitive — how it activates, what it links to, where it
       projects. Use before reading a whole body.
@@ -81,23 +92,22 @@ transport: cli | mcp — not a server-side resolution stage.)
 
 ## Reactions (what fires when)
 
-A signal (framework event) or host phase fires; the reacting primitive
-self-subscribes via on:, like a skill declares triggers:
-  - sensor — a check → verdict (exit/HTTP status); gates.
-  - tool   — an external callable; on-demand, or a side-effect with on:.
-  - agent  — an inferential review → structured returns:.
+A signal or host event fires; the reacting primitive subscribes via
+event:, like a skill declares triggers:
+  - hook      — a check → verdict (exit status); a failure blocks.
+  - tool      — an external callable; on demand, or a side effect on an event.
+  - subagent  — an inferential review → structured returns:.
 
 ## Write tools (each shells out to the keystone binary)
 
-  keystone_new_<kind>          Scaffold a new primitive.
-                               <kind> ∈ {guide, sensor, agent,
-                                         command, skill, playbook, pattern,
-                                         posture, tool, corpus, document,
-                                         adapter, policy}.
+  keystone_new_<kind>          Scaffold a new primitive. <kind> is one of
+                               rule, reference, hook, permission, eval,
+                               skill, command, subagent, tool, document,
+                               adapter, policy.
   keystone_charter_bootstrap   Scaffold the charter (init equivalent).
-  keystone_target_add          Add another agent target.
+  keystone_target_add          Add another host.
   keystone_index_refresh       Rebuild .keystone/INDEX.json.
-  keystone_project_refresh     Regenerate .claude/ host projections.
+  keystone_project_refresh     Regenerate every host's projection.
 
 ## Resources
 
@@ -106,12 +116,11 @@ self-subscribes via on:, like a skill declares triggers:
   keystone://charter/status            — install audit (layout + counts)
 
 Activate by reading the index first, then opening primitive bodies on
-demand. Never read every guide/sensor/command file blindly — let the
-agent's matching machinery (globs, triggers, phase) decide what fires.
+demand. Never read every rule, hook, or command file blindly — let the
+host's matching (paths:, descriptions, events) decide what applies.
 
 After any write tool, call keystone_index_refresh so INDEX.json stays
-current. If the change touched skill/agent/command/playbook, also call
-keystone_project_refresh so .claude/ host projections regenerate.
+current, then keystone_project_refresh so every host sees the change.
 `
 
 // Options configures the server. Mostly project rooting; everything
@@ -173,22 +182,28 @@ func Serve(ctx context.Context, opts Options) error {
 func registerTools(s *server.MCPServer, projectDir string) {
 	s.AddTool(
 		mcp.NewTool("keystone_list_primitives",
-			mcp.WithDescription("List charter primitives, optionally filtered by kind, glob, or tag(s). Returns descriptors only — open bodies via keystone_get_primitive. The returned descriptors reflect the COMPOSED view (concern `includes:` already merged into list fields)."),
+			mcp.WithDescription("List charter primitives, optionally filtered by kind, category, path pattern, or tag(s). Returns descriptors only — open bodies via keystone_get_primitive. The returned descriptors reflect the COMPOSED view (`includes:` already merged into list fields)."),
 			mcp.WithString("kind",
-				mcp.Description("Filter by kind (guide, sensor, agent, command, skill, playbook, pattern, corpus, document, concern, posture, tool, eval). Omit for all."),
+				mcp.Description("Filter by kind: a constraint (rule, reference, hook, permission, eval) or a capability (skill, command, subagent, tool, document). Omit for all."),
 			),
-			mcp.WithString("glob",
-				mcp.Description("Filter primitives that declare this glob pattern in their `globs:` frontmatter. Exact-string match on the pattern."),
+			mcp.WithString("category",
+				mcp.Description("Filter by category: constraint or capability. Omit for both."),
+			),
+			mcp.WithString("paths",
+				mcp.Description("Filter primitives that declare this pattern in their `paths:` frontmatter. Exact-string match on the pattern. (`glob` is the 4.x name.)"),
 			),
 			mcp.WithArray("tags",
-				mcp.Description("Filter primitives that declare ALL of these tags (AND). Tags merge across includes — a concern's tags propagate to the primitives that include it."),
+				mcp.Description("Filter primitives that declare ALL of these tags (AND). Tags merge across includes."),
 				mcp.WithStringItems(),
 			),
 		),
 		func(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-			kindFilter := req.GetString("kind", "")
-			globFilter := req.GetString("glob", "")
-			tagFilter := req.GetStringSlice("tags", nil)
+			f := listFilter{
+				kind:     req.GetString("kind", ""),
+				category: req.GetString("category", ""),
+				path:     req.GetString("paths", req.GetString("glob", "")),
+				tags:     req.GetStringSlice("tags", nil),
+			}
 
 			idx, err := loadIndex(projectDir)
 			if err != nil {
@@ -197,16 +212,9 @@ func registerTools(s *server.MCPServer, projectDir string) {
 
 			out := make([]primitive.Primitive, 0, len(idx.Primitives))
 			for _, p := range idx.Primitives {
-				if kindFilter != "" && !primitive.IsKind(p.Kind, kindFilter) {
-					continue
+				if f.match(p) {
+					out = append(out, p)
 				}
-				if globFilter != "" && !contains(p.Paths, globFilter) {
-					continue
-				}
-				if !hasAllStrings(p.Tags, tagFilter) {
-					continue
-				}
-				out = append(out, p)
 			}
 
 			body, err := json.MarshalIndent(map[string]any{
@@ -221,14 +229,14 @@ func registerTools(s *server.MCPServer, projectDir string) {
 	)
 
 	s.AddTool(
-		mcp.NewTool("keystone_get_corpus",
-			mcp.WithDescription("Open the corpus reasoning linked from a guide or rule. Follows the primitive's `traces:` field — returns one or more corpus bodies. Use this in stage 2 of the resolution flow, only when a rule's body isn't enough to act."),
+		mcp.NewTool("keystone_get_reference",
+			mcp.WithDescription("Open the references linked from a rule. Follows the rule's `corpus:` field — returns one or more reference bodies. Use this in stage 2 of the resolution flow, only when a rule's body isn't enough to act."),
 			mcp.WithString("id",
 				mcp.Required(),
-				mcp.Description("Source primitive's id (typically a guide or rule). Returns all corpus entries the source traces to."),
+				mcp.Description("Source primitive's id (typically a rule). Returns every reference it links."),
 			),
 			mcp.WithString("kind",
-				mcp.Description("Source primitive's kind (default: guide)."),
+				mcp.Description("Source primitive's kind (default: rule)."),
 			),
 		),
 		func(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
@@ -236,7 +244,7 @@ func registerTools(s *server.MCPServer, projectDir string) {
 			if err != nil {
 				return mcp.NewToolResultError(err.Error()), nil
 			}
-			kind := req.GetString("kind", "guide")
+			kind := req.GetString("kind", string(primitive.KindRule))
 
 			source, _, err := loadPrimitiveBody(projectDir, kind, id)
 			if err != nil {
@@ -247,24 +255,23 @@ func registerTools(s *server.MCPServer, projectDir string) {
 					"source_kind": source.Kind,
 					"source_id":   source.ID,
 					"traces":      []string{},
-					"corpus":      []any{},
-					"note":        "this primitive has no traces — no linked corpus",
+					"references":  []any{},
+					"note":        "this primitive links no reference",
 				}, "", "  ")
 				return mcp.NewToolResultText(string(body)), nil
 			}
 
-			corpus := []map[string]any{}
+			refs := []map[string]any{}
 			for _, ref := range source.Corpus {
-				cKind, cID := parseTraceRef(ref)
-				p, body, err := loadPrimitiveBody(projectDir, cKind, cID)
+				p, body, err := loadReference(projectDir, ref)
 				if err != nil {
-					corpus = append(corpus, map[string]any{
+					refs = append(refs, map[string]any{
 						"trace": ref,
 						"error": err.Error(),
 					})
 					continue
 				}
-				corpus = append(corpus, map[string]any{
+				refs = append(refs, map[string]any{
 					"trace":       ref,
 					"kind":        p.Kind,
 					"id":          p.ID,
@@ -277,7 +284,7 @@ func registerTools(s *server.MCPServer, projectDir string) {
 				"source_kind": source.Kind,
 				"source_id":   source.ID,
 				"traces":      source.Corpus,
-				"corpus":      corpus,
+				"references":  refs,
 			}, "", "  ")
 			return mcp.NewToolResultText(string(out)), nil
 		},
@@ -288,7 +295,7 @@ func registerTools(s *server.MCPServer, projectDir string) {
 			mcp.WithDescription("Return the full body of a single primitive given its kind and id. The body includes the frontmatter and the markdown that follows."),
 			mcp.WithString("kind",
 				mcp.Required(),
-				mcp.Description("Primitive kind (guide, sensor, agent, command, skill, playbook, pattern, corpus, document, concern, posture, tool, eval)."),
+				mcp.Description("Primitive kind: rule, reference, hook, permission, eval, skill, command, subagent, tool, or document (4.x names are accepted)."),
 			),
 			mcp.WithString("id",
 				mcp.Required(),
@@ -321,10 +328,10 @@ func registerTools(s *server.MCPServer, projectDir string) {
 
 	s.AddTool(
 		mcp.NewTool("keystone_show",
-			mcp.WithDescription("Return one primitive's descriptor PLUS forward + reverse cross-references in a single call. Surfaces: the composed view of the target (tags / tools / globs / host_triggers after `includes:` resolution), `included_by` (when target is a concern), `traces` (forward) and `traced_by` (reverse) for guide↔corpus pairs, severity / model / phase / provenance. Use this when you need to understand a primitive's neighborhood in one shot — saves N follow-up keystone_get_primitive calls."),
+			mcp.WithDescription("Return one primitive's descriptor PLUS forward + reverse cross-references in a single call. Surfaces: the composed view of the target (tags / tools / paths / host_triggers after `includes:` resolution), `included_by` (when another primitive includes it), `traces` (forward) and `traced_by` (reverse) for rule↔reference pairs, severity / model / phase / provenance. Use this when you need to understand a primitive's neighborhood in one shot — saves N follow-up keystone_get_primitive calls."),
 			mcp.WithString("kind",
 				mcp.Required(),
-				mcp.Description("Primitive kind (guide, sensor, agent, playbook, concern, command, corpus, etc.)."),
+				mcp.Description("Primitive kind: rule, reference, hook, permission, eval, skill, command, subagent, tool, or document."),
 			),
 			mcp.WithString("id",
 				mcp.Required(),
@@ -390,7 +397,7 @@ type showView struct {
 	Phase        string                  `json:"phase,omitempty"`
 	Tags         []string                `json:"tags,omitempty"`
 	Tools        []string                `json:"tools,omitempty"`
-	Paths        []string                `json:"globs,omitempty"`
+	Paths        []string                `json:"paths,omitempty"`
 	Triggers     []string                `json:"triggers,omitempty"`
 	Includes     []string                `json:"includes,omitempty"`
 	IncludedBy   []string                `json:"included_by,omitempty"`
@@ -513,7 +520,7 @@ func registerResources(s *server.MCPServer, projectDir string) {
 	s.AddResourceTemplate(
 		mcp.NewResourceTemplate("keystone://primitive/{kind}/{id}",
 			"Primitive body",
-			mcp.WithTemplateDescription("Returns one primitive's body. URI form: keystone://primitive/<kind>/<id> (id may use slashes for hierarchical primitives like guides)."),
+			mcp.WithTemplateDescription("Returns one primitive's body. URI form: keystone://primitive/<kind>/<id> (id may use slashes for hierarchical primitives like rules)."),
 			mcp.WithTemplateMIMEType("text/markdown"),
 		),
 		func(ctx context.Context, req mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
@@ -568,16 +575,34 @@ func loadPrimitiveBody(projectDir, kind, id string) (primitive.Primitive, string
 	return primitive.Primitive{}, "", fmt.Errorf("no primitive with kind=%q id=%q", kind, id)
 }
 
-// parseTraceRef interprets a `traces:` entry. The canonical form is
-// `corpus/<topic>/<name>`; the kind is always reference (4.x corpus) when not
-// explicitly prefixed. Accepts both forms.
-func parseTraceRef(ref string) (kind, id string) {
-	const corpusPrefix = "corpus/"
-	if strings.HasPrefix(ref, corpusPrefix) {
-		return string(primitive.KindReference), ref
+// listFilter is keystone_list_primitives' filter; an empty field matches all.
+type listFilter struct {
+	kind, category, path string
+	tags                 []string
+}
+
+func (f listFilter) match(p primitive.Primitive) bool {
+	if f.kind != "" && !primitive.IsKind(p.Kind, f.kind) {
+		return false
 	}
-	// Fallback: assume corpus.
-	return string(primitive.KindReference), "corpus/" + ref
+	if f.category != "" && string(primitive.CategoryOf(primitive.Kind(p.Kind))) != f.category {
+		return false
+	}
+	if f.path != "" && !contains(p.Paths, f.path) {
+		return false
+	}
+	return hasAllStrings(p.Tags, f.tags)
+}
+
+// loadReference resolves a `corpus:` entry to its reference: by id, or by
+// the 4.x id that carries a `corpus/` prefix.
+func loadReference(projectDir, ref string) (primitive.Primitive, string, error) {
+	kind := string(primitive.KindReference)
+	p, body, err := loadPrimitiveBody(projectDir, kind, ref)
+	if err != nil && !strings.HasPrefix(ref, "corpus/") {
+		return loadPrimitiveBody(projectDir, kind, "corpus/"+ref)
+	}
+	return p, body, err
 }
 
 func parsePrimitiveURI(uri string) (kind, id string, err error) {

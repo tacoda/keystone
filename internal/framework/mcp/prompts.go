@@ -20,7 +20,7 @@ import (
 func registerPrompts(s *server.MCPServer, projectDir string) {
 	s.AddPrompt(
 		mcp.NewPrompt("keystone_bootstrap",
-			mcp.WithPromptDescription("One-time codebase analysis. Detects stack, fills the state ledger, classifies sensors. Run once per project, before the first `task`."),
+			mcp.WithPromptDescription("One-time codebase analysis. Detects stack, fills the state ledger, classifies hooks. Run once per project, before the first `task`."),
 		),
 		func(ctx context.Context, req mcp.GetPromptRequest) (*mcp.GetPromptResult, error) {
 			return promptResult(
@@ -30,8 +30,8 @@ func registerPrompts(s *server.MCPServer, projectDir string) {
 
 - detect language / framework / CI from the repo
 - seed references/state/CODEBASE_STATE.md and INSTALL_PROFILE.md
-- classify every sensor as computational or inferential
-- seed idiom globs from the region map
+- classify every hook as computational or inferential
+- seed idiom rule paths: from the region map
 
 Surface any conversational gaps (aspirational patterns, methodology, migration plans) and ask the user to fill them in. Do NOT invent answers.`,
 			), nil
@@ -59,22 +59,22 @@ Surface any conversational gaps (aspirational patterns, methodology, migration p
 Open .agents/skills/task/SKILL.md and execute the sequence:
   spec → orient → (implementation) → check-drift → verify → review
 
-Resolve each stage per the runtime-resolution flow (rules → corpus → external → ask). At any iron-law violation, halt and surface to the user.`, desc),
+Resolve each stage per the runtime-resolution flow (rules → references → external → ask). At any iron-law violation, halt and surface to the user.`, desc),
 			), nil
 		},
 	)
 
 	s.AddPrompt(
 		mcp.NewPrompt("keystone_audit",
-			mcp.WithPromptDescription("Periodic dual-flywheel: learning + pruning. Walks the inbox, promotes accepted candidates, archives stale guides."),
+			mcp.WithPromptDescription("Periodic dual-flywheel: learning + pruning. Walks the inbox, promotes accepted candidates, archives stale rules."),
 		),
 		func(ctx context.Context, req mcp.GetPromptRequest) (*mcp.GetPromptResult, error) {
 			return promptResult(
 				"keystone_audit",
 				"Run the audit action.",
 				`Open .agents/commands/audit.md and execute its Activities. Drive the dual flywheel:
-  - Learning: walk learning/inbox/, propose promotions to corpus/guides
-  - Pruning: identify stale guides/corpus, propose archive moves
+  - Learning: walk learning/inbox/, propose promotions to rules/references
+  - Pruning: identify stale rules/references, propose archive moves
 
 Surface every proposed move to the user before applying. Never delete; archive with a one-line reason.`,
 			), nil
@@ -103,7 +103,7 @@ Surface every proposed move to the user before applying. Never delete; archive w
 
 Open .agents/commands/learn.md and write a candidate to .keystone/learning/inbox/<timestamp>-<slug>.md following the canonical shape (captured/source/proposed-layer/proposed-globs frontmatter + What happened / Why it matters / Proposed change body).
 
-Promotion to corpus/guides happens in synthesize, not here.`, finding),
+Promotion to rules/references happens in synthesize, not here.`, finding),
 			), nil
 		},
 	)

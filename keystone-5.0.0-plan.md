@@ -624,3 +624,16 @@ agent loads. 5.0 measures the load.
   `show` and `explain` print the category; `show --json` gains `category`
   and renames `globs` to `paths`. Coverage and conformance say rule,
   reference, and `paths:` instead of guide, corpus, and globs.
+- Phase 6.3: done. MCP: `keystone_get_corpus` is `keystone_get_reference`
+  (default source kind `rule`); `keystone_new_*` tools are the 5.0 kinds
+  (the 4.x verbs failed once the CLI refused them); `keystone_list_primitives`
+  takes `category` and `paths` (`glob` still accepted); the server
+  instructions describe the two categories; server version 3.0.0. Fixed:
+  MCP resolved a `corpus:` entry only under a `corpus/` id, so a 5.0
+  reference id never resolved. Dashboard: the nav splits the charter into
+  constraints and capabilities; the primitives page filters by category
+  and `paths`; the new-primitive form offers the 10 kinds (it offered
+  guide/corpus/sensor/action/playbook, which all failed) and its redirect
+  went to a 404 route. A test GETs every nav link. The runtime-resolution
+  rule names `keystone_get_reference`; this repo's copy also lost a stale
+  stage-3 pointer to the removed `keystone_source_query`.

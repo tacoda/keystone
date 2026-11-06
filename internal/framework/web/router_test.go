@@ -5,9 +5,12 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"regexp"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/tacoda/keystone/internal/framework/primitive"
 )
 
 // newTestRouter spins up a server against a temp project dir and
@@ -286,4 +289,40 @@ func TestRouter_SSEEndpoint(t *testing.T) {
 	// suppressed.
 	cancel()
 	_, _ = io.Copy(io.Discard, resp.Body)
+}
+
+// TestRouter_NavLinksResolve — every link in the top nav serves a page,
+// and the nav splits the charter into constraints and capabilities.
+func TestRouter_NavLinksResolve(t *testing.T) {
+	_, h := newTestRouter(t)
+	rr := httptest.NewRecorder()
+	h.ServeHTTP(rr, httptest.NewRequest(http.MethodGet, "/", nil))
+	nav := rr.Body.String()
+	if i, j := strings.Index(nav, "<nav>"), strings.Index(nav, "</nav>"); i >= 0 && j > i {
+		nav = nav[i:j]
+	}
+	for _, want := range []string{">constraints<", ">capabilities<"} {
+		if !strings.Contains(nav, want) {
+			t.Errorf("nav missing %s", want)
+		}
+	}
+	links := regexp.MustCompile(`href="(/[^"]*)"`).FindAllStringSubmatch(nav, -1)
+	if len(links) == 0 {
+		t.Fatal("no nav links found")
+	}
+	for _, m := range links {
+		rr := httptest.NewRecorder()
+		h.ServeHTTP(rr, httptest.NewRequest(http.MethodGet, m[1], nil))
+		if rr.Code != http.StatusOK {
+			t.Errorf("GET %s = %d", m[1], rr.Code)
+		}
+	}
+}
+
+func TestFilterPrimitives_Category(t *testing.T) {
+	ps := []primitive.Primitive{{Frontmatter: primitive.Frontmatter{Kind: "skill", ID: "a"}}, {Frontmatter: primitive.Frontmatter{Kind: "hook", ID: "b"}}}
+	got := filterPrimitives(ps, primitiveFilter{category: "constraint"})
+	if len(got) != 1 || got[0].Kind != "hook" {
+		t.Errorf("category=constraint: %v", got)
+	}
 }

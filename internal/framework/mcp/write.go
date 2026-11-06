@@ -41,76 +41,25 @@ func registerWriteTools(s *server.MCPServer, projectDir string) {
 // per authorable kind. The handler for each synthesizes the equivalent CLI arg
 // slice and execs the keystone binary.
 func writeGenerators() []writeGen {
+	gen := func(verb, idArg, desc string) writeGen {
+		return writeGen{tool: "keystone_new_" + verb, verb: verb, idArg: idArg, desc: desc}
+	}
 	return []writeGen{
-		{
-			tool:  "keystone_new_rule",
-			verb:  "rule",
-			idArg: "<topic>/<name>",
-			desc:  "Scaffold a rule — a glob-scoped directive. id form: '<topic>/<name>' (e.g. 'process/release').",
-		},
-		{
-			tool:  "keystone_new_command",
-			verb:  "command",
-			idArg: "<id>",
-			desc:  "Scaffold a command — a unit of work / lifecycle step.",
-		},
-		{
-			tool:  "keystone_new_skill",
-			verb:  "skill",
-			idArg: "<id>",
-			desc:  "Scaffold a skill — a composed capability. id may use the colon-namespaced form (e.g. 'keystone:demo').",
-		},
-		{
-			tool:  "keystone_new_agent",
-			verb:  "agent",
-			idArg: "<id>",
-			desc:  "Scaffold an agent — a role spawned as a subagent.",
-		},
-		{
-			tool:  "keystone_new_pattern",
-			verb:  "pattern",
-			idArg: "<id>",
-			desc:  "Scaffold a pattern — a reusable documentation pattern in prose (the Diátaxis modes: tutorial, how-to, reference, explanation). Prose only; no projection.",
-		},
-		{
-			tool:  "keystone_new_posture",
-			verb:  "posture",
-			idArg: "<id>",
-			desc:  "Scaffold a posture — tool/permission lists (allow/ask/deny) that project to the host permissions block.",
-		},
-		{
-			tool:  "keystone_new_tool",
-			verb:  "tool",
-			idArg: "<id>",
-			desc:  "Scaffold a tool — an author-defined callable the agent invokes (transport: cli | mcp | plugin).",
-		},
-		{
-			tool:  "keystone_new_document",
-			verb:  "document",
-			idArg: "<id>",
-			desc:  "Scaffold a document template (governed output: plan, review, adr, retro, feature). Instances land in .keystone/work/.",
-		},
-		{
-			tool:  "keystone_new_corpus",
-			verb:  "corpus",
-			idArg: "<topic>/<name>",
-			desc:  "Scaffold a corpus reasoning entry (the on-demand why). id form: '<topic>/<name>'.",
-		},
-		{
-			tool:  "keystone_new_adapter",
-			verb:  "adapter",
-			idArg: "<agent>",
-			desc:  "Scaffold the per-agent adapter triple (activation, lifecycle, sensors) for a new host.",
-		},
-		// Note: `source` is no longer a kind — external-system access is a
-		// `tool` (transport: cli=curl / mcp). The legacy source subsystem
-		// has been removed.
-		{
-			tool:  "keystone_new_policy",
-			verb:  "policy",
-			idArg: "<name>",
-			desc:  "Scaffold a new policy repo skeleton (separate dir; publish to git afterward).",
-		},
+		// constraints — limit, gate, or check what the agent does
+		gen("rule", "<topic>/<name>", "Scaffold a rule plus its paired reference (constraint). A rule applies when a touched file matches its `paths:`, or everywhere without them. id form: '<topic>/<name>' (e.g. 'process/release')."),
+		gen("reference", "<topic>/<name>", "Scaffold a reference (constraint): the reasoning behind a rule, opened on demand. id form: '<topic>/<name>'."),
+		gen("hook", "<id>", "Scaffold a hook (constraint): a check that runs on an event (`event:` + `run:`); a non-zero exit blocks the agent."),
+		gen("permission", "<id>", "Scaffold a permission (constraint): allow / ask / deny tool rules, translated to every host that can enforce them."),
+		gen("eval", "<id>", "Scaffold an eval (constraint): a test that the charter changes agent behavior."),
+		// capabilities — add things the agent can do
+		gen("skill", "<id>", "Scaffold a skill (capability) in Agent Skills shape: .agents/skills/<id>/SKILL.md."),
+		gen("command", "<id>", "Scaffold a command (capability): a unit of work the user asks for by name."),
+		gen("subagent", "<id>", "Scaffold a subagent (capability): a role the agent delegates to."),
+		gen("tool", "<id>", "Scaffold a tool (capability): an author-defined callable (transport: mcp | cli | plugin). Not a host tool like Bash or Read."),
+		gen("document", "<id>", "Scaffold a document template (capability): governed output such as a plan, review, or ADR. Instances land in .keystone/work/."),
+		// keystone itself
+		gen("adapter", "<host>", "Scaffold a host adapter for a new host."),
+		gen("policy", "<name>", "Scaffold a new policy repo skeleton (separate dir; publish to git afterward)."),
 	}
 }
 

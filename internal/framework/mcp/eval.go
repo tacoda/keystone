@@ -47,7 +47,7 @@ func registerEvalTools(s *server.MCPServer, projectDir string) {
 
 	s.AddTool(
 		mcp.NewTool("keystone_eval_run",
-			mcp.WithDescription("Run every eval and return a JSON report. Pass `filter` to narrow by substring on the eval id. Static + sensor levels are implemented; agent level is reserved for 2.1."),
+			mcp.WithDescription("Run every eval and return a JSON report. Pass `filter` to narrow by substring on the eval id. Static + hook levels are implemented; agent level is reserved for 2.1."),
 			mcp.WithString("filter",
 				mcp.Description("Substring filter on eval ids. Empty = all."),
 			),

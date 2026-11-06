@@ -73,9 +73,6 @@ func (s *server) handleActionNewPrimitive(w http.ResponseWriter, r *http.Request
 	}
 
 	args := []string{"new", kind, id}
-	if sensorKind := strings.TrimSpace(r.FormValue("sensor_kind")); kind == "sensor" && sensorKind != "" {
-		args = append(args, "--kind", sensorKind)
-	}
 
 	ctx, cancel := context.WithTimeout(r.Context(), 10*time.Second)
 	defer cancel()
@@ -88,7 +85,7 @@ func (s *server) handleActionNewPrimitive(w http.ResponseWriter, r *http.Request
 	// Refresh INDEX.json so the new primitive shows up.
 	_, _ = runKeystone(ctx, s.projectDir, "index", "--dir", s.projectDir)
 
-	htmxRedirect(w, r, "/primitives/"+kind+"/"+id)
+	htmxRedirect(w, r, "/charter/primitives/"+kind+"/"+id)
 }
 
 // -- delete primitive ----------------------------------------------

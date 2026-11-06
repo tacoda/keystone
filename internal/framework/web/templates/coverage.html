@@ -3,7 +3,7 @@
 {{define "main"}}
 <section class="card">
   <h1>charter coverage</h1>
-  <p class="muted">Which project files a guide governs, and which are <em>uncharted</em> — matched by no guide's globs, so the agent runs there with no ambient rule. Generated, vendored, and hidden trees are skipped.</p>
+  <p class="muted">Which project files a rule governs, and which are <em>uncharted</em> — matched by no rule's <code>paths:</code>, so the agent runs there with no ambient rule. Generated, vendored, and hidden trees are skipped.</p>
   {{if .Error}}
   <p class="muted">coverage error: {{.Error}}</p>
   {{else}}
@@ -24,7 +24,7 @@
     </tbody>
   </table>
   {{else}}
-  <p class="muted">every scanned file is governed by a guide.</p>
+  <p class="muted">every scanned file is governed by a rule.</p>
   {{end}}
   {{end}}
 </section>

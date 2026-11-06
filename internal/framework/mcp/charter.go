@@ -28,7 +28,7 @@ func registerCharterViews(s *server.MCPServer, projectDir string) {
 func registerConformanceTool(s *server.MCPServer, projectDir string) {
 	s.AddTool(
 		mcp.NewTool("keystone_charter_conformance",
-			mcp.WithDescription("Score the charter-conformance rubric: cascade integrity, frontmatter validity, guide↔corpus pairing, and coverage — each PASS/PARTIAL/FAIL — with an overall verdict (CONFORMANT | DRIFTING | NON-CONFORMANT)."),
+			mcp.WithDescription("Score the charter-conformance rubric: cascade integrity, frontmatter validity, rule↔reference pairing, and coverage — each PASS/PARTIAL/FAIL — with an overall verdict (CONFORMANT | DRIFTING | NON-CONFORMANT)."),
 		),
 		func(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 			rub, err := charter.Conformance(projectDir, kconfig.DefaultAgentsRoot)
@@ -47,8 +47,8 @@ func registerConformanceTool(s *server.MCPServer, projectDir string) {
 func registerExplainTool(s *server.MCPServer, projectDir string) {
 	s.AddTool(
 		mcp.NewTool("keystone_explain",
-			mcp.WithDescription("Explain a primitive by id: its kind, how/when it activates (a guide's globs, a sensor's on:, a skill's triggers, …), what it links to, and where it projects. Optionally narrow by kind."),
-			mcp.WithString("id", mcp.Required(), mcp.Description("Primitive id (e.g. 'keystone:verify', 'guides/idioms/go/stdlib-first').")),
+			mcp.WithDescription("Explain a primitive by id: its kind, how/when it activates (a rule's paths:, a hook's event:, a skill's description, …), what it links to, and where it projects. Optionally narrow by kind."),
+			mcp.WithString("id", mcp.Required(), mcp.Description("Primitive id (e.g. 'keystone:verify', 'idioms/go/stdlib-first').")),
 			mcp.WithString("kind", mcp.Description("Narrow to this kind when an id is shared across kinds.")),
 		),
 		func(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
@@ -109,7 +109,7 @@ func registerSignalListTool(s *server.MCPServer, projectDir string) {
 func registerCoverageTool(s *server.MCPServer, projectDir string) {
 	s.AddTool(
 		mcp.NewTool("keystone_charter_coverage",
-			mcp.WithDescription("Report charter coverage: how many project source files a guide governs vs. uncharted (matched by no guide's globs), grouped by top-level region. Surfaces where the agent runs with no ambient rule."),
+			mcp.WithDescription("Report charter coverage: how many project source files a rule governs vs. uncharted (matched by no rule's paths:), grouped by top-level region. Surfaces where the agent runs with no ambient rule."),
 		),
 		func(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 			res, err := charter.Coverage(projectDir, kconfig.DefaultAgentsRoot)
