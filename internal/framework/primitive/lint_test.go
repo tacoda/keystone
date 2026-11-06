@@ -269,3 +269,14 @@ func TestLint_TagsKebabCase(t *testing.T) {
 		t.Errorf("expected 2 kebab-case errors, got %d (all findings: %+v)", errs, findings)
 	}
 }
+
+// TestLint_HookWithRunNoMode — a hook with run: and no mode: is a
+// computational check (as hook fire treats it), so it needs no returns:.
+func TestLint_HookWithRunNoMode(t *testing.T) {
+	p := Primitive{Frontmatter: Frontmatter{Kind: "hook", ID: "vet", Description: "x", Event: "Stop", Run: "go vet ./..."}, Path: ".agents/hooks/vet.md"}
+	for _, f := range Lint([]Primitive{p}) {
+		if f.Severity == FindingError {
+			t.Errorf("unexpected error: %s", f)
+		}
+	}
+}

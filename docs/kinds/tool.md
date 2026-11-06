@@ -48,7 +48,7 @@ The body explains what the tool does and when the agent should call it instead o
 | `args` | no | A list of `name`, `type`, `required`, and `description`. A bare string is short for `name`. |
 | `event` | no | A signal that also fires the tool, as a side effect. |
 
-`keystone lint` reports an error when `run` is missing or when `transport` has another value. Lint also accepts `http`, but no code serves an `http` tool, so don't use it.
+`keystone lint` reports an error when `run` is missing or when `transport` has another value. A 4.x `http` tool gets a warning: it runs like a `cli` tool, so set `transport: cli`.
 
 ## How the handler runs
 

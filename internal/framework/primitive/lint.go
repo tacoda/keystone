@@ -195,8 +195,17 @@ func lintActionKinds(p Primitive, add func(FindingSeverity, string)) {
 // sensor fires a `run:` check at its gate; an inferential sensor is a review
 // dispatched as an agent and must declare a `returns:` verdict schema (its
 // body is the review prompt — no separate `agent:` needed).
+// isComputationalHook: `mode: computational`, or no mode and a `run:`, which
+// is how HookFire runs it.
+func isComputationalHook(p Primitive) bool {
+	if p.Mode != "" {
+		return p.Mode == "computational"
+	}
+	return strings.TrimSpace(p.Run) != ""
+}
+
 func lintSensorContract(p Primitive, add func(FindingSeverity, string)) {
-	if p.Mode == "computational" {
+	if isComputationalHook(p) {
 		if strings.TrimSpace(p.Run) == "" {
 			add(FindingError, "computational hook missing `run:` — the check command to fire at the gate")
 		}
@@ -232,13 +241,15 @@ func lintGuideTier(p Primitive, add func(FindingSeverity, string)) {
 
 // lintToolContract enforces a tool's handler + transport. A tool is an
 // author-defined external callable: it needs a `run:` handler and a
-// `transport:` of cli | http | mcp | plugin (empty defaults to cli). A
+// `transport:` of cli | mcp | plugin (empty defaults to cli; 4.x http warns). A
 // tool fires on-demand, or as a side-effect when it declares `on:`.
 func lintToolContract(p Primitive, add func(FindingSeverity, string)) {
 	switch p.Transport {
-	case "", "cli", "http", "mcp", "plugin":
+	case "", "cli", "mcp", "plugin":
+	case "http": // 4.x; still readable (migrations iron law 6)
+		add(FindingWarning, "tool transport `http` runs like `cli` in 5.0 (its run: handler makes the call); set `transport: cli`")
 	default:
-		add(FindingError, fmt.Sprintf("tool transport %q invalid (cli | http | mcp | plugin)", p.Transport))
+		add(FindingError, fmt.Sprintf("tool transport %q invalid (cli | mcp | plugin)", p.Transport))
 	}
 	if strings.TrimSpace(p.Run) == "" {
 		add(FindingError, "tool missing `run:` — the handler the agent invokes")

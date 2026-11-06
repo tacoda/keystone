@@ -4,10 +4,12 @@ import (
 	"fmt"
 	"io/fs"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/spf13/cobra"
 
+	"github.com/tacoda/keystone/internal/framework/config"
 	"github.com/tacoda/keystone/internal/framework/migrations"
 )
 
@@ -29,7 +31,7 @@ var rootCmd = &cobra.Command{
 }
 
 // warnIfPendingMigrations prints a one-line stderr warning when the
-// install at the current working directory has migrations the registry
+// install containing the current working directory has migrations the registry
 // knows about but that the lockfile hasn't recorded as applied. Never
 // returns an error — the warning is advisory; commands proceed normally
 // (per the migrations no-breaking-changes invariant).
@@ -37,6 +39,20 @@ var rootCmd = &cobra.Command{
 // Skips migrate / options / version / help / completion to avoid
 // confusing or duplicate output during the commands that already speak
 // to this state.
+// projectRoot is the nearest directory at or above dir that holds a
+// keystone.json, so a command run from a subdirectory reads the right
+// lockfile.
+func projectRoot(dir string) (string, bool) {
+	for d := dir; ; d = filepath.Dir(d) {
+		if _, err := os.Stat(filepath.Join(d, config.ProjectConfigFile)); err == nil {
+			return d, true
+		}
+		if filepath.Dir(d) == d {
+			return "", false
+		}
+	}
+}
+
 func warnIfPendingMigrations(cmd *cobra.Command, _ []string) error {
 	switch cmd.Name() {
 	case "migrate", "options", "version", "help", "completion", "keystone":
@@ -46,7 +62,11 @@ func warnIfPendingMigrations(cmd *cobra.Command, _ []string) error {
 	if err != nil {
 		return nil
 	}
-	applied := readAppliedTolerant(cwd)
+	root, ok := projectRoot(cwd)
+	if !ok {
+		return nil // not inside a keystone project: nothing to migrate
+	}
+	applied := readAppliedTolerant(root)
 	pending := migrations.Pending(applied)
 	if len(pending) == 0 {
 		return nil

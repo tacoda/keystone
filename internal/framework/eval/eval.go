@@ -342,9 +342,9 @@ func runSensors(ctx context.Context, projectDir string, s Spec, r *Result) {
 			failed = true
 			continue
 		}
-		cmd := extractSensorCommand(filepath.Join(projectDir, p.Path))
+		cmd := hookCommand(projectDir, p)
 		if cmd == "" {
-			r.Messages = append(r.Messages, fmt.Sprintf("✗ sensor %q has no shell command block", want.ID))
+			r.Messages = append(r.Messages, fmt.Sprintf("✗ hook %q has no run: (or 4.x command block)", want.ID))
 			failed = true
 			continue
 		}
@@ -372,9 +372,18 @@ func runSensors(ctx context.Context, projectDir string, s Spec, r *Result) {
 	}
 }
 
-// extractSensorCommand pulls the first fenced ``` block out of a
-// sensor body. Sensors author the command inline; this is the
-// extraction contract we agree on.
+// hookCommand is the command a hook runs: its `run:`, the same one
+// `keystone hook fire` runs. A 4.x sensor that wrote its command inline
+// falls back to the first fenced block in its body.
+func hookCommand(projectDir string, p primitive.Primitive) string {
+	if run := strings.TrimSpace(p.Run); run != "" {
+		return run
+	}
+	return extractSensorCommand(filepath.Join(projectDir, p.Path))
+}
+
+// extractSensorCommand pulls the first fenced ``` block out of a 4.x
+// sensor body.
 func extractSensorCommand(path string) string {
 	body, err := os.ReadFile(path)
 	if err != nil {
@@ -398,7 +407,7 @@ func extractSensorCommand(path string) string {
 }
 
 func runShell(ctx context.Context, dir, cmdline string) (string, int) {
-	cmd := exec.CommandContext(ctx, "sh", "-c", cmdline)
+	cmd := exec.CommandContext(ctx, "bash", "-c", cmdline) // as keystone hook fire runs it
 	cmd.Dir = dir
 	out, err := cmd.CombinedOutput()
 	exit := 0
