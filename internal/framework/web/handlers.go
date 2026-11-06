@@ -130,7 +130,7 @@ func (s *server) handlePrimitivesDetail(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 	for _, p := range primitives {
-		if p.Kind == kind && p.ID == id {
+		if primitive.IsKind(p.Kind, kind) && p.ID == id {
 			body, err := os.ReadFile(filepath.Join(s.projectDir, p.Path))
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -173,12 +173,12 @@ func (s *server) handlePrimitivesFragment(w http.ResponseWriter, r *http.Request
 func filterPrimitives(in []primitive.Primitive, kind, glob string, tags []string) []primitive.Primitive {
 	out := in[:0:0]
 	for _, p := range in {
-		if kind != "" && p.Kind != kind {
+		if kind != "" && !primitive.IsKind(p.Kind, kind) {
 			continue
 		}
 		if glob != "" {
 			match := false
-			for _, g := range p.Globs {
+			for _, g := range p.Paths {
 				if g == glob {
 					match = true
 					break

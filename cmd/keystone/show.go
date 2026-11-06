@@ -108,7 +108,7 @@ type showView struct {
 	Phase        string                  `json:"phase,omitempty"`
 	Tags         []string                `json:"tags,omitempty"`
 	Tools        []string                `json:"tools,omitempty"`
-	Globs        []string                `json:"globs,omitempty"`
+	Paths        []string                `json:"globs,omitempty"`
 	Triggers     []string                `json:"triggers,omitempty"`
 	Includes     []string                `json:"includes,omitempty"`
 	IncludedBy   []string                `json:"included_by,omitempty"`
@@ -129,7 +129,7 @@ func buildShowView(target primitive.Primitive, all []primitive.Primitive) showVi
 		Phase:        target.Phase,
 		Tags:         target.Tags,
 		Tools:        target.Tools,
-		Globs:        target.Globs,
+		Paths:        target.Paths,
 		Triggers:     target.Triggers,
 		Includes:     target.Includes,
 		Traces:       target.Corpus,
@@ -167,7 +167,7 @@ func buildShowView(target primitive.Primitive, all []primitive.Primitive) showVi
 // reflects what the agent actually sees.
 func findPrimitive(primitives []primitive.Primitive, kind, id string) (primitive.Primitive, bool) {
 	for _, p := range primitives {
-		if p.Kind == kind && p.ID == id {
+		if primitive.IsKind(p.Kind, kind) && p.ID == id {
 			return p, true
 		}
 	}
@@ -208,9 +208,9 @@ func printShowText(w *os.File, v showView) {
 			fmt.Fprintf(w, "    - %s\n", t)
 		}
 	}
-	if len(v.Globs) > 0 {
+	if len(v.Paths) > 0 {
 		fmt.Fprintln(w, "\n  globs:")
-		for _, g := range v.Globs {
+		for _, g := range v.Paths {
 			fmt.Fprintf(w, "    - %s\n", g)
 		}
 	}

@@ -1,6 +1,6 @@
 # 0010: Constraints and capabilities, standard vocabulary (5.0)
 
-**Status:** Proposed
+**Status:** Accepted
 **Date:** 2026-11-05
 
 This ADR is the amendment record for the 5.0 charter changes (see
@@ -126,5 +126,5 @@ command as a user-invoked skill shim.
 
 ## Provenance
 
-Proposed by the maintainer (solo stage). Becomes Accepted when Phase 0 of the
-plan closes: every host-matrix cell sourced or marked unsupported.
+Proposed and ratified by the maintainer (solo stage), 2026-11-05, after Phase 0
+sourced every host-matrix cell (`docs/hosts.md`).

@@ -148,7 +148,7 @@ func filterByKind(prims []primitive.Primitive, kind string) []primitive.Primitiv
 	}
 	var out []primitive.Primitive
 	for _, p := range prims {
-		if p.Kind == kind {
+		if primitive.IsKind(p.Kind, kind) {
 			out = append(out, p)
 		}
 	}

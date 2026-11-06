@@ -49,72 +49,111 @@ import "strings"
 // primitive's contract is, not how it's stored or served.
 type Kind string
 
+// 5.0 vocabulary (ADR 0010). Kinds use the names hosts already use, and
+// every kind belongs to one of two categories: a constraint limits, gates,
+// or verifies what the agent does; a capability adds something it can do.
 const (
-	// 3.0 canonical vocabulary. A keystone primitive is to an agent
-	// primitive as an ActiveRecord model is to a DB table: same concept,
-	// plus validations / associations / conveniences the bare host file
-	// lacks. The keystone names (guide/sensor/playbook) stay where the
-	// abstraction maps 1-to-many to host mechanisms by `mode:`; the host
-	// names (command/skill/agent) stay where the concept is identical.
-	KindGuide    Kind = "guide"    // ambient, glob-scoped directive → rule (inferential) | LSP (computational)
-	KindSensor   Kind = "sensor"   // a check that reacts to a signal/phase → verdict (exit/HTTP status); gates
-	KindCommand  Kind = "command"  // a unit of work / lifecycle step (was action)
-	KindSkill    Kind = "skill"    // composed capability
-	KindPlaybook Kind = "playbook" // composed sequence of commands with gates
-	KindAgent    Kind = "agent"    // a role spawned as a subagent (was persona/subagent)
-	KindPattern  Kind = "pattern"  // a recurring recipe, in prose; on-demand
-	KindPosture  Kind = "posture"  // tool/permission posture → settings.json permissions
-	KindTool     Kind = "tool"     // author-defined callable → keystone MCP server registration
-	KindDocument Kind = "document" // governed output doc; `type:` carries the subtype (e.g. feature)
+	// Constraints.
+	KindRule       Kind = "rule"       // ambient, path-scoped directive (was guide)
+	KindReference  Kind = "reference"  // the why behind a rule, loaded on demand (was corpus); keystone extension
+	KindHook       Kind = "hook"       // a check that reacts to an event → verdict; gates (was sensor)
+	KindPermission Kind = "permission" // allow/ask/deny tool rules (was posture)
+	KindEval       Kind = "eval"       // measures whether rules change behavior; keystone extension
 
-	// Standalone primitives.
-	KindCorpus Kind = "corpus" // deep reasoning, loaded on-demand
-	KindEval   Kind = "eval"
-	// `source` is no longer an authorable kind: external-system access is a
-	// `tool` (transport: cli=curl / mcp).
+	// Capabilities.
+	KindSkill    Kind = "skill"    // Agent Skills spec skill (absorbs playbook, pattern)
+	KindCommand  Kind = "command"  // user-invoked unit of work
+	KindSubagent Kind = "subagent" // a role the main agent delegates to (was agent)
+	KindTool     Kind = "tool"     // author-defined callable → keystone MCP server
+	KindDocument Kind = "document" // governed output doc; `type:` carries the subtype; keystone extension
 
-	// Composition primitive. A concern is a reusable fragment of
-	// frontmatter + body that other primitives pull in via the
-	// `includes:` field. It also routes to corpus (carries `corpus:`
-	// refs) without inlining the reasoning. Concerns are leaves and the
-	// host primitive always wins on scalar fields. See compose.go.
+	// KindConcern is retired in 5.0. It stays recognized only so 4.x trees
+	// keep composing until `keystone migrate` inlines every concern into
+	// its consumers. Not in KnownKinds; not authorable.
 	KindConcern Kind = "concern"
 )
 
-// KnownKinds is the closed set the indexer and linter validate against.
-// `rule` is intentionally absent — it is a projection-target name, not an
-// authorable kind (author a `guide`).
+// Category splits the charter into its two halves (ADR 0010).
+type Category string
+
+const (
+	CategoryConstraint Category = "constraint"
+	CategoryCapability Category = "capability"
+)
+
+// KnownKinds is the closed set the indexer and linter validate against,
+// constraints first.
 var KnownKinds = []Kind{
-	KindGuide, KindSensor, KindCommand, KindSkill, KindPlaybook,
-	KindAgent, KindPattern, KindPosture, KindTool, KindDocument,
-	KindCorpus, KindEval, KindConcern,
+	KindRule, KindReference, KindHook, KindPermission, KindEval,
+	KindSkill, KindCommand, KindSubagent, KindTool, KindDocument,
+}
+
+var kindCategory = map[Kind]Category{
+	KindRule: CategoryConstraint, KindReference: CategoryConstraint,
+	KindHook: CategoryConstraint, KindPermission: CategoryConstraint,
+	KindEval:  CategoryConstraint,
+	KindSkill: CategoryCapability, KindCommand: CategoryCapability,
+	KindSubagent: CategoryCapability, KindTool: CategoryCapability,
+	KindDocument: CategoryCapability,
+}
+
+// CategoryOf returns the category of k, or "" for an unknown kind.
+func CategoryOf(k Kind) Category { return kindCategory[k] }
+
+// legacyKinds maps every 4.x kind name to its 5.0 kind. Walk normalizes
+// legacy names so a 4.x tree keeps working until it is migrated; lint
+// warns on each one.
+var legacyKinds = map[string]Kind{
+	"guide":    KindRule,
+	"corpus":   KindReference,
+	"sensor":   KindHook,
+	"posture":  KindPermission,
+	"agent":    KindSubagent,
+	"playbook": KindSkill,
+	"pattern":  KindSkill,
+}
+
+// NormalizeKind maps a 4.x kind name to its 5.0 kind. legacy reports
+// whether a rename happened. Unknown names pass through unchanged.
+func NormalizeKind(name string) (k Kind, legacy bool) {
+	if nk, ok := legacyKinds[name]; ok {
+		return nk, true
+	}
+	return Kind(name), false
 }
 
 // canonicalDirKind maps a canonical charter subdirectory to the kind it
 // holds. Convention over configuration: a file's directory is its kind
 // declaration, so `kind:` may be omitted from frontmatter and inferred.
-// No `rules/` entry — `rule` is not a kind.
+// The 4.x directory names stay mapped until the 5.0 migration moves them.
 var canonicalDirKind = map[string]Kind{
-	"guides":    KindGuide,
-	"sensors":   KindSensor,
-	"commands":  KindCommand,
-	"skills":    KindSkill,
-	"playbooks": KindPlaybook,
-	"agents":    KindAgent,
-	"patterns":  KindPattern,
-	"posture":   KindPosture,
-	"tools":     KindTool,
-	"documents": KindDocument,
-	"corpus":    KindCorpus,
+	"rules":       KindRule,
+	"references":  KindReference,
+	"hooks":       KindHook,
+	"permissions": KindPermission,
+	"evals":       KindEval,
+	"skills":      KindSkill,
+	"commands":    KindCommand,
+	"agents":      KindSubagent,
+	"tools":       KindTool,
+	"documents":   KindDocument,
+
+	// 4.x directories.
+	"guides":    KindRule,
+	"corpus":    KindReference,
+	"sensors":   KindHook,
+	"posture":   KindPermission,
+	"playbooks": KindSkill,
+	"patterns":  KindSkill,
 	"concerns":  KindConcern,
-	"evals":     KindEval,
 }
 
-// resolveKind returns the explicit kind when set, else the kind inferred
-// from the path. Convention over configuration with an explicit override.
+// resolveKind returns the explicit kind (normalized from any 4.x name)
+// when set, else the kind inferred from the path.
 func resolveKind(explicit, relPath string) string {
 	if strings.TrimSpace(explicit) != "" {
-		return explicit
+		k, _ := NormalizeKind(explicit)
+		return string(k)
 	}
 	return string(InferKind(relPath))
 }
@@ -166,7 +205,10 @@ type Frontmatter struct {
 	ID          string `yaml:"id"          json:"id"`
 	Description string `yaml:"description" json:"description"`
 
-	Globs    []string `yaml:"globs,omitempty"    json:"globs,omitempty"`
+	// Paths scopes a rule to the files it governs (glob list). The YAML
+	// key is `paths:`, the key Claude Code and Cline read; the 4.x key
+	// `globs:` is accepted as an alias.
+	Paths    []string `yaml:"paths,omitempty"    json:"paths,omitempty"`
 	Phase    string   `yaml:"phase,omitempty"    json:"phase,omitempty"`
 	Triggers []string `yaml:"triggers,omitempty" json:"triggers,omitempty"`
 	Tools    []string `yaml:"tools,omitempty"    json:"tools,omitempty"`
@@ -180,13 +222,13 @@ type Frontmatter struct {
 	// computational.
 	Mode string `yaml:"mode,omitempty" json:"mode,omitempty"`
 
-	// Event is the signal or host phase a primitive subscribes to via its
-	// `on:` field — a sensor (check), tool (side-effect), or agent (review)
-	// self-declares what fires it, the way a skill declares `triggers:`.
-	// A host phase (PreToolUse…) bridges into the host; a signal
-	// (pre-verify, on-gate, a custom name) is keystone-fired. The YAML key
-	// is `on:`; `event:` is accepted as a back-compat alias.
-	Event string `yaml:"on,omitempty" json:"on,omitempty"`
+	// Event is the host event or signal a primitive subscribes to — a hook
+	// (check), tool (side-effect), or subagent (review) self-declares what
+	// fires it. A host event (PreToolUse…) bridges into the host; a signal
+	// (pre-verify, on-gate, a custom name) is a custom hook event that
+	// keystone fires. The YAML key is `event:`; the 4.x key `on:` is
+	// accepted as an alias.
+	Event string `yaml:"event,omitempty" json:"event,omitempty"`
 
 	// Run is the shell command/script a computational hook/sensor/tool
 	// executes. NOT the `command` kind — that is an agent-driven unit of
@@ -311,9 +353,17 @@ type Index struct {
 	Generated  string              `json:"generated"`
 	Primitives []Primitive         `json:"primitives"`
 	ByKind     map[string][]string `json:"by_kind"`
-	ByGlob     map[string][]string `json:"by_glob,omitempty"`
+	ByCategory map[string][]string `json:"by_category"`
+	ByPath     map[string][]string `json:"by_path,omitempty"`
 }
 
 // IndexVersion is the schema version emitted into Index.Version. Bumped
 // when the descriptor shape changes in a way that consumers must notice.
-const IndexVersion = "2.0"
+const IndexVersion = "5.0"
+
+// IsKind reports whether a normalized kind matches a requested kind, which
+// may be a 4.x name typed by a user (`--kind sensor` finds hooks).
+func IsKind(have, want string) bool {
+	k, _ := NormalizeKind(want)
+	return have == string(k)
+}

@@ -16,7 +16,7 @@ import (
 //     declare its own `includes:` — that's reported as a ComposeError
 //     and the primitive is returned with composition skipped (so the
 //     indexer can still surface the structural issue downstream).
-//   - List fields union (deduped, stable-ordered): Globs, Triggers,
+//   - List fields union (deduped, stable-ordered): Paths, Triggers,
 //     Tools, Tags, Traces, Deps, HostTriggers. The host primitive's
 //     own values come LAST in the merged list so a re-listed value
 //     can demote a concern-contributed one.
@@ -139,7 +139,7 @@ func composeOne(host Primitive, concerns map[string]Primitive) (Primitive, []Com
 			})
 			continue
 		}
-		globs = append(globs, c.Globs...)
+		globs = append(globs, c.Paths...)
 		triggers = append(triggers, c.Triggers...)
 		tools = append(tools, c.Tools...)
 		tags = append(tags, c.Tags...)
@@ -151,7 +151,7 @@ func composeOne(host Primitive, concerns map[string]Primitive) (Primitive, []Com
 	// Append host's own (declared) values last; dedupe each list
 	// preserving the FIRST occurrence so concern values stay ahead
 	// when the host hasn't re-listed them.
-	merged.Globs = dedupeStable(append(globs, host.Globs...))
+	merged.Paths = dedupeStable(append(globs, host.Paths...))
 	merged.Triggers = dedupeStable(append(triggers, host.Triggers...))
 	merged.Tools = dedupeStable(append(tools, host.Tools...))
 	merged.Tags = dedupeStable(append(tags, host.Tags...))

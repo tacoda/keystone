@@ -130,13 +130,13 @@ func lintOne(p Primitive, known map[Kind]bool, exists map[string]bool) []Finding
 	return out
 }
 
-// lintKindAndMode validates the `kind:` value (closed set; `rule` is rejected
-// with a guide-pointing hint) and the cross-cutting `mode:` value.
+// lintKindAndMode validates the `kind:` value (closed set) and the
+// cross-cutting `mode:` value.
 func lintKindAndMode(p Primitive, known map[Kind]bool, add func(FindingSeverity, string)) {
 	if strings.TrimSpace(p.Kind) == "" {
 		add(FindingError, "missing required field `kind`")
-	} else if p.Kind == "rule" {
-		add(FindingError, "rule is not a kind — author a guide (rule is a projection-target name)")
+	} else if Kind(p.Kind) == KindConcern {
+		add(FindingWarning, "concern is retired in 5.0 — `keystone migrate` inlines it into its consumers")
 	} else if !known[Kind(p.Kind)] {
 		add(FindingError, fmt.Sprintf("unknown kind %q (allowed: %s)", p.Kind, knownKindList()))
 	}
@@ -164,15 +164,11 @@ func lintIDAndDescription(p Primitive, add func(FindingSeverity, string)) {
 // lintKindFields validates the per-kind required fields and contracts.
 func lintKindFields(p Primitive, add func(FindingSeverity, string)) {
 	switch Kind(p.Kind) {
-	case KindGuide:
+	case KindRule:
 		lintGuideKind(p, add)
-	case KindSkill:
-		if len(p.Triggers) == 0 {
-			add(FindingError, "skill missing `triggers:` — a skill with no triggers cannot fire")
-		}
-	case KindAgent:
+	case KindSubagent:
 		if len(p.Tools) == 0 {
-			add(FindingError, "agent missing `tools:` — declare the tool allow-list explicitly")
+			add(FindingError, "subagent missing `tools:` — declare the tool allow-list explicitly")
 		}
 	default:
 		lintActionKinds(p, add)
@@ -183,7 +179,7 @@ func lintKindFields(p Primitive, add func(FindingSeverity, string)) {
 // the dispatch switch to keep lintKindFields a flat router.
 func lintActionKinds(p Primitive, add func(FindingSeverity, string)) {
 	switch Kind(p.Kind) {
-	case KindSensor:
+	case KindHook:
 		lintSensorContract(p, add)
 	case KindTool:
 		lintToolContract(p, add)
@@ -197,12 +193,12 @@ func lintActionKinds(p Primitive, add func(FindingSeverity, string)) {
 func lintSensorContract(p Primitive, add func(FindingSeverity, string)) {
 	if p.Mode == "computational" {
 		if strings.TrimSpace(p.Run) == "" {
-			add(FindingError, "computational sensor missing `run:` — the check command to fire at the gate")
+			add(FindingError, "computational hook missing `run:` — the check command to fire at the gate")
 		}
 		return
 	}
 	if strings.TrimSpace(p.Returns) == "" {
-		add(FindingError, "inferential sensor missing `returns:` — declare the structured-result verdict schema")
+		add(FindingError, "inferential hook missing `returns:` — declare the structured-result verdict schema")
 	}
 }
 
@@ -212,7 +208,7 @@ func lintSensorContract(p Primitive, add func(FindingSeverity, string)) {
 func lintGuideKind(p Primitive, add func(FindingSeverity, string)) {
 	lintGuideTier(p, add)
 	if p.Mode == "computational" && strings.TrimSpace(p.Run) == "" {
-		add(FindingError, "computational guide missing `run:` — the LSP/formatter command to fire")
+		add(FindingError, "computational rule missing `run:` — the LSP/formatter command to fire")
 	}
 }
 
@@ -222,7 +218,7 @@ func lintGuideTier(p Primitive, add func(FindingSeverity, string)) {
 	switch p.Tier {
 	case "", string(TierIronLaw), string(TierGoldenRule), string(TierPreference):
 	default:
-		add(FindingError, fmt.Sprintf("guide tier %q invalid (iron-law | golden-rule | preference)", p.Tier))
+		add(FindingError, fmt.Sprintf("rule tier %q invalid (iron-law | golden-rule | preference)", p.Tier))
 	}
 }
 
@@ -251,7 +247,7 @@ func lintTagsAndGlobs(p Primitive, add func(FindingSeverity, string)) {
 			add(FindingError, fmt.Sprintf("tag %q is not kebab-case (lowercase letters, digits, hyphens; must start with a letter)", t))
 		}
 	}
-	for _, g := range p.Globs {
+	for _, g := range p.Paths {
 		if strings.TrimSpace(g) == "" {
 			add(FindingError, "globs entry is empty — remove or fix")
 		}

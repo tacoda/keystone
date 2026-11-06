@@ -243,7 +243,7 @@ func runStatic(projectDir string, s Spec, r *Result) {
 	}
 	byID := map[string]primitive.Primitive{}
 	for _, p := range primitives {
-		if p.Kind == "guide" || p.Kind == "rule" {
+		if p.Kind == "rule" {
 			byID[p.Kind+"/"+p.ID] = p
 			byID[p.ID] = p
 		}
@@ -257,7 +257,7 @@ func runStatic(projectDir string, s Spec, r *Result) {
 			failed = true
 			continue
 		}
-		if !globsHit(p.Globs, s.Expected.TouchedFiles) {
+		if !globsHit(p.Paths, s.Expected.TouchedFiles) {
 			r.Messages = append(r.Messages, fmt.Sprintf("✗ rules_fired: %q did NOT match any touched file", id))
 			failed = true
 			continue
@@ -269,7 +269,7 @@ func runStatic(projectDir string, s Spec, r *Result) {
 		if !ok {
 			continue // missing means it can't fire — silent by default
 		}
-		if globsHit(p.Globs, s.Expected.TouchedFiles) {
+		if globsHit(p.Paths, s.Expected.TouchedFiles) {
 			r.Messages = append(r.Messages, fmt.Sprintf("✗ rules_silent: %q SHOULD NOT have activated", id))
 			failed = true
 			continue
@@ -330,7 +330,7 @@ func runSensors(ctx context.Context, projectDir string, s Spec, r *Result) {
 	}
 	byID := map[string]primitive.Primitive{}
 	for _, p := range primitives {
-		if p.Kind == "sensor" {
+		if p.Kind == "hook" {
 			byID[p.ID] = p
 		}
 	}

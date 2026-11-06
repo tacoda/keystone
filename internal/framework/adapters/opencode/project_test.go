@@ -32,12 +32,12 @@ func TestProjectAgents_MirrorsSkillsAgentsCommands(t *testing.T) {
 	prims := []primitive.Primitive{
 		writeSource(t, root, "skill", "foo", ".charter/skills/foo/SKILL.md", "skill body\n"),
 		writeSource(t, root, "command", "verify", ".charter/commands/verify.md", "command body\n"),
-		writeSource(t, root, "agent", "reviewer", ".charter/agents/reviewer.md", "agent body\n"),
+		writeSource(t, root, "subagent", "reviewer", ".charter/agents/reviewer.md", "agent body\n"),
 	}
 	// A globbed guide projects to .opencode/rules/ as a rule-shim.
-	guide := writeSource(t, root, "guide", "guides/idioms/go/stdlib-first",
+	guide := writeSource(t, root, "rule", "guides/idioms/go/stdlib-first",
 		".charter/guides/idioms/go/stdlib-first.md", "# Stdlib first\n\n## IRON LAW\n- x\n")
-	guide.Globs = []string{"**/*.go"}
+	guide.Paths = []string{"**/*.go"}
 	prims = append(prims, guide)
 
 	res, err := ProjectAgents(root, prims)

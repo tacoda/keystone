@@ -82,7 +82,7 @@ func HookFire(p Primitive) (event string, computational, ok bool) {
 	if strings.TrimSpace(p.Run) != "" {
 		return event, true, true
 	}
-	if strings.TrimSpace(p.Agent) != "" || Kind(p.Kind) == KindSensor {
+	if strings.TrimSpace(p.Agent) != "" || Kind(p.Kind) == KindHook {
 		return event, false, true
 	}
 	return "", false, false

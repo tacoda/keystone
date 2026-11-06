@@ -17,7 +17,7 @@ func find(t *testing.T, fs []Finding, severity FindingSeverity, msgContains stri
 
 func TestLint_RequiredFields(t *testing.T) {
 	ps := []Primitive{
-		{Frontmatter: Frontmatter{Kind: "guide", ID: "p/x"}},        // missing description
+		{Frontmatter: Frontmatter{Kind: "rule", ID: "p/x"}},         // missing description
 		{Frontmatter: Frontmatter{Kind: "skill", Description: "x"}}, // missing id
 		{Frontmatter: Frontmatter{ID: "x", Description: "x"}},       // missing kind
 	}
@@ -43,10 +43,10 @@ func TestLint_UnknownKind(t *testing.T) {
 	}
 }
 
-// TestLint_RetiredKindIsUnknown — the collapse/2.x kinds that 3.0 dropped
-// (action→command, persona/subagent→agent) are simply unknown.
+// TestLint_RetiredKindIsUnknown — the 2.x kinds that 3.0 dropped
+// (action, persona) are unknown to lint.
 func TestLint_RetiredKindIsUnknown(t *testing.T) {
-	for _, old := range []string{"action", "persona", "subagent"} {
+	for _, old := range []string{"action", "persona"} {
 		t.Run(old, func(t *testing.T) {
 			fs := Lint([]Primitive{{Frontmatter: Frontmatter{Kind: old, ID: "x", Description: "d"}}})
 			if !find(t, fs, FindingError, "unknown kind") {
@@ -56,12 +56,15 @@ func TestLint_RetiredKindIsUnknown(t *testing.T) {
 	}
 }
 
-// TestLint_RuleIsNotAKind — `rule` is a projection-target name, not an
-// authorable kind. Lint rejects it with a guide-pointing hint.
-func TestLint_RuleIsNotAKind(t *testing.T) {
-	fs := Lint([]Primitive{{Frontmatter: Frontmatter{Kind: "rule", ID: "x", Description: "d"}}})
-	if !find(t, fs, FindingError, "rule is not a kind") {
-		t.Errorf("expected rule-is-not-a-kind error, got %v", fs)
+// TestLint_ConcernWarnsUntilMigrated — a 4.x concern still composes, so
+// lint warns (with the fix) instead of failing the tree.
+func TestLint_ConcernWarnsUntilMigrated(t *testing.T) {
+	fs := Lint([]Primitive{{Frontmatter: Frontmatter{Kind: "concern", ID: "x", Description: "d"}}})
+	if !find(t, fs, FindingWarning, "keystone migrate") {
+		t.Errorf("expected migrate warning, got %v", fs)
+	}
+	if find(t, fs, FindingError, "") {
+		t.Errorf("concern must not error before migration, got %v", fs)
 	}
 }
 
@@ -69,12 +72,12 @@ func TestLint_RuleIsNotAKind(t *testing.T) {
 // golden-rule, or preference (empty = preference default).
 func TestLint_GuideTier(t *testing.T) {
 	for _, tier := range []string{"", "iron-law", "golden-rule", "preference"} {
-		fs := Lint([]Primitive{{Frontmatter: Frontmatter{Kind: "guide", ID: "p/x", Description: "d", Tier: tier}}})
+		fs := Lint([]Primitive{{Frontmatter: Frontmatter{Kind: "rule", ID: "p/x", Description: "d", Tier: tier}}})
 		if find(t, fs, FindingError, "tier") {
 			t.Errorf("tier %q: expected no tier error, got %v", tier, fs)
 		}
 	}
-	bad := Lint([]Primitive{{Frontmatter: Frontmatter{Kind: "guide", ID: "p/y", Description: "d", Tier: "critical"}}})
+	bad := Lint([]Primitive{{Frontmatter: Frontmatter{Kind: "rule", ID: "p/y", Description: "d", Tier: "critical"}}})
 	if !find(t, bad, FindingError, "tier") {
 		t.Errorf("expected invalid-tier error, got %v", bad)
 	}
@@ -99,11 +102,11 @@ func TestLint_ToolContract(t *testing.T) {
 
 // TestLint_ModeValue — `mode:` must be computational, inferential, or empty.
 func TestLint_ModeValue(t *testing.T) {
-	fs := Lint([]Primitive{{Frontmatter: Frontmatter{Kind: "guide", ID: "p/x", Description: "d", Mode: "bogus"}}})
+	fs := Lint([]Primitive{{Frontmatter: Frontmatter{Kind: "rule", ID: "p/x", Description: "d", Mode: "bogus"}}})
 	if !find(t, fs, FindingError, "mode") {
 		t.Errorf("expected invalid-mode error, got %v", fs)
 	}
-	clean := Lint([]Primitive{{Frontmatter: Frontmatter{Kind: "guide", ID: "p/y", Description: "d", Mode: "inferential"}}})
+	clean := Lint([]Primitive{{Frontmatter: Frontmatter{Kind: "rule", ID: "p/y", Description: "d", Mode: "inferential"}}})
 	if find(t, clean, FindingError, "mode") {
 		t.Errorf("did not expect a mode error for a valid mode, got %v", clean)
 	}
@@ -113,22 +116,22 @@ func TestLint_ModeValue(t *testing.T) {
 // `run:` check; inferential is a review needing a `returns:` verdict schema.
 func TestLint_SensorContract(t *testing.T) {
 	infMissing := Lint([]Primitive{{Frontmatter: Frontmatter{
-		Kind: "sensor", ID: "review", Description: "d", Mode: "inferential"}}})
+		Kind: "hook", ID: "review", Description: "d", Mode: "inferential"}}})
 	if !find(t, infMissing, FindingError, "returns") {
 		t.Errorf("expected inferential sensor to require returns, got %v", infMissing)
 	}
 	compMissing := Lint([]Primitive{{Frontmatter: Frontmatter{
-		Kind: "sensor", ID: "build", Description: "d", Mode: "computational"}}})
+		Kind: "hook", ID: "build", Description: "d", Mode: "computational"}}})
 	if !find(t, compMissing, FindingError, "run") {
 		t.Errorf("expected computational sensor to require run, got %v", compMissing)
 	}
 	cleanInf := Lint([]Primitive{{Frontmatter: Frontmatter{
-		Kind: "sensor", ID: "ok", Description: "d", Mode: "inferential", Returns: "findings"}}})
+		Kind: "hook", ID: "ok", Description: "d", Mode: "inferential", Returns: "findings"}}})
 	if HasErrors(cleanInf) {
 		t.Errorf("expected clean inferential sensor, got %v", cleanInf)
 	}
 	cleanComp := Lint([]Primitive{{Frontmatter: Frontmatter{
-		Kind: "sensor", ID: "build2", Description: "d", Mode: "computational", Run: "go test ./...", Event: "pre-verify"}}})
+		Kind: "hook", ID: "build2", Description: "d", Mode: "computational", Run: "go test ./...", Event: "pre-verify"}}})
 	if HasErrors(cleanComp) {
 		t.Errorf("expected clean computational sensor, got %v", cleanComp)
 	}
@@ -139,12 +142,12 @@ func TestLint_SensorContract(t *testing.T) {
 // sensor body is the review prompt — no separate agent: needed).
 func TestLint_SensorActionContract(t *testing.T) {
 	infMissing := Lint([]Primitive{{Frontmatter: Frontmatter{
-		Kind: "sensor", ID: "on-gate-review", Description: "d", Mode: "inferential", Event: "on-gate"}}})
+		Kind: "hook", ID: "on-gate-review", Description: "d", Mode: "inferential", Event: "on-gate"}}})
 	if !find(t, infMissing, FindingError, "returns") {
 		t.Errorf("expected inferential sensor to require returns, got %v", infMissing)
 	}
 	compMissing := Lint([]Primitive{{Frontmatter: Frontmatter{
-		Kind: "sensor", ID: "fmt", Description: "d", Mode: "computational", Event: "PostToolUse"}}})
+		Kind: "hook", ID: "fmt", Description: "d", Mode: "computational", Event: "PostToolUse"}}})
 	if !find(t, compMissing, FindingError, "run") {
 		t.Errorf("expected computational sensor to require run, got %v", compMissing)
 	}
@@ -152,8 +155,8 @@ func TestLint_SensorActionContract(t *testing.T) {
 
 func TestLint_DuplicateID(t *testing.T) {
 	ps := []Primitive{
-		{Frontmatter: Frontmatter{Kind: "guide", ID: "p/x", Description: "d"}, Path: "a.md"},
-		{Frontmatter: Frontmatter{Kind: "guide", ID: "p/x", Description: "d"}, Path: "b.md"},
+		{Frontmatter: Frontmatter{Kind: "rule", ID: "p/x", Description: "d"}, Path: "a.md"},
+		{Frontmatter: Frontmatter{Kind: "rule", ID: "p/x", Description: "d"}, Path: "b.md"},
 	}
 	fs := Lint(ps)
 	if !find(t, fs, FindingError, "duplicate") {
@@ -161,19 +164,20 @@ func TestLint_DuplicateID(t *testing.T) {
 	}
 }
 
-func TestLint_SkillRequiresTriggers(t *testing.T) {
+// TestLint_SkillNeedsNoTriggers — in 5.0 a skill activates on its
+// description (Agent Skills spec), so `triggers:` is no longer required.
+func TestLint_SkillNeedsNoTriggers(t *testing.T) {
 	ps := []Primitive{
-		{Frontmatter: Frontmatter{Kind: "skill", ID: "demo", Description: "d"}}, // no triggers
+		{Frontmatter: Frontmatter{Kind: "skill", ID: "demo", Description: "d"}},
 	}
-	fs := Lint(ps)
-	if !find(t, fs, FindingError, "skill missing `triggers:`") {
-		t.Errorf("expected skill-missing-triggers error, got %v", fs)
+	if fs := Lint(ps); len(fs) != 0 {
+		t.Errorf("expected clean skill without triggers, got %v", fs)
 	}
 }
 
 func TestLint_AgentRequiresTools(t *testing.T) {
 	ps := []Primitive{
-		{Frontmatter: Frontmatter{Kind: "agent", ID: "security-reviewer", Description: "d"}},
+		{Frontmatter: Frontmatter{Kind: "subagent", ID: "security-reviewer", Description: "d"}},
 	}
 	fs := Lint(ps)
 	if !find(t, fs, FindingError, "agent missing `tools:`") {
@@ -184,8 +188,8 @@ func TestLint_AgentRequiresTools(t *testing.T) {
 func TestLint_CorpusResolve(t *testing.T) {
 	// `corpus:` (was `traces:`) cites the reasoning; a dangling ref warns.
 	ps := []Primitive{
-		{Frontmatter: Frontmatter{Kind: "guide", ID: "p/x", Description: "d", Corpus: []string{"corpus/p/x", "corpus/missing"}}},
-		{Frontmatter: Frontmatter{Kind: "corpus", ID: "corpus/p/x", Description: "d"}},
+		{Frontmatter: Frontmatter{Kind: "rule", ID: "p/x", Description: "d", Corpus: []string{"corpus/p/x", "corpus/missing"}}},
+		{Frontmatter: Frontmatter{Kind: "reference", ID: "corpus/p/x", Description: "d"}},
 	}
 	fs := Lint(ps)
 	if !find(t, fs, FindingWarning, "corpus entry") {
@@ -231,11 +235,11 @@ func TestLint_HasErrors(t *testing.T) {
 
 func TestLint_Clean(t *testing.T) {
 	ps := []Primitive{
-		{Frontmatter: Frontmatter{Kind: "guide", ID: "p/x", Description: "Real description."}},
-		{Frontmatter: Frontmatter{Kind: "sensor", ID: "review", Description: "Real description.", Mode: "inferential", Agent: "reviewer", Returns: "findings"}},
-		{Frontmatter: Frontmatter{Kind: "sensor", ID: "on-gate", Description: "Real description.", Mode: "inferential", Event: "on-gate", Agent: "reviewer", Returns: "verdict"}},
+		{Frontmatter: Frontmatter{Kind: "rule", ID: "p/x", Description: "Real description."}},
+		{Frontmatter: Frontmatter{Kind: "hook", ID: "review", Description: "Real description.", Mode: "inferential", Agent: "reviewer", Returns: "findings"}},
+		{Frontmatter: Frontmatter{Kind: "hook", ID: "on-gate", Description: "Real description.", Mode: "inferential", Event: "on-gate", Agent: "reviewer", Returns: "verdict"}},
 		{Frontmatter: Frontmatter{Kind: "skill", ID: "demo", Description: "Real description.", Triggers: []string{"demo"}}},
-		{Frontmatter: Frontmatter{Kind: "agent", ID: "demo", Description: "Real description.", Tools: []string{"Read"}}},
+		{Frontmatter: Frontmatter{Kind: "subagent", ID: "demo", Description: "Real description.", Tools: []string{"Read"}}},
 		{Frontmatter: Frontmatter{Kind: "document", ID: "implementation-plan", Description: "Real description."}},
 	}
 	fs := Lint(ps)
@@ -248,7 +252,7 @@ func TestLint_TagsKebabCase(t *testing.T) {
 	prims := []Primitive{
 		{
 			Frontmatter: Frontmatter{
-				Kind: "guide", ID: "g1", Description: "x", Globs: []string{"x"},
+				Kind: "rule", ID: "g1", Description: "x", Paths: []string{"x"},
 				Tags: []string{"valid-tag", "Bad_Tag", "ALSO-BAD"},
 			},
 			Path: ".charter/guides/g1.md",

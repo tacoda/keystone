@@ -48,7 +48,7 @@ func TestBuildShowView_IncludedByReverseLookup(t *testing.T) {
 
 func TestBuildShowView_TracedByReverseLookup(t *testing.T) {
 	primitives := []primitive.Primitive{
-		{Frontmatter: primitive.Frontmatter{Kind: "corpus", ID: "corpus/security/owasp-top-10"}},
+		{Frontmatter: primitive.Frontmatter{Kind: "reference", ID: "corpus/security/owasp-top-10"}},
 		{Frontmatter: primitive.Frontmatter{
 			Kind: "rule", ID: "rules/process/security-review",
 			Corpus: []string{"corpus/security/owasp-top-10"},
@@ -65,7 +65,7 @@ func TestBuildShowView_TracedByReverseLookup(t *testing.T) {
 
 func TestBuildShowView_NotFound(t *testing.T) {
 	primitives := []primitive.Primitive{
-		{Frontmatter: primitive.Frontmatter{Kind: "guide", ID: "x"}},
+		{Frontmatter: primitive.Frontmatter{Kind: "rule", ID: "x"}},
 	}
 	_, found := buildShowView(primitives, "guide", "does-not-exist")
 	if found {

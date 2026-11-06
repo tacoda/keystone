@@ -72,7 +72,7 @@ func ProjectRules(projectDir string, primitives []primitive.Primitive) (Projecti
 	out.tally(wrote)
 
 	for _, p := range primitives {
-		if primitive.Kind(p.Kind) != primitive.KindGuide || len(p.Globs) == 0 {
+		if primitive.Kind(p.Kind) != primitive.KindRule || len(p.Paths) == 0 {
 			continue
 		}
 		slug := ruleSlug(p.ID)
@@ -118,7 +118,7 @@ func buildMDC(p primitive.Primitive) []byte {
 	b.WriteString("---\n")
 	fmt.Fprintf(&b, "description: %s\n", yamlScalar(p.Description))
 	b.WriteString("globs:\n")
-	for _, g := range p.Globs {
+	for _, g := range p.Paths {
 		fmt.Fprintf(&b, "  - %q\n", g)
 	}
 	b.WriteString("alwaysApply: false\n")

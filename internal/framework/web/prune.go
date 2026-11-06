@@ -73,7 +73,7 @@ func findPruneCandidates(projectDir string, primitives []primitive.Primitive) []
 	// entries nobody traces to.
 	for _, p := range primitives {
 		key := p.Kind + "/" + p.ID
-		if p.Kind == "corpus" && !referenced[key] && !referenced[p.ID] {
+		if p.Kind == string(primitive.KindReference) && !referenced[key] && !referenced[p.ID] {
 			out = append(out, PruneCandidate{
 				Kind:     p.Kind,
 				ID:       p.ID,

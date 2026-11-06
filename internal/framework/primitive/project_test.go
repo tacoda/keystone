@@ -31,35 +31,31 @@ func TestProjectionRelPath(t *testing.T) {
 		// Projected names are kebab-case + keystone-prefixed; an id already
 		// in the keystone namespace is not double-prefixed.
 		{"skill", "keystone:index", "", nil, filepath.Join(".claude", "skills", "keystone-index", "SKILL.md")},
-		{"agent", "code-reviewer", "", nil, filepath.Join(".claude", "agents", "keystone-code-reviewer.md")},
+		{"subagent", "code-reviewer", "", nil, filepath.Join(".claude", "agents", "keystone-code-reviewer.md")},
 		{"command", "review", "", nil, filepath.Join(".claude", "commands", "keystone-review.md")},
 		{"command", "verify", "", nil, filepath.Join(".claude", "commands", "keystone-verify.md")},
 		{"skill", "task", "", nil, filepath.Join(".claude", "skills", "keystone-task", "SKILL.md")},
-		// playbook projects like skill — a composed SKILL.md orchestrator.
-		{"playbook", "task", "", nil, filepath.Join(".claude", "skills", "keystone-task", "SKILL.md")},
-		// Glob-scoped inferential guide → rule shim (empty mode defaults inferential).
-		{"guide", "guides/idioms/go/stdlib-first", "", []string{"cmd/**/*.go"}, filepath.Join(".claude", "rules", "keystone-go-stdlib-first.md")},
-		{"guide", "guides/idioms/charter-content/state-files", "inferential", []string{"x/**"}, filepath.Join(".claude", "rules", "keystone-charter-content-state-files.md")},
-		// Computational guide → no shim (author a hook instead).
-		{"guide", "guides/idioms/go/fmt", "computational", []string{"**/*.go"}, ""},
-		// Guide without globs → no projection.
-		{"guide", "guides/process/spec", "", nil, ""},
-		// Inferential sensor (review) → subagent; computational sensor fires
-		// via the hook layer (no adapter file).
-		{"sensor", "review-functional", "inferential", nil, filepath.Join(".claude", "agents", "keystone-review-functional.md")},
-		{"sensor", "review-security", "", nil, filepath.Join(".claude", "agents", "keystone-review-security.md")},
-		{"sensor", "build", "computational", nil, ""},
+		// Path-scoped inferential rule → rule shim (empty mode defaults inferential).
+		{"rule", "guides/idioms/go/stdlib-first", "", []string{"cmd/**/*.go"}, filepath.Join(".claude", "rules", "keystone-go-stdlib-first.md")},
+		{"rule", "guides/idioms/charter-content/state-files", "inferential", []string{"x/**"}, filepath.Join(".claude", "rules", "keystone-charter-content-state-files.md")},
+		// Computational rule → no shim (author a hook instead).
+		{"rule", "guides/idioms/go/fmt", "computational", []string{"**/*.go"}, ""},
+		// Rule without paths → no projection.
+		{"rule", "guides/process/spec", "", nil, ""},
+		// Inferential hook (review) → subagent; computational hook fires
+		// via the host hook bridge (no adapter file).
+		{"hook", "review-functional", "inferential", nil, filepath.Join(".claude", "agents", "keystone-review-functional.md")},
+		{"hook", "review-security", "", nil, filepath.Join(".claude", "agents", "keystone-review-security.md")},
+		{"hook", "build", "computational", nil, ""},
 		// Other no-projection kinds.
-		{"corpus", "corpus/process/spec", "", nil, ""},
-		{"hook", "on-gate", "", nil, ""},
-		{"pattern", "repository", "", nil, ""},
-		{"posture", "default", "", nil, ""},
+		{"reference", "corpus/process/spec", "", nil, ""},
+		{"permission", "default", "", nil, ""},
 		{"tool", "grep-symbols", "", nil, ""},
 		{"document", "implementation-plan", "", nil, ""},
 		{"eval", "demo", "", nil, ""},
 	}
 	for _, c := range cases {
-		p := Primitive{Frontmatter: Frontmatter{Kind: c.kind, ID: c.id, Mode: c.mode, Globs: c.globs}}
+		p := Primitive{Frontmatter: Frontmatter{Kind: c.kind, ID: c.id, Mode: c.mode, Paths: c.globs}}
 		got := ProjectionRelPath(p)
 		if got != c.want {
 			t.Errorf("ProjectionRelPath(%s/%s, mode=%q, globs=%v) = %q, want %q", c.kind, c.id, c.mode, c.globs, got, c.want)

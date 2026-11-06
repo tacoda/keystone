@@ -8,15 +8,15 @@ import (
 
 func TestFilterByKind(t *testing.T) {
 	prims := []primitive.Primitive{
-		{Frontmatter: primitive.Frontmatter{Kind: "guide", ID: "x"}},
-		{Frontmatter: primitive.Frontmatter{Kind: "sensor", ID: "y"}},
+		{Frontmatter: primitive.Frontmatter{Kind: "rule", ID: "x"}},
+		{Frontmatter: primitive.Frontmatter{Kind: "hook", ID: "y"}},
 	}
 	if got := filterByKind(prims, ""); len(got) != 2 {
 		t.Errorf("empty kind should pass all, got %d", len(got))
 	}
-	got := filterByKind(prims, "sensor")
-	if len(got) != 1 || got[0].Kind != "sensor" {
-		t.Errorf("--kind sensor should filter to sensors, got %+v", got)
+	got := filterByKind(prims, "sensor") // 4.x name finds hooks
+	if len(got) != 1 || got[0].Kind != "hook" {
+		t.Errorf("--kind sensor should filter to hooks, got %+v", got)
 	}
 }
 

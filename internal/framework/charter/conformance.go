@@ -157,7 +157,7 @@ func pairingCriterion(prims []primitive.Primitive) Criterion {
 func corpusTopicSet(prims []primitive.Primitive) map[string]bool {
 	set := map[string]bool{}
 	for _, p := range prims {
-		if primitive.Kind(p.Kind) == primitive.KindCorpus {
+		if primitive.Kind(p.Kind) == primitive.KindReference {
 			set[strings.TrimPrefix(p.ID, "corpus/")] = true
 		}
 	}
@@ -176,7 +176,7 @@ func isPaired(p primitive.Primitive, corpusTopics map[string]bool) bool {
 // needsCorpusPairing reports whether a primitive is an idiom guide that
 // the golden rule expects to pair with a corpus entry.
 func needsCorpusPairing(p primitive.Primitive) bool {
-	if primitive.Kind(p.Kind) != primitive.KindGuide || p.Mode == "computational" {
+	if primitive.Kind(p.Kind) != primitive.KindRule || p.Mode == "computational" {
 		return false
 	}
 	if strings.HasSuffix(p.ID, "/README") {

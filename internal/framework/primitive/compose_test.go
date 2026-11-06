@@ -7,7 +7,7 @@ import (
 
 func TestCompose_NoIncludes(t *testing.T) {
 	in := []Primitive{
-		{Frontmatter: Frontmatter{Kind: "guide", ID: "g1", Tools: []string{"Read"}}},
+		{Frontmatter: Frontmatter{Kind: "rule", ID: "g1", Tools: []string{"Read"}}},
 	}
 	out, errs := Compose(in)
 	if len(errs) != 0 {
@@ -64,7 +64,7 @@ func TestCompose_HostWinsScalars(t *testing.T) {
 			Model:       "sonnet",
 		}},
 		{Frontmatter: Frontmatter{
-			Kind: "sensor", ID: "host-sensor",
+			Kind: "hook", ID: "host-sensor",
 			Description: "host's description",
 			Severity:    "must",
 			Model:       "opus",
@@ -173,7 +173,7 @@ func TestCompose_HostTriggersDedup(t *testing.T) {
 			HostTriggers: []HostTrigger{{Phase: "Stop", Command: "go test", Timeout: 30}},
 		}},
 		{Frontmatter: Frontmatter{
-			Kind: "sensor", ID: "host",
+			Kind: "hook", ID: "host",
 			Includes:     []string{"shared"},
 			HostTriggers: []HostTrigger{{Phase: "Stop", Command: "go test", Timeout: 30}},
 		}},

@@ -120,7 +120,7 @@ func runList(args []string) error {
 func filterPrimitives(primitives []primitive.Primitive, kind string, tags []string) []primitive.Primitive {
 	var out []primitive.Primitive
 	for _, p := range primitives {
-		if kind != "" && p.Kind != kind {
+		if kind != "" && !primitive.IsKind(p.Kind, kind) {
 			continue
 		}
 		if !hasAllTags(p.Tags, tags) {

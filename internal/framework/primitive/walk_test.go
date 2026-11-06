@@ -113,12 +113,12 @@ func TestWalk_FindsAllKindsSkipsReadmesAndNonFM(t *testing.T) {
 		got[p.Kind+"/"+p.ID] = p.Path
 	}
 	wantIDs := []string{
-		"guide/idioms/rails/migrations",
-		"corpus/corpus/idioms/rails/migrations",
-		"sensor/drift",
-		"sensor/build",
+		"rule/idioms/rails/migrations",
+		"reference/corpus/idioms/rails/migrations",
+		"hook/drift",
+		"hook/build",
 		"skill/review-code",
-		"agent/cavecrew-reviewer",
+		"subagent/cavecrew-reviewer",
 		"command/verify",
 	}
 	for _, id := range wantIDs {
@@ -141,18 +141,18 @@ func TestBuildAndWrite(t *testing.T) {
 	if idx.Version != IndexVersion {
 		t.Errorf("Version = %q, want %q", idx.Version, IndexVersion)
 	}
-	if IndexVersion != "2.0" {
-		t.Errorf("IndexVersion = %q, want 2.0", IndexVersion)
+	if IndexVersion != "5.0" {
+		t.Errorf("IndexVersion = %q, want 5.0", IndexVersion)
 	}
 	if idx.Generated != "2026-06-17T00:00:00Z" {
 		t.Errorf("Generated = %q", idx.Generated)
 	}
-	if len(idx.ByKind["guide"]) != 1 {
-		t.Errorf("ByKind[guide] = %v", idx.ByKind["guide"])
+	if len(idx.ByKind["rule"]) != 1 {
+		t.Errorf("ByKind[rule] = %v", idx.ByKind["rule"])
 	}
-	if len(idx.ByGlob["db/migrate/**"]) != 1 ||
-		idx.ByGlob["db/migrate/**"][0] != "guide/idioms/rails/migrations" {
-		t.Errorf("ByGlob = %v", idx.ByGlob)
+	if len(idx.ByPath["db/migrate/**"]) != 1 ||
+		idx.ByPath["db/migrate/**"][0] != "rule/idioms/rails/migrations" {
+		t.Errorf("ByPath = %v", idx.ByPath)
 	}
 
 	out := filepath.Join(root, "charter", "INDEX.json")
@@ -169,5 +169,36 @@ func TestBuildAndWrite(t *testing.T) {
 	}
 	if len(decoded.Primitives) != len(primitives) {
 		t.Errorf("decoded primitives = %d, want %d", len(decoded.Primitives), len(primitives))
+	}
+}
+
+// TestBuild_ByCategory — every indexed primitive lands in its category.
+func TestBuild_ByCategory(t *testing.T) {
+	primitives, _, err := Walk(fixtureTree(t), "charter")
+	if err != nil {
+		t.Fatal(err)
+	}
+	idx := Build(primitives, time.Unix(0, 0))
+	// rule + reference + 2 hooks; skill + subagent + command.
+	if c, k := len(idx.ByCategory["constraint"]), len(idx.ByCategory["capability"]); c != 4 || k != 3 {
+		t.Errorf("ByCategory = %v, want 4 constraints and 3 capabilities", idx.ByCategory)
+	}
+}
+
+// TestBuildLite_CategoryOrder — the lite index lists constraints before
+// capabilities and stamps each entry with its category.
+func TestBuildLite_CategoryOrder(t *testing.T) {
+	prims := []Primitive{
+		{Frontmatter: Frontmatter{Kind: "skill", ID: "a"}},
+		{Frontmatter: Frontmatter{Kind: "hook", ID: "b"}},
+		{Frontmatter: Frontmatter{Kind: "command", ID: "c"}},
+		{Frontmatter: Frontmatter{Kind: "rule", ID: "d"}},
+	}
+	lite := BuildLite(Build(prims, time.Unix(0, 0)))
+	want := []string{"constraint/hook/b", "constraint/rule/d", "capability/command/c", "capability/skill/a"}
+	for i, e := range lite.Primitives {
+		if got := e.Category + "/" + e.Kind + "/" + e.ID; got != want[i] {
+			t.Errorf("lite[%d] = %s, want %s", i, got, want[i])
+		}
 	}
 }

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"github.com/tacoda/keystone/internal/framework/primitive"
 	"net/http"
 	"os"
 	"os/exec"
@@ -121,7 +122,7 @@ func (s *server) handleActionDeletePrimitive(w http.ResponseWriter, r *http.Requ
 	}
 	var target string
 	for _, p := range primitives {
-		if p.Kind == kind && p.ID == id {
+		if primitive.IsKind(p.Kind, kind) && p.ID == id {
 			target = filepath.Join(s.projectDir, p.Path)
 			break
 		}

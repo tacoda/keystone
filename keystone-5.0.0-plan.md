@@ -343,4 +343,13 @@ Work on `feat/5.0-standard-vocabulary`, one PR per phase or pair of phases.
 
 ## Status
 
-- Phase 0: done pending ADR 0010 ratification. Matrix in `docs/hosts.md`.
+- Phase 0: done. ADR 0010 accepted; matrix in `docs/hosts.md`.
+- Phase 1: done. 10 kinds + `Category`; INDEX v5.0 (`by_category`, lite
+  `category`, constraints first); `paths:` / `event:` canonical with
+  `globs:` / `on:` aliases; `primitive.IsKind` for user-typed kind filters.
+  Transition choice: 4.x kind names normalize at parse time (not only in
+  Walk), so 4.x trees and `keystone new <old-kind>` keep working until the
+  Phase 7 migration; `concern` lints as a warning naming `keystone migrate`.
+  Phase 7 turns legacy names into a hard error. Skill `triggers:` is no longer
+  required (description is the activation contract). Deferred: hook `type:`
+  (command/agent/prompt) to Phase 5, where projection first needs it.

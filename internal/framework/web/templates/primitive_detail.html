@@ -13,7 +13,7 @@
 
   <dl>
     <dt>path</dt><dd><code>{{.Primitive.Path}}</code></dd>
-    {{if .Primitive.Globs}}<dt>globs</dt><dd>{{range .Primitive.Globs}}<code>{{.}}</code> {{end}}</dd>{{end}}
+    {{if .Primitive.Paths}}<dt>globs</dt><dd>{{range .Primitive.Paths}}<code>{{.}}</code> {{end}}</dd>{{end}}
     {{if .Primitive.Provenance}}<dt>provenance</dt><dd><code>{{.Primitive.Provenance}}</code></dd>{{end}}
     {{if .Primitive.Phase}}<dt>phase</dt><dd><code>{{.Primitive.Phase}}</code></dd>{{end}}
     {{if .Primitive.Severity}}<dt>severity</dt><dd><code>{{.Primitive.Severity}}</code></dd>{{end}}

@@ -45,12 +45,12 @@ func parsesAndLintsClean(t *testing.T, path, wantKind string) {
 
 func TestNewPattern_ScaffoldsCleanProse(t *testing.T) {
 	_, path := runNewScaffold(t, "pattern", "tutorial", "patterns/tutorial.md")
-	parsesAndLintsClean(t, path, "pattern")
+	parsesAndLintsClean(t, path, "skill") // 4.x pattern folds into skill
 }
 
 func TestNewPosture_ScaffoldsCleanPermissions(t *testing.T) {
 	_, path := runNewScaffold(t, "posture", "default", "posture/default.md")
-	parsesAndLintsClean(t, path, "posture")
+	parsesAndLintsClean(t, path, "permission") // 4.x posture normalizes
 	data, _ := os.ReadFile(path)
 	fm, _, _ := primitive.Parse(string(data))
 	if len(fm.Allow) == 0 || len(fm.Deny) == 0 {

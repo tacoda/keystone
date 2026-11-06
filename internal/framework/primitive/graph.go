@@ -106,18 +106,16 @@ func renderMermaid(nodes []Primitive, edges []graphEdge) string {
 	}
 	// Per-kind colors aligned with the dashboard palette.
 	for _, line := range []string{
-		"classDef guide    fill:#13161d,stroke:#4ade9a,color:#4ade9a",
-		"classDef rule     fill:#13161d,stroke:#4ade9a,color:#4ade9a",
-		"classDef corpus   fill:#13161d,stroke:#60a5fa,color:#60a5fa",
-		"classDef sensor   fill:#13161d,stroke:#f59e0b,color:#f59e0b",
-		"classDef action   fill:#13161d,stroke:#e879a0,color:#e879a0",
-		"classDef playbook fill:#13161d,stroke:#e879a0,color:#e879a0",
-		"classDef skill    fill:#13161d,stroke:#a78bfa,color:#a78bfa",
-		"classDef subagent fill:#13161d,stroke:#a78bfa,color:#a78bfa",
-		"classDef command  fill:#13161d,stroke:#a78bfa,color:#a78bfa",
-		"classDef persona  fill:#13161d,stroke:#a78bfa,color:#a78bfa",
-		"classDef eval     fill:#13161d,stroke:#f59e0b,color:#f59e0b",
-		"classDef source   fill:#13161d,stroke:#60a5fa,color:#60a5fa",
+		"classDef rule       fill:#13161d,stroke:#4ade9a,color:#4ade9a",
+		"classDef reference  fill:#13161d,stroke:#60a5fa,color:#60a5fa",
+		"classDef hook       fill:#13161d,stroke:#f59e0b,color:#f59e0b",
+		"classDef permission fill:#13161d,stroke:#f59e0b,color:#f59e0b",
+		"classDef eval       fill:#13161d,stroke:#f59e0b,color:#f59e0b",
+		"classDef skill      fill:#13161d,stroke:#a78bfa,color:#a78bfa",
+		"classDef command    fill:#13161d,stroke:#a78bfa,color:#a78bfa",
+		"classDef subagent   fill:#13161d,stroke:#a78bfa,color:#a78bfa",
+		"classDef tool       fill:#13161d,stroke:#e879a0,color:#e879a0",
+		"classDef document   fill:#13161d,stroke:#e879a0,color:#e879a0",
 	} {
 		fmt.Fprintln(&b, "  "+line)
 	}

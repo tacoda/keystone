@@ -48,7 +48,7 @@ func Search(projectDir string, primitives []Primitive, query string, limit int) 
 				where = "description"
 			}
 		}
-		for _, g := range p.Globs {
+		for _, g := range p.Paths {
 			if strings.Contains(strings.ToLower(g), q) {
 				score += 3
 				if where == "" {

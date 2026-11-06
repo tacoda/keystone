@@ -2,6 +2,7 @@ package web
 
 import (
 	"encoding/json"
+	"github.com/tacoda/keystone/internal/framework/primitive"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -46,12 +47,12 @@ func (s *server) apiPrimitives(w http.ResponseWriter, r *http.Request) {
 	glob := r.URL.Query().Get("glob")
 	out := primitives[:0:0]
 	for _, p := range primitives {
-		if kind != "" && p.Kind != kind {
+		if kind != "" && !primitive.IsKind(p.Kind, kind) {
 			continue
 		}
 		if glob != "" {
 			match := false
-			for _, g := range p.Globs {
+			for _, g := range p.Paths {
 				if g == glob {
 					match = true
 					break
@@ -82,7 +83,7 @@ func (s *server) apiPrimitiveDetail(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	for _, p := range primitives {
-		if p.Kind == kind && p.ID == id {
+		if primitive.IsKind(p.Kind, kind) && p.ID == id {
 			body, err := os.ReadFile(filepath.Join(s.projectDir, p.Path))
 			if err != nil {
 				writeError(w, http.StatusInternalServerError, err.Error())

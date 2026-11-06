@@ -69,7 +69,7 @@ func Project(projectDir string, primitives []Primitive) ([]ProjectionResult, err
 		src := filepath.Join(projectDir, p.Path)
 		dest := filepath.Join(projectDir, rel)
 		var writeErr error
-		if Kind(p.Kind) == KindGuide {
+		if Kind(p.Kind) == KindRule {
 			writeErr = writeRuleShim(src, dest, p)
 		} else {
 			writeErr = writeLowered(src, dest, p)
@@ -96,21 +96,20 @@ func Project(projectDir string, primitives []Primitive) ([]ProjectionResult, err
 func ProjectionRelPath(p Primitive) string {
 	name := projectedDiskName(p.ID)
 	switch Kind(p.Kind) {
-	// A playbook is a composed orchestrator — it projects to a SKILL.md
-	// like a skill.
-	case KindSkill, KindPlaybook:
+	// 4.x playbooks and patterns normalize to skill and project the same way.
+	case KindSkill:
 		return filepath.Join(".claude", "skills", name, "SKILL.md")
-	case KindAgent:
+	case KindSubagent:
 		return filepath.Join(".claude", "agents", name+".md")
 	case KindCommand:
 		return filepath.Join(".claude", "commands", name+".md")
-	case KindGuide:
+	case KindRule:
 		return guideProjection(p)
-	case KindSensor:
+	case KindHook:
 		return sensorProjection(p, name)
 	}
-	// hook, pattern, posture, tool, document, corpus, concern, eval,
-	// source: no host file projection here.
+	// permission, tool, document, reference, concern, eval: no host file
+	// projection here.
 	return ""
 }
 
@@ -119,7 +118,7 @@ func ProjectionRelPath(p Primitive) string {
 // carried by a hook (no shim); a guide without globs is global-process
 // content with no ambient channel.
 func guideProjection(p Primitive) string {
-	if p.Mode == string(modeComputational) || len(p.Globs) == 0 {
+	if p.Mode == string(modeComputational) || len(p.Paths) == 0 {
 		return ""
 	}
 	return filepath.Join(".claude", "rules", ruleShimDiskID(p.ID)+".md")
@@ -187,7 +186,7 @@ func RenderForHost(projectDir string, p Primitive) (content []byte, ok bool, err
 		return nil, false, nil
 	}
 	src := filepath.Join(projectDir, p.Path)
-	if Kind(p.Kind) == KindGuide {
+	if Kind(p.Kind) == KindRule {
 		content, err = ruleShimContent(src, p)
 	} else {
 		content, err = loweredContent(src, p)
@@ -311,7 +310,7 @@ func ruleShimContent(srcAbs string, p Primitive) ([]byte, error) {
 	b.WriteString(yamlSafe(p.Description))
 	b.WriteString("\n")
 	b.WriteString("globs:\n")
-	for _, g := range p.Globs {
+	for _, g := range p.Paths {
 		fmt.Fprintf(&b, "  - %q\n", g)
 	}
 	fmt.Fprintf(&b, "source: %s\n", p.Path)

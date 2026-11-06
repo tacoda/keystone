@@ -29,7 +29,7 @@ func TestPrimitiveCache_RefreshAndGet(t *testing.T) {
 	if len(prims) != 1 {
 		t.Fatalf("expected 1 primitive post-refresh, got %d", len(prims))
 	}
-	if prims[0].Kind != "guide" || prims[0].ID != "process/spec" {
+	if prims[0].Kind != "rule" || prims[0].ID != "process/spec" {
 		t.Errorf("wrong primitive: %+v", prims[0])
 	}
 	if len(idx.Primitives) != 1 {

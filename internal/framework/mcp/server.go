@@ -197,10 +197,10 @@ func registerTools(s *server.MCPServer, projectDir string) {
 
 			out := make([]primitive.Primitive, 0, len(idx.Primitives))
 			for _, p := range idx.Primitives {
-				if kindFilter != "" && p.Kind != kindFilter {
+				if kindFilter != "" && !primitive.IsKind(p.Kind, kindFilter) {
 					continue
 				}
-				if globFilter != "" && !contains(p.Globs, globFilter) {
+				if globFilter != "" && !contains(p.Paths, globFilter) {
 					continue
 				}
 				if !hasAllStrings(p.Tags, tagFilter) {
@@ -390,7 +390,7 @@ type showView struct {
 	Phase        string                  `json:"phase,omitempty"`
 	Tags         []string                `json:"tags,omitempty"`
 	Tools        []string                `json:"tools,omitempty"`
-	Globs        []string                `json:"globs,omitempty"`
+	Paths        []string                `json:"globs,omitempty"`
 	Triggers     []string                `json:"triggers,omitempty"`
 	Includes     []string                `json:"includes,omitempty"`
 	IncludedBy   []string                `json:"included_by,omitempty"`
@@ -407,7 +407,7 @@ func buildShowView(primitives []primitive.Primitive, kind, id string) (showView,
 	var target primitive.Primitive
 	found := false
 	for _, p := range primitives {
-		if p.Kind == kind && p.ID == id {
+		if primitive.IsKind(p.Kind, kind) && p.ID == id {
 			target = p
 			found = true
 			break
@@ -427,7 +427,7 @@ func buildShowView(primitives []primitive.Primitive, kind, id string) (showView,
 		Phase:        target.Phase,
 		Tags:         target.Tags,
 		Tools:        target.Tools,
-		Globs:        target.Globs,
+		Paths:        target.Paths,
 		Triggers:     target.Triggers,
 		Includes:     target.Includes,
 		Traces:       target.Corpus,
@@ -557,7 +557,7 @@ func loadPrimitiveBody(projectDir, kind, id string) (primitive.Primitive, string
 		return primitive.Primitive{}, "", err
 	}
 	for _, p := range primitives {
-		if p.Kind == kind && p.ID == id {
+		if primitive.IsKind(p.Kind, kind) && p.ID == id {
 			data, err := os.ReadFile(filepath.Join(projectDir, p.Path))
 			if err != nil {
 				return p, "", fmt.Errorf("read %s: %w", p.Path, err)
@@ -569,15 +569,15 @@ func loadPrimitiveBody(projectDir, kind, id string) (primitive.Primitive, string
 }
 
 // parseTraceRef interprets a `traces:` entry. The canonical form is
-// `corpus/<topic>/<name>`; the kind defaults to "corpus" when not
+// `corpus/<topic>/<name>`; the kind is always reference (4.x corpus) when not
 // explicitly prefixed. Accepts both forms.
 func parseTraceRef(ref string) (kind, id string) {
 	const corpusPrefix = "corpus/"
 	if strings.HasPrefix(ref, corpusPrefix) {
-		return "corpus", ref
+		return string(primitive.KindReference), ref
 	}
 	// Fallback: assume corpus.
-	return "corpus", "corpus/" + ref
+	return string(primitive.KindReference), "corpus/" + ref
 }
 
 func parsePrimitiveURI(uri string) (kind, id string, err error) {

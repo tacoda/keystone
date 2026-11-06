@@ -198,7 +198,7 @@ func orphanCorpus(primitives []primitive.Primitive) []string {
 	}
 	var out []string
 	for _, p := range primitives {
-		if p.Kind != "corpus" {
+		if p.Kind != string(primitive.KindReference) {
 			continue
 		}
 		if !referenced[p.ID] && !referenced["corpus/"+p.ID] {
@@ -211,7 +211,7 @@ func orphanCorpus(primitives []primitive.Primitive) []string {
 func countByKind(primitives []primitive.Primitive, kind string) int {
 	n := 0
 	for _, p := range primitives {
-		if p.Kind == kind {
+		if primitive.IsKind(p.Kind, kind) {
 			n++
 		}
 	}
@@ -220,7 +220,7 @@ func countByKind(primitives []primitive.Primitive, kind string) int {
 
 func severityCount(primitives []primitive.Primitive, severity string) (matched, totalGuides int) {
 	for _, p := range primitives {
-		if p.Kind != "guide" {
+		if p.Kind != string(primitive.KindRule) {
 			continue
 		}
 		totalGuides++

@@ -26,7 +26,7 @@ func Matches(p primitive.Primitive, id, kind string) bool {
 	if p.ID != id {
 		return false
 	}
-	return kind == "" || p.Kind == kind
+	return kind == "" || primitive.IsKind(p.Kind, kind)
 }
 
 // Explain builds an Explanation for a primitive from its descriptor.
@@ -51,13 +51,13 @@ func Explain(p primitive.Primitive) Explanation {
 // activators renders the kind-specific "how does this fire/activate"
 // line. A map (not a switch) keeps Explain's complexity flat.
 var activators = map[primitive.Kind]func(primitive.Primitive) string{
-	primitive.KindGuide: func(p primitive.Primitive) string {
-		if len(p.Globs) == 0 {
+	primitive.KindRule: func(p primitive.Primitive) string {
+		if len(p.Paths) == 0 {
 			return "ambient rule — active every turn in its topic."
 		}
-		return "ambient rule — active when a touched file matches: " + strings.Join(p.Globs, ", ")
+		return "ambient rule — active when a touched file matches: " + strings.Join(p.Paths, ", ")
 	},
-	primitive.KindSensor: func(p primitive.Primitive) string {
+	primitive.KindHook: func(p primitive.Primitive) string {
 		on := orAmbient(p.Event)
 		if p.Mode == "inferential" {
 			return fmt.Sprintf("inferential check — an agent review on %s, returns: %s.", on, orNone(p.Returns))
@@ -71,26 +71,20 @@ var activators = map[primitive.Kind]func(primitive.Primitive) string{
 		}
 		return fmt.Sprintf("external callable (transport: %s) — invoked on demand.", t)
 	},
-	primitive.KindAgent: func(p primitive.Primitive) string {
+	primitive.KindSubagent: func(p primitive.Primitive) string {
 		return "spawned as a subagent by id; tools: " + orNone(strings.Join(p.Tools, ", "))
 	},
 	primitive.KindCommand: func(p primitive.Primitive) string {
 		return "a unit of work; phase: " + orAny(p.Phase)
 	},
 	primitive.KindSkill: func(p primitive.Primitive) string {
-		return "auto-activates on triggers: " + orNone(strings.Join(p.Triggers, ", "))
+		return "activates when its description matches the task" + gatesSuffix(p.Gates) + "."
 	},
-	primitive.KindPlaybook: func(p primitive.Primitive) string {
-		return "a composed sequence of commands; gates: " + orNone(strings.Join(p.Gates, ", "))
+	primitive.KindReference: func(p primitive.Primitive) string {
+		return "reasoning — loaded on demand via a rule's corpus: link."
 	},
-	primitive.KindCorpus: func(p primitive.Primitive) string {
-		return "reasoning — loaded on demand via a guide's corpus: link."
-	},
-	primitive.KindPattern: func(p primitive.Primitive) string {
-		return "a reusable documentation pattern — applied when writing docs."
-	},
-	primitive.KindPosture: func(p primitive.Primitive) string {
-		return "a tool/permission posture — projects to settings.json permissions."
+	primitive.KindPermission: func(p primitive.Primitive) string {
+		return "allow/ask/deny tool rules — projects to each host's permission config."
 	},
 	primitive.KindDocument: func(p primitive.Primitive) string {
 		return "a governed output template (type: " + orNone(p.Type) + ")."
@@ -101,6 +95,14 @@ var activators = map[primitive.Kind]func(primitive.Primitive) string{
 	primitive.KindConcern: func(p primitive.Primitive) string {
 		return "a composition mixin — pulled into other primitives via includes:."
 	},
+}
+
+// gatesSuffix names a skill's human gates (carried over from a 4.x playbook).
+func gatesSuffix(gates []string) string {
+	if len(gates) == 0 {
+		return ""
+	}
+	return "; gates: " + strings.Join(gates, ", ")
 }
 
 func explainLinks(p primitive.Primitive) []string {

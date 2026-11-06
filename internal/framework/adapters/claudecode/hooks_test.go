@@ -14,7 +14,7 @@ import (
 // A hook fires deterministically via run: — required for it to bridge.
 func hookOn(id, event string) primitive.Primitive {
 	return primitive.Primitive{
-		Frontmatter: primitive.Frontmatter{Kind: "sensor", ID: id, Event: event, Run: "true"},
+		Frontmatter: primitive.Frontmatter{Kind: "hook", ID: id, Event: event, Run: "true"},
 	}
 }
 
@@ -198,7 +198,7 @@ func TestProjectHooks_IgnoresNonHookPrimitives(t *testing.T) {
 	root := t.TempDir()
 	p := []primitive.Primitive{
 		// A guide with an event somehow set → ignored (not kind:hook).
-		{Frontmatter: primitive.Frontmatter{Kind: "guide", ID: "g1", Event: "Stop"}},
+		{Frontmatter: primitive.Frontmatter{Kind: "rule", ID: "g1", Event: "Stop"}},
 		// A hook with no event → contributes nothing.
 		hookOn("idle", ""),
 		// A real host-phase hook → bridged.

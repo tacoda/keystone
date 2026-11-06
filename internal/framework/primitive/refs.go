@@ -43,7 +43,7 @@ func IncomingRefs(primitives []Primitive, target Primitive) []IncomingRef {
 		}
 		// Traces are typically corpus references — match against
 		// `corpus/<id>` AND bare `<id>`.
-		if target.Kind == string(KindCorpus) {
+		if target.Kind == string(KindReference) {
 			for _, t := range p.Corpus {
 				if t == want || t == wantBare ||
 					strings.TrimPrefix(t, "corpus/") == strings.TrimPrefix(wantBare, "corpus/") {

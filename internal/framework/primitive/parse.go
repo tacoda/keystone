@@ -58,7 +58,8 @@ type fmShadow struct {
 	Kind         string        `yaml:"kind"`
 	ID           string        `yaml:"id"`
 	Description  string        `yaml:"description"`
-	Globs        []string      `yaml:"globs"`
+	Paths        []string      `yaml:"paths"`
+	Globs        []string      `yaml:"globs"` // 4.x alias for `paths:`
 	Phase        string        `yaml:"phase"`
 	Triggers     []string      `yaml:"triggers"`
 	Tools        []string      `yaml:"tools"`
@@ -80,8 +81,8 @@ type fmShadow struct {
 	ProducedBy   string        `yaml:"produced_by"`
 	Supersedes   []string      `yaml:"supersedes"`
 	Mode         string        `yaml:"mode"`
-	On           string        `yaml:"on"`
-	Event        string        `yaml:"event"` // back-compat alias for `on:`
+	Event        string        `yaml:"event"`
+	On           string        `yaml:"on"` // 4.x alias for `event:`
 	Run          string        `yaml:"run"`
 	Transport    string        `yaml:"transport"`
 	Agent        string        `yaml:"agent"`
@@ -96,10 +97,14 @@ func (f *Frontmatter) UnmarshalYAML(value *yaml.Node) error {
 	if err := value.Decode(&s); err != nil {
 		return err
 	}
-	f.Kind = s.Kind
+	k, _ := NormalizeKind(s.Kind) // 4.x kind names map to 5.0 kinds
+	f.Kind = string(k)
 	f.ID = s.ID
 	f.Description = s.Description
-	f.Globs = s.Globs
+	f.Paths = s.Paths
+	if len(f.Paths) == 0 {
+		f.Paths = s.Globs
+	}
 	f.Phase = s.Phase
 	f.Triggers = s.Triggers
 	f.Tools = s.Tools
@@ -120,7 +125,7 @@ func (f *Frontmatter) UnmarshalYAML(value *yaml.Node) error {
 	f.ProducedBy = s.ProducedBy
 	f.Supersedes = s.Supersedes
 	f.Mode = s.Mode
-	f.Event = firstNonEmpty(s.On, s.Event) // `on:` canonical; `event:` alias
+	f.Event = firstNonEmpty(s.Event, s.On) // `event:` canonical; `on:` alias
 	f.Run = s.Run
 	f.Transport = s.Transport
 	f.Agent = s.Agent

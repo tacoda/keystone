@@ -12,7 +12,7 @@ import (
 func postureFixture() []primitive.Primitive {
 	return []primitive.Primitive{
 		{Frontmatter: primitive.Frontmatter{
-			Kind: "posture", ID: "default", Description: "x",
+			Kind: "permission", ID: "default", Description: "x",
 			Allow: []string{"Bash(go test:*)", "Read(*)"},
 			Ask:   []string{"Bash(git push:*)"},
 			Deny:  []string{"Read(.env)"},

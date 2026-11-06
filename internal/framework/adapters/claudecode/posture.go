@@ -57,7 +57,7 @@ func ProjectPosture(projectDir string, primitives []primitive.Primitive) (Postur
 func collectPosture(primitives []primitive.Primitive) map[string][]string {
 	want := map[string][]string{}
 	for _, p := range primitives {
-		if primitive.Kind(p.Kind) != primitive.KindPosture {
+		if primitive.Kind(p.Kind) != primitive.KindPermission {
 			continue
 		}
 		want["allow"] = append(want["allow"], p.Allow...)

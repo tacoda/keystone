@@ -108,10 +108,10 @@ supersedes:
 ---
 # body unchanged
 `)
-	eqStr(t, "Kind", fm.Kind, "guide")
+	eqStr(t, "Kind", fm.Kind, "rule") // 4.x `kind: guide` normalizes
 	eqStr(t, "ID", fm.ID, "idioms/rails/migrations")
 	eqStr(t, "Severity", fm.Severity, "must")
-	wantSlice(t, "Globs", fm.Globs, []string{"db/migrate/**", "!db/migrate/legacy/**"})
+	wantSlice(t, "Paths", fm.Paths, []string{"db/migrate/**", "!db/migrate/legacy/**"})
 	// `corpus:` is the renamed `traces:` — cite the reasoning behind this rule.
 	wantSlice(t, "Corpus", fm.Corpus, []string{"corpus/idioms/rails/migrations"})
 	wantSlice(t, "Supersedes", fm.Supersedes, []string{"idioms/rails/old-migrations"})
@@ -188,7 +188,7 @@ run: gofmt -w "$KEYSTONE_FILE"
 ---
 body
 `)
-	eqStr(t, "Kind", comp.Kind, "sensor")
+	eqStr(t, "Kind", comp.Kind, "hook") // 4.x `kind: sensor` normalizes
 	eqStr(t, "Mode", comp.Mode, "computational")
 	eqStr(t, "Event", comp.Event, "PostToolUse")
 	eqStr(t, "Run", comp.Run, `gofmt -w "$KEYSTONE_FILE"`)

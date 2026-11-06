@@ -88,8 +88,8 @@ func guideGlobs(projectDir, charterRoot string) ([]string, error) {
 	composed, _ := primitive.Compose(prims)
 	var globs []string
 	for _, p := range composed {
-		if primitive.Kind(p.Kind) == primitive.KindGuide {
-			globs = append(globs, positiveGlobs(p.Globs)...)
+		if primitive.Kind(p.Kind) == primitive.KindRule {
+			globs = append(globs, positiveGlobs(p.Paths)...)
 		}
 	}
 	return globs, nil
