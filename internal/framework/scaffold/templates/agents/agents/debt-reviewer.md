@@ -1,5 +1,5 @@
 ---
-kind: agent
+kind: subagent
 id: debt-reviewer
 description: Triages the code-debt ledger and recommends which entries to action this cycle.
 tools:

@@ -1,11 +1,11 @@
 ---
-kind: sensor
+kind: hook
 id: build
 description: 'The project''s build / compile / package step.'
 tags:
   - computational
 mode: computational
-on: Stop
+event: Stop
 run: go build ./...
 ---
 # Sensor: build

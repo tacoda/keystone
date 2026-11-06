@@ -1,5 +1,5 @@
 ---
-kind: guide
+kind: rule
 id: process/scoping
 description: 'How big any single commit, PR, or implementation pass is allowed to get before it must split.'
 tags:

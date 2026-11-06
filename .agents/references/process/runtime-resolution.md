@@ -1,5 +1,5 @@
 ---
-kind: corpus
+kind: reference
 id: corpus/process/runtime-resolution
 description: Why the runtime resolution flow escalates instead of fanning out — staged lookup costs less and keeps decisions auditable.
 ---

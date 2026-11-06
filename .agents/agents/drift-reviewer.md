@@ -1,5 +1,5 @@
 ---
-kind: agent
+kind: subagent
 id: drift-reviewer
 description: Drift reviewer — flags places the current diff drifts from loaded charter rules.
 tools:

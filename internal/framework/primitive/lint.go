@@ -125,6 +125,9 @@ func lintOne(p Primitive, known map[Kind]bool, exists map[string]bool) []Finding
 	lintKindAndMode(p, known, add)
 	lintIDAndDescription(p, add)
 	lintKindFields(p, add)
+	if Kind(p.Kind) != KindSkill { // skills get the stricter spec check
+		lintLegacySpelling(p, add)
+	}
 	lintTagsAndGlobs(p, add)
 	out = append(out, lintRefs(p, exists)...)
 	return out

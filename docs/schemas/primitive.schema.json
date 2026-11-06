@@ -1,0 +1,141 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://keystone.tacoda.dev/schemas/primitive.json",
+  "title": "Keystone primitive frontmatter (5.0)",
+  "description": "YAML frontmatter of a charter primitive under .agents/. The kind is inferred from the directory (rules/, references/, hooks/, permissions/, evals/, skills/, commands/, agents/, tools/, documents/), so `kind:` is optional. Constraints: rule, reference, hook, permission, eval. Capabilities: skill, command, subagent, tool, document. Validate a file against `#/$defs/<kind>`, picked by its directory (frontmatter alone cannot tell kinds apart). See ADR 0010. 4.x spellings stay readable: kinds guide/corpus/sensor/posture/agent/playbook/pattern, `globs:` for `paths:`, `on:` for `event:`.",
+  "$defs": {
+    "stringList": { "type": "array", "items": { "type": "string" } },
+    "common": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Stable id; defaults to the path slug. Characters: [a-z0-9-:_/]." },
+        "description": { "type": "string", "minLength": 1, "description": "One line. Agents use it to decide whether to open the body." },
+        "tags": { "$ref": "#/$defs/stringList", "description": "Kebab-case taxonomy for `keystone list --tag`." },
+        "supersedes": { "$ref": "#/$defs/stringList", "description": "Ids this primitive replaces." },
+        "corpus": { "$ref": "#/$defs/stringList", "description": "References (the why) this primitive cites; loaded on demand." },
+        "deps": { "$ref": "#/$defs/stringList", "description": "Retired in 3.0; read for back-compat only." }
+      },
+      "required": ["description"]
+    },
+    "rule": {
+      "description": "Constraint. An ambient directive, scoped by paths. Lives at .agents/rules/<topic>/<name>.md.",
+      "allOf": [{ "$ref": "#/$defs/common" }],
+      "properties": {
+        "kind": { "enum": ["rule", "guide"] },
+        "paths": { "$ref": "#/$defs/stringList", "description": "Globs this rule governs. The key Claude Code and Cline read. Absent = always on." },
+        "mode": { "enum": ["inferential", "computational"], "default": "inferential", "description": "computational rules fire `run:` (an LSP or formatter); inferential rules are read by the agent." },
+        "run": { "type": "string", "description": "Required when mode is computational." },
+        "severity": { "enum": ["must", "should", "may"] },
+        "tier": { "enum": ["iron-law", "golden-rule", "preference"], "default": "preference" }
+      }
+    },
+    "reference": {
+      "description": "Constraint (keystone extension). The reasoning behind a rule, loaded on demand. Lives at .agents/references/<topic>/<name>.md.",
+      "allOf": [{ "$ref": "#/$defs/common" }],
+      "properties": { "kind": { "enum": ["reference", "corpus"] } }
+    },
+    "hook": {
+      "description": "Constraint. A check that reacts to a host event or a signal and gates on its verdict. Lives at .agents/hooks/<id>.md.",
+      "allOf": [{ "$ref": "#/$defs/common" }],
+      "properties": {
+        "kind": { "enum": ["hook", "sensor"] },
+        "event": { "type": "string", "description": "A host event (PreToolUse, PostToolUse, Stop, …) or a signal (pre-verify, on-gate, or a custom name)." },
+        "mode": { "enum": ["computational", "inferential"], "default": "computational" },
+        "run": { "type": "string", "description": "Shell command; required when computational. Non-zero exit blocks." },
+        "agent": { "type": "string", "description": "Subagent an inferential hook dispatches." },
+        "returns": { "type": "string", "description": "Verdict schema; required when inferential." }
+      }
+    },
+    "permission": {
+      "description": "Constraint. Tool permission rules in Claude Code syntax (`Tool` or `Tool(specifier)`). Deny wins. Lives at .agents/permissions/<id>.md.",
+      "allOf": [{ "$ref": "#/$defs/common" }],
+      "properties": {
+        "kind": { "enum": ["permission", "posture"] },
+        "allow": { "$ref": "#/$defs/stringList" },
+        "ask": { "$ref": "#/$defs/stringList" },
+        "deny": { "$ref": "#/$defs/stringList" }
+      }
+    },
+    "eval": {
+      "description": "Constraint (keystone extension). A fixture-based test of whether the charter changes agent behavior. Lives at .agents/evals/<id>/EVAL.md.",
+      "allOf": [{ "$ref": "#/$defs/common" }],
+      "properties": { "kind": { "const": "eval" } }
+    },
+    "skill": {
+      "description": "Capability. An Agent Skills spec SKILL.md (https://agentskills.io/specification) at .agents/skills/<name>/SKILL.md. Only spec keys are allowed; `keystone lint --fix` converts the 4.x shape.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "maxLength": 64, "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$", "description": "Must match the directory name." },
+        "description": { "type": "string", "minLength": 1, "maxLength": 1024, "description": "What the skill does and when to use it — the activation contract." },
+        "license": { "type": "string" },
+        "compatibility": { "type": "string", "maxLength": 500 },
+        "allowed-tools": { "type": "string", "description": "Space-separated tool names. Experimental in the spec." },
+        "metadata": { "type": "object", "additionalProperties": { "type": "string" }, "description": "String to string. Keystone reads `model` and `tags` (comma-separated) from here." }
+      },
+      "required": ["name", "description"],
+      "additionalProperties": false
+    },
+    "command": {
+      "description": "Capability. A user-invoked unit of work. Lives at .agents/commands/<id>.md.",
+      "allOf": [{ "$ref": "#/$defs/common" }],
+      "properties": {
+        "kind": { "const": "command" },
+        "phase": { "type": "string" },
+        "args": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              { "type": "string" },
+              {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string" },
+                  "type": { "type": "string" },
+                  "required": { "type": "boolean" },
+                  "description": { "type": "string" }
+                },
+                "required": ["name"]
+              }
+            ]
+          }
+        },
+        "tools": { "$ref": "#/$defs/stringList" },
+        "model": { "type": "string" },
+        "produces": { "$ref": "#/$defs/stringList", "description": "Document ids this command writes." },
+        "consumes": { "$ref": "#/$defs/stringList", "description": "Document ids this command reads." },
+        "stop": { "type": "string", "description": "Explicit done-condition." }
+      }
+    },
+    "subagent": {
+      "description": "Capability. A role the main agent delegates to. Lives at .agents/agents/<id>.md, the directory hosts read.",
+      "allOf": [{ "$ref": "#/$defs/common" }],
+      "properties": {
+        "kind": { "enum": ["subagent", "agent"] },
+        "tools": { "$ref": "#/$defs/stringList", "description": "Tool allow-list; required." },
+        "model": { "type": "string" }
+      },
+      "required": ["tools"]
+    },
+    "tool": {
+      "description": "Capability. An author-defined callable, served by the keystone MCP server. Lives at .agents/tools/<id>.md.",
+      "allOf": [{ "$ref": "#/$defs/common" }],
+      "properties": {
+        "kind": { "const": "tool" },
+        "transport": { "enum": ["cli", "http", "mcp", "plugin"], "default": "cli" },
+        "run": { "type": "string" },
+        "event": { "type": "string", "description": "Optional: fire as a side-effect on this event or signal." }
+      }
+    },
+    "document": {
+      "description": "Capability (keystone extension). A governed output template (ADR, review, retro, …). Instances live under .keystone/work/. Lives at .agents/documents/<id>.md.",
+      "allOf": [{ "$ref": "#/$defs/common" }],
+      "properties": {
+        "kind": { "const": "document" },
+        "type": { "type": "string", "description": "Subtype, e.g. adr or feature." },
+        "gates": { "$ref": "#/$defs/stringList", "description": "Ordered lifecycle states." },
+        "gate": { "type": "string", "description": "Current state of an instance." },
+        "produced_by": { "type": "string", "description": "Command that writes this document." }
+      }
+    }
+  }
+}

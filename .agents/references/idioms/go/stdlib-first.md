@@ -1,5 +1,5 @@
 ---
-kind: corpus
+kind: reference
 id: corpus/idioms/go/stdlib-first
 description: 'Prefer Go stdlib for primitives that exist there.'
 ---

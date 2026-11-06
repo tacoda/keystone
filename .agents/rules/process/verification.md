@@ -1,5 +1,5 @@
 ---
-kind: guide
+kind: rule
 id: process/verification
 description: 'The phase where claims are paired with evidence before commit.'
 ---

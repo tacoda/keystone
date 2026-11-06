@@ -102,8 +102,11 @@ func (f *Frontmatter) UnmarshalYAML(value *yaml.Node) error {
 	if err := value.Decode(&s); err != nil {
 		return err
 	}
-	k, _ := NormalizeKind(s.Kind) // 4.x kind names map to 5.0 kinds
+	k, legacy := NormalizeKind(s.Kind) // 4.x kind names map to 5.0 kinds
 	f.Kind = string(k)
+	if legacy {
+		f.LegacyKind = s.Kind
+	}
 	f.ID = firstNonEmpty(s.ID, s.Name) // spec skills carry `name`, not `id`
 	f.Description = s.Description
 	f.Name = s.Name

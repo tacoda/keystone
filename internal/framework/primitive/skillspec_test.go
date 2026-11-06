@@ -108,15 +108,26 @@ func TestSpecSkillFrontmatter_RefusesUncarriedKeys(t *testing.T) {
 	}
 }
 
-func TestInlineIncludes(t *testing.T) {
-	raw := "kind: agent\nid: code-reviewer\ndescription: d\ntools:\n  - Read\nincludes:\n  - reads-diff\ntags:\n  - review\nmodel: opus\n"
-	composed := Primitive{Frontmatter: Frontmatter{Tools: []string{"Bash", "Read"}, Tags: []string{"diff", "review"}}}
-	got, err := InlineIncludes(raw, composed)
+func TestModernizeFrontmatter(t *testing.T) {
+	raw := "kind: sensor\nid: build\ndescription: d\non: Stop\nincludes:\n  - reads-diff\ntools:\n  - Read\nglobs:\n  - \"**/*.go\"\n"
+	composed := Primitive{Frontmatter: Frontmatter{
+		Kind: "hook", LegacyKind: "sensor", Tools: []string{"Bash", "Read"}, Paths: []string{"**/*.go"},
+	}}
+	got, err := ModernizeFrontmatter(raw, composed)
 	if err != nil {
 		t.Fatal(err)
 	}
-	want := "kind: agent\nid: code-reviewer\ndescription: d\ntools:\n  - Bash\n  - Read\ntags:\n  - diff\n  - review\nmodel: opus\n"
+	want := "kind: hook\nid: build\ndescription: d\nevent: Stop\ntools:\n  - Bash\n  - Read\npaths:\n  - '**/*.go'\n"
 	if got != want {
 		t.Errorf("got:\n%s\nwant:\n%s", got, want)
+	}
+}
+
+func TestLintLegacySpelling(t *testing.T) {
+	p := Primitive{Frontmatter: Frontmatter{Kind: "rule", LegacyKind: "guide", Keys: []string{"kind", "globs"}}}
+	var got []Finding
+	lintLegacySpelling(p, func(sev FindingSeverity, msg string) { got = append(got, Finding{Severity: sev, Message: msg}) })
+	if !find(t, got, FindingWarning, "kind: guide → kind: rule; globs: → paths:") {
+		t.Errorf("expected legacy-spelling warning, got %v", got)
 	}
 }

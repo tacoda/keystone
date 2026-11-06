@@ -1,5 +1,5 @@
 ---
-kind: corpus
+kind: reference
 id: corpus/idioms/charter-content/state-files
 description: 'How state files are written and what must not be hand-edited.'
 ---

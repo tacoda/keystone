@@ -1,11 +1,11 @@
 ---
-kind: sensor
+kind: hook
 id: lint
 description: 'Surface-level style and pattern checks.'
 tags:
   - computational
 mode: computational
-on: Stop
+event: Stop
 run: go vet ./...
 ---
 # Sensor: lint

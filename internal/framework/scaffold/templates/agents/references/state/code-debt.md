@@ -1,5 +1,5 @@
 ---
-kind: corpus
+kind: reference
 id: corpus/state/code-debt
 description: 'Paired ledger: [charter-debt.'
 ---

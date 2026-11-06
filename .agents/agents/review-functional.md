@@ -1,5 +1,5 @@
 ---
-kind: agent
+kind: subagent
 id: review-functional
 description: 'An agent reads the diff and reports logic, correctness, and behavior issues.'
 tags:

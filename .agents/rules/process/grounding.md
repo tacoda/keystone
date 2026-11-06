@@ -1,5 +1,5 @@
 ---
-kind: guide
+kind: rule
 id: process/grounding
 description: 'The discipline of verifying that what the agent references — functions, APIs, packages, files, flags — actually exists before invoking it.'
 tags:

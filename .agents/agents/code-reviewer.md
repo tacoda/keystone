@@ -1,5 +1,5 @@
 ---
-kind: agent
+kind: subagent
 id: code-reviewer
 description: General code reviewer that runs the four review sensors on the current diff and surfaces findings.
 tools:

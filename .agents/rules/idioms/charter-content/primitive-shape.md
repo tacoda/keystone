@@ -1,8 +1,8 @@
 ---
-kind: guide
+kind: rule
 id: guides/idioms/charter-content/primitive-shape
 description: 'Frontmatter, canonical paths, corpus/guide pairing, narrow-only globs.'
-globs:
+paths:
   - ".charter/**/*.md"
   - "internal/framework/scaffold/templates/**/*.md"
 tags:

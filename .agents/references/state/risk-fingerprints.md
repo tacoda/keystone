@@ -1,5 +1,5 @@
 ---
-kind: corpus
+kind: reference
 id: corpus/state/risk-fingerprints
 description: 'Per-region risk score based on complexity + coupling + coverage.'
 ---

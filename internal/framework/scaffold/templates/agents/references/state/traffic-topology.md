@@ -1,5 +1,5 @@
 ---
-kind: corpus
+kind: reference
 id: corpus/state/traffic-topology
 description: 'Where attention concentrates in the codebase.'
 ---

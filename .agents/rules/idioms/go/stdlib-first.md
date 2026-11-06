@@ -1,8 +1,8 @@
 ---
-kind: guide
+kind: rule
 id: guides/idioms/go/stdlib-first
 description: 'Prefer Go stdlib over new third-party deps.'
-globs:
+paths:
   - "cmd/**/*.go"
   - "internal/**/*.go"
   - "go.mod"

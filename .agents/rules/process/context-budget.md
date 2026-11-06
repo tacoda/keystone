@@ -1,5 +1,5 @@
 ---
-kind: guide
+kind: rule
 id: process/context-budget
 description: 'How much the agent reads, runs, or spawns before making a change.'
 ---

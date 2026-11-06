@@ -1,7 +1,7 @@
 ---
-kind: sensor
+kind: hook
 mode: computational
-on: pre-verify
+event: pre-verify
 run: '# TODO: wire the vuln-scan command (see corpus/state/CODEBASE_STATE.md)'
 id: vuln-scan
 description: 'Scans declared dependencies for known vulnerabilities (CVEs, advisories).'

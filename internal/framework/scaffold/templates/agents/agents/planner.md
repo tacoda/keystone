@@ -1,5 +1,5 @@
 ---
-kind: agent
+kind: subagent
 id: planner
 description: Planning scout — loads codebase state and matching idioms for the touched region, then sketches a plan.
 tools:

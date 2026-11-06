@@ -1,5 +1,5 @@
 ---
-kind: guide
+kind: rule
 id: process/release
 description: 'The phase where the change lands and is announced.'
 ---

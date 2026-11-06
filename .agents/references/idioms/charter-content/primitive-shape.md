@@ -1,5 +1,5 @@
 ---
-kind: corpus
+kind: reference
 id: corpus/idioms/charter-content/primitive-shape
 description: 'Frontmatter, paths, and corpus/guide pairing for charter primitives.'
 ---

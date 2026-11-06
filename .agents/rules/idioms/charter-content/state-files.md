@@ -1,8 +1,8 @@
 ---
-kind: guide
+kind: rule
 id: guides/idioms/charter-content/state-files
 description: 'Authoring rules for .charter/corpus/state/.'
-globs:
+paths:
   - ".charter/corpus/state/**/*.md"
   - "internal/framework/scaffold/templates/**/corpus/state/**/*.md"
 tags:

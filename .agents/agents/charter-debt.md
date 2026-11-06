@@ -1,5 +1,5 @@
 ---
-kind: agent
+kind: subagent
 id: charter-debt
 description: 'Surfaces debt in the charter itself — content that exists but isn''t earning its keep.'
 tags:

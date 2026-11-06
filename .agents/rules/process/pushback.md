@@ -1,5 +1,5 @@
 ---
-kind: guide
+kind: rule
 id: process/pushback
 description: 'The discipline of disagreeing with the user when the user is wrong.'
 ---

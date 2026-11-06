@@ -1,5 +1,5 @@
 ---
-kind: guide
+kind: rule
 id: process/planning
 description: 'The phase that turns an approved spec into an approved plan, before code is written.'
 ---

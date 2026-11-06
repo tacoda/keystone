@@ -1,12 +1,12 @@
 ---
-kind: sensor
+kind: hook
 id: traffic-topology
 description: 'Combines git churn + recency + business criticality into a map of where attention concentrates.'
 tags:
   - computational
 mode: computational
-on: Stop
-run: true
+event: Stop
+run: "true"
 ---
 # Sensor: traffic-topology
 

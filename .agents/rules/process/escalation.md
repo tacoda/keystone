@@ -1,5 +1,5 @@
 ---
-kind: guide
+kind: rule
 id: process/escalation
 description: 'When the agent is stuck, when to stop and ask the user — versus when to keep going.'
 ---

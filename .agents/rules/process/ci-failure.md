@@ -1,5 +1,5 @@
 ---
-kind: guide
+kind: rule
 id: process/ci-failure
 description: 'What to do when CI fails — on a PR, after a merge, or post-deploy.'
 ---

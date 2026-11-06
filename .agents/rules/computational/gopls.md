@@ -1,11 +1,11 @@
 ---
-kind: guide
+kind: rule
 mode: computational
 event: PostToolUse
 run: 'command -v gopls >/dev/null 2>&1 && gopls version >/dev/null 2>&1 || true'
 id: guides/computational/gopls
 description: 'gopls — Go LSP for in-editor signal.'
-globs:
+paths:
   - "cmd/**/*.go"
   - "internal/**/*.go"
 ---

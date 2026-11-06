@@ -1,5 +1,5 @@
 ---
-kind: guide
+kind: rule
 id: process/self-validation
 description: 'The discipline of refusing to count the agent''s own claim as evidence.'
 ---

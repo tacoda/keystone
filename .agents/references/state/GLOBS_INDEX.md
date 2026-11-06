@@ -1,5 +1,5 @@
 ---
-kind: corpus
+kind: reference
 id: corpus/state/GLOBS_INDEX
 description: 'Reverse-index of every guide that declares globs: in its frontmatter.'
 ---

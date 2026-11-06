@@ -1,11 +1,11 @@
 ---
-kind: sensor
+kind: hook
 id: test
 description: 'The project''s test suite.'
 tags:
   - computational
 mode: computational
-on: Stop
+event: Stop
 run: go test ./...
 ---
 # Sensor: test

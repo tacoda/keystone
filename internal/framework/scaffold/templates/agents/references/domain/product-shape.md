@@ -1,5 +1,5 @@
 ---
-kind: corpus
+kind: reference
 id: corpus/domain/product-shape
 description: 'One-paragraph statement of the product.'
 ---

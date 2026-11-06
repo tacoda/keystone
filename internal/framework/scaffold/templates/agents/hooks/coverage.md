@@ -1,7 +1,7 @@
 ---
-kind: sensor
+kind: hook
 mode: computational
-on: pre-verify
+event: pre-verify
 run: '# TODO: wire the coverage command (see corpus/state/CODEBASE_STATE.md)'
 id: coverage
 description: 'Reads test coverage and updates the State layer.'

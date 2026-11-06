@@ -1,5 +1,5 @@
 ---
-kind: corpus
+kind: reference
 id: corpus/state/quality-radar
 description: 'Five-dimension scorecard for the codebase (or for the most recent reviewed diff).'
 ---

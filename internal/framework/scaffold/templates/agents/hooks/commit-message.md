@@ -1,7 +1,7 @@
 ---
-kind: sensor
+kind: hook
 mode: computational
-on: PreToolUse
+event: PreToolUse
 run: '# TODO: wire the commit-message check'
 id: commit-message
 description: 'Validates conventional-commit format and absence of AI attribution.'

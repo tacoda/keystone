@@ -1,12 +1,12 @@
 ---
-kind: sensor
+kind: hook
 id: vuln-scan
 description: 'Scans declared dependencies for known vulnerabilities (CVEs, advisories).'
 tags:
   - computational
 mode: computational
-on: Stop
-run: true
+event: Stop
+run: "true"
 ---
 # Sensor: vuln-scan
 

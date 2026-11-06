@@ -135,13 +135,7 @@ func SpecSkillFrontmatter(p Primitive) (string, error) {
 	if len(out.Metadata) == 0 {
 		out.Metadata = nil
 	}
-	var b strings.Builder
-	enc := yaml.NewEncoder(&b)
-	enc.SetIndent(2) // match the repo's frontmatter style
-	if err := enc.Encode(out); err != nil {
-		return "", err
-	}
-	return b.String(), enc.Close()
+	return encodeYAML(out)
 }
 
 func specMetadata(p Primitive) map[string]string {
@@ -158,11 +152,44 @@ func specMetadata(p Primitive) map[string]string {
 	return md
 }
 
-// InlineIncludes rewrites raw frontmatter fm so it carries the composed list
-// fields directly and drops `includes:` — retiring concerns (ADR 0010)
-// without changing what the primitive resolves to. Other keys keep their
-// order and values.
-func InlineIncludes(fm string, composed Primitive) (string, error) {
+// legacyKeys maps each 4.x frontmatter key to its 5.0 spelling.
+var legacyKeys = map[string]string{"globs": "paths", "on": "event"}
+
+// legacySpellings lists p's 4.x spellings as "old → new" pairs.
+func legacySpellings(p Primitive) []string {
+	var out []string
+	if p.LegacyKind != "" {
+		out = append(out, "kind: "+p.LegacyKind+" → kind: "+p.Kind)
+	}
+	for _, k := range p.Keys {
+		if nk, ok := legacyKeys[k]; ok {
+			out = append(out, k+": → "+nk+":")
+		}
+	}
+	return out
+}
+
+// lintLegacySpelling warns on 4.x spellings. They still parse (migrations
+// iron law 6), but YAML 1.1 parsers read `on:` as a boolean, and hosts
+// only know the 5.0 names.
+func lintLegacySpelling(p Primitive, add func(FindingSeverity, string)) {
+	if old := legacySpellings(p); len(old) > 0 {
+		add(FindingWarning, "4.x spelling ("+strings.Join(old, "; ")+") — `keystone lint --fix` rewrites it")
+	}
+}
+
+// NeedsModernize reports whether a non-skill primitive carries 4.x
+// spellings or retired `includes:` that ModernizeFrontmatter rewrites.
+func NeedsModernize(p Primitive) bool {
+	return len(legacySpellings(p)) > 0 || len(p.Includes) > 0
+}
+
+// ModernizeFrontmatter rewrites raw frontmatter fm into 5.0 spelling: 4.x
+// keys renamed in place (`globs:` → `paths:`, `on:` → `event:`), a 4.x
+// `kind:` value renamed, and `includes:` dropped with the composed list
+// fields written directly (concerns are retired, ADR 0010). Other keys
+// keep their order and values.
+func ModernizeFrontmatter(fm string, composed Primitive) (string, error) {
 	var doc yaml.Node
 	if err := yaml.Unmarshal([]byte(fm), &doc); err != nil {
 		return "", err
@@ -171,26 +198,45 @@ func InlineIncludes(fm string, composed Primitive) (string, error) {
 		return "", fmt.Errorf("frontmatter is not a mapping")
 	}
 	m := doc.Content[0]
-	pathsKey := "paths"
-	if mapIndex(m, "globs") >= 0 {
-		pathsKey = "globs"
+	renameLegacy(m, composed)
+	if i := mapIndex(m, "includes"); i >= 0 {
+		m.Content = append(m.Content[:i], m.Content[i+2:]...)
+		inlineComposedLists(m, composed)
 	}
+	return encodeYAML(m)
+}
+
+// renameLegacy renames 4.x keys in place and a 4.x `kind:` value.
+func renameLegacy(m *yaml.Node, composed Primitive) {
+	for old, nk := range legacyKeys {
+		if i := mapIndex(m, old); i >= 0 {
+			m.Content[i].Value = nk
+		}
+	}
+	if i := mapIndex(m, "kind"); i >= 0 && composed.LegacyKind != "" {
+		m.Content[i+1].Value = composed.Kind
+	}
+}
+
+// encodeYAML marshals v with 2-space indent, the repo's frontmatter style.
+func encodeYAML(v any) (string, error) {
+	var b strings.Builder
+	enc := yaml.NewEncoder(&b)
+	enc.SetIndent(2)
+	if err := enc.Encode(v); err != nil {
+		return "", err
+	}
+	return b.String(), enc.Close()
+}
+
+// inlineComposedLists writes the list fields a concern could contribute.
+func inlineComposedLists(m *yaml.Node, composed Primitive) {
 	for key, vals := range map[string][]string{
-		pathsKey: composed.Paths, "triggers": composed.Triggers, "tools": composed.Tools,
+		"paths": composed.Paths, "triggers": composed.Triggers, "tools": composed.Tools,
 		"tags": composed.Tags, "corpus": composed.Corpus, "deps": composed.Deps,
 	} {
 		setList(m, key, vals)
 	}
-	if i := mapIndex(m, "includes"); i >= 0 {
-		m.Content = append(m.Content[:i], m.Content[i+2:]...)
-	}
-	var b strings.Builder
-	enc := yaml.NewEncoder(&b)
-	enc.SetIndent(2)
-	if err := enc.Encode(m); err != nil {
-		return "", err
-	}
-	return b.String(), enc.Close()
 }
 
 // mapIndex returns the index of key's key-node in mapping m, or -1.

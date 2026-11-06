@@ -1,5 +1,5 @@
 ---
-kind: corpus
+kind: reference
 id: corpus/state/CODEBASE_STATE
 description: 'Empirical map of this codebase.'
 ---

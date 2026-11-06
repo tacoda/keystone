@@ -1,11 +1,11 @@
 ---
-kind: guide
+kind: rule
 mode: computational
 event: PostToolUse
 run: 'command -v gofmt >/dev/null 2>&1 && test -z "$(gofmt -l cmd internal)" || true'
 id: guides/computational/gofmt
 description: 'gofmt — canonical Go formatting.'
-globs:
+paths:
   - "cmd/**/*.go"
   - "internal/**/*.go"
 ---

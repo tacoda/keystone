@@ -1,11 +1,11 @@
 ---
-kind: sensor
+kind: hook
 id: type-check
 description: 'Signature and contract consistency.'
 tags:
   - computational
 mode: computational
-on: Stop
+event: Stop
 run: go vet ./...
 ---
 # Sensor: type-check

@@ -210,6 +210,9 @@ type Frontmatter struct {
 	// Keys lists the top-level frontmatter keys as authored, so lint can
 	// tell a spec-shaped skill from one carrying keystone-only keys.
 	Keys []string `yaml:"-" json:"-"`
+	// LegacyKind is the 4.x `kind:` value when one was normalized (e.g.
+	// "guide"), so lint can name the 5.0 spelling.
+	LegacyKind string `yaml:"-" json:"-"`
 
 	// Paths scopes a rule to the files it governs (glob list). The YAML
 	// key is `paths:`, the key Claude Code and Cline read; the 4.x key

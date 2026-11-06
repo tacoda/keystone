@@ -1,5 +1,5 @@
 ---
-kind: agent
+kind: subagent
 id: synthesizer
 description: Promotes learning-inbox candidates into the right corpus or guide layer.
 tools:

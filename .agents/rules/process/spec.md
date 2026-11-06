@@ -1,5 +1,5 @@
 ---
-kind: guide
+kind: rule
 id: process/spec
 description: 'The phase that captures what needs to happen, before deciding how.'
 ---

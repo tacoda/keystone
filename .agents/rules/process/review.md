@@ -1,5 +1,5 @@
 ---
-kind: guide
+kind: rule
 id: process/review
 description: 'The phase that confirms a mechanically-correct change is also the right change.'
 ---

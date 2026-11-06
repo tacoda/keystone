@@ -1,11 +1,11 @@
 ---
-kind: sensor
+kind: hook
 id: commit-message
 description: 'Validates conventional-commit format and absence of AI attribution.'
 tags:
   - computational
 mode: computational
-on: PreToolUse
+event: PreToolUse
 run: keystone verify --sensor commit-message
 ---
 # Sensor: commit-message

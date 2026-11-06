@@ -1,5 +1,5 @@
 ---
-kind: sensor
+kind: hook
 mode: inferential
 returns: review-findings
 id: quality-radar

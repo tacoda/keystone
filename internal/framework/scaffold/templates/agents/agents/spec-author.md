@@ -1,5 +1,5 @@
 ---
-kind: agent
+kind: subagent
 id: spec-author
 description: Captures intent and acceptance criteria for a unit of work — first step on any task.
 tools:

@@ -1,5 +1,5 @@
 ---
-kind: guide
+kind: rule
 id: process/implementation
 description: 'The phase where code gets written, test-first.'
 ---

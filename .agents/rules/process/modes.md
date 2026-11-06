@@ -1,5 +1,5 @@
 ---
-kind: guide
+kind: rule
 id: process/modes
 description: 'Active mode: paired'
 ---

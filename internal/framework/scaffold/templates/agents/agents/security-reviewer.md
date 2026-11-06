@@ -1,5 +1,5 @@
 ---
-kind: agent
+kind: subagent
 id: security-reviewer
 description: Security-focused PR reviewer that hunts OWASP-top-10 patterns and unsafe defaults.
 tools:

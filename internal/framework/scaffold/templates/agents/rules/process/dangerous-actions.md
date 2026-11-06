@@ -1,5 +1,5 @@
 ---
-kind: guide
+kind: rule
 id: process/dangerous-actions
 description: 'Operations the agent must confirm with the user before executing — irreversible, broadly-visible, or outside the local workspace.'
 ---

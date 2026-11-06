@@ -429,3 +429,13 @@ agent loads. 5.0 measures the load.
   concerns deleted, lint at 0 warnings; scaffold templates and `keystone new
   skill` emit spec shape. Found for Phase 4: the Claude skill projection
   writes `tools:`, but Claude Code's skill key is `allowed-tools`.
+- Phase 2c: done. `docs/schemas/primitive.schema.json` — one `$defs`
+  entry per kind (picked by directory; frontmatter alone cannot tell kinds
+  apart). All 199 primitives in `.agents/` and the scaffold templates
+  validate. Found while validating: YAML 1.1 parsers read the 4.x key `on:`
+  as boolean `true`, and `run: true` as a boolean — so lint now warns on
+  every 4.x spelling (`on:`, `globs:`, 4.x kind names) and `lint --fix`
+  rewrites them in place (key order and quoting kept). Dogfood + templates
+  fixed (73 + 64 files, at most 2 lines each); 8 placeholder hooks quoted
+  `run: "true"`.
+- **Phase 2 complete.**

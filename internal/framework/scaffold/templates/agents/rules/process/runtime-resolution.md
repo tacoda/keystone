@@ -1,5 +1,5 @@
 ---
-kind: guide
+kind: rule
 id: process/runtime-resolution
 description: How the agent resolves a scenario — staged escalation from rules to corpus to external sources, asking before applying.
 severity: must

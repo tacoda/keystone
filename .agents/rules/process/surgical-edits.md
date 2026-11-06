@@ -1,5 +1,5 @@
 ---
-kind: guide
+kind: rule
 id: process/surgical-edits
 description: 'Touch only what serves the task.'
 tags:

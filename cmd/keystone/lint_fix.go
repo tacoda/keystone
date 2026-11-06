@@ -10,9 +10,9 @@ import (
 )
 
 // fixFrontmatter applies the 5.0 frontmatter fixes to project primitives:
-// SKILL.md files move into Agent Skills spec shape, and any other primitive
-// with `includes:` gets its composed tools/tags inlined (concerns are
-// retired). Bodies are untouched, vendored policy files are skipped
+// SKILL.md files move into Agent Skills spec shape; every other primitive
+// gets 5.0 spelling (`paths:`, `event:`, 5.0 kind names) and its retired
+// concerns inlined. Bodies are untouched, vendored policy files are skipped
 // (read-only), and each rewrite prints its new frontmatter, so nothing is
 // overwritten silently.
 func fixFrontmatter(absDir string, primitives []primitive.Primitive) (int, error) {
@@ -45,7 +45,7 @@ func fixedFrontmatter(abs string, p primitive.Primitive) (string, error) {
 	if primitive.NeedsSpecFix(p) {
 		return primitive.SpecSkillFrontmatter(p)
 	}
-	if len(p.Includes) == 0 {
+	if !primitive.NeedsModernize(p) {
 		return "", nil
 	}
 	data, err := os.ReadFile(abs)
@@ -53,7 +53,7 @@ func fixedFrontmatter(abs string, p primitive.Primitive) (string, error) {
 		return "", err
 	}
 	raw, _, _ := primitive.SplitFrontmatter(string(data))
-	return primitive.InlineIncludes(raw, p)
+	return primitive.ModernizeFrontmatter(raw, p)
 }
 
 // rewriteFrontmatter replaces the frontmatter block of the file at abs,

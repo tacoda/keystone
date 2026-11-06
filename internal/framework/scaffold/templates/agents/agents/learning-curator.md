@@ -1,5 +1,5 @@
 ---
-kind: agent
+kind: subagent
 id: learning-curator
 description: Captures a learning candidate from a surprise, incident, or review finding into charter/learning/inbox/.
 tools:

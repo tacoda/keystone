@@ -1,5 +1,5 @@
 ---
-kind: corpus
+kind: reference
 id: corpus/state/INSTALL_PROFILE
 description: 'Selections captured by `keystone init`; read by the bootstrap action.'
 created: 2026-06-18

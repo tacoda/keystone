@@ -1,5 +1,5 @@
 ---
-kind: agent
+kind: subagent
 id: auditor
 description: Dual-flywheel auditor — captures learning candidates and prunes dead rules from the charter.
 tools:

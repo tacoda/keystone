@@ -1,7 +1,7 @@
 ---
-kind: sensor
+kind: hook
 mode: computational
-on: pre-verify
+event: pre-verify
 run: '# TODO: wire the stack-drift command (see corpus/state/CODEBASE_STATE.md)'
 id: stack-drift
 description: 'Detects when the empirical reality of the repo has diverged from what CODEBASESTATE.'

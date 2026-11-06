@@ -1,12 +1,12 @@
 ---
-kind: sensor
+kind: hook
 id: spec-adherence
 description: 'Walks the spec''s acceptance criteria against the current diff.'
 tags:
   - computational
 mode: computational
-on: Stop
-run: true
+event: Stop
+run: "true"
 ---
 # Sensor: spec-adherence
 

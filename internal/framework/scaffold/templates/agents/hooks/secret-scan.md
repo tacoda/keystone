@@ -1,7 +1,7 @@
 ---
-kind: sensor
+kind: hook
 mode: computational
-on: pre-verify
+event: pre-verify
 run: '# TODO: wire the secret-scan command (see corpus/state/CODEBASE_STATE.md)'
 id: secret-scan
 description: 'Scans the diff (or repo, on audit) for committed secrets — API keys, tokens, private keys, credentials.'

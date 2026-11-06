@@ -1,12 +1,12 @@
 ---
-kind: sensor
+kind: hook
 id: stack-drift
 description: 'Detects when the empirical reality of the repo has diverged from what CODEBASESTATE.'
 tags:
   - computational
 mode: computational
-on: Stop
-run: true
+event: Stop
+run: "true"
 ---
 # Sensor: stack-drift
 

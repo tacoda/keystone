@@ -1,5 +1,5 @@
 ---
-kind: agent
+kind: subagent
 id: mode-switcher
 description: Pacing-mode coordinator — switches the charter between paired, solo, and autopilot.
 tools:
