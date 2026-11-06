@@ -341,7 +341,7 @@ func signalCmd() *cobra.Command {
 func charterCmd() *cobra.Command {
 	c := &cobra.Command{
 		Use:                "charter",
-		Short:              "Inspect the charter (coverage: files no guide governs)",
+		Short:              "Inspect the charter (coverage: files no rule governs)",
 		DisableFlagParsing: true,
 		RunE:               runAndForward(runCharter),
 	}

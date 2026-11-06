@@ -15,7 +15,7 @@ import (
 func evalCmd() *cobra.Command {
 	c := &cobra.Command{
 		Use:   "eval",
-		Short: "Run charter evals (static + sensor levels)",
+		Short: "Run charter evals (static and hook levels)",
 		Long: `keystone eval — measure how the charter behaves against
 known scenarios. Each eval is a primitive of kind: eval, living at
 .agents/evals/<id>/EVAL.md with a sibling expected.json
@@ -25,8 +25,10 @@ Subcommands:
   run     Execute every eval (or a --filter subset) and write a report.
   list    Print every eval id discovered in the charter.
 
-Phase A (this release) implements static + sensor levels. Agent-level
-evals (LLM-driven, judge-graded) land in 2.1.`,
+Two levels run today: static (which rules a file path activates) and
+hook (` + "`level: sensor`" + ` in EVAL.md, expectations under "sensors" in
+expected.json; runs each hook's run: and checks its exit and output).
+The agent level (LLM-driven, judge-graded) is not implemented yet.`,
 	}
 	c.AddCommand(evalRunCmd())
 	c.AddCommand(evalListCmd())

@@ -76,33 +76,33 @@ func printProjectUsage(w *os.File) {
 	fmt.Fprint(w, `keystone project — regenerate host-native projections
 
 Usage:
-  keystone project [--dir <path>]
+  keystone project [--dir <path>] [--overwrite]
 
-Walks every primitive under .agents/ and writes host-native
-projections from the canonical sources:
+Delivers .agents/ to every host in keystone.json "adapters" (and any
+custom host defined in .agents/hosts/), by the cheapest method each host
+supports:
 
-  Framework wrappers (encouraged authoring path):
-    kind: persona  → .claude/agents/<id>.md
-    kind: action   → .claude/commands/<id>.md
-    kind: playbook → .claude/skills/<id>/SKILL.md
+  native   the host already reads the path (Codex and opencode read
+           .agents/skills/)
+  link     a symlink where the host reads the same format elsewhere
+           (Claude Code: .claude/skills/<name>); "link_mode": "copy"
+           writes copies instead
+  shim     a translated file where the host needs another format
+           (.claude/agents/<id>.md, .cursor/rules/<slug>.mdc,
+           .github/instructions/<slug>.instructions.md, …)
+  index    an AGENTS.md entry where the host has no slot for the kind
 
-  Agent escape hatches (raw host-native, same targets):
-    kind: subagent → .claude/agents/<id>.md
-    kind: command  → .claude/commands/<id>.md
-    kind: skill    → .claude/skills/<id>/SKILL.md
+It also writes the AGENTS.md and CLAUDE.md managed blocks, the hook
+bridges, and the permission rules each host can enforce, and names each
+gap a host can't close.
 
-A framework wrapper and its agent counterpart share the same .claude/
-target by design — collisions on the same id are caught by `+"`keystone lint`"+`.
-
-Disk-name normalization: ids containing ":" (canonical namespace
-separator) are rewritten to "-" in the projection filename; the
-frontmatter id stays unchanged.
-
-Hand-edits to projection files are erased on the next run — the
-canonical source under .agents/ is the only file you edit.
-The drift sensor reports projections that diverge from their source.
+Keystone records every file it writes in .keystone/lockfile.json and
+never replaces a file it didn't write; --overwrite replaces it. Edit the
+source in .agents/, never a projected file: `+"`keystone verify`"+`
+reports projections that drift from their source.
 
 Flags:
   --dir <path>    Project root (defaults to cwd).
+  --overwrite     Replace host files keystone didn't write.
 `)
 }

@@ -165,40 +165,39 @@ func printVerifyUsage(w *os.File) {
 	if ids == "" {
 		ids = "(none registered)"
 	}
-	fmt.Fprintf(w, `keystone verify — check vendored policies, the strict cascade, or one sensor
+	fmt.Fprintf(w, `keystone verify — check the charter, or run one built-in hook check
 
 Usage:
   keystone verify [--dir <path>]
   keystone verify --hook <id> [--dir <path>]
 
-Default mode: reads keystone.json + the lockfile, then:
-  - Walks every vendored policy and compares per-file hashes to the
-    lockfile. Any drift triggers an immediate policies.Reset (run
-    `+"`keystone install`"+` afterward to repopulate).
-  - Walks each policy's strict items and reports project-layer files
-    that shadow them.
+Default mode reads keystone.json and the lockfile, then checks:
+  - Vendored policies: per-file hashes against the lockfile. Drift resets
+    the policy (run `+"`keystone install`"+` afterward to repopulate).
+  - Strict items: project files that shadow a policy's strict item.
+  - Budget caps: keystone.json "budgets" against what each host loads.
+  - Projection drift: host files that no longer match .agents/.
 
---hook mode: runs one keystone-owned hook check and exits with a Claude
-Code hook protocol code. Reads tool_input fields (file_path, content,
-command) from stdin JSON when present. Sensors that wrap external
-tools (build, test, lint, vuln-scan) aren't routed here — wire those
-to the external tool directly in your keystone.json hooks block.
+--hook mode runs one of keystone's built-in hook checks and exits with a
+Claude Code hook code. It reads tool_input fields (file_path, content,
+command) from stdin JSON when present. Checks that wrap external tools
+(build, test, lint, vuln-scan) aren't built in: write them as hooks in
+.agents/hooks/ whose run: calls the tool.
 
-Currently registered sensors: %s
+Built-in hook checks: %s
 
 Exit codes (default mode):
-  0  clean (no drift after reset, no violations)
-  0  drift only — drifted policies were reset; user re-installs to recover
-  1  any strict violation
+  0  clean (drift alone resets the policy and still exits 0)
+  1  a strict violation, an exceeded budget cap, or projection drift
 
 Exit codes (--hook mode):
   0  pass / advisory
-  2  block with sensor message on stderr (Claude Code hook block)
-  1  internal error or unknown sensor
+  2  block, with the message on stderr (Claude Code hook block)
+  1  internal error or unknown check
 
 Flags:
   --dir <path>      Project root (defaults to cwd).
-  --hook <id>       Run one hook check instead of the policy cascade.
+  --hook <id>       Run one built-in hook check instead.
                     (--sensor is the 4.x spelling.)
 `, ids)
 }

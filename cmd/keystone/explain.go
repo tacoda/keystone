@@ -127,8 +127,8 @@ Usage:
 
     keystone explain <id> [--kind K] [--dir D]
 
-Explains a primitive: what it is, how/when it activates (a guide's globs,
-a sensor's on:, a skill's triggers, …), what it links to, and where it
+Explains a primitive: what it is, how/when it activates (a rule's paths:,
+a hook's event:, a skill's description, …), what it links to, and where it
 projects. Flags whether the primitive has uncommitted changes.
 `)
 }

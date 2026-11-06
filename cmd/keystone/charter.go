@@ -203,11 +203,11 @@ func printCharterUsage(w *os.File) {
 
 Usage:
 
-    keystone charter coverage [--dir D]                        # files no guide governs (uncharted territory)
+    keystone charter coverage [--dir D]                        # files no rule governs (uncharted territory)
     keystone charter show [--effective] [--kind K] [--dir D]   # the charter roster
     keystone charter conformance [--dir D]                     # rubric: does the repo conform to its charter?
 
-Coverage reports which project files a guide's globs match and which are
+Coverage reports which project files a rule's paths: match and which are
 uncharted — where the agent runs with no ambient rule. Show lists the
 charter's primitives by kind; --effective resolves the cascade (project
 wins, then policies) and annotates what each winner overrides.

@@ -38,7 +38,7 @@ var categories = []Category{
 			{"goose", "Block Goose"},
 			{"opencode", "opencode (open source CLI)"},
 			{"pi", "Pi"},
-			{"generic", "No specific agent — install the corpus only"},
+			{"generic", "No specific agent — install the charter only"},
 		},
 	},
 	{
@@ -114,7 +114,7 @@ var categories = []Category{
 		Description: "Opt-in opinion packs the installer can drop into charter/. Multiple allowed; skip if you want a blank slate.",
 		MultiSelect: true,
 		Values: []OptionValue{
-			{"universal-principles", "Engineering principles corpus + guides (SOLID, TDD, BDD, naming, error handling, ...)"},
+			{"universal-principles", "Engineering principles: rules and references (SOLID, TDD, BDD, naming, error handling, ...)"},
 		},
 	},
 }

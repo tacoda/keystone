@@ -241,22 +241,20 @@ Usage:
 
 Walks the charter once, composes the target primitive, and prints:
 
-  - The target's own descriptor (kind, id, description, path,
-    severity, model, tags, host_triggers).
-  - includes: concerns the target composes in.
-  - included by: primitives that include this one (when target is
-    a concern).
-  - traces: forward links from a guide to corpus entries.
-  - traced by: reverse — guides whose traces:[ ] mention this id.
-  - Host hooks (when target is a sensor with host_triggers).
+  - The target's own descriptor (category, kind, id, description, path,
+    severity, model, tags, paths, host_triggers).
+  - includes: primitives the target composes in.
+  - included by: primitives that include this one.
+  - traces: the references this primitive links (its corpus: field).
+  - traced by: primitives whose corpus: names this id.
+  - Host hooks (when the target is a hook with host_triggers).
 
 Flags:
   --json            Emit a structured JSON object instead of text.
   --dir <path>      Project root (defaults to cwd).
 
 Examples:
-  keystone show sensor secret-scan
-  keystone show concern reads-diff
-  keystone show guide guides/idioms/go/stdlib-first --json
+  keystone show hook secret-scan
+  keystone show rule idioms/go/stdlib-first --json
 `)
 }

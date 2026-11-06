@@ -26,23 +26,23 @@ var agentWarnings = map[string][]agentGap{
 			fallback:  ".agents/references/hosts/aider/review-strategy.md",
 		},
 		{
-			feature:   "commit-message sensor gate",
-			impact:    "Aider's default auto-commits fire before the commit-message sensor can inspect the message",
+			feature:   "commit-message hook gate",
+			impact:    "Aider's default auto-commits fire before the commit-message hook can inspect the message",
 			configFix: "set `auto-commits: false` in `.aider.conf.yml`",
 			fallback:  "",
 		},
 		{
 			feature:   "native tracker integration",
-			impact:    "the tracker-card-fetcher sensor falls back to shell or user paste",
+			impact:    "the tracker-card-fetcher subagent falls back to shell or user paste",
 			configFix: "use `/run gh issue view <id>` for GitHub Issues, or paste card content for Jira/Linear/Asana",
 			fallback:  ".agents/references/hosts/aider/tracker-workflow.md",
 		},
 	},
 	"continue": {
 		{
-			feature:   "lifecycle slash commands",
-			impact:    "without slash commands, every lifecycle action must be invoked as natural-language chat",
-			configFix: "add a `.continue/config.yaml` with the `prompts:` block from `charter/adapters/continue/lifecycle.md`",
+			feature:   "lifecycle skills",
+			impact:    "the keystone-* lifecycle skills reach Continue as copies in `.continue/skills/`; without them, every lifecycle step must be asked for in chat",
+			configFix: "run `keystone project` after each charter change so the copies stay current",
 			fallback:  "",
 		},
 		{
@@ -53,7 +53,7 @@ var agentWarnings = map[string][]agentGap{
 		},
 		{
 			feature:   "native tracker integration",
-			impact:    "the tracker-card-fetcher sensor needs an MCP server or shell fallback",
+			impact:    "the tracker-card-fetcher subagent needs an MCP server or shell fallback",
 			configFix: "configure an Atlassian/Linear/GitHub MCP server in `.continue/config.yaml`'s `mcpServers:` block",
 			fallback:  ".agents/references/hosts/continue/tracker-workflow.md",
 		},
@@ -61,19 +61,19 @@ var agentWarnings = map[string][]agentGap{
 	"cline": {
 		{
 			feature:   "menu auto-load",
-			impact:    "Cline only auto-reads `.clinerules` on newer versions; older versions need the menu in the extension's custom-instructions field",
-			configFix: "paste the contents of `cline-instructions.md` into Cline's `Custom Instructions` field in VS Code settings",
+			impact:    "Cline only auto-reads `.clinerules` on newer versions; older versions need the charter's orientation in the extension's custom-instructions field",
+			configFix: "paste the keystone block of `AGENTS.md` into Cline's `Custom Instructions` field in VS Code settings",
 			fallback:  "",
 		},
 		{
 			feature:   "lifecycle workflows",
-			impact:    "without saved workflows, every lifecycle action must be invoked as natural-language chat",
-			configFix: "add the `Keystone: <action>` workflows listed in `charter/adapters/cline/lifecycle.md` via the side panel's workflows menu",
+			impact:    "without saved workflows, every lifecycle step must be asked for in chat",
+			configFix: "save a `Keystone: <step>` workflow per keystone-* lifecycle skill (spec, verify, review, …) via the side panel's workflows menu",
 			fallback:  "",
 		},
 		{
 			feature:   "auto-approve for verify cycle",
-			impact:    "without auto-approve, the verify action stalls on a click per sensor command",
+			impact:    "without auto-approve, the verify skill stalls on a click per hook command",
 			configFix: "in Cline's settings, auto-approve file reads + read-only git commands + project test/lint/build commands",
 			fallback:  "",
 		},
@@ -87,7 +87,7 @@ var agentWarnings = map[string][]agentGap{
 	"goose": {
 		{
 			feature:   "developer extension",
-			impact:    "without the developer extension, sensors degrade to 'agent surfaces commands, user runs them'",
+			impact:    "without the developer extension, hooks degrade to 'agent surfaces commands, user runs them'",
 			configFix: "run `goose configure --enable-extension developer` (or enable it in the desktop app's Extensions settings)",
 			fallback:  "",
 		},
@@ -99,7 +99,7 @@ var agentWarnings = map[string][]agentGap{
 		},
 		{
 			feature:   "native tracker integration",
-			impact:    "the tracker-card-fetcher sensor needs an MCP extension or shell fallback",
+			impact:    "the tracker-card-fetcher subagent needs an MCP extension or shell fallback",
 			configFix: "run `goose configure --add-extension` and configure an Atlassian/Linear/GitHub MCP server",
 			fallback:  ".agents/references/hosts/goose/tracker-workflow.md",
 		},
@@ -133,15 +133,15 @@ var agentWarnings = map[string][]agentGap{
 	"generic": {
 		{
 			feature:   "lifecycle invocation",
-			impact:    "the generic adapter assumes only that the agent can read markdown on demand; lifecycle actions are entirely user-driven",
-			configFix: "if your agent has a rules file, slash-command, or saved-workflow primitive, document your bindings in a new `charter/adapters/<your-agent>/lifecycle.md`",
+			impact:    "the generic host assumes only that the agent can read markdown on demand; lifecycle steps are entirely user-driven",
+			configFix: "if your agent has a rules file, slash-command, or saved-workflow primitive, define it as a custom host (`keystone new adapter <name>`) or record your bindings in `.agents/references/hosts/<your-agent>/lifecycle.md`",
 			fallback:  ".agents/references/hosts/generic/lifecycle-overrides.md",
 		},
 		{
-			feature:   "autonomous sensor execution",
-			impact:    "unknown whether the agent can run shell during a turn; sensors may degrade to 'agent surfaces commands, user runs them'",
-			configFix: "if the agent has shell access, document it in `charter/adapters/<your-agent>/sensors.md`; otherwise document the surfaced-command workflow",
-			fallback:  ".agents/references/hosts/generic/sensors-overrides.md",
+			feature:   "autonomous hook execution",
+			impact:    "unknown whether the agent can run shell during a turn; hooks may degrade to 'agent surfaces commands, user runs them'",
+			configFix: "if the agent has shell access, document it in `.agents/references/hosts/<your-agent>/hooks.md`; otherwise document the surfaced-command workflow",
+			fallback:  ".agents/references/hosts/generic/hooks-overrides.md",
 		},
 		{
 			feature:   "sub-agent parallelism (review)",

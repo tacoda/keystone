@@ -96,40 +96,37 @@ func printIndexUsage(w *os.File) {
 	fmt.Fprint(w, `keystone index — emit the primitive descriptor index
 
 Usage:
-  keystone index [--dir <path>] [--charter-root <path>]
+  keystone index [--dir <path>]
 
-Walks the charter primitive locations and writes a single descriptor
-artifact at <keystone-dir>/INDEX.json (one level above the charter
-root — `+"`.keystone/INDEX.json`"+` for the default layout):
+Walks .agents/ and writes .keystone/INDEX.json (every descriptor) and
+.keystone/INDEX.lite.json (category, kind, id, description). A
+primitive's kind comes from its folder:
 
-  Framework wrappers:
-    <charter-root>/guides/**/*.md          → kind: guide      (wraps rule)
-    <charter-root>/sensors/*.md            → kind: sensor     (wraps rule)
-    <charter-root>/actions/*.md            → kind: action     (wraps command)
-    <charter-root>/playbooks/*.md          → kind: playbook   (wraps skill)
-    <charter-root>/personas/*.md           → kind: persona    (wraps subagent)
+  Constraints:
+    .agents/rules/**/*.md              → rule
+    .agents/references/**/*.md         → reference
+    .agents/hooks/*.md                 → hook
+    .agents/permissions/*.md           → permission
+    .agents/evals/<id>/EVAL.md         → eval
 
-  Framework standalone:
-    <charter-root>/corpus/**/*.md          → kind: corpus
-    <charter-root>/evals/<id>/EVAL.md      → kind: eval
-    <charter-root>/sources/*.md            → kind: source
+  Capabilities:
+    .agents/skills/<id>/SKILL.md       → skill
+    .agents/commands/*.md              → command
+    .agents/agents/*.md                → subagent
+    .agents/tools/*.md                 → tool
+    .agents/documents/*.md             → document
 
-  Agent escape hatches:
-    <charter-root>/rules/*.md              → kind: rule
-    <charter-root>/skills/<id>/SKILL.md    → kind: skill
-    <charter-root>/agents/*.md             → kind: subagent
-    <charter-root>/commands/*.md           → kind: command
+Vendored policies under .keystone/policies/ are indexed the same way.
+The 4.x folders (guides/, corpus/, sensors/, playbooks/, …) still index
+under their 5.0 kinds. Files without frontmatter are skipped; files whose
+frontmatter fails to parse are reported on stderr. README.md is never
+indexed.
 
-Files without canonical frontmatter are skipped (pre-migration state);
-files whose frontmatter fails to parse are reported on stderr and the
-remaining primitives still index. README.md is never indexed.
-
-The agent reads INDEX.json once at session start, then opens each
-primitive's body only when the descriptor's globs / triggers / phase
-match the work in hand.
+The agent reads the index first, then opens a body only when the
+primitive applies (a rule's paths:, a skill's description, a hook's
+event).
 
 Flags:
-  --dir <path>           Project root (defaults to cwd).
-  --charter-root <path>  Charter directory path (default: .agents).
+  --dir <path>    Project root (defaults to cwd).
 `)
 }
