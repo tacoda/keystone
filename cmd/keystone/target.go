@@ -11,14 +11,14 @@ import (
 )
 
 // runTarget dispatches `keystone target <subcommand> ...`.
-func runTarget(args []string, assets fs.FS) error {
+func runTarget(args []string, _ fs.FS) error {
 	if len(args) == 0 {
 		printTargetUsage(os.Stderr)
 		return fmt.Errorf("target requires a subcommand")
 	}
 	switch args[0] {
 	case "add":
-		return runTargetAdd(args[1:], assets)
+		return runTargetAdd(args[1:])
 	case "help", "--help", "-h":
 		printTargetUsage(os.Stdout)
 		return nil
@@ -43,7 +43,7 @@ Commands:
 // existing charter directory. Errors out if any requested agent is already
 // recorded in the lockfile — the user must explicitly remove it first
 // rather than risk silent overwrites.
-func runTargetAdd(args []string, assets fs.FS) error {
+func runTargetAdd(args []string) error {
 	dir := "."
 	var positional []string
 
@@ -116,14 +116,14 @@ func runTargetAdd(args []string, assets fs.FS) error {
 		}
 	}
 
-	for _, agent := range requested {
-		if err := installAgentTarget(assets, agent, absDir); err != nil {
-			return err
-		}
-	}
-
 	if err := appendInstalledAgents(absDir, charterRoot, requested); err != nil {
 		return fmt.Errorf("update lockfile: %w", err)
+	}
+	if err := addAdapters(absDir, requested); err != nil {
+		return fmt.Errorf("update keystone.json adapters: %w", err)
+	}
+	if err := runProject([]string{"--dir", absDir}); err != nil {
+		return err
 	}
 
 	for _, agent := range requested {
@@ -134,28 +134,29 @@ func runTargetAdd(args []string, assets fs.FS) error {
 }
 
 func printTargetAddUsage(w *os.File) {
-	fmt.Fprint(w, `keystone target add — install another agent's target bundle into an existing charter
+	fmt.Fprint(w, `keystone target add — add another agent host to an existing charter
 
 Usage:
   keystone target add <agent>[,<agent>...] [--dir <path>]
 
-Requires charter/ to exist in <dir> (default: .). Errors out if any of the
+Requires .agents/ to exist in <dir> (default: .). Adds the agents to
+keystone.json adapters and re-projects. Errors out if any of the
 requested agents is already recorded in the lockfile.
 
 Flags:
-  --dir <path>   Directory containing charter/ (defaults to cwd).
+  --dir <path>   Project root containing .agents/ (defaults to cwd).
 `)
 }
 
 func printTargetAddNextSteps(agents []string, charterRoot string) {
 	fmt.Fprintf(os.Stdout, "\n✓ added %s to the charter.\n\n", strings.Join(agents, ", "))
 	if len(agents) == 1 {
-		fmt.Fprintf(os.Stdout, "  See %s/adapters/%s/lifecycle.md for how to invoke actions in it.\n",
-			charterRoot, agentTargetDir(agents[0]))
+		fmt.Fprintf(os.Stdout, "  See %s/hosts/%s/lifecycle.md for how to invoke actions in it.\n",
+			config.StateRoot, agentTargetDir(agents[0]))
 	} else {
 		fmt.Fprint(os.Stdout, "  See:\n")
 		for _, a := range agents {
-			fmt.Fprintf(os.Stdout, "    %s/adapters/%s/lifecycle.md\n", charterRoot, agentTargetDir(a))
+			fmt.Fprintf(os.Stdout, "    %s/hosts/%s/lifecycle.md\n", config.StateRoot, agentTargetDir(a))
 		}
 	}
 	fmt.Fprintln(os.Stdout)

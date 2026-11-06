@@ -1,3 +1,7 @@
+// FROZEN: used only by the v2.x migrations and the frozen 4.x Cursor /
+// Continue adapters. Live projection (5.0+) renders AGENTS.md as a managed
+// block in internal/framework/projection (AgentsMD).
+//
 // Package agnostic projects the agent-agnostic surface — the files
 // every non-Claude coding agent reads regardless of host (Aider,
 // Cline, Cursor, OpenCode, Roo, generic AGENTS.md readers).

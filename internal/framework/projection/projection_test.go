@@ -46,9 +46,17 @@ func walk(t *testing.T, root string) []primitive.Primitive {
 	return prims
 }
 
+// plan returns the primitive outputs for hosts; root files (AGENTS.md,
+// CLAUDE.md, .aider.conf.yml) are covered by agentsmd_test.go.
 func plan(t *testing.T, root string, hosts ...Profile) []Output {
 	t.Helper()
-	return Plan(walk(t, root), hosts).Outputs
+	var outs []Output
+	for _, o := range Plan(walk(t, root), hosts).Outputs {
+		if o.Content == nil {
+			outs = append(outs, o)
+		}
+	}
+	return outs
 }
 
 // apply runs Apply in symlink mode and fails the test on error.
@@ -94,13 +102,13 @@ func TestPlan_ReusesLocationsHostsAlreadyRead(t *testing.T) {
 
 	pr := Plan(walk(t, seedCharter(t)), []Profile{ClaudeCode(), readsAgents, readsClaude})
 	outs, warns := pr.Outputs, pr.Warnings
-	for _, o := range outs {
-		if o.Host != "claude-code" {
-			t.Errorf("unexpected output for %s: %s", o.Host, o.Dest)
-		}
-	}
 	if len(warns) != 1 || warns[0].Host != "reads-claude" {
 		t.Errorf("want one duplicate warning for reads-claude, got %v", warns)
+	}
+	for _, o := range outs {
+		if o.Host != "claude-code" && o.Content == nil {
+			t.Errorf("unexpected output for %s: %s", o.Host, o.Dest)
+		}
 	}
 }
 

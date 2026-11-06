@@ -18,6 +18,7 @@
     "5.0"
   ],
   "projections": [
+    ".aider.conf.yml",
     ".claude/agents/keystone-auditor.md",
     ".claude/agents/keystone-bootstrap-scout.md",
     ".claude/agents/keystone-charter-debt.md",

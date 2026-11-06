@@ -95,10 +95,35 @@ func planUp_5_0(absDir string) (*Plan, error) {
 		return carryGitignore_5_0(filepath.Join(absDir, ".gitignore"))
 	})
 	p.Add("record 4.x keystone-* host projections as keystone-owned (so `keystone project` may replace and prune them)", recordLegacyProjections_5_0)
+	p.Add("remove 4.x generated entrypoints superseded by the AGENTS.md block (CHARTER.md; pointer-only AGENTS.md / CONVENTIONS.md)", removeLegacyEntrypoints_5_0)
 	p.Add("rebuild INDEX.json + INDEX.lite.json under "+stateRoot_5_0+"/", func(absDir string) error {
 		return rebuildIndex(absDir, agentsRoot_5_0, stateRoot_5_0)
 	})
 	return p, nil
+}
+
+// legacyEntrypoints_5_0 maps each 4.x root file to the exact prefix of the
+// content 4.x generated for it. 4.x rewrote these whole files on every
+// `keystone project`, so a file with this prefix holds no user content; a
+// file without it is left alone.
+var legacyEntrypoints_5_0 = map[string]string{
+	"CHARTER.md":     "# Charter\n\nThis repo is governed by a **keystone charter**",
+	"AGENTS.md":      "# Charter\n\nYou **must** read [`CHARTER.md`](CHARTER.md)",
+	"CONVENTIONS.md": "# Charter\n\nYou **must** read [`CHARTER.md`](CHARTER.md)",
+}
+
+func removeLegacyEntrypoints_5_0(absDir string) error {
+	for name, prefix := range legacyEntrypoints_5_0 {
+		path := filepath.Join(absDir, name)
+		data, err := os.ReadFile(path)
+		if err != nil || !strings.HasPrefix(string(data), prefix) {
+			continue // absent, or not keystone-generated
+		}
+		if err := os.Remove(path); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 // legacyProjectionDirs_5_0 are the host directories 4.x projected into,

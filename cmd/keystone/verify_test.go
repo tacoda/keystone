@@ -21,13 +21,28 @@ func TestVerify_PreVerifyHookBlocks(t *testing.T) {
 }
 
 // TestVerify_NoPreVerifyHookProceeds — with no pre-verify hook, the gate is a
-// no-op and verify runs to completion (clean tree, no policies).
+// no-op and verify runs to completion (projected tree, no policies).
 func TestVerify_NoPreVerifyHookProceeds(t *testing.T) {
 	root := t.TempDir()
 	if err := os.WriteFile(filepath.Join(root, "keystone.json"), []byte(`{"version":"2","policies":[]}`+"\n"), 0o644); err != nil {
 		t.Fatal(err)
 	}
+	if err := runProject([]string{"--dir", root}); err != nil {
+		t.Fatal(err)
+	}
 	if err := verifyWithHooks([]string{"--dir", root}); err != nil {
 		t.Errorf("expected clean verify with no hooks, got %v", err)
+	}
+}
+
+// TestVerify_UnprojectedTreeDrifts — before the first `keystone project`,
+// AGENTS.md is missing, and verify says so.
+func TestVerify_UnprojectedTreeDrifts(t *testing.T) {
+	root := t.TempDir()
+	if err := os.WriteFile(filepath.Join(root, "keystone.json"), []byte(`{"version":"2","policies":[]}`+"\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := verifyWithHooks([]string{"--dir", root}); err == nil {
+		t.Error("expected projection drift before the first keystone project")
 	}
 }

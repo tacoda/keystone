@@ -68,14 +68,7 @@ keystone signal fire <name>    # dispatch primitives subscribed (on:) to a signa
 After any primitive add / move / delete: run `keystone index && keystone project`.
 
 <!-- keystone:start -->
-@CHARTER.md
+@AGENTS.md
 
-You **must** read [`CHARTER.md`](CHARTER.md) before doing anything in this repo — it carries the iron laws and the ambient rules that govern the charter. The import above loads it; do not proceed without it.
-
-## On this host — Claude Code
-
-- **Subagents** — spawn charter agents (`.agents/agents/`) as subagents via the Task tool for review/scout work.
-- **Slash commands** — charter commands and playbooks surface as `/keystone-<id>`.
-- **Skills** — auto-activate by their `triggers:`.
-- **Hooks** — charter hooks fire automatically on Claude Code lifecycle events.
+Read [`AGENTS.md`](AGENTS.md) before anything else in this repo: it carries the iron laws and how the charter activates. The import above loads it.
 <!-- keystone:end -->

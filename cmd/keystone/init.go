@@ -94,12 +94,6 @@ func runInit(args []string, assets fs.FS) error {
 		return err
 	}
 
-	for _, agent := range agents {
-		if err := installAgentTarget(assets, agent, absDir); err != nil {
-			return err
-		}
-	}
-
 	if err := installConditional(assets, absDir, flags.charterRoot, flags.selections); err != nil {
 		return fmt.Errorf("install optional content: %w", err)
 	}
@@ -108,7 +102,7 @@ func runInit(args []string, assets fs.FS) error {
 		return fmt.Errorf("initialize lockfile: %w", err)
 	}
 
-	if err := writeProjectConfigIfMissing(absDir, flags.charterRoot); err != nil {
+	if err := writeProjectConfigIfMissing(absDir, agents); err != nil {
 		return fmt.Errorf("initialize project config: %w", err)
 	}
 
@@ -207,10 +201,9 @@ func indexAndProject(projectDir, charterRoot string) error {
 		return fmt.Errorf("project primitives: %w", err)
 	}
 
-	// Always-on entrypoint surface: canonical CHARTER.md + AGENTS.md
-	// pointer. Written before target templates are copied (skip-if-
-	// exists) so a fresh install ships them.
-	return writeCharterSurface(projectDir, true)
+	// Root entrypoints (AGENTS.md, CLAUDE.md, .aider.conf.yml) are part of
+	// the projection above.
+	return nil
 }
 
 // initializeLockfile creates <charterRoot>/keystone.lock.json if it doesn't
@@ -240,27 +233,6 @@ func initializeLockfile(destDir, charterRoot string, agents []string) error {
 		return err
 	}
 	fmt.Fprintf(os.Stdout, "  wrote: %s\n", filepath.Join(destDir, lockfile.RelPath()))
-	return nil
-}
-
-// installAgentTarget copies one agent's target bundle into destDir, merging its
-// menu file. Existing target files are left alone (skipIfExists). If the agent
-// has no shipped target bundle, prints a notice and returns nil — callers treat
-// this as a soft success since the corpus alone is still useful.
-func installAgentTarget(assets fs.FS, agent, destDir string) error {
-	targetRoot := filepath.Join("targets", agentTargetDir(agent))
-	if _, err := assets.Open(targetRoot); err != nil {
-		fmt.Fprintf(os.Stderr, "! no target bundle for %s; configure activation manually\n", agent)
-		return nil
-	}
-	fmt.Fprintf(os.Stdout, "▸ installing %s target\n", agent)
-	menuPath, err := installMenuFile(assets, agent, destDir)
-	if err != nil {
-		return fmt.Errorf("install menu file for %s: %w", agent, err)
-	}
-	if err := copyTree(assets, targetRoot, destDir, skipIfExists, menuPath); err != nil {
-		return fmt.Errorf("copy target for %s: %w", agent, err)
-	}
 	return nil
 }
 
@@ -321,19 +293,54 @@ func preflight(dir string) {
 // writeProjectConfigIfMissing creates keystone.json at the project root if
 // it doesn't exist yet. Re-running init never overwrites a user-edited
 // keystone.json — the user's policy tree is preserved.
-func writeProjectConfigIfMissing(projectDir, charterRoot string) error {
+// The chosen agents become `adapters`, which selects the hosts `keystone
+// project` writes for; on an existing keystone.json they are only added.
+func writeProjectConfigIfMissing(projectDir string, agents []string) error {
 	if _, err := config.ReadProjectConfig(projectDir); err == nil {
 		fmt.Fprintf(os.Stdout, "  exists: %s (kept)\n", filepath.Join(projectDir, config.ProjectConfigFile))
-		return nil
+		return addAdapters(projectDir, agents)
 	} else if !errors.Is(err, os.ErrNotExist) {
 		return err
 	}
-	cfg := config.DefaultProjectConfig(charterRoot)
+	cfg := config.DefaultProjectConfig("")
+	cfg.Adapters = hostAdapters(agents)
 	if err := config.WriteProjectConfig(projectDir, cfg); err != nil {
 		return err
 	}
 	fmt.Fprintf(os.Stdout, "  wrote: %s\n", filepath.Join(projectDir, config.ProjectConfigFile))
 	return nil
+}
+
+// hostAdapters maps `--agent` choices to keystone.json adapter names. The
+// generic choice needs no adapter: every project gets AGENTS.md.
+func hostAdapters(agents []string) []string {
+	var out []string
+	for _, a := range agents {
+		if a != "generic" && a != "_generic" {
+			out = append(out, a)
+		}
+	}
+	return out
+}
+
+// addAdapters appends agents missing from keystone.json `adapters`; the
+// user's existing entries and order are kept.
+func addAdapters(projectDir string, agents []string) error {
+	cfg, err := config.ReadProjectConfig(projectDir)
+	if err != nil {
+		return err
+	}
+	changed := false
+	for _, a := range hostAdapters(agents) {
+		if !cfg.HasAdapter(a) {
+			cfg.Adapters = append(cfg.Adapters, a)
+			changed = true
+		}
+	}
+	if !changed {
+		return nil
+	}
+	return config.WriteProjectConfig(projectDir, cfg)
 }
 
 // installScaffold copies the two scaffold trees: templates/agents → the
@@ -409,14 +416,14 @@ func printNextSteps(agents []string, charterRoot string) {
 	var bootstrapIn, lifecycle string
 	if len(agents) == 1 {
 		bootstrapIn = fmt.Sprintf("in %s", agents[0])
-		lifecycle = fmt.Sprintf("     See %s/adapters/%s/lifecycle.md for how to invoke it.\n",
-			charterRoot, agentTargetDir(agents[0]))
+		lifecycle = fmt.Sprintf("     See %s/hosts/%s/lifecycle.md for how to invoke it.\n",
+			config.StateRoot, agentTargetDir(agents[0]))
 	} else {
 		bootstrapIn = "in any one of the agents above (the charter edits are agent-agnostic)"
 		var b strings.Builder
 		b.WriteString("     See:\n")
 		for _, a := range agents {
-			fmt.Fprintf(&b, "       %s/adapters/%s/lifecycle.md\n", charterRoot, agentTargetDir(a))
+			fmt.Fprintf(&b, "       %s/hosts/%s/lifecycle.md\n", config.StateRoot, agentTargetDir(a))
 		}
 		b.WriteString("     for how to invoke it in each agent.\n")
 		lifecycle = b.String()

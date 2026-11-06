@@ -63,7 +63,7 @@ func Apply(projectDir string, outs []Output, owned []string, opts Options) (Appl
 func preflight(projectDir string, outs []Output, owned map[string]bool, opts Options) error {
 	var conflicts []string
 	for _, o := range outs {
-		if o.Dest != "" && blocked(filepath.Join(projectDir, o.Dest), owned[o.Dest], opts) {
+		if ownable(o) && blocked(filepath.Join(projectDir, o.Dest), owned[o.Dest], opts) {
 			conflicts = append(conflicts, o.Dest)
 		}
 	}
@@ -77,14 +77,15 @@ func preflight(projectDir string, outs []Output, owned map[string]bool, opts Opt
 // materialize writes one output; changed is false when disk already matches.
 func materialize(projectDir string, o Output, opts Options) (bool, error) {
 	dest := filepath.Join(projectDir, o.Dest)
-	switch {
-	case o.Strategy == Shim:
+	switch effective(o, opts.Mode) {
+	case Block:
+		return writeBlock(dest, o.Content)
+	case Shim:
 		return writeShim(projectDir, o, dest)
-	case o.Strategy == Copy || opts.Mode == LinkCopy:
+	case Copy:
 		return copyTarget(filepath.Join(projectDir, o.Target), dest)
-	default:
-		return linkTarget(projectDir, o, dest)
 	}
+	return linkTarget(projectDir, o, dest)
 }
 
 // blocked reports whether dest holds something keystone may not replace:
@@ -129,7 +130,24 @@ func replaceAt(dest string, write func() error) error {
 	return write()
 }
 
+// writeBlock merges content into dest's managed block, keeping every byte
+// outside the markers (the file belongs to the user).
+func writeBlock(dest string, content []byte) (bool, error) {
+	prev, err := os.ReadFile(dest)
+	if err != nil && !os.IsNotExist(err) {
+		return false, err
+	}
+	merged := MergeBlock(string(prev), string(content))
+	if merged == string(prev) {
+		return false, nil
+	}
+	return true, os.WriteFile(dest, []byte(merged), 0o644)
+}
+
 func expectedShim(projectDir string, o Output) ([]byte, error) {
+	if o.Content != nil {
+		return o.Content, nil
+	}
 	if o.Render == nil {
 		content, ok, err := primitive.RenderForHost(projectDir, o.Prim)
 		if err == nil && !ok {
@@ -262,20 +280,48 @@ func Check(projectDir string, outs []Output, mode LinkMode) []Drift {
 
 func checkOne(projectDir string, o Output, mode LinkMode) string {
 	dest := filepath.Join(projectDir, o.Dest)
-	switch {
-	case !exists(dest):
+	if !exists(dest) {
 		return "missing — run `keystone project`"
-	case o.Strategy == Shim:
+	}
+	switch effective(o, mode) {
+	case Block:
+		return blockDrift(dest, o.Content)
+	case Shim:
 		return shimDrift(projectDir, o, dest)
-	case o.Strategy == Copy || mode == LinkCopy:
-		if !sameTree(filepath.Join(projectDir, o.Target), dest) {
-			return "copy differs from " + o.Target
-		}
-	default:
-		want, _ := relLink(projectDir, o)
-		if cur, err := os.Readlink(dest); err != nil || cur != want {
-			return "not a link to " + o.Target
-		}
+	case Copy:
+		return copyDrift(projectDir, o, dest)
+	}
+	return linkDrift(projectDir, o, dest)
+}
+
+// effective is the strategy actually materialized: a symlink becomes a
+// copy in copy link mode.
+func effective(o Output, mode LinkMode) Strategy {
+	if o.Strategy == Symlink && mode == LinkCopy {
+		return Copy
+	}
+	return o.Strategy
+}
+
+func copyDrift(projectDir string, o Output, dest string) string {
+	if !sameTree(filepath.Join(projectDir, o.Target), dest) {
+		return "copy differs from " + o.Target
+	}
+	return ""
+}
+
+func linkDrift(projectDir string, o Output, dest string) string {
+	want, _ := relLink(projectDir, o)
+	if cur, err := os.Readlink(dest); err != nil || cur != want {
+		return "not a link to " + o.Target
+	}
+	return ""
+}
+
+func blockDrift(dest string, content []byte) string {
+	prev, _ := os.ReadFile(dest)
+	if MergeBlock(string(prev), string(content)) != string(prev) {
+		return "managed block is stale or edited — run `keystone project`"
 	}
 	return ""
 }

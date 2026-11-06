@@ -1,14 +1,11 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
 
-	"github.com/tacoda/keystone/internal/framework/adapters/agnostic"
-	"github.com/tacoda/keystone/internal/framework/adapters/aider"
 	"github.com/tacoda/keystone/internal/framework/adapters/claudecode"
 	"github.com/tacoda/keystone/internal/framework/config"
 	"github.com/tacoda/keystone/internal/framework/primitive"
@@ -73,71 +70,13 @@ func runProject(args []string) error {
 	fmt.Fprintf(os.Stdout, "✓ keystone project — %d written, %d unchanged, %d pruned\n",
 		len(res.Wrote), len(res.Unchanged), len(res.Pruned))
 
-	// Run host adapters. Each adapter projects the host-specific
-	// surface (hooks → .claude/settings.json, .cursor/rules/, etc.).
-	// Source of truth for hooks lives in sensor frontmatter under
-	// `.agents/hooks/` — the adapter reads the already-walked
-	// primitive slice rather than walking again.
-	cfg, cfgErr := config.ReadProjectConfig(absDir)
-	if cfgErr != nil && !errors.Is(cfgErr, os.ErrNotExist) {
-		fmt.Fprintf(os.Stderr, "keystone project: read keystone.json: %v\n", cfgErr)
-	}
-
-	// Canonical entrypoint (CHARTER.md) + the always-on AGENTS.md
-	// pointer. Every other host file is a thin pointer to CHARTER.md.
-	if err := writeCharterSurface(absDir, true); err != nil {
-		return err
-	}
-
-	// Claude Code adapter: hooks + posture regions in .claude/settings.json.
-	if err := projectClaudeCode(absDir, primitives); err != nil {
-		return err
-	}
-
-	// Opt-in cross-host adapters. Selection via keystone.json
-	// `adapters:` list. Each adapter writes its host's surface and
-	// reports the count of files emitted.
-	if cfg != nil {
-		if cfg.HasAdapter(config.AdapterAider) {
-			ares, err := aider.ProjectAider(absDir, agnostic.RenderPointer(agnostic.AiderProfile()))
-			if err != nil {
-				return fmt.Errorf("aider: %w", err)
-			}
-			if len(ares.Wrote) > 0 {
-				fmt.Fprintf(os.Stdout, "  aider: wrote %s\n", strings.Join(ares.Wrote, ", "))
-			} else {
-				fmt.Fprintf(os.Stdout, "  aider: unchanged\n")
-			}
-		}
-	}
-	return nil
+	// Claude Code adapter: hooks + posture regions in .claude/settings.json
+	// (Phase 5 moves these onto the projection engine).
+	return projectClaudeCode(absDir, primitives)
 }
 
 // projectClaudeCode emits the two Claude Code settings.json regions: the
 // managed hooks block and the posture-derived permissions block.
-// writeCharterSurface emits the always-on entrypoint surface: the
-// canonical CHARTER.md plus the thin AGENTS.md pointer to it. Shared by
-// `keystone project`, `keystone init`, and the watch loop so the three
-// never drift. When verbose, prints a "wrote:" line per changed file.
-func writeCharterSurface(projectDir string, verbose bool) error {
-	cres, err := agnostic.ProjectCharterMD(projectDir)
-	if err != nil {
-		return fmt.Errorf("CHARTER.md: %w", err)
-	}
-	ares, err := agnostic.ProjectAgentsMD(projectDir, agnostic.RenderPointer(agnostic.GenericProfile()))
-	if err != nil {
-		return fmt.Errorf("agnostic AGENTS.md: %w", err)
-	}
-	if verbose {
-		for _, r := range []agnostic.ProjectionResult{cres, ares} {
-			if r.Wrote {
-				fmt.Fprintf(os.Stdout, "  wrote: %s\n", r.Path)
-			}
-		}
-	}
-	return nil
-}
-
 func projectClaudeCode(absDir string, primitives []primitive.Primitive) error {
 	hres, err := claudecode.ProjectHooks(absDir, primitives)
 	if err != nil {

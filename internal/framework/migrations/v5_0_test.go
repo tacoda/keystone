@@ -116,6 +116,24 @@ func TestV5_Up_RecordsLegacyProjections(t *testing.T) {
 	}
 }
 
+// TestV5_Up_RemovesLegacyEntrypoints — 4.x generated CHARTER.md and a
+// pointer-only AGENTS.md go; a user-written AGENTS.md stays.
+func TestV5_Up_RemovesLegacyEntrypoints(t *testing.T) {
+	tmp := seed40Install(t)
+	writeAll(t, tmp, map[string]string{
+		"CHARTER.md":     "# Charter\n\nThis repo is governed by a **keystone charter** — x\n",
+		"CONVENTIONS.md": "# Charter\n\nYou **must** read [`CHARTER.md`](CHARTER.md) now\n",
+		"AGENTS.md":      "# Our agents\n\nHand-written.\n",
+	})
+	runV4(t, tmp, planUp_5_0)
+	for _, gone := range []string{"CHARTER.md", "CONVENTIONS.md"} {
+		if _, err := os.Stat(filepath.Join(tmp, gone)); !os.IsNotExist(err) {
+			t.Errorf("%s should be removed", gone)
+		}
+	}
+	mustExist(t, tmp, "AGENTS.md")
+}
+
 func TestV5_Up_IsIdempotent(t *testing.T) {
 	tmp := seed40Install(t)
 	runV4(t, tmp, planUp_5_0)

@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"os"
 	"os/signal"
@@ -15,8 +14,6 @@ import (
 	"github.com/fsnotify/fsnotify"
 	"github.com/spf13/cobra"
 
-	"github.com/tacoda/keystone/internal/framework/adapters/agnostic"
-	"github.com/tacoda/keystone/internal/framework/adapters/aider"
 	"github.com/tacoda/keystone/internal/framework/adapters/claudecode"
 	"github.com/tacoda/keystone/internal/framework/config"
 	"github.com/tacoda/keystone/internal/framework/primitive"
@@ -214,32 +211,11 @@ func runPipeline(ctx context.Context, projectDir string, doLint, doProject bool)
 	fmt.Fprintf(os.Stdout, ") in %s\n", time.Since(t0).Round(time.Millisecond))
 }
 
-// runWatchAdapters mirrors the adapter fan-out in `keystone project`.
-// Failures from any single adapter log a warning but don't abort the
-// watch loop — a half-finished cross-host projection is better than
-// the watcher dying on a transient I/O error.
+// runWatchAdapters re-projects the Claude Code settings.json regions, the
+// one host surface not yet on the projection engine (Phase 5). Root files
+// (AGENTS.md, CLAUDE.md, .aider.conf.yml) come from projectHosts.
 func runWatchAdapters(projectDir string, primitives []primitive.Primitive) {
-	// Canonical CHARTER.md + agnostic AGENTS.md pointer — always emitted.
-	if err := writeCharterSurface(projectDir, false); err != nil {
-		fmt.Fprintf(os.Stderr, "; ✗ %v", err)
-	}
-	// Claude Code settings.json — hooks + posture, always emitted
-	// (claude-code is the default host).
 	watchClaudeCode(projectDir, primitives)
-	// Opt-in adapters from keystone.json.
-	cfg, cfgErr := config.ReadProjectConfig(projectDir)
-	if cfgErr != nil && !errors.Is(cfgErr, os.ErrNotExist) {
-		fmt.Fprintf(os.Stderr, "; ✗ read keystone.json: %v", cfgErr)
-		return
-	}
-	if cfg == nil {
-		return
-	}
-	if cfg.HasAdapter(config.AdapterAider) {
-		if _, err := aider.ProjectAider(projectDir, agnostic.RenderPointer(agnostic.AiderProfile())); err != nil {
-			fmt.Fprintf(os.Stderr, "; ✗ aider: %v", err)
-		}
-	}
 }
 
 // watchClaudeCode re-projects the Claude Code settings.json regions (hooks +

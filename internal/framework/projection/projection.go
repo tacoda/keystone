@@ -33,8 +33,11 @@ const (
 	Symlink Strategy = "symlink"
 	Copy    Strategy = "copy"
 	Shim    Strategy = "shim"
-	Index   Strategy = "index"
-	Report  Strategy = "report"
+	// Block is a managed region between keystone markers inside a file the
+	// user also edits (AGENTS.md, CLAUDE.md). Never owned, never pruned.
+	Block  Strategy = "block"
+	Index  Strategy = "index"
+	Report Strategy = "report"
 )
 
 // LinkMode picks how a Symlink strategy is materialized.
@@ -99,6 +102,7 @@ type Output struct {
 	Strategy Strategy
 	Prim     primitive.Primitive // the source primitive, for shim rendering
 	Render   Renderer            // Shim renderer; nil = Claude Code format
+	Content  []byte              // fixed bytes (root files); overrides Render
 }
 
 // Warning flags a plan-level concern, e.g. a host that will see the same
@@ -136,6 +140,7 @@ func Plan(primitives []primitive.Primitive, hosts []Profile) PlanResult {
 			}
 		}
 	}
+	outs = append(outs, RootOutputs(primitives, hosts)...)
 	return PlanResult{Outputs: outs, Warnings: duplicateWarnings(primitives, hosts, located)}
 }
 
@@ -214,12 +219,17 @@ func underDir(loc, dir string) bool {
 
 func key(p primitive.Primitive) string { return p.Kind + "/" + p.ID }
 
-// Dests returns the sorted, de-duplicated host paths of outs.
+// ownable reports whether keystone owns o's path once written: every output
+// with a path, except managed blocks (the file belongs to the user).
+func ownable(o Output) bool { return o.Dest != "" && o.Strategy != Block }
+
+// Dests returns the sorted, de-duplicated host paths keystone owns in outs
+// (every output except managed blocks, whose file belongs to the user).
 func Dests(outs []Output) []string {
 	seen := map[string]bool{}
 	var ds []string
 	for _, o := range outs {
-		if o.Dest != "" && !seen[o.Dest] {
+		if ownable(o) && !seen[o.Dest] {
 			seen[o.Dest] = true
 			ds = append(ds, o.Dest)
 		}

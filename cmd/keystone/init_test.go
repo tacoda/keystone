@@ -4,6 +4,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -107,14 +108,14 @@ func TestInit_FreshScaffoldGoldenFiles(t *testing.T) {
 		".claude/skills/keystone-new-guide/SKILL.md",
 	}
 
-	for _, rel := range wantFiles {
-		path := filepath.Join(projectDir, rel)
-		if info, err := os.Stat(path); err != nil {
-			t.Errorf("missing expected file: %s (%v)", rel, err)
-		} else if info.IsDir() {
-			t.Errorf("expected file, got directory: %s", rel)
-		}
-	}
+	assertFilesExist(t, projectDir, wantFiles)
+
+	// --agent codex selects the codex host: keystone.json adapters, the
+	// Codex subagent TOMLs, and the generated AGENTS.md / CLAUDE.md blocks.
+	assertFileContains(t, projectDir, "keystone.json", `"codex"`)
+	assertFileContains(t, projectDir, ".codex/agents/keystone-verifier.toml", "developer_instructions = ")
+	assertFileContains(t, projectDir, "AGENTS.md", "<!-- keystone:start -->", "## Constraints", "**Codex**")
+	assertFileContains(t, projectDir, "CLAUDE.md", "@AGENTS.md")
 
 	// Universal-principles must NOT scaffold by default — it's opt-in
 	// via --starter universal-principles.
@@ -127,5 +128,49 @@ func TestInit_FreshScaffoldGoldenFiles(t *testing.T) {
 	// `keystone install` calls don't accidentally commit policy content.
 	if _, err := os.Stat(filepath.Join(projectDir, ".agents/policies")); !os.IsNotExist(err) {
 		t.Errorf("charter/policies should not exist on a fresh init with no policies declared (got err = %v)", err)
+	}
+}
+
+func assertFilesExist(t *testing.T, root string, rels []string) {
+	t.Helper()
+	for _, rel := range rels {
+		info, err := os.Stat(filepath.Join(root, rel))
+		switch {
+		case err != nil:
+			t.Errorf("missing expected file: %s (%v)", rel, err)
+		case info.IsDir():
+			t.Errorf("expected file, got directory: %s", rel)
+		}
+	}
+}
+
+func assertFileContains(t *testing.T, root, rel string, wants ...string) {
+	t.Helper()
+	data, err := os.ReadFile(filepath.Join(root, rel))
+	if err != nil {
+		t.Errorf("%s: %v", rel, err)
+		return
+	}
+	for _, w := range wants {
+		if !strings.Contains(string(data), w) {
+			t.Errorf("%s missing %q", rel, w)
+		}
+	}
+}
+
+// TestAddAdapters_AppendsMissingKeepsOrder — target add / re-init only add
+// hosts; existing entries and their order stay, and "generic" is skipped.
+func TestAddAdapters_AppendsMissingKeepsOrder(t *testing.T) {
+	root := t.TempDir()
+	if err := os.WriteFile(filepath.Join(root, "keystone.json"), []byte(`{"version":"2","policies":[],"adapters":["cursor"]}`+"\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := addAdapters(root, []string{"generic", "codex", "cursor"}); err != nil {
+		t.Fatal(err)
+	}
+	assertFileContains(t, root, "keystone.json", `"cursor",`, `"codex"`)
+	data, _ := os.ReadFile(filepath.Join(root, "keystone.json"))
+	if strings.Contains(string(data), "generic") {
+		t.Errorf("generic must not become an adapter:\n%s", data)
 	}
 }

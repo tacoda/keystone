@@ -13,11 +13,7 @@ var allHosts = []string{"cursor", "github-copilot", "continue", "opencode", "cod
 // TestHosts_PlanPerHost pins every host's outputs for the fixture charter
 // (one skill, one path-scoped rule, one command, one subagent).
 func TestHosts_PlanPerHost(t *testing.T) {
-	root := seedCharter(t)
-	got := map[string][]string{}
-	for _, o := range Plan(walk(t, root), Enabled(allHosts)).Outputs {
-		got[o.Host] = append(got[o.Host], string(o.Strategy)+" "+o.Dest)
-	}
+	got := outputsByHost(plan(t, seedCharter(t), Enabled(allHosts)...))
 	want := map[string][]string{
 		"claude-code": {"shim .claude/agents/keystone-reviewer.md", "shim .claude/commands/keystone-verify.md",
 			"shim .claude/rules/keystone-go-style.md", "symlink .claude/skills/deploy"},
@@ -43,6 +39,14 @@ func TestHosts_PlanPerHost(t *testing.T) {
 			t.Errorf("%s:\n  got  %v\n  want %v", host, g, w)
 		}
 	}
+}
+
+func outputsByHost(outs []Output) map[string][]string {
+	got := map[string][]string{}
+	for _, o := range outs {
+		got[o.Host] = append(got[o.Host], string(o.Strategy)+" "+o.Dest)
+	}
+	return got
 }
 
 func TestHosts_ShimFormats(t *testing.T) {

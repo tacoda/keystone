@@ -2,18 +2,8 @@ package agnostic
 
 import (
 	"fmt"
-	"path/filepath"
 	"strings"
 )
-
-// CharterMDRelPath is the single canonical agent-entrypoint file at the
-// repo root. `keystone project` writes it once; every host's own file
-// (CLAUDE.md, AGENTS.md, CONVENTIONS.md, a Cursor/Continue rule) is a
-// thin pointer that directs the agent to read it. The full orientation
-// — how to read the index, the activation table, the iron laws, the
-// lifecycle — lives here and nowhere else, so there is one source of
-// truth for what governs the repo.
-const CharterMDRelPath = "CHARTER.md"
 
 // HostProfile describes what a given coding-agent host can do with the
 // charter. The thin per-host pointer renders a capability delta from it
@@ -39,17 +29,7 @@ type HostProfile struct {
 	Hooks bool
 }
 
-// Host profiles, one per supported target. Kept as constructors so a
-// caller reads `agnostic.ClaudeCodeProfile()` at the call site rather
-// than threading a registry.
-func ClaudeCodeProfile() HostProfile {
-	return HostProfile{Name: "Claude Code", Import: "@CHARTER.md", Subagents: true, SlashCommands: true, SkillsAutoActivate: true, Hooks: true}
-}
-
-func OpencodeProfile() HostProfile {
-	return HostProfile{Name: "opencode", Subagents: true, SlashCommands: true, SkillsAutoActivate: true}
-}
-
+// Host profiles kept for the frozen 4.x Cursor/Continue pointer rules.
 func CursorProfile() HostProfile {
 	return HostProfile{Name: "Cursor", SkillsAutoActivate: true}
 }
@@ -60,15 +40,6 @@ func ContinueProfile() HostProfile {
 
 func AiderProfile() HostProfile {
 	return HostProfile{Name: "Aider"}
-}
-
-// GenericProfile is the conservative default for the shared root
-// AGENTS.md, which many hosts read. It claims no host-specific
-// capability; a host that has more (subagents, commands) discovers them
-// through its own projected dirs regardless. Empty Name → the pointer
-// renders a plain "On this host" heading.
-func GenericProfile() HostProfile {
-	return HostProfile{}
 }
 
 // RenderPointer returns the thin per-host entrypoint body: an imperative
@@ -121,76 +92,4 @@ func renderCapabilities(p HostProfile) string {
 		lines = append(lines, "- **No automatic hooks** — run the checks a hook would fire (lint, type-check, test, build) yourself before claiming done.")
 	}
 	return strings.Join(lines, "\n") + "\n"
-}
-
-// ProjectCharterMD writes the canonical CHARTER.md at the repo root.
-// Idempotent: re-running with unchanged content is a no-op.
-func ProjectCharterMD(projectDir string) (ProjectionResult, error) {
-	abs := filepath.Join(projectDir, CharterMDRelPath)
-	body := []byte(CharterBody())
-	res, err := writeIfChanged(abs, CharterMDRelPath, body)
-	return res, err
-}
-
-// CharterBody is the canonical, host-neutral orientation written to
-// CHARTER.md. It is the one place the full orientation lives.
-func CharterBody() string {
-	return `# Charter
-
-This repo is governed by a **keystone charter** — the authored standards
-that constrain whatever coding-agent harness runs here (Claude Code,
-Cursor, Codex, opencode, …). A *harness* is the engine that runs the
-model; the *charter* is what you author to make its output reliable.
-Author the spec → charter. Be the engine → harness.
-
-The charter is a tree of typed primitives under ` + "`.agents/`" + `. Every
-host-native surface (` + "`.claude/`" + `, ` + "`.cursor/`" + `, this file) is projected
-from it — do not hand-edit projected files.
-
-## Read first
-
-` + "`.keystone/INDEX.lite.json`" + ` — cheap discovery (kind + id + description
-per primitive). Browse it to pick what you need; open the full
-` + "`.keystone/INDEX.json`" + ` only when you need a primitive's path, globs, or
-triggers, and open a body only when its activation condition matches.
-
-## Activate by kind
-
-- **guide** — touched files match the entry's ` + "`globs:`" + ` (or it declares none).
-- **corpus** — a guide's ` + "`corpus:`" + ` (or a prose forward-link) points at it — the *why*, on demand.
-- **command** — user intent matches ` + "`description`" + ` + ` + "`phase`" + `; the body is a unit of work.
-- **playbook** — a composed sequence of commands with human ` + "`gates:`" + `.
-- **sensor** — a check that reacts to a signal or host phase (` + "`on:`" + `); computational (` + "`run:`" + ` → status verdict) or inferential (agent review → schema); gates.
-- **tool** — an author-defined external callable; on-demand, or a side-effect when it declares ` + "`on:`" + `.
-- **skill** — auto-activates by ` + "`triggers:`" + ` match.
-- **agent** — a role spawned as a subagent by ` + "`id`" + `; the body is its system prompt.
-- **pattern** — a reusable documentation pattern; apply when writing docs.
-
-A **signal** is a keystone framework event (` + "`on:`" + `); host phases are bridged, any other ` + "`on:`" + ` value is a signal (extensible; ` + "`keystone signal list`" + `).
-
-## Iron laws (non-negotiable, every phase)
-
-- No proceeding without explicit acceptance criteria.
-- No completion claims without fresh verification — checks run this turn, against post-edit state, with cited output.
-- No commits with failing checks. Never ` + "`--no-verify`" + `.
-- No AI attribution in commits, PRs, or tracker comments.
-- No silent overwrites of state files.
-- No reading or writing sensitive files (` + "`.env*`" + `, ` + "`*.pem`" + `, ` + "`*.key`" + `, ` + "`credentials.json`" + `, secrets dirs) — ask out-of-band.
-- No dangerous action without explicit in-turn confirmation (` + "`rm -rf`" + `, force-push, ` + "`reset --hard`" + `, prod DB writes, external comms, installs).
-- No invented imports, methods, config keys, or CLI flags — grep / read the manifest / check ` + "`--help`" + ` first.
-- No "while I'm here" cleanups — every changed line traces to the request.
-- No accepting a subagent's "done" report as evidence — read the diff; re-run checks in the parent turn.
-
-## Lifecycle
-
-To start a unit of work, say **"run task on ` + "`<ticket-id>`" + `"** — runs the
-` + "`task`" + ` playbook. For one command, ask in natural language ("run verify",
-"do a review pass"); its body lives at its INDEX ` + "`path`" + `.
-
-## Override
-
-Project files at ` + "`.agents/<kind>/<id>.md`" + ` always win. Among installed
-policies, deeper nesting refines outer policies; a ` + "`strict:`" + ` item is
-absolute — nothing else overrides it.
-`
 }

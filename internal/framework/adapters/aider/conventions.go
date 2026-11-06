@@ -1,3 +1,6 @@
+// FROZEN: used only by the v2.x migrations. Live projection (5.0+) writes
+// .aider.conf.yml from internal/framework/projection (RootOutputs).
+//
 // Package aider projects the keystone surface Aider expects:
 // `CONVENTIONS.md` at the repo root plus an `.aider.conf.yml` that
 // points Aider at the project's orientation files.

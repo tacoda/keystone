@@ -508,3 +508,23 @@ agent loads. 5.0 measures the load.
   (dedupe unverified, Phase 9 smoke); command `audit` and skill
   `keystone:audit` share the projected name `keystone-audit` (pre-existing
   in 4.x; Claude Code lets the skill win) — Phase 6 renaming.
+- Phase 4b: done. `AGENTS.md` is the rendered entrypoint, written as a
+  managed block (`<!-- keystone:start/end -->`): replaced in place, or
+  inserted after the first H1 with every other byte kept, so a user's own
+  AGENTS.md is never overwritten. It carries constraints / capabilities,
+  rules that apply everywhere (one line each; bodies on demand), iron laws,
+  lifecycle, override, and an "On each host" line per enabled host (what it
+  loads itself vs. what to open from `.agents/`). `CLAUDE.md` gets a block
+  with `@AGENTS.md`; `.aider.conf.yml` (owned whole file) reads AGENTS.md +
+  INDEX.lite. `CHARTER.md` and Aider `CONVENTIONS.md` are no longer written;
+  the `v5_0` migration removes them (and a pointer-only AGENTS.md) only when
+  their content has the exact 4.x generated prefix. `verify` reports a stale
+  or edited managed block. 809 words always-loaded for this repo.
+- Phase 4c: done. All `targets/` pointer templates and the menu installer
+  deleted (every host reads AGENTS.md itself; CLAUDE.md and .aider.conf.yml
+  come from projection). Fixed a 4.x gap: `init --agent X` never wrote
+  keystone.json `adapters`, so only Claude Code was ever projected; now init
+  writes them and `keystone target add` appends and re-projects. Frozen:
+  `adapters/agnostic`, `aider` (v2.x migrations only).
+  Phase 8 note: README.md still describes CHARTER.md.
+- **Phase 4 complete.**
