@@ -83,3 +83,31 @@ func TestHosts_ShimFormats(t *testing.T) {
 		t.Errorf("fresh all-host projection drifted: %v", d)
 	}
 }
+
+// TestTools_ByTransport — AGENTS.md says how to call each tool; only a
+// plugin tool becomes an opencode native tool.
+func TestTools_ByTransport(t *testing.T) {
+	root := seedCharter(t)
+	write(t, root, map[string]string{
+		".agents/tools/served.md": "---\nid: served\ndescription: Served.\ntransport: mcp\nrun: \"true\"\n---\n",
+		".agents/tools/shell.md":  "---\nid: shell\ndescription: Shell.\ntransport: cli\nrun: \"true\"\nargs:\n  - name: target\n---\n",
+		".agents/tools/native.md": "---\nid: native\ndescription: Native \\\"q\\\".\ntransport: plugin\nrun: \"true\"\nargs:\n  - name: target\n    required: true\n---\n",
+	})
+	prims := walk(t, root)
+	md := AgentsMD(prims, Enabled([]string{"opencode"}))
+	for _, want := range []string{"## Tools", "MCP tool `keystone_tool_served`", "`keystone tool run shell --target <target>`", "`keystone tool run native --target <target>`"} {
+		if !strings.Contains(md, want) {
+			t.Errorf("AGENTS.md missing %q", want)
+		}
+	}
+	if _, err := Apply(root, Plan(prims, Enabled([]string{"opencode"})).Outputs, nil, Options{Mode: LinkSymlink}); err != nil {
+		t.Fatal(err)
+	}
+	assertContains(t, root, ".opencode/tools/native.ts", `import { tool } from "@opencode-ai/plugin"`,
+		`"target": tool.schema.string().describe("")`, "keystone tool run ${\"native\"} ${argv}")
+	for _, absent := range []string{".opencode/tools/served.ts", ".opencode/tools/shell.ts"} {
+		if _, err := os.Stat(filepath.Join(root, absent)); err == nil {
+			t.Errorf("%s: only plugin tools become native tools", absent)
+		}
+	}
+}

@@ -17,6 +17,7 @@ const (
 	commandK  = primitive.KindCommand
 	subagentK = primitive.KindSubagent
 	hookK     = primitive.KindHook
+	toolK     = primitive.KindTool
 )
 
 var (
@@ -183,6 +184,7 @@ func OpenCode() Profile {
 			subagentK: {Strategy: Shim, Dest: nameDest(".opencode/agents", ".md"), Render: bodyRenderer(func(p primitive.Primitive) any {
 				return opencodeAgent{Description: p.Description, Mode: "subagent", Model: p.Model}
 			})},
+			toolK: {Strategy: Shim, Dest: pluginToolDest(".opencode/tools", ".ts"), Render: opencodeTool},
 		},
 		Reads: map[primitive.Kind][]string{skillK: {".agents/skills", ".opencode/skills", ".claude/skills"}},
 	}

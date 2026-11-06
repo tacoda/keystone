@@ -88,7 +88,7 @@ var kindDirs = []struct {
 	{primitive.KindSkill, "skills", "activates when its description matches the task"},
 	{primitive.KindCommand, "commands", "a unit of work the user asks for by name"},
 	{primitive.KindSubagent, "agents", "a role you delegate to"},
-	{primitive.KindTool, "tools", "a callable, served by the keystone MCP server"},
+	{primitive.KindTool, "tools", "a callable you run: through the keystone MCP server or `keystone tool run` (listed below)"},
 	{primitive.KindDocument, "documents", "a template for governed output; instances live in `.keystone/work/`"},
 }
 
@@ -106,6 +106,7 @@ func AgentsMD(primitives []primitive.Primitive, hosts []Profile) string {
 	writeKindSection(&b, "Constraints", primitive.CategoryConstraint)
 	writeKindSection(&b, "Capabilities", primitive.CategoryCapability)
 	writeEverywhereRules(&b, primitives)
+	writeTools(&b, primitives)
 	b.WriteString(agentsLaws)
 	writeHosts(&b, primitives, hosts)
 	return b.String()
@@ -135,6 +136,36 @@ func writeEverywhereRules(b *strings.Builder, primitives []primitive.Primitive) 
 	sort.Strings(lines)
 	b.WriteString("\n## Rules that apply everywhere\n\nOpen the one that fits the phase you are in.\n\n")
 	b.WriteString(strings.Join(lines, "\n") + "\n")
+}
+
+// writeTools lists each tool with how to call it: an mcp tool by its MCP
+// name, a cli or plugin tool by its `keystone tool run` command (a plugin
+// tool is also a native tool on hosts that have one).
+func writeTools(b *strings.Builder, primitives []primitive.Primitive) {
+	var lines []string
+	for _, p := range primitives {
+		if primitive.Kind(p.Kind) == primitive.KindTool {
+			lines = append(lines, fmt.Sprintf("- **%s** — %s Call: %s", p.ID, strings.TrimSpace(p.Description), toolCall(p)))
+		}
+	}
+	if len(lines) == 0 {
+		return
+	}
+	sort.Strings(lines)
+	b.WriteString("\n## Tools\n\nNot your host's built-in tools: these are the charter's own.\n\n")
+	b.WriteString(strings.Join(lines, "\n") + "\n")
+}
+
+func toolCall(p primitive.Primitive) string {
+	if p.Transport == "mcp" {
+		return "MCP tool `" + MCPToolName(p.ID) + "` (keystone MCP server)."
+	}
+	return "`" + primitive.ToolCommand(p) + "`."
+}
+
+// MCPToolName is the name the keystone MCP server serves tool id under.
+func MCPToolName(id string) string {
+	return "keystone_tool_" + strings.NewReplacer(":", "_", "/", "_", "-", "_").Replace(id)
 }
 
 // appliesEverywhere is an inferential rule with no paths: scope.
@@ -209,7 +240,7 @@ func hostKinds(h Profile) (auto, manual []string) {
 	for _, k := range kindDirs {
 		r, ok := h.Rules[k.kind]
 		switch {
-		case !ok:
+		case !ok, k.kind == primitive.KindTool: // the Tools section says how to call each
 		case r.Strategy == Index:
 			manual = append(manual, plural(k.kind))
 		default:

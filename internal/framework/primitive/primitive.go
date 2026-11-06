@@ -376,3 +376,14 @@ func IsKind(have, want string) bool {
 	k, _ := NormalizeKind(want)
 	return have == string(k)
 }
+
+// ToolCommand is the shell command that runs tool p through keystone
+// (`keystone tool run <id> --<arg> <arg>`), the form AGENTS.md lists and
+// host plugins call.
+func ToolCommand(p Primitive) string {
+	cmd := "keystone tool run " + p.ID
+	for _, a := range p.Args {
+		cmd += " --" + a.Name + " <" + a.Name + ">"
+	}
+	return cmd
+}

@@ -1,17 +1,15 @@
 package mcp
 
 import (
-	"bytes"
 	"context"
 	"fmt"
-	"os"
-	"os/exec"
-	"strings"
 
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 
 	"github.com/tacoda/keystone/internal/framework/primitive"
+	"github.com/tacoda/keystone/internal/framework/projection"
+	"github.com/tacoda/keystone/internal/framework/toolrun"
 )
 
 // registerToolPrimitives registers every `kind: tool` with `transport: mcp`
@@ -51,25 +49,18 @@ func registerOneTool(s *server.MCPServer, projectDir string, p primitive.Primiti
 	)
 }
 
-// toolMCPName renders a tool id as an MCP tool name: keystone_tool_<id>, with
-// namespace / hierarchy separators flattened to underscores.
-func toolMCPName(id string) string {
-	return "keystone_tool_" + strings.NewReplacer(":", "_", "/", "_", "-", "_").Replace(id)
-}
+// toolMCPName renders a tool id as an MCP tool name (keystone_tool_<id>);
+// AGENTS.md lists the same name.
+func toolMCPName(id string) string { return projection.MCPToolName(id) }
 
-// execTool runs the tool's run: handler with the call arguments exported as
-// KEYSTONE_ARG_<NAME> env vars.
+// execTool runs the tool's run: handler (toolrun.Run) with the declared
+// arguments the call supplied.
 func execTool(ctx context.Context, projectDir string, p primitive.Primitive, req mcp.CallToolRequest) (string, error) {
-	cmd := exec.CommandContext(ctx, "bash", "-c", p.Run)
-	cmd.Dir = projectDir
-	env := os.Environ()
+	args := map[string]string{}
 	for _, a := range p.Args {
-		env = append(env, "KEYSTONE_ARG_"+strings.ToUpper(a.Name)+"="+req.GetString(a.Name, ""))
+		if v := req.GetString(a.Name, ""); v != "" {
+			args[a.Name] = v
+		}
 	}
-	cmd.Env = env
-	var buf bytes.Buffer
-	cmd.Stdout = &buf
-	cmd.Stderr = &buf
-	err := cmd.Run()
-	return buf.String(), err
+	return toolrun.Run(ctx, projectDir, p, args)
 }
