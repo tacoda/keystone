@@ -35,7 +35,7 @@ const Version = "2.0.0"
 // detailed contracts live in `docs/ports/primitive.md`.
 const instructions = `keystone MCP — the charter, served.
 
-The charter lives at .charter/ and is indexed at .charter/INDEX.json.
+The charter lives at .agents/ and is indexed at .keystone/INDEX.json.
 Both this server and the keystone CLI read the same files; they never
 disagree.
 
@@ -96,7 +96,7 @@ self-subscribes via on:, like a skill declares triggers:
                                          adapter, policy}.
   keystone_charter_bootstrap   Scaffold the charter (init equivalent).
   keystone_target_add          Add another agent target.
-  keystone_index_refresh       Rebuild .charter/INDEX.json.
+  keystone_index_refresh       Rebuild .keystone/INDEX.json.
   keystone_project_refresh     Regenerate .claude/ host projections.
 
 ## Resources
@@ -118,7 +118,7 @@ keystone_project_refresh so .claude/ host projections regenerate.
 // else is derived from the charter on disk.
 type Options struct {
 	// ProjectDir is the consumer project root (the dir holding
-	// keystone.json + .charter/). Defaults to cwd at server start.
+	// keystone.json + .agents/). Defaults to cwd at server start.
 	ProjectDir string
 }
 
@@ -462,11 +462,11 @@ func registerResources(s *server.MCPServer, projectDir string) {
 	s.AddResource(
 		mcp.NewResource("keystone://index",
 			"Charter primitive index",
-			mcp.WithResourceDescription("The full .charter/INDEX.json — descriptors for every primitive in the charter."),
+			mcp.WithResourceDescription("The full .keystone/INDEX.json — descriptors for every primitive in the charter."),
 			mcp.WithMIMEType("application/json"),
 		),
 		func(ctx context.Context, req mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
-			path := filepath.Join(projectDir, kconfig.KeystoneDir(kconfig.DefaultCharterRoot), kconfig.IndexName)
+			path := filepath.Join(projectDir, kconfig.StateRoot, kconfig.IndexName)
 			data, err := os.ReadFile(path)
 			if err != nil {
 				return nil, fmt.Errorf("read index: %w", err)
@@ -484,7 +484,7 @@ func registerResources(s *server.MCPServer, projectDir string) {
 	s.AddResource(
 		mcp.NewResource("keystone://charter/status",
 			"Charter install status",
-			mcp.WithResourceDescription("Summary of what's installed at .charter/: primitive count by kind, INDEX.json freshness."),
+			mcp.WithResourceDescription("Summary of what's installed at .agents/: primitive count by kind, INDEX.json freshness."),
 			mcp.WithMIMEType("application/json"),
 		),
 		func(ctx context.Context, req mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
@@ -543,7 +543,7 @@ func loadIndex(projectDir string) (*primitive.Index, error) {
 	// re-walk is cheap (filesystem-bound) and the alternative would be
 	// stale-data hazards if a primitive was added since the last
 	// `keystone index` run.
-	primitives, _, err := primitive.Walk(projectDir, kconfig.DefaultCharterRoot)
+	primitives, _, err := primitive.Walk(projectDir, kconfig.DefaultAgentsRoot)
 	if err != nil {
 		return nil, err
 	}
@@ -552,7 +552,7 @@ func loadIndex(projectDir string) (*primitive.Index, error) {
 }
 
 func loadPrimitiveBody(projectDir, kind, id string) (primitive.Primitive, string, error) {
-	primitives, _, err := primitive.Walk(projectDir, kconfig.DefaultCharterRoot)
+	primitives, _, err := primitive.Walk(projectDir, kconfig.DefaultAgentsRoot)
 	if err != nil {
 		return primitive.Primitive{}, "", err
 	}

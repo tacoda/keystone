@@ -25,7 +25,7 @@ func mcpCmd() *cobra.Command {
 		Short: "Run the keystone MCP server, or register it with a host agent",
 		Long: `keystone mcp — model-context-protocol server for the charter.
 
-The server reads .charter/ and .charter/INDEX.json and
+The server reads .agents/ and .keystone/INDEX.json and
 exposes them as MCP tools and resources so host agents (Claude Code,
 Cursor, Codex, …) can consult the charter at runtime without reading
 every markdown file. Same source of truth as the CLI; no version skew.
@@ -56,7 +56,7 @@ into its MCP config. To register the server, run:
   keystone mcp install --agent claude-code
   keystone mcp install --agent cursor
 
-The server reads from the project's .charter/ tree. Pass
+The server reads from the project's .agents/ tree. Pass
 --dir to point at a project other than the current directory.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
@@ -92,7 +92,7 @@ Pass --stdout to print the config JSON instead of writing it; useful
 for piping into another tool or pasting into an agent's session.
 
 The server entry runs ` + "`keystone mcp serve`" + ` against the project's
-.charter/. Re-installing is idempotent.`,
+.agents/. Re-installing is idempotent.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if agent == "" {
 				return fmt.Errorf("--agent is required (try: claude-code, cursor, vscode, codex, opencode)")
@@ -138,7 +138,7 @@ func mcpStatusCmd() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			indexPath := filepath.Join(absDir, config.DefaultCharterRoot, config.IndexName)
+			indexPath := filepath.Join(absDir, config.DefaultAgentsRoot, config.IndexName)
 			indexExists := fileExists(indexPath)
 			fmt.Fprintf(os.Stdout, "keystone mcp status\n")
 			fmt.Fprintf(os.Stdout, "  project_dir:  %s\n", absDir)

@@ -12,7 +12,7 @@ import (
 // This is a transitional helper for the 0.x → 1.0 path. At 1.0 the
 // INSTALL_PROFILE.md fallback can be dropped.
 func ensureLockfile(installDir, charterRoot string) (*lockfile.Lockfile, error) {
-	lf, err := lockfile.Read(installDir, charterRoot)
+	lf, err := lockfile.Read(installDir)
 	if err != nil {
 		return nil, err
 	}

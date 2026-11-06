@@ -9,7 +9,7 @@ import (
 // runNewDocument handles `keystone new document <id>`. Scaffolds
 // <charter-root>/documents/<id>.md — a template for a governed output
 // document (plan, review, ADR, retro, feature). Instances are written
-// under .charter/work/ and advanced through `gates:` by `keystone
+// under .keystone/work/ and advanced through `gates:` by `keystone
 // document promote`.
 func runNewDocument(args []string) error {
 	projectDir, charterRoot, remaining, err := parseDirAndCharterRoot(args)
@@ -42,7 +42,7 @@ gates:
 # %s
 
 The template another operator fills in. Each section is a heading the
-author completes; the filled instance lands in .charter/work/<task-id>/.
+author completes; the filled instance lands in .keystone/work/<task-id>/.
 
 ## Sections
 

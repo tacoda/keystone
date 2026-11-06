@@ -72,7 +72,7 @@ func runPolicyAdd(args []string) error {
 	if err != nil {
 		return fmt.Errorf("resolve dir: %w", err)
 	}
-	charterRoot := config.DefaultCharterRoot
+	charterRoot := config.DefaultAgentsRoot
 
 	cfg, err := loadOrCreateProjectConfig(absDir, charterRoot)
 	if err != nil {
@@ -94,14 +94,14 @@ func runPolicyAdd(args []string) error {
 		return err
 	}
 
-	lf, err := lockfile.Read(absDir, charterRoot)
+	lf, err := lockfile.Read(absDir)
 	if err != nil {
 		return err
 	}
 	if err := installOnePolicy(absDir, charterRoot, node, lf); err != nil {
 		return err
 	}
-	if err := lockfile.Write(absDir, charterRoot, lf); err != nil {
+	if err := lockfile.Write(absDir, lf); err != nil {
 		return err
 	}
 

@@ -149,31 +149,22 @@ var canonicalDirKind = map[string]Kind{
 }
 
 // resolveKind returns the explicit kind (normalized from any 4.x name)
-// when set, else the kind inferred from the path.
-func resolveKind(explicit, relPath string) string {
+// when set, else the kind inferred from the root-relative path.
+func resolveKind(explicit, rootRel string) string {
 	if strings.TrimSpace(explicit) != "" {
 		k, _ := NormalizeKind(explicit)
 		return string(k)
 	}
-	return string(InferKind(relPath))
+	return string(InferKind(rootRel))
 }
 
-// InferKind returns the kind implied by a primitive's canonical
-// directory — the path segment immediately under "charter/" — or "" when
-// the path is off-convention. relPath is project-relative POSIX. This is
-// the convention-over-configuration entry point: Walk fills an empty
-// `kind:` from the directory, so authors need not declare it.
-func InferKind(relPath string) Kind {
-	const marker = "charter/"
-	i := strings.Index(relPath, marker)
-	if i < 0 {
-		return ""
-	}
-	rest := relPath[i+len(marker):]
-	seg := rest
-	if j := strings.Index(rest, "/"); j >= 0 {
-		seg = rest[:j]
-	}
+// InferKind returns the kind implied by a primitive's canonical directory —
+// the first segment of rootRel, a POSIX path relative to the charter root
+// (`.agents/`) or to a vendored policy root — or "" when off-convention.
+// This is the convention-over-configuration entry point: Walk fills an
+// empty `kind:` from the directory, so authors need not declare it.
+func InferKind(rootRel string) Kind {
+	seg, _, _ := strings.Cut(rootRel, "/")
 	return canonicalDirKind[seg]
 }
 
@@ -272,7 +263,7 @@ type Frontmatter struct {
 	Stop     string   `yaml:"stop,omitempty"        json:"stop,omitempty"`
 	Gates    []string `yaml:"gates,omitempty"       json:"gates,omitempty"`
 	// Gate is the current lifecycle state of a document *instance* (under
-	// .charter/work/). Templates declare `gates:` (the ordered set);
+	// .keystone/work/). Templates declare `gates:` (the ordered set);
 	// instances carry `gate:` (where they are now). `keystone document
 	// promote` advances it.
 	Gate       string   `yaml:"gate,omitempty"        json:"gate,omitempty"`
@@ -297,7 +288,7 @@ type Frontmatter struct {
 
 	// HostTriggers is the per-host activation surface for computational
 	// sensors. Same pattern as other primitive frontmatter — declared
-	// inline in the sensor's `.charter/sensors/<id>.md` rather
+	// inline in the sensor's `.agents/sensors/<id>.md` rather
 	// than in a separate config file. Each entry projects to one host
 	// hook entry (Claude Code: .claude/settings.json; Cursor: equivalent
 	// hook config; etc.) via per-host adapters. Empty for LLM-judgment

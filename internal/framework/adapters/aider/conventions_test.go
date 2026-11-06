@@ -32,7 +32,7 @@ func TestProjectAider_WritesBothFiles(t *testing.T) {
 	for _, want := range []string{
 		"CONVENTIONS.md",
 		"AGENTS.md",
-		".charter/INDEX.lite.json",
+		".keystone/INDEX.lite.json",
 	} {
 		if !strings.Contains(string(cfg), want) {
 			t.Errorf(".aider.conf.yml missing %q\n%s", want, cfg)

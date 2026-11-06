@@ -129,7 +129,7 @@ func Verify(installDir string, cfg *config.ProjectConfig, expectedFiles map[stri
 	visit := func(node config.PolicyNode, path []string) error {
 		ctx := strings.Join(append(path, node.Name), " > ")
 		exp := expectedFiles[node.Name]
-		drifts, err := policies.Verify(node.Name, installDir, charterRoot, exp)
+		drifts, err := policies.Verify(node.Name, installDir, exp)
 		if err != nil {
 			return fmt.Errorf("verify policy %q: %w", node.Name, err)
 		}
@@ -145,7 +145,7 @@ func Verify(installDir string, cfg *config.ProjectConfig, expectedFiles map[stri
 				Depth:         len(path),
 				StrictSensors: append([]string{}, node.Strict["sensors"]...),
 			}
-			sensorsPrefix := filepath.ToSlash(filepath.Join(charterRoot, "policies", node.Name, "sensors")) + "/"
+			sensorsPrefix := filepath.ToSlash(filepath.Join(config.PoliciesDir, node.Name, "sensors")) + "/"
 			for rel := range exp {
 				if strings.HasPrefix(rel, sensorsPrefix) {
 					depthV.VendoredSensors = append(depthV.VendoredSensors, rel)
@@ -263,7 +263,7 @@ func findShadowing(installDir, charterRoot, policy, port, item string) ([]string
 // error when the manifest is missing (older installs may omit it); the
 // caller should treat absence as "no required claims to check."
 func loadInstalledManifest(installDir, charterRoot, policy string) (*manifest.Manifest, error) {
-	policyRoot := filepath.Join(installDir, charterRoot, "policies", policy)
+	policyRoot := filepath.Join(installDir, config.PoliciesDir, policy)
 	if _, err := os.Stat(filepath.Join(policyRoot, manifest.PolicyManifestFile)); err != nil {
 		if os.IsNotExist(err) {
 			return nil, nil
@@ -305,7 +305,7 @@ func requiredSatisfied(installDir, charterRoot string, ancestors []string, port,
 	}
 	// Ancestor policies, in order outer → inner.
 	for _, anc := range ancestors {
-		ancPath := filepath.Join(installDir, charterRoot, "policies", anc, port, want)
+		ancPath := filepath.Join(installDir, config.PoliciesDir, anc, port, want)
 		if _, err := os.Stat(ancPath); err == nil {
 			return true
 		}

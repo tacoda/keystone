@@ -9,7 +9,6 @@ import (
 	"strings"
 
 	"github.com/tacoda/keystone/internal/framework/config"
-	"github.com/tacoda/keystone/internal/framework/policies"
 	"github.com/tacoda/keystone/internal/framework/primitive"
 )
 
@@ -49,7 +48,7 @@ func (s *server) collectInventory(_ context.Context, search string) (*PolicyInve
 	needle := strings.ToLower(strings.TrimSpace(search))
 
 	// Project layer.
-	projectPrimitives, _, err := s.primitiveCache.getLayer(config.DefaultCharterRoot)
+	projectPrimitives, _, err := s.primitiveCache.getLayer(config.DefaultAgentsRoot)
 	if err != nil {
 		return nil, err
 	}
@@ -65,7 +64,7 @@ func (s *server) collectInventory(_ context.Context, search string) (*PolicyInve
 		return inv, nil
 	}
 	for _, p := range flattenPolicies(cfg.Policies) {
-		policyRoot := filepath.Join(config.DefaultCharterRoot, policies.PolicyRoot, p.Name)
+		policyRoot := filepath.Join(config.PoliciesDir, p.Name)
 		// getLayer returns nil + err on a missing vendored tree; we
 		// surface that as zero primitives, mirroring the previous
 		// per-call Walk behavior.

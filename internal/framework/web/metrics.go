@@ -92,7 +92,7 @@ func (s *server) collectMetrics(ctx context.Context) (*MetricsSnapshot, error) {
 		}
 	}
 
-	indexPath := filepath.Join(s.projectDir, kconfig.KeystoneDir(kconfig.DefaultCharterRoot), kconfig.IndexName)
+	indexPath := filepath.Join(s.projectDir, kconfig.StateRoot, kconfig.IndexName)
 	indexFresh := false
 	indexAge := ""
 	if info, err := os.Stat(indexPath); err == nil {

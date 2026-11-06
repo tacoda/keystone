@@ -12,7 +12,7 @@ import (
 
 // runLint handles `keystone lint [--dir <path>]`.
 //
-// Walks every primitive under .charter/, parses frontmatter,
+// Walks every primitive under .agents/, parses frontmatter,
 // runs Lint(), prints findings, and exits non-zero on any error-level
 // finding. Warnings are reported but never block the exit.
 func runLint(args []string) error {
@@ -45,7 +45,7 @@ func runLint(args []string) error {
 	if err != nil {
 		return fmt.Errorf("resolve dir: %w", err)
 	}
-	charterRoot := config.DefaultCharterRoot
+	charterRoot := config.DefaultAgentsRoot
 
 	primitives, warnings, err := primitive.Walk(absDir, charterRoot)
 	if err != nil {
@@ -97,7 +97,7 @@ func printLintUsage(w *os.File) {
 Usage:
   keystone lint [--dir <path>] [--verbose]
 
-Walks every canonical primitive under .charter/, checks each
+Walks every canonical primitive under .agents/, checks each
 file's frontmatter against the canonical schema, and reports any
 violations. Exits non-zero on any error-level finding.
 

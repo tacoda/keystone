@@ -39,7 +39,7 @@ func runCharterConformance(args []string) error {
 	if err != nil {
 		return fmt.Errorf("resolve dir: %w", err)
 	}
-	rub, err := charter.Conformance(absDir, config.DefaultCharterRoot)
+	rub, err := charter.Conformance(absDir, config.DefaultAgentsRoot)
 	if err != nil {
 		return fmt.Errorf("conformance: %w", err)
 	}
@@ -55,7 +55,7 @@ func runCharterCoverage(args []string) error {
 	if err != nil {
 		return fmt.Errorf("resolve dir: %w", err)
 	}
-	res, err := charter.Coverage(absDir, config.DefaultCharterRoot)
+	res, err := charter.Coverage(absDir, config.DefaultAgentsRoot)
 	if err != nil {
 		return fmt.Errorf("coverage: %w", err)
 	}
@@ -108,7 +108,7 @@ func runCharterShow(args []string) error {
 	if err != nil {
 		return fmt.Errorf("resolve dir: %w", err)
 	}
-	prims, _, err := primitive.Walk(absDir, config.DefaultCharterRoot)
+	prims, _, err := primitive.Walk(absDir, config.DefaultAgentsRoot)
 	if err != nil {
 		return fmt.Errorf("walk charter: %w", err)
 	}

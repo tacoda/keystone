@@ -65,13 +65,13 @@ This project uses a **keystone charter** — an agent-agnostic framework
 for guides, sensors, actions, playbooks, and personas. Every
 host-native surface (Claude Code skills, Cursor rules, Aider
 conventions) is projected from the canonical sources under
-` + "`.charter/`" + `.
+` + "`.agents/`" + `.
 
 ## Read first
 
-` + "`.charter/INDEX.lite.json`" + ` — cheap discovery (kind + id +
+` + "`.keystone/INDEX.lite.json`" + ` — cheap discovery (kind + id +
 description per primitive). Browse this to pick what you need; open
-the full ` + "`.charter/INDEX.json`" + ` only when you need a primitive's
+the full ` + "`.keystone/INDEX.json`" + ` only when you need a primitive's
 path, globs, or triggers.
 
 ## Activate by kind
@@ -104,7 +104,7 @@ To start a unit of work, say **"run task on ` + "`<ticket-id>`" + `"** — runs 
 
 ## Override
 
-Project files at ` + "`.charter/<kind>/<id>.md`" + ` always win. Among
+Project files at ` + "`.agents/<kind>/<id>.md`" + ` always win. Among
 installed policies, deeper nesting refines outer policies; ` + "`strict:`" + ` is
 absolute.
 `

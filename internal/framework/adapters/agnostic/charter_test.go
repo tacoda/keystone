@@ -16,7 +16,7 @@ func TestCharterBody_HasCoreSections(t *testing.T) {
 		"## Iron laws",
 		"## Lifecycle",
 		"## Override",
-		".charter/INDEX.lite.json",
+		".keystone/INDEX.lite.json",
 	} {
 		if !strings.Contains(body, want) {
 			t.Errorf("CharterBody missing %q", want)

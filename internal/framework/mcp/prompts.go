@@ -26,10 +26,10 @@ func registerPrompts(s *server.MCPServer, projectDir string) {
 			return promptResult(
 				"keystone_bootstrap",
 				"Run the bootstrap action.",
-				`Open .charter/actions/bootstrap.md and execute its Activities in order:
+				`Open .agents/actions/bootstrap.md and execute its Activities in order:
 
 - detect language / framework / CI from the repo
-- seed corpus/state/CODEBASE_STATE.md and INSTALL_PROFILE.md
+- seed references/state/CODEBASE_STATE.md and INSTALL_PROFILE.md
 - classify every sensor as computational or inferential
 - seed idiom globs from the region map
 
@@ -56,7 +56,7 @@ Surface any conversational gaps (aspirational patterns, methodology, migration p
 				fmt.Sprintf("Run task on: %s", desc),
 				fmt.Sprintf(`Run task on: %s
 
-Open .charter/playbooks/task.md and execute the sequence:
+Open .agents/playbooks/task.md and execute the sequence:
   spec → orient → (implementation) → check-drift → verify → review
 
 Resolve each stage per the runtime-resolution flow (rules → corpus → external → ask). At any iron-law violation, halt and surface to the user.`, desc),
@@ -72,7 +72,7 @@ Resolve each stage per the runtime-resolution flow (rules → corpus → externa
 			return promptResult(
 				"keystone_audit",
 				"Run the audit action.",
-				`Open .charter/actions/audit.md and execute its Activities. Drive the dual flywheel:
+				`Open .agents/actions/audit.md and execute its Activities. Drive the dual flywheel:
   - Learning: walk learning/inbox/, propose promotions to corpus/guides
   - Pruning: identify stale guides/corpus, propose archive moves
 
@@ -101,7 +101,7 @@ Surface every proposed move to the user before applying. Never delete; archive w
 
 %s
 
-Open .charter/actions/learn.md and write a candidate to learning/inbox/<timestamp>-<slug>.md following the canonical shape (captured/source/proposed-layer/proposed-globs frontmatter + What happened / Why it matters / Proposed change body).
+Open .agents/actions/learn.md and write a candidate to learning/inbox/<timestamp>-<slug>.md following the canonical shape (captured/source/proposed-layer/proposed-globs frontmatter + What happened / Why it matters / Proposed change body).
 
 Promotion to corpus/guides happens in synthesize, not here.`, finding),
 			), nil

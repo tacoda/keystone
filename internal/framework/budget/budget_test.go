@@ -43,7 +43,7 @@ func TestPortForPath(t *testing.T) {
 		{"charter/learning/inbox/X.md", "charter", ""},
 		{"charter/archive/X.md", "charter", ""},
 		{"charter/README.md", "charter", ""},
-		{"charter/policies/X/guides/Y.md", "charter", ""}, // policies/ has its own logic; not a port
+		{".keystone/policies/X/guides/Y.md", "charter", ""}, // policies/ has its own logic; not a port
 		{"custom/guides/X.md", "custom", "guides"},
 		{"other/guides/X.md", "charter", ""}, // wrong charter root
 	}

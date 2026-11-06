@@ -43,7 +43,7 @@ type ProjectionResult struct {
 //
 // Other kinds (corpus, sensor, eval, source, rule) and guides without
 // declared globs have no host-native projection at this layer — the
-// agent reads them through .charter/INDEX.json + the canonical paths
+// agent reads them through .keystone/INDEX.json + the canonical paths
 // directly. Guides without globs are global-process content that is
 // either always-on (and distilled into CLAUDE.md) or on-demand via
 // INDEX.json; only globbed idiom guides need an ambient

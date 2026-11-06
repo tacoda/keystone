@@ -36,7 +36,7 @@ origin for HTML, REST API, and SSE.
 The dashboard at http://127.0.0.1:<port>/ shows the charter inventory
 and primitive detail pages. The REST API
 under /api/ is read-only. Server-Sent Events at /events push HTMX
-fragments whenever a file in .charter/ changes — the dashboard
+fragments whenever a file in .agents/ changes — the dashboard
 updates without polling.
 
 Default port 4773 ("KEYS" on a phone keypad). Override with --port.`,

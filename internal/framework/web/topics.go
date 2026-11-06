@@ -1,6 +1,7 @@
 package web
 
 import (
+	"github.com/tacoda/keystone/internal/framework/config"
 	"path/filepath"
 	"strings"
 )
@@ -22,7 +23,7 @@ const (
 // it should emit. The coarse `charter-changed` topic is always
 // present, so widgets that don't care which subsystem moved still
 // fire. Multiple narrow topics may also apply — e.g. a touch to
-// `policies/<x>/.charter/...` is `primitives-changed` (the
+// `policies/<x>/.agents/...` is `primitives-changed` (the
 // primitives a policy ships moved).
 //
 // Paths are matched on forward-slash form so the classification is
@@ -36,15 +37,15 @@ func topicsForPath(projectDir, path string) []sseTopic {
 	switch {
 	case strings.Contains(rel, "/learning/inbox/") || strings.HasSuffix(rel, "/learning/inbox"):
 		out = append(out, topicInbox, topicPrimitives)
-	case strings.Contains(rel, "/.charter/policies/") || strings.Contains(rel, "/policies/"):
+	case strings.Contains(rel, "/policies/"):
 		out = append(out, topicPrimitives)
 	case strings.HasSuffix(rel, "/INDEX.json") || strings.HasSuffix(rel, "INDEX.json"):
 		out = append(out, topicPrimitives)
-	// Specific files under the charter root must match before the generic
-	// charter-dir case below — the lockfile lives at .charter/lockfile.json.
+	// Specific files must match before the generic charter-dir case below —
+	// the lockfile lives at .keystone/lockfile.json.
 	case strings.Contains(rel, "/prune") || strings.HasSuffix(rel, "lockfile.json"):
 		out = append(out, topicPrune)
-	case strings.Contains(rel, "/.charter/") || strings.HasPrefix(rel, ".charter/"):
+	case strings.HasPrefix(rel, config.DefaultAgentsRoot+"/"):
 		out = append(out, topicPrimitives)
 	}
 

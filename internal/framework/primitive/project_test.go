@@ -65,7 +65,7 @@ func TestProjectionRelPath(t *testing.T) {
 
 func TestProject_RuleShim(t *testing.T) {
 	root := t.TempDir()
-	src := filepath.Join(root, ".charter/guides/idioms/go/stdlib-first.md")
+	src := filepath.Join(root, ".agents/guides/idioms/go/stdlib-first.md")
 	if err := os.MkdirAll(filepath.Dir(src), 0o755); err != nil {
 		t.Fatal(err)
 	}
@@ -105,7 +105,7 @@ This prose section must be excluded from the shim.
 		t.Fatal(err)
 	}
 
-	primitives, _, err := Walk(root, ".charter")
+	primitives, _, err := Walk(root, ".agents")
 	if err != nil {
 		t.Fatalf("Walk: %v", err)
 	}
@@ -135,7 +135,7 @@ This prose section must be excluded from the shim.
 		`globs:`,
 		`  - "cmd/**/*.go"`,
 		`  - "go.mod"`,
-		`source: .charter/guides/idioms/go/stdlib-first.md`,
+		`source: .agents/guides/idioms/go/stdlib-first.md`,
 		`generated_by: keystone-project`,
 		`# Stdlib first`,
 		`## IRON LAW`,
@@ -153,7 +153,7 @@ This prose section must be excluded from the shim.
 
 func TestProject_RuleWithoutGlobsSkipped(t *testing.T) {
 	root := t.TempDir()
-	src := filepath.Join(root, ".charter/guides/process/spec.md")
+	src := filepath.Join(root, ".agents/guides/process/spec.md")
 	if err := os.MkdirAll(filepath.Dir(src), 0o755); err != nil {
 		t.Fatal(err)
 	}
@@ -161,7 +161,7 @@ func TestProject_RuleWithoutGlobsSkipped(t *testing.T) {
 	if err := os.WriteFile(src, []byte(body), 0o644); err != nil {
 		t.Fatal(err)
 	}
-	primitives, _, _ := Walk(root, ".charter")
+	primitives, _, _ := Walk(root, ".agents")
 	results, err := Project(root, primitives)
 	if err != nil {
 		t.Fatal(err)
@@ -181,18 +181,18 @@ func TestProject_CopiesSkillAgentCommand(t *testing.T) {
 
 	// Seed canonical sources across the projecting kinds.
 	files := map[string]string{
-		".charter/skills/keystone-demo/SKILL.md": "---\nkind: skill\nid: keystone:demo\ndescription: x\ntriggers: [demo]\n---\nbody\n",
-		".charter/agents/reviewer.md":            "---\nkind: agent\nid: reviewer\ndescription: x\ntools: [Read]\n---\nbody\n",
-		".charter/commands/check.md":             "---\nkind: command\nid: check\ndescription: x\n---\nbody\n",
-		".charter/agents/security.md":            "---\nkind: agent\nid: security\ndescription: x\ntools: [Read]\n---\nbody\n",
-		".charter/commands/ship.md":              "---\nkind: command\nid: ship\ndescription: x\n---\nbody\n",
-		".charter/skills/onboard/SKILL.md":       "---\nkind: skill\nid: onboard\ndescription: x\ntriggers: [onboard]\n---\nbody\n",
+		".agents/skills/keystone-demo/SKILL.md": "---\nkind: skill\nid: keystone:demo\ndescription: x\ntriggers: [demo]\n---\nbody\n",
+		".agents/agents/reviewer.md":            "---\nkind: agent\nid: reviewer\ndescription: x\ntools: [Read]\n---\nbody\n",
+		".agents/commands/check.md":             "---\nkind: command\nid: check\ndescription: x\n---\nbody\n",
+		".agents/agents/security.md":            "---\nkind: agent\nid: security\ndescription: x\ntools: [Read]\n---\nbody\n",
+		".agents/commands/ship.md":              "---\nkind: command\nid: ship\ndescription: x\n---\nbody\n",
+		".agents/skills/onboard/SKILL.md":       "---\nkind: skill\nid: onboard\ndescription: x\ntriggers: [onboard]\n---\nbody\n",
 		// Source that has no projection target — should be ignored without error.
-		".charter/guides/process/spec.md": "---\nkind: guide\nid: guides/process/spec\ndescription: x\n---\nbody\n",
+		".agents/guides/process/spec.md": "---\nkind: guide\nid: guides/process/spec\ndescription: x\n---\nbody\n",
 	}
 	seedFiles(t, root, files)
 
-	primitives, _, err := Walk(root, ".charter")
+	primitives, _, err := Walk(root, ".agents")
 	if err != nil {
 		t.Fatalf("Walk: %v", err)
 	}
@@ -271,11 +271,11 @@ func assertContainsNone(t *testing.T, s string, banned []string) {
 func TestProject_TypeAware(t *testing.T) {
 	root := t.TempDir()
 	seedFiles(t, root, map[string]string{
-		".charter/sensors/review-functional.md": "---\nkind: sensor\nid: review-functional\ndescription: x\nmode: inferential\nagent: reviewer\nreturns: findings\n---\n# functional review\n",
-		".charter/playbooks/task.md":            "---\nkind: playbook\nid: task\ndescription: x\n---\n# task orchestrator\n",
-		".charter/guides/idioms/go/fmt.md":      "---\nkind: guide\nid: guides/idioms/go/fmt\ndescription: x\nmode: computational\nglobs:\n  - \"**/*.go\"\n---\n# fmt\n",
+		".agents/sensors/review-functional.md": "---\nkind: sensor\nid: review-functional\ndescription: x\nmode: inferential\nagent: reviewer\nreturns: findings\n---\n# functional review\n",
+		".agents/playbooks/task.md":            "---\nkind: playbook\nid: task\ndescription: x\n---\n# task orchestrator\n",
+		".agents/guides/idioms/go/fmt.md":      "---\nkind: guide\nid: guides/idioms/go/fmt\ndescription: x\nmode: computational\nglobs:\n  - \"**/*.go\"\n---\n# fmt\n",
 	})
-	primitives, _, err := Walk(root, ".charter")
+	primitives, _, err := Walk(root, ".agents")
 	if err != nil {
 		t.Fatalf("Walk: %v", err)
 	}
@@ -299,10 +299,10 @@ func TestProject_TypeAware(t *testing.T) {
 func TestProject_OverwritesHandEdits(t *testing.T) {
 	root := t.TempDir()
 	seedFiles(t, root, map[string]string{
-		".charter/skills/x/SKILL.md":         "---\nkind: skill\nid: x\ndescription: x\ntriggers: [x]\n---\nfresh body\n",
+		".agents/skills/x/SKILL.md":          "---\nkind: skill\nid: x\ndescription: x\ntriggers: [x]\n---\nfresh body\n",
 		".claude/skills/keystone-x/SKILL.md": "STALE HAND EDIT", // pre-existing hand-edit
 	})
-	primitives, _, _ := Walk(root, ".charter")
+	primitives, _, _ := Walk(root, ".agents")
 	if _, err := Project(root, primitives); err != nil {
 		t.Fatalf("Project: %v", err)
 	}

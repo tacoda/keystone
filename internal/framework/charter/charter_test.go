@@ -61,12 +61,12 @@ func TestSignals_BuiltinsPlusCustomSortedDeduped(t *testing.T) {
 func TestCoverage_GovernedVsUncharted(t *testing.T) {
 	tmp := t.TempDir()
 	// a guide governing **/*.go
-	write(t, tmp, ".charter/guides/idioms/go/x.md",
+	write(t, tmp, ".agents/guides/idioms/go/x.md",
 		"---\nkind: guide\nid: idioms/go/x\ndescription: d\nglobs:\n  - \"**/*.go\"\n---\nbody\n")
 	write(t, tmp, "cmd/main.go", "package main\n")
 	write(t, tmp, "docs/readme.md", "# doc\n") // uncharted (no guide matches *.md)
 
-	res, err := Coverage(tmp, ".charter")
+	res, err := Coverage(tmp, ".agents")
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -254,24 +254,75 @@ Work on `feat/5.0-standard-vocabulary`, one PR per phase or pair of phases.
   categories. Dashboard nav splits into Constraints and Capabilities.
 - Verify: `mcp_test.go`, CLI tests, dashboard route tests; no 404 on any nav link.
 
+### Phase 6b: `keystone allocate` (context de-bloat)
+
+User-requested. Reads a root instruction file (`CLAUDE.md`, `AGENTS.md`, or
+a path) and proposes moving sections out of it into the right primitive, so
+the always-loaded file shrinks.
+
+- Split the file into sections (H2/H3 blocks) and classify each one:
+  - mentions file paths or globs → **rule** with `paths:`;
+  - "always run X before commit/after edit" → **hook**;
+  - allow/deny tool or command lists → **permission**;
+  - a numbered procedure the user triggers → **command**; one the agent
+    should pick up on its own → **skill**;
+  - long rationale behind another section → **reference**;
+  - iron laws and short always-on rules → stay in the root file.
+- Report per section: target kind, proposed path, and token count moved out
+  of the always-loaded file. Total saving at the end.
+- `--apply` writes the new primitives and removes the moved sections, showing
+  the diff first (no silent overwrites). Default is report-only.
+- Heuristics are computational and deterministic. A `keystone-allocate`
+  skill wraps the report for an agent to refine the borderline cases.
+- Verify: golden tests on a fixture `CLAUDE.md` with one section per target
+  kind; `--apply` round-trip leaves `keystone lint` clean.
+
+### Phase 6c: Context budget, reportable and enforced
+
+User-requested. Today `internal/framework/budget` estimates tokens per
+charter directory ("port") and `keystone doctor` prints it against
+`keystone.json` `budgets` caps. That measures files on disk, not what an
+agent loads. 5.0 measures the load.
+
+- **Two tiers, per host.** *Always loaded:* root file (`AGENTS.md` /
+  `CLAUDE.md` shim), rules without `paths:`, every skill and subagent
+  `description` (hosts list them up front). *On demand:* path-scoped rules,
+  skill/command/subagent bodies, references. Computed from the projection
+  table, so each host's number reflects what that host reads.
+- **`keystone budget`** prints both tiers per host, then per category and
+  kind, with the top files. `--json` for CI and the dashboard.
+- **Caps.** `keystone.json` `budgets` re-keyed to 5.0: `always_loaded`
+  (the one that matters most), per-kind `max_tokens`, and `max_tokens_per_load`
+  for any single file. 4.x port keys keep working (mapped to kinds).
+- **Managed, not just reported.** `keystone verify` fails when a cap is
+  exceeded, naming the file and the overage. Each overage suggests
+  `keystone allocate` (Phase 6b), and `allocate` reports savings against the
+  `always_loaded` cap.
+- Surfaces: CLI, MCP `keystone_budget` tool, a dashboard Budget page.
+- Out of scope: exact tokenizer counts. The estimate stays bytes/4 (it
+  under-counts BPE by 25 to 35%, already documented); caps are set against
+  the same estimate, so the comparison holds.
+- Verify: golden test on a fixture charter for both tiers per host; a
+  verify test that fails on an over-cap root file and passes after trimming.
+
 ### Phase 7: Migration and dogfood
 
-- `internal/framework/migrations/v5_0.go`:
-  - move `.charter/<kind>/` to `.agents/<new-kind>/` and keystone state to
-    `.keystone/`;
-  - rewrite frontmatter (frontmatter only, never bodies; the 4.0 lesson);
-  - fold playbooks and patterns into skills, inline the two concerns, split
-    sensors into hooks;
-  - fold `triggers:` into `description`. This is lossy, so the migration writes
-    `.keystone/migration-5.0-report.md` listing every rewritten description for
-    human review;
-  - `CHARTER.md` content merges into the new `AGENTS.md`; old projected files
-    under `.claude/` etc. are replaced by links and shims.
-  - `Down` reverses the moves; documented as best-effort for the lossy folds.
-- Installed policies: bump the policy manifest schema. The resolver refuses a
-  4.x-shaped policy with a clear message. Republish keystone's own policies in
-  5.0 shape.
-- Dogfood: migrate this repo, add `opencode` (and `codex`, `github-copilot`)
+- The layout half of `v5_0` landed in Phase 2 (moves only, merge into an
+  existing `.agents/`, refuse on conflicting files or unknown entries; Down
+  restores `.charter/`). This repo was migrated then.
+- Correction (Phase 2): the migrations package's iron laws forbid rewriting
+  user frontmatter (law 2) and require runtime back-compat (law 6). So 5.0
+  does **not** rewrite frontmatter or turn 4.x names into a hard error.
+  4.x kinds, dirs, `globs:`, and `on:` stay readable permanently; `keystone
+  lint` warns with the 5.0 spelling, and an opt-in `keystone lint --fix`
+  (user-invoked, shows the diff) applies it. `triggers:` is reported, not
+  folded: the user moves it into `description`.
+- `CHARTER.md` content merges into the new `AGENTS.md`; old projected files
+  under `.claude/` etc. are replaced by links and shims (Phase 4 renderer).
+- Installed policies: 4.x-shaped policy trees keep loading through the
+  legacy dir and kind mapping (law 6). Republish keystone's own policies in
+  5.0 shape; no resolver refusal.
+- Dogfood: add `opencode` (and `codex`, `github-copilot`)
   to `keystone.json` `adapters`, `keystone index && keystone project`, commit.
 - Verify: up/down round-trip test on a 4.x fixture; idempotent re-run test;
   `keystone verify` clean; `keystone charter conformance` CONFORMANT.
@@ -281,8 +332,13 @@ Work on `feat/5.0-standard-vocabulary`, one PR per phase or pair of phases.
 - `README.md`, `GLOSSARY.md` (constraints vs capabilities, kind table, the
   "agent vs subagent" note), `CONVENTIONS.md`, `CONTRIBUTING.md`, `docs/**`,
   `docs/hosts.md`, and every rule under `.agents/rules/charter-content/`.
-- `docs/upgrade-4.x-to-5.0.md`: what moves, what folds, what to review in the
-  migration report, how to choose `linkMode`.
+- `docs/upgrade-4.x-to-5.0.md`: what moves, what folds, what `lint` warns
+  about, how to choose `linkMode`. Known conflict: a repo with both
+  `guides/README.md` and a 4.x `rules/README.md` stops the migration (both
+  map to `.agents/rules/README.md`); delete the `rules/` one, it described
+  the retired guide/rule split. After upgrading, refresh the installed binary
+  (`go install` or the release) before hooks fire: an old binary reads
+  `.charter/` and finds nothing.
 - `CHANGELOG.md` 5.0.0 entry with every breaking change listed.
 - Run the voice chain from `~/.claude/VOICE.md` section 15 on README and the
   upgrade guide.
@@ -348,8 +404,17 @@ Work on `feat/5.0-standard-vocabulary`, one PR per phase or pair of phases.
   `category`, constraints first); `paths:` / `event:` canonical with
   `globs:` / `on:` aliases; `primitive.IsKind` for user-typed kind filters.
   Transition choice: 4.x kind names normalize at parse time (not only in
-  Walk), so 4.x trees and `keystone new <old-kind>` keep working until the
-  Phase 7 migration; `concern` lints as a warning naming `keystone migrate`.
-  Phase 7 turns legacy names into a hard error. Skill `triggers:` is no longer
+  Walk), so 4.x trees and `keystone new <old-kind>` keep working; `concern`
+  lints as a warning naming `keystone migrate`. Permanent, per migrations
+  iron law 6 (see the Phase 7 correction). Skill `triggers:` is no longer
   required (description is the activation contract). Deferred: hook `type:`
   (command/agent/prompt) to Phase 5, where projection first needs it.
+- Phase 2a: done. `.agents/` (primitives) + `.keystone/` (INDEX, lockfile,
+  learning, work, archive, state, sources, hosts, policies, snapshots);
+  scaffold templates restructured to `agents/` + `keystone/`; `InferKind`
+  reads the first segment under the walk root (works for policy trees);
+  dead `charterRoot` params removed from the policies and lockfile APIs;
+  `v5_0` layout migration + tests; this repo migrated (no `.charter/`).
+  CodeScene: `v5_0.go` String-Heavy / Primitive Obsession accepted (path-moving
+  code; same acceptance as the 4.0 CLI path code); every other file stable or
+  improved.

@@ -88,7 +88,7 @@ func planUp_3_0(absDir string) (*Plan, error) {
 		return nil
 	})
 	p.Add("rebuild INDEX.json + INDEX.lite.json on the new vocabulary", func(absDir string) error {
-		return rebuildIndex(absDir, newRoot, config.KeystoneDir(newRoot))
+		return rebuildIndex(absDir, newRoot, newRoot) // 3.0: INDEX lived at the charter root
 	})
 	return p, nil
 }

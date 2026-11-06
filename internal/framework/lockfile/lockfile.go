@@ -1,13 +1,8 @@
 // Package lockfile reads and writes the per-install state record at
-// <keystone-dir>/lockfile.json — the `.charter/` umbrella holds the
-// lockfile alongside the charter tree and generated INDEX.json, so both
-// the CLI and keystone-mcp can locate it under one well-known prefix.
-// Pins every installed policy by source ref + resolved SHA + per-file
-// hashes. JSON format.
-//
-// The charter root is configurable (default `.charter`,
-// overridable per install via the --charter-root flag at
-// `keystone init`); the lockfile lives one level above it.
+// .keystone/lockfile.json, beside the generated INDEX.json, so both the
+// CLI and keystone-mcp can locate it under one well-known prefix. Pins
+// every installed policy by source ref + resolved SHA + per-file hashes.
+// JSON format.
 package lockfile
 
 import (
@@ -24,10 +19,10 @@ import (
 const Version = 1
 
 // RelPath returns the lockfile's path relative to the install directory:
-// <keystone-dir>/lockfile.json — one level above the charter root.
-// Pass to filepath.Join(installDir, ...) for the absolute path.
-func RelPath(charterRoot string) string {
-	return filepath.Join(config.KeystoneDir(charterRoot), config.LockfileName)
+// .keystone/lockfile.json. Pass to filepath.Join(installDir, ...) for the
+// absolute path.
+func RelPath() string {
+	return filepath.Join(config.StateRoot, config.LockfileName)
 }
 
 // KeystoneInfo records the install-scoped state: binary version, install
@@ -78,12 +73,10 @@ type Lockfile struct {
 	MigrationsApplied []string              `json:"migrations_applied,omitempty"`
 }
 
-// Read loads the lockfile at <installDir>/<charterRoot>/keystone.lock.json,
+// Read loads the lockfile at <installDir>/.keystone/lockfile.json,
 // returning an empty Lockfile (not an error) if the file does not exist.
-func Read(installDir, charterRoot string) (*Lockfile, error) {
-	rel := RelPath(charterRoot)
-	path := filepath.Join(installDir, rel)
-	return ReadFromPath(path)
+func Read(installDir string) (*Lockfile, error) {
+	return ReadFromPath(filepath.Join(installDir, RelPath()))
 }
 
 // ReadFromPath loads the lockfile at an explicit absolute path. Used by
@@ -113,12 +106,10 @@ func ReadFromPath(path string) (*Lockfile, error) {
 }
 
 // Write serializes the lockfile back to disk at
-// <installDir>/<charterRoot>/keystone.lock.json. Always emits Version =
+// <installDir>/.keystone/lockfile.json. Always emits Version =
 // lockfile.Version. Indents for human readability.
-func Write(installDir, charterRoot string, lf *Lockfile) error {
-	rel := RelPath(charterRoot)
-	path := filepath.Join(installDir, rel)
-	return WriteToPath(path, lf)
+func Write(installDir string, lf *Lockfile) error {
+	return WriteToPath(filepath.Join(installDir, RelPath()), lf)
 }
 
 // WriteToPath serializes the lockfile to an explicit absolute path. Used

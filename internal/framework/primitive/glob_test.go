@@ -19,7 +19,7 @@ func TestMatchPath(t *testing.T) {
 		{"**/*_test.go", "internal/framework/primitive/glob.go", false},
 		{"*.go", "root.go", true},
 		{"*.go", "cmd/root.go", false}, // * does not cross /
-		{".charter/**/*.md", ".charter/guides/idioms/go/stdlib-first.md", true},
+		{".agents/**/*.md", ".agents/guides/idioms/go/stdlib-first.md", true},
 	}
 	for _, c := range cases {
 		if got := MatchPath(c.pat, c.path); got != c.want {

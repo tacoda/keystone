@@ -18,7 +18,7 @@ func evalCmd() *cobra.Command {
 		Short: "Run charter evals (static + sensor levels)",
 		Long: `keystone eval — measure how the charter behaves against
 known scenarios. Each eval is a primitive of kind: eval, living at
-.charter/evals/<id>/EVAL.md with a sibling expected.json
+.agents/evals/<id>/EVAL.md with a sibling expected.json
 and optional fixture/.
 
 Subcommands:

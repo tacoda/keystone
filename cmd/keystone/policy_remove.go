@@ -50,8 +50,6 @@ func runPolicyRemove(args []string) error {
 	if err != nil {
 		return fmt.Errorf("resolve dir: %w", err)
 	}
-	charterRoot := config.DefaultCharterRoot
-
 	cfg, err := config.ReadProjectConfig(absDir)
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -70,16 +68,16 @@ func runPolicyRemove(args []string) error {
 		return err
 	}
 
-	if err := policies.Reset(name, absDir, charterRoot); err != nil {
+	if err := policies.Reset(name, absDir); err != nil {
 		return err
 	}
 
-	lf, err := lockfile.Read(absDir, charterRoot)
+	lf, err := lockfile.Read(absDir)
 	if err != nil {
 		return err
 	}
 	delete(lf.Policies, name)
-	if err := lockfile.Write(absDir, charterRoot, lf); err != nil {
+	if err := lockfile.Write(absDir, lf); err != nil {
 		return err
 	}
 

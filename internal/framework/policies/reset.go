@@ -13,11 +13,11 @@ import (
 //
 // On POSIX the directory's contents are chmodded back to writable before
 // removal so a previous Install's read-only marks don't block rm.
-func Reset(name, projectDir, charterRoot string) error {
+func Reset(name, projectDir string) error {
 	if name == "" {
 		return fmt.Errorf("policies.Reset: empty name")
 	}
-	target := policyDir(projectDir, charterRoot, name)
+	target := policyDir(projectDir, name)
 
 	if runtime.GOOS != "windows" {
 		_ = makeWritable(target)

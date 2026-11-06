@@ -25,7 +25,7 @@ func runExplain(args []string) error {
 	if err != nil {
 		return fmt.Errorf("resolve dir: %w", err)
 	}
-	prims, _, err := primitive.Walk(absDir, config.DefaultCharterRoot)
+	prims, _, err := primitive.Walk(absDir, config.DefaultAgentsRoot)
 	if err != nil {
 		return fmt.Errorf("walk charter: %w", err)
 	}

@@ -5,13 +5,13 @@ description: Authoring rules for .charter/corpus/state/.
 globs:
   - ".charter/corpus/state/**/*.md"
   - "internal/framework/scaffold/templates/**/corpus/state/**/*.md"
-source: .charter/guides/idioms/charter-content/state-files.md
+source: .agents/rules/idioms/charter-content/state-files.md
 generated_by: keystone-project
 ---
 
 # State files — rules
 
-Full guide: `.charter/guides/idioms/charter-content/state-files.md` (read on demand).
+Full guide: `.agents/rules/idioms/charter-content/state-files.md` (read on demand).
 
 ## IRON LAW
 

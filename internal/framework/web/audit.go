@@ -20,12 +20,12 @@ import (
 type auditEntry struct {
 	Timestamp string   `json:"ts"`              // RFC3339, UTC
 	Topics    []string `json:"topics"`          // SSE topics this burst emitted
-	Paths     []string `json:"paths,omitempty"` // dirty paths inside .charter/
+	Paths     []string `json:"paths,omitempty"` // dirty paths inside .agents/
 	Summary   string   `json:"summary"`         // one-line human description
 }
 
 // auditLog persists charter change events to a per-session
-// append-only JSONL file under `.charter/state/audit/`. One file
+// append-only JSONL file under `.agents/state/audit/`. One file
 // per `keystone web serve` process; never overwritten. The
 // dashboard reads the tail to render the audit widget; older
 // sessions sit on disk until startup prune.
@@ -44,7 +44,7 @@ type auditLog struct {
 // auditDirFor returns the canonical audit dir under a project. Kept
 // as a function so tests can mirror the layout against a temp dir.
 func auditDirFor(projectDir string) string {
-	return filepath.Join(projectDir, config.DefaultCharterRoot, "state", "audit")
+	return filepath.Join(projectDir, config.DefaultAgentsRoot, "state", "audit")
 }
 
 // openAuditLog creates the audit dir if missing and opens a fresh

@@ -63,7 +63,7 @@ func runPolicyUpdate(args []string) error {
 	if err != nil {
 		return fmt.Errorf("resolve dir: %w", err)
 	}
-	charterRoot := config.DefaultCharterRoot
+	charterRoot := config.DefaultAgentsRoot
 
 	cfg, err := config.ReadProjectConfig(absDir)
 	if err != nil {
@@ -87,18 +87,18 @@ func runPolicyUpdate(args []string) error {
 
 	// Always reset before reinstall — picks up any moving-ref drift even
 	// when the version field hasn't changed.
-	if err := policies.Reset(node.Name, absDir, charterRoot); err != nil {
+	if err := policies.Reset(node.Name, absDir); err != nil {
 		return err
 	}
 
-	lf, err := lockfile.Read(absDir, charterRoot)
+	lf, err := lockfile.Read(absDir)
 	if err != nil {
 		return err
 	}
 	if err := installOnePolicy(absDir, charterRoot, *node, lf); err != nil {
 		return err
 	}
-	if err := lockfile.Write(absDir, charterRoot, lf); err != nil {
+	if err := lockfile.Write(absDir, lf); err != nil {
 		return err
 	}
 

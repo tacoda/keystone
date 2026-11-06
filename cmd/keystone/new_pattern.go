@@ -56,7 +56,7 @@ func runNewPosture(args []string) error {
 	if err != nil {
 		return err
 	}
-	path := filepath.Join(projectDir, charterRoot, "posture", strings.ReplaceAll(id, ":", "-")+".md")
+	path := filepath.Join(projectDir, charterRoot, "permissions", strings.ReplaceAll(id, ":", "-")+".md")
 	body := fmt.Sprintf(`---
 kind: posture
 id: %s

@@ -92,7 +92,7 @@ type Result struct {
 // LoadAll walks the charter, parses every EVAL.md, and pairs each
 // with its sibling expected.json (if present).
 func LoadAll(projectDir string) ([]Spec, error) {
-	primitives, _, err := primitive.Walk(projectDir, config.DefaultCharterRoot)
+	primitives, _, err := primitive.Walk(projectDir, config.DefaultAgentsRoot)
 	if err != nil {
 		return nil, err
 	}
@@ -235,7 +235,7 @@ func runOne(ctx context.Context, projectDir string, s Spec, level string) Result
 // id in RulesFired matches at least one touched file AND every id
 // in RulesSilent matches none.
 func runStatic(projectDir string, s Spec, r *Result) {
-	primitives, _, err := primitive.Walk(projectDir, config.DefaultCharterRoot)
+	primitives, _, err := primitive.Walk(projectDir, config.DefaultAgentsRoot)
 	if err != nil {
 		r.Status = "fail"
 		r.Messages = append(r.Messages, "walk: "+err.Error())
@@ -322,7 +322,7 @@ func matchGlob(pat, path string) bool {
 // shell command in the markdown body; we extract it best-effort
 // from the first fenced code block.
 func runSensors(ctx context.Context, projectDir string, s Spec, r *Result) {
-	primitives, _, err := primitive.Walk(projectDir, config.DefaultCharterRoot)
+	primitives, _, err := primitive.Walk(projectDir, config.DefaultAgentsRoot)
 	if err != nil {
 		r.Status = "fail"
 		r.Messages = append(r.Messages, "walk: "+err.Error())
@@ -435,7 +435,7 @@ func RenderMarkdown(r Report) string {
 
 // EvalsRoot returns the absolute dir holding the evals tree.
 func EvalsRoot(projectDir string) string {
-	return filepath.Join(projectDir, config.DefaultCharterRoot, "evals")
+	return filepath.Join(projectDir, config.DefaultAgentsRoot, "evals")
 }
 
 // EnsureRoot makes sure the evals directory exists. Returns the

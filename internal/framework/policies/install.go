@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"github.com/tacoda/keystone/internal/framework/config"
 	"io"
 	"io/fs"
 	"os"
@@ -13,10 +14,8 @@ import (
 	"strings"
 )
 
-// PolicyRoot is the directory under <project>/<charterRoot>/ where every
-// installed policy lives. Gitignored at the consumer side; managed by the
-// vendor flow, not by users.
-const PolicyRoot = "policies"
+// Installed policies live under config.PoliciesDir (.keystone/policies/).
+// Gitignored at the consumer side; managed by the vendor flow, not by users.
 
 // readOnlyMode is the file permission applied after install on POSIX.
 // Best-effort UX hint that vendored files are not meant to be edited; the
@@ -54,18 +53,14 @@ type policyManifest struct {
 //
 // If the destination already exists, it is removed first — Install is the
 // "fresh write" path used by both first-install and drift-reset.
-func Install(cached *Cached, name, projectDir, charterRoot string) (*Installed, error) {
+func Install(cached *Cached, name, projectDir string) (*Installed, error) {
 	if cached == nil {
 		return nil, fmt.Errorf("policies.Install: nil Cached")
 	}
 	if name == "" {
 		return nil, fmt.Errorf("policies.Install: empty name")
 	}
-	if charterRoot == "" {
-		return nil, fmt.Errorf("policies.Install: empty charterRoot")
-	}
-
-	target := policyDir(projectDir, charterRoot, name)
+	target := policyDir(projectDir, name)
 	if err := os.RemoveAll(target); err != nil {
 		return nil, fmt.Errorf("clear target: %w", err)
 	}
@@ -118,7 +113,7 @@ func Install(cached *Cached, name, projectDir, charterRoot string) (*Installed, 
 
 		// Record the hash keyed by path relative to the project root, so the
 		// lockfile entry lines up with how Verify walks the tree.
-		relFromProject := filepath.ToSlash(filepath.Join(charterRoot, PolicyRoot, name, rel))
+		relFromProject := filepath.ToSlash(filepath.Join(config.PoliciesDir, name, rel))
 		files[relFromProject] = hash
 
 		// Capture the manifest's declared name/version on the way past.
@@ -151,8 +146,8 @@ func Install(cached *Cached, name, projectDir, charterRoot string) (*Installed, 
 
 // policyDir returns the absolute path of the install directory for a
 // single policy.
-func policyDir(projectDir, charterRoot, name string) string {
-	return filepath.Join(projectDir, charterRoot, PolicyRoot, name)
+func policyDir(projectDir, name string) string {
+	return filepath.Join(projectDir, config.PoliciesDir, name)
 }
 
 // copyFile streams src to dst and returns the "sha256:<hex>" hash of the

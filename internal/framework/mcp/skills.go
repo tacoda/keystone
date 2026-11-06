@@ -16,7 +16,7 @@ import (
 )
 
 // registerSkillResources auto-discovers every SKILL.md under
-// .charter/skills/ and exposes them as MCP resources.
+// .agents/skills/ and exposes them as MCP resources.
 // Hosts like Claude Code that auto-load `skill://` URIs pick these up
 // without further configuration.
 //
@@ -32,7 +32,7 @@ func registerSkillResources(s *server.MCPServer, projectDir string) {
 	s.AddResource(
 		mcp.NewResource("skill://list",
 			"Project-local skills",
-			mcp.WithResourceDescription("Every SKILL.md under .charter/skills/. URI form: skill://<name>/SKILL.md."),
+			mcp.WithResourceDescription("Every SKILL.md under .agents/skills/. URI form: skill://<name>/SKILL.md."),
 			mcp.WithMIMEType("application/json"),
 		),
 		func(ctx context.Context, req mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
@@ -107,11 +107,11 @@ type skillEntry struct {
 	description string // pulled from frontmatter if present
 }
 
-// walkSkills scans .charter/skills/ for SKILL.md files.
+// walkSkills scans .agents/skills/ for SKILL.md files.
 // Returns an empty slice if the directory does not exist (a fresh
 // install without authored skills still serves the resource API).
 func walkSkills(projectDir string) ([]skillEntry, error) {
-	root := filepath.Join(projectDir, kconfig.DefaultCharterRoot, "skills")
+	root := filepath.Join(projectDir, kconfig.DefaultAgentsRoot, "skills")
 	info, err := os.Stat(root)
 	if err != nil {
 		if os.IsNotExist(err) {

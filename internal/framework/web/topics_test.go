@@ -19,27 +19,27 @@ func TestTopicsForPath(t *testing.T) {
 	}{
 		{
 			name: "inbox candidate triggers inbox + primitives",
-			path: filepath.FromSlash("/proj/.charter/learning/inbox/2026-06-18.md"),
+			path: filepath.FromSlash("/proj/.agents/learning/inbox/2026-06-18.md"),
 			want: []sseTopic{topicCharter, topicInbox, topicPrimitives},
 		},
 		{
 			name: "policies tree triggers primitives",
-			path: filepath.FromSlash("/proj/.charter/policies/tacoda-org/charter/guides/x.md"),
+			path: filepath.FromSlash("/proj/.keystone/policies/tacoda-org/charter/guides/x.md"),
 			want: []sseTopic{topicCharter, topicPrimitives},
 		},
 		{
 			name: "INDEX.json triggers primitives",
-			path: filepath.FromSlash("/proj/.charter/INDEX.json"),
+			path: filepath.FromSlash("/proj/.keystone/INDEX.json"),
 			want: []sseTopic{topicCharter, topicPrimitives},
 		},
 		{
 			name: "charter tree triggers primitives",
-			path: filepath.FromSlash("/proj/.charter/guides/process/spec.md"),
+			path: filepath.FromSlash("/proj/.agents/guides/process/spec.md"),
 			want: []sseTopic{topicCharter, topicPrimitives},
 		},
 		{
 			name: "lockfile triggers prune",
-			path: filepath.FromSlash("/proj/.charter/lockfile.json"),
+			path: filepath.FromSlash("/proj/.keystone/lockfile.json"),
 			want: []sseTopic{topicCharter, topicPrune},
 		},
 		{

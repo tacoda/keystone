@@ -47,7 +47,7 @@ func runInstall(args []string) error {
 	if err != nil {
 		return fmt.Errorf("resolve dir: %w", err)
 	}
-	charterRoot := config.DefaultCharterRoot
+	charterRoot := config.DefaultAgentsRoot
 
 	cfg, err := config.ReadProjectConfig(absDir)
 	if err != nil {
@@ -62,7 +62,7 @@ func runInstall(args []string) error {
 		return nil
 	}
 
-	lf, err := lockfile.Read(absDir, charterRoot)
+	lf, err := lockfile.Read(absDir)
 	if err != nil {
 		return err
 	}
@@ -74,10 +74,10 @@ func runInstall(args []string) error {
 		}
 	}
 
-	if err := lockfile.Write(absDir, charterRoot, lf); err != nil {
+	if err := lockfile.Write(absDir, lf); err != nil {
 		return err
 	}
-	fmt.Fprintf(os.Stdout, "  wrote: %s\n", filepath.Join(absDir, lockfile.RelPath(charterRoot)))
+	fmt.Fprintf(os.Stdout, "  wrote: %s\n", filepath.Join(absDir, lockfile.RelPath()))
 	fmt.Fprintf(os.Stdout, "✓ installed %d policy(s).\n", len(flat))
 	return nil
 }
@@ -93,7 +93,7 @@ func installOnePolicy(projectDir, charterRoot string, node config.PolicyNode, lf
 		return fmt.Errorf("fetch: %w", err)
 	}
 
-	installed, err := policies.Install(cached, node.Name, projectDir, charterRoot)
+	installed, err := policies.Install(cached, node.Name, projectDir)
 	if err != nil {
 		return fmt.Errorf("install: %w", err)
 	}
@@ -108,7 +108,7 @@ func installOnePolicy(projectDir, charterRoot string, node config.PolicyNode, lf
 
 	fmt.Fprintf(os.Stdout, "  ✓ %d file(s) installed at %s\n",
 		len(installed.Files),
-		filepath.Join(charterRoot, policies.PolicyRoot, node.Name))
+		filepath.Join(config.PoliciesDir, node.Name))
 	return nil
 }
 

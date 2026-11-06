@@ -4,6 +4,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
+	"github.com/tacoda/keystone/internal/framework/config"
 	"io"
 	"io/fs"
 	"os"
@@ -34,10 +35,10 @@ type Drift struct {
 //
 // Drift paths are returned in stable (sorted) order so callers can
 // deterministically render them.
-func Verify(name, projectDir, charterRoot string, expected map[string]string) ([]Drift, error) {
-	target := policyDir(projectDir, charterRoot, name)
+func Verify(name, projectDir string, expected map[string]string) ([]Drift, error) {
+	target := policyDir(projectDir, name)
 
-	current, err := hashFilesUnder(target, charterRoot, name)
+	current, err := hashFilesUnder(target, name)
 	if err != nil {
 		return nil, fmt.Errorf("hash installed files: %w", err)
 	}
@@ -66,7 +67,7 @@ func Verify(name, projectDir, charterRoot string, expected map[string]string) ([
 // map of project-relative slash-paths → sha256 hashes. Missing target
 // returns an empty map (not an error) — callers interpret that as "the
 // whole policy is gone."
-func hashFilesUnder(target, charterRoot, name string) (map[string]string, error) {
+func hashFilesUnder(target, name string) (map[string]string, error) {
 	out := map[string]string{}
 	if _, err := os.Stat(target); os.IsNotExist(err) {
 		return out, nil
@@ -86,7 +87,7 @@ func hashFilesUnder(target, charterRoot, name string) (map[string]string, error)
 		if err != nil {
 			return err
 		}
-		key := filepath.ToSlash(filepath.Join(charterRoot, PolicyRoot, name, rel))
+		key := filepath.ToSlash(filepath.Join(config.PoliciesDir, name, rel))
 		out[key] = hash
 		return nil
 	})

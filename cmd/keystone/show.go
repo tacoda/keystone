@@ -71,7 +71,7 @@ func runShow(args []string) error {
 		return fmt.Errorf("resolve dir: %w", err)
 	}
 
-	primitives, _, err := primitive.Walk(absDir, config.DefaultCharterRoot)
+	primitives, _, err := primitive.Walk(absDir, config.DefaultAgentsRoot)
 	if err != nil {
 		return err
 	}

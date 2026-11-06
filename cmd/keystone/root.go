@@ -189,7 +189,7 @@ func newCmd() *cobra.Command {
 func targetCmd() *cobra.Command {
 	c := &cobra.Command{
 		Use:                "target",
-		Short:              "Manage agent targets installed under .charter/adapters/",
+		Short:              "Manage agent targets installed under .keystone/hosts/",
 		DisableFlagParsing: true,
 		RunE:               runAndForwardAssets(runTarget),
 	}
@@ -219,7 +219,7 @@ func patchCmd() *cobra.Command {
 func indexCmd() *cobra.Command {
 	c := &cobra.Command{
 		Use:                "index",
-		Short:              "Emit .charter/INDEX.json — primitive descriptors only",
+		Short:              "Emit .keystone/INDEX.json — primitive descriptors only",
 		DisableFlagParsing: true,
 		RunE:               runAndForward(runIndex),
 	}

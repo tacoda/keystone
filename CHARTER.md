@@ -6,15 +6,15 @@ Cursor, Codex, opencode, …). A *harness* is the engine that runs the
 model; the *charter* is what you author to make its output reliable.
 Author the spec → charter. Be the engine → harness.
 
-The charter is a tree of typed primitives under `.charter/`. Every
+The charter is a tree of typed primitives under `.agents/`. Every
 host-native surface (`.claude/`, `.cursor/`, this file) is projected
 from it — do not hand-edit projected files.
 
 ## Read first
 
-`.charter/INDEX.lite.json` — cheap discovery (kind + id + description
+`.keystone/INDEX.lite.json` — cheap discovery (kind + id + description
 per primitive). Browse it to pick what you need; open the full
-`.charter/INDEX.json` only when you need a primitive's path, globs, or
+`.keystone/INDEX.json` only when you need a primitive's path, globs, or
 triggers, and open a body only when its activation condition matches.
 
 ## Activate by kind
@@ -52,6 +52,6 @@ To start a unit of work, say **"run task on `<ticket-id>`"** — runs the
 
 ## Override
 
-Project files at `.charter/<kind>/<id>.md` always win. Among installed
+Project files at `.agents/<kind>/<id>.md` always win. Among installed
 policies, deeper nesting refines outer policies; a `strict:` item is
 absolute — nothing else overrides it.

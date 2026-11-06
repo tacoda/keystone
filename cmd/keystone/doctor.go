@@ -85,7 +85,7 @@ func runDoctor(args []string) error {
 	if err != nil {
 		return fmt.Errorf("resolve dir: %w", err)
 	}
-	charterRoot := config.DefaultCharterRoot
+	charterRoot := config.DefaultAgentsRoot
 
 	hadErrors := false
 
@@ -194,7 +194,7 @@ func runBudgetReport(projectDir, charterRoot string) error {
 func walkCharterBudget(projectDir, charterRoot string) (*budget.Allocator, error) {
 	alloc := budget.NewAllocator()
 	root := filepath.Join(projectDir, charterRoot)
-	skip := filepath.Join(charterRoot, policies.PolicyRoot)
+	skip := filepath.FromSlash(config.PoliciesDir)
 
 	err := filepath.WalkDir(root, func(p string, d fs.DirEntry, err error) error {
 		if err != nil {
@@ -293,7 +293,7 @@ var markdownLink = regexp.MustCompile(`\[[^\]]*\]\(([^)]+)\)`)
 
 func checkPathConventions(projectDir, charterRoot string) ([]pathViolation, error) {
 	root := filepath.Join(projectDir, charterRoot)
-	skip := filepath.Join(charterRoot, policies.PolicyRoot)
+	skip := filepath.FromSlash(config.PoliciesDir)
 	var hits []pathViolation
 
 	err := filepath.WalkDir(root, func(path string, d fs.DirEntry, err error) error {
@@ -341,7 +341,7 @@ func checkPathConventions(projectDir, charterRoot string) ([]pathViolation, erro
 // path.Join normalizes the '..' and '.' segments correctly.
 func fixPathConventions(projectDir, charterRoot string) (int, error) {
 	root := filepath.Join(projectDir, charterRoot)
-	skip := filepath.Join(charterRoot, policies.PolicyRoot)
+	skip := filepath.FromSlash(config.PoliciesDir)
 	count := 0
 
 	err := filepath.WalkDir(root, func(p string, d fs.DirEntry, err error) error {
@@ -474,7 +474,7 @@ func checkPolicyIntegrity(projectDir, charterRoot string) (int, error) {
 		fmt.Fprintf(os.Stdout, "✓ policies: keystone.json declares no policies — nothing to verify\n")
 		return 0, nil
 	}
-	lf, err := lockfile.Read(projectDir, charterRoot)
+	lf, err := lockfile.Read(projectDir)
 	if err != nil {
 		return 0, err
 	}
@@ -494,7 +494,7 @@ func checkPolicyIntegrity(projectDir, charterRoot string) (int, error) {
 			for _, f := range d.Files {
 				fmt.Fprintf(os.Stdout, "        - %s (%s)\n", f.Path, f.Kind)
 			}
-			if err := policies.Reset(d.Policy, projectDir, charterRoot); err != nil {
+			if err := policies.Reset(d.Policy, projectDir); err != nil {
 				return 0, err
 			}
 		}
@@ -523,14 +523,14 @@ func checkTemplateDrift(projectDir, charterRoot string) ([]templateDiff, error) 
 	root := filepath.Join(projectDir, charterRoot)
 	var diffs []templateDiff
 
-	err := fs.WalkDir(scaffold.Templates, "charter", func(path string, d fs.DirEntry, err error) error {
+	err := fs.WalkDir(scaffold.Templates, "agents", func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
 		if d.IsDir() {
 			return nil
 		}
-		rel := strings.TrimPrefix(path, "charter/")
+		rel := strings.TrimPrefix(path, "agents/")
 		userPath := filepath.Join(root, rel)
 		userBytes, err := os.ReadFile(userPath)
 		if err != nil {

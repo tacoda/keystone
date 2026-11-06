@@ -9,28 +9,28 @@ import (
 func TestInferKind(t *testing.T) {
 	cases := map[string]Kind{
 		// 5.0 directories.
-		".charter/rules/go/stdlib-first.md":   KindRule,
-		".charter/references/process/spec.md": KindReference,
-		".charter/hooks/build.md":             KindHook,
-		".charter/permissions/default.md":     KindPermission,
-		".charter/evals/regression.md":        KindEval,
-		".charter/skills/task/SKILL.md":       KindSkill,
-		".charter/commands/verify.md":         KindCommand,
-		".charter/agents/code-reviewer.md":    KindSubagent,
-		".charter/tools/grep-symbols.md":      KindTool,
-		".charter/documents/adr.md":           KindDocument,
+		"rules/go/stdlib-first.md":   KindRule,
+		"references/process/spec.md": KindReference,
+		"hooks/build.md":             KindHook,
+		"permissions/default.md":     KindPermission,
+		"evals/regression.md":        KindEval,
+		"skills/task/SKILL.md":       KindSkill,
+		"commands/verify.md":         KindCommand,
+		"agents/code-reviewer.md":    KindSubagent,
+		"tools/grep-symbols.md":      KindTool,
+		"documents/adr.md":           KindDocument,
 		// 4.x directories normalize to their 5.0 kinds.
-		".charter/guides/idioms/go/stdlib-first.md": KindRule,
-		".charter/sensors/build.md":                 KindHook,
-		".charter/playbooks/task.md":                KindSkill,
-		".charter/patterns/retry-with-backoff.md":   KindSkill,
-		".charter/posture/default.md":               KindPermission,
-		".charter/corpus/process/spec.md":           KindReference,
-		".charter/concerns/reads-diff.md":           KindConcern,
+		"guides/idioms/go/stdlib-first.md": KindRule,
+		"sensors/build.md":                 KindHook,
+		"playbooks/task.md":                KindSkill,
+		"patterns/retry-with-backoff.md":   KindSkill,
+		"posture/default.md":               KindPermission,
+		"corpus/process/spec.md":           KindReference,
+		"concerns/reads-diff.md":           KindConcern,
 		// Off-convention paths infer nothing.
-		".charter/sources/jira.md": "",
-		".charter/whatever/x.md":   "",
-		"README.md":                "",
+		"sources/jira.md": "",
+		"whatever/x.md":   "",
+		"README.md":       "",
 	}
 	for path, want := range cases {
 		if got := InferKind(path); got != want {
@@ -88,7 +88,7 @@ func TestCategoryOf(t *testing.T) {
 // its kind from the canonical directory (convention over configuration).
 func TestWalk_InfersKindFromDir(t *testing.T) {
 	root := t.TempDir()
-	src := filepath.Join(root, ".charter/guides/process/spec.md")
+	src := filepath.Join(root, ".agents/guides/process/spec.md")
 	if err := os.MkdirAll(filepath.Dir(src), 0o755); err != nil {
 		t.Fatal(err)
 	}
@@ -97,7 +97,7 @@ func TestWalk_InfersKindFromDir(t *testing.T) {
 	if err := os.WriteFile(src, []byte(body), 0o644); err != nil {
 		t.Fatal(err)
 	}
-	primitives, _, err := Walk(root, ".charter")
+	primitives, _, err := Walk(root, ".agents")
 	if err != nil {
 		t.Fatalf("Walk: %v", err)
 	}
@@ -113,7 +113,7 @@ func TestWalk_InfersKindFromDir(t *testing.T) {
 // inference (escape hatch).
 func TestWalk_ExplicitKindWins(t *testing.T) {
 	root := t.TempDir()
-	src := filepath.Join(root, ".charter/guides/special.md")
+	src := filepath.Join(root, ".agents/guides/special.md")
 	if err := os.MkdirAll(filepath.Dir(src), 0o755); err != nil {
 		t.Fatal(err)
 	}
@@ -121,7 +121,7 @@ func TestWalk_ExplicitKindWins(t *testing.T) {
 	if err := os.WriteFile(src, []byte(body), 0o644); err != nil {
 		t.Fatal(err)
 	}
-	primitives, _, err := Walk(root, ".charter")
+	primitives, _, err := Walk(root, ".agents")
 	if err != nil {
 		t.Fatalf("Walk: %v", err)
 	}

@@ -18,7 +18,7 @@ func TestProjectRules_WritesMDCPerGuide(t *testing.T) {
 			Description: "Prefer Go stdlib over new deps.",
 			Paths:       []string{"cmd/**/*.go", "go.mod"},
 		},
-		Path: ".charter/guides/idioms/go/stdlib-first.md",
+		Path: ".agents/guides/idioms/go/stdlib-first.md",
 	}
 	res, err := ProjectRules(root, []primitive.Primitive{guide})
 	if err != nil {
@@ -38,7 +38,7 @@ func TestProjectRules_WritesMDCPerGuide(t *testing.T) {
 		`globs:`,
 		`  - "cmd/**/*.go"`,
 		`alwaysApply: false`,
-		`source: .charter/guides/idioms/go/stdlib-first.md`,
+		`source: .agents/guides/idioms/go/stdlib-first.md`,
 	} {
 		if !strings.Contains(s, want) {
 			t.Errorf("MDC missing %q\n%s", want, s)
@@ -89,7 +89,7 @@ func TestProjectRules_IsIdempotent(t *testing.T) {
 			Kind: "rule", ID: "guides/idioms/go/stdlib-first",
 			Description: "x", Paths: []string{"cmd/**/*.go"},
 		},
-		Path: ".charter/guides/idioms/go/stdlib-first.md",
+		Path: ".agents/guides/idioms/go/stdlib-first.md",
 	}
 	if _, err := ProjectRules(root, []primitive.Primitive{p}); err != nil {
 		t.Fatal(err)

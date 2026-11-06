@@ -32,7 +32,7 @@ func registerSearchTool(s *server.MCPServer, projectDir string) {
 				return mcp.NewToolResultError(err.Error()), nil
 			}
 			limit := int(req.GetFloat("limit", 25))
-			primitives, _, err := primitive.Walk(projectDir, kconfig.DefaultCharterRoot)
+			primitives, _, err := primitive.Walk(projectDir, kconfig.DefaultAgentsRoot)
 			if err != nil {
 				return mcp.NewToolResultError(err.Error()), nil
 			}

@@ -1,29 +1,34 @@
 // Package config holds project-wide settings that are stable across the
 // lifetime of an install: the charter directory name, framework version
 // pin, and (in later phases) the policy tree declared in keystone.json.
-//
-// At Phase 2 only the charter root is configurable here. Phase 3 will fold
-// the full keystone.json schema into this package.
 package config
 
-// DefaultCharterRoot is the single standardized directory that holds the
-// charter inside a consumer's repo and feeds every agent. At 3.0 this is
-// `.charter` — one agent-neutral location (the name describes the thing,
-// not the tool). The primitives, the generated INDEX.json, the lockfile,
-// and the document workspace all live under it; projection reads it and
-// writes each host surface (.claude/, .cursor/, AGENTS.md, …).
+// DefaultAgentsRoot is the directory that holds the charter's primitives:
+// rules, hooks, permissions, skills, commands, subagents, and the rest. At
+// 5.0 this is `.agents` — the tool-neutral directory hosts already read
+// (`.agents/skills/` is native in Codex, Cursor, Copilot, opencode, Goose,
+// and Pi). Only standard primitives live here (ADR 0010).
 //
-// This is the one place to change the charter location. `keystone.json`
+// This is the one place to change the primitives location. `keystone.json`
 // stays at the repo root as the entry-point config.
-const DefaultCharterRoot = ".charter"
+const DefaultAgentsRoot = ".agents"
+
+// StateRoot holds everything keystone-private: INDEX.json, the lockfile,
+// learning/, work/, archive/, state/, sources/, hosts/, and vendored
+// policies/. Kept out of .agents/ so hosts that read .agents/ see only
+// standard files.
+const StateRoot = ".keystone"
+
+// PoliciesDir is where `keystone policy add` vendors policy trees,
+// repo-relative.
+const PoliciesDir = StateRoot + "/policies"
 
 // LockfileName is the basename of the per-install state record, written
-// at <charter-root>/lockfile.json. At 3.0 this resolves to
-// `.charter/lockfile.json`.
+// at <StateRoot>/lockfile.json.
 const LockfileName = "lockfile.json"
 
 // IndexName is the basename of the generated primitive descriptor index,
-// written at <charter-root>/INDEX.json.
+// written at <StateRoot>/INDEX.json.
 const IndexName = "INDEX.json"
 
 // IndexLiteName is the basename of the cheap-discovery sibling index
@@ -32,19 +37,3 @@ const IndexName = "INDEX.json"
 // INDEX.json is opened only when a path, glob, or trigger is needed to
 // activate a specific primitive.
 const IndexLiteName = "INDEX.lite.json"
-
-// KeystoneDir returns the directory that holds the lockfile, INDEX.json,
-// and document workspace. At 3.0 the charter root IS that umbrella — they
-// live directly under `.charter/` — so this returns the charter root
-// itself.
-//
-// Pre-3.0 installs nested the charter under `.charter/` (the umbrella
-// was the parent of the charter root). Those paths are pinned inside the
-// v2.x migrations and the `keystone migrate` legacy-layout detection, not
-// derived here, so this function need not special-case them.
-func KeystoneDir(charterRoot string) string {
-	if charterRoot == "" {
-		charterRoot = DefaultCharterRoot
-	}
-	return charterRoot
-}

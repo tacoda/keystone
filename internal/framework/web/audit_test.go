@@ -39,8 +39,8 @@ func TestAuditLog_AppendWritesJSONL(t *testing.T) {
 	a.Append(auditEntry{
 		Timestamp: "2026-06-18T12:00:00Z",
 		Topics:    []string{"charter-changed", "primitives-changed"},
-		Paths:     []string{".charter/guides/process/spec.md"},
-		Summary:   ".charter/guides/process/spec.md",
+		Paths:     []string{".agents/guides/process/spec.md"},
+		Summary:   ".agents/guides/process/spec.md",
 	})
 	a.Append(auditEntry{
 		Timestamp: "2026-06-18T12:00:01Z",
@@ -119,8 +119,8 @@ func TestSummarizeAudit(t *testing.T) {
 		want   string
 	}{
 		{"empty paths", nil, []string{"charter-changed"}, "watcher fired (topics: charter-changed)"},
-		{"single path", []string{".charter/guides/x.md"}, []string{"charter-changed"}, ".charter/guides/x.md"},
-		{"multi path", []string{".charter/a", ".charter/b", ".charter/c"}, []string{"charter-changed"}, ".charter/a (+2 more)"},
+		{"single path", []string{".agents/guides/x.md"}, []string{"charter-changed"}, ".agents/guides/x.md"},
+		{"multi path", []string{".agents/a", ".agents/b", ".agents/c"}, []string{"charter-changed"}, ".agents/a (+2 more)"},
 	}
 	for _, c := range cases {
 		got := summarizeAudit(c.paths, c.topics)

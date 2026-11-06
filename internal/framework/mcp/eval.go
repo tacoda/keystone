@@ -21,7 +21,7 @@ import (
 func registerEvalTools(s *server.MCPServer, projectDir string) {
 	s.AddTool(
 		mcp.NewTool("keystone_eval_list",
-			mcp.WithDescription("List every eval id declared in .charter/evals/. Returns descriptors (id, level, description) without running anything."),
+			mcp.WithDescription("List every eval id declared in .agents/evals/. Returns descriptors (id, level, description) without running anything."),
 		),
 		func(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 			specs, err := eval.LoadAll(projectDir)

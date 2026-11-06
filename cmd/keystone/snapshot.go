@@ -17,13 +17,13 @@ import (
 )
 
 // snapshotCmd groups save/list/restore. Snapshots are tarballs of
-// `.charter/` stashed under `.charter-snapshots/` at the project
+// `.agents/` stashed under `.keystone/snapshots/` at the project
 // root. Cheap insurance before `keystone migrate`, destructive
 // prune passes, or experimental policy installs.
 func snapshotCmd() *cobra.Command {
 	c := &cobra.Command{
 		Use:   "snapshot",
-		Short: "Save / list / restore local snapshots of .charter/",
+		Short: "Save / list / restore local snapshots of .agents/",
 	}
 	c.AddCommand(snapshotSaveCmd())
 	c.AddCommand(snapshotListCmd())
@@ -32,7 +32,7 @@ func snapshotCmd() *cobra.Command {
 }
 
 func snapshotsDir(projectDir string) string {
-	return filepath.Join(projectDir, ".charter-snapshots")
+	return filepath.Join(projectDir, config.StateRoot, "snapshots")
 }
 
 func snapshotSaveCmd() *cobra.Command {
@@ -42,15 +42,15 @@ func snapshotSaveCmd() *cobra.Command {
 	)
 	c := &cobra.Command{
 		Use:   "save",
-		Short: "Snapshot .charter/ to .charter-snapshots/<ts>-<label>.tar.gz",
+		Short: "Snapshot .agents/ to .keystone/snapshots/<ts>-<label>.tar.gz",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			abs, err := filepath.Abs(dir)
 			if err != nil {
 				return err
 			}
-			ks := filepath.Join(abs, config.DefaultCharterRoot)
+			ks := filepath.Join(abs, config.DefaultAgentsRoot)
 			if _, err := os.Stat(ks); err != nil {
-				return fmt.Errorf(".charter/ not found at %s — nothing to snapshot", abs)
+				return fmt.Errorf(".agents/ not found at %s — nothing to snapshot", abs)
 			}
 			snapDir := snapshotsDir(abs)
 			if err := os.MkdirAll(snapDir, 0o755); err != nil {
@@ -113,7 +113,7 @@ func snapshotRestoreCmd() *cobra.Command {
 	var dir string
 	c := &cobra.Command{
 		Use:   "restore <snapshot>",
-		Short: "Restore .charter/ from a snapshot — destructive, asks for confirm",
+		Short: "Restore .agents/ from a snapshot — destructive, asks for confirm",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			abs, err := filepath.Abs(dir)
@@ -128,7 +128,7 @@ func snapshotRestoreCmd() *cobra.Command {
 			if _, err := os.Stat(src); err != nil {
 				return fmt.Errorf("snapshot %s not found", src)
 			}
-			ks := filepath.Join(abs, config.DefaultCharterRoot)
+			ks := filepath.Join(abs, config.DefaultAgentsRoot)
 			fmt.Fprintf(os.Stderr, "⚠ this will REMOVE %s and restore from %s. Type 'yes' to proceed: ", ks, src)
 			var ack string
 			_, _ = fmt.Scanln(&ack)

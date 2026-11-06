@@ -2,6 +2,7 @@ package primitive
 
 import (
 	"fmt"
+	"github.com/tacoda/keystone/internal/framework/config"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -114,16 +115,13 @@ func Walk(projectDir, charterRoot string) (primitives []Primitive, warnings []Wa
 				return nil
 			}
 			relPath := filepath.ToSlash(relProject(projectDir, path))
-			// Convention over configuration: an omitted `kind:` is
-			// inferred from the canonical directory. Explicit `kind:`
-			// wins (escape hatch).
 			// Convention over configuration: an omitted kind is inferred
 			// from the canonical directory; an explicit kind wins.
-			fm.Kind = resolveKind(fm.Kind, relPath)
+			fm.Kind = resolveKind(fm.Kind, strings.TrimPrefix(relPath, filepath.ToSlash(charterRoot)+"/"))
 			primitives = append(primitives, Primitive{
 				Frontmatter: fm,
 				Path:        relPath,
-				Provenance:  derivProvenance(relPath, charterRoot),
+				Provenance:  derivProvenance(relPath),
 			})
 			return nil
 		})
@@ -158,25 +156,19 @@ type Warning struct {
 }
 
 // derivProvenance turns a primitive's repo-relative path into the
-// cascade layer it ships under. Paths inside `<charter>/policies/<name>/`
-// are policy-vendored; anything else under `<charter>/` is project.
+// cascade layer it ships under. Paths inside `.keystone/policies/<name>/`
+// are policy-vendored; anything else is project.
 //
-// Examples (with charterRoot = ".charter"):
-//
-//	.charter/guides/process/spec.md            → "project"
-//	.charter/policies/acme/guides/x.md         → "policy/acme"
-//	.charter/policies/acme/nested/policies/b/  → "policy/acme" (outermost wins)
-func derivProvenance(relPath, charterRoot string) string {
-	policiesPrefix := filepath.ToSlash(filepath.Join(charterRoot, "policies")) + "/"
-	rel := filepath.ToSlash(relPath)
-	if !strings.HasPrefix(rel, policiesPrefix) {
+//	.agents/rules/process/spec.md                → "project"
+//	.keystone/policies/acme/rules/x.md           → "policy/acme"
+//	.keystone/policies/acme/nested/policies/b/   → "policy/acme" (outermost wins)
+func derivProvenance(relPath string) string {
+	rest, ok := strings.CutPrefix(filepath.ToSlash(relPath), config.PoliciesDir+"/")
+	if !ok {
 		return "project"
 	}
-	rest := strings.TrimPrefix(rel, policiesPrefix)
-	if i := strings.IndexByte(rest, '/'); i >= 0 {
-		return "policy/" + rest[:i]
-	}
-	return "policy/" + rest
+	name, _, _ := strings.Cut(rest, "/")
+	return "policy/" + name
 }
 
 func relProject(projectDir, path string) string {

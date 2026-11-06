@@ -89,7 +89,7 @@ func cascadeCriterion(projectDir, charterRoot string) Criterion {
 		return c
 	}
 	expected := map[string]map[string]string{}
-	if lf, lerr := lockfile.Read(projectDir, charterRoot); lerr == nil {
+	if lf, lerr := lockfile.Read(projectDir); lerr == nil {
 		for name, lock := range lf.Policies {
 			expected[name] = lock.Files
 		}

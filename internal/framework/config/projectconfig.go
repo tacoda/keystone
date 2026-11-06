@@ -15,7 +15,7 @@ const ProjectConfigFile = "keystone.json"
 
 // SchemaVersion is the current keystone.json schema version. Bumped
 // when fields are renamed or removed. 2.0 dropped `harness_root` (the
-// layout is now fixed at .charter/); existing v1 installs are
+// layout is now fixed at .agents/); existing v1 installs are
 // upgraded by `keystone migrate`.
 const SchemaVersion = "2"
 
@@ -133,10 +133,10 @@ type BudgetSpec struct {
 
 // ResolvedCharterRoot always returns the fixed charter path at 2.0.
 //
-// Deprecated: callers should reference config.DefaultCharterRoot
+// Deprecated: callers should reference config.DefaultAgentsRoot
 // directly. Retained so existing call sites compile while they migrate.
 func (c *ProjectConfig) ResolvedCharterRoot() string {
-	return DefaultCharterRoot
+	return DefaultAgentsRoot
 }
 
 // DefaultProjectConfig returns the seed config written by `keystone init`

@@ -67,18 +67,18 @@ Usage:
 
 Each generator drops a skeleton at the conventional path with the right
 frontmatter, sections, and charter-root-relative cross-references. The
-charter root is .charter/.
+charter root is .agents/.
 
 Ids may use the colon-namespaced form (e.g. keystone:index); the disk
 filename normalizes : to -.
 
 Examples:
-  keystone new rule process/release        # .charter/rules/process/release.md
-                                           # + paired .charter/corpus/process/release.md
-  keystone new skill keystone:index         # .charter/skills/keystone-index/SKILL.md
-  keystone new agent security-reviewer      # .charter/agents/security-reviewer.md
-  keystone new command review               # .charter/commands/review.md
-  keystone new document adr                 # .charter/documents/adr.md
+  keystone new rule process/release        # .agents/rules/process/release.md
+                                           # + paired .agents/references/process/release.md
+  keystone new skill keystone:index         # .agents/skills/keystone-index/SKILL.md
+  keystone new agent security-reviewer      # .agents/agents/security-reviewer.md
+  keystone new command review               # .agents/commands/review.md
+  keystone new document adr                 # .agents/documents/adr.md
   keystone new policy acme-policies         # ./acme-policies/ (policy repo skeleton)
 `)
 }
@@ -108,7 +108,7 @@ func parseDirAndCharterRoot(args []string) (projectDir, charterRoot string, rema
 	if err != nil {
 		return "", "", nil, fmt.Errorf("resolve dir: %w", err)
 	}
-	return absDir, config.DefaultCharterRoot, remaining, nil
+	return absDir, config.DefaultAgentsRoot, remaining, nil
 }
 
 // writeSkeleton writes content to path, refusing to overwrite an existing

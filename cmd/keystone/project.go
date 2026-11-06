@@ -19,7 +19,7 @@ import (
 
 // runProject handles `keystone project [--dir <path>]`.
 //
-// Walks every primitive under .charter/ and regenerates the
+// Walks every primitive under .agents/ and regenerates the
 // host-native projections under .claude/ from the canonical sources.
 // Hand-edits to projections are overwritten; the drift sensor flags
 // them as findings.
@@ -50,7 +50,7 @@ func runProject(args []string) error {
 	if err != nil {
 		return fmt.Errorf("resolve dir: %w", err)
 	}
-	charterRoot := config.DefaultCharterRoot
+	charterRoot := config.DefaultAgentsRoot
 
 	primitives, warnings, err := primitive.Walk(absDir, charterRoot)
 	if err != nil {
@@ -83,7 +83,7 @@ func runProject(args []string) error {
 	// Run host adapters. Each adapter projects the host-specific
 	// surface (hooks → .claude/settings.json, .cursor/rules/, etc.).
 	// Source of truth for hooks lives in sensor frontmatter under
-	// `.charter/sensors/` — the adapter reads the already-walked
+	// `.agents/sensors/` — the adapter reads the already-walked
 	// primitive slice rather than walking again.
 	cfg, cfgErr := config.ReadProjectConfig(absDir)
 	if cfgErr != nil && !errors.Is(cfgErr, os.ErrNotExist) {
@@ -197,7 +197,7 @@ func printProjectUsage(w *os.File) {
 Usage:
   keystone project [--dir <path>]
 
-Walks every primitive under .charter/ and writes host-native
+Walks every primitive under .agents/ and writes host-native
 projections from the canonical sources:
 
   Framework wrappers (encouraged authoring path):
@@ -218,7 +218,7 @@ separator) are rewritten to "-" in the projection filename; the
 frontmatter id stays unchanged.
 
 Hand-edits to projection files are erased on the next run — the
-canonical source under .charter/ is the only file you edit.
+canonical source under .agents/ is the only file you edit.
 The drift sensor reports projections that diverge from their source.
 
 Flags:

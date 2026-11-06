@@ -116,11 +116,12 @@ command as a user-invoked skill shim.
 ## Consequences
 
 - **Breaking.** On-disk layout, kind names, frontmatter shape, CLI and MCP
-  names all change. The `v5_0` migration performs the moves and rewrites, and
-  writes `.keystone/migration-5.0-report.md` for the lossy folds
-  (`triggers:` into `description`, playbook gates into a body checklist).
-- Installed 4.x policies must be republished in 5.0 shape. The resolver
-  refuses a 4.x policy with a message naming the fix.
+  names all change. The `v5_0` migration performs the moves only, as the
+  migrations iron laws require (no rewriting of user frontmatter). 4.x kind
+  names, directories, `globs:`, and `on:` stay readable permanently through
+  parse-time normalization; `keystone lint` warns with the 5.0 spelling.
+- Installed 4.x policies keep loading through the same normalization.
+  Policy authors should republish in 5.0 shape.
 - Second layout move in two majors. Accepted: following the standards removes
   per-host projection for the hosts that read `.agents/` natively.
 

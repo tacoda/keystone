@@ -34,7 +34,7 @@ func watchCmd() *cobra.Command {
 	)
 	c := &cobra.Command{
 		Use:   "watch",
-		Short: "Watch .charter/ and re-run index + project + lint on change",
+		Short: "Watch .agents/ and re-run index + project + lint on change",
 		Long: `Long-running file watcher. Debounces bursts of writes and
 runs the configured pipeline:
 
@@ -49,7 +49,7 @@ fresh INDEX.json via their existing SSE channel.`,
 			if err != nil {
 				return err
 			}
-			root := filepath.Join(abs, config.DefaultCharterRoot)
+			root := filepath.Join(abs, config.DefaultAgentsRoot)
 			if _, err := os.Stat(root); err != nil {
 				return fmt.Errorf("no charter at %s — run `keystone init` first", root)
 			}
@@ -126,7 +126,7 @@ fresh INDEX.json via their existing SSE channel.`,
 
 func relevantEvent(ev fsnotify.Event) bool {
 	base := filepath.Base(ev.Name)
-	if strings.HasPrefix(base, ".") && base != filepath.Base(config.DefaultCharterRoot) {
+	if strings.HasPrefix(base, ".") && base != filepath.Base(config.DefaultAgentsRoot) {
 		return false
 	}
 	if strings.HasSuffix(base, "~") || strings.HasSuffix(base, ".swp") {
@@ -168,7 +168,7 @@ func watchRecursive(w *fsnotify.Watcher, root string) error {
 // — no manual `keystone project` invocation needed.
 func runPipeline(ctx context.Context, projectDir string, doLint, doProject bool) {
 	t0 := time.Now()
-	primitives, _, err := primitive.Walk(projectDir, config.DefaultCharterRoot)
+	primitives, _, err := primitive.Walk(projectDir, config.DefaultAgentsRoot)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "✗ walk: %v\n", err)
 		return
@@ -179,7 +179,7 @@ func runPipeline(ctx context.Context, projectDir string, doLint, doProject bool)
 	}
 	primitives = composed
 	idx := primitive.Build(primitives, time.Now())
-	keystoneDir := filepath.Join(projectDir, config.KeystoneDir(config.DefaultCharterRoot))
+	keystoneDir := filepath.Join(projectDir, config.StateRoot)
 	outPath := filepath.Join(keystoneDir, config.IndexName)
 	if err := primitive.Write(outPath, idx); err != nil {
 		fmt.Fprintf(os.Stderr, "✗ write index: %v\n", err)

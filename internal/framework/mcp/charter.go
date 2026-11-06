@@ -31,7 +31,7 @@ func registerConformanceTool(s *server.MCPServer, projectDir string) {
 			mcp.WithDescription("Score the charter-conformance rubric: cascade integrity, frontmatter validity, guide↔corpus pairing, and coverage — each PASS/PARTIAL/FAIL — with an overall verdict (CONFORMANT | DRIFTING | NON-CONFORMANT)."),
 		),
 		func(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-			rub, err := charter.Conformance(projectDir, kconfig.DefaultCharterRoot)
+			rub, err := charter.Conformance(projectDir, kconfig.DefaultAgentsRoot)
 			if err != nil {
 				return mcp.NewToolResultError(err.Error()), nil
 			}
@@ -57,7 +57,7 @@ func registerExplainTool(s *server.MCPServer, projectDir string) {
 				return mcp.NewToolResultError(err.Error()), nil
 			}
 			kind := req.GetString("kind", "")
-			prims, _, err := primitive.Walk(projectDir, kconfig.DefaultCharterRoot)
+			prims, _, err := primitive.Walk(projectDir, kconfig.DefaultAgentsRoot)
 			if err != nil {
 				return mcp.NewToolResultError(err.Error()), nil
 			}
@@ -86,7 +86,7 @@ func registerSignalListTool(s *server.MCPServer, projectDir string) {
 				custom = cfg.Signals
 			}
 			subs := map[string][]string{}
-			if prims, _, err := primitive.Walk(projectDir, kconfig.DefaultCharterRoot); err == nil {
+			if prims, _, err := primitive.Walk(projectDir, kconfig.DefaultAgentsRoot); err == nil {
 				for _, p := range prims {
 					ev := strings.TrimSpace(p.Event)
 					if primitive.IsSignal(ev) {
@@ -112,7 +112,7 @@ func registerCoverageTool(s *server.MCPServer, projectDir string) {
 			mcp.WithDescription("Report charter coverage: how many project source files a guide governs vs. uncharted (matched by no guide's globs), grouped by top-level region. Surfaces where the agent runs with no ambient rule."),
 		),
 		func(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-			res, err := charter.Coverage(projectDir, kconfig.DefaultCharterRoot)
+			res, err := charter.Coverage(projectDir, kconfig.DefaultAgentsRoot)
 			if err != nil {
 				return mcp.NewToolResultError(err.Error()), nil
 			}

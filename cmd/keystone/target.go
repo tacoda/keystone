@@ -77,7 +77,7 @@ func runTargetAdd(args []string, assets fs.FS) error {
 	if err != nil {
 		return fmt.Errorf("resolve dir: %w", err)
 	}
-	charterRoot := config.DefaultCharterRoot
+	charterRoot := config.DefaultAgentsRoot
 	if _, err := os.Stat(filepath.Join(absDir, charterRoot)); err != nil {
 		if os.IsNotExist(err) {
 			return fmt.Errorf("no %s/ in %s — run `keystone init` first", charterRoot, absDir)
@@ -127,7 +127,7 @@ func runTargetAdd(args []string, assets fs.FS) error {
 	}
 
 	for _, agent := range requested {
-		printAgentWarnings(agent, charterRoot)
+		printAgentWarnings(agent)
 	}
 	printTargetAddNextSteps(requested, charterRoot)
 	return nil

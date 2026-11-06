@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/tacoda/keystone/internal/framework/config"
-	"github.com/tacoda/keystone/internal/framework/policies"
 	"github.com/tacoda/keystone/internal/framework/primitive"
 )
 
@@ -104,26 +103,26 @@ func (c *primitiveCache) getLayer(charterRoot string) ([]primitive.Primitive, pr
 // refresh is the project-default convenience wrapper used by callers
 // that only care about the project layer (loadPrimitives, buildIndex).
 func (c *primitiveCache) refresh() {
-	c.refreshLayer(config.DefaultCharterRoot)
+	c.refreshLayer(config.DefaultAgentsRoot)
 }
 
 // get is the project-default convenience wrapper. Same contract as
-// getLayer(DefaultCharterRoot).
+// getLayer(DefaultAgentsRoot).
 func (c *primitiveCache) get() ([]primitive.Primitive, primitive.Index, error) {
-	return c.getLayer(config.DefaultCharterRoot)
+	return c.getLayer(config.DefaultAgentsRoot)
 }
 
 // knownLayerRoots returns the charter roots that should be cached —
 // project + every declared policy. Recomputed per call so policy
 // changes mid-run are picked up.
 func (s *server) knownLayerRoots() []string {
-	roots := []string{config.DefaultCharterRoot}
+	roots := []string{config.DefaultAgentsRoot}
 	cfg, _ := config.ReadProjectConfig(s.projectDir)
 	if cfg == nil {
 		return roots
 	}
 	for _, p := range flattenPolicies(cfg.Policies) {
-		roots = append(roots, filepath.Join(config.DefaultCharterRoot, policies.PolicyRoot, p.Name))
+		roots = append(roots, filepath.Join(config.PoliciesDir, p.Name))
 	}
 	return roots
 }

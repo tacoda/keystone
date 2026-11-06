@@ -72,8 +72,6 @@ func runVerify(args []string) error {
 	if err != nil {
 		return fmt.Errorf("resolve dir: %w", err)
 	}
-	charterRoot := config.DefaultCharterRoot
-
 	cfg, err := config.ReadProjectConfig(absDir)
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -82,7 +80,7 @@ func runVerify(args []string) error {
 		return err
 	}
 
-	lf, err := lockfile.Read(absDir, charterRoot)
+	lf, err := lockfile.Read(absDir)
 	if err != nil {
 		return err
 	}
@@ -103,7 +101,7 @@ func runVerify(args []string) error {
 			for _, f := range d.Files {
 				fmt.Fprintf(os.Stdout, "      - %s (%s)\n", f.Path, f.Kind)
 			}
-			if err := policies.Reset(d.Policy, absDir, charterRoot); err != nil {
+			if err := policies.Reset(d.Policy, absDir); err != nil {
 				return fmt.Errorf("reset %s: %w", d.Policy, err)
 			}
 		}

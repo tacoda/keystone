@@ -23,7 +23,7 @@ func graphCmd() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			primitives, _, err := primitive.Walk(abs, config.DefaultCharterRoot)
+			primitives, _, err := primitive.Walk(abs, config.DefaultAgentsRoot)
 			if err != nil {
 				return err
 			}

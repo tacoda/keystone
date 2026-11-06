@@ -11,14 +11,14 @@ import (
 	"github.com/tacoda/keystone/internal/framework/lockfile"
 )
 
-// writeInstallProfile renders sel as <charterRoot>/corpus/state/INSTALL_PROFILE.md
+// writeInstallProfile renders sel as <charterRoot>/references/state/INSTALL_PROFILE.md
 // under destDir. Overwrites any existing file (the file is install-scoped —
 // re-running init should reset it).
 //
 // The profile is the human-readable record. Machine state (keystone version,
 // agents, policies) lives in <charterRoot>/keystone.lock.json — written separately.
 func writeInstallProfile(destDir, charterRoot string, sel Selections) error {
-	path := filepath.Join(destDir, charterRoot, "corpus", "state", "INSTALL_PROFILE.md")
+	path := filepath.Join(destDir, charterRoot, "references", "state", "INSTALL_PROFILE.md")
 	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
 		return err
 	}
@@ -31,7 +31,7 @@ func writeInstallProfile(destDir, charterRoot string, sel Selections) error {
 	fmt.Fprintf(&b, "created: %s\n", time.Now().UTC().Format("2006-01-02"))
 	fmt.Fprintf(&b, "---\n\n")
 	fmt.Fprintf(&b, "# Install Profile\n\n")
-	lockPath := filepath.ToSlash(filepath.Join(config.KeystoneDir(charterRoot), config.LockfileName))
+	lockPath := filepath.ToSlash(filepath.Join(config.StateRoot, config.LockfileName))
 	fmt.Fprintf(&b, "Selections captured by `keystone init`. Read by the **bootstrap** action; safe to edit by hand. Machine state (keystone version, agents, policies) lives in [`%s`](%s) at the repo root.\n\n", lockPath, lockPath)
 	fmt.Fprintf(&b, "## Selections\n\n")
 	fmt.Fprintf(&b, "| Category | Value(s) |\n")
@@ -58,7 +58,7 @@ func writeInstallProfile(destDir, charterRoot string, sel Selections) error {
 // Falls back to parsing INSTALL_PROFILE.md for installs that predate the
 // lockfile.
 func readInstalledAgents(destDir, charterRoot string) ([]string, error) {
-	lf, err := lockfile.Read(destDir, charterRoot)
+	lf, err := lockfile.Read(destDir)
 	if err != nil {
 		return nil, err
 	}
@@ -72,7 +72,7 @@ func readInstalledAgents(destDir, charterRoot string) ([]string, error) {
 // from the lockfile. Falls back to INSTALL_PROFILE.md frontmatter for installs
 // that predate the lockfile. Returns "" if neither source has a value.
 func readKeystoneVersion(destDir, charterRoot string) (string, error) {
-	lf, err := lockfile.Read(destDir, charterRoot)
+	lf, err := lockfile.Read(destDir)
 	if err != nil {
 		return "", err
 	}
@@ -91,7 +91,7 @@ func updateKeystoneVersion(destDir, charterRoot, newVersion string) error {
 		return err
 	}
 	lf.Keystone.Version = newVersion
-	return lockfile.Write(destDir, charterRoot, lf)
+	return lockfile.Write(destDir, lf)
 }
 
 // appendInstalledAgents adds newAgents to the lockfile's agent list, preserving
@@ -119,10 +119,10 @@ func appendInstalledAgents(destDir, charterRoot string, newAgents []string) erro
 			seen[a] = true
 		}
 	}
-	if err := lockfile.Write(destDir, charterRoot, lf); err != nil {
+	if err := lockfile.Write(destDir, lf); err != nil {
 		return err
 	}
-	fmt.Fprintf(os.Stdout, "  updated: %s\n", filepath.Join(destDir, lockfile.RelPath(charterRoot)))
+	fmt.Fprintf(os.Stdout, "  updated: %s\n", filepath.Join(destDir, lockfile.RelPath()))
 	return nil
 }
 
@@ -130,7 +130,7 @@ func appendInstalledAgents(destDir, charterRoot string, newAgents []string) erro
 // from INSTALL_PROFILE.md. Used as a backward-compat fallback for installs
 // created before the lockfile existed. Returns "" if the field is missing.
 func readKeystoneVersionFromProfile(destDir, charterRoot string) (string, error) {
-	path := filepath.Join(destDir, charterRoot, "corpus", "state", "INSTALL_PROFILE.md")
+	path := filepath.Join(destDir, charterRoot, "references", "state", "INSTALL_PROFILE.md")
 	data, err := os.ReadFile(path)
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -150,7 +150,7 @@ func readKeystoneVersionFromProfile(destDir, charterRoot string) (string, error)
 // Used as a backward-compat fallback for installs created before the lockfile
 // existed.
 func readInstalledAgentsFromProfile(destDir, charterRoot string) ([]string, error) {
-	path := filepath.Join(destDir, charterRoot, "corpus", "state", "INSTALL_PROFILE.md")
+	path := filepath.Join(destDir, charterRoot, "references", "state", "INSTALL_PROFILE.md")
 	data, err := os.ReadFile(path)
 	if err != nil {
 		if os.IsNotExist(err) {

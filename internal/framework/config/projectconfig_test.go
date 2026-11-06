@@ -119,8 +119,8 @@ func TestProjectConfig_ResolvedCharterRoot(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			if got := c.cfg.ResolvedCharterRoot(); got != DefaultCharterRoot {
-				t.Errorf("ResolvedCharterRoot() = %q, want %q (fixed at 2.0)", got, DefaultCharterRoot)
+			if got := c.cfg.ResolvedCharterRoot(); got != DefaultAgentsRoot {
+				t.Errorf("ResolvedCharterRoot() = %q, want %q (fixed at 2.0)", got, DefaultAgentsRoot)
 			}
 		})
 	}

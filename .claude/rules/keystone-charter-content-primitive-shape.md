@@ -5,13 +5,13 @@ description: Frontmatter, canonical paths, corpus/guide pairing, narrow-only glo
 globs:
   - ".charter/**/*.md"
   - "internal/framework/scaffold/templates/**/*.md"
-source: .charter/guides/idioms/charter-content/primitive-shape.md
+source: .agents/rules/idioms/charter-content/primitive-shape.md
 generated_by: keystone-project
 ---
 
 # Primitive shape — rules
 
-Full guide: `.charter/guides/idioms/charter-content/primitive-shape.md` (read on demand).
+Full guide: `.agents/rules/idioms/charter-content/primitive-shape.md` (read on demand).
 
 ## IRON LAW
 

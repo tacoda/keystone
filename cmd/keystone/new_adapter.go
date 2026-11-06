@@ -2,11 +2,12 @@ package main
 
 import (
 	"fmt"
+	"github.com/tacoda/keystone/internal/framework/config"
 	"path/filepath"
 )
 
 func runNewAdapter(args []string) error {
-	projectDir, charterRoot, remaining, err := parseDirAndCharterRoot(args)
+	projectDir, _, remaining, err := parseDirAndCharterRoot(args)
 	if err != nil {
 		return err
 	}
@@ -14,7 +15,7 @@ func runNewAdapter(args []string) error {
 		return fmt.Errorf("`keystone new adapter` requires exactly one agent argument")
 	}
 	agent := remaining[0]
-	base := filepath.Join(projectDir, charterRoot, "adapters", agent)
+	base := filepath.Join(projectDir, config.StateRoot, "hosts", agent)
 
 	files := map[string]string{
 		"activation.md": fmt.Sprintf(`# Adapter — %s — activation

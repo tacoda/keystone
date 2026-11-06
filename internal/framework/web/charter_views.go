@@ -19,7 +19,7 @@ type region struct {
 // handleCoverage renders the charter-coverage page: how much of the
 // project's source a guide governs, and which regions are uncharted.
 func (s *server) handleCoverage(w http.ResponseWriter, r *http.Request) {
-	res, err := charter.Coverage(s.projectDir, config.DefaultCharterRoot)
+	res, err := charter.Coverage(s.projectDir, config.DefaultAgentsRoot)
 	if err != nil {
 		s.renderPage(w, r, "coverage.html", map[string]any{"Error": err.Error()})
 		return
@@ -75,7 +75,7 @@ func (s *server) handleSignals(w http.ResponseWriter, r *http.Request) {
 // subscribe to it via `on:` (host phases excluded — those bridge).
 func signalSubscribers(projectDir string) map[string][]string {
 	subs := map[string][]string{}
-	prims, _, err := primitive.Walk(projectDir, config.DefaultCharterRoot)
+	prims, _, err := primitive.Walk(projectDir, config.DefaultAgentsRoot)
 	if err != nil {
 		return subs
 	}

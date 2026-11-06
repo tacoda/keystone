@@ -35,7 +35,7 @@ type initFlags struct {
 func parseInitArgs(args []string) (*initFlags, error) {
 	flags := &initFlags{
 		dir:         ".",
-		charterRoot: config.DefaultCharterRoot,
+		charterRoot: config.DefaultAgentsRoot,
 		selections:  Selections{},
 	}
 
@@ -72,7 +72,7 @@ func parseInitArgs(args []string) (*initFlags, error) {
 			flags.policies = append(flags.policies, strings.TrimPrefix(a, "--policy="))
 
 		case a == "--charter-root" || strings.HasPrefix(a, "--charter-root="):
-			return nil, fmt.Errorf("--charter-root was removed in 2.0; the charter layout is fixed at .charter/")
+			return nil, fmt.Errorf("--charter-root was removed in 2.0; the charter layout is fixed at .agents/")
 
 		case strings.HasPrefix(a, "--") && strings.Contains(a, "="):
 			// --flag=value form

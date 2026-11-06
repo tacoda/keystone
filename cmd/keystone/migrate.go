@@ -294,9 +294,9 @@ func printPlan(w io.Writer, version, dir string, p *migrations.Plan) {
 }
 
 // readAppliedTolerant returns the applied-migrations list from the
-// lockfile, tolerating every historical location: 4.0 (.charter/
-// lockfile.json), 3.0 (.harness/lockfile.json), 2.0–2.4 (.keystone/
-// lockfile.json), and pre-2.0 (harness/keystone.lock.json). On any read
+// lockfile, tolerating every historical location: 5.0 and 2.0–2.4
+// (.keystone/lockfile.json), 4.0 (.charter/lockfile.json), 3.0
+// (.harness/lockfile.json), and pre-2.0 (harness/keystone.lock.json). On any read
 // error the list comes back empty.
 //
 // Filesystem-derived fallback: when no lockfile entry is found, the
@@ -307,14 +307,15 @@ func printPlan(w io.Writer, version, dir string, p *migrations.Plan) {
 // hasn't been migrated yet.
 func readAppliedTolerant(absDir string) []string {
 	candidates := []string{
-		// 4.0+ canonical: the lockfile lives at <root>/lockfile.json.
-		filepath.Join(absDir, config.DefaultCharterRoot, config.LockfileName),
+		// 5.0 canonical (and the 2.0–2.4 legacy location — the applied
+		// list tells them apart): .keystone/lockfile.json.
+		filepath.Join(absDir, config.StateRoot, config.LockfileName),
+		// 4.0 legacy: the single root was .charter/.
+		filepath.Join(absDir, ".charter", "lockfile.json"),
 		// 3.0 legacy: the single root was .harness/.
 		filepath.Join(absDir, ".harness", "lockfile.json"),
-		// 2.0–2.4 legacy: under .keystone/.
-		filepath.Join(absDir, ".keystone", "lockfile.json"),
 		// pre-2.0: bare harness/ dir with the old lockfile name.
-		filepath.Join(absDir, config.DefaultCharterRoot, "keystone.lock.json"),
+		filepath.Join(absDir, ".charter", "keystone.lock.json"),
 		filepath.Join(absDir, "harness", "keystone.lock.json"),
 	}
 	for _, path := range candidates {
@@ -343,13 +344,7 @@ func readAppliedAt(path string) ([]string, bool) {
 }
 
 func writeApplied(absDir string, applied []string) error {
-	// Write to the lockfile at its current location. Post-4.0 the charter
-	// (and its lockfile) lives at <root>/.charter/; a pre-3.0 install still
-	// has it under .keystone/. The 3.0/4.0 Up relocates it before this runs.
-	path := filepath.Join(absDir, config.DefaultCharterRoot, config.LockfileName)
-	if !dirExists(filepath.Join(absDir, config.DefaultCharterRoot)) {
-		path = filepath.Join(absDir, ".keystone", "lockfile.json")
-	}
+	path := currentLockfilePath(absDir)
 	lf, err := lockfile.ReadFromPath(path)
 	if err != nil {
 		// Lockfile may not exist yet (fresh install). Build a minimal one.
@@ -360,6 +355,16 @@ func writeApplied(absDir string, applied []string) error {
 		return err
 	}
 	return lockfile.WriteToPath(path, lf)
+}
+
+// currentLockfilePath is where the lockfile lives right now: .keystone/ at
+// 5.0 (and pre-3.0), .charter/ on a 4.0 layout (e.g. after a 5.0 Down).
+// Each Up relocates the lockfile before writeApplied runs.
+func currentLockfilePath(absDir string) string {
+	if dirExists(filepath.Join(absDir, ".charter")) && !dirExists(filepath.Join(absDir, config.DefaultAgentsRoot)) {
+		return filepath.Join(absDir, ".charter", config.LockfileName)
+	}
+	return filepath.Join(absDir, config.StateRoot, config.LockfileName)
 }
 
 func resolveDir(dir string) (string, error) {
@@ -391,13 +396,13 @@ func fileExists(p string) bool {
 // a successful Up or Down run. Errors are reported but not fatal — the
 // structural migration has already landed and is the load-bearing change.
 func regenerateGenerated(absDir string) {
-	charterRoot := config.DefaultCharterRoot
+	charterRoot := config.DefaultAgentsRoot
 	primitives, _, walkErr := primitive.Walk(absDir, charterRoot)
 	if walkErr != nil {
 		return
 	}
 	idx := primitive.Build(primitives, time.Now())
-	outPath := filepath.Join(absDir, config.KeystoneDir(charterRoot), config.IndexName)
+	outPath := filepath.Join(absDir, config.StateRoot, config.IndexName)
 	if err := primitive.Write(outPath, idx); err != nil {
 		fmt.Fprintf(os.Stderr, "! keystone migrate: index write failed: %v\n", err)
 	} else {
@@ -425,7 +430,7 @@ Usage:
 Subcommands:
   up [<version>]    Apply every pending migration up to <version>
                     (default: latest). Records applied migrations in
-                    .charter/lockfile.json.
+                    .keystone/lockfile.json.
   down [<version>]  Revert migrations newer than <version> (default:
                     one step). Pops entries off the applied list as
                     each Down plan succeeds.

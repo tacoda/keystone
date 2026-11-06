@@ -14,7 +14,7 @@ import (
 	"github.com/tacoda/keystone/internal/framework/config"
 )
 
-// fsWatcher tails .charter/ for changes and republishes them onto
+// fsWatcher tails .agents/ for changes and republishes them onto
 // the SSE hub as htmx-flavored events. The dashboard subscribes to
 // /events with `sse-swap` directives; an SSE message with an HTML
 // fragment swaps the matching DOM node.
@@ -59,7 +59,7 @@ func newFSWatcher(projectDir string, hub *sseHub, onChange func()) (*fsWatcher, 
 	}
 
 	watched := []string{
-		filepath.Join(projectDir, config.DefaultCharterRoot),
+		filepath.Join(projectDir, config.DefaultAgentsRoot),
 	}
 	for _, root := range watched {
 		if err := addRecursive(w, root); err != nil {
@@ -97,7 +97,7 @@ func (fw *fsWatcher) loop(ctx context.Context) {
 			// Ignore irrelevant churn — .git, .swp, files our own
 			// write path produces.
 			base := filepath.Base(ev.Name)
-			if strings.HasPrefix(base, ".") && base != filepath.Base(config.DefaultCharterRoot) {
+			if strings.HasPrefix(base, ".") && base != filepath.Base(config.DefaultAgentsRoot) {
 				continue
 			}
 			if strings.HasSuffix(base, "~") || strings.HasSuffix(base, ".swp") {

@@ -98,7 +98,7 @@ func (s *server) kpiLint() kpi {
 // surface than what's actually shipped — the most common cause of
 // "I edited the rule and the agent didn't notice."
 func (s *server) kpiIndex() kpi {
-	indexPath := filepath.Join(s.projectDir, config.KeystoneDir(config.DefaultCharterRoot), config.IndexName)
+	indexPath := filepath.Join(s.projectDir, config.StateRoot, config.IndexName)
 	if _, err := os.Stat(indexPath); err != nil {
 		return kpi{Label: "index", Value: "missing", Tone: "bad", Hint: "run `keystone index`", Topic: topicPrimitives}
 	}

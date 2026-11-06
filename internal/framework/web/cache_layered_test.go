@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/tacoda/keystone/internal/framework/config"
-	"github.com/tacoda/keystone/internal/framework/policies"
 	"github.com/tacoda/keystone/internal/framework/primitive"
 )
 
@@ -28,12 +27,12 @@ func seedGuide(t *testing.T, root, charterRoot, idLeaf string) {
 
 func TestLayeredCache_ProjectOnly(t *testing.T) {
 	root := t.TempDir()
-	seedGuide(t, root, config.DefaultCharterRoot, "spec")
+	seedGuide(t, root, config.DefaultAgentsRoot, "spec")
 
 	c := newPrimitiveCache(root)
-	c.refreshLayer(config.DefaultCharterRoot)
+	c.refreshLayer(config.DefaultAgentsRoot)
 
-	prims, _, err := c.getLayer(config.DefaultCharterRoot)
+	prims, _, err := c.getLayer(config.DefaultAgentsRoot)
 	if err != nil {
 		t.Fatalf("getLayer err: %v", err)
 	}
@@ -44,22 +43,22 @@ func TestLayeredCache_ProjectOnly(t *testing.T) {
 
 func TestLayeredCache_MultipleLayers(t *testing.T) {
 	root := t.TempDir()
-	seedGuide(t, root, config.DefaultCharterRoot, "spec")
+	seedGuide(t, root, config.DefaultAgentsRoot, "spec")
 
-	policyA := filepath.Join(config.DefaultCharterRoot, policies.PolicyRoot, "alpha")
-	policyB := filepath.Join(config.DefaultCharterRoot, policies.PolicyRoot, "beta")
+	policyA := filepath.Join(config.PoliciesDir, "alpha")
+	policyB := filepath.Join(config.PoliciesDir, "beta")
 	seedGuide(t, root, policyA, "rule-a")
 	seedGuide(t, root, policyB, "rule-b")
 
 	c := newPrimitiveCache(root)
-	for _, h := range []string{config.DefaultCharterRoot, policyA, policyB} {
+	for _, h := range []string{config.DefaultAgentsRoot, policyA, policyB} {
 		c.refreshLayer(h)
 	}
 
 	cases := map[string]string{
-		config.DefaultCharterRoot: "process/spec",
-		policyA:                   "process/rule-a",
-		policyB:                   "process/rule-b",
+		config.DefaultAgentsRoot: "process/spec",
+		policyA:                  "process/rule-a",
+		policyB:                  "process/rule-b",
 	}
 	for h, wantID := range cases {
 		prims, _, err := c.getLayer(h)
@@ -75,11 +74,11 @@ func TestLayeredCache_MultipleLayers(t *testing.T) {
 
 func TestLayeredCache_ColdMissSyncs(t *testing.T) {
 	root := t.TempDir()
-	seedGuide(t, root, config.DefaultCharterRoot, "spec")
+	seedGuide(t, root, config.DefaultAgentsRoot, "spec")
 	c := newPrimitiveCache(root)
 
 	// No refresh first — getLayer must walk on demand.
-	prims, _, err := c.getLayer(config.DefaultCharterRoot)
+	prims, _, err := c.getLayer(config.DefaultAgentsRoot)
 	if err != nil {
 		t.Fatalf("cold-miss err: %v", err)
 	}
@@ -90,16 +89,16 @@ func TestLayeredCache_ColdMissSyncs(t *testing.T) {
 
 func TestLayeredCache_ConcurrentReads(t *testing.T) {
 	root := t.TempDir()
-	seedGuide(t, root, config.DefaultCharterRoot, "spec")
+	seedGuide(t, root, config.DefaultAgentsRoot, "spec")
 	c := newPrimitiveCache(root)
-	c.refreshLayer(config.DefaultCharterRoot)
+	c.refreshLayer(config.DefaultAgentsRoot)
 
 	var wg sync.WaitGroup
 	for i := 0; i < 100; i++ {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			_, _, _ = c.getLayer(config.DefaultCharterRoot)
+			_, _, _ = c.getLayer(config.DefaultAgentsRoot)
 		}()
 	}
 	done := make(chan struct{})
@@ -115,13 +114,13 @@ func TestLayeredCache_ConcurrentReads(t *testing.T) {
 // observe how often a layer is walked.
 func TestCollectInventory_UsesCache(t *testing.T) {
 	root := t.TempDir()
-	seedGuide(t, root, config.DefaultCharterRoot, "spec")
+	seedGuide(t, root, config.DefaultAgentsRoot, "spec")
 
 	srv, err := newServer(root)
 	if err != nil {
 		t.Fatalf("newServer: %v", err)
 	}
-	srv.primitiveCache.refreshLayer(config.DefaultCharterRoot)
+	srv.primitiveCache.refreshLayer(config.DefaultAgentsRoot)
 
 	var calls int64
 	prev := walkFn

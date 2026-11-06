@@ -88,7 +88,7 @@ func writeGenerators() []writeGen {
 			tool:  "keystone_new_document",
 			verb:  "document",
 			idArg: "<id>",
-			desc:  "Scaffold a document template (governed output: plan, review, adr, retro, feature). Instances land in .charter/work/.",
+			desc:  "Scaffold a document template (governed output: plan, review, adr, retro, feature). Instances land in .keystone/work/.",
 		},
 		{
 			tool:  "keystone_new_corpus",
@@ -119,7 +119,7 @@ func writeGenerators() []writeGen {
 func registerCharterTools(s *server.MCPServer, projectDir string) {
 	s.AddTool(
 		mcp.NewTool("keystone_charter_bootstrap",
-			mcp.WithDescription("Scaffold the charter into the project directory (non-interactive equivalent of `keystone init`). Use this when the project has no `.charter/` yet."),
+			mcp.WithDescription("Scaffold the charter into the project directory (non-interactive equivalent of `keystone init`). Use this when the project has no `.agents/` yet."),
 			mcp.WithString("agent",
 				mcp.Required(),
 				mcp.Description("Target agent to bind (e.g. claude-code, codex, cursor, _generic)."),
@@ -164,7 +164,7 @@ func registerCharterTools(s *server.MCPServer, projectDir string) {
 	// INDEX.json and host projections stay current.
 	s.AddTool(
 		mcp.NewTool("keystone_index_refresh",
-			mcp.WithDescription("Regenerate .charter/INDEX.json from the charter. Call after any keystone_new_* tool."),
+			mcp.WithDescription("Regenerate .keystone/INDEX.json from the charter. Call after any keystone_new_* tool."),
 		),
 		func(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 			out, err := execKeystone(ctx, "index", "--dir", projectDir)
@@ -236,7 +236,7 @@ func registerGenerator(
 				"id":           id,
 				"output":       strings.TrimSpace(out),
 				"project":      projectDir,
-				"refresh_hint": "Call keystone_index_refresh next to rebuild .charter/INDEX.json.",
+				"refresh_hint": "Call keystone_index_refresh next to rebuild .keystone/INDEX.json.",
 			}, "", "  ")
 			return mcp.NewToolResultText(string(body)), nil
 		},

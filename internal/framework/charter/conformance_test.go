@@ -5,13 +5,13 @@ import "testing"
 func TestConformance_CleanProjectIsConformant(t *testing.T) {
 	tmp := t.TempDir()
 	// A well-formed guide (paired corpus) governing all .go; a corpus.
-	write(t, tmp, ".charter/guides/idioms/go/x.md",
+	write(t, tmp, ".agents/guides/idioms/go/x.md",
 		"---\nkind: guide\nid: idioms/go/x\ndescription: d\nglobs:\n  - \"**/*.go\"\ncorpus:\n  - idioms/go/x\n---\nbody\n")
-	write(t, tmp, ".charter/corpus/idioms/go/x.md",
+	write(t, tmp, ".agents/corpus/idioms/go/x.md",
 		"---\nkind: corpus\nid: idioms/go/x\ndescription: d\n---\nwhy\n")
 	write(t, tmp, "main.go", "package main\n")
 
-	rub, err := Conformance(tmp, ".charter")
+	rub, err := Conformance(tmp, ".agents")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -26,11 +26,11 @@ func TestConformance_CleanProjectIsConformant(t *testing.T) {
 func TestConformance_UnpairedGuideDrifts(t *testing.T) {
 	tmp := t.TempDir()
 	// Inferential guide with NO corpus → pairing fails → verdict FAIL (0%).
-	write(t, tmp, ".charter/guides/idioms/go/x.md",
+	write(t, tmp, ".agents/guides/idioms/go/x.md",
 		"---\nkind: guide\nid: idioms/go/x\ndescription: d\nglobs:\n  - \"**/*.go\"\n---\nbody\n")
 	write(t, tmp, "main.go", "package main\n")
 
-	rub, err := Conformance(tmp, ".charter")
+	rub, err := Conformance(tmp, ".agents")
 	if err != nil {
 		t.Fatal(err)
 	}

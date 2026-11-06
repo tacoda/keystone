@@ -17,7 +17,7 @@ func runNewScaffold(t *testing.T, verb, id, relPath string) (string, string) {
 	if err := runNew([]string{verb, id, "--dir", root}); err != nil {
 		t.Fatalf("keystone new %s %s: %v", verb, id, err)
 	}
-	return root, filepath.Join(root, config.DefaultCharterRoot, relPath)
+	return root, filepath.Join(root, config.DefaultAgentsRoot, relPath)
 }
 
 // parsesAndLintsClean asserts the scaffolded file parses with the expected
@@ -49,7 +49,7 @@ func TestNewPattern_ScaffoldsCleanProse(t *testing.T) {
 }
 
 func TestNewPosture_ScaffoldsCleanPermissions(t *testing.T) {
-	_, path := runNewScaffold(t, "posture", "default", "posture/default.md")
+	_, path := runNewScaffold(t, "posture", "default", "permissions/default.md")
 	parsesAndLintsClean(t, path, "permission") // 4.x posture normalizes
 	data, _ := os.ReadFile(path)
 	fm, _, _ := primitive.Parse(string(data))

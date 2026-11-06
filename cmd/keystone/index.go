@@ -13,9 +13,9 @@ import (
 
 // runIndex handles `keystone index [--dir <path>] [--charter-root <name>]`.
 //
-// Walks every canonical primitive location under .charter/
+// Walks every canonical primitive location under .agents/
 // (guides, actions, corpus, sensors, skills, agents, commands), parses
-// each file's frontmatter, and writes .charter/INDEX.json describing
+// each file's frontmatter, and writes .keystone/INDEX.json describing
 // every primitive. The agent reads this artifact once at session start
 // and opens bodies on demand.
 func runIndex(args []string) error {
@@ -45,7 +45,7 @@ func runIndex(args []string) error {
 	if err != nil {
 		return fmt.Errorf("resolve dir: %w", err)
 	}
-	charterRoot := config.DefaultCharterRoot
+	charterRoot := config.DefaultAgentsRoot
 
 	primitives, warnings, err := primitive.Walk(absDir, charterRoot)
 	if err != nil {
@@ -64,7 +64,7 @@ func runIndex(args []string) error {
 	primitives = composed
 
 	idx := primitive.Build(primitives, time.Now())
-	outPath := filepath.Join(absDir, config.KeystoneDir(charterRoot), config.IndexName)
+	outPath := filepath.Join(absDir, config.StateRoot, config.IndexName)
 	if err := primitive.Write(outPath, idx); err != nil {
 		return err
 	}
@@ -80,7 +80,7 @@ func runIndex(args []string) error {
 	// agents here for first-pass browsing; the full INDEX is opened
 	// only when a path/glob/trigger is needed to activate a primitive.
 	lite := primitive.BuildLite(idx)
-	liteOutPath := filepath.Join(absDir, config.KeystoneDir(charterRoot), config.IndexLiteName)
+	liteOutPath := filepath.Join(absDir, config.StateRoot, config.IndexLiteName)
 	if err := primitive.WriteLite(liteOutPath, lite); err != nil {
 		return err
 	}
@@ -100,7 +100,7 @@ Usage:
 
 Walks the charter primitive locations and writes a single descriptor
 artifact at <keystone-dir>/INDEX.json (one level above the charter
-root — `+"`.charter/INDEX.json`"+` for the default layout):
+root — `+"`.keystone/INDEX.json`"+` for the default layout):
 
   Framework wrappers:
     <charter-root>/guides/**/*.md          → kind: guide      (wraps rule)
@@ -130,6 +130,6 @@ match the work in hand.
 
 Flags:
   --dir <path>           Project root (defaults to cwd).
-  --charter-root <path>  Charter directory path (default: .charter).
+  --charter-root <path>  Charter directory path (default: .agents).
 `)
 }

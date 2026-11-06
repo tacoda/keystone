@@ -23,7 +23,7 @@ func runNewRule(args []string) error {
 	}
 
 	ruleRel := filepath.Join("rules", topic, name+".md")
-	corpusRel := filepath.Join("corpus", topic, name+".md")
+	corpusRel := filepath.Join("references", topic, name+".md")
 	rulePath := filepath.Join(projectDir, charterRoot, ruleRel)
 	corpusPath := filepath.Join(projectDir, charterRoot, corpusRel)
 
@@ -95,7 +95,7 @@ func runNewCorpus(args []string) error {
 	if err != nil {
 		return err
 	}
-	corpusRel := filepath.Join("corpus", topic, name+".md")
+	corpusRel := filepath.Join("references", topic, name+".md")
 	ruleRel := filepath.Join("rules", topic, name+".md")
 	corpusPath := filepath.Join(projectDir, charterRoot, corpusRel)
 	title := titleize(name)

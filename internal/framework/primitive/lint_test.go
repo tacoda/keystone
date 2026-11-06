@@ -255,7 +255,7 @@ func TestLint_TagsKebabCase(t *testing.T) {
 				Kind: "rule", ID: "g1", Description: "x", Paths: []string{"x"},
 				Tags: []string{"valid-tag", "Bad_Tag", "ALSO-BAD"},
 			},
-			Path: ".charter/guides/g1.md",
+			Path: ".agents/guides/g1.md",
 		},
 	}
 	findings := Lint(prims)

@@ -67,12 +67,12 @@ func (s *server) collectInsights(primitives []primitive.Primitive) []Insight {
 	}
 
 	// 3. Stale INDEX → medium.
-	indexPath := filepath.Join(s.projectDir, config.KeystoneDir(config.DefaultCharterRoot), config.IndexName)
+	indexPath := filepath.Join(s.projectDir, config.StateRoot, config.IndexName)
 	indexInfo, indexErr := os.Stat(indexPath)
 	if indexErr != nil {
 		out = append(out, Insight{
 			ID: "index.missing", Severity: "high",
-			Title:      "no .charter/INDEX.json",
+			Title:      "no .keystone/INDEX.json",
 			Detail:     "Agents read the index first. Without it, every primitive must be opened blindly — defeats the staged resolution flow.",
 			Action:     "run `keystone index`",
 			ActionLink: "",
@@ -165,7 +165,7 @@ func (s *server) collectInsights(primitives []primitive.Primitive) []Insight {
 }
 
 func inboxStats(projectDir string) (oldest time.Duration, count int) {
-	dir := filepath.Join(projectDir, config.DefaultCharterRoot, "learning", "inbox")
+	dir := filepath.Join(projectDir, config.DefaultAgentsRoot, "learning", "inbox")
 	entries, err := os.ReadDir(dir)
 	if err != nil {
 		return 0, 0
