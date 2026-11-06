@@ -28,95 +28,78 @@ func runNewRule(args []string) error {
 	corpusPath := filepath.Join(projectDir, charterRoot, corpusRel)
 
 	title := titleize(name)
-	id := "rules/" + topic + "/" + name
+	id := topic + "/" + name
 	ruleBody := fmt.Sprintf(`---
 kind: rule
 id: %s
 description: TODO — one-line description of what this rule governs.
-severity: must
+# paths:            # apply only when a touched file matches; omit to apply everywhere
+#   - "src/**/*.go"
 corpus:
   - %s
 ---
 
-# %s — rules
+# %s
 
 One-sentence framing of what this rule governs.
 
-## RULES
+## Rules
 
 - Directive one.
 - Directive two.
 
 For reasoning, see [`+"`%s`"+`](%s).
-`, id, "corpus/"+topic+"/"+name, title, filepath.ToSlash(corpusRel), filepath.ToSlash(corpusRel))
+`, id, id, title, filepath.ToSlash(corpusRel), filepath.ToSlash(corpusRel))
 
-	corpusBody := fmt.Sprintf(`---
-kind: corpus
-id: corpus/%s
+	if err := writeSkeleton(rulePath, ruleBody); err != nil {
+		return err
+	}
+	return writeSkeleton(corpusPath, referenceBody(id, title, ruleRel))
+}
+
+// referenceBody is a reference skeleton: the reasoning behind its rule.
+func referenceBody(id, title, ruleRel string) string {
+	return fmt.Sprintf(`---
+kind: reference
+id: %s
 description: TODO — one-line description of the reasoning captured here.
 ---
 
 # %s — reasoning
 
-Long-form explanation of why the rules in the paired guide exist.
+Long-form explanation of why the paired rule exists.
 
 ## Anti-patterns
 
-Failure modes the rules guard against.
+Failure modes the rule guards against.
 
-## References
+## Sources
 
 Source material — papers, books, posts.
 
-Back to the rules: [`+"`%s`"+`](%s).
+Back to the rule: [`+"`%s`"+`](%s).
 `, id, title, filepath.ToSlash(ruleRel), filepath.ToSlash(ruleRel))
-
-	if err := writeSkeleton(rulePath, ruleBody); err != nil {
-		return err
-	}
-	if err := writeSkeleton(corpusPath, corpusBody); err != nil {
-		return err
-	}
-	return nil
 }
 
-// runNewCorpus handles `keystone new corpus <topic>/<name>`. Scaffolds
-// only the corpus file; useful when the guide already exists or the
-// corpus stands alone (rare).
-func runNewCorpus(args []string) error {
+// runNewReference handles `keystone new reference <topic>/<name>`: only the
+// reference, for when the rule already exists or the reasoning stands alone.
+func runNewReference(args []string) error {
 	projectDir, charterRoot, remaining, err := parseDirAndCharterRoot(args)
 	if err != nil {
 		return err
 	}
 	if len(remaining) != 1 {
-		return fmt.Errorf("`keystone new corpus` requires exactly one argument: <topic>/<name>")
+		return fmt.Errorf("`keystone new reference` requires exactly one argument: <topic>/<name>")
 	}
 	topic, name, err := splitTopicName(remaining[0])
 	if err != nil {
 		return err
 	}
-	corpusRel := filepath.Join("references", topic, name+".md")
+	path := filepath.Join(projectDir, charterRoot, "references", topic, name+".md")
 	ruleRel := filepath.Join("rules", topic, name+".md")
-	corpusPath := filepath.Join(projectDir, charterRoot, corpusRel)
-	title := titleize(name)
-	body := fmt.Sprintf(`# %s — reasoning
-
-Long-form explanation.
-
-## Anti-patterns
-
-Failure modes.
-
-## References
-
-Source material.
-
-Back to the rules: [`+"`%s`"+`](%s).
-`, title, filepath.ToSlash(ruleRel), filepath.ToSlash(ruleRel))
-	return writeSkeleton(corpusPath, body)
+	return writeSkeleton(path, referenceBody(topic+"/"+name, titleize(name), ruleRel))
 }
 
-// splitTopicName parses a `<topic>/<name>` argument.
 func splitTopicName(s string) (string, string, error) {
 	i := strings.IndexByte(s, '/')
 	if i < 0 {

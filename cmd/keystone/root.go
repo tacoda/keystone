@@ -129,7 +129,9 @@ func initCmd() *cobra.Command {
 	c := &cobra.Command{
 		Use:                "init [dir]",
 		Short:              "Scaffold the charter into a directory",
-		Long:               "Scaffold the charter folder and the agent menu file(s) into <dir> (default: current directory).",
+		Long: "Scaffold .agents/ and .keystone/ into <dir> (default: current directory) and project every host.\n" +
+			"Existing files are never replaced; --overwrite replaces keystone's own scaffold and host files in place.\n" +
+			"Files you added are never deleted.",
 		DisableFlagParsing: true,
 		RunE:               runAndForwardAssets(runInit),
 	}

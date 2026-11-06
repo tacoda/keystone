@@ -566,6 +566,6 @@ func printTemplateDrift(diffs []templateDiff, charterRoot string) {
 		fmt.Fprintf(os.Stdout, "    %s/%s\n", charterRoot, d.Rel)
 	}
 	fmt.Fprintln(os.Stdout, "  These are either intentional project customizations or files the templates")
-	fmt.Fprintln(os.Stdout, "  changed upstream. Compare with `keystone init --reset --i-understand-this-is-destructive`")
+	fmt.Fprintln(os.Stdout, "  changed upstream. Compare with `keystone init --overwrite`")
 	fmt.Fprintln(os.Stdout, "  on a copy to see what changed.")
 }

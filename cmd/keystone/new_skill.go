@@ -111,22 +111,22 @@ If the skill wraps a shell command, show the exact invocation:
 
 // runNewSubagent handles `keystone new subagent <id>`. Scaffolds
 // <charter-root>/agents/<id>.md with canonical primitive frontmatter.
-func runNewAgent(args []string) error {
+func runNewSubagent(args []string) error {
 	projectDir, charterRoot, remaining, err := parseDirAndCharterRoot(args)
 	if err != nil {
 		return err
 	}
 	if len(remaining) != 1 {
-		return fmt.Errorf("`keystone new agent` requires exactly one argument: <id>")
+		return fmt.Errorf("`keystone new subagent` requires exactly one argument: <id>")
 	}
 	id := remaining[0]
 	if err := validatePrimitiveID(id); err != nil {
-		return fmt.Errorf("agent id: %w", err)
+		return fmt.Errorf("subagent id: %w", err)
 	}
 	diskName := strings.ReplaceAll(id, ":", "-")
 	path := filepath.Join(projectDir, charterRoot, "agents", diskName+".md")
 	body := fmt.Sprintf(`---
-kind: agent
+kind: subagent
 id: %s
 description: TODO — one-line description of what this subagent does.
 tools:

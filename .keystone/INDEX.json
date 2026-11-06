@@ -1,6 +1,6 @@
 {
   "version": "5.0",
-  "generated": "2026-11-06T06:14:18Z",
+  "generated": "2026-11-06T14:36:15Z",
   "primitives": [
     {
       "kind": "command",
@@ -738,8 +738,8 @@
     },
     {
       "kind": "skill",
-      "id": "keystone-new-action",
-      "description": "Scaffold a new lifecycle action (atomic unit of work) at the canonical path. Triggers: keystone new action; keystone:new-action; /keystone:new-action; add a new action; scaffold a lifecycle action.",
+      "id": "keystone-new",
+      "description": "Scaffold a new primitive (rule, reference, hook, permission, eval, skill, command, subagent, tool, document) at the canonical path. Triggers: keystone new; keystone:new; /keystone:new; add a rule; add a hook; add a skill; scaffold a primitive.",
       "metadata": {
         "model": "sonnet",
         "tags": "scaffold,composition"
@@ -756,7 +756,7 @@
         "scaffold",
         "composition"
       ],
-      "path": ".agents/skills/keystone-new-action/SKILL.md",
+      "path": ".agents/skills/keystone-new/SKILL.md",
       "provenance": "project"
     },
     {
@@ -784,75 +784,6 @@
     },
     {
       "kind": "skill",
-      "id": "keystone-new-corpus",
-      "description": "Scaffold a corpus reasoning entry (the *why*) at the canonical path. Triggers: keystone new corpus; keystone:new-corpus; /keystone:new-corpus; add corpus reasoning; scaffold a corpus entry.",
-      "metadata": {
-        "model": "sonnet",
-        "tags": "scaffold,composition"
-      },
-      "tools": [
-        "Read",
-        "Write",
-        "Edit",
-        "Glob",
-        "Bash"
-      ],
-      "model": "sonnet",
-      "tags": [
-        "scaffold",
-        "composition"
-      ],
-      "path": ".agents/skills/keystone-new-corpus/SKILL.md",
-      "provenance": "project"
-    },
-    {
-      "kind": "skill",
-      "id": "keystone-new-guide",
-      "description": "Scaffold a new rule guide + paired corpus stub at the canonical path. Triggers: keystone new guide; keystone:new-guide; /keystone:new-guide; add a new guide; scaffold a rule guide; new keystone rule.",
-      "metadata": {
-        "model": "sonnet",
-        "tags": "scaffold,composition"
-      },
-      "tools": [
-        "Read",
-        "Write",
-        "Edit",
-        "Glob",
-        "Bash"
-      ],
-      "model": "sonnet",
-      "tags": [
-        "scaffold",
-        "composition"
-      ],
-      "path": ".agents/skills/keystone-new-guide/SKILL.md",
-      "provenance": "project"
-    },
-    {
-      "kind": "skill",
-      "id": "keystone-new-playbook",
-      "description": "Scaffold a new playbook (ordered sequence of actions) at the canonical path. Triggers: keystone new playbook; keystone:new-playbook; /keystone:new-playbook; add a new playbook; scaffold a workflow.",
-      "metadata": {
-        "model": "sonnet",
-        "tags": "scaffold,composition"
-      },
-      "tools": [
-        "Read",
-        "Write",
-        "Edit",
-        "Glob",
-        "Bash"
-      ],
-      "model": "sonnet",
-      "tags": [
-        "scaffold",
-        "composition"
-      ],
-      "path": ".agents/skills/keystone-new-playbook/SKILL.md",
-      "provenance": "project"
-    },
-    {
-      "kind": "skill",
       "id": "keystone-new-policy",
       "description": "Scaffold a new policy repo skeleton outside the current project. Triggers: keystone new policy; keystone:new-policy; /keystone:new-policy; bootstrap a policy repo; scaffold a keystone policy.",
       "metadata": {
@@ -872,29 +803,6 @@
         "composition"
       ],
       "path": ".agents/skills/keystone-new-policy/SKILL.md",
-      "provenance": "project"
-    },
-    {
-      "kind": "skill",
-      "id": "keystone-new-sensor",
-      "description": "Scaffold a new sensor (automated check) at the canonical path. Triggers: keystone new sensor; keystone:new-sensor; /keystone:new-sensor; add a sensor; scaffold a new check.",
-      "metadata": {
-        "model": "sonnet",
-        "tags": "scaffold,composition"
-      },
-      "tools": [
-        "Read",
-        "Write",
-        "Edit",
-        "Glob",
-        "Bash"
-      ],
-      "model": "sonnet",
-      "tags": [
-        "scaffold",
-        "composition"
-      ],
-      "path": ".agents/skills/keystone-new-sensor/SKILL.md",
       "provenance": "project"
     },
     {
@@ -1396,13 +1304,9 @@
       "keystone-index",
       "keystone-learn",
       "keystone-mode",
-      "keystone-new-action",
+      "keystone-new",
       "keystone-new-adapter",
-      "keystone-new-corpus",
-      "keystone-new-guide",
-      "keystone-new-playbook",
       "keystone-new-policy",
-      "keystone-new-sensor",
       "keystone-orient",
       "keystone-review",
       "keystone-spec",
@@ -1453,13 +1357,9 @@
       "skill/keystone-index",
       "skill/keystone-learn",
       "skill/keystone-mode",
-      "skill/keystone-new-action",
+      "skill/keystone-new",
       "skill/keystone-new-adapter",
-      "skill/keystone-new-corpus",
-      "skill/keystone-new-guide",
-      "skill/keystone-new-playbook",
       "skill/keystone-new-policy",
-      "skill/keystone-new-sensor",
       "skill/keystone-orient",
       "skill/keystone-review",
       "skill/keystone-spec",

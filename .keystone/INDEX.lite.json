@@ -1,6 +1,6 @@
 {
   "version": "5.0",
-  "generated": "2026-11-06T06:14:18Z",
+  "generated": "2026-11-06T14:36:15Z",
   "primitives": [
     {
       "category": "constraint",
@@ -431,8 +431,8 @@
     {
       "category": "capability",
       "kind": "skill",
-      "id": "keystone-new-action",
-      "description": "Scaffold a new lifecycle action (atomic unit of work) at the canonical path. Triggers: keystone new action; keystone:new-action; /keystone:new-action; add a new action; scaffold a lifecycle action."
+      "id": "keystone-new",
+      "description": "Scaffold a new primitive (rule, reference, hook, permission, eval, skill, command, subagent, tool, document) at the canonical path. Triggers: keystone new; keystone:new; /keystone:new; add a rule; add a hook; add a skill; scaffold a primitive."
     },
     {
       "category": "capability",
@@ -443,32 +443,8 @@
     {
       "category": "capability",
       "kind": "skill",
-      "id": "keystone-new-corpus",
-      "description": "Scaffold a corpus reasoning entry (the *why*) at the canonical path. Triggers: keystone new corpus; keystone:new-corpus; /keystone:new-corpus; add corpus reasoning; scaffold a corpus entry."
-    },
-    {
-      "category": "capability",
-      "kind": "skill",
-      "id": "keystone-new-guide",
-      "description": "Scaffold a new rule guide + paired corpus stub at the canonical path. Triggers: keystone new guide; keystone:new-guide; /keystone:new-guide; add a new guide; scaffold a rule guide; new keystone rule."
-    },
-    {
-      "category": "capability",
-      "kind": "skill",
-      "id": "keystone-new-playbook",
-      "description": "Scaffold a new playbook (ordered sequence of actions) at the canonical path. Triggers: keystone new playbook; keystone:new-playbook; /keystone:new-playbook; add a new playbook; scaffold a workflow."
-    },
-    {
-      "category": "capability",
-      "kind": "skill",
       "id": "keystone-new-policy",
       "description": "Scaffold a new policy repo skeleton outside the current project. Triggers: keystone new policy; keystone:new-policy; /keystone:new-policy; bootstrap a policy repo; scaffold a keystone policy."
-    },
-    {
-      "category": "capability",
-      "kind": "skill",
-      "id": "keystone-new-sensor",
-      "description": "Scaffold a new sensor (automated check) at the canonical path. Triggers: keystone new sensor; keystone:new-sensor; /keystone:new-sensor; add a sensor; scaffold a new check."
     },
     {
       "category": "capability",

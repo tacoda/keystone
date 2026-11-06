@@ -45,7 +45,7 @@ What "stable" means for a port:
 These commands and their flags don't disappear or change semantics in 1.x:
 
 ```
-keystone init [<dir>] [--agent <name>] [--reset --i-understand-this-is-destructive]
+keystone init [<dir>] [--agent <name>] [--overwrite]
               [--harness-root <name>] [--starter <packs>]
 keystone install [--dir <path>] [--harness-root <name>]
 keystone plugin add <shorthand> [--name <n>] [--dir <path>] [--harness-root <name>]

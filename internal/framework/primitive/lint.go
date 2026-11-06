@@ -268,15 +268,15 @@ func lintTagsAndGlobs(p Primitive, add func(FindingSeverity, string)) {
 // to keep each function's complexity in check.
 func lintRefs(p Primitive, exists map[string]bool) []Finding {
 	// Each association field resolves a ref against a set of candidate
-	// key-prefixes ("" = the raw ref). corpus defaults to the corpus/
-	// kind; produces/consumes target documents; supersedes targets a
+	// key-prefixes ("" = the raw ref). corpus targets a reference, by id or
+	// by the 4.x id without its corpus/ prefix; produces/consumes target documents; supersedes targets a
 	// same-kind id. Data-driven so the function stays flat.
 	checks := []struct {
 		field    string
 		refs     []string
 		prefixes []string
 	}{
-		{"corpus", p.Corpus, []string{"", "corpus/"}},
+		{"corpus", p.Corpus, []string{"", "reference/", "reference/corpus/"}},
 		{"produces", p.Produces, []string{"document/", ""}},
 		{"consumes", p.Consumes, []string{"document/", ""}},
 		{"supersedes", p.Supersedes, []string{p.Kind + "/", ""}},

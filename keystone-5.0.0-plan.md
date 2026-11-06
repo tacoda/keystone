@@ -602,3 +602,19 @@ agent loads. 5.0 measures the load.
   that keeps checks running, so it fails safe. Unverified, listed in
   docs/hosts.md: Cursor `failClosed`, exit-2, and stdout semantics; Cursor
   path globs; the Copilot deny-on-non-zero claim.
+- Phase 6.1: done. `keystone new` takes the 10 kinds (constraints, then
+  capabilities) plus `adapter` and `policy`; the 4.x names (`guide`,
+  `corpus`, `sensor`, `posture`, `agent`, `playbook`, `pattern`) exit
+  non-zero and name the new one. New `keystone new hook`. Scaffolds write
+  5.0 kinds, and a rule's `corpus:` entry resolves to its paired reference.
+  Fixed a Phase 1 miss: `corpus:` refs resolved only under the 4.x
+  `corpus/` kind, so they never resolved against `reference`. `init
+  --reset` (which ran `RemoveAll` on `.agents/`) is replaced by
+  `init --overwrite`: keystone's scaffold and host files are replaced in
+  place, and nothing is deleted. The 6 stale `keystone-new-*` scaffold
+  skills (guide, corpus, sensor, playbook, command, action) are one
+  `keystone-new` skill.
+  For Phase 7: existing installs keep the removed `keystone-new-*` skill
+  folders (the migration should remove them when unmodified). Wire the
+  `cli` and `plugin` tool transports (today only `mcp` is served).
+  For Phase 8: `docs/conventions.md` still names `new guide|sensor|playbook`.

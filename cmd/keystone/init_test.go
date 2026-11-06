@@ -88,11 +88,7 @@ func TestInit_FreshScaffoldGoldenFiles(t *testing.T) {
 		".agents/skills/keystone-audit/SKILL.md",
 		".agents/skills/keystone-index/SKILL.md",
 		".agents/skills/keystone-verify/SKILL.md",
-		".agents/skills/keystone-new-guide/SKILL.md",
-		".agents/skills/keystone-new-corpus/SKILL.md",
-		".agents/skills/keystone-new-sensor/SKILL.md",
-		".agents/skills/keystone-new-command/SKILL.md",
-		".agents/skills/keystone-new-playbook/SKILL.md",
+		".agents/skills/keystone-new/SKILL.md",
 		".agents/skills/keystone-new-adapter/SKILL.md",
 		".agents/skills/keystone-new-policy/SKILL.md",
 		".agents/agents/README.md",
@@ -105,7 +101,7 @@ func TestInit_FreshScaffoldGoldenFiles(t *testing.T) {
 		".claude/skills/keystone-bootstrap/SKILL.md",
 		".claude/skills/keystone-index/SKILL.md",
 		".claude/skills/keystone-verify/SKILL.md",
-		".claude/skills/keystone-new-guide/SKILL.md",
+		".claude/skills/keystone-new/SKILL.md",
 	}
 
 	assertFilesExist(t, projectDir, wantFiles)
@@ -173,4 +169,69 @@ func TestAddAdapters_AppendsMissingKeepsOrder(t *testing.T) {
 	if strings.Contains(string(data), "generic") {
 		t.Errorf("generic must not become an adapter:\n%s", data)
 	}
+}
+
+// TestInit_OverwriteReplacesInPlace — a re-run keeps user edits; only
+// --overwrite replaces keystone's files, and nothing the user added is
+// deleted. The 4.x --reset is refused.
+func TestInit_OverwriteReplacesInPlace(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping e2e init test in -short mode")
+	}
+	dir, run := initRunner(t)
+	mustInit(t, run)
+	spec := filepath.Join(dir, ".agents/rules/process/spec.md")
+	mine := filepath.Join(dir, ".agents/rules/mine.md")
+	writeMine(t, spec, mine)
+
+	mustInit(t, run)
+	if !isMine(spec) {
+		t.Error("re-init without --overwrite replaced a user-edited file")
+	}
+	mustInit(t, run, "--overwrite")
+	if isMine(spec) {
+		t.Error("--overwrite left keystone's scaffold file unreplaced")
+	}
+	if !isMine(mine) {
+		t.Error("--overwrite touched a file the user added")
+	}
+	if out, err := run("--reset"); err == nil || !strings.Contains(out, "--overwrite") {
+		t.Errorf("--reset must be refused naming --overwrite: %v\n%s", err, out)
+	}
+}
+
+// initRunner builds the binary and returns a fresh project dir plus a
+// function that runs `keystone init <dir> <args>` there.
+func initRunner(t *testing.T) (string, func(...string) (string, error)) {
+	t.Helper()
+	bin := filepath.Join(t.TempDir(), "keystone")
+	if out, err := exec.Command("go", "build", "-o", bin, ".").CombinedOutput(); err != nil {
+		t.Fatalf("go build: %v\n%s", err, out)
+	}
+	dir := t.TempDir()
+	return dir, func(args ...string) (string, error) {
+		out, err := exec.Command(bin, append([]string{"init", dir}, args...)...).CombinedOutput()
+		return string(out), err
+	}
+}
+
+func mustInit(t *testing.T, run func(...string) (string, error), args ...string) {
+	t.Helper()
+	if out, err := run(args...); err != nil {
+		t.Fatalf("init %v: %v\n%s", args, err, out)
+	}
+}
+
+func writeMine(t *testing.T, paths ...string) {
+	t.Helper()
+	for _, p := range paths {
+		if err := os.WriteFile(p, []byte("MINE\n"), 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+}
+
+func isMine(path string) bool {
+	data, err := os.ReadFile(path)
+	return err == nil && string(data) == "MINE\n"
 }

@@ -6,73 +6,54 @@ import (
 	"strings"
 )
 
-// runNewPattern handles `keystone new pattern <id>`. A pattern is prose — a
-// reusable documentation pattern (the Diátaxis modes: tutorial, how-to,
-// reference, explanation). The scaffold generates a documentation skeleton the
-// author fills in; it is not a code generator and has no projection.
-func runNewPattern(args []string) error {
-	id, projectDir, charterRoot, err := newOneArg(args, "pattern")
-	if err != nil {
-		return err
-	}
-	path := filepath.Join(projectDir, charterRoot, "patterns", strings.ReplaceAll(id, ":", "-")+".md")
-	body := fmt.Sprintf(`---
-kind: pattern
-id: %s
-description: TODO — the documentation pattern this prescribes and when to use it.
----
-
-# %s
-
-## Purpose
-
-The reader's need this document type serves (Diátaxis: learning / task /
-information / understanding).
-
-## Audience & context
-
-Who reads a document of this type and what they already know.
-
-## Structure
-
-The section skeleton a document following this pattern uses.
-
-## Conventions
-
-Voice, length, what to include and what to leave out.
-
-## Example
-
-A short model document following the pattern.
-`, id, id)
-	return writeSkeleton(path, body)
-}
-
-// runNewPosture handles `keystone new posture <id>`. A posture declares
-// allow/ask/deny tool-permission lists that project to the host's permissions
-// block (Claude Code: .claude/settings.json).
-func runNewPosture(args []string) error {
-	id, projectDir, charterRoot, err := newOneArg(args, "posture")
+// runNewPermission handles `keystone new permission <id>`: allow/ask/deny
+// rules in Claude Code syntax, translated to every host that can enforce them.
+func runNewPermission(args []string) error {
+	id, projectDir, charterRoot, err := newOneArg(args, "permission")
 	if err != nil {
 		return err
 	}
 	path := filepath.Join(projectDir, charterRoot, "permissions", strings.ReplaceAll(id, ":", "-")+".md")
 	body := fmt.Sprintf(`---
-kind: posture
+kind: permission
 id: %s
-description: TODO — the tool/permission posture this declares.
+description: TODO — what these permission rules protect.
 allow:
   - "Bash(go test:*)"
 ask:
   - "Bash(git push:*)"
 deny:
-  - "Read(.env*)"
+  - "Read(./.env*)"
 ---
 
 # %s
 
 Why these grants are set this way — what the allow/ask/deny lists protect and
 the trust boundary they encode.
+`, id, id)
+	return writeSkeleton(path, body)
+}
+
+// runNewHook handles `keystone new hook <id>`: a computational check that
+// runs on a host event and blocks the agent when it exits non-zero.
+func runNewHook(args []string) error {
+	id, projectDir, charterRoot, err := newOneArg(args, "hook")
+	if err != nil {
+		return err
+	}
+	path := filepath.Join(projectDir, charterRoot, "hooks", strings.ReplaceAll(id, ":", "-")+".md")
+	body := fmt.Sprintf(`---
+kind: hook
+id: %s
+description: TODO — what this check catches.
+mode: computational
+event: Stop        # a host event (PreToolUse, PostToolUse, Stop, …) or a keystone signal
+run: "true"        # TODO — the check; a non-zero exit blocks
+---
+
+# %s
+
+What the check verifies, what a failure means, and how to fix one.
 `, id, id)
 	return writeSkeleton(path, body)
 }

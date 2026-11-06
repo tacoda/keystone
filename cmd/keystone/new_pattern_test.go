@@ -3,6 +3,7 @@ package main
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/tacoda/keystone/internal/framework/config"
@@ -43,18 +44,47 @@ func parsesAndLintsClean(t *testing.T, path, wantKind string) {
 	}
 }
 
-func TestNewPattern_ScaffoldsCleanProse(t *testing.T) {
-	_, path := runNewScaffold(t, "pattern", "tutorial", "patterns/tutorial.md")
-	parsesAndLintsClean(t, path, "skill") // 4.x pattern folds into skill
-}
-
-func TestNewPosture_ScaffoldsCleanPermissions(t *testing.T) {
-	_, path := runNewScaffold(t, "posture", "default", "permissions/default.md")
-	parsesAndLintsClean(t, path, "permission") // 4.x posture normalizes
+func TestNewPermission_ScaffoldsCleanRules(t *testing.T) {
+	_, path := runNewScaffold(t, "permission", "default", "permissions/default.md")
+	parsesAndLintsClean(t, path, "permission")
 	data, _ := os.ReadFile(path)
 	fm, _, _ := primitive.Parse(string(data))
 	if len(fm.Allow) == 0 || len(fm.Deny) == 0 {
-		t.Errorf("posture scaffold missing allow/deny lists: %+v", fm)
+		t.Errorf("permission scaffold missing allow/deny lists: %+v", fm)
+	}
+}
+
+func TestNewHookAndSubagent_ScaffoldClean(t *testing.T) {
+	_, hook := runNewScaffold(t, "hook", "go-vet", "hooks/go-vet.md")
+	parsesAndLintsClean(t, hook, "hook")
+	_, sub := runNewScaffold(t, "subagent", "reviewer", "agents/reviewer.md")
+	parsesAndLintsClean(t, sub, "subagent")
+}
+
+// TestNewRule_PairsReference — the rule's corpus: entry resolves to the
+// reference it scaffolds, so the pair lints with no warning.
+func TestNewRule_PairsReference(t *testing.T) {
+	root, _ := runNewScaffold(t, "rule", "go/errors", "rules/go/errors.md")
+	prims, _, err := primitive.Walk(root, config.DefaultAgentsRoot)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(prims) != 2 {
+		t.Fatalf("want rule + reference, got %d primitive(s)", len(prims))
+	}
+	for _, f := range primitive.Lint(prims) {
+		if f.Severity == primitive.FindingError || strings.Contains(f.Message, "does not resolve") {
+			t.Errorf("scaffold pair lints: %s", f)
+		}
+	}
+}
+
+func TestNew_LegacyKindsNameTheirReplacement(t *testing.T) {
+	for old, now := range newRenamed {
+		err := runNew([]string{old, "x", "--dir", t.TempDir()})
+		if err == nil || !strings.Contains(err.Error(), "keystone new "+now) {
+			t.Errorf("new %s: want an error naming `keystone new %s`, got %v", old, now, err)
+		}
 	}
 }
 

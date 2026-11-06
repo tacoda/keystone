@@ -77,17 +77,13 @@ func runInit(args []string, assets fs.FS) error {
 		return err
 	}
 
+	// Never delete: --overwrite replaces keystone's own scaffold files in
+	// place; files the user added stay.
 	mode := skipIfExists
-	if flags.reset {
-		if charterExists {
-			fmt.Fprintf(os.Stdout, "▸ --reset: removing existing %s/\n", charterDest)
-			if err := os.RemoveAll(charterDest); err != nil {
-				return fmt.Errorf("reset charter: %w", err)
-			}
-		}
+	if flags.overwrite {
 		mode = overwrite
 	} else if charterExists {
-		fmt.Fprintf(os.Stdout, "▸ %s/ already exists — writing only new files (existing files are kept; pass --reset to rewrite)\n", charterDest)
+		fmt.Fprintf(os.Stdout, "▸ %s/ already exists — writing only new files (existing files are kept; pass --overwrite to replace keystone's)\n", charterDest)
 	}
 
 	if err := installScaffold(assets, absDir, charterDest, mode); err != nil {
@@ -122,7 +118,7 @@ func runInit(args []string, assets fs.FS) error {
 	// host agent can't see. Errors are non-fatal — the structural install
 	// is already complete and these artifacts can be regenerated with
 	// `keystone index` / `keystone project`.
-	if err := indexAndProject(absDir, flags.charterRoot); err != nil {
+	if err := indexAndProject(absDir, flags.charterRoot, flags.overwrite); err != nil {
 		fmt.Fprintf(os.Stderr, "! post-install index/project skipped: %v\n", err)
 	}
 
@@ -179,7 +175,7 @@ func reportAmbientLoad(projectDir, charterRoot string) error {
 // tree under .claude/. Called once at the end of `keystone init` so a
 // fresh install ships discoverable slash commands without an extra
 // manual step.
-func indexAndProject(projectDir, charterRoot string) error {
+func indexAndProject(projectDir, charterRoot string, overwrite bool) error {
 	primitives, warnings, err := primitive.Walk(projectDir, charterRoot)
 	if err != nil {
 		return fmt.Errorf("walk primitives: %w", err)
@@ -197,7 +193,7 @@ func indexAndProject(projectDir, charterRoot string) error {
 		fmt.Fprintf(os.Stdout, "  wrote: %s (%d primitive(s))\n", rel, len(primitives))
 	}
 
-	if _, err := projectHosts(projectDir, primitives, os.Stdout, false); err != nil {
+	if _, err := projectHosts(projectDir, primitives, os.Stdout, overwrite); err != nil {
 		return fmt.Errorf("project primitives: %w", err)
 	}
 
