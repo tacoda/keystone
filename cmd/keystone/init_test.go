@@ -57,6 +57,8 @@ func TestInit_FreshScaffoldGoldenFiles(t *testing.T) {
 	// --agent codex selects the codex host: keystone.json adapters, the
 	// Codex subagent TOMLs, and the generated AGENTS.md / CLAUDE.md blocks.
 	assertFileContains(t, projectDir, "keystone.json", `"codex"`)
+	// A fresh install starts on the current layout: no migration is pending.
+	assertFileContains(t, projectDir, ".keystone/lockfile.json", `"migrations_applied"`, `"5.0"`)
 	assertFileContains(t, projectDir, ".codex/agents/verifier.toml", "developer_instructions = ")
 	assertFileContains(t, projectDir, "AGENTS.md", "<!-- keystone:start -->", "## Constraints", "**Codex**")
 	assertFileContains(t, projectDir, "CLAUDE.md", "@AGENTS.md")

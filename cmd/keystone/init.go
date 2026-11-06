@@ -11,6 +11,7 @@ import (
 
 	"github.com/tacoda/keystone/internal/framework/config"
 	"github.com/tacoda/keystone/internal/framework/lockfile"
+	"github.com/tacoda/keystone/internal/framework/migrations"
 	"github.com/tacoda/keystone/internal/framework/primitive"
 )
 
@@ -183,6 +184,22 @@ func indexAndProject(projectDir, charterRoot string, overwrite bool) error {
 // exist yet, or fills in the keystone section if a prior call only wrote
 // policy entries. Records the binary version, install date, the configured
 // charter root, and the agent IDs whose menu files were just installed.
+// markFreshInstallMigrated records every migration as applied on a brand
+// new install: it starts on the current layout, so nothing is pending. An
+// older layout (.charter/, .harness/) in the folder means a real upgrade
+// is still to run, so nothing is recorded.
+func markFreshInstallMigrated(destDir string, lf *lockfile.Lockfile) {
+	for _, legacy := range []string{".charter", ".harness"} {
+		if _, err := os.Stat(filepath.Join(destDir, legacy)); err == nil {
+			return
+		}
+	}
+	lf.MigrationsApplied = nil
+	for _, m := range migrations.All() {
+		lf.MigrationsApplied = append(lf.MigrationsApplied, m.Version)
+	}
+}
+
 func initializeLockfile(destDir, charterRoot string, agents []string) error {
 	lf, err := ensureLockfile(destDir, charterRoot)
 	if err != nil {
@@ -191,6 +208,7 @@ func initializeLockfile(destDir, charterRoot string, agents []string) error {
 	lf.Keystone.Version = version
 	if lf.Keystone.Installed == "" {
 		lf.Keystone.Installed = time.Now().UTC().Format("2006-01-02")
+		markFreshInstallMigrated(destDir, lf)
 	}
 	seen := map[string]bool{}
 	for _, a := range lf.Keystone.Agents {

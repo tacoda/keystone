@@ -791,3 +791,21 @@ agent loads. 5.0 measures the load.
       says `docs/specs/`. Pick one.
   13. Stale comments: `cmd/keystone/conditional.go:22`,
       `internal/framework/scaffold/embed.go` (`targets/`, `charter/`).
+- Phase 9: done. Bug list items 1-13 fixed or decided:
+  strict/required locks map to 5.0 folders (a "guides" lock had stopped
+  firing); new policies are 5.0-shaped; shims rebase their links (0 broken
+  projected links, from ~300); doctor checks that links resolve; hook evals
+  run `run:`; `http` tools warn; hooks with `run:` and no `mode:` lint as
+  computational; the migration warning finds the project root; `verify
+  --hook` (alias `--sensor`); spec path is `docs/specs/`; stale comments.
+  User decisions: shipped commands folded into the `keystone-*` skills;
+  the fail-closed bridge stays (recovery documented).
+  Found during the phase: prune could delete a charter source through a
+  symlinked host folder (fixed, regression test); Cursor blocked every
+  `preToolUse` on the bridge's plain-text stdout (fixed from Cursor's
+  docs); Codex hooks exist (bridge added); a fresh init reported 8 pending
+  migrations (fixed). Host behaviors settled from docs, recorded in
+  docs/hosts.md; only Claude Code is verified by a real run.
+  Smoke test (fresh project, all 10 hosts plus a custom host): init,
+  target add, new for every kind, project (idempotent), lint, verify,
+  doctor, budget, allocate, hook fire per host, tool list: all pass.
