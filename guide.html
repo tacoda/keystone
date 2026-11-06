@@ -3,21 +3,23 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Keystone Guide — the agent charter framework. A hands-on tutorial.</title>
-<meta name="description" content="A Rails-guide-style narrative tutorial for Keystone, the agent charter framework. Install, author your first charter, write a guide + sensor, wire signals, and operate the cascade.">
+<meta name="voice-register" content="informational">
+<meta name="voice-english" content="ste">
+<title>Keystone Guide: get started with the agent charter framework</title>
+<meta name="description" content="A hands-on walkthrough for Keystone 5.0, the agent charter framework. Install, run keystone init, write your first rule and hook, and project them to every host.">
 <link rel="canonical" href="https://www.tacoda.dev/keystone/guide.html">
 
 <!-- Open Graph -->
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://www.tacoda.dev/keystone/guide.html">
-<meta property="og:title" content="Keystone Guide — the agent charter framework. A hands-on tutorial.">
-<meta property="og:description" content="A Rails-guide-style narrative tutorial for Keystone, the agent charter framework. Install, author your first charter, write a guide + sensor, wire signals, and operate the cascade.">
+<meta property="og:title" content="Keystone Guide: get started with the agent charter framework">
+<meta property="og:description" content="A hands-on walkthrough for Keystone 5.0, the agent charter framework. Install, run keystone init, write your first rule and hook, and project them to every host.">
 <meta property="og:image" content="https://www.tacoda.dev/keystone/keystone_logo.png">
 
 <!-- Twitter Card -->
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Keystone Guide — the agent charter framework. A hands-on tutorial.">
-<meta name="twitter:description" content="A Rails-guide-style narrative tutorial for Keystone, the agent charter framework. Install, author your first charter, write a guide + sensor, wire signals, and operate the cascade.">
+<meta name="twitter:title" content="Keystone Guide: get started with the agent charter framework">
+<meta name="twitter:description" content="A hands-on walkthrough for Keystone 5.0, the agent charter framework. Install, run keystone init, write your first rule and hook, and project them to every host.">
 <meta name="twitter:image" content="https://www.tacoda.dev/keystone/keystone_logo.png">
 
 <link rel="icon" type="image/png" href="keystone_logo.png">
@@ -1173,7 +1175,7 @@
         <h1>Keystone</h1>
       </div>
       <p>the agent charter framework</p>
-      <p>guide · v4.0.0</p>
+      <p>guide · v5.0.1</p>
     </div>
 
     <nav>
@@ -1185,16 +1187,16 @@
       </div>
 
       <div class="nav-group">
-        <span class="nav-label">Authoring primitives</span>
-        <a class="nav-link" href="#first-guide">4 · Your first guide</a>
-        <a class="nav-link" href="#first-sensor">5 · Your first sensor</a>
-        <a class="nav-link" href="#signals">6 · Signals</a>
+        <span class="nav-label">Writing the charter</span>
+        <a class="nav-link" href="#first-rule">4 · Your first rule</a>
+        <a class="nav-link" href="#project">5 · Project to your hosts</a>
+        <a class="nav-link" href="#first-hook">6 · Your first hook</a>
       </div>
 
       <div class="nav-group">
         <span class="nav-label">Operating</span>
-        <a class="nav-link" href="#policies">7 · Policies &amp; the cascade</a>
-        <a class="nav-link" href="#operating">8 · Operating the charter</a>
+        <a class="nav-link" href="#allocate">7 · Bring an existing setup</a>
+        <a class="nav-link" href="#budget">8 · Check the context budget</a>
         <a class="nav-link" href="#next-steps">9 · Next steps</a>
       </div>
 
@@ -1219,59 +1221,42 @@
   <!-- ===================== 1 · INTRODUCTION ===================== -->
   <section id="introduction" class="page" data-title="Introduction">
     <div class="page-head">
-      <div class="crumb">Guide · Keystone v4.0.0</div>
+      <div class="crumb">Guide · Keystone v5.0.1</div>
       <h1>Get started with <em class="hero-any">Keystone</em>.</h1>
       <p class="tagline">
-        This is a hands-on tutorial. By the end you will have installed Keystone, authored a
-        real charter for a repo, written a guide and a sensor, wired a signal, and understood
-        how vendored policies cascade into your project. Work through it top to bottom — each
-        section builds on the last.
+        Keystone keeps the standards for your coding agents in one folder, <code>.agents/</code>,
+        and delivers them to every agent you use. This guide takes you from install to a charter
+        with one rule and one hook. Work through it in order, because each step uses the last one.
       </p>
     </div>
 
     <div class="prose">
-      <h2>What a charter is</h2>
+      <h2>What Keystone does</h2>
       <p>
-        A <strong>charter</strong> is the set of standards you author to constrain your coding
-        agents — per repository. It lives at <code>.charter/</code> as plain, versioned
-        markdown. <code>CHARTER.md</code> is the single entrypoint; every host file (CLAUDE.md,
-        AGENTS.md, Cursor rules, Continue rules) is a thin pointer to it. Once the charter is in
-        place, any agent that can read <code>.charter/INDEX.json</code> and the files it points
-        at can operate the project. Keystone the toolchain authors and maintains the charter, but
-        is not required at runtime.
+        You write your standards once, as plain Markdown files in <code>.agents/</code>. Then
+        <code>keystone project</code> writes them into each host's own format. The hosts are Claude
+        Code, Cursor, Copilot, Codex, opencode, Continue, Cline, Goose, Pi, and Aider. Where a host
+        can't enforce something, Keystone tells you, and it tells the agent too.
       </p>
+      <p>
+        That set of standards is a <strong>charter</strong>. Keystone keeps its own state, such as
+        the index and the lockfile, in <code>.keystone/</code>. You edit <code>.agents/</code>, and
+        you never edit <code>.keystone/</code> by hand.
+      </p>
+
+      <h2>What you'll have at the end</h2>
+      <ul>
+        <li>Keystone installed, and a charter in your repo.</li>
+        <li>One rule that applies only to the files it names, with its reasoning one hop away.</li>
+        <li>One hook that blocks the agent when a check fails.</li>
+        <li>Both delivered to your host by <code>keystone project</code>.</li>
+      </ul>
 
       <h2>Harness vs. charter</h2>
       <p>
-        Keep two roles straight, because they are easy to conflate:
-      </p>
-      <ul>
-        <li><strong>Harness</strong> — the <em>engine</em> that runs the model: the coding agent
-          (Claude Code, Cursor, Codex, opencode, …), the orchestrator, the runner. If you
-          <em>are the engine</em>, you are building a harness.</li>
-        <li><strong>Charter</strong> — the <em>standards you author</em> to constrain whatever
-          harness runs, so each repo gets reliable, quality output. If you <em>author the
-          spec</em>, you are writing a charter.</li>
-      </ul>
-      <p>
-        Keystone is not a harness. It is the <strong>agent charter framework</strong>: charter
-        engineering (a.k.a. constraint engineering) at the repository level.
-      </p>
-
-      <div class="callout">
-        <strong>Note</strong> Earlier releases called this a "harness." At 4.0 the vocabulary
-        changed to "charter" and the root moved to <code>.charter/</code>. This guide uses 4.0
-        vocabulary throughout.
-      </div>
-
-      <h2>Why per-repo discipline</h2>
-      <p>
-        AI coding agents are productive, and they drift. They forget your conventions between
-        sessions; each repo reinvents the same ad-hoc prompt hacks; org-wide discipline can't be
-        shared, versioned, or audited. A charter fixes that at the level where code actually
-        lives — the repository. Every unique repo gets its own authored standards, and org
-        discipline ships in as vendored <strong>policies</strong> that every repo pulls, pinned
-        and hash-verified. Swap agents, keep the rules.
+        A <strong>harness</strong> runs the model: the coding agent, the orchestrator, the runner.
+        A <strong>charter</strong> is the set of standards that constrains that harness. Keystone
+        manages the charter, so it isn't a harness. Swap agents, and the charter stays.
       </p>
     </div>
 
@@ -1280,23 +1265,31 @@
       <div class="action">
         <span class="action-tag">authoring</span>
         <h3>CLI</h3>
-        <p>The <code>keystone</code> binary authors and maintains the charter — <code>init</code>, <code>index</code>, <code>project</code>, <code>verify</code>, and the primitive generators.</p>
+        <p>The <code>keystone</code> binary scaffolds, indexes, projects, and verifies the charter.</p>
       </div>
       <div class="action">
         <span class="action-tag">dispatch</span>
         <h3>MCP server</h3>
-        <p>Dispatches the same charter to host agents over the model-context-protocol. Convenience, not required at runtime.</p>
+        <p>Serves the same charter to your agent as MCP tools, and your host starts it.</p>
       </div>
       <div class="action">
         <span class="action-tag">observe</span>
         <h3>Dashboard</h3>
-        <p>A localhost operator view at <code>http://localhost:4773</code> — coverage, signals, prune, eval runs.</p>
+        <p>A local view at <code>http://localhost:4773</code> for coverage, the budget, signals, and evals.</p>
       </div>
     </div>
 
     <div class="callout">
-      <strong>Remember</strong> All three tools are convenience. The charter alone — plain files
-      under <code>.charter/</code> — is enough for any agent to operate the project.
+      <strong>Remember</strong> An agent can read the charter with none of these tools, because it's
+      plain files. Hooks are the one exception: each host bridge calls the <code>keystone</code>
+      binary on your <code>PATH</code>.
+    </div>
+
+    <div class="callout">
+      <strong>Coming from 4.x?</strong> Run <code>keystone migrate up</code>, then install the 5.0
+      binary before your hooks run again. The 4.x names still parse, and
+      <code>keystone lint --fix</code> rewrites them. See the <a href="docs.html">reference</a> for
+      the map from each old name to its new one.
     </div>
 
     <div class="page-foot">
@@ -1311,18 +1304,17 @@
       <div class="crumb">Guide · Step 2</div>
       <h1>Install Keystone</h1>
       <p class="tagline">
-        You'll install the binary, scaffold a charter into a repo, and wire your agent to the MCP
-        server. Three commands, minimum friction.
+        Install the binary, run <code>keystone init</code> in your repo, and connect your agent to
+        the MCP server. That's three commands.
       </p>
     </div>
 
     <div class="prose">
       <h2>1. Install the binary</h2>
-      <p>Grab it from the Homebrew tap (or download a release binary):</p>
+      <p>Install it from the Homebrew tap, or download a release binary from GitHub:</p>
     </div>
 
-    <pre class="code"><span class="prompt">$</span> brew install tacoda/tap/keystone
-<span class="comment">● keystone installed</span></pre>
+    <pre class="code"><span class="prompt">$</span> brew install tacoda/tap/keystone</pre>
 
     <section class="hero-term">
       <div class="term">
@@ -1331,19 +1323,16 @@
           <span class="tlabel">~/my-project</span>
         </div>
         <div class="term-body">
-          <span class="pr">$</span> brew install tacoda/tap/keystone<br>
-          <span class="ok">●</span> keystone v4.0.0 installed<br>
-          <span class="pr">$</span> cd my-project<br>
-          <span class="pr">$</span> keystone init<br>
-          <span class="dim">?</span> Select your agent <span class="dim">›</span> <span class="ok">claude-code</span><br>
-          <span class="ar">▸</span> installing charter to .charter/<br>
-          <span class="ar">▸</span> installing claude-code target <span class="dim">→</span> CLAUDE.md → @CHARTER.md<br>
-          <span class="ar">▸</span> wrote: .charter/INDEX.json<br>
-          <span class="ar">▸</span> wrote: .charter/lockfile.json<br>
+          <span class="pr">$</span> keystone init --agent claude-code<br>
+          <span class="ar">▸</span> installing charter to .agents<br>
+          <span class="ar">▸</span> installing keystone state to .keystone<br>
+          <span class="dim">  wrote:</span> .keystone/INDEX.json (81 primitive(s))<br>
+          <span class="dim">  wrote:</span> AGENTS.md<br>
+          <span class="dim">  wrote:</span> CLAUDE.md<br>
           <span class="ok">✓</span> charter installed for claude-code.<br>
+          <span class="ar">▶</span> <span class="dim">Next:</span> run the <span class="ok">/keystone:bootstrap</span> skill in claude-code.<br>
           <span class="pr">$</span> keystone mcp install --agent claude-code<br>
-          <span class="ok">✓</span> wrote .mcp.json (keystone MCP server wired)<br>
-          <span class="ar">▶</span> <span class="dim">Next:</span> run <span class="ok">/keystone-bootstrap</span> in claude-code.<br>
+          <span class="ok">✓</span> wrote .mcp.json<br>
           <span class="pr">$</span> claude<br>
           <span class="dim">&gt;</span> <span class="ok">/keystone-bootstrap</span><br>
           <span class="ar" id="spark">✶</span> <span class="dim">Thinking… (<span id="elapsed">3</span>s · esc to interrupt)</span><span class="cursor"></span>
@@ -1352,38 +1341,50 @@
     </section>
 
     <div class="prose">
-      <h2>2. Scaffold the charter</h2>
+      <h2>2. Run <code>keystone init</code></h2>
       <p>
-        From inside a repo, run <code>keystone init</code>. It writes <code>.charter/</code>, a
-        per-host menu, and asks exactly one question — your agent target. Pass
-        <code>--agent</code> to skip the prompt entirely (zero questions):
+        Run <code>keystone init</code> from the root of your repo. Pass <code>--agent</code> to name
+        your host. Without the flag, init asks you to pick one in a terminal:
       </p>
     </div>
 
-    <pre class="code"><span class="prompt">$</span> keystone init                     <span class="comment"># one question: pick your agent</span>
-<span class="prompt">$</span> keystone init --agent claude-code  <span class="comment"># zero questions</span></pre>
+    <pre class="code"><span class="prompt">$</span> keystone init                     <span class="comment"># asks you to pick your agent</span>
+<span class="prompt">$</span> keystone init --agent claude-code  <span class="comment"># no questions</span></pre>
 
     <div class="prose">
       <p>
-        <code>init</code> is minimum-friction on purpose. Anything that needs a decision at
-        install time is an opt-in flag, never scaffolded silently. It writes the charter root and
-        emits the descriptor index (<code>keystone index</code> runs as part of init; you can
-        re-run it any time).
+        Pass one of these host names to <code>--agent</code>:
+      </p>
+    </div>
+
+    <pre class="code">claude-code  codex  cursor  github-copilot  opencode
+continue  cline  goose  pi  aider  generic</pre>
+
+    <div class="prose">
+      <p>
+        Init writes <code>.agents/</code>, <code>.keystone/</code>, <code>keystone.json</code>, and
+        <code>AGENTS.md</code>, and then it projects your host. It skips every file that already
+        exists. If you want it to replace Keystone's own files, pass <code>--overwrite</code>.
+      </p>
+      <p>
+        Init ends with a next step: run the <code>keystone-bootstrap</code> skill in your agent.
+        That skill reads your codebase, detects the stack, and fills
+        <code>.agents/references/state/CODEBASE_STATE.md</code>.
       </p>
 
-      <h2>3. Wire your agent to the MCP server</h2>
+      <h2>3. Connect your agent to the MCP server</h2>
       <p>
-        The MCP server lets your host agent pull the same charter Keystone authored. One line
-        writes the host's MCP config:
+        This command writes the host's MCP config, and the host starts the server on its next
+        session:
       </p>
     </div>
 
     <pre class="code"><span class="prompt">$</span> keystone mcp install --agent claude-code   <span class="comment"># writes .mcp.json</span>
-<span class="comment"># other hosts: --agent cursor → .cursor/mcp.json, etc.</span></pre>
+<span class="comment"># cursor → .cursor/mcp.json · codex → .codex/mcp.json · opencode → opencode.json</span></pre>
 
     <div class="callout">
-      <strong>Optional</strong> Run <code>keystone web serve</code> to open the localhost
-      dashboard at <code>http://localhost:4773</code>. It's an operator view, not a requirement.
+      <strong>Optional</strong> Run <code>keystone web serve</code> to open the local dashboard at
+      <code>http://localhost:4773</code>. You don't need it to follow this guide.
     </div>
 
     <div class="page-foot">
@@ -1398,548 +1399,535 @@
       <div class="crumb">Guide · Step 3</div>
       <h1>Your first charter</h1>
       <p class="tagline">
-        Now look at what <code>init</code> gave you. You'll learn what lives under
-        <code>.charter/</code>, why <code>CHARTER.md</code> is the entrypoint, and the two commands
-        you'll run constantly: <code>index</code> and <code>project</code>.
+        Look at what init gave you: two folders, ten kinds of primitive, and one entry file that
+        every host reads.
       </p>
     </div>
 
     <div class="prose">
-      <h2>What <code>.charter/</code> contains</h2>
+      <h2>Two folders</h2>
       <p>
-        The charter root holds your primitives, the descriptor index, and the state that anchors
-        everything. Here's the shape:
+        <code>.agents/</code> holds the sources you edit. <code>.keystone/</code> holds Keystone's
+        state. Here's the shape after init:
       </p>
     </div>
 
     <div class="tree">
-      <div class="tree-line"><span class="tree-dir">.charter/</span></div>
-      <div class="tree-line"><span class="tree-structure">├─</span> <span class="tree-file">CHARTER.md</span><span class="tree-annotation ann-1">the single agent entrypoint (full orientation)</span></div>
-      <div class="tree-line"><span class="tree-structure">├─</span> <span class="tree-file">INDEX.json</span><span class="tree-annotation ann-2">descriptor index — every primitive, read first</span></div>
-      <div class="tree-line"><span class="tree-structure">├─</span> <span class="tree-file">lockfile.json</span><span class="tree-annotation ann-3">per-file policy hashes</span></div>
-      <div class="tree-line"><span class="tree-structure">├─</span> <span class="tree-dir">guides/</span><span class="tree-annotation ann-1">ambient, glob-scoped directives</span></div>
-      <div class="tree-line"><span class="tree-structure">├─</span> <span class="tree-dir">corpus/</span><span class="tree-annotation ann-2">the reasoning (why), loaded on demand + state/</span></div>
-      <div class="tree-line"><span class="tree-structure">├─</span> <span class="tree-dir">sensors/</span><span class="tree-annotation ann-3">checks that react to a signal or host phase</span></div>
-      <div class="tree-line"><span class="tree-structure">├─</span> <span class="tree-dir">agents/</span><span class="tree-annotation ann-4">roles spawned as subagents</span></div>
-      <div class="tree-line"><span class="tree-structure">├─</span> <span class="tree-dir">commands/</span> <span class="tree-file">playbooks/</span> <span class="tree-file">skills/</span><span class="tree-annotation ann-5">units of work + composed sequences</span></div>
-      <div class="tree-line"><span class="tree-structure">└─</span> <span class="tree-dir">tools/</span> <span class="tree-file">patterns/</span> <span class="tree-file">postures/</span> <span class="tree-file">documents/</span> <span class="tree-file">evals/</span><span class="tree-annotation ann-default">the rest of the 13 kinds</span></div>
+      <div class="tree-line"><span class="tree-dir">.agents/</span></div>
+      <div class="tree-line"><span class="tree-structure">├─</span> <span class="tree-dir">rules/</span><span class="tree-annotation ann-1">directives the agent follows</span></div>
+      <div class="tree-line"><span class="tree-structure">├─</span> <span class="tree-dir">references/</span><span class="tree-annotation ann-2">the reasoning behind each rule</span></div>
+      <div class="tree-line"><span class="tree-structure">├─</span> <span class="tree-dir">hooks/</span><span class="tree-annotation ann-3">checks that run on an event</span></div>
+      <div class="tree-line"><span class="tree-structure">├─</span> <span class="tree-dir">skills/</span><span class="tree-annotation ann-4">Agent Skills, including the keystone-* lifecycle skills</span></div>
+      <div class="tree-line"><span class="tree-structure">└─</span> <span class="tree-dir">agents/</span> <span class="tree-file">commands/</span> <span class="tree-file">evals/</span><span class="tree-annotation ann-5">subagents, commands, and evals</span></div>
+      <div class="tree-line"><span class="tree-dir">.keystone/</span></div>
+      <div class="tree-line"><span class="tree-structure">├─</span> <span class="tree-file">INDEX.json</span> <span class="tree-file">INDEX.lite.json</span><span class="tree-annotation ann-1">the descriptor index, read first</span></div>
+      <div class="tree-line"><span class="tree-structure">├─</span> <span class="tree-file">lockfile.json</span><span class="tree-annotation ann-2">every file Keystone wrote</span></div>
+      <div class="tree-line"><span class="tree-structure">└─</span> <span class="tree-dir">learning/</span><span class="tree-annotation ann-default">the learning inbox</span></div>
     </div>
 
     <div class="prose">
       <p>
-        <code>keystone.json</code> stays at the repo root — it holds your policy pins and signal
-        declarations. Everything else lives under <code>.charter/</code>.
+        <code>keystone.json</code> stays at the repo root. It lists your hosts under
+        <code>adapters</code> and your vendored policies under <code>policies</code>:
       </p>
-
-      <h2>The 13 primitive kinds</h2>
-      <p>
-        A charter is built from <strong>13 primitive kinds</strong>. Each carries canonical
-        frontmatter (<code>kind</code>, <code>id</code>, <code>description</code>, plus per-kind
-        fields) and lives at a canonical path.
-      </p>
-    </div>
-
-    <div class="layer-header">
-      <span>Kind</span><span>What it is</span><span>Fires / activates</span><span>Projects to</span>
-    </div>
-    <div class="layers">
-      <div class="layer l1"><div class="layer-cell layer-name">guide</div><div class="layer-cell layer-desc">ambient, glob-scoped directive — inferential or computational</div><div class="layer-cell layer-act">globs match</div><div class="layer-cell layer-act">.claude/rules/, .cursor/rules/</div></div>
-      <div class="layer l3"><div class="layer-cell layer-name">sensor</div><div class="layer-cell layer-desc">a check → verdict (exit / HTTP status) or agent review</div><div class="layer-cell layer-act">on: signal / phase</div><div class="layer-cell layer-act">host bridge / dispatch</div></div>
-      <div class="layer l4"><div class="layer-cell layer-name">agent</div><div class="layer-cell layer-desc">a role spawned as a subagent</div><div class="layer-cell layer-act">spawned by id</div><div class="layer-cell layer-act">.claude/agents/</div></div>
-      <div class="layer l2"><div class="layer-cell layer-name">command</div><div class="layer-cell layer-desc">a unit of work / lifecycle step</div><div class="layer-cell layer-act">invoked by name</div><div class="layer-cell layer-act">.claude/commands/</div></div>
-      <div class="layer l5"><div class="layer-cell layer-name">skill</div><div class="layer-cell layer-desc">a single composed capability</div><div class="layer-cell layer-act">triggers: match</div><div class="layer-cell layer-act">.claude/skills/</div></div>
-      <div class="layer l1"><div class="layer-cell layer-name">playbook</div><div class="layer-cell layer-desc">a composed sequence of commands with gates:</div><div class="layer-cell layer-act">invoked by name</div><div class="layer-cell layer-act">—</div></div>
-      <div class="layer l2"><div class="layer-cell layer-name">corpus</div><div class="layer-cell layer-desc">the reasoning / why, loaded on demand</div><div class="layer-cell layer-act">guide's corpus:</div><div class="layer-cell layer-act">—</div></div>
-      <div class="layer l3"><div class="layer-cell layer-name">pattern</div><div class="layer-cell layer-desc">a reusable documentation pattern (Diátaxis)</div><div class="layer-cell layer-act">applied in prose</div><div class="layer-cell layer-act">—</div></div>
-      <div class="layer l4"><div class="layer-cell layer-name">document</div><div class="layer-cell layer-desc">a governed output (plan / review / adr / retro / feature)</div><div class="layer-cell layer-act">gate transitions</div><div class="layer-cell layer-act">.charter/work/</div></div>
-      <div class="layer l5"><div class="layer-cell layer-name">concern</div><div class="layer-cell layer-desc">a composition mixin</div><div class="layer-cell layer-act">included</div><div class="layer-cell layer-act">—</div></div>
-      <div class="layer l1"><div class="layer-cell layer-name">posture</div><div class="layer-cell layer-desc">tool / permission posture</div><div class="layer-cell layer-act">projection</div><div class="layer-cell layer-act">.claude/settings.json</div></div>
-      <div class="layer l2"><div class="layer-cell layer-name">tool</div><div class="layer-cell layer-desc">author-defined external callable (cli | http | mcp | plugin); on-demand or a side-effect with on:</div><div class="layer-cell layer-act">on-demand / on:</div><div class="layer-cell layer-act">MCP register</div></div>
-      <div class="layer l3"><div class="layer-cell layer-name">eval</div><div class="layer-cell layer-desc">the eval harness</div><div class="layer-cell layer-act">keystone eval run</div><div class="layer-cell layer-act">—</div></div>
-    </div>
-
-    <div class="callout">
-      <strong>4.0</strong> There is no <code>hook</code> kind. It was retired at 4.0 — a reaction
-      is now a <code>sensor</code> (a check), a <code>tool</code> (a side-effect), or an
-      <code>agent</code> (a review) that self-subscribes to a signal or host phase via
-      <code>on:</code>. Pick the kind by what the primitive <em>is</em>, not how it fires.
-    </div>
-
-    <div class="prose">
-      <h2><code>CHARTER.md</code>, the entrypoint</h2>
-      <p>
-        <code>CHARTER.md</code> is the single canonical agent entrypoint — full orientation for
-        the repo. Every host file is a thin pointer to it: Claude Code imports it natively
-        (<code>@CHARTER.md</code>); other hosts get an imperative "read CHARTER.md" plus a per-host
-        capability delta (which subagents / slash commands / skills the host supports). You author
-        one entrypoint; each host reads it its own way.
-      </p>
-
-      <h2>The two commands you'll run constantly</h2>
-      <p>
-        Every time you add, move, or delete a primitive, two commands keep the charter coherent:
-      </p>
-      <ul>
-        <li><strong><code>keystone index</code></strong> — walks <code>.charter/</code>, parses
-          frontmatter, and emits <code>.charter/INDEX.json</code>. Agents read this descriptor
-          index first and open bodies only when activation conditions match.</li>
-        <li><strong><code>keystone project</code></strong> — regenerates the host projections
-          (<code>.claude/</code>, <code>.cursor/</code>, …) from your canonical sources.</li>
-      </ul>
-    </div>
-
-    <pre class="code"><span class="prompt">$</span> keystone index      <span class="comment"># regenerate .charter/INDEX.json</span>
-<span class="prompt">$</span> keystone project    <span class="comment"># regenerate host projections</span></pre>
-
-    <div class="callout">
-      <strong>Tip</strong> <code>keystone watch</code> runs an fsnotify loop that re-runs
-      <code>index + project + lint</code> on every save under <code>.charter/</code>. Keep it in a
-      side terminal while you author.
-    </div>
-
-    <div class="page-foot">
-      <span><a href="#install">← Install</a></span>
-      <span><a href="#first-guide">Next: Your first guide →</a></span>
-    </div>
-  </section>
-
-  <!-- ===================== 4 · FIRST GUIDE ===================== -->
-  <section id="first-guide" class="page" data-title="Your first guide">
-    <div class="page-head">
-      <div class="crumb">Guide · Step 4</div>
-      <h1>Your first guide</h1>
-      <p class="tagline">
-        A guide is an ambient, glob-scoped directive — the workhorse primitive. You'll author an
-        idiom guide, pair it with a corpus entry, scope it with globs, and watch it project into
-        <code>.claude/rules/</code> and other hosts.
-      </p>
-    </div>
-
-    <div class="prose">
-      <p>
-        Say your repo has a Rails backend and you want migrations to stay small and reversible.
-        You'll capture that as an idiom guide. Scaffold it:
-      </p>
-    </div>
-
-    <pre class="code"><span class="prompt">$</span> keystone new guide idioms/rails/migrations</pre>
-
-    <div class="prose">
-      <p>
-        That writes a guide file and a paired corpus stub. Author the guide body with canonical
-        frontmatter:
-      </p>
-    </div>
-
-    <pre class="code"><span class="comment"># .charter/guides/idioms/rails/migrations.md</span>
-<span class="kw">---</span>
-kind: guide
-id: idioms/rails/migrations
-description: Migrations are reversible and small.
-globs: ["db/migrate/**"]
-severity: should
-corpus: corpus/idioms/rails/migrations
-<span class="kw">---</span>
-
-Keep each migration reversible and scoped to one change. Prefer
-`change` over `up`/`down` when the operation is reversible. Never
-mix a schema change and a data backfill in the same migration.</pre>
-
-    <div class="prose">
-      <h2>How globs scope activation</h2>
-      <p>
-        <code>globs:</code> <strong>narrows</strong> a guide — it can only remove the guide from
-        activation, never expand it. The rule is:
-      </p>
-    </div>
-
-    <pre class="code">activates ⇔ (topic default fires) ∧ (globs match, or no globs declared)</pre>
-
-    <div class="prose">
-      <p>
-        With <code>globs: ["db/migrate/**"]</code>, the guide activates only when the ambient
-        topic already applies <em>and</em> a touched file is under <code>db/migrate/</code>.
-        Globs reflect real code structure — a glob that matches no files is a learning signal,
-        not a feature. The <strong>bootstrap</strong> flow seeds initial globs from the region map
-        in <code>corpus/state/CODEBASE_STATE.md</code>.
-      </p>
-
-      <h2>Pair it with corpus</h2>
-      <p>
-        A guide states <em>what</em>; the corpus states <em>why</em>. Corpus is loaded on demand —
-        never auto-loaded — so a guide body can stay terse while the reasoning lives one hop away.
-        Author the paired entry the generator stubbed:
-      </p>
-    </div>
-
-    <pre class="code"><span class="comment"># .charter/corpus/idioms/rails/migrations.md</span>
-<span class="kw">---</span>
-kind: corpus
-id: corpus/idioms/rails/migrations
-description: Why migrations stay small and reversible.
-<span class="kw">---</span>
-
-An irreversible migration can't be rolled back cleanly in an
-incident. A migration that mixes schema + backfill locks tables
-for the duration of the backfill. Small, reversible migrations
-keep deploys safe and reviewable.</pre>
-
-    <div class="callout">
-      <strong>Golden rule</strong> A new guide gets its paired corpus entry in the same change. A
-      guide with no corpus link, or a corpus with no guide, is debt the charter-debt review flags.
-    </div>
-
-    <div class="prose">
-      <h2>Project it to your hosts</h2>
-      <p>
-        Re-index and project. For Claude Code and other pointer-style hosts, the guide becomes a
-        rule shim under <code>.claude/rules/</code>, and idiom loading is gated through
-        <code>corpus/state/GLOBS_INDEX.md</code>. For Cursor, <code>keystone project</code> writes
-        a <code>.cursor/rules/&lt;id&gt;.mdc</code> with the <code>globs:</code> mirrored verbatim.
-      </p>
-    </div>
-
-    <pre class="code"><span class="prompt">$</span> keystone index && keystone project
-<span class="ok">✓</span> .claude/rules/idioms-rails-migrations.md
-<span class="ok">✓</span> .cursor/rules/idioms-rails-migrations.mdc</pre>
-
-    <div class="page-foot">
-      <span><a href="#first-charter">← Your first charter</a></span>
-      <span><a href="#first-sensor">Next: Your first sensor →</a></span>
-    </div>
-  </section>
-
-  <!-- ===================== 5 · FIRST SENSOR ===================== -->
-  <section id="first-sensor" class="page" data-title="Your first sensor">
-    <div class="page-head">
-      <div class="crumb">Guide · Step 5</div>
-      <h1>Your first sensor</h1>
-      <p class="tagline">
-        A sensor is a check that reacts to a signal or a host phase. It comes in two flavors:
-        <strong>computational</strong> (a script → exit / HTTP status verdict) and
-        <strong>inferential</strong> (an agent review → a structured verdict). You'll write one of
-        each.
-      </p>
-    </div>
-
-    <div class="prose">
-      <h2>A computational sensor</h2>
-      <p>
-        Computational sensors run a command and turn its result into a verdict. A non-zero exit
-        (or a failing HTTP status) blocks the gate. Subscribe it to a host phase or a signal with
-        <code>on:</code>, and give it a <code>run:</code>:
-      </p>
-    </div>
-
-    <pre class="code"><span class="prompt">$</span> keystone new sensor lint</pre>
-
-    <pre class="code"><span class="comment"># .charter/sensors/lint.md</span>
-<span class="kw">---</span>
-kind: sensor
-id: lint
-description: Block the gate if the linter fails.
-mode: computational
-on: pre-verify
-run: golangci-lint run ./...
-<span class="kw">---</span>
-
-Runs the project linter. A non-zero exit blocks verification.</pre>
-
-    <div class="prose">
-      <p>
-        Here <code>on: pre-verify</code> subscribes the sensor to a host phase. When that phase
-        fires, Keystone runs <code>run:</code> and reads its exit status — zero passes, non-zero
-        blocks. A sensor can equally subscribe to your own signal (see the next section).
-      </p>
-
-      <h2>An inferential sensor</h2>
-      <p>
-        Inferential sensors are reviews. Instead of a script, they're dispatched as an agent that
-        reads the diff and returns a structured verdict. Declare the shape with
-        <code>returns:</code>:
-      </p>
-    </div>
-
-    <pre class="code"><span class="comment"># .charter/sensors/security-review.md</span>
-<span class="kw">---</span>
-kind: sensor
-id: security-review
-description: Flag OWASP-top-10 patterns in the current diff.
-mode: inferential
-on: pre-verify
-returns:
-  verdict: pass | warn | block
-  findings: list
-<span class="kw">---</span>
-
-Read the diff. Report any injection, auth, or unsafe-default
-patterns. Return `block` on a clear vulnerability, `warn` on a
-smell, `pass` otherwise.</pre>
-
-    <div class="callout">
-      <strong>Why two modes</strong> Keystone can't invoke an LLM itself — an inferential sensor
-      emits a dispatch manifest and the host spawns the agent. A computational sensor runs a
-      script directly. Same subscription model (<code>on:</code>), different verdict source.
-    </div>
-
-    <div class="page-foot">
-      <span><a href="#first-guide">← Your first guide</a></span>
-      <span><a href="#signals">Next: Signals →</a></span>
-    </div>
-  </section>
-
-  <!-- ===================== 6 · SIGNALS ===================== -->
-  <section id="signals" class="page" data-title="Signals">
-    <div class="page-head">
-      <div class="crumb">Guide · Step 6</div>
-      <h1>Signals</h1>
-      <p class="tagline">
-        A signal is a Keystone framework event the host can't see — the extensible counterpart to
-        a host hook phase. You'll learn the closed set of host phases, how to define your own open
-        signals, and how reactions self-subscribe via <code>on:</code>.
-      </p>
-    </div>
-
-    <div class="prose">
-      <h2>Host phases vs. signals</h2>
-      <p>
-        There are two kinds of <code>on:</code> value, and the distinction is the whole idea:
-      </p>
-      <ul>
-        <li><strong>Host phases</strong> are a <em>closed</em> set bridged into the host —
-          <code>PreToolUse</code>, <code>Stop</code>, and friends. You subscribe to them; you
-          don't invent them.</li>
-        <li><strong>Signals</strong> are <em>open</em>. Any <code>on:</code> value that isn't a
-          host phase is a signal, so you define your own — declare them in <code>keystone.json</code>
-          under <code>signals:</code>.</li>
-      </ul>
     </div>
 
     <pre class="code"><span class="comment">// keystone.json</span>
 {
-  "signals": [
-    "on-migration-added",
-    "on-release-cut"
+  "version": "2",
+  "policies": [],
+  "adapters": [
+    "claude-code"
   ]
 }</pre>
 
     <div class="prose">
-      <h2>Fire and list signals</h2>
+      <h2>Two categories, ten kinds</h2>
       <p>
-        Fire a signal by name; list the declared ones to discover what's available:
+        Every file in <code>.agents/</code> is a primitive of one of ten kinds.
+        <strong>Constraints</strong> limit, gate, or check what the agent does.
+        <strong>Capabilities</strong> add things the agent can do. Keystone reads the kind from the
+        folder, so you can leave <code>kind:</code> out.
       </p>
     </div>
 
-    <pre class="code"><span class="prompt">$</span> keystone signal fire on-migration-added
-<span class="prompt">$</span> keystone signal list</pre>
+    <div class="layer-header">
+      <span>Kind</span><span>What it is</span><span>Category</span><span>Folder</span>
+    </div>
+    <div class="layers">
+      <div class="layer l1"><div class="layer-cell layer-name">rule</div><div class="layer-cell layer-desc">a directive; applies when a touched file matches its paths:, or everywhere without them</div><div class="layer-cell layer-act">constraint</div><div class="layer-cell layer-act">.agents/rules/</div></div>
+      <div class="layer l2"><div class="layer-cell layer-name">reference</div><div class="layer-cell layer-desc">the reasoning behind a rule, opened on demand</div><div class="layer-cell layer-act">constraint</div><div class="layer-cell layer-act">.agents/references/</div></div>
+      <div class="layer l3"><div class="layer-cell layer-name">hook</div><div class="layer-cell layer-desc">a check that runs on an event; a non-zero exit blocks</div><div class="layer-cell layer-act">constraint</div><div class="layer-cell layer-act">.agents/hooks/</div></div>
+      <div class="layer l4"><div class="layer-cell layer-name">permission</div><div class="layer-cell layer-desc">allow, ask, and deny rules for tools</div><div class="layer-cell layer-act">constraint</div><div class="layer-cell layer-act">.agents/permissions/</div></div>
+      <div class="layer l5"><div class="layer-cell layer-name">eval</div><div class="layer-cell layer-desc">a test that the charter changes agent behavior</div><div class="layer-cell layer-act">constraint</div><div class="layer-cell layer-act">.agents/evals/</div></div>
+      <div class="layer l1"><div class="layer-cell layer-name">skill</div><div class="layer-cell layer-desc">an Agent Skills SKILL.md; activates when its description matches the task</div><div class="layer-cell layer-act">capability</div><div class="layer-cell layer-act">.agents/skills/</div></div>
+      <div class="layer l2"><div class="layer-cell layer-name">command</div><div class="layer-cell layer-desc">a unit of work the user asks for by name</div><div class="layer-cell layer-act">capability</div><div class="layer-cell layer-act">.agents/commands/</div></div>
+      <div class="layer l3"><div class="layer-cell layer-name">subagent</div><div class="layer-cell layer-desc">a role the agent delegates to</div><div class="layer-cell layer-act">capability</div><div class="layer-cell layer-act">.agents/agents/</div></div>
+      <div class="layer l4"><div class="layer-cell layer-name">tool</div><div class="layer-cell layer-desc">a callable you write: over MCP, as a command, or as a host plugin</div><div class="layer-cell layer-act">capability</div><div class="layer-cell layer-act">.agents/tools/</div></div>
+      <div class="layer l5"><div class="layer-cell layer-name">document</div><div class="layer-cell layer-desc">a template for governed output, such as a plan or an ADR</div><div class="layer-cell layer-act">capability</div><div class="layer-cell layer-act">.agents/documents/</div></div>
+    </div>
 
     <div class="prose">
-      <h2>Reactions self-subscribe</h2>
       <p>
-        There is no <code>hook</code> kind to route signals — reactions subscribe to themselves
-        via <code>on:</code>, exactly like a skill declares its <code>triggers:</code>. When a
-        signal fires, the subscribers react:
+        This guide covers the two kinds you'll write first: a rule and a hook. Read the
+        <a href="docs.html">reference</a> for the other eight.
       </p>
-      <ul>
-        <li><strong>sensor</strong> — runs a check → a verdict (exit / HTTP status); gates.</li>
-        <li><strong>tool</strong> — fires a side-effect (transport <code>cli | http | mcp | plugin</code>).</li>
-        <li><strong>agent</strong> — runs an inferential review → a structured <code>returns:</code>.</li>
-      </ul>
+
+      <h2><code>AGENTS.md</code>, the entry file</h2>
       <p>
-        So to react to your <code>on-migration-added</code> signal with a check, you write a
-        sensor with <code>on: on-migration-added</code> — no separate wiring. The primitive's own
-        frontmatter is the subscription.
+        <code>AGENTS.md</code> is the file every host reads first. Keystone writes a managed block
+        into it, between <code>&lt;!-- keystone:start --&gt;</code> and
+        <code>&lt;!-- keystone:end --&gt;</code>. The block holds the orientation, the iron laws,
+        the rules that apply everywhere, and one line per host. Keystone rewrites only that block,
+        so your own text around it stays.
+      </p>
+      <p>
+        <code>CLAUDE.md</code> gets a block that imports <code>AGENTS.md</code>:
       </p>
     </div>
 
-    <pre class="code"><span class="comment"># .charter/sensors/migration-guard.md</span>
-<span class="kw">---</span>
-kind: sensor
-id: migration-guard
-description: Check new migrations are reversible.
-mode: computational
-on: on-migration-added        <span class="comment"># self-subscribes to your signal</span>
-run: script/check-reversible.sh
-<span class="kw">---</span></pre>
+    <pre class="code"><span class="comment">&lt;!-- keystone:start --&gt;</span>
+@AGENTS.md
 
-    <div class="callout">
-      <strong>4.0</strong> <code>keystone hook fire</code> is kept as an alias for
-      <code>keystone signal fire</code>, but there is no <code>hook</code> primitive — the
-      firing layer is the signal, and every reaction self-subscribes.
-    </div>
+Read [`AGENTS.md`](AGENTS.md) before anything else in this repo: it carries the iron laws and how the charter activates. The import above loads it.
+<span class="comment">&lt;!-- keystone:end --&gt;</span></pre>
 
     <div class="page-foot">
-      <span><a href="#first-sensor">← Your first sensor</a></span>
-      <span><a href="#policies">Next: Policies &amp; the cascade →</a></span>
+      <span><a href="#install">← Install</a></span>
+      <span><a href="#first-rule">Next: Your first rule →</a></span>
     </div>
   </section>
 
-  <!-- ===================== 7 · POLICIES ===================== -->
-  <section id="policies" class="page" data-title="Policies &amp; the cascade">
+  <!-- ===================== 4 · FIRST RULE ===================== -->
+  <section id="first-rule" class="page" data-title="Your first rule">
+    <div class="page-head">
+      <div class="crumb">Guide · Step 4</div>
+      <h1>Your first rule</h1>
+      <p class="tagline">
+        A rule is a directive the agent follows. Write one that applies only to your migration
+        files, and put its reasoning in a paired reference.
+      </p>
+    </div>
+
+    <div class="prose">
+      <p>
+        Say your repo has a Rails backend, and you want migrations to stay small and reversible.
+        Scaffold a rule with <code>keystone new rule &lt;topic&gt;/&lt;name&gt;</code>:
+      </p>
+    </div>
+
+    <pre class="code"><span class="prompt">$</span> keystone new rule rails/migrations
+  wrote: .agents/rules/rails/migrations.md
+  wrote: .agents/references/rails/migrations.md</pre>
+
+    <div class="prose">
+      <p>
+        The generator writes two files: the rule and its paired reference. The rule's
+        <code>corpus:</code> field already points to the reference. Open the rule, and replace the
+        placeholders:
+      </p>
+    </div>
+
+    <pre class="code"><span class="comment"># .agents/rules/rails/migrations.md</span>
+<span class="kw">---</span>
+kind: rule
+id: rails/migrations
+description: Migrations are small and reversible.
+paths:
+  - "db/migrate/**"
+corpus:
+  - rails/migrations
+<span class="kw">---</span>
+
+# Migrations
+
+## Rules
+
+- Keep each migration reversible and scoped to one change.
+- Never mix a schema change and a data backfill in one migration.
+
+For reasoning, see [`references/rails/migrations.md`](../../references/rails/migrations.md).</pre>
+
+    <div class="prose">
+      <h2>Scope it with <code>paths:</code></h2>
+      <p>
+        <code>paths:</code> is a list of globs. The rule applies when a file the agent touches
+        matches one of them, and <code>**</code> matches any number of folders. A rule without
+        <code>paths:</code> applies everywhere.
+      </p>
+      <p>
+        <code>paths:</code> only narrows where a rule applies. It can't make a rule apply in more
+        places. If no pattern matches a real file, the rule never applies, so check each pattern
+        against your tree.
+      </p>
+
+      <h2>Put the reasoning in the reference</h2>
+      <p>
+        The rule says what to do, and the reference says why. The agent opens a reference only
+        when the rule's body isn't enough, so the rule can stay short. Edit the reference that the
+        generator wrote:
+      </p>
+    </div>
+
+    <pre class="code"><span class="comment"># .agents/references/rails/migrations.md</span>
+<span class="kw">---</span>
+kind: reference
+id: rails/migrations
+description: Why migrations stay small and reversible.
+<span class="kw">---</span>
+
+# Why migrations stay small
+
+An irreversible migration can't be rolled back cleanly in an
+incident. A migration that mixes a schema change and a backfill
+locks tables for the duration of the backfill.</pre>
+
+    <div class="callout">
+      <strong>Tip</strong> Host shims copy only these sections from a rule body:
+      <code>Iron law</code>, <code>Iron laws</code>, <code>Golden rule</code>,
+      <code>Golden rules</code>, <code>Rules</code>, and <code>Anti-patterns</code>. Put your
+      directives under one of them.
+    </div>
+
+    <div class="page-foot">
+      <span><a href="#first-charter">← Your first charter</a></span>
+      <span><a href="#project">Next: Project to your hosts →</a></span>
+    </div>
+  </section>
+
+  <!-- ===================== 5 · PROJECT ===================== -->
+  <section id="project" class="page" data-title="Project to your hosts">
+    <div class="page-head">
+      <div class="crumb">Guide · Step 5</div>
+      <h1>Project to your hosts</h1>
+      <p class="tagline">
+        <code>keystone project</code> delivers <code>.agents/</code> to every host in
+        <code>keystone.json</code>. Run it after you add, move, or delete a primitive.
+      </p>
+    </div>
+
+    <pre class="code"><span class="prompt">$</span> keystone index &amp;&amp; keystone project
+<span class="ok">✓</span> keystone index — wrote .keystone/INDEX.json (83 primitive(s) across 5 kind(s))
+<span class="ok">✓</span> keystone index — wrote .keystone/INDEX.lite.json (lite descriptor)
+  wrote: .claude/rules/rails-migrations.md
+<span class="ok">✓</span> keystone project — 1 written, 46 unchanged, 0 pruned</pre>
+
+    <div class="prose">
+      <p>
+        <code>keystone index</code> rebuilds the descriptor index. <code>keystone project</code>
+        then writes each host's files. On Claude Code, your rule becomes a shim in
+        <code>.claude/rules/</code>. The shim keeps your <code>paths:</code> and copies the
+        <code>## Rules</code> section:
+      </p>
+    </div>
+
+    <pre class="code"><span class="comment"># .claude/rules/rails-migrations.md</span>
+<span class="kw">---</span>
+description: Migrations are small and reversible.
+paths:
+  - "db/migrate/**"
+source: .agents/rules/rails/migrations.md
+generated_by: keystone-project
+<span class="kw">---</span>
+
+# Migrations
+
+Full rule: `.agents/rules/rails/migrations.md` (read on demand).
+
+## Rules
+
+- Keep each migration reversible and scoped to one change.
+- Never mix a schema change and a data backfill in one migration.</pre>
+
+    <div class="prose">
+      <h2>How each host gets a primitive</h2>
+      <p>Keystone picks the cheapest method that each host supports:</p>
+      <ul>
+        <li><strong>Native.</strong> The host already reads the path. Codex and opencode read
+          <code>.agents/skills/</code>.</li>
+        <li><strong>Link.</strong> The host reads the same format at another path. Claude Code
+          gets a symlink per skill in <code>.claude/skills/</code>.</li>
+        <li><strong>Shim.</strong> The host needs a different format. Cursor gets
+          <code>.mdc</code> rules, and Copilot gets <code>.instructions.md</code> files.</li>
+        <li><strong>Index.</strong> The host has no slot for the kind. <code>AGENTS.md</code> lists
+          it, and the agent opens it from <code>.agents/</code> when it applies.</li>
+      </ul>
+      <p>
+        A rule without <code>paths:</code> goes into the <code>AGENTS.md</code> block as one line,
+        with its path and description. The agent opens the body when it applies.
+      </p>
+
+      <h2>Add a host</h2>
+      <p>
+        To add a host, add its name to <code>adapters</code> in <code>keystone.json</code>. Then
+        run <code>keystone project</code> again:
+      </p>
+    </div>
+
+    <pre class="code"><span class="comment">// keystone.json</span>
+{
+  "version": "2",
+  "policies": [],
+  "adapters": [
+    "claude-code",
+    "cursor"
+  ]
+}</pre>
+
+    <div class="prose">
+      <p>
+        For an agent that Keystone has no profile for, run
+        <code>keystone new adapter &lt;name&gt;</code>. It writes
+        <code>.agents/hosts/&lt;name&gt;.json</code>, which sets one method per kind.
+      </p>
+      <p>
+        Keystone records every file it writes in <code>.keystone/lockfile.json</code>. It never
+        replaces a file that it didn't write.
+      </p>
+    </div>
+
+    <div class="callout">
+      <strong>Tip</strong> <code>keystone watch</code> re-indexes and re-projects on every save
+      under <code>.agents/</code>. Keep it open in a side terminal while you write.
+    </div>
+
+    <div class="page-foot">
+      <span><a href="#first-rule">← Your first rule</a></span>
+      <span><a href="#first-hook">Next: Your first hook →</a></span>
+    </div>
+  </section>
+
+  <!-- ===================== 6 · FIRST HOOK ===================== -->
+  <section id="first-hook" class="page" data-title="Your first hook">
+    <div class="page-head">
+      <div class="crumb">Guide · Step 6</div>
+      <h1>Your first hook</h1>
+      <p class="tagline">
+        A rule is text, so the agent can ignore it. A hook is a check, and on a host with a hook
+        bridge, a failing check blocks the agent. Write one that runs your tests when the agent
+        finishes its turn.
+      </p>
+    </div>
+
+    <pre class="code"><span class="prompt">$</span> keystone new hook tests
+  wrote: .agents/hooks/tests.md</pre>
+
+    <div class="prose">
+      <p>
+        The generator writes <code>mode: computational</code>, <code>event: Stop</code>, and a
+        placeholder <code>run: "true"</code>. Replace the placeholder, because it always passes:
+      </p>
+    </div>
+
+    <pre class="code"><span class="comment"># .agents/hooks/tests.md</span>
+<span class="kw">---</span>
+kind: hook
+id: tests
+description: Block the turn when the test suite fails.
+mode: computational
+event: Stop
+run: bin/rails test
+<span class="kw">---</span>
+
+# tests
+
+A non-zero exit means a test failed. Read the failure and fix it before you claim done.</pre>
+
+    <div class="prose">
+      <h2><code>event:</code> and <code>run:</code></h2>
+      <p>
+        <code>event:</code> names when the hook fires. <code>run:</code> is the shell command. If
+        the command exits non-zero, the hook blocks. Without <code>event:</code>, the hook never
+        fires.
+      </p>
+
+      <h2>Host events and signals</h2>
+      <p>An <code>event:</code> value is one of two things:</p>
+      <ul>
+        <li><strong>A host event</strong> is one the host fires, such as <code>Stop</code>. The
+          full set is <code>PreToolUse</code>, <code>PostToolUse</code>,
+          <code>UserPromptSubmit</code>, <code>Notification</code>, <code>Stop</code>,
+          <code>SubagentStop</code>, <code>PreCompact</code>, <code>SessionStart</code>, and
+          <code>SessionEnd</code>.</li>
+        <li><strong>A signal</strong> is any other name. Keystone fires <code>pre-verify</code> and
+          <code>post-verify</code> around <code>keystone verify</code>, and you fire any signal with
+          <code>keystone signal fire &lt;name&gt;</code>. A signal never reaches the host.</li>
+      </ul>
+      <p>
+        <code>keystone signal list</code> shows the built-in signals and the ones that
+        <code>keystone.json</code> declares under <code>signals</code>.
+      </p>
+
+      <h2>Bridges fail closed</h2>
+      <p>
+        Run <code>keystone index &amp;&amp; keystone project</code> again. Keystone writes one
+        bridge per host event. On Claude Code, the bridge goes into
+        <code>.claude/settings.json</code>, next to your own hooks:
+      </p>
+    </div>
+
+    <pre class="code"><span class="comment">// .claude/settings.json (hooks.Stop)</span>
+"command": "keystone hook fire Stop --host claude-code || exit 2"</pre>
+
+    <div class="prose">
+      <p>
+        When the host fires the event, the bridge runs every hook with that <code>event:</code>
+        in parallel. If any command exits non-zero, the bridge exits 2, and the host treats that
+        as a block. A missing binary or a bad flag also exits 2, so the bridge fails closed.
+      </p>
+      <p>
+        Fire the event yourself to see a block. In this example repo, <code>bin/rails</code>
+        doesn't exist yet, so the hook fails:
+      </p>
+    </div>
+
+    <pre class="code"><span class="prompt">$</span> keystone hook fire Stop --host claude-code
+✗ hook tests: exit status 127
+bash: bin/rails: No such file or directory
+keystone: hook fire Stop: 1 hook(s) failed
+<span class="prompt">$</span> echo $?
+2</pre>
+
+    <div class="prose">
+      <p>
+        On a host event, a command that runs past 50 seconds also counts as a failure. A hook has
+        no matcher of its own, so a <code>PreToolUse</code> hook runs before every tool call.
+      </p>
+    </div>
+
+    <div class="callout">
+      <strong>Where hooks block</strong> Claude Code, Cursor, Copilot, Codex, and opencode get a
+      bridge. I've run the block on Claude Code. For the other four, it's what each host's hook
+      docs specify. Every other host gets no bridge: <code>keystone project</code> reports the gap,
+      and <code>AGENTS.md</code> tells the agent to run the checks itself.
+    </div>
+
+    <div class="prose">
+      <p>
+        A hook can also be inferential: the body is a review prompt, and <code>returns:</code> sets
+        the verdict the agent must fill. The <a href="docs.html">reference</a> covers that mode
+        and the per-host details.
+      </p>
+    </div>
+
+    <div class="page-foot">
+      <span><a href="#project">← Project to your hosts</a></span>
+      <span><a href="#allocate">Next: Bring an existing setup →</a></span>
+    </div>
+  </section>
+
+  <!-- ===================== 7 · ALLOCATE ===================== -->
+  <section id="allocate" class="page" data-title="Bring an existing setup">
     <div class="page-head">
       <div class="crumb">Guide · Step 7</div>
-      <h1>Policies &amp; the cascade</h1>
+      <h1>Bring an existing setup</h1>
       <p class="tagline">
-        Policies are how org discipline ships into every repo — vendored charter fragments,
-        version-and-hash-pinned. You'll add one and learn the cascade rules that decide who wins.
+        Already have a <code>CLAUDE.md</code>, Cursor rules, or Copilot instructions?
+        <code>keystone allocate</code> tells you where each item belongs in <code>.agents/</code>.
       </p>
     </div>
 
     <div class="prose">
       <p>
-        A <strong>policy</strong> is a vendored charter fragment declared in
-        <code>keystone.json</code>. It's pinned by version, hash-verified, and drift-reset on
-        <code>keystone verify</code>. A policy can ship any primitive kind. Add one:
+        Allocate reads <code>.claude/</code>, <code>.cursor/rules</code>,
+        <code>.cursorrules</code>, Copilot instructions, <code>.clinerules</code>,
+        <code>.windsurfrules</code>, <code>.continue/</code>, and <code>.opencode/</code>. For each
+        item, it reports the kind and the <code>.agents/</code> path. Here it is on a repo with one
+        Cursor rule:
       </p>
     </div>
 
-    <pre class="code"><span class="prompt">$</span> keystone policy add tacoda/tacoda-org@v2.0.0</pre>
+    <pre class="code"><span class="prompt">$</span> keystone allocate
+keystone allocate — 1 item(s) move into .agents/, 0 stay
+
+  .cursor/rules/go.mdc → rule .agents/rules/go.md
+      globs → paths
+
+Run `keystone allocate --apply` to write these into .agents/ (originals stay in place).</pre>
 
     <div class="prose">
-      <h2>The cascade</h2>
       <p>
-        When the same item exists in more than one layer, the cascade decides which body loads.
-        The rules, in order:
+        Allocate also splits <code>CLAUDE.md</code>, <code>AGENTS.md</code>,
+        <code>GEMINI.md</code>, and <code>.goosehints</code> into sections. It proposes moving each
+        section that doesn't need to load every session. A section that names file patterns
+        becomes a path-scoped rule, and a numbered procedure becomes a command. Long reasoning
+        becomes a reference, and iron laws stay where they are.
       </p>
       <ul>
-        <li><strong>Project wins by default.</strong> Your files at <code>.charter/&lt;kind&gt;/&lt;id&gt;</code>
-          override any policy's version of that item.</li>
-        <li><strong>Nested policies refine outer ones.</strong> Among policies, a policy nested
-          deeper in <code>keystone.json</code> refines the outer policy it's nested in.</li>
-        <li><strong><code>strict:</code> locks absolutely.</strong> A policy can mark an item
-          <code>strict</code> — then nothing else, project or other policy, can override it. This
-          is how a security team makes a rule non-negotiable.</li>
+        <li><strong><code>keystone allocate</code></strong> writes nothing.</li>
+        <li><strong><code>keystone allocate --apply</code></strong> writes new files under
+          <code>.agents/</code> and changes no original.</li>
+        <li><strong><code>keystone allocate --overwrite</code></strong> hands the originals to
+          Keystone, so the next projection replaces them.</li>
       </ul>
     </div>
 
-    <div class="mermaid-wrap">
-      <p class="mermaid-caption">Project always wins by default; nested policies refine; <code>strict</code> locks absolutely</p>
-      <div class="mermaid">
-flowchart TB
-  subgraph project ["project layer (you own · edit freely)"]
-    pg["guides / sensors / agents<br/>under .charter/"]
-  end
-  subgraph policies ["vendored policies (read-only · pinned + hashed)"]
-    outer["outer policy"]
-    inner["nested policy<br/><i>refines outer</i>"]
-    strict["strict item<br/><i>locked absolutely</i>"]
-  end
-  pg -->|wins by default| effective["effective charter"]
-  outer --> effective
-  inner -->|refines| outer
-  strict -.->|overrides everything| effective
-  classDef proj fill:#13161d,stroke:#4ade9a,color:#4ade9a
-  classDef pol fill:#1a1e28,stroke:#60a5fa,color:#60a5fa
-  classDef lock fill:#1a1e28,stroke:#f59e0b,color:#f59e0b
-  class pg proj
-  class outer,inner pol
-  class strict lock
-      </div>
-    </div>
-
-    <div class="prose">
-      <h2>See the effective set</h2>
-      <p>
-        To see who actually wins after the cascade resolves, ask for the effective roster:
-      </p>
-    </div>
-
-    <pre class="code"><span class="prompt">$</span> keystone charter show --effective   <span class="comment"># the post-cascade winning set</span>
-<span class="prompt">$</span> keystone verify                     <span class="comment"># cascade + policy-drift check</span></pre>
-
     <div class="callout">
-      <strong>Depth limit</strong> Some kinds (sensors, for example) are only allowed at the
-      project layer and at top-level policies. A deeply nested policy that ships them fails
-      <code>keystone verify</code> with a <code>DepthViolation</code>.
+      <strong>Tip</strong> Run the report first, and read it. Use <code>--overwrite</code> only
+      when you're ready for Keystone to own those files.
     </div>
 
     <div class="page-foot">
-      <span><a href="#signals">← Signals</a></span>
-      <span><a href="#operating">Next: Operating the charter →</a></span>
+      <span><a href="#first-hook">← Your first hook</a></span>
+      <span><a href="#budget">Next: Check the context budget →</a></span>
     </div>
   </section>
 
-  <!-- ===================== 8 · OPERATING ===================== -->
-  <section id="operating" class="page" data-title="Operating the charter">
+  <!-- ===================== 8 · BUDGET ===================== -->
+  <section id="budget" class="page" data-title="Check the context budget">
     <div class="page-head">
       <div class="crumb">Guide · Step 8</div>
-      <h1>Operating the charter</h1>
+      <h1>Check the context budget</h1>
       <p class="tagline">
-        A charter is a living thing. You'll run the learn → synthesize → ratify flywheel, check
-        coverage and conformance, explain any primitive, and pick a pacing mode.
+        Each host loads part of the charter at the start of every session.
+        <code>keystone budget</code> shows how much, per host.
       </p>
     </div>
 
+    <pre class="code"><span class="prompt">$</span> keystone budget
+Context budget (word-count estimate; real tokenizers count about 1.35× more)
+
+Always loaded, per host:
+  claude-code       1506
+         788  AGENTS.md (root)
+  <span class="comment">…</span>
+
+On demand (opened when they apply): 21031
+  rule             10371
+  reference         2810
+  skill             6278
+  subagent          1572
+  <span class="comment">…</span></pre>
+
     <div class="prose">
-      <h2>The flywheel: learn → synthesize → ratify</h2>
       <p>
-        The charter improves through a governed loop. You <strong>capture</strong> surprises,
-        incidents, and review findings into the learning inbox; you <strong>synthesize</strong>
-        accepted candidates into the right guide / corpus / sensor layer; you
-        <strong>ratify</strong> the amendment (governance, provenance, hash-pinning). A parallel
-        pruning wheel removes content that no longer earns its keep.
+        The <strong>always loaded</strong> tier is what the host reads at the start of every
+        session. That tier holds root files, rules without <code>paths:</code>, and the name and
+        description of every skill, command, and subagent. The <strong>on demand</strong> tier is
+        every body the agent opens when it applies.
+      </p>
+      <p>
+        The numbers are a word-count estimate. Real tokenizers count about 1.35 times more, and the
+        caps use the same estimate. Set caps in <code>keystone.json</code>:
       </p>
     </div>
 
-    <div class="flywheels">
-      <div class="flywheel">
-        <h3 class="fw-learn-h">◴ Learning</h3>
-        <div class="loop">
-          <div class="loop-step"><span class="loop-num">01</span><span class="loop-text"><strong>Capture</strong> a surprise, incident, or review finding into <code>.charter/learning/inbox/</code>.</span></div>
-          <div class="loop-step"><span class="loop-num">02</span><span class="loop-text"><strong>Synthesize</strong> accepted candidates into a guide, corpus entry, or sensor.</span></div>
-          <div class="loop-step"><span class="loop-num">03</span><span class="loop-text"><strong>Ratify</strong> — amend the charter with provenance + hash-pinning; re-index.</span></div>
-        </div>
-      </div>
-      <div class="flywheel">
-        <h3 class="fw-prune-h">◵ Pruning</h3>
-        <div class="loop">
-          <div class="loop-step"><span class="loop-num">01</span><span class="loop-text"><strong>Surface</strong> content that isn't earning its keep — dead guides, orphan corpus.</span></div>
-          <div class="loop-step"><span class="loop-num">02</span><span class="loop-text"><strong>Triage</strong> against the debt ledger; each entry names trigger + impact + next step.</span></div>
-          <div class="loop-step"><span class="loop-num">03</span><span class="loop-text"><strong>Archive</strong> retired content into <code>.charter/archive/</code>; re-index.</span></div>
-        </div>
-      </div>
-    </div>
+    <pre class="code"><span class="comment">// keystone.json</span>
+"budgets": {
+  "always_loaded": { "max_tokens": 4000 },
+  "reference":     { "max_tokens_per_load": 3000 }
+}</pre>
 
     <div class="prose">
-      <h2>Coverage and conformance</h2>
       <p>
-        Two commands tell you whether the charter is healthy against the actual repo:
-      </p>
-      <ul>
-        <li><strong><code>keystone charter coverage</code></strong> — which project files no guide
-          governs ("uncharted territory").</li>
-        <li><strong><code>keystone charter conformance</code></strong> — a rubric across cascade,
-          validity, pairing, and coverage, resolving to <code>CONFORMANT</code>,
-          <code>DRIFTING</code>, or <code>NON-CONFORMANT</code>.</li>
-      </ul>
-    </div>
-
-    <pre class="code"><span class="prompt">$</span> keystone charter coverage      <span class="comment"># files no guide governs</span>
-<span class="prompt">$</span> keystone charter conformance   <span class="comment"># CONFORMANT | DRIFTING | NON-CONFORMANT</span></pre>
-
-    <div class="prose">
-      <h2>Explain any primitive</h2>
-      <p>
-        When you want to know how a primitive activates, what it links to, and where it projects —
-        plus any uncommitted changes — ask <code>keystone explain</code>:
-      </p>
-    </div>
-
-    <pre class="code"><span class="prompt">$</span> keystone explain idioms/rails/migrations</pre>
-
-    <div class="prose">
-      <h2>Pacing modes</h2>
-      <p>
-        The charter runs at a <strong>pacing mode</strong> that controls how much autonomy the
-        agent has through the lifecycle — <code>paired</code> (tight human gates),
-        <code>solo</code>, and <code>autopilot</code>. Switch modes as trust in the charter grows;
-        the iron laws (sensitive files, dangerous actions, explicit acceptance criteria) never
-        loosen regardless of mode.
+        When a cap is exceeded, <code>keystone budget</code> exits non-zero. <code>keystone
+        verify</code> runs the same check, and it names the file and the overage. Pass
+        <code>--json</code> to read the result in CI.
       </p>
     </div>
 
     <div class="page-foot">
-      <span><a href="#policies">← Policies &amp; the cascade</a></span>
+      <span><a href="#allocate">← Bring an existing setup</a></span>
       <span><a href="#next-steps">Next: Next steps →</a></span>
     </div>
   </section>
@@ -1950,18 +1938,25 @@ flowchart TB
       <div class="crumb">Guide · Step 9</div>
       <h1>Next steps</h1>
       <p class="tagline">
-        You've installed Keystone, authored a charter, written a guide and two sensors, defined a
-        signal, and learned the cascade. Here's where to go deeper.
+        You've installed Keystone, written a rule and its reference, projected them, and added a
+        hook that blocks. Everything else is in the reference.
       </p>
     </div>
 
     <div class="cta-card alt">
-      <div class="cta-headline">Reference documentation</div>
+      <div class="cta-headline">Learn more in the reference</div>
       <p class="cta-body">
-        Every primitive kind, its canonical frontmatter, path convention, cascade behavior, and
-        projection targets — the port contracts — live in the reference. When you need the exact
-        required fields for a kind, that's the page.
+        Each item below has a full section in the reference, with its frontmatter, its failure
+        modes, and how each host gets it.
       </p>
+      <ul class="cta-list">
+        <li><span class="il-tag">other kinds</span> Permissions, evals, skills, commands, subagents, tools, and documents.</li>
+        <li><span class="il-tag">policies</span> Vendor a charter fragment from another repo with <code>keystone policy add</code>. The project wins by default, and a <code>strict</code> item locks.</li>
+        <li><span class="il-tag">lifecycle</span> The <code>keystone-*</code> skills. Say "run task on &lt;ticket-id&gt;" to start a unit of work.</li>
+        <li><span class="il-tag">hosts</span> The full host matrix, inferential hooks, and custom adapters.</li>
+        <li><span class="il-tag">health</span> <code>keystone verify</code>, <code>keystone charter coverage</code>, and <code>keystone charter conformance</code>.</li>
+        <li><span class="il-tag">upgrade</span> <code>keystone migrate up</code> and the map from each 4.x name to its 5.0 name.</li>
+      </ul>
       <div class="cta-buttons">
         <a class="cta-btn cta-primary" href="docs.html">Open the reference →</a>
       </div>
@@ -1970,10 +1965,8 @@ flowchart TB
     <div class="cta-card">
       <div class="cta-headline">Source, changelog &amp; contributing</div>
       <p class="cta-body">
-        Keystone is open source under the MIT license. The 4.0.0 changelog records the charter
-        rename, the retirement of the <code>hook</code> kind, and the signals model. Contributions
-        welcome — see <code>CONTRIBUTING.md</code> for the local dev loop and the bar for adding a
-        primitive kind.
+        Keystone is open source under the MIT license. The 5.0.0 changelog lists every change in
+        this release. To contribute, read <code>CONTRIBUTING.md</code> for the local dev loop.
       </p>
       <div class="cta-buttons">
         <a class="cta-btn cta-primary" href="https://github.com/tacoda/keystone" target="_blank" rel="noopener">GitHub ↗</a>
@@ -1984,24 +1977,24 @@ flowchart TB
     <div class="section-label">Quick reference</div>
     <div class="action-grid">
       <div class="action">
+        <span class="action-tag">set up</span>
+        <h3>keystone init / allocate</h3>
+        <p>Seed <code>.agents/</code> and <code>.keystone/</code>, or report where an existing setup belongs.</p>
+      </div>
+      <div class="action">
         <span class="action-tag">author</span>
-        <h3>keystone init / index / project</h3>
-        <p>Scaffold the charter, emit the descriptor index, regenerate host projections.</p>
+        <h3>keystone new &lt;kind&gt; &lt;id&gt;</h3>
+        <p>Scaffold any of the ten kinds, a policy, or an adapter.</p>
       </div>
       <div class="action">
-        <span class="action-tag">verify</span>
-        <h3>keystone verify / charter conformance</h3>
-        <p>Cascade + policy-drift check; rubric across cascade / validity / pairing / coverage.</p>
+        <span class="action-tag">deliver</span>
+        <h3>keystone index / project</h3>
+        <p>Rebuild the descriptor index, then deliver <code>.agents/</code> to every host.</p>
       </div>
       <div class="action">
-        <span class="action-tag">signals</span>
-        <h3>keystone signal fire | list</h3>
-        <p>Fire or list the extensible framework events your reactions subscribe to via <code>on:</code>.</p>
-      </div>
-      <div class="action">
-        <span class="action-tag">explore</span>
-        <h3>keystone explain / charter show</h3>
-        <p>Explain any primitive; show the roster, <code>--effective</code> for the post-cascade winning set.</p>
+        <span class="action-tag">check</span>
+        <h3>keystone verify / budget</h3>
+        <p>Check policy drift, strict items, budget caps, and projection drift. Show each host's context.</p>
       </div>
     </div>
 
