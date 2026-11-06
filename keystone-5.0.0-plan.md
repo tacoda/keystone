@@ -761,3 +761,15 @@ agent loads. 5.0 measures the load.
      Claude Code's built-in); commands duplicate the `keystone-*` skills.
   9. Codex hook bridge; Cursor `failClosed`/exit-2/stdout semantics;
      Copilot deny-on-non-zero; opencode `@opencode-ai/plugin` install.
+- Hosts decision (user): per-host docs removed from the scaffold;
+  `keystone new adapter <name>` now defines a custom host in
+  `.agents/hosts/<name>.json` (native | link | copy | index per kind for
+  skill, rule, command, subagent; `dir` local and outside `.agents/` and
+  `.keystone/`; built-in names refused). `keystone target add` accepts it.
+  No format conversion, hook bridge, or permission translation: reported.
+  A copied rule keeps `paths:` frontmatter; whether a custom host honors it
+  is the host's business.
+- Phase 8 remaining (8.4): the bodies of the shipped commands, hooks, and
+  skills (templates and this repo) still use 4.x terms (`corpus/state/`,
+  "sensor", "guide"). Scaffold READMEs, docs, and the fresh-install link
+  check are clean.
