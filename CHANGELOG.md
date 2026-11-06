@@ -2,6 +2,19 @@
 
 All notable changes to keystone are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); the project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.0.1] — 2026-11-06
+
+### Security
+
+- `golang.org/x/net` 0.56.0 → 0.60.0 and `github.com/quic-go/quic-go`
+  0.59.0 → 0.59.1, fixing GO-2026-6617, GO-2026-6612, GO-2026-6611,
+  GO-2026-6603, and GO-2026-5676 (reachable through the dashboard server
+  and the HTTP stack). 5.0.0 binaries carry the vulnerable versions;
+  upgrade to 5.0.1.
+- The module now requires Go 1.26 and pins `toolchain go1.26.10`, so local
+  builds use a standard library with the crypto/x509, net/http, and
+  html/template fixes (GO-2026-6809 and earlier).
+
 ## [5.0.0] — 2026-11-06
 
 Major release: **constraints and capabilities**. The charter splits into
