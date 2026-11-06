@@ -12,13 +12,13 @@ description: End-to-end task workflow.
 
 The agent walks through each phase below in order. After each phase, **pause for the user's acceptance** before proceeding to the next. Do not race ahead.
 
-1. **spec** — read [`spec.md`](../../commands/spec.md). Author the spec, restate intent, list acceptance criteria, list non-goals, flag uncertainty. Save it. **Gate:** explicit user acceptance.
-2. **orient** — read [`orient.md`](../../commands/orient.md). Read `CODEBASE_STATE.md`, load idioms for the touched region, sketch a plan. **Gate:** explicit user acceptance of the plan.
+1. **spec** — read [`spec.md`](../../skills/keystone-spec/SKILL.md). Author the spec, restate intent, list acceptance criteria, list non-goals, flag uncertainty. Save it. **Gate:** explicit user acceptance.
+2. **orient** — read [`orient.md`](../../skills/keystone-orient/SKILL.md). Read `CODEBASE_STATE.md`, load idioms for the touched region, sketch a plan. **Gate:** explicit user acceptance of the plan.
 3. **implementation** — read [`.agents/rules/process/implementation.md`](../../rules/process/implementation.md). Make the changes inside the loaded idioms. Iron law: surgical edits only — touch what the spec requires.
-4. **check-drift** — read [`check-drift.md`](../../commands/check-drift.md). Fast diff-vs-rules comparison before running heavyweight hooks.
-5. **verify** — read [`verify.md`](../../commands/verify.md). Run the lint, type-check, test, build, drift, and commit-message hooks in this turn. Iron law: no completion claims without fresh evidence.
-6. **review** — read [`review.md`](../../commands/review.md). Run functional / security / risk / deployment review (parallel sub-agents if supported) plus spec-adherence against the acceptance criteria.
-7. **learn** *(conditional)* — if something surprising came up during the task, read [`learn.md`](../../commands/learn.md) and capture it to `.keystone/learning/inbox/`. Otherwise skip.
+4. **check-drift** — read [`check-drift.md`](../../skills/keystone-check-drift/SKILL.md). Fast diff-vs-rules comparison before running heavyweight hooks.
+5. **verify** — read [`verify.md`](../../skills/keystone-verify/SKILL.md). Run the lint, type-check, test, build, drift, and commit-message hooks in this turn. Iron law: no completion claims without fresh evidence.
+6. **review** — read [`review.md`](../../skills/keystone-review/SKILL.md). Run functional / security / risk / deployment review (parallel sub-agents if supported) plus spec-adherence against the acceptance criteria.
+7. **learn** *(conditional)* — if something surprising came up during the task, read [`learn.md`](../../skills/keystone-learn/SKILL.md) and capture it to `.keystone/learning/inbox/`. Otherwise skip.
 
 ## Iron laws (carry across every phase)
 
@@ -35,5 +35,5 @@ Read [`.agents/rules/process/modes.md`](../../rules/process/modes.md) to learn t
 ## When *not* to use task
 
 - One-off questions or short edits that don't need a spec. Skip directly to the relevant command.
-- The very first session on a new project. Run [`bootstrap.md`](../../commands/bootstrap.md) first so `CODEBASE_STATE.md` exists.
-- Periodic charter hygiene. Use [`audit.md`](../../commands/audit.md) instead.
+- The very first session on a new project. Run [`bootstrap.md`](../../skills/keystone-bootstrap/SKILL.md) first so `CODEBASE_STATE.md` exists.
+- Periodic charter hygiene. Use [`audit.md`](../../skills/keystone-audit/SKILL.md) instead.

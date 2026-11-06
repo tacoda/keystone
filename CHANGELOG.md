@@ -40,6 +40,11 @@ host hook bridges call the installed `keystone`.
   lockfile records as keystone's; anything else stops the run unless you
   pass `--overwrite`. `keystone init --reset` (which deleted `.agents/`)
   is replaced by `keystone init --overwrite`, which deletes nothing.
+- **Lifecycle steps are skills.** The eleven shipped commands (`spec`,
+  `orient`, `verify`, `review`, `learn`, `audit`, …) are folded into the
+  matching `keystone-*` skills, which activate on their own or by name.
+  Keystone ships no commands, so none can collide with a host's built-in
+  slash commands, and agents see one copy of each step.
 - **`keystone new`** takes the 5.0 kinds; the 4.x names exit non-zero and
   name the replacement.
 - **MCP.** `keystone_get_corpus` → `keystone_get_reference`;
@@ -101,6 +106,10 @@ host hook bridges call the installed `keystone`.
 - A rule's `corpus:` link never resolved to a reference with a 5.0 id
   (lint and MCP).
 - The dashboard's new-primitive form redirected to a missing page.
+- `keystone project` could delete a charter source: an owned path under a
+  symlinked host folder (a corrupt or tampered lockfile) resolved into
+  `.agents/`, and prune removed it. Prune now refuses any path whose
+  resolved target is in `.agents/` or `.keystone/`.
 
 ### Removed
 

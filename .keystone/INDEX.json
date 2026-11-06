@@ -1,84 +1,7 @@
 {
   "version": "5.0",
-  "generated": "2026-11-06T16:12:23Z",
+  "generated": "2026-11-06T16:22:30Z",
   "primitives": [
-    {
-      "kind": "command",
-      "id": "audit",
-      "description": "Full dual-flywheel audit.",
-      "path": ".agents/commands/audit.md",
-      "provenance": "project"
-    },
-    {
-      "kind": "command",
-      "id": "bootstrap",
-      "description": "One-time initial charter scaffold.",
-      "path": ".agents/commands/bootstrap.md",
-      "provenance": "project"
-    },
-    {
-      "kind": "command",
-      "id": "check-drift",
-      "description": "Run the drift hook on the current diff.",
-      "path": ".agents/commands/check-drift.md",
-      "provenance": "project"
-    },
-    {
-      "kind": "command",
-      "id": "debt-review",
-      "description": "Triage the code-debt ledger.",
-      "path": ".agents/commands/debt-review.md",
-      "provenance": "project"
-    },
-    {
-      "kind": "command",
-      "id": "learn",
-      "description": "Capture a learning candidate from a surprise, an incident, or a review finding.",
-      "path": ".agents/commands/learn.md",
-      "provenance": "project"
-    },
-    {
-      "kind": "command",
-      "id": "mode",
-      "description": "Switch the charter pacing mode (paired / solo / autopilot).",
-      "path": ".agents/commands/mode.md",
-      "provenance": "project"
-    },
-    {
-      "kind": "command",
-      "id": "orient",
-      "description": "Enter the planning phase.",
-      "path": ".agents/commands/orient.md",
-      "provenance": "project"
-    },
-    {
-      "kind": "command",
-      "id": "review",
-      "description": "Run the four review subagents on the current diff.",
-      "path": ".agents/commands/review.md",
-      "provenance": "project"
-    },
-    {
-      "kind": "command",
-      "id": "spec",
-      "description": "Capture intent and acceptance criteria for a unit of work.",
-      "path": ".agents/commands/spec.md",
-      "provenance": "project"
-    },
-    {
-      "kind": "command",
-      "id": "synthesize",
-      "description": "Promote learning-inbox candidates into the right reference or rule layer.",
-      "path": ".agents/commands/synthesize.md",
-      "provenance": "project"
-    },
-    {
-      "kind": "command",
-      "id": "verify",
-      "description": "Run the verification hooks: lint, type-check, test, build, drift, commit-message.",
-      "path": ".agents/commands/verify.md",
-      "provenance": "project"
-    },
     {
       "kind": "hook",
       "id": "build",
@@ -904,7 +827,7 @@
     {
       "kind": "skill",
       "id": "keystone-verify",
-      "description": "Check vendored policies for drift and the strict cascade for project-layer violations. Triggers: keystone verify; keystone:verify; /keystone:verify; verify the charter cascade; audit policy drift; check strict violations.",
+      "description": "Run the verification gate before a commit: every runnable hook (lint, type-check, test, build, drift, commit-message), then keystone verify for policy drift and strict locks. Triggers: keystone verify; keystone:verify; /keystone:verify; verify the charter cascade; audit policy drift; check strict violations.",
       "metadata": {
         "model": "opus"
       },
@@ -1247,19 +1170,6 @@
     }
   ],
   "by_kind": {
-    "command": [
-      "audit",
-      "bootstrap",
-      "check-drift",
-      "debt-review",
-      "learn",
-      "mode",
-      "orient",
-      "review",
-      "spec",
-      "synthesize",
-      "verify"
-    ],
     "hook": [
       "build",
       "commit-message",
@@ -1363,17 +1273,6 @@
   },
   "by_category": {
     "capability": [
-      "command/audit",
-      "command/bootstrap",
-      "command/check-drift",
-      "command/debt-review",
-      "command/learn",
-      "command/mode",
-      "command/orient",
-      "command/review",
-      "command/spec",
-      "command/synthesize",
-      "command/verify",
       "skill/keystone-allocate",
       "skill/keystone-audit",
       "skill/keystone-bootstrap",

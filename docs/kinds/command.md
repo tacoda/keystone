@@ -26,7 +26,7 @@ args:
 3. Stop and ask the user to approve them.
 ```
 
-Save your command as `.agents/commands/spec.md`, then run `keystone index && keystone project`. On Claude Code, the user then types `/spec`.
+Save your command as `.agents/skills/keystone-spec/SKILL.md`, then run `keystone index && keystone project`. On Claude Code, the user then types `/spec`.
 
 ## Where it lives
 
@@ -75,7 +75,7 @@ Commands are flat, with one file per command and no topic folders, because the i
 
 ## Failure modes
 
-- **The command shadows a host built-in.** A command id can match a slash command the host already ships. The 5.0 plan flags `/review` on Claude Code as a likely clash (unverified), so pick an id the host doesn't use.
+- **The command shadows a host built-in.** A command id can match a slash command the host already ships. Claude Code has built-in commands such as `/init`, so pick an id the host doesn't use. Keystone itself ships no commands: its lifecycle steps are `keystone-*` skills.
 - **The host has no slash commands.** On Codex, Cline, Goose, and Aider, the user asks in plain words. The agent then finds the command in `AGENTS.md`.
 - **A command and a skill do the same work.** The agent may pick either. Keep one, or make the skill call the command.
 

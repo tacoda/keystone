@@ -64,7 +64,7 @@ Open the one that fits the phase you are in.
 
 ## Lifecycle
 
-To start a unit of work, say **"run task on `<ticket-id>`"**; it runs the `task` skill. For one command, ask in plain words ("run verify"); its body is at its INDEX `path`.
+To start a unit of work, say **"run task on `<ticket-id>`"**; it runs the `task` skill. For one step, ask in plain words ("run verify"): the matching `keystone-*` skill activates.
 
 ## Override
 

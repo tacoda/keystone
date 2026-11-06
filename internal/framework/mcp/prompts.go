@@ -26,7 +26,7 @@ func registerPrompts(s *server.MCPServer, projectDir string) {
 			return promptResult(
 				"keystone_bootstrap",
 				"Run the bootstrap action.",
-				`Open .agents/commands/bootstrap.md and execute its Activities in order:
+				`Open .agents/skills/keystone-bootstrap/SKILL.md and execute its Activities in order:
 
 - detect language / framework / CI from the repo
 - seed references/state/CODEBASE_STATE.md and INSTALL_PROFILE.md
@@ -72,7 +72,7 @@ Resolve each stage per the runtime-resolution flow (rules → references → ext
 			return promptResult(
 				"keystone_audit",
 				"Run the audit action.",
-				`Open .agents/commands/audit.md and execute its Activities. Drive the dual flywheel:
+				`Open .agents/skills/keystone-audit/SKILL.md and execute its Activities. Drive the dual flywheel:
   - Learning: walk learning/inbox/, propose promotions to rules/references
   - Pruning: identify stale rules/references, propose archive moves
 
@@ -101,7 +101,7 @@ Surface every proposed move to the user before applying. Never delete; archive w
 
 %s
 
-Open .agents/commands/learn.md and write a candidate to .keystone/learning/inbox/<timestamp>-<slug>.md following the canonical shape (captured/source/proposed-layer/proposed-globs frontmatter + What happened / Why it matters / Proposed change body).
+Open .agents/skills/keystone-learn/SKILL.md and write a candidate to .keystone/learning/inbox/<timestamp>-<slug>.md following the canonical shape (captured/source/proposed-layer/proposed-globs frontmatter + What happened / Why it matters / Proposed change body).
 
 Promotion to rules/references happens in synthesize, not here.`, finding),
 			), nil

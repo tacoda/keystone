@@ -1,6 +1,6 @@
 {
   "version": "5.0",
-  "generated": "2026-11-06T16:12:23Z",
+  "generated": "2026-11-06T16:22:30Z",
   "primitives": [
     {
       "category": "constraint",
@@ -322,72 +322,6 @@
     },
     {
       "category": "capability",
-      "kind": "command",
-      "id": "audit",
-      "description": "Full dual-flywheel audit."
-    },
-    {
-      "category": "capability",
-      "kind": "command",
-      "id": "bootstrap",
-      "description": "One-time initial charter scaffold."
-    },
-    {
-      "category": "capability",
-      "kind": "command",
-      "id": "check-drift",
-      "description": "Run the drift hook on the current diff."
-    },
-    {
-      "category": "capability",
-      "kind": "command",
-      "id": "debt-review",
-      "description": "Triage the code-debt ledger."
-    },
-    {
-      "category": "capability",
-      "kind": "command",
-      "id": "learn",
-      "description": "Capture a learning candidate from a surprise, an incident, or a review finding."
-    },
-    {
-      "category": "capability",
-      "kind": "command",
-      "id": "mode",
-      "description": "Switch the charter pacing mode (paired / solo / autopilot)."
-    },
-    {
-      "category": "capability",
-      "kind": "command",
-      "id": "orient",
-      "description": "Enter the planning phase."
-    },
-    {
-      "category": "capability",
-      "kind": "command",
-      "id": "review",
-      "description": "Run the four review subagents on the current diff."
-    },
-    {
-      "category": "capability",
-      "kind": "command",
-      "id": "spec",
-      "description": "Capture intent and acceptance criteria for a unit of work."
-    },
-    {
-      "category": "capability",
-      "kind": "command",
-      "id": "synthesize",
-      "description": "Promote learning-inbox candidates into the right reference or rule layer."
-    },
-    {
-      "category": "capability",
-      "kind": "command",
-      "id": "verify",
-      "description": "Run the verification hooks: lint, type-check, test, build, drift, commit-message."
-    },
-    {
-      "category": "capability",
       "kind": "skill",
       "id": "keystone-allocate",
       "description": "Move an existing agent setup into the charter and cut always-loaded context: run keystone allocate, review its classifications, then apply. Triggers: keystone allocate; keystone:allocate; /keystone:allocate; convert my .claude setup; migrate .cursorrules; trim CLAUDE.md; reduce context bloat."
@@ -480,7 +414,7 @@
       "category": "capability",
       "kind": "skill",
       "id": "keystone-verify",
-      "description": "Check vendored policies for drift and the strict cascade for project-layer violations. Triggers: keystone verify; keystone:verify; /keystone:verify; verify the charter cascade; audit policy drift; check strict violations."
+      "description": "Run the verification gate before a commit: every runnable hook (lint, type-check, test, build, drift, commit-message), then keystone verify for policy drift and strict locks. Triggers: keystone verify; keystone:verify; /keystone:verify; verify the charter cascade; audit policy drift; check strict violations."
     },
     {
       "category": "capability",

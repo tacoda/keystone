@@ -154,6 +154,10 @@ that doesn't follow them), set copies everywhere:
 - **MCP:** `keystone_get_corpus` is now `keystone_get_reference`, and the
   `keystone_new_<kind>` tools use the 5.0 kinds.
 - **`keystone show --json`** names the field `paths`, not `globs`.
+- **Lifecycle commands:** 5.0 folds the shipped commands (`spec`, `verify`,
+  `review`, …) into the `keystone-*` skills. Your `.agents/commands/`
+  copies keep working as commands. Delete them once you use the skills, so
+  agents see one copy of each step.
 - **Host docs:** 5.0 no longer ships the per-host docs that 4.x kept in
   `.charter/adapters/`. The migration moves yours to `.keystone/hosts/`, and
   keystone doesn't read them. `AGENTS.md` now says what each host loads.

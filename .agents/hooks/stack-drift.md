@@ -35,4 +35,4 @@ Detects when the empirical reality of the repo has diverged from what `CODEBASE_
 
 ## Why no rebootstrap command
 
-[`bootstrap`](../commands/bootstrap.md) is a one-time initial seed of state, idioms, and hook classification. Re-running it would either overwrite human edits or no-op against existing content, and neither is useful. Stack drift is an **incremental** problem the **audit** command is built for: reconcile only the parts that drifted, leave the rest alone.
+[`bootstrap`](../skills/keystone-bootstrap/SKILL.md) is a one-time initial seed of state, idioms, and hook classification. Re-running it would either overwrite human edits or no-op against existing content, and neither is useful. Stack drift is an **incremental** problem the **audit** command is built for: reconcile only the parts that drifted, leave the rest alone.

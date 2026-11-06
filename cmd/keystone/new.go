@@ -95,7 +95,7 @@ Examples:
   keystone new skill keystone:index         # .agents/skills/keystone-index/SKILL.md
   keystone new subagent security-reviewer   # .agents/agents/security-reviewer.md
   keystone new hook go-vet                  # .agents/hooks/go-vet.md
-  keystone new command review               # .agents/commands/review.md
+  keystone new command release-notes        # .agents/commands/release-notes.md
   keystone new document adr                 # .agents/documents/adr.md
   keystone new policy acme-policies         # ./acme-policies/ (policy repo skeleton)
 `)

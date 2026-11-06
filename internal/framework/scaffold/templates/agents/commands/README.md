@@ -1,13 +1,13 @@
 # Commands
 
-Each file here is a command: a unit of work the user asks for by name, such as `/spec` or "run verify". A command does nothing until someone calls it. If the work should start from the task itself, write a skill instead.
+Keystone ships no commands: its lifecycle steps (spec, orient, verify, review, …) are `keystone-*` skills. Each file here is a command: a unit of work the user asks for by name, such as `/release-notes`. A command does nothing until someone calls it. If the work should start from the task itself, write a skill instead.
 
 ## Shape
 
 ```markdown
 ---
-id: spec
-description: Capture intent and acceptance criteria for a unit of work.
+id: release-notes
+description: Draft release notes from the commits since the last tag.
 args:
   - name: card
     type: string
@@ -15,7 +15,7 @@ args:
     description: The tracker card id.
 ---
 
-# spec
+# release-notes
 
 The prompt the host gives the agent when the user calls the command.
 ```

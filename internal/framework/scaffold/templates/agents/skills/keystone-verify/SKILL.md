@@ -1,23 +1,41 @@
 ---
 name: keystone-verify
-description: 'Check vendored policies for drift and the strict cascade for project-layer violations. Triggers: keystone verify; keystone:verify; /keystone:verify; verify the charter cascade; audit policy drift; check strict violations.'
+description: 'Run the verification gate before a commit: every runnable hook (lint, type-check, test, build, drift, commit-message), then keystone verify for policy drift and strict locks. Triggers: keystone verify; keystone:verify; /keystone:verify; verify the charter cascade; audit policy drift; check strict violations.'
 ---
 
-# keystone:verify — cascade + drift check
+# keystone:verify — the verification gate
 
-Walks every vendored policy under `.keystone/policies/`,
-compares per-file hashes to the lockfile, and reports project files
-that shadow strict-locked policy items.
-
-Exits non-zero on cascade violation. Drift alone exits zero but is
-reported and the affected policy is reset (re-install needed to
-repopulate).
+Pairs every claim with fresh evidence before a commit. Run each runnable
+hook in this turn, then run `keystone verify`: it checks vendored policies
+for drift, project files that shadow a policy's strict items, budget caps,
+and host projection drift. `keystone verify` exits non-zero on a strict
+violation, an exceeded cap, or projection drift.
 
 ## Run
 
-```
-keystone verify
-```
+**Run the verification hooks**: lint, type-check, test, build, drift, commit-message. Pre-commit gate. Read [`.agents/rules/process/verification.md`](../../rules/process/verification.md).
+
+## Activities
+
+Run every hook classified as runnable in `.agents/references/state/CODEBASE_STATE.md`, **in this turn** (no stale evidence). For each hook:
+
+1. **lint** — [`.agents/hooks/lint.md`](../../hooks/lint.md). Invoke the project's lint command.
+2. **type-check** — [`.agents/hooks/type-check.md`](../../hooks/type-check.md). Invoke the type-check command. Skip if no type checker.
+3. **test** — [`.agents/hooks/test.md`](../../hooks/test.md). Invoke the test command. Fresh run.
+4. **build** — [`.agents/hooks/build.md`](../../hooks/build.md). Invoke the build command.
+5. **drift** — [`.agents/hooks/drift.md`](../../hooks/drift.md). Compare diff to loaded rules.
+6. **commit-message** — [`.agents/hooks/commit-message.md`](../../hooks/commit-message.md). Inspect the proposed message before `git commit`.
+7. **charter** — run `keystone verify` and show its output.
+
+Show the actual tool output for each. Do not claim a hook passed without producing its output this turn.
+
+## Iron law
+
+**No completion claims without fresh verification evidence.** Hooks must run in this turn.
+
+## On failure
+
+Return to **implementation**. Do not "fix forward" inside verify. After the fix, re-invoke verify in a fresh turn.
 
 ## When to trigger
 
