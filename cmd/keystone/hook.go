@@ -41,7 +41,7 @@ func isHelpFlag(s string) bool { return s == "--help" || s == "-h" }
 // hookFireOpts is the parsed invocation: the event plus the optional context
 // (phase / command / type) passed through to each hook as env vars.
 type hookFireOpts struct {
-	event, phase, command, typ, dir string
+	event, phase, command, typ, dir, host string
 }
 
 // runHookFire selects every primitive subscribed (via `on:`) to the given
@@ -97,7 +97,7 @@ func parseHookFire(args []string) (hookFireOpts, error) {
 	opts := hookFireOpts{dir: "."}
 	flags := map[string]*string{
 		"--phase": &opts.phase, "--command": &opts.command,
-		"--type": &opts.typ, "--dir": &opts.dir,
+		"--type": &opts.typ, "--dir": &opts.dir, "--host": &opts.host,
 	}
 	var positionals []string
 	for i := 0; i < len(args); i++ {
@@ -195,6 +195,7 @@ func hookEnv(opts hookFireOpts) []string {
 		"KEYSTONE_PHASE=" + opts.phase,
 		"KEYSTONE_COMMAND=" + opts.command,
 		"KEYSTONE_TYPE=" + opts.typ,
+		"KEYSTONE_HOST=" + opts.host, // which host's payload shape is on stdin
 	}
 }
 

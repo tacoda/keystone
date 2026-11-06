@@ -33,16 +33,27 @@ func projectHosts(absDir string, primitives []primitive.Primitive, w io.Writer, 
 	if err := lockfile.Write(absDir, lf); err != nil {
 		return res, err
 	}
+	printProjection(w, res, pr)
+	return res, nil
+}
+
+// printProjection logs what changed, every constraint a host cannot
+// enforce, and the plan's warnings.
+func printProjection(w io.Writer, res projection.ApplyResult, pr projection.PlanResult) {
 	for _, d := range res.Wrote {
 		fmt.Fprintf(w, "  wrote: %s\n", d)
 	}
 	for _, d := range res.Pruned {
 		fmt.Fprintf(w, "  pruned: %s\n", d)
 	}
+	for _, o := range pr.Outputs {
+		if o.Strategy == projection.Report {
+			fmt.Fprintf(w, "  ⚠ %s cannot enforce %ss — %s\n", o.Host, o.Kind, projection.ReportAdvice(o.Kind))
+		}
+	}
 	for _, x := range pr.Warnings {
 		fmt.Fprintf(w, "  ⚠ %s: %s\n", x.Host, x.Message)
 	}
-	return res, nil
 }
 
 // planHosts builds the projection plan for the project's enabled hosts

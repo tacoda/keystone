@@ -80,6 +80,8 @@ func materialize(projectDir string, o Output, opts Options) (bool, error) {
 	switch effective(o, opts.Mode) {
 	case Block:
 		return writeBlock(dest, o.Content)
+	case Merge:
+		return writeMerge(dest, o.MergeFn)
 	case Shim:
 		return writeShim(projectDir, o, dest)
 	case Copy:
@@ -128,6 +130,22 @@ func replaceAt(dest string, write func() error) error {
 		return err
 	}
 	return write()
+}
+
+// writeMerge rewrites dest through its merge function when that changes it.
+func writeMerge(dest string, merge func([]byte) ([]byte, error)) (bool, error) {
+	prev, err := os.ReadFile(dest)
+	if err != nil && !os.IsNotExist(err) {
+		return false, err
+	}
+	next, err := merge(prev)
+	if err != nil || bytes.Equal(prev, next) {
+		return false, err
+	}
+	if err := os.MkdirAll(filepath.Dir(dest), 0o755); err != nil {
+		return false, err
+	}
+	return true, os.WriteFile(dest, next, 0o644)
 }
 
 // writeBlock merges content into dest's managed block, keeping every byte
@@ -286,6 +304,8 @@ func checkOne(projectDir string, o Output, mode LinkMode) string {
 	switch effective(o, mode) {
 	case Block:
 		return blockDrift(dest, o.Content)
+	case Merge:
+		return mergeDrift(dest, o.MergeFn)
 	case Shim:
 		return shimDrift(projectDir, o, dest)
 	case Copy:
@@ -314,6 +334,14 @@ func linkDrift(projectDir string, o Output, dest string) string {
 	want, _ := relLink(projectDir, o)
 	if cur, err := os.Readlink(dest); err != nil || cur != want {
 		return "not a link to " + o.Target
+	}
+	return ""
+}
+
+func mergeDrift(dest string, merge func([]byte) ([]byte, error)) string {
+	prev, _ := os.ReadFile(dest)
+	if next, err := merge(prev); err != nil || !bytes.Equal(prev, next) {
+		return "keystone entries are stale or edited — run `keystone project`"
 	}
 	return ""
 }

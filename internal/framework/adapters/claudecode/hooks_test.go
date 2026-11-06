@@ -34,7 +34,7 @@ func TestProjectHooks_BridgePerHostPhase(t *testing.T) {
 	s := string(data)
 	for _, want := range []string{
 		`"PreToolUse"`,
-		`"command": "keystone hook fire PreToolUse"`,
+		`"command": "keystone hook fire PreToolUse --host claude-code"`,
 		`"statusMessage": "keystone:bridge:PreToolUse"`,
 	} {
 		if !strings.Contains(s, want) {
@@ -210,5 +210,24 @@ func TestProjectHooks_IgnoresNonHookPrimitives(t *testing.T) {
 	}
 	if res.Added != 1 {
 		t.Errorf("expected 1 bridge (only the host-phase hook), got %d", res.Added)
+	}
+}
+
+// TestMergeHooks_KeepsUserHookOnSamePhase — a user's own hook on a phase
+// keystone also bridges must survive (it used to be replaced wholesale).
+func TestMergeHooks_KeepsUserHookOnSamePhase(t *testing.T) {
+	seed := []byte(`{"hooks":{"PreToolUse":[{"matcher":"Bash","hooks":[{"type":"command","command":"./my-check.sh"}]}]}}`)
+	out, err := MergeHooks(seed, []string{"PreToolUse"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, want := range []string{"./my-check.sh", "keystone hook fire PreToolUse --host claude-code"} {
+		if !strings.Contains(string(out), want) {
+			t.Errorf("merged settings missing %q:\n%s", want, out)
+		}
+	}
+	again, _ := MergeHooks(out, []string{"PreToolUse"})
+	if string(again) != string(out) {
+		t.Errorf("merge is not idempotent:\n%s", again)
 	}
 }

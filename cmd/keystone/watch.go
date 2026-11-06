@@ -221,9 +221,6 @@ func runWatchAdapters(projectDir string, primitives []primitive.Primitive) {
 // watchClaudeCode re-projects the Claude Code settings.json regions (hooks +
 // posture) during a watch cycle, logging failures to stderr without aborting.
 func watchClaudeCode(projectDir string, primitives []primitive.Primitive) {
-	if _, err := claudecode.ProjectHooks(projectDir, primitives); err != nil {
-		fmt.Fprintf(os.Stderr, "; ✗ claudecode hooks: %v", err)
-	}
 	if _, err := claudecode.ProjectPosture(projectDir, primitives); err != nil {
 		fmt.Fprintf(os.Stderr, "; ✗ claudecode posture: %v", err)
 	}

@@ -78,17 +78,6 @@ func runProject(args []string) error {
 // projectClaudeCode emits the two Claude Code settings.json regions: the
 // managed hooks block and the posture-derived permissions block.
 func projectClaudeCode(absDir string, primitives []primitive.Primitive) error {
-	hres, err := claudecode.ProjectHooks(absDir, primitives)
-	if err != nil {
-		return fmt.Errorf("claudecode hooks: %w", err)
-	}
-	if hres.Wrote {
-		fmt.Fprintf(os.Stdout, "  wrote: %s (+%d managed hook(s), -%d stale)\n",
-			hres.Path, hres.Added, hres.Removed)
-	} else if hres.Added > 0 {
-		fmt.Fprintf(os.Stdout, "  unchanged: %s (%d managed hook(s))\n", hres.Path, hres.Added)
-	}
-
 	pres, err := claudecode.ProjectPosture(absDir, primitives)
 	if err != nil {
 		return fmt.Errorf("claudecode posture: %w", err)

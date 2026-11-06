@@ -35,7 +35,10 @@ const (
 	Shim    Strategy = "shim"
 	// Block is a managed region between keystone markers inside a file the
 	// user also edits (AGENTS.md, CLAUDE.md). Never owned, never pruned.
-	Block  Strategy = "block"
+	Block Strategy = "block"
+	// Merge folds keystone's entries into a config file the user also edits
+	// (.claude/settings.json, .cursor/hooks.json). Never owned, never pruned.
+	Merge  Strategy = "merge"
 	Index  Strategy = "index"
 	Report Strategy = "report"
 )
@@ -89,6 +92,9 @@ type Profile struct {
 	// already sits under one of them (canonically, or written for an
 	// earlier host).
 	Reads map[primitive.Kind][]string
+	// Hooks builds the host's hook bridge; nil means the host cannot run
+	// keystone hooks, which is reported rather than skipped.
+	Hooks HookBridge
 }
 
 // Output is one planned host artifact.
@@ -103,6 +109,9 @@ type Output struct {
 	Prim     primitive.Primitive // the source primitive, for shim rendering
 	Render   Renderer            // Shim renderer; nil = Claude Code format
 	Content  []byte              // fixed bytes (root files); overrides Render
+	// MergeFn returns the file's new bytes from its current bytes (nil when
+	// absent), for the Merge strategy. It must be pure and idempotent.
+	MergeFn func(prev []byte) ([]byte, error)
 }
 
 // Warning flags a plan-level concern, e.g. a host that will see the same
@@ -141,7 +150,9 @@ func Plan(primitives []primitive.Primitive, hosts []Profile) PlanResult {
 		}
 	}
 	outs = append(outs, RootOutputs(primitives, hosts)...)
-	return PlanResult{Outputs: outs, Warnings: duplicateWarnings(primitives, hosts, located)}
+	hookOuts, hookWarns := hookOutputs(primitives, hosts)
+	outs = append(outs, hookOuts...)
+	return PlanResult{Outputs: outs, Warnings: append(duplicateWarnings(primitives, hosts, located), hookWarns...)}
 }
 
 // planOne plans p for host h. ok is false when nothing is needed: the
@@ -220,8 +231,8 @@ func underDir(loc, dir string) bool {
 func key(p primitive.Primitive) string { return p.Kind + "/" + p.ID }
 
 // ownable reports whether keystone owns o's path once written: every output
-// with a path, except managed blocks (the file belongs to the user).
-func ownable(o Output) bool { return o.Dest != "" && o.Strategy != Block }
+// with a path, except managed blocks and merges (the file is the user's).
+func ownable(o Output) bool { return o.Dest != "" && o.Strategy != Block && o.Strategy != Merge }
 
 // Dests returns the sorted, de-duplicated host paths keystone owns in outs
 // (every output except managed blocks, whose file belongs to the user).

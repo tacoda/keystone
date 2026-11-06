@@ -32,7 +32,8 @@ var (
 func ClaudeCode() Profile {
 	shim := Rule{Strategy: Shim, Dest: primitive.ProjectionRelPath}
 	return Profile{
-		Host: "claude-code",
+		Host:  "claude-code",
+		Hooks: claudeHooks,
 		Rules: map[primitive.Kind]Rule{
 			skillK:    {Strategy: Symlink, Dest: skillDirDest(".claude/skills"), Target: skillDir},
 			ruleK:     shim,
@@ -67,7 +68,8 @@ type userSkill struct {
 // into skills, so a command projects as a user-invoked skill.
 func Cursor() Profile {
 	return Profile{
-		Host: "cursor",
+		Host:  "cursor",
+		Hooks: cursorHooks,
 		Rules: map[primitive.Kind]Rule{
 			skillK: native,
 			ruleK: {Strategy: Shim, Dest: pathRuleDest(".cursor/rules", ".mdc"), Render: ruleRenderer(func(p primitive.Primitive) any {
@@ -101,7 +103,8 @@ type promptFile struct {
 // instruction files, commands prompt files, subagents custom agents.
 func GitHubCopilot() Profile {
 	return Profile{
-		Host: "github-copilot",
+		Host:  "github-copilot",
+		Hooks: copilotHooks,
 		Rules: map[primitive.Kind]Rule{
 			skillK: native,
 			ruleK: {Strategy: Shim, Dest: pathRuleDest(".github/instructions", ".instructions.md"), Render: ruleRenderer(func(p primitive.Primitive) any {
@@ -167,7 +170,8 @@ type opencodeAgent struct {
 // instead of costing always-loaded context.
 func OpenCode() Profile {
 	return Profile{
-		Host: "opencode",
+		Host:  "opencode",
+		Hooks: opencodeHooks,
 		Rules: map[primitive.Kind]Rule{
 			skillK: native,
 			ruleK:  index,

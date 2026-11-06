@@ -57,21 +57,11 @@ type HookProjectionResult struct {
 func ProjectHooks(projectDir string, primitives []primitive.Primitive) (HookProjectionResult, error) {
 	rel := SettingsRelPath
 	abs := filepath.Join(projectDir, rel)
-
-	existing, err := readSettings(abs)
-	if err != nil {
-		return HookProjectionResult{Path: rel}, fmt.Errorf("read %s: %w", rel, err)
-	}
-
-	removed := stripManagedHooks(existing)
-	added := injectBridges(existing, hostPhases(primitives))
-
-	out, err := marshalSettings(existing)
-	if err != nil {
-		return HookProjectionResult{Path: rel}, fmt.Errorf("marshal %s: %w", rel, err)
-	}
-
 	prev, _ := os.ReadFile(abs)
+	out, added, removed, err := mergeHooks(prev, hostPhases(primitives))
+	if err != nil {
+		return HookProjectionResult{Path: rel}, fmt.Errorf("%s: %w", rel, err)
+	}
 	if bytes.Equal(prev, out) {
 		return HookProjectionResult{Path: rel, Wrote: false, Added: added, Removed: removed}, nil
 	}
@@ -80,6 +70,32 @@ func ProjectHooks(projectDir string, primitives []primitive.Primitive) (HookProj
 	}
 	return HookProjectionResult{Path: rel, Wrote: true, Added: added, Removed: removed}, nil
 }
+
+// MergeHooks returns settings.json bytes with keystone's bridge entries
+// refreshed for phases: managed entries (statusMessage "keystone:…") are
+// stripped and one bridge group per phase is appended. Every other key and
+// every user-authored hook — including ones on the same phase — is kept.
+// Pure: no I/O. existing may be empty (first run).
+func MergeHooks(existing []byte, phases []string) ([]byte, error) {
+	out, _, _, err := mergeHooks(existing, phases)
+	return out, err
+}
+
+func mergeHooks(existing []byte, phases []string) (out []byte, added, removed int, err error) {
+	settings := map[string]any{}
+	if len(bytes.TrimSpace(existing)) > 0 {
+		if err := json.Unmarshal(existing, &settings); err != nil {
+			return nil, 0, 0, fmt.Errorf("parse: %w", err)
+		}
+	}
+	removed = stripManagedHooks(settings)
+	added = injectBridges(settings, phases)
+	out, err = marshalSettings(settings)
+	return out, added, removed, err
+}
+
+// HostPhases is hostPhases, exported for the projection engine.
+func HostPhases(primitives []primitive.Primitive) []string { return hostPhases(primitives) }
 
 // hostPhases returns the distinct host-phase events any deterministically-
 // firing primitive binds to (sorted, deduped) — a `hook`, a computational
@@ -112,19 +128,18 @@ func injectBridges(settings map[string]any, phases []string) int {
 		hooksMap = map[string]any{}
 	}
 	for _, phase := range phases {
-		hooksMap[phase] = []any{
-			map[string]any{
-				"matcher": "",
-				"hooks": []any{
-					map[string]any{
-						"type":          "command",
-						"shell":         "bash",
-						"command":       "keystone hook fire " + phase,
-						"statusMessage": HookEntryStatusPrefix + "bridge:" + phase,
-					},
+		groups, _ := hooksMap[phase].([]any) // user groups on this phase stay
+		hooksMap[phase] = append(groups, map[string]any{
+			"matcher": "",
+			"hooks": []any{
+				map[string]any{
+					"type":          "command",
+					"shell":         "bash",
+					"command":       "keystone hook fire " + phase + " --host claude-code",
+					"statusMessage": HookEntryStatusPrefix + "bridge:" + phase,
 				},
 			},
-		}
+		})
 	}
 	settings["hooks"] = hooksMap
 	return len(phases)

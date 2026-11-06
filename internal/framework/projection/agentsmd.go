@@ -5,6 +5,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/tacoda/keystone/internal/framework/adapters/claudecode"
 	"github.com/tacoda/keystone/internal/framework/primitive"
 )
 
@@ -106,7 +107,7 @@ func AgentsMD(primitives []primitive.Primitive, hosts []Profile) string {
 	writeKindSection(&b, "Capabilities", primitive.CategoryCapability)
 	writeEverywhereRules(&b, primitives)
 	b.WriteString(agentsLaws)
-	writeHosts(&b, hosts)
+	writeHosts(&b, primitives, hosts)
 	return b.String()
 }
 
@@ -146,11 +147,28 @@ func appliesEverywhere(p primitive.Primitive) bool {
 
 // writeHosts states, per enabled host, what it loads by itself and what
 // the agent must open from .agents/ by hand.
-func writeHosts(b *strings.Builder, hosts []Profile) {
+func writeHosts(b *strings.Builder, primitives []primitive.Primitive, hosts []Profile) {
 	b.WriteString("\n## On each host\n\n")
+	hooksOnHostEvents := len(claudecode.HostPhases(primitives)) > 0
 	for _, h := range hosts {
-		b.WriteString(hostLine(h) + ".\n")
+		line := hostLine(h)
+		if hooksOnHostEvents && h.Hooks == nil {
+			line += "; does **not** run hooks — " + ReportAdvice(string(primitive.KindHook))
+		}
+		b.WriteString(line + ".\n")
 	}
+}
+
+// ReportAdvice is what the agent must do itself when a host cannot enforce
+// a constraint kind.
+func ReportAdvice(kind string) string {
+	switch primitive.Kind(kind) {
+	case primitive.KindHook:
+		return "run the checks in `.agents/hooks/` yourself before claiming done"
+	case primitive.KindPermission:
+		return "follow the deny / ask lists in `.agents/permissions/` yourself"
+	}
+	return "apply it yourself"
 }
 
 // hostLine is one host's bullet: what it loads by itself, and what the

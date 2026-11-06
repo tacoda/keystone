@@ -74,6 +74,6 @@ Project files in `.agents/` win over installed policies (`.keystone/policies/`).
 
 - **Claude Code** — loads rules, hooks (inferential), skills, commands, subagents by itself.
 - **Cursor** — loads rules, skills, commands, subagents by itself.
-- **Continue** — loads rules, skills, commands by itself; open subagents from `.agents/` yourself.
-- **Aider** — open rules, skills, commands, subagents from `.agents/` yourself.
+- **Continue** — loads rules, skills, commands by itself; open subagents from `.agents/` yourself; does **not** run hooks — run the checks in `.agents/hooks/` yourself before claiming done.
+- **Aider** — open rules, skills, commands, subagents from `.agents/` yourself; does **not** run hooks — run the checks in `.agents/hooks/` yourself before claiming done.
 <!-- keystone:end -->

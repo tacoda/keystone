@@ -1,0 +1,23 @@
+{
+  "hooks": {
+    "postToolUse": [
+      {
+        "command": "keystone hook fire PostToolUse --host cursor",
+        "failClosed": true
+      }
+    ],
+    "preToolUse": [
+      {
+        "command": "keystone hook fire PreToolUse --host cursor",
+        "failClosed": true
+      }
+    ],
+    "stop": [
+      {
+        "command": "keystone hook fire Stop --host cursor",
+        "failClosed": true
+      }
+    ]
+  },
+  "version": 1
+}

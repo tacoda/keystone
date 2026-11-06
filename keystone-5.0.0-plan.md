@@ -528,3 +528,23 @@ agent loads. 5.0 measures the load.
   `adapters/agnostic`, `aider` (v2.x migrations only).
   Phase 8 note: README.md still describes CHARTER.md.
 - **Phase 4 complete.**
+- Phase 5a: done. Security fix (own commit): a failing hook on a host event
+  exited 1, which Claude Code / Codex / Cursor treat as non-blocking, so
+  PreToolUse checks never blocked; it now exits 2, and the host's event JSON
+  reaches each hook on stdin (`KEYSTONE_HOST` names the payload shape).
+  Hook bridges on the engine: Claude Code (merge into settings.json), Cursor
+  (merge into .cursor/hooks.json, `failClosed: true`), Copilot (owned
+  .github/hooks/keystone.json), opencode (owned plugin; Bun `$` throws on
+  non-zero, which blocks). New `merge` strategy for shared config files:
+  keystone entries found by their `keystone hook fire` command, user entries
+  kept, never owned or pruned; drift checked by re-merging. Fixed: the
+  Claude Code merge replaced a whole event's hook list, deleting user hooks
+  on the same event. Codex / Goose / Pi (bridge formats unverified) and
+  Cline / Continue / Aider (no hook system) are reported by `project` and in
+  AGENTS.md ("does not run hooks — run the checks yourself"). Warnings: an
+  event a host has no equivalent for; Copilot may double-fire hooks it also
+  reads from .claude/settings.json. Removing the last host-event hook strips
+  keystone's entries from shared files. CodeScene: String-Heavy in
+  projection/hooks.go accepted (event and path names).
+  Open: Codex bridge once its hooks.json shape is verified; payload
+  passing to the opencode plugin.
