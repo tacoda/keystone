@@ -8,6 +8,7 @@ import (
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 
+	"github.com/tacoda/keystone/internal/framework/budget"
 	"github.com/tacoda/keystone/internal/framework/charter"
 	kconfig "github.com/tacoda/keystone/internal/framework/config"
 	"github.com/tacoda/keystone/internal/framework/primitive"
@@ -21,6 +22,25 @@ func registerCharterViews(s *server.MCPServer, projectDir string) {
 	registerCoverageTool(s, projectDir)
 	registerExplainTool(s, projectDir)
 	registerConformanceTool(s, projectDir)
+	registerBudgetTool(s, projectDir)
+}
+
+// registerBudgetTool reports the context budget: what each host loads into
+// every session, what loads on demand, and any keystone.json cap exceeded.
+func registerBudgetTool(s *server.MCPServer, projectDir string) {
+	s.AddTool(
+		mcp.NewTool("keystone_budget",
+			mcp.WithDescription("Report the context budget: per host, the tokens loaded every session (root files, skill/command/subagent listings, pathless rules); on demand, the tokens per kind and the largest files; and every keystone.json budgets cap exceeded. Word-count estimate (real tokenizers count about 1.35x more)."),
+		),
+		func(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+			r, err := budget.MeasureProject(projectDir)
+			if err != nil {
+				return mcp.NewToolResultError(err.Error()), nil
+			}
+			body, _ := json.MarshalIndent(r, "", "  ")
+			return mcp.NewToolResultText(string(body)), nil
+		},
+	)
 }
 
 // registerConformanceTool reports the charter-conformance rubric: an

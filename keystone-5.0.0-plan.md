@@ -710,3 +710,9 @@ agent loads. 5.0 measures the load.
   per-host summary. The 4.x per-port Allocator is removed: on 5.0 it
   counted nothing, because its port names were the 4.x folders. Plan text
   corrected: the estimate is a word count, not bytes/4.
+- Phase 6c.2: done. MCP `keystone_budget` returns the report as JSON;
+  the dashboard has a Budget page (`/charter/budget`, in the nav) with caps
+  exceeded, the always-loaded tier per host, the on-demand tier per kind,
+  and the largest files; `keystone allocate` prints each host's
+  always-loaded tier against the `always_loaded` cap. The measurement lives
+  in `budget.MeasureProject`, shared by the CLI, MCP, and dashboard.

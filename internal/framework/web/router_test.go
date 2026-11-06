@@ -326,3 +326,15 @@ func TestFilterPrimitives_Category(t *testing.T) {
 		t.Errorf("category=constraint: %v", got)
 	}
 }
+
+func TestRouter_BudgetPage(t *testing.T) {
+	_, h := newTestRouter(t)
+	rr := httptest.NewRecorder()
+	h.ServeHTTP(rr, httptest.NewRequest(http.MethodGet, "/charter/budget", nil))
+	if rr.Code != http.StatusOK {
+		t.Fatalf("GET /charter/budget = %d", rr.Code)
+	}
+	if body := rr.Body.String(); !strings.Contains(body, "always loaded, per host") {
+		t.Errorf("budget page did not render the report:\n%s", body)
+	}
+}

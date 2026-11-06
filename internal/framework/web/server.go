@@ -234,6 +234,7 @@ func (s *server) routes() {
 		{"/charter/investigator", s.handleInvestigator},
 		{"/charter/graph", s.handleGraph},
 		{"/charter/coverage", s.handleCoverage},
+		{"/charter/budget", s.handleBudget},
 		{"/charter/signals", s.handleSignals},
 
 		// Flywheels.

@@ -5,6 +5,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/tacoda/keystone/internal/framework/budget"
 	"github.com/tacoda/keystone/internal/framework/charter"
 	"github.com/tacoda/keystone/internal/framework/config"
 	"github.com/tacoda/keystone/internal/framework/primitive"
@@ -14,6 +15,29 @@ import (
 type region struct {
 	Name  string
 	Count int
+}
+
+// handleBudget renders the context-budget page: each host's always-loaded
+// tier, the on-demand tier per kind, and any keystone.json cap exceeded.
+func (s *server) handleBudget(w http.ResponseWriter, r *http.Request) {
+	rep, err := budget.MeasureProject(s.projectDir)
+	if err != nil {
+		s.renderPage(w, r, "budget.html", map[string]any{"Error": err.Error()})
+		return
+	}
+	var kinds []region
+	for _, k := range primitive.KnownKinds {
+		if t := rep.ByKind[string(k)]; t > 0 {
+			kinds = append(kinds, region{Name: string(k), Count: t})
+		}
+	}
+	largest := rep.OnDemand
+	if len(largest) > 10 {
+		largest = largest[:10]
+	}
+	s.renderPage(w, r, "budget.html", map[string]any{
+		"Report": rep, "Kinds": kinds, "Largest": largest, "AlwaysCap": budget.AlwaysCap(s.projectDir),
+	})
 }
 
 // handleCoverage renders the charter-coverage page: how much of the

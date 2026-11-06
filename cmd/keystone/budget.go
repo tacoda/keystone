@@ -2,16 +2,13 @@ package main
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"os"
 	"path/filepath"
 
 	"github.com/tacoda/keystone/internal/framework/budget"
-	"github.com/tacoda/keystone/internal/framework/config"
 	"github.com/tacoda/keystone/internal/framework/primitive"
-	"github.com/tacoda/keystone/internal/framework/projection"
 )
 
 // runBudget handles `keystone budget [--json] [--dir D]`: the context an
@@ -42,23 +39,7 @@ func runBudget(args []string) error {
 }
 
 // measureBudget walks the charter and measures it for the enabled hosts.
-func measureBudget(absDir string) (budget.Report, error) {
-	prims, _, err := primitive.Walk(absDir, config.DefaultAgentsRoot)
-	if err != nil {
-		return budget.Report{}, err
-	}
-	composed, _ := primitive.Compose(prims)
-	cfg, err := config.ReadProjectConfig(absDir)
-	if err != nil && !errors.Is(err, os.ErrNotExist) {
-		return budget.Report{}, err
-	}
-	var adapters []string
-	var budgets map[string]config.BudgetSpec
-	if cfg != nil {
-		adapters, budgets = cfg.Adapters, cfg.Budgets
-	}
-	return budget.Measure(absDir, composed, projection.Enabled(adapters), budgets), nil
-}
+func measureBudget(absDir string) (budget.Report, error) { return budget.MeasureProject(absDir) }
 
 // budgetError fails when any cap is exceeded.
 func budgetError(r budget.Report) error {

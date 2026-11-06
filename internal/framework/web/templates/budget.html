@@ -1,0 +1,47 @@
+{{define "budget.html"}}{{template "layout" .}}{{end}}
+{{define "title"}}budget{{end}}
+{{define "main"}}
+<section class="card">
+  <h1>context budget</h1>
+  <p class="muted">What each host loads into every session (root files, skill / command / subagent listings, rules without <code>paths:</code>), and what an agent opens on demand. Word-count estimate; real tokenizers count about 1.35× more. Caps come from <code>keystone.json</code> <code>budgets</code>.</p>
+  {{if .Error}}
+  <p class="muted">budget error: {{.Error}}</p>
+  {{else}}
+  {{if .Report.Violations}}
+  <h2>caps exceeded</h2>
+  <table>
+    <thead><tr><th>scope</th><th>file</th><th>tokens</th><th>cap</th></tr></thead>
+    <tbody>
+      {{range .Report.Violations}}
+      <tr><td>{{.Scope}}</td><td>{{if .Path}}<code>{{.Path}}</code>{{end}}</td><td>{{.Tokens}}</td><td>{{.Cap}}</td></tr>
+      {{end}}
+    </tbody>
+  </table>
+  <p class="muted">Run <code>keystone allocate</code> to move root-file sections that can load on demand.</p>
+  {{end}}
+  <h2>always loaded, per host{{if .AlwaysCap}} (cap {{.AlwaysCap}}){{end}}</h2>
+  <table>
+    <thead><tr><th>host</th><th>tokens</th><th>largest</th></tr></thead>
+    <tbody>
+      {{range .Report.Hosts}}
+      <tr><td>{{.Host}}</td><td>{{.Always}}</td><td>{{with .Entries}}{{with index . 0}}<code>{{.Path}}</code> ({{.Tokens}}){{end}}{{end}}</td></tr>
+      {{end}}
+    </tbody>
+  </table>
+  <h2>on demand, per kind</h2>
+  <table>
+    <thead><tr><th>kind</th><th>tokens</th></tr></thead>
+    <tbody>
+      {{range .Kinds}}<tr><td>{{.Name}}</td><td>{{.Count}}</td></tr>{{end}}
+    </tbody>
+  </table>
+  <h2>largest on-demand files</h2>
+  <table>
+    <thead><tr><th>file</th><th>kind</th><th>tokens</th></tr></thead>
+    <tbody>
+      {{range .Largest}}<tr><td><code>{{.Path}}</code></td><td>{{.Kind}}</td><td>{{.Tokens}}</td></tr>{{end}}
+    </tbody>
+  </table>
+  {{end}}
+</section>
+{{end}}

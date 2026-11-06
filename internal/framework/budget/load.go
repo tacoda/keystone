@@ -1,6 +1,7 @@
 package budget
 
 import (
+	"errors"
 	"os"
 	"path/filepath"
 	"sort"
@@ -55,6 +56,35 @@ var onDemandKinds = map[string]bool{
 
 // listedKinds are the kinds a host lists up front, by name and description.
 var listedKinds = map[string]bool{"skill": true, "command": true, "subagent": true}
+
+// MeasureProject walks the charter at projectDir and measures it for the
+// hosts and caps in keystone.json (claude-code only, no caps, without one).
+func MeasureProject(projectDir string) (Report, error) {
+	prims, _, err := primitive.Walk(projectDir, config.DefaultAgentsRoot)
+	if err != nil {
+		return Report{}, err
+	}
+	composed, _ := primitive.Compose(prims)
+	cfg, err := config.ReadProjectConfig(projectDir)
+	if err != nil && !errors.Is(err, os.ErrNotExist) {
+		return Report{}, err
+	}
+	var adapters []string
+	var budgets map[string]config.BudgetSpec
+	if cfg != nil {
+		adapters, budgets = cfg.Adapters, cfg.Budgets
+	}
+	return Measure(projectDir, composed, projection.Enabled(adapters), budgets), nil
+}
+
+// AlwaysCap is the always_loaded cap in keystone.json, 0 when none.
+func AlwaysCap(projectDir string) int {
+	cfg, err := config.ReadProjectConfig(projectDir)
+	if err != nil || cfg == nil {
+		return 0
+	}
+	return caps(cfg.Budgets)[AlwaysLoaded].MaxTokens
+}
 
 // Measure computes the budget from each host's projection profile, so a
 // host's always-loaded tier reflects what that host reads, and applies the

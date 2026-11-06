@@ -86,6 +86,9 @@ the previous stage does not carry enough information:
   keystone_explain id=<i> [kind=<k>]
       Explain a primitive — how it activates, what it links to, where it
       projects. Use before reading a whole body.
+  keystone_budget
+      Tokens each host loads every session, tokens on demand per kind,
+      and any keystone.json budgets cap exceeded.
   keystone_charter_conformance
       Rubric verdict (CONFORMANT|DRIFTING|NON-CONFORMANT) from objective
       checks: cascade, frontmatter validity, pairing, coverage.

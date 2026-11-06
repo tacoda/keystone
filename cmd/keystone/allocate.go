@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 
 	"github.com/tacoda/keystone/internal/framework/allocate"
+	"github.com/tacoda/keystone/internal/framework/budget"
 	"github.com/tacoda/keystone/internal/framework/config"
 	"github.com/tacoda/keystone/internal/framework/lockfile"
 	"github.com/tacoda/keystone/internal/framework/projection"
@@ -42,6 +43,7 @@ func runAllocate(args []string) error {
 // to write (and writing was asked for).
 func reportAllocation(absDir string, items []allocate.Item, write bool) bool {
 	printRootTotals(os.Stdout, allocate.RootTotals(absDir, items))
+	printAlwaysCap(os.Stdout, absDir)
 	if len(items) == 0 {
 		fmt.Fprintln(os.Stdout, "✓ keystone allocate — nothing to move: no host-specific setup outside keystone's projections, and no root-file section that loads better on demand")
 		return false
@@ -137,6 +139,26 @@ func printRootTotals(w io.Writer, totals []allocate.RootTotal) {
 			fmt.Fprintf(w, "; the moves below save ~%d", t.Saved)
 		}
 		fmt.Fprintln(w)
+	}
+}
+
+// printAlwaysCap compares each host's always-loaded tier with the
+// keystone.json always_loaded cap, when one is set.
+func printAlwaysCap(w io.Writer, absDir string) {
+	limit := budget.AlwaysCap(absDir)
+	if limit == 0 {
+		return
+	}
+	r, err := budget.MeasureProject(absDir)
+	if err != nil {
+		return
+	}
+	for _, h := range r.Hosts {
+		status := "within"
+		if h.Always > limit {
+			status = fmt.Sprintf("over by %d", h.Always-limit)
+		}
+		fmt.Fprintf(w, "  always_loaded cap %d: %s loads %d (%s)\n", limit, h.Host, h.Always, status)
 	}
 }
 
