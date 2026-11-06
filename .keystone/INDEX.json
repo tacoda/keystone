@@ -1,6 +1,6 @@
 {
   "version": "5.0",
-  "generated": "2026-11-06T15:40:33Z",
+  "generated": "2026-11-06T15:49:45Z",
   "primitives": [
     {
       "kind": "command",
@@ -785,7 +785,7 @@
     {
       "kind": "skill",
       "id": "keystone-new-adapter",
-      "description": "Scaffold the per-agent adapter triple (lifecycle, sensors, activation) for a new host. Triggers: keystone new adapter; keystone:new-adapter; /keystone:new-adapter; add a host adapter; scaffold a new agent target.",
+      "description": "Define a host keystone has no built-in profile for (.agents/hosts/\u003cname\u003e.json): pick native, link, copy, or index per kind, then project to it. Triggers: keystone new adapter; keystone:new-adapter; /keystone:new-adapter; add a host; support a new coding agent; project to another agent.",
       "metadata": {
         "model": "sonnet",
         "tags": "scaffold,composition"

@@ -3,32 +3,21 @@
 <!-- voice-register: informational -->
 <!-- voice-english: ste -->
 
-Host docs are Markdown notes that tell an agent how the charter works on its host. They are prose for the agent and the user to read. No keystone command reads them, and they don't change what `keystone project` writes. For the projection itself, see [`docs/hosts.md`](../hosts.md). That page gives the strategy per host and kind.
+Keystone 5.0 ships no per-host docs. In 4.x, `keystone init` installed three
+docs for each host (`activation.md`, `lifecycle.md`, `sensors.md`). They
+drifted. 5.0 replaces them with what the code knows about each host:
 
-## Where they live
+- `AGENTS.md`, in its keystone block, has one line per enabled host. The line
+  says what the host loads by itself and what the agent opens or runs by hand.
+- `keystone project` names each gap: hooks a host can't run, and permission
+  rules it can't enforce.
+- `docs/hosts.md` is the full matrix, with its sources and open items.
 
-The templates live in the scaffold package, under `templates/keystone/hosts/`. `keystone init` copies them to `.keystone/hosts/`, one folder per host plus a `README.md`:
+`keystone init` installs only `.keystone/hosts/README.md`, which points at
+these. To record how your team handles a gap on one host, write a reference
+under `.agents/references/hosts/`. To project to a host keystone has no
+profile for, run `keystone new adapter <name>` (see `docs/hosts.md`).
 
-```
-.keystone/hosts/<host>/activation.md
-.keystone/hosts/<host>/lifecycle.md
-.keystone/hosts/<host>/sensors.md
-```
-
-Each of the ten hosts gets a folder, such as `claude-code` or `aider`. If your host has no folder, read `_generic`.
-
-## The three files
-
-| File | Answers |
-|---|---|
-| `activation.md` | What the host reads at session start, how it finds rules and references, and how to reset context. |
-| `lifecycle.md` | How to run each lifecycle command (`orient`, `verify`, `learn`, and the rest) on this host. |
-| `sensors.md` | How hooks fire here: by themselves, as a command the user runs, or as a checklist. |
-
-After `init` finishes, it prints the path to `lifecycle.md` for each host you chose. Open that file first.
-
-## Add a host doc
-
-Run `keystone new adapter <host>`. It writes the three files under `.keystone/hosts/<host>/` with a heading and a short prompt in each. Fill in each file for your host.
-
-A host doc doesn't add projection support. For that, add a host profile to `internal/framework/projection/hosts.go`.
+A 4.x install keeps its old per-host docs after `keystone migrate up` moves
+them to `.keystone/hosts/<host>/`. Keystone doesn't read them. Delete them
+when you no longer need them.

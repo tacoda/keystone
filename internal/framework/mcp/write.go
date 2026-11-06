@@ -58,7 +58,7 @@ func writeGenerators() []writeGen {
 		gen("tool", "<id>", "Scaffold a tool (capability): an author-defined callable (transport: mcp | cli | plugin). Not a host tool like Bash or Read."),
 		gen("document", "<id>", "Scaffold a document template (capability): governed output such as a plan, review, or ADR. Instances land in .keystone/work/."),
 		// keystone itself
-		gen("adapter", "<host>", "Scaffold a host adapter for a new host."),
+		gen("adapter", "<name>", "Define a host keystone has no built-in profile for: writes .agents/hosts/<name>.json (native, link, copy, or index per kind). Then keystone_target_add <name>."),
 		gen("policy", "<name>", "Scaffold a new policy repo skeleton (separate dir; publish to git afterward)."),
 	}
 }

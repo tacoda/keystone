@@ -144,7 +144,10 @@ func checkProjectionDrift(absDir string) error {
 	if err != nil {
 		return err
 	}
-	pr, mode := planHosts(absDir, composed, lf.ManagedEntries)
+	pr, mode, err := planHosts(absDir, composed, lf.ManagedEntries)
+	if err != nil {
+		return err
+	}
 	drifts := projection.Check(absDir, pr.Outputs, mode)
 	if len(drifts) == 0 {
 		return nil

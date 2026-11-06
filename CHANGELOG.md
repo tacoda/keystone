@@ -80,6 +80,9 @@ host hook bridges call the installed `keystone`.
 - **Tool transports.** `keystone tool run|list`; `cli` and `plugin` tools
   are listed in `AGENTS.md` with their command, and a `plugin` tool is
   also an opencode custom tool.
+- **Custom hosts.** `keystone new adapter <name>` defines a host keystone
+  has no profile for in `.agents/hosts/<name>.json` (native, link, copy, or
+  index per kind); `keystone target add <name>` enables it.
 - **`keystone new hook`**, **`keystone list constraints|capabilities`**,
   and category grouping in `list`, `charter show`, `show`, `explain`, MCP,
   and the dashboard nav.
@@ -104,6 +107,10 @@ host hook bridges call the installed `keystone`.
 - The 4.x per-port budget counter (it counted nothing on the 5.0 layout).
 - The six `keystone-new-*` scaffold skills, replaced by `keystone-new`;
   the migration archives unedited copies.
+- The per-host docs (`activation.md`, `lifecycle.md`, `sensors.md` for each
+  of 11 hosts). The `AGENTS.md` host lines, `keystone project` gap reports,
+  and `docs/hosts.md` replace them. `keystone new adapter` now defines a
+  custom host instead of scaffolding those docs.
 
 ## [4.0.0] — 2026-07-01
 

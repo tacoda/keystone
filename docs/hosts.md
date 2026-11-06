@@ -31,6 +31,36 @@ or index/report instead of shim).
 | pi | native | index | native | shim `.pi/prompts/` | index (none) | report (bridge format unverified) | report (none) | shim `.pi/mcp.json` |
 | aider | shim `.aider.conf.yml` `read:` | index | index | index | index | report | report (none) | report (none) |
 
+## Custom hosts
+
+For a coding agent with no built-in profile, run `keystone new adapter
+<name>`. It writes `.agents/hosts/<name>.json`, which sets one strategy per
+kind:
+
+```json
+{
+  "name": "zed",
+  "kinds": {
+    "skill":    { "strategy": "link", "dir": ".zed/skills" },
+    "rule":     { "strategy": "copy", "dir": ".zed/rules" },
+    "command":  { "strategy": "index" },
+    "subagent": { "strategy": "native" }
+  }
+}
+```
+
+- `native` means the host reads that kind from `.agents/`.
+- `link` and `copy` write each primitive under `dir` in the `.agents/`
+  format. `link` follows `link_mode`.
+- `index` lists the kind in `AGENTS.md`. A kind the file leaves out is
+  indexed.
+
+`keystone target add <name>` adds the host to `adapters`, and `keystone
+project` delivers to it from then on. A custom host gets no format
+conversion, no hook bridge, and no permission translation: keystone reports
+hooks and permissions as gaps. `dir` must stay inside the repo and outside
+`.agents/` and `.keystone/`. Keystone refuses a built-in host's name.
+
 ## Findings that shape the design
 
 1. **Rule frontmatter uses `paths:`.** Claude Code reads only `paths` from

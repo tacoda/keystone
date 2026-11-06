@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"github.com/tacoda/keystone/internal/framework/config"
 	"os"
 )
 
@@ -24,7 +23,7 @@ var agentWarnings = map[string][]agentGap{
 			feature:   "sub-agent parallelism (review)",
 			impact:    "the review action runs each concern (functional + security) sequentially in one chat instead of in parallel",
 			configFix: "",
-			fallback:  ".keystone/hosts/aider/review-strategy.md",
+			fallback:  ".agents/references/hosts/aider/review-strategy.md",
 		},
 		{
 			feature:   "commit-message sensor gate",
@@ -36,7 +35,7 @@ var agentWarnings = map[string][]agentGap{
 			feature:   "native tracker integration",
 			impact:    "the tracker-card-fetcher sensor falls back to shell or user paste",
 			configFix: "use `/run gh issue view <id>` for GitHub Issues, or paste card content for Jira/Linear/Asana",
-			fallback:  ".keystone/hosts/aider/tracker-workflow.md",
+			fallback:  ".agents/references/hosts/aider/tracker-workflow.md",
 		},
 	},
 	"continue": {
@@ -50,13 +49,13 @@ var agentWarnings = map[string][]agentGap{
 			feature:   "sub-agent parallelism (review)",
 			impact:    "the review action runs each concern sequentially in one chat",
 			configFix: "",
-			fallback:  ".keystone/hosts/continue/review-strategy.md",
+			fallback:  ".agents/references/hosts/continue/review-strategy.md",
 		},
 		{
 			feature:   "native tracker integration",
 			impact:    "the tracker-card-fetcher sensor needs an MCP server or shell fallback",
 			configFix: "configure an Atlassian/Linear/GitHub MCP server in `.continue/config.yaml`'s `mcpServers:` block",
-			fallback:  ".keystone/hosts/continue/tracker-workflow.md",
+			fallback:  ".agents/references/hosts/continue/tracker-workflow.md",
 		},
 	},
 	"cline": {
@@ -82,7 +81,7 @@ var agentWarnings = map[string][]agentGap{
 			feature:   "sub-agent parallelism (review)",
 			impact:    "review runs sequentially; subtasks are also sequential",
 			configFix: "",
-			fallback:  ".keystone/hosts/cline/review-strategy.md",
+			fallback:  ".agents/references/hosts/cline/review-strategy.md",
 		},
 	},
 	"goose": {
@@ -102,13 +101,13 @@ var agentWarnings = map[string][]agentGap{
 			feature:   "native tracker integration",
 			impact:    "the tracker-card-fetcher sensor needs an MCP extension or shell fallback",
 			configFix: "run `goose configure --add-extension` and configure an Atlassian/Linear/GitHub MCP server",
-			fallback:  ".keystone/hosts/goose/tracker-workflow.md",
+			fallback:  ".agents/references/hosts/goose/tracker-workflow.md",
 		},
 		{
 			feature:   "sub-agent parallelism (review)",
 			impact:    "review runs sequentially",
 			configFix: "",
-			fallback:  ".keystone/hosts/goose/review-strategy.md",
+			fallback:  ".agents/references/hosts/goose/review-strategy.md",
 		},
 	},
 	"github-copilot": {
@@ -116,19 +115,19 @@ var agentWarnings = map[string][]agentGap{
 			feature:   "lifecycle slash commands",
 			impact:    "Copilot has no slash-command primitive for project actions; every action is a natural-language ask",
 			configFix: "",
-			fallback:  ".keystone/hosts/github-copilot/invocation-cheatsheet.md",
+			fallback:  ".agents/references/hosts/github-copilot/invocation-cheatsheet.md",
 		},
 		{
 			feature:   "sub-agent parallelism (review)",
 			impact:    "review runs sequentially in one chat",
 			configFix: "",
-			fallback:  ".keystone/hosts/github-copilot/review-strategy.md",
+			fallback:  ".agents/references/hosts/github-copilot/review-strategy.md",
 		},
 		{
 			feature:   "tracker integration outside GitHub",
 			impact:    "Copilot's native tracker fetch only covers GitHub Issues; Jira/Linear/Asana need paste or a separate MCP",
 			configFix: "use `gh issue view` for GitHub Issues; for other trackers, paste card content or configure an MCP",
-			fallback:  ".keystone/hosts/github-copilot/tracker-workflow.md",
+			fallback:  ".agents/references/hosts/github-copilot/tracker-workflow.md",
 		},
 	},
 	"generic": {
@@ -136,25 +135,25 @@ var agentWarnings = map[string][]agentGap{
 			feature:   "lifecycle invocation",
 			impact:    "the generic adapter assumes only that the agent can read markdown on demand; lifecycle actions are entirely user-driven",
 			configFix: "if your agent has a rules file, slash-command, or saved-workflow primitive, document your bindings in a new `charter/adapters/<your-agent>/lifecycle.md`",
-			fallback:  ".keystone/hosts/generic/lifecycle-overrides.md",
+			fallback:  ".agents/references/hosts/generic/lifecycle-overrides.md",
 		},
 		{
 			feature:   "autonomous sensor execution",
 			impact:    "unknown whether the agent can run shell during a turn; sensors may degrade to 'agent surfaces commands, user runs them'",
 			configFix: "if the agent has shell access, document it in `charter/adapters/<your-agent>/sensors.md`; otherwise document the surfaced-command workflow",
-			fallback:  ".keystone/hosts/generic/sensors-overrides.md",
+			fallback:  ".agents/references/hosts/generic/sensors-overrides.md",
 		},
 		{
 			feature:   "sub-agent parallelism (review)",
 			impact:    "assume review runs sequentially",
 			configFix: "",
-			fallback:  ".keystone/hosts/generic/review-strategy.md",
+			fallback:  ".agents/references/hosts/generic/review-strategy.md",
 		},
 		{
 			feature:   "tracker integration",
 			impact:    "unknown; assume paste or shell fallback",
 			configFix: "if the agent supports MCP, configure a tracker server; otherwise document the manual workflow",
-			fallback:  ".keystone/hosts/generic/tracker-workflow.md",
+			fallback:  ".agents/references/hosts/generic/tracker-workflow.md",
 		},
 	},
 }
@@ -178,7 +177,8 @@ func printAgentWarnings(agent string) {
 	fmt.Fprintf(os.Stdout, "fundamentally cannot close certain gaps — fall back to the charter\n")
 	fmt.Fprintf(os.Stdout, "file approach in those cases.\n\n")
 
-	// Fallback paths point at the per-host docs under .keystone/hosts/.
+	// Fallback paths point at a reference the team writes under
+	// .agents/references/hosts/ (opened on demand).
 	for _, g := range gaps {
 		fmt.Fprintf(os.Stdout, "  • %s\n", g.feature)
 		fmt.Fprintf(os.Stdout, "      Impact: %s.\n", g.impact)
@@ -189,7 +189,7 @@ func printAgentWarnings(agent string) {
 			fmt.Fprintf(os.Stdout, "      Or document: add %s describing how your team handles this.\n", g.fallback)
 		}
 		if g.configFix == "" && g.fallback == "" {
-			fmt.Fprintf(os.Stdout, "      Workaround: see %s/hosts/%s/.\n", config.StateRoot, agent)
+			fmt.Fprintln(os.Stdout, "      Workaround: see the host's line in AGENTS.md (keystone block).")
 		}
 		fmt.Fprintln(os.Stdout)
 	}

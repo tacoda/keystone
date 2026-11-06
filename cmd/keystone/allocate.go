@@ -101,7 +101,8 @@ func enabledHosts(absDir string) []string {
 		adapters = cfg.Adapters
 	}
 	var hosts []string
-	for _, p := range projection.Enabled(adapters) {
+	enabled, _ := projection.HostsFor(absDir, adapters) // a bad custom host fails `keystone project`, not this report
+	for _, p := range enabled {
 		hosts = append(hosts, p.Host)
 	}
 	return hosts

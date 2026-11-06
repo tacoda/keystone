@@ -74,7 +74,11 @@ func MeasureProject(projectDir string) (Report, error) {
 	if cfg != nil {
 		adapters, budgets = cfg.Adapters, cfg.Budgets
 	}
-	return Measure(projectDir, composed, projection.Enabled(adapters), budgets), nil
+	hosts, err := projection.HostsFor(projectDir, adapters)
+	if err != nil {
+		return Report{}, err
+	}
+	return Measure(projectDir, composed, hosts, budgets), nil
 }
 
 // AlwaysCap is the always_loaded cap in keystone.json, 0 when none.

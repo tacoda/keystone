@@ -21,16 +21,6 @@ func isSupportedAgent(name string) bool {
 	return cat.isValidValue(name)
 }
 
-// agentTargetDir returns the directory name under targets/ for an agent.
-// "generic" maps to "_generic" so the catalog stays kebab-case while the
-// directory keeps its conventional underscore prefix.
-func agentTargetDir(agent string) string {
-	if agent == "generic" {
-		return "_generic"
-	}
-	return agent
-}
-
 // detectAgent inspects dir for agent-specific marker files and returns the
 // matching agent name, or "" if none match.
 func detectAgent(dir string) string {

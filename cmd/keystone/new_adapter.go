@@ -2,47 +2,39 @@ package main
 
 import (
 	"fmt"
-	"github.com/tacoda/keystone/internal/framework/config"
+	"os"
 	"path/filepath"
+
+	"github.com/tacoda/keystone/internal/framework/projection"
 )
 
+// runNewAdapter handles `keystone new adapter <name>`: a host keystone has
+// no built-in profile for, defined in .agents/hosts/<name>.json. Each kind
+// starts indexed in AGENTS.md; the author sets native, link, or copy (with
+// the host's folder) where the host reads it.
 func runNewAdapter(args []string) error {
 	projectDir, _, remaining, err := parseDirAndCharterRoot(args)
 	if err != nil {
 		return err
 	}
 	if len(remaining) != 1 {
-		return fmt.Errorf("`keystone new adapter` requires exactly one agent argument")
+		return fmt.Errorf("`keystone new adapter` requires exactly one argument: <name>")
 	}
-	agent := remaining[0]
-	base := filepath.Join(projectDir, config.StateRoot, "hosts", agent)
-
-	files := map[string]string{
-		"activation.md": fmt.Sprintf(`# Adapter — %s — activation
-
-What this agent reads at session start (the menu file). Describe how the
-agent is told to load the charter — e.g. the file path it picks up
-automatically, any required configuration to point it at the charter.
-`, agent),
-		"lifecycle.md": fmt.Sprintf(`# Adapter — %s — lifecycle
-
-How this agent invokes playbooks and actions. List the invocation
-incantation per action: command line, slash command, chat directive, or
-file edit pattern.
-`, agent),
-		"sensors.md": fmt.Sprintf(`# Adapter — %s — sensors
-
-How this agent invokes sensors and consumes their output. Note any
-capability gaps and document the fallback for each (configure the agent
-or maintain a small workaround file under charter/adapters/%s/).
-`, agent, agent),
+	name := remaining[0]
+	body, err := projection.CustomHostSkeleton(name)
+	if err != nil {
+		return err
 	}
-
-	for relname, body := range files {
-		path := filepath.Join(base, relname)
-		if err := writeSkeleton(path, body); err != nil {
-			return err
-		}
+	if err := writeSkeleton(filepath.Join(projectDir, projection.CustomHostsDir, name+".json"), string(body)); err != nil {
+		return err
 	}
+	fmt.Fprintf(os.Stdout, `
+Next:
+  1. For each kind the host reads, set "strategy": "native" (it reads .agents/),
+     "link" or "copy" (add "dir": the host's folder), or leave "index".
+  2. Run: keystone target add %s
+     keystone projects to it from then on. Hooks and permissions are reported
+     as gaps: a custom host gets no bridge or translation.
+`, name)
 	return nil
 }

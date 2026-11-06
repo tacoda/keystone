@@ -147,6 +147,10 @@ that doesn't follow them), set copies everywhere:
 - **MCP:** `keystone_get_corpus` is now `keystone_get_reference`, and the
   `keystone_new_<kind>` tools use the 5.0 kinds.
 - **`keystone show --json`** names the field `paths`, not `globs`.
+- **Host docs:** 5.0 no longer ships the per-host docs that 4.x kept in
+  `.charter/adapters/`. The migration moves yours to `.keystone/hosts/`, and
+  keystone doesn't read them. `AGENTS.md` now says what each host loads.
+  Delete them when you no longer need them.
 - **Budgets:** `keystone.json` `budgets` keys are now `always_loaded` or a
   kind name. The 4.x keys (`guides`, `corpus`, …) still work. See `keystone
   budget --help`.

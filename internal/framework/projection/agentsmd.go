@@ -220,6 +220,14 @@ func ReportAdvice(kind string) string {
 
 // hostLine is one host's bullet: what it loads by itself, and what the
 // agent must open from .agents/ by hand.
+// displayName is a built-in host's product name, or a custom host's name.
+func displayName(host string) string {
+	if n, ok := hostNames[host]; ok {
+		return n
+	}
+	return host
+}
+
 func hostLine(h Profile) string {
 	auto, manual := hostKinds(h)
 	var parts []string
@@ -229,7 +237,7 @@ func hostLine(h Profile) string {
 	if len(manual) > 0 {
 		parts = append(parts, "open "+strings.Join(manual, ", ")+" from `.agents/` yourself")
 	}
-	line := "- **" + hostNames[h.Host] + "**"
+	line := "- **" + displayName(h.Host) + "**"
 	if len(parts) > 0 {
 		line += " — " + strings.Join(parts, "; ")
 	}

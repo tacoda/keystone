@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/tacoda/keystone/internal/framework/config"
+	"github.com/tacoda/keystone/internal/framework/projection"
 )
 
 // runTarget dispatches `keystone target <subcommand> ...`.
@@ -85,21 +86,9 @@ func runTargetAdd(args []string) error {
 		return err
 	}
 
-	requested := []string{}
-	seen := map[string]bool{}
-	for _, p := range strings.Split(rawAgents, ",") {
-		v := strings.TrimSpace(p)
-		if v == "" || seen[v] {
-			continue
-		}
-		seen[v] = true
-		if !isSupportedAgent(v) {
-			return fmt.Errorf("unknown agent %q (supported: %v)", v, supportedAgents())
-		}
-		requested = append(requested, v)
-	}
-	if len(requested) == 0 {
-		return fmt.Errorf("no agents supplied")
+	requested, err := parseTargetAgents(absDir, rawAgents)
+	if err != nil {
+		return err
 	}
 
 	existing, err := readInstalledAgents(absDir, charterRoot)
@@ -148,16 +137,30 @@ Flags:
 `)
 }
 
+// parseTargetAgents reads a comma-separated agent list: each a built-in
+// host or one defined in .agents/hosts/, deduped, at least one.
+func parseTargetAgents(absDir, raw string) ([]string, error) {
+	var requested []string
+	seen := map[string]bool{}
+	for _, p := range strings.Split(raw, ",") {
+		v := strings.TrimSpace(p)
+		if v == "" || seen[v] {
+			continue
+		}
+		seen[v] = true
+		if !isSupportedAgent(v) && !projection.IsCustomHost(absDir, v) {
+			return nil, fmt.Errorf("unknown agent %q (supported: %v, or a host defined with `keystone new adapter`)", v, supportedAgents())
+		}
+		requested = append(requested, v)
+	}
+	if len(requested) == 0 {
+		return nil, fmt.Errorf("no agents supplied")
+	}
+	return requested, nil
+}
+
 func printTargetAddNextSteps(agents []string, charterRoot string) {
 	fmt.Fprintf(os.Stdout, "\n✓ added %s to the charter.\n\n", strings.Join(agents, ", "))
-	if len(agents) == 1 {
-		fmt.Fprintf(os.Stdout, "  See %s/hosts/%s/lifecycle.md for how to invoke actions in it.\n",
-			config.StateRoot, agentTargetDir(agents[0]))
-	} else {
-		fmt.Fprint(os.Stdout, "  See:\n")
-		for _, a := range agents {
-			fmt.Fprintf(os.Stdout, "    %s/hosts/%s/lifecycle.md\n", config.StateRoot, agentTargetDir(a))
-		}
-	}
+	fmt.Fprintln(os.Stdout, "  AGENTS.md says, per host, what it loads by itself and what to run by hand.")
 	fmt.Fprintln(os.Stdout)
 }

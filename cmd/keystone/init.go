@@ -389,17 +389,10 @@ func printNextSteps(agents []string, charterRoot string) {
 	var bootstrapIn, lifecycle string
 	if len(agents) == 1 {
 		bootstrapIn = fmt.Sprintf("in %s", agents[0])
-		lifecycle = fmt.Sprintf("     See %s/hosts/%s/lifecycle.md for how to invoke it.\n",
-			config.StateRoot, agentTargetDir(agents[0]))
+		lifecycle = "     AGENTS.md says what that host loads by itself and what to run by hand.\n"
 	} else {
 		bootstrapIn = "in any one of the agents above (the charter edits are agent-agnostic)"
-		var b strings.Builder
-		b.WriteString("     See:\n")
-		for _, a := range agents {
-			fmt.Fprintf(&b, "       %s/hosts/%s/lifecycle.md\n", config.StateRoot, agentTargetDir(a))
-		}
-		b.WriteString("     for how to invoke it in each agent.\n")
-		lifecycle = b.String()
+		lifecycle = "     AGENTS.md says, per host, what it loads by itself and what to run by hand.\n"
 	}
 
 	fmt.Fprintf(os.Stdout, `

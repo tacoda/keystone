@@ -42,5 +42,5 @@ keystone new policy acme-policies
 3. Initialize git and push to a host so consumers can pin the source.
 4. Consumers add the policy via `keystone policy add <owner>/<repo>@<version>`.
 
-See the [policy authoring guide](../../../docs/adr/) for the full
-policy lifecycle.
+The policy lifecycle is in keystone's ADRs:
+https://github.com/tacoda/keystone/tree/main/docs/adr

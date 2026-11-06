@@ -8,6 +8,7 @@ import (
 
 	"github.com/tacoda/keystone/internal/framework/config"
 	"github.com/tacoda/keystone/internal/framework/primitive"
+	"github.com/tacoda/keystone/internal/framework/projection"
 )
 
 // runNewScaffold dispatches a `keystone new <verb> <id>` into a temp dir and
@@ -120,5 +121,24 @@ func TestNewSkill_ScaffoldsSpecShape(t *testing.T) {
 		if f.Severity == primitive.FindingError {
 			t.Errorf("scaffold lints with error: %s", f)
 		}
+	}
+}
+
+// TestNewAdapter_WritesLoadableHost — the skeleton is a valid custom host,
+// and a built-in host name is refused.
+func TestNewAdapter_WritesLoadableHost(t *testing.T) {
+	root := t.TempDir()
+	if err := runNew([]string{"adapter", "zed", "--dir", root}); err != nil {
+		t.Fatal(err)
+	}
+	hosts, err := projection.LoadCustomHosts(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(hosts) != 1 || hosts[0].Host != "zed" {
+		t.Errorf("hosts = %v", hosts)
+	}
+	if err := runNew([]string{"adapter", "cursor", "--dir", root}); err == nil {
+		t.Error("a built-in host name must be refused")
 	}
 }

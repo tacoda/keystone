@@ -737,3 +737,27 @@ agent loads. 5.0 measures the load.
   - Not done here: republishing keystone's own policy repos in 5.0 shape
     (separate repos; 4.x policy trees keep loading through the legacy
     folder and kind mapping).
+- Phase 8 (in progress): 8.1 README, GLOSSARY, upgrade guide, CHANGELOG
+  done; 8.2 `docs/kinds/` (one page per kind), `docs/internals/`,
+  conventions, compatibility, CONTRIBUTING, charter-content rules, hosts
+  matrix done. Scaffold READMEs in progress. Open decision: the per-host
+  templates (`templates/keystone/hosts/*`, ~16,500 words of 4.x content
+  installed into every repo) and `keystone new adapter`.
+- Phase 9 bug list (found during Phase 8, each checked in code):
+  1. Policy `strict` keys and prefixes in `loader/cascade.go` and
+     `manifest/manifest.go` are the 4.x names (`sensors`, `guides`, …): a
+     5.0-shaped policy's strict items may not lock. Security-relevant.
+  2. Shim bodies keep the source's relative links, so links break in the
+     projected copy (`.cursor/skills/*/SKILL.md`, …): ~300 broken links.
+  3. `keystone doctor`'s no-`../` link rule predates the two-root layout;
+     links between `.agents/` and `.keystone/` need `../` (124 hits).
+  4. Sensor-level evals run a hook's first fenced code block, not its
+     `run:`, so a hook from `keystone new hook` fails its own eval.
+  5. Lint accepts `transport: http`; nothing serves it.
+  6. Lint treats a hook with no `mode:` as inferential (needs `returns:`).
+  7. `keystone hook fire` reads the lockfile from cwd for its pending-
+     migration warning (wrong from a subdirectory).
+  8. Shipped `review` command projects to `/review` (likely shadowed by
+     Claude Code's built-in); commands duplicate the `keystone-*` skills.
+  9. Codex hook bridge; Cursor `failClosed`/exit-2/stdout semantics;
+     Copilot deny-on-non-zero; opencode `@opencode-ai/plugin` install.

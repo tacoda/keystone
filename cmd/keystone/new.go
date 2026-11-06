@@ -79,7 +79,7 @@ Usage:
     keystone new document <id>            [--dir <path>]   # a governed output template
 
   Keystone itself:
-    keystone new adapter <host>           [--dir <path>]
+    keystone new adapter <name>           [--dir <path>]   # a host keystone has no profile for (.agents/hosts/<name>.json)
     keystone new policy <name>            [--dir <path>]
 
 Each generator drops a skeleton at the conventional path with the right

@@ -85,6 +85,11 @@ Permission rules use Claude Code syntax, `Bash(go test:*)`. Keystone writes
 them to Claude Code unchanged, translates them for Cursor and Codex, and
 never makes an allow broader than you wrote it.
 
+For an agent that isn't on the list, `keystone new adapter <name>` defines
+it in `.agents/hosts/<name>.json`: per kind, it says whether the host reads
+`.agents/` natively, gets links or copies in its own folder, or opens the
+kind from `AGENTS.md`.
+
 Some hosts can't run hooks or enforce some permission rules. `keystone
 project` names each gap, and `AGENTS.md` tells the agent on that host to run
 the checks itself. [`docs/hosts.md`](docs/hosts.md) has the matrix and its
@@ -150,7 +155,7 @@ same order:
 | `keystone init`                | Seed `.agents/` and `.keystone/`, then project every host. `--overwrite` replaces keystone's files. |
 | `keystone allocate`            | Report where an existing setup belongs. `--apply` writes, `--overwrite` hands originals over. |
 | `keystone budget`              | The context each host loads, against your caps. `--json` for CI.     |
-| `keystone new <kind> <id>`     | Scaffold any of the ten kinds, plus `adapter` and `policy`.          |
+| `keystone new <kind> <id>`     | Scaffold any of the ten kinds, a `policy`, or an `adapter` (a host keystone has no profile for). |
 | `keystone index`               | Rebuild `.keystone/INDEX.json` and `INDEX.lite.json`.                |
 | `keystone project`             | Deliver `.agents/` to every host in `adapters`.                      |
 | `keystone lint`                | Check frontmatter. `--fix` applies the 5.0 spelling.                 |
