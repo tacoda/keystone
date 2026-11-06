@@ -11,19 +11,37 @@ package manifest
 const PolicyManifestFile = "keystone-policy.json"
 
 // StrictSpec lists items, by kind, for either a `strict` or `required`
-// declaration on a policy. Corpus is intentionally absent — it is background
-// reference loaded on-demand and not subject to the cascade.
+// declaration on a policy. References are absent: they load on demand and
+// are not subject to the cascade. The 4.x keys (guides, playbooks,
+// actions, sensors) stay readable and lock the same items in 5.0 folders.
 type StrictSpec struct {
-	Guides    []string `json:"guides,omitempty"`
-	Playbooks []string `json:"playbooks,omitempty"`
-	Actions   []string `json:"actions,omitempty"`
-	Sensors   []string `json:"sensors,omitempty"`
+	Rules    []string `json:"rules,omitempty"`
+	Skills   []string `json:"skills,omitempty"`
+	Commands []string `json:"commands,omitempty"`
+	Hooks    []string `json:"hooks,omitempty"`
+
+	Guides    []string `json:"guides,omitempty"`    // 4.x: rules
+	Playbooks []string `json:"playbooks,omitempty"` // 4.x: skills
+	Actions   []string `json:"actions,omitempty"`   // 4.x: commands
+	Sensors   []string `json:"sensors,omitempty"`   // 4.x: hooks
+}
+
+// ByKey is the spec as key → items, for every key that names items.
+func (s StrictSpec) ByKey() map[string][]string {
+	out := map[string][]string{}
+	for key, items := range map[string][]string{
+		"rules": s.Rules, "skills": s.Skills, "commands": s.Commands, "hooks": s.Hooks,
+		"guides": s.Guides, "playbooks": s.Playbooks, "actions": s.Actions, "sensors": s.Sensors,
+	} {
+		if len(items) > 0 {
+			out[key] = items
+		}
+	}
+	return out
 }
 
 // IsEmpty reports whether the spec names any items.
-func (s StrictSpec) IsEmpty() bool {
-	return len(s.Guides) == 0 && len(s.Playbooks) == 0 && len(s.Actions) == 0 && len(s.Sensors) == 0
-}
+func (s StrictSpec) IsEmpty() bool { return len(s.ByKey()) == 0 }
 
 // Manifest describes one policy. Loaded from keystone-policy.json at the
 // policy repo root.

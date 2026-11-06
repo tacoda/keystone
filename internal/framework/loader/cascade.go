@@ -2,9 +2,9 @@ package loader
 
 import (
 	"fmt"
-	"io/fs"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 
 	"github.com/tacoda/keystone/internal/framework/config"
@@ -140,16 +140,11 @@ func Verify(installDir string, cfg *config.ProjectConfig, expectedFiles map[stri
 		// not contribute sensors. Top-level policies and the project layer can.
 		if len(path) > 0 {
 			depthV := DepthViolation{
-				Policy:        node.Name,
-				PathContext:   ctx,
-				Depth:         len(path),
-				StrictSensors: append([]string{}, node.Strict["sensors"]...),
-			}
-			sensorsPrefix := filepath.ToSlash(filepath.Join(config.PoliciesDir, node.Name, "sensors")) + "/"
-			for rel := range exp {
-				if strings.HasPrefix(rel, sensorsPrefix) {
-					depthV.VendoredSensors = append(depthV.VendoredSensors, rel)
-				}
+				Policy:          node.Name,
+				PathContext:     ctx,
+				Depth:           len(path),
+				StrictSensors:   strictHooks(node.Strict),
+				VendoredSensors: vendoredHooks(node.Name, exp),
 			}
 			if len(depthV.StrictSensors) > 0 || len(depthV.VendoredSensors) > 0 {
 				res.DepthViolations = append(res.DepthViolations, depthV)
@@ -227,35 +222,7 @@ func Verify(installDir string, cfg *config.ProjectConfig, expectedFiles map[stri
 // strict-violating file in the first place. The check is for the
 // project layer's free-form content.
 func findShadowing(installDir, charterRoot, policy, port, item string) ([]string, error) {
-	root := filepath.Join(installDir, charterRoot, port)
-	want := item + ".md"
-
-	if _, err := os.Stat(root); os.IsNotExist(err) {
-		return nil, nil
-	}
-
-	var hits []string
-	err := filepath.WalkDir(root, func(path string, d fs.DirEntry, err error) error {
-		if err != nil {
-			return err
-		}
-		if d.IsDir() {
-			return nil
-		}
-		if filepath.Base(path) != want {
-			return nil
-		}
-		rel, relErr := filepath.Rel(installDir, path)
-		if relErr != nil {
-			return relErr
-		}
-		hits = append(hits, filepath.ToSlash(rel))
-		return nil
-	})
-	if err != nil {
-		return nil, err
-	}
-	return hits, nil
+	return findItem(installDir, filepath.Join(installDir, charterRoot, folderFor(port)), item)
 }
 
 // loadInstalledManifest reads the vendored keystone-policy.json for `policy`
@@ -273,42 +240,59 @@ func loadInstalledManifest(installDir, charterRoot, policy string) (*manifest.Ma
 	return manifest.Load(policyRoot)
 }
 
-// requiredByPort flattens a StrictSpec into a port-keyed map (mirroring
-// PolicyNode.Strict's shape) so the verify walker can iterate uniformly.
-func requiredByPort(s manifest.StrictSpec) map[string][]string {
-	out := map[string][]string{}
-	if len(s.Guides) > 0 {
-		out["guides"] = s.Guides
+// strictHooks lists a node's strict hooks, under any key that names hooks
+// (hooks, sensors, …).
+func strictHooks(strict map[string][]string) []string {
+	var out []string
+	for key, items := range strict {
+		if folderFor(key) == "hooks" {
+			out = append(out, items...)
+		}
 	}
-	if len(s.Playbooks) > 0 {
-		out["playbooks"] = s.Playbooks
-	}
-	if len(s.Actions) > 0 {
-		out["actions"] = s.Actions
-	}
-	if len(s.Sensors) > 0 {
-		out["sensors"] = s.Sensors
-	}
+	sort.Strings(out)
 	return out
 }
+
+// vendoredHooks lists the hook files a policy ships, in its 5.0 hooks/ or
+// 4.x sensors/ folder.
+func vendoredHooks(policy string, files map[string]string) []string {
+	var out []string
+	for _, f := range policyFolders("hooks") {
+		prefix := filepath.ToSlash(filepath.Join(config.PoliciesDir, policy, f)) + "/"
+		for rel := range files {
+			if strings.HasPrefix(rel, prefix) {
+				out = append(out, rel)
+			}
+		}
+	}
+	sort.Strings(out)
+	return out
+}
+
+// requiredByPort flattens a StrictSpec into a key → items map (mirroring
+// PolicyNode.Strict's shape) so the verify walker can iterate uniformly.
+func requiredByPort(s manifest.StrictSpec) map[string][]string { return s.ByKey() }
 
 // requiredSatisfied reports whether an item required by a policy at depth
 // len(path) is supplied by an outer layer — either by a policy ancestor in
 // the same path, or by the project layer. Siblings and descendants do not
 // satisfy `required`.
 func requiredSatisfied(installDir, charterRoot string, ancestors []string, port, item string) bool {
-	want := item + ".md"
-	// Project layer.
-	projectPath := filepath.Join(installDir, charterRoot, port, want)
-	if _, err := os.Stat(projectPath); err == nil {
-		return true
+	if hasItem(installDir, filepath.Join(installDir, charterRoot, folderFor(port)), item) {
+		return true // project layer
 	}
-	// Ancestor policies, in order outer → inner.
+	// Ancestor policies, outer → inner, in their 5.0 or 4.x folders.
 	for _, anc := range ancestors {
-		ancPath := filepath.Join(installDir, config.PoliciesDir, anc, port, want)
-		if _, err := os.Stat(ancPath); err == nil {
-			return true
+		for _, f := range policyFolders(port) {
+			if hasItem(installDir, filepath.Join(installDir, config.PoliciesDir, anc, f), item) {
+				return true
+			}
 		}
 	}
 	return false
+}
+
+func hasItem(base, root, item string) bool {
+	hits, err := findItem(base, root, item)
+	return err == nil && len(hits) > 0
 }

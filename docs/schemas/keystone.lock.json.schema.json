@@ -53,6 +53,10 @@
     "strictSpec": {
       "type": "object",
       "properties": {
+        "rules":     { "type": "array", "items": { "type": "string" } },
+        "skills":    { "type": "array", "items": { "type": "string" } },
+        "commands":  { "type": "array", "items": { "type": "string" } },
+        "hooks":     { "type": "array", "items": { "type": "string" } },
         "guides":    { "type": "array", "items": { "type": "string" } },
         "playbooks": { "type": "array", "items": { "type": "string" } },
         "actions":   { "type": "array", "items": { "type": "string" } },

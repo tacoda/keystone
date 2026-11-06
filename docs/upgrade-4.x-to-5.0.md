@@ -151,6 +151,10 @@ that doesn't follow them), set copies everywhere:
   `.charter/adapters/`. The migration moves yours to `.keystone/hosts/`, and
   keystone doesn't read them. `AGENTS.md` now says what each host loads.
   Delete them when you no longer need them.
+- **Policy locks:** a `strict` or `required` list keyed `guides`,
+  `sensors`, `playbooks`, or `actions` keeps locking the same items in the
+  5.0 folders. New policies can use `rules`, `hooks`, `skills`, and
+  `commands`.
 - **Budgets:** `keystone.json` `budgets` keys are now `always_loaded` or a
   kind name. The 4.x keys (`guides`, `corpus`, …) still work. See `keystone
   budget --help`.

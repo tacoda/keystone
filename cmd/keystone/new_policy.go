@@ -72,23 +72,22 @@ A keystone policy. Pin from a consumer's keystone.json:
 ## Layout
 
 `+"```"+`
-keystone-policy.json   # name, version, optional strict map
-guides/<topic>/        # rules; loaded ambient
-corpus/<topic>/        # paired reasoning; on-demand
-sensors/               # automated checks
-actions/               # lifecycle units
-playbooks/             # ordered action sequences
-adapters/<agent>/      # per-agent bindings (optional)
+keystone-policy.json   # name, version, optional strict / required lists
+rules/<topic>/         # rules; paths: scopes each one
+references/<topic>/    # the reasoning behind rules; opened on demand
+hooks/                 # checks that run on an event and can block
+commands/              # units of work a user asks for by name
+skills/<id>/SKILL.md   # Agent Skills
 `+"```"+`
 
 Edit this README to describe what the policy ships and how consumers
 should use it. Then commit, tag a version, and publish.
 `, name, name, name),
-		"rules/.gitkeep":    "",
-		"corpus/.gitkeep":   "",
-		"hooks/.gitkeep":    "",
-		"commands/.gitkeep": "",
-		"skills/.gitkeep":   "",
+		"rules/.gitkeep":      "",
+		"references/.gitkeep": "",
+		"hooks/.gitkeep":      "",
+		"commands/.gitkeep":   "",
+		"skills/.gitkeep":     "",
 	}
 
 	for rel, body := range files {
@@ -98,6 +97,6 @@ should use it. Then commit, tag a version, and publish.
 		}
 	}
 
-	fmt.Fprintf(os.Stdout, "\n▶ Next: `cd %s`, edit the README + keystone-policy.json, drop content into rules/corpus/hooks/..., then `git init && git tag v0.1.0` and publish.\n", name)
+	fmt.Fprintf(os.Stdout, "\n▶ Next: `cd %s`, edit the README + keystone-policy.json, drop content into rules/, references/, hooks/, ..., then `git init && git tag v0.1.0` and publish.\n", name)
 	return nil
 }

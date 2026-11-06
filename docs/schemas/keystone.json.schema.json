@@ -90,7 +90,7 @@
         },
         "strict": {
           "type": "object",
-          "description": "Per-port lock list. A strict item is absolute — nothing else (project, sibling policies, descendant policies) can override it. Key is the port name (e.g. \"guides\", \"sensors\"); value is a list of item basenames (no .md extension).",
+          "description": "Per-port lock list. A strict item is absolute — nothing else (project, sibling policies, descendant policies) can override it. Key is a 5.0 folder or kind (\"rules\", \"hooks\", \"skills\", …) or a 4.x port (\"guides\", \"sensors\", …), which locks the same items; value is a list of item basenames (no .md extension; a skill by its folder name).",
           "additionalProperties": {
             "type": "array",
             "items": {
