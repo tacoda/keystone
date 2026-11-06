@@ -142,44 +142,23 @@ State ledgers record what is true about this project now. You keep them in `.age
 
 ## Path conventions
 
-Two rules govern how a charter file links to another file.
-
-### Rule 1: charter links are charter-root-relative
-
-A link from one charter file to another resolves against `.agents/`, not against the source file. `keystone doctor` rejects any link with a `../` or `./` segment.
+A link in a charter file is plain Markdown: it resolves from the folder of
+the file that holds it, so it works in an editor, on GitHub, and for an
+agent that opens the file.
 
 ```markdown
 <!-- inside .agents/rules/process/spec.md -->
-For reasoning, see [`references/process/spec.md`](references/process/spec.md).
+For reasoning, see [`references/process/spec.md`](../../references/process/spec.md).
+See [`keystone.json`](../../../keystone.json) for the policy pins.
 ```
 
-```markdown
-<!-- keystone doctor rejects these -->
-[reasoning](../../references/process/spec.md)
-[reasoning](./paired.md)
-```
+`keystone project` rewrites each relative link in a shim (a translated
+host copy, such as `.cursor/rules/spec.mdc`) so it resolves from the
+copy's folder. `keystone doctor --paths-only` fails on any relative link
+under `.agents/` that names no file.
 
-The agent knows the charter root, so a root-relative path stays the same at any depth. But a source-relative path makes the agent rebuild the location with path math.
-
-Known gap: the 5.0 path sweep rewrote many shipped links to the source-relative form, and `keystone doctor` reports 124 of them in this repo. Until one side changes, the rule and the shipped files disagree.
-
-### Rule 2: code links are repo-root-relative
-
-A link to a file outside the charter resolves against `<repo-root>`. This rule covers source code, `keystone.json`, and build scripts.
-
-```markdown
-<!-- inside .agents/commands/release.md -->
-See [`keystone.json`](keystone.json) for the policy pins.
-See [`src/main.go`](src/main.go) for the entrypoint.
-```
-
-The reason is that the agent already works from the repo root when it acts on code.
-
-### Enforcement
-
-- `keystone new` writes links in these forms.
-- `keystone doctor` flags each charter link with a `../` or `./` segment. Run it with `--fix` to rewrite them to the root-relative form.
-- On a violation, the doctor exits non-zero, so you can gate merges on it in CI.
+A skill keystone links or copies into a host folder keeps its links as
+written, so keep a skill's links inside its own folder where you can.
 
 ## Authoring
 

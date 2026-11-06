@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io/fs"
 	"os"
-	"path"
 	"path/filepath"
 	"regexp"
 	"sort"
@@ -14,6 +13,7 @@ import (
 	"github.com/tacoda/keystone/internal/framework/loader"
 	"github.com/tacoda/keystone/internal/framework/lockfile"
 	"github.com/tacoda/keystone/internal/framework/policies"
+	"github.com/tacoda/keystone/internal/framework/projection"
 	"github.com/tacoda/keystone/internal/framework/scaffold"
 )
 
@@ -23,8 +23,8 @@ import (
 // Runs three independent checks against an existing install:
 //
 //  1. Path conformance — scan every markdown file under <charter-root>/
-//     (excluding vendored policies) and flag any inter-charter link with
-//     '../' or './' segments. See docs/conventions.md for the rule.
+//     (excluding vendored policies) and flag any relative link that names
+//     no file.
 //  2. Policy drift — load keystone.json + lockfile, run loader.Verify;
 //     drifted policies get reset and the user is told to re-run
 //     `keystone install`.
@@ -90,11 +90,7 @@ func runDoctor(args []string) error {
 
 	if runPaths {
 		if fix {
-			fixed, err := fixPathConventions(absDir, charterRoot)
-			if err != nil {
-				return fmt.Errorf("path fix: %w", err)
-			}
-			fmt.Fprintf(os.Stdout, "✓ paths: rewrote %d link(s) to charter-root-relative form\n", fixed)
+			return fmt.Errorf("--fix no longer rewrites links: 5.0 links are relative to their own file, so fix a broken one by hand")
 		}
 		violations, err := checkPathConventions(absDir, charterRoot)
 		if err != nil {
@@ -158,9 +154,9 @@ Usage:
 
 Runs three independent checks by default:
 
-  paths   — every inter-charter link must be charter-root-relative;
-            '../' and './' segments are forbidden (see docs/conventions.md
-            for the rule). Violations exit non-zero.
+  paths   — every relative Markdown link under .agents/ resolves to a
+            file, read from the linking file's folder (code blocks are
+            skipped). A broken link exits non-zero.
   policies — walks vendored policies, detects drift, resets drifted policies
             so a follow-up 'keystone install' can repopulate from cache.
   drift   — diffs the user's scaffolded defaults against the binary's
@@ -175,10 +171,6 @@ Flags:
                           approximate token count vs keystone.json's
                           budgets block). Always informational — never
                           exits non-zero.
-  --fix                   Rewrite path violations in place (paths check only).
-                          Each '../' or './' link is resolved against the
-                          source file's directory and replaced with the
-                          charter-root-relative form.
   --dir <path>            Project root (defaults to cwd).
   --charter-root <name>   Override the charter folder (defaults to the
                           value in keystone.json, then "charter").
@@ -225,130 +217,55 @@ func checkPathConventions(projectDir, charterRoot string) ([]pathViolation, erro
 		if err != nil {
 			return err
 		}
-		for i, line := range strings.Split(string(body), "\n") {
-			for _, m := range markdownLink.FindAllStringSubmatch(line, -1) {
-				target := strings.TrimSpace(m[1])
-				if hasForbiddenSegment(target) {
-					hits = append(hits, pathViolation{File: rel, Line: i + 1, Link: target})
-				}
-			}
-		}
+		hits = append(hits, brokenLinks(rel, filepath.Dir(path), string(body))...)
 		return nil
 	})
 	return hits, err
 }
 
-// fixPathConventions walks every markdown file under <charter-root>/
-// (excluding vendored policies) and rewrites markdown links with '../'
-// or './' segments to their charter-root-relative form. Returns the
-// total count of rewritten links.
-//
-// Resolution: for a link `target` in a file at `<charterRoot>/<rel>`,
-// the charter-root-relative form is path.Join(dir(rel), target). Go's
-// path.Join normalizes the '..' and '.' segments correctly.
-func fixPathConventions(projectDir, charterRoot string) (int, error) {
-	root := filepath.Join(projectDir, charterRoot)
-	skip := filepath.FromSlash(config.PoliciesDir)
-	count := 0
-
-	err := filepath.WalkDir(root, func(p string, d fs.DirEntry, err error) error {
-		if err != nil {
-			if os.IsNotExist(err) {
-				return nil
-			}
-			return err
+// brokenLinks lists the links in body (a file at rel, in folder dir) that
+// name no file. Code blocks are skipped.
+func brokenLinks(rel, dir, body string) []pathViolation {
+	var hits []pathViolation
+	inFence := false
+	for i, line := range strings.Split(body, "\n") {
+		if strings.HasPrefix(strings.TrimSpace(line), "```") {
+			inFence = !inFence
+			continue
 		}
-		rel, _ := filepath.Rel(projectDir, p)
-		rel = filepath.ToSlash(rel)
-		if d.IsDir() {
-			if strings.HasPrefix(rel, filepath.ToSlash(skip)) {
-				return filepath.SkipDir
-			}
-			return nil
+		if !inFence {
+			hits = append(hits, lineBrokenLinks(rel, dir, i+1, line)...)
 		}
-		if filepath.Ext(p) != ".md" {
-			return nil
-		}
-		body, err := os.ReadFile(p)
-		if err != nil {
-			return err
-		}
-		// Path of this file's directory relative to charter root.
-		insideCharter := strings.TrimPrefix(rel, charterRoot+"/")
-		fileDir := path.Dir(insideCharter)
-		if fileDir == "." {
-			fileDir = ""
-		}
-
-		fileChanged := false
-		newBody := markdownLink.ReplaceAllStringFunc(string(body), func(match string) string {
-			submatches := markdownLink.FindStringSubmatch(match)
-			if len(submatches) < 2 {
-				return match
-			}
-			target := strings.TrimSpace(submatches[1])
-			if !hasForbiddenSegment(target) {
-				return match
-			}
-			// Preserve any #anchor or ?query suffix verbatim.
-			suffix := ""
-			if i := strings.IndexAny(target, "#?"); i >= 0 {
-				suffix = target[i:]
-				target = target[:i]
-			}
-			resolved := path.Join(fileDir, target)
-			fileChanged = true
-			count++
-			// Splice the new target back into the original [text](target)
-			// match, preserving the leading [...]( and trailing ).
-			openParen := strings.IndexByte(match, '(')
-			closeParen := strings.LastIndexByte(match, ')')
-			if openParen < 0 || closeParen < 0 {
-				return match
-			}
-			return match[:openParen+1] + resolved + suffix + match[closeParen:]
-		})
-		if fileChanged {
-			if err := os.WriteFile(p, []byte(newBody), 0o644); err != nil {
-				return err
-			}
-		}
-		return nil
-	})
-	if err != nil {
-		return 0, err
 	}
-	return count, nil
+	return hits
 }
 
-// hasForbiddenSegment returns true for inter-charter link targets that
-// contain '../' or './' segments. URL-style targets are exempt.
-func hasForbiddenSegment(target string) bool {
-	if target == "" {
+func lineBrokenLinks(rel, dir string, n int, line string) []pathViolation {
+	var hits []pathViolation
+	for _, m := range markdownLink.FindAllStringSubmatch(line, -1) {
+		if target := strings.TrimSpace(m[1]); brokenLink(dir, target) {
+			hits = append(hits, pathViolation{File: rel, Line: n, Link: target})
+		}
+	}
+	return hits
+}
+
+// brokenLink reports a relative link target that names no file when read
+// from dir. URLs, anchors, and absolute paths are not checked.
+func brokenLink(dir, target string) bool {
+	if !projection.IsRelativeLink(target) {
 		return false
 	}
-	if strings.Contains(target, "://") {
-		return false // url-style — out of scope
-	}
-	if strings.HasPrefix(target, "#") || strings.HasPrefix(target, "mailto:") {
-		return false
-	}
-	// Strip url-style fragment + query suffix so '../X.md#anchor' still
-	// flags as a violation.
 	if i := strings.IndexAny(target, "#?"); i >= 0 {
 		target = target[:i]
 	}
-	for _, seg := range strings.Split(target, "/") {
-		if seg == ".." || seg == "." {
-			return true
-		}
-	}
-	return false
+	_, err := os.Stat(filepath.Join(dir, filepath.FromSlash(target)))
+	return err != nil
 }
 
 func printPathReport(hits []pathViolation, charterRoot string) {
 	if len(hits) == 0 {
-		fmt.Fprintf(os.Stdout, "✓ paths: every inter-charter link is charter-root-relative (no ../ or ./ segments)\n")
+		fmt.Fprintf(os.Stdout, "✓ paths: every relative link resolves\n")
 		return
 	}
 	sort.Slice(hits, func(i, j int) bool {
@@ -357,13 +274,12 @@ func printPathReport(hits []pathViolation, charterRoot string) {
 		}
 		return hits[i].File < hits[j].File
 	})
-	fmt.Fprintf(os.Stdout, "✗ paths: %d inter-charter link(s) use forbidden ../ or ./ segments\n", len(hits))
+	fmt.Fprintf(os.Stdout, "✗ paths: %d link(s) name a file that doesn't exist\n", len(hits))
 	for _, h := range hits {
 		fmt.Fprintf(os.Stdout, "    %s:%d  %s\n", h.File, h.Line, h.Link)
 	}
-	fmt.Fprintf(os.Stdout, "  Convention: inter-charter links are written relative to the charter root\n")
-	fmt.Fprintf(os.Stdout, "  (e.g. `corpus/process/spec.md`, not `../../corpus/process/spec.md`).\n")
-	fmt.Fprintf(os.Stdout, "  See docs/conventions.md for the rule.\n")
+	fmt.Fprintf(os.Stdout, "  A link is read from the linking file's folder. Projected host copies are\n")
+	fmt.Fprintf(os.Stdout, "  rebased by keystone project; fix the source in .agents/.\n")
 }
 
 // --- Policy integrity check ---------------------------------------------

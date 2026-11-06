@@ -6,7 +6,7 @@ disable-model-invocation: true
 
 # learn
 
-**Capture a learning candidate** from a surprise, an incident, or a review finding. Writes to `.keystone/learning/inbox/` for later synthesis. Read [`.keystone/learning/README.md`](../../.keystone/learning/README.md).
+**Capture a learning candidate** from a surprise, an incident, or a review finding. Writes to `.keystone/learning/inbox/` for later synthesis. Read [`.keystone/learning/README.md`](../../../.keystone/learning/README.md).
 
 ## Activities
 

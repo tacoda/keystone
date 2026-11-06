@@ -6,7 +6,7 @@ disable-model-invocation: true
 
 # orient
 
-**Enter the planning phase.** Load codebase state and matching idioms for the touched region, then sketch a plan. Read [`.agents/rules/process/planning.md`](../rules/process/planning.md) for the full discipline.
+**Enter the planning phase.** Load codebase state and matching idioms for the touched region, then sketch a plan. Read [`.agents/rules/process/planning.md`](../../../.agents/rules/process/planning.md) for the full discipline.
 
 ## Activities
 

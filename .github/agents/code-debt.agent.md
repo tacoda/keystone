@@ -7,10 +7,10 @@ description: Surfaces and categorizes debt in the codebase — the known-subopti
 
 Surfaces and categorizes **debt in the codebase** — the known-suboptimal code the team has chosen to live with, plus the shape of any new debt being added in the current diff.
 
-Paired subagent: [`charter-debt`](charter-debt.md). It covers debt in the charter itself (stale rules, placeholder bootstrap, empty idiom dirs, etc.). The two are tracked separately on purpose.
+Paired subagent: [`charter-debt`](../../.agents/agents/charter-debt.md). It covers debt in the charter itself (stale rules, placeholder bootstrap, empty idiom dirs, etc.). The two are tracked separately on purpose.
 
 - **Trigger** — **audit** (codebase-wide) and **review** (diff-scoped).
-- **Inputs** — `git grep` for debt markers (`TODO`, `FIXME`, `HACK`, `XXX`, `DEPRECATED`), complexity hotspots from [risk-fingerprint](../hooks/risk-fingerprint.md), and any debt items already listed in `.agents/references/state/code-debt.md`.
+- **Inputs** — `git grep` for debt markers (`TODO`, `FIXME`, `HACK`, `XXX`, `DEPRECATED`), complexity hotspots from [risk-fingerprint](../../.agents/hooks/risk-fingerprint.md), and any debt items already listed in `.agents/references/state/code-debt.md`.
 - **Exit condition** — every surfaced item is categorized (see Categories) and either matched to an existing ledger entry or proposed as a new one.
 - **Output** — table of debt items: location, category, severity, owner (if known), whether new in this diff.
 - **State writes** — proposes a diff to `.agents/references/state/code-debt.md`. User accepts or edits.

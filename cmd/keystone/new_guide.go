@@ -49,12 +49,23 @@ One-sentence framing of what this rule governs.
 - Directive two.
 
 For reasoning, see [`+"`%s`"+`](%s).
-`, id, id, title, filepath.ToSlash(corpusRel), filepath.ToSlash(corpusRel))
+`, id, id, title, filepath.ToSlash(corpusRel), linkFrom(ruleRel, corpusRel))
 
 	if err := writeSkeleton(rulePath, ruleBody); err != nil {
 		return err
 	}
 	return writeSkeleton(corpusPath, referenceBody(id, title, ruleRel))
+}
+
+// linkFrom is a Markdown link target from the file at from to the file at
+// to (both relative to .agents/): plain relative Markdown, which keystone
+// rebases in host shims.
+func linkFrom(from, to string) string {
+	rel, err := filepath.Rel(filepath.Dir(filepath.FromSlash(from)), filepath.FromSlash(to))
+	if err != nil {
+		return filepath.ToSlash(to)
+	}
+	return filepath.ToSlash(rel)
 }
 
 // referenceBody is a reference skeleton: the reasoning behind its rule.
@@ -78,7 +89,7 @@ Failure modes the rule guards against.
 Source material — papers, books, posts.
 
 Back to the rule: [`+"`%s`"+`](%s).
-`, id, title, filepath.ToSlash(ruleRel), filepath.ToSlash(ruleRel))
+`, id, title, filepath.ToSlash(ruleRel), linkFrom("references/"+strings.TrimPrefix(filepath.ToSlash(ruleRel), "rules/"), ruleRel))
 }
 
 // runNewReference handles `keystone new reference <topic>/<name>`: only the

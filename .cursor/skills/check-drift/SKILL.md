@@ -6,7 +6,7 @@ disable-model-invocation: true
 
 # check-drift
 
-**Run the drift hook on the current diff.** Compare the in-progress changes against loaded charter rules. Fast pre-verify check. Read [`.agents/hooks/drift.md`](../hooks/drift.md) and [`.agents/rules/process/implementation.md`](../rules/process/implementation.md).
+**Run the drift hook on the current diff.** Compare the in-progress changes against loaded charter rules. Fast pre-verify check. Read [`.agents/hooks/drift.md`](../../../.agents/hooks/drift.md) and [`.agents/rules/process/implementation.md`](../../../.agents/rules/process/implementation.md).
 
 ## Activities
 

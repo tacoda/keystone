@@ -25,3 +25,20 @@ func TestVerifyBudget_FailsOverCapThenPasses(t *testing.T) {
 		t.Errorf("after trimming: %v", err)
 	}
 }
+
+// TestDoctorPaths_BrokenOnly — doctor flags a relative link that names no
+// file and accepts ../ links that resolve.
+func TestDoctorPaths_BrokenOnly(t *testing.T) {
+	root := t.TempDir()
+	writeFiles(t, root, map[string]string{
+		".agents/rules/process/spec.md": "[ok](../../references/spec.md) [gone](../../references/nope.md) [web](https://x.y)\n```\n[code](../nope.md)\n```\n",
+		".agents/references/spec.md":    "x\n",
+	})
+	hits, err := checkPathConventions(root, ".agents")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(hits) != 1 || hits[0].Link != "../../references/nope.md" {
+		t.Errorf("hits = %+v, want only the broken link", hits)
+	}
+}

@@ -6,9 +6,9 @@ invokable: true
 
 # debt-review
 
-**Triage the code-debt ledger.** Read [`.agents/agents/code-debt.md`](../agents/code-debt.md) and [`.agents/references/state/code-debt.md`](../references/state/code-debt.md).
+**Triage the code-debt ledger.** Read [`.agents/agents/code-debt.md`](../../.agents/agents/code-debt.md) and [`.agents/references/state/code-debt.md`](../../.agents/references/state/code-debt.md).
 
-For **charter debt** (stale rules, placeholder bootstrap, empty idiom dirs, uncited policies), use the [`audit`](audit.md) command. Its Pruning flywheel writes to `.agents/references/state/charter-debt.md`.
+For **charter debt** (stale rules, placeholder bootstrap, empty idiom dirs, uncited policies), use the [`audit`](../../.agents/commands/audit.md) command. Its Pruning flywheel writes to `.agents/references/state/charter-debt.md`.
 
 ## Activities
 

@@ -6,7 +6,7 @@ disable-model-invocation: true
 
 # synthesize
 
-**Promote learning-inbox candidates into the right reference or rule layer.** Read [`.keystone/learning/README.md`](../../.keystone/learning/README.md).
+**Promote learning-inbox candidates into the right reference or rule layer.** Read [`.keystone/learning/README.md`](../../../.keystone/learning/README.md).
 
 ## Activities
 

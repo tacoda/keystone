@@ -7,7 +7,7 @@ tools:
 ---
 # Subagent: charter-debt
 
-Surfaces **debt in the charter itself** — content that exists but isn't earning its keep. Distinct from [`code-debt`](code-debt.md), which covers debt in the codebase.
+Surfaces **debt in the charter itself** — content that exists but isn't earning its keep. Distinct from [`code-debt`](../../.agents/agents/code-debt.md), which covers debt in the codebase.
 
 - **Trigger** — **audit** (full sweep). Cheaper subsets can run on demand.
 - **Inputs** — `.agents/` tree, `.agents/references/state/CODEBASE_STATE.md`, `.keystone/lockfile.json`, `git log -- .agents/`, and the outputs of the hooks classified as available in `CODEBASE_STATE.md`.
@@ -25,7 +25,7 @@ Surfaces **debt in the charter itself** — content that exists but isn't earnin
 | **failing-hook** | Hook classified as available in `CODEBASE_STATE.md` but errors when invoked. | Try the recorded command; record exit code. |
 | **empty-shell** | Directory scaffolded by bootstrap (idioms, learning/inbox) that has no real content. | Directory size + non-README file count. |
 | **uncited-policy** | Installed policy whose rules were never referenced in the last N reviews. | Cross-reference policy rule paths against review outputs (or `git log` of review reports). |
-| **drifted-state** | `CODEBASE_STATE.md` `last_reconciled` is older than N months OR [stack-drift](../hooks/stack-drift.md) hook flagged divergence. | Frontmatter date + stack-drift output. |
+| **drifted-state** | `CODEBASE_STATE.md` `last_reconciled` is older than N months OR [stack-drift](../../.agents/hooks/stack-drift.md) hook flagged divergence. | Frontmatter date + stack-drift output. |
 
 ## Severity
 

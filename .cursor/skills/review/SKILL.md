@@ -6,7 +6,7 @@ disable-model-invocation: true
 
 # review
 
-**Run the four review subagents on the current diff.** Semantic check, post-verify. Read [`.agents/rules/process/review.md`](../rules/process/review.md).
+**Run the four review subagents on the current diff.** Semantic check, post-verify. Read [`.agents/rules/process/review.md`](../../../.agents/rules/process/review.md).
 
 ## Activities
 
@@ -14,12 +14,12 @@ Run the four review subagents. If the agent supports parallel subagents (Claude 
 
 | Subagent | Doc |
 |---|---|
-| review-functional | [`.agents/agents/review-functional.md`](../agents/review-functional.md) |
-| review-security | [`.agents/agents/review-security.md`](../agents/review-security.md) |
-| review-risk | [`.agents/agents/review-risk.md`](../agents/review-risk.md) |
-| review-deployment | [`.agents/agents/review-deployment.md`](../agents/review-deployment.md) |
+| review-functional | [`.agents/agents/review-functional.md`](../../../.agents/agents/review-functional.md) |
+| review-security | [`.agents/agents/review-security.md`](../../../.agents/agents/review-security.md) |
+| review-risk | [`.agents/agents/review-risk.md`](../../../.agents/agents/review-risk.md) |
+| review-deployment | [`.agents/agents/review-deployment.md`](../../../.agents/agents/review-deployment.md) |
 
-Also run **spec-adherence** ([`.agents/hooks/spec-adherence.md`](../hooks/spec-adherence.md)) if a spec was authored — walk acceptance criteria line by line against the diff.
+Also run **spec-adherence** ([`.agents/hooks/spec-adherence.md`](../../../.agents/hooks/spec-adherence.md)) if a spec was authored — walk acceptance criteria line by line against the diff.
 
 ## Output
 

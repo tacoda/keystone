@@ -4,18 +4,18 @@ description: 'Run the verification hooks: lint, type-check, test, build, drift, 
 
 # verify
 
-**Run the verification hooks**: lint, type-check, test, build, drift, commit-message. Pre-commit gate. Read [`.agents/rules/process/verification.md`](../rules/process/verification.md).
+**Run the verification hooks**: lint, type-check, test, build, drift, commit-message. Pre-commit gate. Read [`.agents/rules/process/verification.md`](../../.agents/rules/process/verification.md).
 
 ## Activities
 
 Run every hook classified as runnable in `.agents/references/state/CODEBASE_STATE.md`, **in this turn** (no stale evidence). For each hook:
 
-1. **lint** — [`.agents/hooks/lint.md`](../hooks/lint.md). Invoke the project's lint command.
-2. **type-check** — [`.agents/hooks/type-check.md`](../hooks/type-check.md). Invoke the type-check command. Skip if no type checker.
-3. **test** — [`.agents/hooks/test.md`](../hooks/test.md). Invoke the test command. Fresh run.
-4. **build** — [`.agents/hooks/build.md`](../hooks/build.md). Invoke the build command.
-5. **drift** — [`.agents/hooks/drift.md`](../hooks/drift.md). Compare diff to loaded rules.
-6. **commit-message** — [`.agents/hooks/commit-message.md`](../hooks/commit-message.md). Inspect the proposed message before `git commit`.
+1. **lint** — [`.agents/hooks/lint.md`](../../.agents/hooks/lint.md). Invoke the project's lint command.
+2. **type-check** — [`.agents/hooks/type-check.md`](../../.agents/hooks/type-check.md). Invoke the type-check command. Skip if no type checker.
+3. **test** — [`.agents/hooks/test.md`](../../.agents/hooks/test.md). Invoke the test command. Fresh run.
+4. **build** — [`.agents/hooks/build.md`](../../.agents/hooks/build.md). Invoke the build command.
+5. **drift** — [`.agents/hooks/drift.md`](../../.agents/hooks/drift.md). Compare diff to loaded rules.
+6. **commit-message** — [`.agents/hooks/commit-message.md`](../../.agents/hooks/commit-message.md). Inspect the proposed message before `git commit`.
 
 Show the actual tool output for each. Do not claim a hook passed without producing its output this turn.
 

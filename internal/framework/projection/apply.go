@@ -183,6 +183,15 @@ func expectedShim(projectDir string, o Output) ([]byte, error) {
 	if o.Content != nil {
 		return o.Content, nil
 	}
+	content, err := renderShim(projectDir, o)
+	if err != nil {
+		return nil, err
+	}
+	return RebaseLinks(content, o.Src, o.Dest), nil
+}
+
+// renderShim renders a shim from its source primitive.
+func renderShim(projectDir string, o Output) ([]byte, error) {
 	if o.Render == nil {
 		content, ok, err := primitive.RenderForHost(projectDir, o.Prim)
 		if err == nil && !ok {

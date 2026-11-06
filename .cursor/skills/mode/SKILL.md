@@ -6,7 +6,7 @@ disable-model-invocation: true
 
 # mode
 
-**Switch the charter pacing mode** (paired / solo / autopilot). Read [`.agents/rules/process/modes.md`](../rules/process/modes.md).
+**Switch the charter pacing mode** (paired / solo / autopilot). Read [`.agents/rules/process/modes.md`](../../../.agents/rules/process/modes.md).
 
 ## Activities
 
