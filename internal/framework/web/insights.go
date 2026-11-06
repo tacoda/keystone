@@ -165,7 +165,7 @@ func (s *server) collectInsights(primitives []primitive.Primitive) []Insight {
 }
 
 func inboxStats(projectDir string) (oldest time.Duration, count int) {
-	dir := filepath.Join(projectDir, config.DefaultAgentsRoot, "learning", "inbox")
+	dir := filepath.Join(projectDir, config.StateRoot, "learning", "inbox")
 	entries, err := os.ReadDir(dir)
 	if err != nil {
 		return 0, 0

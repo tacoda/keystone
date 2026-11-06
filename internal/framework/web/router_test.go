@@ -5,6 +5,8 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"os"
+	"path/filepath"
 	"regexp"
 	"strings"
 	"testing"
@@ -336,5 +338,22 @@ func TestRouter_BudgetPage(t *testing.T) {
 	}
 	if body := rr.Body.String(); !strings.Contains(body, "always loaded, per host") {
 		t.Errorf("budget page did not render the report:\n%s", body)
+	}
+}
+
+// TestListInbox_ReadsKeystoneState — the learning inbox lives under
+// .keystone/ in 5.0, not .agents/.
+func TestListInbox_ReadsKeystoneState(t *testing.T) {
+	root := t.TempDir()
+	dir := filepath.Join(root, ".keystone", "learning", "inbox")
+	if err := os.MkdirAll(dir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(dir, "x.md"), []byte("---\nstatus: proposed\n---\nbody\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	items, err := listInbox(root)
+	if err != nil || len(items) != 1 {
+		t.Errorf("listInbox = %v, %v; want the one candidate under .keystone/", items, err)
 	}
 }

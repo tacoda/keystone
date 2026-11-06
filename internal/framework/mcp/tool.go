@@ -35,7 +35,11 @@ func registerToolPrimitives(s *server.MCPServer, projectDir string) {
 func registerOneTool(s *server.MCPServer, projectDir string, p primitive.Primitive) {
 	opts := []mcp.ToolOption{mcp.WithDescription(p.Description)}
 	for _, a := range p.Args {
-		opts = append(opts, mcp.WithString(a.Name, mcp.Description(a.Description)))
+		props := []mcp.PropertyOption{mcp.Description(a.Description)}
+		if a.Required {
+			props = append(props, mcp.Required())
+		}
+		opts = append(opts, mcp.WithString(a.Name, props...))
 	}
 	s.AddTool(
 		mcp.NewTool(toolMCPName(p.ID), opts...),

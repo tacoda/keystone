@@ -44,7 +44,7 @@ type auditLog struct {
 // auditDirFor returns the canonical audit dir under a project. Kept
 // as a function so tests can mirror the layout against a temp dir.
 func auditDirFor(projectDir string) string {
-	return filepath.Join(projectDir, config.DefaultAgentsRoot, "state", "audit")
+	return filepath.Join(projectDir, config.StateRoot, "state", "audit")
 }
 
 // openAuditLog creates the audit dir if missing and opens a fresh
