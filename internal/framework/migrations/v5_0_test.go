@@ -202,3 +202,29 @@ func TestV5_Down_RestoresCharterLayout(t *testing.T) {
 		".charter/INDEX.json",
 	)
 }
+
+// TestV5_StaleScaffold_ArchivedOnlyWhenUnedited — the shipped 4.0.0
+// keystone-new-guide moves to the archive and Down brings it back; an
+// edited keystone-new-sensor stays where it is.
+func TestV5_StaleScaffold_ArchivedOnlyWhenUnedited(t *testing.T) {
+	shipped, err := os.ReadFile("testdata/v4.0.0-keystone-new-guide.SKILL.md")
+	if err != nil {
+		t.Fatal(err)
+	}
+	tmp := seed40Install(t)
+	writeAll(t, tmp, map[string]string{
+		".charter/skills/keystone-new-guide/SKILL.md":  string(shipped),
+		".charter/skills/keystone-new-sensor/SKILL.md": "---\nname: keystone-new-sensor\ndescription: mine\n---\nedited\n",
+	})
+	runV4(t, tmp, planUp_5_0)
+	mustExist(t, tmp, staleArchive_5_0+"/keystone-new-guide/SKILL.md", ".agents/skills/keystone-new-sensor/SKILL.md")
+	if dirExists(filepath.Join(tmp, ".agents/skills/keystone-new-guide")) {
+		t.Error("the unedited scaffold skill must leave .agents/skills/")
+	}
+	runV4(t, tmp, planDown_5_0)
+	got, _ := os.ReadFile(filepath.Join(tmp, ".charter/skills/keystone-new-guide/SKILL.md"))
+	if string(got) != string(shipped) {
+		t.Error("Down must return the archived skill unchanged")
+	}
+	mustExist(t, tmp, ".charter/skills/keystone-new-sensor/SKILL.md")
+}

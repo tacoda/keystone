@@ -94,6 +94,7 @@ func planUp_5_0(absDir string) (*Plan, error) {
 	p.Add("ignore "+stateRoot_5_0+"/policies/ in .gitignore where "+charterRoot_5_0+"/policies/ was ignored", func(absDir string) error {
 		return carryGitignore_5_0(filepath.Join(absDir, ".gitignore"))
 	})
+	p.Add("move unedited 4.x scaffold skills (keystone-new-guide, -corpus, -sensor, -playbook, -command, -action; replaced by keystone-new) to "+staleArchive_5_0+"/", archiveStaleScaffold_5_0)
 	p.Add("record 4.x keystone-* host projections as keystone-owned (so `keystone project` may replace and prune them)", recordLegacyProjections_5_0)
 	p.Add("remove 4.x generated entrypoints superseded by the AGENTS.md block (CHARTER.md; pointer-only AGENTS.md / CONVENTIONS.md)", removeLegacyEntrypoints_5_0)
 	p.Add("rebuild INDEX.json + INDEX.lite.json under "+stateRoot_5_0+"/", func(absDir string) error {
@@ -174,6 +175,7 @@ func recordLegacyProjections_5_0(absDir string) error {
 // rules/ returns as guides/ (the 4.x name). The .gitignore line is kept.
 func planDown_5_0(absDir string) (*Plan, error) {
 	p := &Plan{}
+	p.Add("return archived 4.x scaffold skills from "+staleArchive_5_0+"/ to "+agentsRoot_5_0+"/skills/", restoreStaleScaffold_5_0)
 	for i := len(layout_5_0) - 1; i >= 0; i-- {
 		m := layout_5_0[i]
 		if m.from == "rules" {
