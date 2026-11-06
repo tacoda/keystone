@@ -8,6 +8,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"io/fs"
 	"os"
@@ -26,8 +27,28 @@ func main() {
 	SetAssets(assets)
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Fprintf(os.Stderr, "keystone: %v\n", err)
-		os.Exit(1)
+		os.Exit(exitCode(err))
 	}
+}
+
+// exitError carries a specific process exit code. Hosts block a tool call
+// only on exit 2 (Claude Code, Codex, Cursor); any other non-zero code is a
+// non-blocking error there, so a failing gate must exit 2, not 1.
+type exitError struct {
+	code int
+	err  error
+}
+
+func (e exitError) Error() string { return e.err.Error() }
+func (e exitError) Unwrap() error { return e.err }
+
+// exitCode is 1 for ordinary errors, or the code an exitError carries.
+func exitCode(err error) int {
+	var ee exitError
+	if errors.As(err, &ee) {
+		return ee.code
+	}
+	return 1
 }
 
 // printOptionLabels writes the full catalog of allowed labels per category.

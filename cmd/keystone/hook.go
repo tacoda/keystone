@@ -1,7 +1,9 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -65,11 +67,30 @@ func runHookFire(args []string) error {
 
 	comp, inf := selectHooks(composed, opts)
 	emitInferentialManifest(inf, opts)
-	failures := runComputationalHooks(absDir, comp, opts)
-	if failures > 0 {
-		return fmt.Errorf("hook fire %s: %d hook(s) failed", opts.event, failures)
+	failures := runComputationalHooks(absDir, comp, opts, hostPayload(opts))
+	if failures == 0 {
+		return nil
 	}
-	return nil
+	err = fmt.Errorf("hook fire %s: %d hook(s) failed", opts.event, failures)
+	if primitive.IsHostPhase(opts.event) {
+		return exitError{code: 2, err: err} // the host blocks only on exit 2
+	}
+	return err
+}
+
+// hostPayload reads the host's event JSON from stdin (tool name, tool input,
+// …) when the event is a host phase and stdin is piped, so each hook sees
+// what triggered it. Signals fired by keystone itself get no payload.
+func hostPayload(opts hookFireOpts) []byte {
+	if !primitive.IsHostPhase(opts.event) {
+		return nil
+	}
+	info, err := os.Stdin.Stat()
+	if err != nil || info.Mode()&os.ModeCharDevice != 0 {
+		return nil
+	}
+	data, _ := io.ReadAll(os.Stdin)
+	return data
 }
 
 func parseHookFire(args []string) (hookFireOpts, error) {
@@ -121,25 +142,24 @@ func selectHooks(primitives []primitive.Primitive, opts hookFireOpts) (comp, inf
 	return comp, inf
 }
 
+// hookResult is one computational hook's outcome.
+type hookResult struct {
+	id  string
+	out string
+	err error
+}
+
 // runComputationalHooks runs every hook's `run:` script concurrently, passing
-// the fire context as env vars. Returns the count of non-zero exits.
-func runComputationalHooks(absDir string, hooks []primitive.Primitive, opts hookFireOpts) int {
-	type result struct {
-		id  string
-		out string
-		err error
-	}
-	results := make([]result, len(hooks))
+// the fire context as env vars and the host payload (if any) on stdin.
+// Returns the count of non-zero exits.
+func runComputationalHooks(absDir string, hooks []primitive.Primitive, opts hookFireOpts, payload []byte) int {
+	results := make([]hookResult, len(hooks))
 	var wg sync.WaitGroup
 	for i, h := range hooks {
 		wg.Add(1)
 		go func(i int, h primitive.Primitive) {
 			defer wg.Done()
-			cmd := exec.Command("bash", "-c", h.Run)
-			cmd.Dir = absDir
-			cmd.Env = append(os.Environ(), hookEnv(opts)...)
-			out, err := cmd.CombinedOutput()
-			results[i] = result{id: h.ID, out: strings.TrimSpace(string(out)), err: err}
+			results[i] = runOneHook(absDir, h, opts, payload)
 		}(i, h)
 	}
 	wg.Wait()
@@ -154,6 +174,19 @@ func runComputationalHooks(absDir string, hooks []primitive.Primitive, opts hook
 		}
 	}
 	return failures
+}
+
+// runOneHook runs h's `run:` with the fire context in its env and the host
+// payload on stdin.
+func runOneHook(absDir string, h primitive.Primitive, opts hookFireOpts, payload []byte) hookResult {
+	cmd := exec.Command("bash", "-c", h.Run)
+	cmd.Dir = absDir
+	cmd.Env = append(os.Environ(), hookEnv(opts)...)
+	if payload != nil {
+		cmd.Stdin = bytes.NewReader(payload)
+	}
+	out, err := cmd.CombinedOutput()
+	return hookResult{id: h.ID, out: strings.TrimSpace(string(out)), err: err}
 }
 
 func hookEnv(opts hookFireOpts) []string {

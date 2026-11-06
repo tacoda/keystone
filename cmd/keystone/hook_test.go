@@ -11,7 +11,7 @@ import (
 // seedHook writes a hook primitive under <root>/.agents/sensors/<id>.md.
 func seedHook(t *testing.T, root, id, body string) {
 	t.Helper()
-	path := filepath.Join(root, ".agents", "sensors", id+".md")
+	path := filepath.Join(root, ".agents", "hooks", id+".md")
 	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
 		t.Fatal(err)
 	}
@@ -70,5 +70,32 @@ func TestFrameworkEventsRegistry(t *testing.T) {
 	}
 	if primitive.IsFrameworkEvent("PreToolUse") {
 		t.Error("PreToolUse is a host phase, not a framework event")
+	}
+}
+
+// TestHookFire_HostPhaseFailureExitsTwo — hosts block a tool call only on
+// exit 2, so a failing hook on a host phase must carry code 2. A signal
+// (keystone-fired) keeps the ordinary error code.
+func TestHookFire_HostPhaseFailureExitsTwo(t *testing.T) {
+	root := t.TempDir()
+	seedHook(t, root, "deny", "---\nkind: hook\nid: deny\ndescription: x\nmode: computational\nevent: PreToolUse\nrun: \"exit 1\"\n---\n")
+	seedHook(t, root, "gate", "---\nkind: hook\nid: gate\ndescription: x\nmode: computational\nevent: pre-verify\nrun: \"exit 1\"\n---\n")
+	if code := exitCode(runHookFire([]string{"PreToolUse", "--dir", root})); code != 2 {
+		t.Errorf("host phase failure exit code = %d, want 2", code)
+	}
+	if code := exitCode(runHookFire([]string{"pre-verify", "--dir", root})); code != 1 {
+		t.Errorf("signal failure exit code = %d, want 1", code)
+	}
+}
+
+// TestRunComputationalHooks_PassesPayload — the host's event JSON reaches
+// each hook on stdin.
+func TestRunComputationalHooks_PassesPayload(t *testing.T) {
+	hooks := []primitive.Primitive{{Frontmatter: primitive.Frontmatter{ID: "p", Run: `grep -q '"tool_name":"Bash"'`}}}
+	if n := runComputationalHooks(t.TempDir(), hooks, hookFireOpts{event: "PreToolUse"}, []byte(`{"tool_name":"Bash"}`)); n != 0 {
+		t.Error("hook should have read the payload from stdin")
+	}
+	if n := runComputationalHooks(t.TempDir(), hooks, hookFireOpts{event: "PreToolUse"}, nil); n != 1 {
+		t.Error("without a payload the grep should fail")
 	}
 }
