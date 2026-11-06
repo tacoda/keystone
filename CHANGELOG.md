@@ -2,6 +2,109 @@
 
 All notable changes to keystone are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); the project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.0.0] — Unreleased
+
+Major release: **constraints and capabilities**. The charter splits into
+two halves with the names the ecosystem already uses. Constraints limit,
+gate, or check the agent (`rule`, `reference`, `hook`, `permission`,
+`eval`); capabilities add what it can do (`skill`, `command`, `subagent`,
+`tool`, `document`). Sources move to `.agents/` (the AGENTS.md and Agent
+Skills standards); keystone's state moves to `.keystone/`. One projection
+engine delivers the charter to ten hosts, and records every file it writes
+so it never replaces one of yours.
+
+Breaking. `keystone migrate up` carries a 4.x install to 5.0 by moving
+files only; it never rewrites frontmatter. See
+`docs/upgrade-4.x-to-5.0.md`. Install the 5.0 binary before migrating:
+host hook bridges call the installed `keystone`.
+
+### Breaking
+
+- **Layout.** `.charter/` splits into `.agents/` (rules, references,
+  hooks, permissions, evals, skills, commands, agents, tools, documents)
+  and `.keystone/` (INDEX, lockfile, learning, work, archive, state,
+  sources, hosts, policies). `playbooks/` and `patterns/` fold into
+  `skills/<id>/SKILL.md`.
+- **Kinds.** `guide` → `rule`, `corpus` → `reference`, `sensor` → `hook`,
+  `posture` → `permission`, `agent` → `subagent`, `playbook` and `pattern`
+  → `skill`. `concern` is retired. 4.x names, folders, `globs:`, and `on:`
+  still parse permanently; `keystone lint` warns and `keystone lint --fix`
+  applies the 5.0 spelling.
+- **Entrypoint.** `CHARTER.md` is gone. `AGENTS.md` carries a managed block
+  (`<!-- keystone:start -->` … `<!-- keystone:end -->`); text outside it
+  is yours. `CLAUDE.md` gets a block that imports `AGENTS.md`.
+- **Projection names.** Host files drop the `keystone-` prefix: a subagent
+  `reviewer` projects as `.claude/agents/reviewer.md`, a command `release`
+  as `/release`. Ids that start with `keystone` keep it.
+- **No silent overwrite.** `keystone project` replaces only files the
+  lockfile records as keystone's; anything else stops the run unless you
+  pass `--overwrite`. `keystone init --reset` (which deleted `.agents/`)
+  is replaced by `keystone init --overwrite`, which deletes nothing.
+- **`keystone new`** takes the 5.0 kinds; the 4.x names exit non-zero and
+  name the replacement.
+- **MCP.** `keystone_get_corpus` → `keystone_get_reference`;
+  `keystone_new_*` tools use the 5.0 kinds; `keystone_list_primitives`
+  takes `category` and `paths` (`glob` still accepted). Server version
+  3.0.0.
+- **JSON.** `keystone show --json` names `paths`, not `globs`.
+- **Budgets.** `keystone.json` `budgets` keys are `always_loaded` or a kind;
+  4.x port keys map to their kinds.
+
+### Added
+
+- **Ten hosts.** Claude Code, Cursor, GitHub Copilot, Continue, opencode,
+  Codex, Cline, Goose, Pi, and Aider, each by the cheapest strategy it
+  supports (native, link, shim, or an `AGENTS.md` entry). `link_mode:
+  copy` replaces symlinks. Gaps (hooks a host can't run, permission rules
+  it can't enforce) are reported by `keystone project` and in `AGENTS.md`.
+- **Hook bridges** for Claude Code, Cursor, Copilot, and opencode. A
+  failing host-event hook exits 2, which blocks on Claude Code and
+  opencode (Cursor and Copilot are unverified, see `docs/hosts.md`); errors
+  before the hooks run, a missing binary, and a timeout (50s) fail the
+  same way. The bridge finds
+  the charter from any subdirectory and passes the host's event JSON on
+  stdin.
+- **Permission translation.** Claude-syntax rules go to Claude Code as
+  written, to Cursor (`.cursor/cli.json`) and Codex (prefix rules) where
+  they translate without broadening an allow; the rest are reported.
+  Keystone removes only the entries it added.
+- **`keystone allocate`.** Converts an existing setup (`.claude/`, Cursor,
+  Copilot, Cline, Windsurf, Continue, opencode) into `.agents/`, and
+  proposes moving root-file sections (`CLAUDE.md`, `AGENTS.md`,
+  `GEMINI.md`, `.goosehints`) that need not load every session.
+  `--apply` writes only new files; `--overwrite` hands the originals to
+  keystone. Skill `keystone-allocate`.
+- **`keystone budget`.** The tokens each host loads every session and the
+  tokens on demand per kind, against `keystone.json` caps; `keystone
+  verify` fails on an exceeded cap. MCP `keystone_budget`; dashboard page.
+- **Tool transports.** `keystone tool run|list`; `cli` and `plugin` tools
+  are listed in `AGENTS.md` with their command, and a `plugin` tool is
+  also an opencode custom tool.
+- **`keystone new hook`**, **`keystone list constraints|capabilities`**,
+  and category grouping in `list`, `charter show`, `show`, `explain`, MCP,
+  and the dashboard nav.
+- **Schemas** in `docs/schemas/` for every kind; skills validate against
+  the Agent Skills spec.
+
+### Fixed
+
+- A failing hook on a host event exited 1, which hosts treat as
+  non-blocking, so no `PreToolUse` check ever blocked.
+- The Claude Code hook merge replaced a whole event's hook list, deleting
+  user hooks on the same event.
+- A permission removed from the charter stayed in `.claude/settings.json`.
+- Claude Code rule shims wrote `globs:`, which Claude Code ignores; they
+  write `paths:`.
+- A rule's `corpus:` link never resolved to a reference with a 5.0 id
+  (lint and MCP).
+- The dashboard's new-primitive form redirected to a missing page.
+
+### Removed
+
+- The 4.x per-port budget counter (it counted nothing on the 5.0 layout).
+- The six `keystone-new-*` scaffold skills, replaced by `keystone-new`;
+  the migration archives unedited copies.
+
 ## [4.0.0] — 2026-07-01
 
 Major release — the **charter rebrand**. Keystone is the *coding-agent

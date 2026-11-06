@@ -1,208 +1,206 @@
 # Keystone
 
-**Keystone is the agent charter framework** — **charter engineering**
-(a.k.a. **constraint engineering**) at the repository level: you author the
-standards that constrain your coding agents, per repo. A small Go toolchain — CLI + MCP server + localhost
-dashboard — that drops a structured, primitive-typed markdown **charter** into
-your repo and keeps it healthy. Once installed, neither tool is required at
-runtime. The charter is plain files; any agent that reads
-`.keystone/INDEX.json` and the bodies it points at can operate the project.
+<!-- voice-register: informational -->
+<!-- voice-english: ste -->
 
-A **harness** is the engine that runs the model — the coding agent (Claude
-Code, Cursor, Codex, opencode, …), the orchestrator, the runner. Keystone is
-not a harness. It manages the **charter**: the standards you *author* to
-constrain whatever harness runs, so each unique repo gets reliable, quality
-output. (Author the spec → charter. Be the engine → harness. See
-[`GLOSSARY.md`](GLOSSARY.md).)
-
-The CLI authors and maintains the charter. The MCP server dispatches the
-same charter to host agents (Claude Code, Cursor, Codex, opencode, …) over the
-model-context-protocol. The dashboard at `http://localhost:4773` gives a
-local operator view — metrics, insights, prune, eval runs.
-All three are convenience. The charter alone is enough.
+Keystone is the agent charter framework. You write the standards your coding
+agents follow in one place, `.agents/`, and keystone delivers them to every
+agent you use: Claude Code, Cursor, Copilot, Codex, opencode, Continue, Cline,
+Goose, Pi, and Aider. The sources follow the AGENTS.md and Agent Skills
+standards, so a host that reads them natively gets them as written. Every
+other host gets links or translated files. Where a host can't enforce
+something, keystone tells you, and the agent too.
 
 ```
-brew install tacoda/tap/keystone    # or grab a release binary
-keystone init                       # writes .agents/ + agent menu
-keystone index                      # emits .keystone/INDEX.json
-keystone mcp install --agent claude-code   # one-line agent wiring
-keystone web serve                  # optional: open the dashboard
+brew install tacoda/tap/keystone      # or grab a release binary
+keystone init                         # writes .agents/ and .keystone/, projects every host
+keystone allocate                     # already have a setup? see where it belongs in .agents/
+keystone budget                       # what each host loads into every session
+keystone mcp install --agent claude-code
 ```
 
-## What's in the charter
+Keystone isn't a harness. A harness runs the model: the coding agent, the
+orchestrator, the runner. Keystone manages the charter that constrains
+whatever harness you run. After install, the tools are optional, because the
+charter is plain files that any agent can read.
 
-`.agents/` holds **13 primitive kinds**:
+## Two halves: constraints and capabilities
 
-| Kind         | What it is                                                            |
-| ------------ | --------------------------------------------------------------------- |
-| `guide`      | ambient, glob-scoped directive — inferential → `.claude/rules/` shim; computational → a host hook (LSP) |
-| `sensor`     | a check that reacts to a signal or host phase (`on:`) — computational (`run:` → exit/HTTP status verdict) or inferential (agent review → schema); gates |
-| `agent`      | a role spawned as a subagent                                          |
-| `command`    | a unit of work / lifecycle step                                       |
-| `skill`      | a single composed capability                                          |
-| `playbook`   | a composed sequence of commands with `gates:`                         |
-| `pattern`    | a reusable documentation pattern (Diátaxis), in prose                 |
-| `corpus`     | the reasoning / why, loaded on demand                                 |
-| `document`   | a governed output (plan / review / adr / retro / feature)             |
-| `concern`    | a composition mixin                                                   |
-| `posture`    | tool/permission posture → settings.json                               |
-| `tool`       | an author-defined external callable (transport: cli \| http \| mcp \| plugin); on-demand, or a side-effect when it declares `on:` |
-| `eval`       | the eval harness                                                      |
+Every primitive in `.agents/` is one of ten kinds. **Constraints** limit, gate,
+or check what the agent does. **Capabilities** add things it can do.
 
-keystone is the model layer over host primitives: each kind adds
-validations, associations, and cross-host projection the bare host file
-lacks. It projects to native paths (`.claude/skills/`, `.claude/agents/`,
-`.claude/commands/`, `.cursor/rules/`, …) on `keystone project`.
+| Category   | Kind         | Folder                 | What it is                                                        |
+| ---------- | ------------ | ---------------------- | ----------------------------------------------------------------- |
+| constraint | `rule`       | `.agents/rules/`       | A directive. It applies when a touched file matches its `paths:`, or everywhere without them. |
+| constraint | `reference`  | `.agents/references/`  | The reasoning behind a rule, opened on demand.                    |
+| constraint | `hook`       | `.agents/hooks/`       | A check that runs on an event. A non-zero exit blocks the agent.  |
+| constraint | `permission` | `.agents/permissions/` | Allow, ask, and deny rules for tools.                             |
+| constraint | `eval`       | `.agents/evals/`       | A test that the charter changes agent behavior.                   |
+| capability | `skill`      | `.agents/skills/`      | An Agent Skills `SKILL.md`. It activates when its description matches the task. |
+| capability | `command`    | `.agents/commands/`    | A unit of work the user asks for by name.                         |
+| capability | `subagent`   | `.agents/agents/`      | A role the agent delegates to.                                    |
+| capability | `tool`       | `.agents/tools/`       | A callable you write: over MCP, as a command, or as a host plugin. |
+| capability | `document`   | `.agents/documents/`   | A template for governed output, such as a plan or an ADR.         |
 
-Every primitive carries canonical frontmatter — `kind`, `id`,
-`description`, plus per-kind fields (`globs`, `phase`, `triggers`,
-`tier`, `mode`, `event`, `run`, `agent`, `returns`, `tools`, `corpus`,
-`includes`, …). The walker emits a single `.keystone/INDEX.json` listing
-every primitive's descriptor; agents read the index first and open
-bodies only when their activation conditions match.
+Keystone's own state lives in `.keystone/`: the index, the lockfile, the
+learning inbox, work in progress, and vendored policies. You edit `.agents/`.
+You never edit `.keystone/` by hand.
 
-## Signals
+The 4.x names (`guide`, `corpus`, `sensor`, `posture`, `agent`, `playbook`,
+`pattern`) still parse. `keystone lint` warns with the 5.0 spelling, and
+`keystone lint --fix` applies it.
 
-A **signal** is a keystone framework event the host can't see — the
-extensible, higher-level counterpart to a host hook phase. A primitive
-subscribes to one via `on:` (like a skill declares `triggers:`): a
-`sensor` runs a check, a `tool` fires a side-effect, an `agent` runs a
-review. Host phases (`PreToolUse`, `Stop`, …) are a closed set bridged
-into the host; **any other `on:` value is a signal**, so projects define
-their own — declare them in `keystone.json` `signals:` and fire with
-`keystone signal fire <name>` (`keystone signal list` to discover). The
-`hook` kind is retired — reactions self-subscribe.
+## One source, every host
 
-## The contract: rules → corpus → ask
+`keystone project` delivers `.agents/` to each host in `keystone.json`
+`adapters`, by the cheapest method that host supports:
 
-Runtime resolution flow — encoded in the MCP server's `instructions`
-block and in `guides/process/runtime-resolution.md`.
+- **Native.** The host already reads the path. Codex and opencode read
+  `.agents/skills/`.
+- **Link.** The host reads the same format at another path. Claude Code gets
+  a symlink per skill in `.claude/skills/`. Set `"link_mode": "copy"` where
+  symlinks are a problem.
+- **Shim.** The host needs a different format. Cursor gets `.mdc` rules,
+  Copilot gets `.instructions.md` files, and Codex gets TOML subagents.
+- **Index.** The host has no slot for the kind. `AGENTS.md` lists it, and the
+  agent opens it from `.agents/` when it applies.
 
-1. **Rules.** Find applicable guides via `INDEX.json`, filtered by
-   touched-files globs and phase. Project wins by default; policies
-   refine via nesting; `strict` items lock absolutely.
-2. **Corpus.** When a guide's body isn't enough, follow its `corpus:`
-   to the linked reasoning.
-3. **Contradictions.** Conflicts between rules and corpus trigger the
-   agent to ask the user to resolve. (External-system access is a
-   `tool`, not a resolution stage.)
+`AGENTS.md` carries a managed block between `<!-- keystone:start -->` and
+`<!-- keystone:end -->`. It holds the orientation, the iron laws, the rules
+that apply everywhere, the tools, and one line per host that says what that
+host loads by itself. Keystone rewrites only the block. Your text around it
+stays. `CLAUDE.md` gets a block that imports `AGENTS.md`.
+
+Keystone records every file it writes in `.keystone/lockfile.json`. It never
+replaces a file it didn't write. Pass `--overwrite` when you want it to.
+
+### Hooks and permissions
+
+A hook runs through a bridge in each host's own hook config. On Claude Code
+and opencode, a failing check blocks the tool call, and so does an error
+before the checks run. Keystone writes bridges for Cursor and Copilot too,
+but I haven't verified that a failure blocks there yet.
+
+Permission rules use Claude Code syntax, `Bash(go test:*)`. Keystone writes
+them to Claude Code unchanged, translates them for Cursor and Codex, and
+never makes an allow broader than you wrote it.
+
+Some hosts can't run hooks or enforce some permission rules. `keystone
+project` names each gap, and `AGENTS.md` tells the agent on that host to run
+the checks itself. [`docs/hosts.md`](docs/hosts.md) has the matrix and its
+sources.
+
+## Bring what you already have
+
+`keystone init` seeds a project and skips every file that already exists.
+To convert an existing setup, run `keystone allocate`. It reads `.claude/`,
+`.cursor/rules`, `.cursorrules`, Copilot instructions, `.clinerules`,
+`.windsurfrules`, `.continue/`, and `.opencode/`. For each item, it reports
+the kind and the `.agents/` path where the item belongs.
+
+It also splits `CLAUDE.md`, `AGENTS.md`, `GEMINI.md`, and `.goosehints` into
+sections, and proposes moving each one that doesn't need to load every
+session. A section that names file patterns becomes a path-scoped rule, a
+numbered procedure becomes a command, and long reasoning becomes a
+reference. Iron laws stay where they are.
+
+- `keystone allocate` writes nothing.
+- `keystone allocate --apply` writes new files under `.agents/` and changes
+  no original.
+- `keystone allocate --overwrite` hands the originals to keystone, so the
+  next projection replaces them.
+
+## Context budget
+
+`keystone budget` measures two tiers for each host. The **always loaded**
+tier is what the host reads at the start of every session: root files, the
+name and description of every skill, command, and subagent it lists, and
+rules without `paths:`. The **on demand** tier is every body the agent opens
+when it applies.
+
+Set caps in `keystone.json`:
+
+```json
+"budgets": {
+  "always_loaded": { "max_tokens": 4000 },
+  "reference":     { "max_tokens_per_load": 3000 }
+}
+```
+
+`keystone verify` fails when a cap is exceeded, and names the file and the
+overage. The estimate is a word count. Real tokenizers count about 1.35
+times more, and the caps use the same estimate.
+
+## How an agent resolves a scenario
+
+The MCP server's instructions and the `runtime-resolution` rule state the
+same order:
+
+1. **Rules.** Find the rules for the touched files and the current phase.
+   The project wins by default. Policies refine it, and a `strict` item is
+   absolute.
+2. **References.** When a rule's body isn't enough, open the references its
+   `corpus:` field links.
+3. **Contradictions.** When a rule and its reference disagree, ask the user.
 
 ## CLI
 
-| Verb                     | What it does                                                                  |
-| ------------------------ | ----------------------------------------------------------------------------- |
-| `keystone init`          | Minimum-friction scaffold. One question (agent target) or zero with `--agent`. |
-| `keystone index`         | Walk `.agents/`, emit `INDEX.json`.                                  |
-| `keystone lint`          | Validate primitive frontmatter; required fields per kind, deps integrity.      |
-| `keystone project`       | Regenerate `.claude/` / `.cursor/` host projections from canonical sources.    |
-| `keystone verify`        | Cascade + policy-drift check.                                                  |
-| `keystone charter coverage` | Which project files no guide governs ("uncharted territory").               |
-| `keystone charter show`  | Charter roster; `--effective` resolves the post-cascade winning set.           |
-| `keystone explain <id>`  | Explain a primitive — how it activates, what it links to, uncommitted changes. |
-| `keystone charter conformance` | Rubric — does the repo conform to its charter? (cascade/validity/pairing/coverage) |
-| `keystone signal fire\|list` | Fire or list signals (extensible framework events).                        |
-| `keystone migrate`       | Version-to-version charter upgrade (… → 4.0). Idempotent.                                    |
-| `keystone new <kind>`    | Scaffold any of the 13 primitive kinds + adapter + policy.                     |
-| `keystone search <q>`    | Full-text search across every primitive.                                       |
-| `keystone graph`         | Render the primitive-relationship graph (Mermaid or DOT).                      |
-| `keystone watch`         | fsnotify loop: index + project + lint on change.                               |
-| `keystone snapshot`      | Save / list / restore tarballs of `.agents/` for safe experiments.           |
-| `keystone eval run`      | Run static + sensor evals. `--baseline <ref>` for regression diffs.            |
-| `keystone policy`        | Add / update / remove vendored policies.                                       |
-| `keystone mcp serve`     | Launch the MCP server over stdio (host-launched).                              |
-| `keystone mcp install`   | Write the host agent's MCP config (`.mcp.json`, `.cursor/mcp.json`, …).        |
-| `keystone web serve`     | Open the localhost dashboard.                                                  |
+| Command                        | What it does                                                         |
+| ------------------------------ | -------------------------------------------------------------------- |
+| `keystone init`                | Seed `.agents/` and `.keystone/`, then project every host. `--overwrite` replaces keystone's files. |
+| `keystone allocate`            | Report where an existing setup belongs. `--apply` writes, `--overwrite` hands originals over. |
+| `keystone budget`              | The context each host loads, against your caps. `--json` for CI.     |
+| `keystone new <kind> <id>`     | Scaffold any of the ten kinds, plus `adapter` and `policy`.          |
+| `keystone index`               | Rebuild `.keystone/INDEX.json` and `INDEX.lite.json`.                |
+| `keystone project`             | Deliver `.agents/` to every host in `adapters`.                      |
+| `keystone lint`                | Check frontmatter. `--fix` applies the 5.0 spelling.                 |
+| `keystone verify`              | Check policy drift, strict items, budget caps, and projection drift. |
+| `keystone list`                | List primitives, constraints first. Filter by kind or category.     |
+| `keystone show`, `explain`     | One primitive: its fields, its links, how it activates.              |
+| `keystone charter coverage`    | Project files that no rule's `paths:` covers.                        |
+| `keystone charter conformance` | Does the repo conform to its charter?                                |
+| `keystone hook fire <event>`   | Run the hooks on an event. Host bridges call it.                     |
+| `keystone signal fire <name>`  | Fire a keystone signal (an event no host sees).                      |
+| `keystone tool run <id>`       | Run a tool the way the MCP server does.                              |
+| `keystone migrate up`          | Upgrade an older install. See the upgrade guide.                     |
+| `keystone watch`               | Re-index and re-project on every save under `.agents/`.              |
+| `keystone mcp serve`           | Run the MCP server over stdio.                                       |
+| `keystone mcp install`         | Write a host's MCP config.                                           |
+| `keystone web serve`           | Open the dashboard at `http://localhost:4773`.                       |
 
-Every command has `--help`. `keystone completion bash|zsh|fish` for shell
-autocomplete.
+Every command takes `--help`.
 
-## MCP server
+## MCP server and dashboard
 
-Same binary, separate verb. `keystone mcp install --agent claude-code`
-writes `.mcp.json`; the host launches the server on session start.
-`keystone mcp install --agent opencode` writes the server into
-`opencode.json`'s `mcp` key as a `local` (stdio) server.
+`keystone mcp install --agent <host>` writes the host's MCP config, and the
+host starts the server. The server reads the same files as the CLI. It offers
+read tools (`keystone_list_primitives`, `keystone_get_reference`,
+`keystone_budget`, …), write tools (`keystone_new_<kind>`), and each
+`transport: mcp` tool as `keystone_tool_<id>`.
 
-Tool surface:
-
-- **Read** — `keystone_list_primitives`, `keystone_get_primitive`,
-  `keystone_get_reference`
-- **Search** — `keystone_search`
-- **Eval** — `keystone_eval_list`, `keystone_eval_run`, `keystone_eval_report`,
-  `keystone_eval_baseline`
-- **Write** — `keystone_new_<kind>` for every kind, plus
-  `keystone_charter_bootstrap`, `keystone_target_add`,
-  `keystone_index_refresh`, `keystone_project_refresh`
-
-Resource surface:
-
-- `keystone://index` — full `INDEX.json`
-- `keystone://primitive/{kind}/{id}` — one body
-- `keystone://charter/status` — install audit
-- `skill://list`, `skill://{name}/SKILL.md` — auto-discovery
-
-Prompt surface: `keystone_bootstrap`, `keystone_task`, `keystone_audit`,
-`keystone_learn`.
-
-## Dashboard
-
-`keystone web serve --port 4773` (the default — KEYS on a phone keypad).
-Localhost-only; same binary; reuses the same data model as the CLI and
-MCP server.
-
-Pages:
-
-- **home** — counts by kind
-- **metrics** — primitive counts, lint stats, freshness, index health
-- **insights** — suggested actions to improve charter performance
-- **primitives** — table w/ kind + glob filter; detail page w/
-  cross-references
-- **policies** — list + add/remove
-- **investigator** — primitives grouped by cascade layer, w/ search
-- **verify** — one-click `keystone verify` + result pane
-- **prune** — lint findings + heuristics (orphan corpus, empty
-  bodies, duplicate descriptions) w/ per-row prune
-- **inbox** — walk learning candidates, accept/reject
-- **flywheels** — copy-paste invocations for learn / synthesize / audit
-- **evals** — declared evals + run button + report fragment
-- **search** — HTMX-live full-text across the charter
-- **graph** — Mermaid-rendered dependency graph
-
-SSE push at `/events` swaps fragments when files in `.agents/` change.
-REST API under `/api/` is read-only.
+`keystone web serve` opens a local dashboard. Its nav splits the charter into
+constraints and capabilities, and it has pages for coverage, the budget,
+signals, evals, and the learning flywheels.
 
 ## Policies
 
-Vendored charter fragments — declared in `keystone.json`, pinned by
-version, hash-verified, drift-reset on `keystone verify`. A policy can
-ship any primitive kind; the project layer always wins by default.
-Cascade order: project wins; nested policies refine outer; `strict`
-declarations lock items absolutely.
+A policy is a charter fragment you vendor from another repo. Keystone pins it
+by version, checks its hash, and resets drift on `keystone verify`. The
+project layer wins by default, and a policy's `strict` items lock.
 
 ```bash
 keystone policy add tacoda/tacoda-org@v2.0.0
 ```
 
-## After install, the tools are optional
+## Upgrading from 4.x
 
-The charter is markdown on disk. An agent that reads
-`.keystone/INDEX.json` plus the primitive bodies it points at can
-operate the charter without keystone installed. The CLI helps you
-author + maintain; the MCP server gives the agent structured access;
-the dashboard gives you a local operator view. None are runtime
-dependencies.
+Run `keystone migrate up`, then install the 5.0 binary before your hooks run
+again. [`docs/upgrade-4.x-to-5.0.md`](docs/upgrade-4.x-to-5.0.md) covers what
+moves, what each 4.x name became, and the one conflict that stops the
+migration.
 
 ## License
 
-MIT. See [`LICENSE`](LICENSE). Contributions welcome — see
-[`CONTRIBUTING.md`](CONTRIBUTING.md). Project + charter-amendment
-governance is in [`GOVERNANCE.md`](GOVERNANCE.md).
-
----
-
-**Migration to 4.0:** run `keystone migrate` once. It brings any prior
-layout up to current — most notably 4.0 renames `.harness/` to
-`.agents/` (and `HARNESS.md` → `CHARTER.md`), rewrites `keystone.json`
-references, and regenerates `INDEX.json` and host projections.
-Idempotent — safe to re-run. Backup first via
-`keystone snapshot save --label pre-4.0`.
+MIT. See [`LICENSE`](LICENSE). Contributions are welcome: see
+[`CONTRIBUTING.md`](CONTRIBUTING.md). [`GOVERNANCE.md`](GOVERNANCE.md) covers
+how the project and the charter change.
