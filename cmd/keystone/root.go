@@ -82,6 +82,7 @@ func init() {
 	rootCmd.AddCommand(patchCmd())
 	rootCmd.AddCommand(indexCmd())
 	rootCmd.AddCommand(lintCmd())
+	rootCmd.AddCommand(allocateCmd())
 	rootCmd.AddCommand(listCmd())
 	rootCmd.AddCommand(showCmd())
 	rootCmd.AddCommand(documentCmd())
@@ -226,6 +227,15 @@ func indexCmd() *cobra.Command {
 		RunE:               runAndForward(runIndex),
 	}
 	return c
+}
+
+func allocateCmd() *cobra.Command {
+	return &cobra.Command{
+		Use:                "allocate",
+		Short:              "Move an existing agent setup (.claude/, .cursor/, Copilot, Cline, …) into .agents/",
+		DisableFlagParsing: true,
+		RunE:               runAndForward(runAllocate),
+	}
 }
 
 func lintCmd() *cobra.Command {

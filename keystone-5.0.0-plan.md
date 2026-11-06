@@ -637,3 +637,20 @@ agent loads. 5.0 measures the load.
   went to a 404 route. A test GETs every nav link. The runtime-resolution
   rule names `keystone_get_reference`; this repo's copy also lost a stale
   stage-3 pointer to the removed `keystone_source_query`.
+- Phase 6b.1: done. `keystone allocate [--apply]` (package
+  `internal/framework/allocate`) reads every host-specific setup — `.claude/`
+  skills, agents, commands, rules, and `settings.json` permissions and
+  matcher-free command hooks; `.cursor/rules/*.mdc` (agent-requested →
+  skill), `.cursor/skills|agents|commands`, `.cursorrules`; Copilot
+  instructions, prompts, agents; `.clinerules` (file or folder),
+  `.windsurfrules`; `.continue/rules|prompts`; `.opencode/agent(s)|command(s)`.
+  Keystone's own projections (lockfile `projections`, symlinks) and its
+  managed settings entries are skipped. Frontmatter: `globs:`/`applyTo:` →
+  `paths:` (comma strings → lists), `alwaysApply` dropped (true → no paths),
+  `tools:` strings → lists, `id:` and `description:` added when missing
+  (each change named in the report). `--apply` writes new files under
+  `.agents/` only; it never overwrites one and never changes an original.
+  Known gaps, reported per item: a subagent with no `tools:` (it had every
+  tool on its host) needs a list; a Claude hook with a matcher stays in
+  settings.json; a moved Claude hook now blocks on any non-zero exit.
+  Fixture test covers every source family and the round trip.
