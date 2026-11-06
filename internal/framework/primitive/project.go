@@ -53,11 +53,11 @@ type ProjectionResult struct {
 // separator) are rewritten to `-` for filesystem safety. The
 // frontmatter id is preserved unchanged inside the projected file.
 // Guide ids (slash-separated hierarchies) are flattened via
-// ruleShimDiskID — see that helper for the exact transform.
+// ruleIDTail and hostName — see those helpers for the exact transform.
 func Project(projectDir string, primitives []Primitive) ([]ProjectionResult, error) {
 	results := make([]ProjectionResult, 0, len(primitives))
 	for _, p := range primitives {
-		rel := ProjectionRelPath(p)
+		rel := relPathWith(p, projectedDiskName)
 		if rel == "" {
 			results = append(results, ProjectionResult{
 				Kind: p.Kind, ID: p.ID,
@@ -72,7 +72,7 @@ func Project(projectDir string, primitives []Primitive) ([]ProjectionResult, err
 		if Kind(p.Kind) == KindRule {
 			writeErr = writeRuleShim(src, dest, p)
 		} else {
-			writeErr = writeLowered(src, dest, p)
+			writeErr = writeLowered(src, dest, p, projectedDiskName)
 		}
 		if writeErr != nil {
 			return results, fmt.Errorf("project %s/%s: %w", p.Kind, p.ID, writeErr)
@@ -93,8 +93,15 @@ func Project(projectDir string, primitives []Primitive) ([]ProjectionResult, err
 // Guides project only when they declare non-empty globs — globless
 // guides are global-process content with no path-triggered ambient
 // channel.
-func ProjectionRelPath(p Primitive) string {
-	name := projectedDiskName(p.ID)
+func ProjectionRelPath(p Primitive) string { return relPathWith(p, hostName) }
+
+// namer renders a primitive id as the file and host name it projects
+// under: hostName for the projection engine, projectedDiskName (with the
+// 4.x `keystone-` prefix) for the frozen Project the 2.x migrations call.
+type namer func(id string) string
+
+func relPathWith(p Primitive, nameOf namer) string {
+	name := nameOf(p.ID)
 	switch Kind(p.Kind) {
 	// 4.x playbooks and patterns normalize to skill and project the same way.
 	case KindSkill:
@@ -104,7 +111,7 @@ func ProjectionRelPath(p Primitive) string {
 	case KindCommand:
 		return filepath.Join(".claude", "commands", name+".md")
 	case KindRule:
-		return guideProjection(p)
+		return guideProjection(p, nameOf)
 	case KindHook:
 		return sensorProjection(p, name)
 	}
@@ -117,11 +124,11 @@ func ProjectionRelPath(p Primitive) string {
 // guide (`rule` is the projection-target name). A computational guide is
 // carried by a hook (no shim); a guide without globs is global-process
 // content with no ambient channel.
-func guideProjection(p Primitive) string {
+func guideProjection(p Primitive, nameOf namer) string {
 	if p.Mode == string(modeComputational) || len(p.Paths) == 0 {
 		return ""
 	}
-	return filepath.Join(".claude", "rules", ruleShimDiskID(p.ID)+".md")
+	return filepath.Join(".claude", "rules", nameOf(ruleIDTail(p.ID))+".md")
 }
 
 // sensorProjection returns the subagent path for an inferential sensor (a
@@ -141,38 +148,36 @@ const (
 	modeInferential   = "inferential"
 )
 
-// keystoneProjectionPrefix is prepended to every projected host artifact so
-// the charter owns a clear namespace (`/keystone-<name>` for commands, etc.).
+// keystoneProjectionPrefix is the 4.x namespace on every projected host
+// file. 5.0 records ownership in the lockfile instead, so the engine drops
+// it; only the frozen Project (2.x migrations) still writes it.
 const keystoneProjectionPrefix = "keystone-"
 
-// projectedDiskName renders a primitive id as a kebab-case, keystone-prefixed
-// filesystem name for its host projection. Namespace (`:`) and hierarchy (`/`)
-// separators flatten to `-`; runs collapse; an id already in the keystone
-// namespace is not double-prefixed.
-func projectedDiskName(id string) string {
+// hostName renders a primitive id as a kebab-case host name: namespace
+// (`:`) and hierarchy (`/`) separators flatten to `-` and runs collapse.
+// `keystone:verify` and `review` keep the names their authors gave them.
+func hostName(id string) string {
 	s := strings.ToLower(id)
 	s = strings.NewReplacer(":", "-", "/", "-").Replace(s)
 	for strings.Contains(s, "--") {
 		s = strings.ReplaceAll(s, "--", "-")
 	}
-	s = strings.Trim(s, "-")
+	return strings.Trim(s, "-")
+}
+
+// projectedDiskName is hostName in the 4.x `keystone-` namespace; frozen.
+func projectedDiskName(id string) string {
+	s := hostName(id)
 	if s == "keystone" || strings.HasPrefix(s, keystoneProjectionPrefix) {
 		return s
 	}
 	return keystoneProjectionPrefix + s
 }
 
-// ruleShimDiskID flattens a guide id into a single-segment, keystone-prefixed
-// filename safe for `.claude/rules/`. The `guides/idioms/` prefix is stripped
-// so the resulting filenames stay short:
-//
-//	guides/idioms/go/stdlib-first              → keystone-go-stdlib-first
-//	guides/idioms/charter-content/state-files  → keystone-charter-content-state-files
-//	guides/process/foo                         → keystone-process-foo (fallback)
-func ruleShimDiskID(guideID string) string {
-	trimmed := strings.TrimPrefix(guideID, "guides/idioms/")
-	trimmed = strings.TrimPrefix(trimmed, "guides/")
-	return projectedDiskName(trimmed)
+// ruleIDTail strips the 4.x `guides/idioms/` and `guides/` id prefixes so a
+// rule shim's flattened name stays short (go/stdlib-first → go-stdlib-first).
+func ruleIDTail(id string) string {
+	return strings.TrimPrefix(strings.TrimPrefix(id, "guides/idioms/"), "guides/")
 }
 
 // RenderForHost returns the host-native content a primitive projects to
@@ -189,7 +194,7 @@ func RenderForHost(projectDir string, p Primitive) (content []byte, ok bool, err
 	if Kind(p.Kind) == KindRule {
 		content, err = ruleShimContent(src, p)
 	} else {
-		content, err = loweredContent(src, p)
+		content, err = loweredContent(src, p, hostName)
 	}
 	if err != nil {
 		return nil, false, err
@@ -200,8 +205,8 @@ func RenderForHost(projectDir string, p Primitive) (content []byte, ok bool, err
 // writeLowered projects a primitive to its host file with frontmatter lowered
 // to the host-native subset, stripping keystone-only fields (kind, id, corpus,
 // includes, mode, event, returns, gates, tier, …). The body is preserved.
-func writeLowered(srcAbs, destAbs string, p Primitive) error {
-	content, err := loweredContent(srcAbs, p)
+func writeLowered(srcAbs, destAbs string, p Primitive, nameOf namer) error {
+	content, err := loweredContent(srcAbs, p, nameOf)
 	if err != nil {
 		return err
 	}
@@ -209,20 +214,20 @@ func writeLowered(srcAbs, destAbs string, p Primitive) error {
 }
 
 // loweredContent builds the frontmatter-lowered host file bytes for p.
-func loweredContent(srcAbs string, p Primitive) ([]byte, error) {
+func loweredContent(srcAbs string, p Primitive, nameOf namer) ([]byte, error) {
 	data, err := os.ReadFile(srcAbs)
 	if err != nil {
 		return nil, fmt.Errorf("read %s: %w", srcAbs, err)
 	}
 	body := stripFrontmatter(string(data))
-	return []byte(lowerFrontmatter(p) + body), nil
+	return []byte(lowerFrontmatter(p, nameOf) + body), nil
 }
 
 // lowerFrontmatter returns the host-native (Claude Code) YAML frontmatter,
 // fenced, for a projected primitive. Skills/agents carry name+description
 // (agents add tools/model); commands carry description + argument-hint /
 // allowed-tools / model.
-func lowerFrontmatter(p Primitive) string {
+func lowerFrontmatter(p Primitive, nameOf namer) string {
 	var b strings.Builder
 	b.WriteString("---\n")
 	if Kind(p.Kind) == KindCommand {
@@ -233,7 +238,7 @@ func lowerFrontmatter(p Primitive) string {
 		writeListKey(&b, "allowed-tools", p.Tools)
 	} else {
 		// skill, playbook, agent, inferential sensor → name + description.
-		fmt.Fprintf(&b, "name: %s\n", projectedDiskName(p.ID))
+		fmt.Fprintf(&b, "name: %s\n", nameOf(p.ID))
 		fmt.Fprintf(&b, "description: %s\n", yamlSafe(p.Description))
 		writeListKey(&b, "tools", p.Tools)
 	}
@@ -322,7 +327,7 @@ func RuleShimMarkdown(fileContents string, p Primitive) string {
 	body := stripFrontmatter(fileContents)
 	title := extractH1(body)
 	if title == "" {
-		title = ruleShimDiskID(p.ID)
+		title = hostName(ruleIDTail(p.ID))
 	}
 	var b strings.Builder
 	fmt.Fprintf(&b, "# %s\n\n", title)
@@ -339,13 +344,12 @@ func RuleShimMarkdown(fileContents string, p Primitive) string {
 // Body returns a primitive file's markdown body, frontmatter removed.
 func Body(fileContents string) string { return stripFrontmatter(fileContents) }
 
-// ProjectedName is the keystone-prefixed, kebab-case name a primitive
-// projects under on a host (`keystone-<name>`), shared across hosts so
-// one concept keeps one name everywhere.
-func ProjectedName(id string) string { return projectedDiskName(id) }
+// ProjectedName is the kebab-case name a primitive projects under on a
+// host, shared across hosts so one concept keeps one name everywhere.
+func ProjectedName(id string) string { return hostName(id) }
 
-// RuleSlug is the flattened, keystone-prefixed file name for a rule shim.
-func RuleSlug(id string) string { return ruleShimDiskID(id) }
+// RuleSlug is the flattened file name for a rule shim (go-stdlib-first).
+func RuleSlug(id string) string { return hostName(ruleIDTail(id)) }
 
 // stripFrontmatter returns the body of a markdown document with the
 // leading YAML frontmatter block removed. If the body has no

@@ -684,3 +684,15 @@ agent loads. 5.0 measures the load.
   prefix, so a converted `reviewer` subagent becomes `keystone-reviewer`
   and `/release` becomes `/keystone-release`. Ownership now lives in the
   lockfile, so the prefix is no longer needed to mark keystone's files.
+- Prefix decision (user-approved): the projection engine drops the 4.x
+  `keystone-` prefix. A primitive projects under its own id, kebab-cased
+  (`reviewer`, `/release`, `go-stdlib-first.md`); an id that already starts
+  with `keystone` keeps it (`keystone-verify`). Ownership lives in the
+  lockfile, so the prefix no longer marks keystone's files. The frozen
+  `primitive.Project` (2.x migrations) keeps the prefix, so the v5.0
+  migration still recognizes the 4.x files it adopts. This repo re-projected
+  cleanly: 62 written, 62 old paths pruned, then idempotent.
+  For Phase 9: the shipped `review` command now projects to `/review`, which
+  I believe collides with Claude Code's built-in `/review`. The shipped
+  commands also duplicate the shipped `keystone-*` skills one for one
+  (`audit` / `keystone-audit`, …); decide whether to keep both.

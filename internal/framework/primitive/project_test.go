@@ -28,24 +28,24 @@ func TestProjectionRelPath(t *testing.T) {
 		globs          []string
 		want           string
 	}{
-		// Projected names are kebab-case + keystone-prefixed; an id already
+		// Projected names are kebab-case, unprefixed (5.0); an id already
 		// in the keystone namespace is not double-prefixed.
 		{"skill", "keystone:index", "", nil, filepath.Join(".claude", "skills", "keystone-index", "SKILL.md")},
-		{"subagent", "code-reviewer", "", nil, filepath.Join(".claude", "agents", "keystone-code-reviewer.md")},
-		{"command", "review", "", nil, filepath.Join(".claude", "commands", "keystone-review.md")},
-		{"command", "verify", "", nil, filepath.Join(".claude", "commands", "keystone-verify.md")},
-		{"skill", "task", "", nil, filepath.Join(".claude", "skills", "keystone-task", "SKILL.md")},
+		{"subagent", "code-reviewer", "", nil, filepath.Join(".claude", "agents", "code-reviewer.md")},
+		{"command", "review", "", nil, filepath.Join(".claude", "commands", "review.md")},
+		{"command", "verify", "", nil, filepath.Join(".claude", "commands", "verify.md")},
+		{"skill", "task", "", nil, filepath.Join(".claude", "skills", "task", "SKILL.md")},
 		// Path-scoped inferential rule → rule shim (empty mode defaults inferential).
-		{"rule", "guides/idioms/go/stdlib-first", "", []string{"cmd/**/*.go"}, filepath.Join(".claude", "rules", "keystone-go-stdlib-first.md")},
-		{"rule", "guides/idioms/charter-content/state-files", "inferential", []string{"x/**"}, filepath.Join(".claude", "rules", "keystone-charter-content-state-files.md")},
+		{"rule", "guides/idioms/go/stdlib-first", "", []string{"cmd/**/*.go"}, filepath.Join(".claude", "rules", "go-stdlib-first.md")},
+		{"rule", "guides/idioms/charter-content/state-files", "inferential", []string{"x/**"}, filepath.Join(".claude", "rules", "charter-content-state-files.md")},
 		// Computational rule → no shim (author a hook instead).
 		{"rule", "guides/idioms/go/fmt", "computational", []string{"**/*.go"}, ""},
 		// Rule without paths → no projection.
 		{"rule", "guides/process/spec", "", nil, ""},
 		// Inferential hook (review) → subagent; computational hook fires
 		// via the host hook bridge (no adapter file).
-		{"hook", "review-functional", "inferential", nil, filepath.Join(".claude", "agents", "keystone-review-functional.md")},
-		{"hook", "review-security", "", nil, filepath.Join(".claude", "agents", "keystone-review-security.md")},
+		{"hook", "review-functional", "inferential", nil, filepath.Join(".claude", "agents", "review-functional.md")},
+		{"hook", "review-security", "", nil, filepath.Join(".claude", "agents", "review-security.md")},
 		{"hook", "build", "computational", nil, ""},
 		// Other no-projection kinds.
 		{"reference", "corpus/process/spec", "", nil, ""},

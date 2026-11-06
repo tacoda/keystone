@@ -15,20 +15,20 @@ var allHosts = []string{"cursor", "github-copilot", "continue", "opencode", "cod
 func TestHosts_PlanPerHost(t *testing.T) {
 	got := outputsByHost(plan(t, seedCharter(t), Enabled(allHosts)...))
 	want := map[string][]string{
-		"claude-code": {"shim .claude/agents/keystone-reviewer.md", "shim .claude/commands/keystone-verify.md",
-			"shim .claude/rules/keystone-go-style.md", "symlink .claude/skills/deploy"},
+		"claude-code": {"shim .claude/agents/reviewer.md", "shim .claude/commands/verify.md",
+			"shim .claude/rules/go-style.md", "symlink .claude/skills/deploy"},
 		// Cursor reads .agents/skills and .claude/agents: no skill or subagent output.
-		"cursor": {"shim .cursor/rules/keystone-go-style.mdc", "shim .cursor/skills/keystone-verify/SKILL.md"},
-		"github-copilot": {"shim .github/agents/keystone-reviewer.agent.md", "shim .github/instructions/keystone-go-style.instructions.md",
-			"shim .github/prompts/keystone-verify.prompt.md"},
+		"cursor": {"shim .cursor/rules/go-style.mdc", "shim .cursor/skills/verify/SKILL.md"},
+		"github-copilot": {"shim .github/agents/reviewer.agent.md", "shim .github/instructions/go-style.instructions.md",
+			"shim .github/prompts/verify.prompt.md"},
 		// Continue reads .claude/skills, so the Claude Code link covers it.
-		"continue": {"index ", "shim .continue/prompts/keystone-verify.md", "shim .continue/rules/keystone-go-style.md"},
-		"opencode": {"index ", "shim .opencode/agents/keystone-reviewer.md", "shim .opencode/commands/keystone-verify.md"},
-		"codex":    {"index ", "index ", "shim .codex/agents/keystone-reviewer.toml"},
-		"cline":    {"copy .cline/skills/deploy", "index ", "index ", "shim .clinerules/keystone-go-style.md"},
+		"continue": {"index ", "shim .continue/prompts/verify.md", "shim .continue/rules/go-style.md"},
+		"opencode": {"index ", "shim .opencode/agents/reviewer.md", "shim .opencode/commands/verify.md"},
+		"codex":    {"index ", "index ", "shim .codex/agents/reviewer.toml"},
+		"cline":    {"copy .cline/skills/deploy", "index ", "index ", "shim .clinerules/go-style.md"},
 		// Goose reads .claude/agents: no subagent output.
 		"goose": {"index ", "index "},
-		"pi":    {"index ", "index ", "shim .pi/prompts/keystone-verify.md"},
+		"pi":    {"index ", "index ", "shim .pi/prompts/verify.md"},
 		"aider": {"index ", "index ", "index ", "index "},
 	}
 	for host, w := range want {
@@ -56,16 +56,16 @@ func TestHosts_ShimFormats(t *testing.T) {
 		t.Fatal(err)
 	}
 	for dest, wants := range map[string][]string{
-		".cursor/rules/keystone-go-style.mdc":                    {"globs:\n  - '**/*.go'", "alwaysApply: false", "# Style", "- gofmt"},
-		".cursor/skills/keystone-verify/SKILL.md":                {"name: keystone-verify", "disable-model-invocation: true", "# Verify"},
-		".github/instructions/keystone-go-style.instructions.md": {"applyTo: '**/*.go'"},
-		".github/prompts/keystone-verify.prompt.md":              {"description: Verify."},
-		".continue/rules/keystone-go-style.md":                   {"name: keystone-go-style", "globs:"},
-		".continue/prompts/keystone-verify.md":                   {"invokable: true"},
-		".opencode/agents/keystone-reviewer.md":                  {"mode: subagent", "# Reviewer"},
-		".codex/agents/keystone-reviewer.toml":                   {`name = "keystone-reviewer"`, `developer_instructions = "# Reviewer"`},
-		".clinerules/keystone-go-style.md":                       {"paths:", "- gofmt"},
-		".pi/prompts/keystone-verify.md":                         {"description: Verify."},
+		".cursor/rules/go-style.mdc":                    {"globs:\n  - '**/*.go'", "alwaysApply: false", "# Style", "- gofmt"},
+		".cursor/skills/verify/SKILL.md":                {"name: verify", "disable-model-invocation: true", "# Verify"},
+		".github/instructions/go-style.instructions.md": {"applyTo: '**/*.go'"},
+		".github/prompts/verify.prompt.md":              {"description: Verify."},
+		".continue/rules/go-style.md":                   {"name: go-style", "globs:"},
+		".continue/prompts/verify.md":                   {"invokable: true"},
+		".opencode/agents/reviewer.md":                  {"mode: subagent", "# Reviewer"},
+		".codex/agents/reviewer.toml":                   {`name = "reviewer"`, `developer_instructions = "# Reviewer"`},
+		".clinerules/go-style.md":                       {"paths:", "- gofmt"},
+		".pi/prompts/verify.md":                         {"description: Verify."},
 		".cline/skills/deploy/scripts/run.sh":                    {"echo run"},
 	} {
 		data, err := os.ReadFile(filepath.Join(root, dest))

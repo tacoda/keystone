@@ -31,11 +31,8 @@ func TestAllocate_OverwriteHandsOver(t *testing.T) {
 	}
 	settings := readRel(t, root, ".claude/settings.json")
 	assertHas(t, "settings.json", settings, `"model": "x"`, "./guard.sh", "keystone hook fire Stop", "!make lint")
-	if _, err := os.Stat(filepath.Join(root, ".claude/agents/reviewer.md")); !os.IsNotExist(err) {
-		t.Error("the Claude subagent original must give way to keystone's projection")
-	}
-	if !strings.Contains(readRel(t, root, ".claude/agents/keystone-reviewer.md"), "Review.") {
-		t.Error("keystone must project the converted subagent")
+	if got := readRel(t, root, ".claude/agents/reviewer.md"); got == overwriteFixture[".claude/agents/reviewer.md"] || !strings.Contains(got, "Review.") {
+		t.Errorf("keystone's projection must replace the original in place, under the same name:\n%s", got)
 	}
 	if readRel(t, root, ".cursor/rules/ts.mdc") != overwriteFixture[".cursor/rules/ts.mdc"] {
 		t.Error("cursor is not enabled: its original must stay untouched")

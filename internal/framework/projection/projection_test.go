@@ -76,9 +76,9 @@ func TestPlan_ClaudeCode(t *testing.T) {
 	}
 	want := map[string]Strategy{
 		".claude/skills/deploy":               Symlink,
-		".claude/rules/keystone-go-style.md":  Shim,
-		".claude/commands/keystone-verify.md": Shim,
-		".claude/agents/keystone-reviewer.md": Shim,
+		".claude/rules/go-style.md":  Shim,
+		".claude/commands/verify.md": Shim,
+		".claude/agents/reviewer.md": Shim,
 	}
 	if len(got) != len(want) {
 		t.Errorf("planned %v, want %v (the computational hook has no host file)", got, want)
@@ -142,7 +142,7 @@ func TestApply_RefusesUnownedPath(t *testing.T) {
 		t.Fatalf("expected refusal, got %v", err)
 	}
 	// Preflight: a refused plan writes nothing at all.
-	if _, err := os.Stat(filepath.Join(root, ".claude/commands/keystone-verify.md")); !os.IsNotExist(err) {
+	if _, err := os.Stat(filepath.Join(root, ".claude/commands/verify.md")); !os.IsNotExist(err) {
 		t.Errorf("refused apply must not write other outputs (err=%v)", err)
 	}
 	if got, _ := os.ReadFile(filepath.Join(root, ".claude/skills/deploy/SKILL.md")); string(got) != "mine\n" {
@@ -159,7 +159,7 @@ func TestApply_PrunesOnlyOwned(t *testing.T) {
 		t.Fatal(err)
 	}
 	second := apply(t, root, plan(t, root, ClaudeCode()), first.Owned)
-	if strings.Join(second.Pruned, ",") != ".claude/commands/keystone-verify.md" {
+	if strings.Join(second.Pruned, ",") != ".claude/commands/verify.md" {
 		t.Errorf("pruned %v, want only the removed command's shim", second.Pruned)
 	}
 	if _, err := os.Stat(filepath.Join(root, ".claude/skills/mine/SKILL.md")); err != nil {
@@ -172,7 +172,7 @@ func TestApply_PrunesOnlyOwned(t *testing.T) {
 // only with --overwrite.
 func TestApply_OverwriteOnlyWhenAsked(t *testing.T) {
 	root := seedCharter(t)
-	write(t, root, map[string]string{".claude/commands/keystone-verify.md": "stale\n"})
+	write(t, root, map[string]string{".claude/commands/verify.md": "stale\n"})
 	outs := plan(t, root, ClaudeCode())
 	if _, err := Apply(root, outs, nil, Options{Mode: LinkSymlink}); err == nil || !strings.Contains(err.Error(), "--overwrite") {
 		t.Fatalf("expected refusal naming --overwrite, got %v", err)
@@ -180,7 +180,7 @@ func TestApply_OverwriteOnlyWhenAsked(t *testing.T) {
 	if _, err := Apply(root, outs, nil, Options{Mode: LinkSymlink, Overwrite: true}); err != nil {
 		t.Fatal(err)
 	}
-	if got, _ := os.ReadFile(filepath.Join(root, ".claude/commands/keystone-verify.md")); string(got) == "stale\n" {
+	if got, _ := os.ReadFile(filepath.Join(root, ".claude/commands/verify.md")); string(got) == "stale\n" {
 		t.Error("--overwrite should replace the unowned file")
 	}
 }
@@ -203,7 +203,7 @@ func TestApply_CopyModeAndDrift(t *testing.T) {
 	}
 	write(t, root, map[string]string{
 		".claude/skills/deploy/SKILL.md":      "edited\n",
-		".claude/commands/keystone-verify.md": "edited\n",
+		".claude/commands/verify.md": "edited\n",
 	})
 	if d := Check(root, outs, LinkCopy); len(d) != 2 {
 		t.Errorf("want 2 drifts (edited copy + edited shim), got %v", d)
