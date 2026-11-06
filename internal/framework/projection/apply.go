@@ -16,6 +16,9 @@ type ApplyResult struct {
 	Wrote, Unchanged, Pruned []string
 	// Owned is the new ownership list to record in the lockfile.
 	Owned []string
+	// Managed is, per merged file, the entries keystone now manages there
+	// (lockfile managed_entries).
+	Managed map[string][]string
 }
 
 // Options controls Apply.
@@ -41,6 +44,7 @@ func Apply(projectDir string, outs []Output, owned []string, opts Options) (Appl
 		if o.Dest == "" {
 			continue
 		}
+		recordManaged(projectDir, o, &res)
 		changed, err := materialize(projectDir, o, opts)
 		if err != nil {
 			return res, fmt.Errorf("%s %s: %w", o.Host, o.Dest, err)
@@ -55,6 +59,19 @@ func Apply(projectDir string, outs []Output, owned []string, opts Options) (Appl
 	pruned, err := prune(projectDir, owned, toSet(res.Owned))
 	res.Pruned = pruned
 	return res, err
+}
+
+// recordManaged stores, before o is written, the entries keystone will
+// manage in o's merged file.
+func recordManaged(projectDir string, o Output, res *ApplyResult) {
+	if o.RecordFn == nil {
+		return
+	}
+	if res.Managed == nil {
+		res.Managed = map[string][]string{}
+	}
+	prev, _ := os.ReadFile(filepath.Join(projectDir, o.Dest))
+	res.Managed[o.Dest] = o.RecordFn(prev)
 }
 
 // preflight refuses the whole plan, before anything is written, when any
@@ -254,7 +271,7 @@ func prune(projectDir string, owned []string, keep map[string]bool) ([]string, e
 			continue
 		}
 		abs := filepath.Join(projectDir, rel)
-		if !exists(abs) {
+		if !exists(abs) || !insideProject(projectDir, abs) {
 			continue
 		}
 		if err := os.RemoveAll(abs); err != nil {
@@ -266,6 +283,18 @@ func prune(projectDir string, owned []string, keep map[string]bool) ([]string, e
 		pruned = append(pruned, rel)
 	}
 	return pruned, nil
+}
+
+// insideProject: abs's parent, with symlinks resolved, is still under
+// projectDir, so a symlinked host folder cannot aim RemoveAll outside it.
+func insideProject(projectDir, abs string) bool {
+	root, err1 := filepath.EvalSymlinks(projectDir)
+	parent, err2 := filepath.EvalSymlinks(filepath.Dir(abs))
+	if err1 != nil || err2 != nil {
+		return false
+	}
+	rel, err := filepath.Rel(root, parent)
+	return err == nil && filepath.IsLocal(rel)
 }
 
 // prunable guards prune against a tampered or corrupt lockfile: only a
@@ -298,14 +327,15 @@ func Check(projectDir string, outs []Output, mode LinkMode) []Drift {
 
 func checkOne(projectDir string, o Output, mode LinkMode) string {
 	dest := filepath.Join(projectDir, o.Dest)
+	if o.Strategy == Merge { // an absent file is fine when nothing merges in
+		return mergeDrift(dest, o.MergeFn)
+	}
 	if !exists(dest) {
 		return "missing — run `keystone project`"
 	}
 	switch effective(o, mode) {
 	case Block:
 		return blockDrift(dest, o.Content)
-	case Merge:
-		return mergeDrift(dest, o.MergeFn)
 	case Shim:
 		return shimDrift(projectDir, o, dest)
 	case Copy:

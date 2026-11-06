@@ -101,5 +101,9 @@
     ".cursor/skills/keystone-spec/SKILL.md",
     ".cursor/skills/keystone-synthesize/SKILL.md",
     ".cursor/skills/keystone-verify/SKILL.md"
-  ]
+  ],
+  "managed_entries": {
+    ".claude/settings.json": null,
+    ".cursor/cli.json": null
+  }
 }

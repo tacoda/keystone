@@ -95,6 +95,9 @@ type Profile struct {
 	// Hooks builds the host's hook bridge; nil means the host cannot run
 	// keystone hooks, which is reported rather than skipped.
 	Hooks HookBridge
+	// Permissions translates the charter's permission rules; nil means the
+	// host has no committed permission config, so every rule is reported.
+	Permissions PermissionBridge
 }
 
 // Output is one planned host artifact.
@@ -112,6 +115,11 @@ type Output struct {
 	// MergeFn returns the file's new bytes from its current bytes (nil when
 	// absent), for the Merge strategy. It must be pure and idempotent.
 	MergeFn func(prev []byte) ([]byte, error)
+	// RecordFn returns the entries keystone manages in a merged file after
+	// this run, from the file's bytes before it (lockfile managed_entries).
+	RecordFn func(prev []byte) []string
+	// Note explains a Report (e.g. which rules a host cannot enforce).
+	Note string
 }
 
 // Warning flags a plan-level concern, e.g. a host that will see the same
@@ -132,6 +140,12 @@ type PlanResult struct {
 // earlier in the slice are planned first, so a later host that reads an
 // earlier host's directory (Cursor and Copilot read .claude/) reuses it.
 func Plan(primitives []primitive.Primitive, hosts []Profile) PlanResult {
+	return PlanWithState(primitives, hosts, nil)
+}
+
+// PlanWithState is Plan with the merged-file entries keystone recorded on
+// the last run (lockfile managed_entries), so stale ones can be removed.
+func PlanWithState(primitives []primitive.Primitive, hosts []Profile, managed map[string][]string) PlanResult {
 	var outs []Output
 	located := map[string][]string{} // primitive key → repo-relative locations
 	for _, p := range primitives {
@@ -152,6 +166,7 @@ func Plan(primitives []primitive.Primitive, hosts []Profile) PlanResult {
 	outs = append(outs, RootOutputs(primitives, hosts)...)
 	hookOuts, hookWarns := hookOutputs(primitives, hosts)
 	outs = append(outs, hookOuts...)
+	outs = append(outs, permissionOutputs(primitives, hosts, managed)...)
 	return PlanResult{Outputs: outs, Warnings: append(duplicateWarnings(primitives, hosts, located), hookWarns...)}
 }
 

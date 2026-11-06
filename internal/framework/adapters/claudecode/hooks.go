@@ -135,7 +135,7 @@ func injectBridges(settings map[string]any, phases []string) int {
 				map[string]any{
 					"type":          "command",
 					"shell":         "bash",
-					"command":       "keystone hook fire " + phase + " --host claude-code",
+					"command":       "keystone hook fire " + phase + " --host claude-code || exit 2", // a missing or old binary still blocks
 					"statusMessage": HookEntryStatusPrefix + "bridge:" + phase,
 				},
 			},

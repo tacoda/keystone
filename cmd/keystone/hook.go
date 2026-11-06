@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"io"
 	"os"
@@ -9,6 +10,7 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/tacoda/keystone/internal/framework/config"
 	"github.com/tacoda/keystone/internal/framework/primitive"
@@ -42,6 +44,7 @@ func isHelpFlag(s string) bool { return s == "--help" || s == "-h" }
 // (phase / command / type) passed through to each hook as env vars.
 type hookFireOpts struct {
 	event, phase, command, typ, dir, host string
+	dirSet                                bool // --dir given: no upward search
 }
 
 // runHookFire selects every primitive subscribed (via `on:`) to the given
@@ -51,13 +54,32 @@ type hookFireOpts struct {
 // invoke an LLM itself, so the inferential side surfaces *what* to dispatch,
 // not the result. Shared by `keystone signal fire` and the `hook fire` alias.
 func runHookFire(args []string) error {
+	err := fireHooks(args)
+	if err != nil && hostPhaseArg(args) {
+		return exitError{code: 2, err: err} // the host blocks only on exit 2: fail closed
+	}
+	return err
+}
+
+// hostPhaseArg reports whether any argument names a host phase, so an error
+// raised before the event is parsed still blocks the host.
+func hostPhaseArg(args []string) bool {
+	for _, a := range args {
+		if primitive.IsHostPhase(a) {
+			return true
+		}
+	}
+	return false
+}
+
+func fireHooks(args []string) error {
 	opts, err := parseHookFire(args)
 	if err != nil {
 		return err
 	}
-	absDir, err := filepath.Abs(opts.dir)
+	absDir, err := charterDir(opts)
 	if err != nil {
-		return fmt.Errorf("resolve dir: %w", err)
+		return err
 	}
 	primitives, _, err := primitive.Walk(absDir, config.DefaultAgentsRoot)
 	if err != nil {
@@ -71,11 +93,33 @@ func runHookFire(args []string) error {
 	if failures == 0 {
 		return nil
 	}
-	err = fmt.Errorf("hook fire %s: %d hook(s) failed", opts.event, failures)
-	if primitive.IsHostPhase(opts.event) {
-		return exitError{code: 2, err: err} // the host blocks only on exit 2
+	return fmt.Errorf("hook fire %s: %d hook(s) failed", opts.event, failures)
+}
+
+// charterDir is --dir, or else the nearest directory at or above the cwd
+// that holds the charter: a host may run the bridge from a subdirectory.
+// A host phase with no charter found is an error (so it blocks), never a
+// silent zero-hook pass.
+func charterDir(opts hookFireOpts) (string, error) {
+	start, err := filepath.Abs(opts.dir)
+	if err != nil {
+		return "", fmt.Errorf("resolve dir: %w", err)
 	}
-	return err
+	if opts.dirSet {
+		return start, nil
+	}
+	for d := start; ; d = filepath.Dir(d) {
+		if info, err := os.Stat(filepath.Join(d, config.DefaultAgentsRoot)); err == nil && info.IsDir() {
+			return d, nil
+		}
+		if filepath.Dir(d) == d {
+			break
+		}
+	}
+	if primitive.IsHostPhase(opts.event) {
+		return "", fmt.Errorf("no %s/ found at or above %s", config.DefaultAgentsRoot, start)
+	}
+	return start, nil
 }
 
 // hostPayload reads the host's event JSON from stdin (tool name, tool input,
@@ -109,6 +153,7 @@ func parseHookFire(args []string) (hookFireOpts, error) {
 				return opts, fmt.Errorf("flag %s requires a value", a)
 			}
 			*dst = args[i+1]
+			opts.dirSet = opts.dirSet || a == "--dir"
 			i++
 		case strings.HasPrefix(a, "-"):
 			return opts, fmt.Errorf("unknown flag %s", a)
@@ -179,14 +224,34 @@ func runComputationalHooks(absDir string, hooks []primitive.Primitive, opts hook
 // runOneHook runs h's `run:` with the fire context in its env and the host
 // payload on stdin.
 func runOneHook(absDir string, h primitive.Primitive, opts hookFireOpts, payload []byte) hookResult {
-	cmd := exec.Command("bash", "-c", h.Run)
+	ctx, cancel := hookContext(opts)
+	defer cancel()
+	cmd := exec.CommandContext(ctx, "bash", "-c", h.Run)
+	cmd.WaitDelay = time.Second // a killed bash's children may hold the output pipe open
 	cmd.Dir = absDir
 	cmd.Env = append(os.Environ(), hookEnv(opts)...)
 	if payload != nil {
 		cmd.Stdin = bytes.NewReader(payload)
 	}
 	out, err := cmd.CombinedOutput()
+	if ctx.Err() != nil {
+		err = fmt.Errorf("timed out after %s", hostHookTimeout)
+	}
 	return hookResult{id: h.ID, out: strings.TrimSpace(string(out)), err: err}
+}
+
+// hostHookTimeout ends a host-phase hook before the host's own timeout
+// (Claude Code: 60s), which the host treats as a non-blocking error. A hit
+// counts as a failure, so it blocks. ponytail: fixed; make it per-hook if a
+// real check needs longer.
+const hostHookTimeout = 50 * time.Second
+
+// hookContext bounds a host-phase hook; keystone-fired signals run unbounded.
+func hookContext(opts hookFireOpts) (context.Context, context.CancelFunc) {
+	if primitive.IsHostPhase(opts.event) {
+		return context.WithTimeout(context.Background(), hostHookTimeout)
+	}
+	return context.WithCancel(context.Background())
 }
 
 func hookEnv(opts hookFireOpts) []string {

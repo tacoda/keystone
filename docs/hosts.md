@@ -108,3 +108,13 @@ to save always-loaded context. Skills are byte-identical, so they link.
 - Duplicate-name handling when a host sees the same skill in two directories.
 - Cline workflow, subagent, and hook file formats.
 - opencode v2 changes.
+- Cursor hooks: whether `failClosed` is a real key, whether exit 2 blocks,
+  and whether keystone's plain-text stdout must be the host's deny JSON.
+  Until confirmed, the Cursor bridge may be written and still not block.
+  The Copilot claim that a non-zero `preToolUse` exit denies the call is
+  also unverified.
+- Cursor `Read(...)` / `Write(...)` glob semantics. Keystone translates
+  only project-relative paths; Claude's `/`, `//`, and `~/` anchors are
+  reported instead.
+- Whether the Cursor hook `command` runs through a shell. If it does, the
+  bridge can take `|| exit 2` like Claude Code and Copilot.

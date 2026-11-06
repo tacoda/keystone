@@ -14,7 +14,6 @@ import (
 	"github.com/fsnotify/fsnotify"
 	"github.com/spf13/cobra"
 
-	"github.com/tacoda/keystone/internal/framework/adapters/claudecode"
 	"github.com/tacoda/keystone/internal/framework/config"
 	"github.com/tacoda/keystone/internal/framework/primitive"
 )
@@ -192,7 +191,6 @@ func runPipeline(ctx context.Context, projectDir string, doLint, doProject bool)
 		} else {
 			fmt.Fprint(os.Stdout, ", projections refreshed")
 		}
-		runWatchAdapters(projectDir, primitives)
 	}
 	if doLint {
 		findings := primitive.Lint(primitives)
@@ -209,19 +207,4 @@ func runPipeline(ctx context.Context, projectDir string, doLint, doProject bool)
 		}
 	}
 	fmt.Fprintf(os.Stdout, ") in %s\n", time.Since(t0).Round(time.Millisecond))
-}
-
-// runWatchAdapters re-projects the Claude Code settings.json regions, the
-// one host surface not yet on the projection engine (Phase 5). Root files
-// (AGENTS.md, CLAUDE.md, .aider.conf.yml) come from projectHosts.
-func runWatchAdapters(projectDir string, primitives []primitive.Primitive) {
-	watchClaudeCode(projectDir, primitives)
-}
-
-// watchClaudeCode re-projects the Claude Code settings.json regions (hooks +
-// posture) during a watch cycle, logging failures to stderr without aborting.
-func watchClaudeCode(projectDir string, primitives []primitive.Primitive) {
-	if _, err := claudecode.ProjectPosture(projectDir, primitives); err != nil {
-		fmt.Fprintf(os.Stderr, "; ✗ claudecode posture: %v", err)
-	}
 }

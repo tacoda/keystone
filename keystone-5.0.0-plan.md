@@ -548,3 +548,57 @@ agent loads. 5.0 measures the load.
   projection/hooks.go accepted (event and path names).
   Open: Codex bridge once its hooks.json shape is verified; payload
   passing to the opencode plugin.
+- Phase 5b: done. Canonical permission rules (Claude
+  syntax) translated per host. Claude Code: identical, merged into
+  settings.json. Cursor: `.cursor/cli.json` allow/deny — `Bash` only for a
+  single command word (`Shell(cmd)`), `Read`, `Edit|Write → Write`,
+  `WebFetch(domain:x)`; no `ask` in Cursor, so ask rules are reported.
+  Codex: owned `.codex/rules/keystone.rules` prefix rules; an exact-command
+  allow is not translated (a prefix would broaden it), an exact deny/ask
+  may be (stricter). opencode: reported for now — `permission.bash` is
+  last-match-wins, so a correct merge must preserve JSON key order; pending
+  an order-preserving merge. Copilot / Goose / Pi / Cline / Continue / Aider:
+  reported (no committed permission config). Every untranslated rule is
+  listed by `keystone project` and counted in AGENTS.md per host — never
+  dropped silently. Shared-file merges record keystone's own entries in the
+  lockfile (`managed_entries`): a rule dropped from the charter is removed,
+  a user's identical entry is kept, and a no-op merge never rewrites the
+  file. The old Claude Code posture projection was additive only (a removed
+  allow lingered); it is replaced. Caught by tests: Claude Code and Cursor
+  permission bridges were not wired (a gofmt-alignment miss), which would
+  have reported every rule instead of enforcing it — now guarded by a test.
+- Phase 5c: done. A security review of the Phase 5 diff found 12 issues;
+  each one was checked against the code. Fixed:
+  - `hook fire` failed open on any error before the hooks ran. A bad flag,
+    an older binary that rejects `--host`, and a walk error all exited 1,
+    which hosts treat as non-blocking. Every error on a host phase now
+    exits 2. The Claude Code and Copilot bridges add `|| exit 2`, so a
+    missing binary also blocks.
+  - `hook fire` read the charter relative to cwd, so a bridge run from a
+    subdirectory found no hooks and passed. It now searches upward for
+    `.agents/`. A host phase with no charter exits 2.
+  - Host-phase hooks had no timeout. A hung check reached the host's
+    timeout, which the host treats as non-blocking. They now stop at 50s
+    and count as a failure.
+  - Cursor: an exact allow `Bash(ls)` became `Shell(ls)`, which allows any
+    arguments. Only a `cmd:*` allow translates now.
+  - A wildcard in the middle of a spec (`Bash(curl *)`) became a literal
+    `*` token, so the Codex deny matched nothing. Such rules are now
+    reported on every host.
+  - `Read` and `Write` paths with Claude's `/`, `//`, and `~/` anchors
+    were passed to Cursor unchanged. They are now reported.
+  - Managed entries were lost when apply failed after a merge, and a host
+    removed from `adapters` kept keystone's allows forever. The record is
+    now saved on the error path, and a disabled host's recorded entries
+    are stripped.
+  - The opencode plugin now passes the event input on stdin.
+  - Prune refuses a path whose parent resolves outside the project
+    through a symlink.
+  - Lint warns when an inferential hook binds a host event, because it
+    cannot block there.
+  Accepted: a user's own entry that starts with `keystone hook fire ` in
+  `.cursor/hooks.json` is treated as keystone's. A host removed from
+  `adapters` keeps keystone's hook-bridge entries in its shared file;
+  that keeps checks running, so it fails safe. Unverified, listed in
+  docs/hosts.md: Cursor `failClosed`, exit-2, and stdout semantics; Cursor
+  path globs; the Copilot deny-on-non-zero claim.

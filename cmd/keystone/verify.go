@@ -120,7 +120,11 @@ func checkProjectionDrift(absDir string) error {
 		return err
 	}
 	composed, _ := primitive.Compose(prims)
-	pr, mode := planHosts(absDir, composed)
+	lf, err := lockfile.Read(absDir)
+	if err != nil {
+		return err
+	}
+	pr, mode := planHosts(absDir, composed, lf.ManagedEntries)
 	drifts := projection.Check(absDir, pr.Outputs, mode)
 	if len(drifts) == 0 {
 		return nil

@@ -205,6 +205,9 @@ func lintSensorContract(p Primitive, add func(FindingSeverity, string)) {
 	if strings.TrimSpace(p.Returns) == "" {
 		add(FindingError, "inferential hook missing `returns:` — declare the structured-result verdict schema")
 	}
+	if IsHostPhase(strings.TrimSpace(p.Event)) {
+		add(FindingWarning, "inferential hook on host event "+p.Event+" cannot block — keystone only lists the agent to spawn; use a `run:` check to gate")
+	}
 }
 
 // lintGuideKind validates a guide: its `tier:`, plus the computational

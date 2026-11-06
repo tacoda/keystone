@@ -20,21 +20,37 @@ func projectHosts(absDir string, primitives []primitive.Primitive, w io.Writer, 
 	if w == nil {
 		w = io.Discard
 	}
-	pr, mode := planHosts(absDir, primitives)
 	lf, err := lockfile.Read(absDir)
 	if err != nil {
 		return projection.ApplyResult{}, err
 	}
-	res, err := projection.Apply(absDir, pr.Outputs, lf.Projections, projection.Options{Mode: mode, Overwrite: overwrite})
-	if err != nil {
-		return res, err
+	pr, mode := planHosts(absDir, primitives, lf.ManagedEntries)
+	res, applyErr := projection.Apply(absDir, pr.Outputs, lf.Projections, projection.Options{Mode: mode, Overwrite: overwrite})
+	if applyErr == nil {
+		lf.Projections = res.Owned
 	}
-	lf.Projections = res.Owned
-	if err := lockfile.Write(absDir, lf); err != nil {
-		return res, err
+	// Record merged entries even when a later write failed: an entry keystone
+	// added but did not record would look like the user's and never leave.
+	if applyErr == nil || len(res.Managed) > 0 {
+		recordManaged(lf, res.Managed)
+		if err := lockfile.Write(absDir, lf); err != nil {
+			return res, err
+		}
+	}
+	if applyErr != nil {
+		return res, applyErr
 	}
 	printProjection(w, res, pr)
 	return res, nil
+}
+
+func recordManaged(lf *lockfile.Lockfile, managed map[string][]string) {
+	for dest, entries := range managed {
+		if lf.ManagedEntries == nil {
+			lf.ManagedEntries = map[string][]string{}
+		}
+		lf.ManagedEntries[dest] = entries
+	}
 }
 
 // printProjection logs what changed, every constraint a host cannot
@@ -49,6 +65,9 @@ func printProjection(w io.Writer, res projection.ApplyResult, pr projection.Plan
 	for _, o := range pr.Outputs {
 		if o.Strategy == projection.Report {
 			fmt.Fprintf(w, "  ⚠ %s cannot enforce %ss — %s\n", o.Host, o.Kind, projection.ReportAdvice(o.Kind))
+			if o.Note != "" {
+				fmt.Fprintf(w, "      %s\n", o.Note)
+			}
 		}
 	}
 	for _, x := range pr.Warnings {
@@ -58,7 +77,7 @@ func printProjection(w io.Writer, res projection.ApplyResult, pr projection.Plan
 
 // planHosts builds the projection plan for the project's enabled hosts
 // (keystone.json `adapters`) and its configured link mode.
-func planHosts(absDir string, primitives []primitive.Primitive) (projection.PlanResult, projection.LinkMode) {
+func planHosts(absDir string, primitives []primitive.Primitive, managed map[string][]string) (projection.PlanResult, projection.LinkMode) {
 	cfg, err := config.ReadProjectConfig(absDir)
 	if err != nil && !errors.Is(err, os.ErrNotExist) {
 		fmt.Fprintf(os.Stderr, "keystone: read keystone.json: %v\n", err)
@@ -68,5 +87,5 @@ func planHosts(absDir string, primitives []primitive.Primitive) (projection.Plan
 	if cfg != nil {
 		linkMode, adapters = cfg.LinkMode, cfg.Adapters
 	}
-	return projection.Plan(primitives, projection.Enabled(adapters)), projection.ResolveLinkMode(linkMode)
+	return projection.PlanWithState(primitives, projection.Enabled(adapters), managed), projection.ResolveLinkMode(linkMode)
 }

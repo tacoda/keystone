@@ -223,3 +223,19 @@ func TestPrunable(t *testing.T) {
 		}
 	}
 }
+
+// TestPrune_SymlinkEscape — an owned path under a symlinked host folder that
+// points outside the project is never removed.
+func TestPrune_SymlinkEscape(t *testing.T) {
+	root, outside := t.TempDir(), t.TempDir()
+	write(t, outside, map[string]string{"victim.md": "keep"})
+	if err := os.Symlink(outside, filepath.Join(root, ".claude")); err != nil {
+		t.Fatal(err)
+	}
+	if pruned, _ := prune(root, []string{".claude/victim.md"}, nil); len(pruned) != 0 {
+		t.Errorf("pruned through a symlink: %v", pruned)
+	}
+	if _, err := os.Stat(filepath.Join(outside, "victim.md")); err != nil {
+		t.Error("file outside the project was removed")
+	}
+}

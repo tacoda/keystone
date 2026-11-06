@@ -16,8 +16,8 @@ func TestHookBridges_PerHost(t *testing.T) {
 	}
 	assertContains(t, root, ".claude/settings.json", `"Stop"`, "keystone hook fire Stop --host claude-code")
 	assertContains(t, root, ".cursor/hooks.json", `"stop"`, "./mine.sh", "keystone hook fire Stop --host cursor", `"failClosed": true`)
-	assertContains(t, root, ".github/hooks/keystone.json", `"agentStop"`, `"bash": "keystone hook fire Stop --host github-copilot"`)
-	assertContains(t, root, ".opencode/plugins/keystone.js", `"session.idle"`, "keystone hook fire Stop --host opencode")
+	assertContains(t, root, ".github/hooks/keystone.json", `"agentStop"`, `"bash": "keystone hook fire Stop --host github-copilot || exit 2"`)
+	assertContains(t, root, ".opencode/plugins/keystone.js", `"session.idle"`, "keystone hook fire Stop --host opencode < ${new Response(JSON.stringify(input))}")
 	reported := reportedHosts(pr.Outputs, "hook")
 	for _, h := range []string{"continue", "codex", "cline", "goose", "pi", "aider"} {
 		if !reported[h] {

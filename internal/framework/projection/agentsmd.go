@@ -150,13 +150,29 @@ func appliesEverywhere(p primitive.Primitive) bool {
 func writeHosts(b *strings.Builder, primitives []primitive.Primitive, hosts []Profile) {
 	b.WriteString("\n## On each host\n\n")
 	hooksOnHostEvents := len(claudecode.HostPhases(primitives)) > 0
+	rules := CollectRules(primitives)
 	for _, h := range hosts {
 		line := hostLine(h)
 		if hooksOnHostEvents && h.Hooks == nil {
 			line += "; does **not** run hooks — " + ReportAdvice(string(primitive.KindHook))
 		}
+		if n := unenforcedRules(h, rules); n > 0 {
+			line += fmt.Sprintf("; does **not** enforce %d permission rule(s) — %s", n, ReportAdvice(string(primitive.KindPermission)))
+		}
 		b.WriteString(line + ".\n")
 	}
+}
+
+// unenforcedRules counts the charter's permission rules host h cannot express.
+func unenforcedRules(h Profile, r Rules) int {
+	if r.empty() {
+		return 0
+	}
+	if h.Permissions == nil {
+		return len(allRules(r))
+	}
+	_, unsupported := h.Permissions(r, nil)
+	return len(unsupported)
 }
 
 // ReportAdvice is what the agent must do itself when a host cannot enforce

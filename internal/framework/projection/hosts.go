@@ -32,8 +32,9 @@ var (
 func ClaudeCode() Profile {
 	shim := Rule{Strategy: Shim, Dest: primitive.ProjectionRelPath}
 	return Profile{
-		Host:  "claude-code",
-		Hooks: claudeHooks,
+		Host:        "claude-code",
+		Hooks:       claudeHooks,
+		Permissions: claudePermissions,
 		Rules: map[primitive.Kind]Rule{
 			skillK:    {Strategy: Symlink, Dest: skillDirDest(".claude/skills"), Target: skillDir},
 			ruleK:     shim,
@@ -68,8 +69,9 @@ type userSkill struct {
 // into skills, so a command projects as a user-invoked skill.
 func Cursor() Profile {
 	return Profile{
-		Host:  "cursor",
-		Hooks: cursorHooks,
+		Host:        "cursor",
+		Hooks:       cursorHooks,
+		Permissions: cursorPermissions,
 		Rules: map[primitive.Kind]Rule{
 			skillK: native,
 			ruleK: {Strategy: Shim, Dest: pathRuleDest(".cursor/rules", ".mdc"), Render: ruleRenderer(func(p primitive.Primitive) any {
@@ -191,7 +193,8 @@ func OpenCode() Profile {
 // rules, so both are indexed. Subagents are TOML.
 func Codex() Profile {
 	return Profile{
-		Host: "codex",
+		Host:        "codex",
+		Permissions: codexPermissions,
 		Rules: map[primitive.Kind]Rule{
 			skillK:    native,
 			ruleK:     index,

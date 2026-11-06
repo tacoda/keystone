@@ -6,7 +6,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/tacoda/keystone/internal/framework/adapters/claudecode"
 	"github.com/tacoda/keystone/internal/framework/config"
 	"github.com/tacoda/keystone/internal/framework/primitive"
 )
@@ -70,21 +69,6 @@ func runProject(args []string) error {
 	fmt.Fprintf(os.Stdout, "✓ keystone project — %d written, %d unchanged, %d pruned\n",
 		len(res.Wrote), len(res.Unchanged), len(res.Pruned))
 
-	// Claude Code adapter: hooks + posture regions in .claude/settings.json
-	// (Phase 5 moves these onto the projection engine).
-	return projectClaudeCode(absDir, primitives)
-}
-
-// projectClaudeCode emits the two Claude Code settings.json regions: the
-// managed hooks block and the posture-derived permissions block.
-func projectClaudeCode(absDir string, primitives []primitive.Primitive) error {
-	pres, err := claudecode.ProjectPosture(absDir, primitives)
-	if err != nil {
-		return fmt.Errorf("claudecode posture: %w", err)
-	}
-	if pres.Wrote {
-		fmt.Fprintf(os.Stdout, "  wrote: %s (+%d permission(s))\n", pres.Path, pres.Added)
-	}
 	return nil
 }
 

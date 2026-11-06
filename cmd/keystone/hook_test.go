@@ -99,3 +99,41 @@ func TestRunComputationalHooks_PassesPayload(t *testing.T) {
 		t.Error("without a payload the grep should fail")
 	}
 }
+
+// TestHookFire_FailsClosed — on a host phase, every error before the hooks
+// run exits 2, and the charter is found from a subdirectory.
+func TestHookFire_FailsClosed(t *testing.T) {
+	root := t.TempDir()
+	seedHook(t, root, "deny", "---\nkind: hook\nid: deny\ndescription: x\nmode: computational\nevent: PreToolUse\nrun: \"exit 1\"\n---\n")
+	if code := exitCode(runHookFire([]string{"PreToolUse", "--bogus"})); code != 2 {
+		t.Errorf("bad flag on a host phase: exit %d, want 2", code)
+	}
+	if err := runHookFire([]string{"PreToolUse", "--dir", t.TempDir()}); err != nil {
+		t.Errorf("explicit --dir with no charter has no hooks: %v", err)
+	}
+	sub := filepath.Join(root, "a", "b")
+	if err := os.MkdirAll(sub, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	t.Chdir(sub)
+	if code := exitCode(runHookFire([]string{"PreToolUse"})); code != 2 {
+		t.Errorf("hook in the charter above cwd must run and block: exit %d, want 2", code)
+	}
+	t.Chdir(t.TempDir())
+	if code := exitCode(runHookFire([]string{"PreToolUse"})); code != 2 {
+		t.Errorf("no charter found on a host phase: exit %d, want 2", code)
+	}
+}
+
+func TestHookContext_BoundsHostPhases(t *testing.T) {
+	ctx, cancel := hookContext(hookFireOpts{event: "PreToolUse"})
+	defer cancel()
+	if _, ok := ctx.Deadline(); !ok {
+		t.Error("host-phase hooks need a deadline below the host's timeout")
+	}
+	sig, cancel2 := hookContext(hookFireOpts{event: "pre-verify"})
+	defer cancel2()
+	if _, ok := sig.Deadline(); ok {
+		t.Error("keystone-fired signals run unbounded")
+	}
+}

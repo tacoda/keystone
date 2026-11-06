@@ -4,7 +4,7 @@
       {
         "hooks": [
           {
-            "command": "keystone hook fire PostToolUse --host claude-code",
+            "command": "keystone hook fire PostToolUse --host claude-code || exit 2",
             "shell": "bash",
             "statusMessage": "keystone:bridge:PostToolUse",
             "type": "command"
@@ -17,7 +17,7 @@
       {
         "hooks": [
           {
-            "command": "keystone hook fire PreToolUse --host claude-code",
+            "command": "keystone hook fire PreToolUse --host claude-code || exit 2",
             "shell": "bash",
             "statusMessage": "keystone:bridge:PreToolUse",
             "type": "command"
@@ -30,7 +30,7 @@
       {
         "hooks": [
           {
-            "command": "keystone hook fire Stop --host claude-code",
+            "command": "keystone hook fire Stop --host claude-code || exit 2",
             "shell": "bash",
             "statusMessage": "keystone:bridge:Stop",
             "type": "command"

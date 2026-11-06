@@ -34,7 +34,7 @@ func TestProjectHooks_BridgePerHostPhase(t *testing.T) {
 	s := string(data)
 	for _, want := range []string{
 		`"PreToolUse"`,
-		`"command": "keystone hook fire PreToolUse --host claude-code"`,
+		`"command": "keystone hook fire PreToolUse --host claude-code || exit 2"`,
 		`"statusMessage": "keystone:bridge:PreToolUse"`,
 	} {
 		if !strings.Contains(s, want) {

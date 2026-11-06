@@ -75,6 +75,11 @@ type Lockfile struct {
 	// (repo-relative, sorted). Prune removes only these; anything else
 	// under a host directory belongs to the user.
 	Projections []string `json:"projections,omitempty"`
+	// ManagedEntries records, per shared config file keystone merges into
+	// (.claude/settings.json, .cursor/cli.json), the entries it added —
+	// "bucket:entry" — so a rule dropped from the charter is removed there
+	// while the user's own identical entries are kept.
+	ManagedEntries map[string][]string `json:"managed_entries,omitempty"`
 }
 
 // Read loads the lockfile at <installDir>/.keystone/lockfile.json,
