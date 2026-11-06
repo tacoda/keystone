@@ -48,4 +48,4 @@ enough information.
   speculatively. Stage 1 covers most work; corpus is a refinement;
   external sources are an escape hatch.
 
-For reasoning, see [`corpus/process/runtime-resolution.md`](corpus/process/runtime-resolution.md).
+For reasoning, see [`corpus/process/runtime-resolution.md`](../../references/process/runtime-resolution.md).

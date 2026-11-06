@@ -9,9 +9,9 @@ Cline and Roo Code are VS Code extensions that present a chat-driven agent with 
 - The **custom instructions** field configured in the extension settings (`cline.customInstructions` / `rooCode.customInstructions`). This is the always-loaded menu.
 - **`.clinerules`** (Cline) or **`.roorules`** (Roo Code) at the repo root — auto-loaded from the workspace. Newer Cline versions read `.clinerules` natively; older ones rely entirely on the settings field. The charter ships both.
 
-Every action is invoked via natural language: "run task on TICKET-123," "run verify," "do a review pass." The agent finds the action in the menu's bulleted list, follows the link to `charter/actions/<action>.md`, and executes the playbook. Users who want a one-click trigger can save the canonical phrase as a Cline workflow (saved prompts triggered from the side panel).
+Every action is invoked via natural language: "run task on TICKET-123," "run verify," "do a review pass." The agent finds the action in the menu's bulleted list, follows the link to `.agents/commands/<action>.md`, and executes the playbook. Users who want a one-click trigger can save the canonical phrase as a Cline workflow (saved prompts triggered from the side panel).
 
-The canonical kickoff phrase is **"run task on `<ticket-id>`"** (or "run the task workflow") — `charter/actions/task.md` orchestrates `spec → orient → implementation → check-drift → verify → review`.
+The canonical kickoff phrase is **"run task on `<ticket-id>`"** (or "run the task workflow") — `.agents/commands/task.md` orchestrates `spec → orient → implementation → check-drift → verify → review`.
 
 ## Cline's Plan / Act modes vs. charter modes
 

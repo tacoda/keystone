@@ -1,6 +1,6 @@
 # Project Charter
 
-This is the project's charter — a body of engineering knowledge, rules, sensors, and self-update flywheels, plus per-agent bindings. The charter is project-owned: every file under `.charter/` is versioned with the code and may be edited freely by the team.
+This is the project's charter — a body of engineering knowledge, rules, sensors, and self-update flywheels, plus per-agent bindings. The charter is project-owned: every file under `.agents/` is versioned with the code and may be edited freely by the team.
 
 ## Twelve primitive kinds in two layers
 
@@ -10,14 +10,14 @@ Every authored file declares a `kind:` in its frontmatter. Twelve kinds, split i
 
 | Kind | What it is | Wraps | Projection | Activation |
 |---|---|---|---|---|
-| [`guide`](guides/README.md) | **Rules** the agent must follow. Severity-tiered. | `rule` (conceptual — INDEX-only, no file projection) | — | **Ambient** — always loaded. Enforced by the [drift sensor](sensors/drift.md). |
-| [`sensor`](sensors/README.md) | **Automated checks** — lint, type-check, test, build, drift, the review reviewers. Fire inside actions at phase boundaries. | `rule` (conceptual) | — | Invoked |
-| [`action`](actions/README.md) | One unit of lifecycle work — `spec`, `verify`, `review`. The substance of a slash command. | `command` | `.claude/commands/<id>.md` | Invoked |
-| [`playbook`](playbooks/README.md) | Ordered chain of actions — the default `task` playbook walks the lifecycle. Surface for slash commands. | `skill` | `.claude/skills/<id>/SKILL.md` | Invoked via host slash command |
-| [`persona`](personas/README.md) | Posture-flavored delegated agent — `security-reviewer`, `code-reviewer`, `planner`, `verifier`. Frontmatter requires `tools:`. | `subagent` | `.claude/agents/<id>.md` | Invoked by name via the host's Task / agent mechanism |
-| [`corpus`](corpus/README.md) | **Informational reference** the agent reads when rules aren't enough. | (standalone) | — | **On-demand** — reached via a guide's `traces:` |
+| [`guide`](rules/README.md) | **Rules** the agent must follow. Severity-tiered. | `rule` (conceptual — INDEX-only, no file projection) | — | **Ambient** — always loaded. Enforced by the [drift sensor](hooks/drift.md). |
+| [`sensor`](hooks/) | **Automated checks** — lint, type-check, test, build, drift, the review reviewers. Fire inside actions at phase boundaries. | `rule` (conceptual) | — | Invoked |
+| [`action`](commands/README.md) | One unit of lifecycle work — `spec`, `verify`, `review`. The substance of a slash command. | `command` | `.claude/commands/<id>.md` | Invoked |
+| [`playbook`](skills/README.md) | Ordered chain of actions — the default `task` playbook walks the lifecycle. Surface for slash commands. | `skill` | `.claude/skills/<id>/SKILL.md` | Invoked via host slash command |
+| [`persona`](agents/README.md) | Posture-flavored delegated agent — `security-reviewer`, `code-reviewer`, `planner`, `verifier`. Frontmatter requires `tools:`. | `subagent` | `.claude/agents/<id>.md` | Invoked by name via the host's Task / agent mechanism |
+| [`corpus`](references/README.md) | **Informational reference** the agent reads when rules aren't enough. | (standalone) | — | **On-demand** — reached via a guide's `traces:` |
 | [`eval`](evals/README.md) | Fixture-based regression test for the charter. Static + sensor levels. | (standalone) | — | Invoked via `keystone eval run` |
-| [`source`](sources/README.md) | External knowledge source declared in `.keystone/context.json` for stage-3 resolution. | (standalone) | — | On-demand via MCP / dashboard |
+| [`source`](../.keystone/sources/README.md) | External knowledge source declared in `.keystone/context.json` for stage-3 resolution. | (standalone) | — | On-demand via MCP / dashboard |
 
 ### Agent layer (escape hatches)
 
@@ -36,12 +36,12 @@ A framework wrapper and its agent counterpart share the same `.claude/` target. 
 
 | Path | Role |
 |---|---|
-| [`learning/`](learning/README.md) + [`archive/`](archive/README.md) | **Flywheels** — additive (Learning) and subtractive (Pruning) loops that keep corpus + guides current. Driven by **synthesize** + **audit**. |
-| [`adapters/<agent>/`](adapters/README.md) | Per-agent bindings that wire lifecycle actions into that agent's invocation mechanism. |
+| [`learning/`](../.keystone/learning/README.md) + [`archive/`](../.keystone/archive/README.md) | **Flywheels** — additive (Learning) and subtractive (Pruning) loops that keep corpus + guides current. Driven by **synthesize** + **audit**. |
+| [`adapters/<agent>/`](../.keystone/hosts/README.md) | Per-agent bindings that wire lifecycle actions into that agent's invocation mechanism. |
 
 ### Extension: [`policies/`](../keystone.json) — vendored shared governance
 
-The distribution layer. **Policies** are distributable charter content fetched from git and vendored read-only into `.charter/policies/<name>/`. Each policy has the same shape as the project layer — every primitive kind above is shippable. Use policies for anything reusable across projects: org / team baselines, security policy, release gates, vendor allowlists, language-idiom bundles, compliance regimes.
+The distribution layer. **Policies** are distributable charter content fetched from git and vendored read-only into `.keystone/policies/<name>/`. Each policy has the same shape as the project layer — every primitive kind above is shippable. Use policies for anything reusable across projects: org / team baselines, security policy, release gates, vendor allowlists, language-idiom bundles, compliance regimes.
 
 Policies are declared in `keystone.json` and pinned by version. The project layer always wins by default; among policies, deeper-nested policies refine shallower ones. A policy can mark an item `strict` to lock it absolutely — nothing else (project or other policy) can override a strict item.
 
@@ -63,10 +63,10 @@ For each principle, idiom, or domain concern, the corpus file and the guide file
 | Layer | Corpus (info) | Guides (rules) |
 |---|---|---|
 | Principles | [`corpus/principles/`](corpus/principles/) | [`guides/principles/`](guides/principles/) |
-| Idioms | [`corpus/idioms/`](corpus/idioms/README.md) | [`guides/idioms/`](guides/idioms/README.md) |
-| Domain | [`corpus/domain/`](corpus/domain/README.md) | [`guides/domain/`](guides/domain/README.md) |
-| State | [`corpus/state/`](corpus/state/README.md) | (no rules — state is empirical) |
-| Process | (no explanatory corpus — process is prescriptive) | [`guides/process/`](guides/process/README.md) |
+| Idioms | [`corpus/idioms/`](references/idioms/README.md) | [`guides/idioms/`](rules/idioms/README.md) |
+| Domain | [`corpus/domain/`](references/domain/README.md) | [`guides/domain/`](rules/domain/README.md) |
+| State | [`corpus/state/`](references/state/README.md) | (no rules — state is empirical) |
+| Process | (no explanatory corpus — process is prescriptive) | [`guides/process/`](rules/process/README.md) |
 
 ## Assumptions
 
@@ -109,7 +109,7 @@ Invoked by the user:
 - **synthesize** — promote inbox items into the right corpus and/or guide.
 - **mode** — set pacing mode.
 
-**Every action is invoked via natural language.** The agent reads its menu file at session start, finds the action in the bulleted list, follows the link to `actions/<action>.md`, and executes the playbook. The canonical kickoff phrase for end-to-end work is **"run task on `<ticket-id>`"** — see [`actions/task.md`](actions/task.md). Per-agent specifics (sensor execution model, sub-agent parallelism, MCP integration) live in `adapters/<your-agent>/lifecycle.md`; if your agent is not listed, see `adapters/_generic/`.
+**Every action is invoked via natural language.** The agent reads its menu file at session start, finds the action in the bulleted list, follows the link to `actions/<action>.md`, and executes the playbook. The canonical kickoff phrase for end-to-end work is **"run task on `<ticket-id>`"** — see [`actions/task.md`](skills/task/SKILL.md). Per-agent specifics (sensor execution model, sub-agent parallelism, MCP integration) live in `adapters/<your-agent>/lifecycle.md`; if your agent is not listed, see `adapters/_generic/`.
 
 ## Iron laws
 

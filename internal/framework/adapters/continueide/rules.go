@@ -1,3 +1,6 @@
+// FROZEN: used only by the v2.x migrations. Live projection (5.0+) is
+// internal/framework/projection (Continue profile).
+//
 // Package continueide projects keystone's idiom guides into the
 // Continue IDE extension's rule layout. Package name is `continueide`
 // (not `continue` — `continue` is a Go keyword and would conflict).

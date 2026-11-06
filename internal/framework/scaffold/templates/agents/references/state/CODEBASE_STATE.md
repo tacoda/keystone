@@ -63,7 +63,7 @@ Inventory of sensors wired up for this project. Filled in by **bootstrap**. A se
 
 ## Guides
 
-Inferential guides (markdown rules) are activated by directory — see `charter/guides/`. The table below tracks **computational guides** the bootstrap action detected. Filled in by **bootstrap**.
+Inferential guides (markdown rules) are activated by directory — see `.agents/rules/`. The table below tracks **computational guides** the bootstrap action detected. Filled in by **bootstrap**.
 
 | Tool | Kind | What it covers | Activation |
 |---|---|---|---|
@@ -73,7 +73,7 @@ Inferential guides (markdown rules) are activated by directory — see `charter/
 
 | Stack | Idiom folder | Region(s) |
 |---|---|---|
-| `<stack-name>` | `charter/corpus/idioms/<stack-name>/` (+ paired `charter/guides/idioms/<stack-name>/`) | `<paths>` |
+| `<stack-name>` | `.agents/references/idioms/<stack-name>/` (+ paired `.agents/rules/idioms/<stack-name>/`) | `<paths>` |
 
 ## Frameworks & libraries
 

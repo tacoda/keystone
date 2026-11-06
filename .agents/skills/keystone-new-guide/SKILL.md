@@ -9,9 +9,9 @@ metadata:
 
 # keystone:new-guide — scaffold a guide + paired corpus
 
-A **guide** is a markdown file under `.charter/guides/<topic>/`
+A **guide** is a markdown file under `.agents/rules/<topic>/`
 that declares one or more rules (the *what*); a paired **corpus** entry
-under `.charter/corpus/<topic>/` carries the reasoning (the
+under `.agents/references/<topic>/` carries the reasoning (the
 *why*). The generator emits both with canonical frontmatter,
 charter-root-relative cross-links, and the required tier headings.
 
@@ -25,8 +25,8 @@ Example:
 
 ```
 keystone new guide process/release
-# writes .charter/guides/process/release.md
-#        .charter/corpus/process/release.md
+# writes .agents/rules/process/release.md
+#        .agents/references/process/release.md
 ```
 
 ## Topic selection
@@ -41,7 +41,7 @@ The topic directory sets the guide's default activation:
 | `principles/` | Ambient on every action.                            |
 | `computational/` | Editor / LSP / on-save (tool-driven).            |
 
-See [`docs/ports/guide.md`](../../../../docs/ports/guide.md) for the
+See [`docs/ports/guide.md`](../../../docs/ports/guide.md) for the
 full guide port contract.
 
 ## After scaffolding

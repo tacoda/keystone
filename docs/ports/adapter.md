@@ -6,10 +6,10 @@
 ## Path convention
 
 ```
-.charter/adapters/<agent>/lifecycle.md                       # project-owned
-.charter/adapters/<agent>/sensors.md
-.charter/adapters/<agent>/activation.md
-.charter/policies/<policy>/adapters/<agent>/...               # policy-owned (read-only)
+.keystone/hosts/<agent>/lifecycle.md                       # project-owned
+.keystone/hosts/<agent>/sensors.md
+.keystone/hosts/<agent>/activation.md
+.keystone/policies/<policy>/adapters/<agent>/...               # policy-owned (read-only)
 ```
 
 `<agent>` is the agent's canonical short name. New agents land by creating a new `<agent>/` directory and a generator entry.
@@ -36,7 +36,7 @@ Each file:
 
 ## Cascade behavior
 
-Same as other ports: project's `.charter/adapters/<agent>/...` always wins by default. Policies can ship adapters too (e.g., an org-specific Claude Code adapter); among policies, policies nested deeper in `keystone.json` refine the outer policies they're nested in.
+Same as other ports: project's `.keystone/hosts/<agent>/...` always wins by default. Policies can ship adapters too (e.g., an org-specific Claude Code adapter); among policies, policies nested deeper in `keystone.json` refine the outer policies they're nested in.
 
 `strict.adapters: ["<agent>"]` on any policy makes that adapter absolute — nothing else (project or any other policy) can ship a competing adapter for that agent.
 

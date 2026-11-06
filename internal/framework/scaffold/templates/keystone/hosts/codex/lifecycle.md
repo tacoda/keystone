@@ -4,9 +4,9 @@ How each abstract lifecycle action is invoked in OpenAI's Codex CLI. Codex reads
 
 ## Invocation
 
-Every action is invoked via natural language: "run task on TICKET-123," "run verify," "do a review pass." The agent reads `AGENTS.md` at session start, finds the action in the bulleted list, follows the link to `charter/actions/<action>.md`, and executes the playbook. Codex has no slash-command primitive — natural language is the only invocation surface, which is why action playbooks are agent-agnostic and live in `charter/actions/`.
+Every action is invoked via natural language: "run task on TICKET-123," "run verify," "do a review pass." The agent reads `AGENTS.md` at session start, finds the action in the bulleted list, follows the link to `.agents/commands/<action>.md`, and executes the playbook. Codex has no slash-command primitive — natural language is the only invocation surface, which is why action playbooks are agent-agnostic and live in `.agents/commands/`.
 
-The canonical kickoff phrase is **"run task on `<ticket-id>`"** (or "run the task workflow") — `charter/actions/task.md` orchestrates `spec → orient → implementation → check-drift → verify → review`.
+The canonical kickoff phrase is **"run task on `<ticket-id>`"** (or "run the task workflow") — `.agents/commands/task.md` orchestrates `spec → orient → implementation → check-drift → verify → review`.
 
 ## Capability matrix
 
@@ -29,7 +29,7 @@ Codex's CLI flags map naturally to the charter's pacing modes:
 | **solo** | `codex --auto-edit` (writes files autonomously; stops on shell commands by default) |
 | **autopilot** | `codex --full-auto` (writes files + runs shell without per-action approval) |
 
-`charter/guides/process/modes.md` documents this mapping in the `mode` action body.
+`.agents/rules/process/modes.md` documents this mapping in the `mode` action body.
 
 ## Sub-agent degradation
 

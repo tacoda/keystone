@@ -24,9 +24,9 @@ Long sessions drift. Before starting fresh work, check whether the current sessi
 - **Session past ~45 minutes of active work** → compact or summarize, if the agent supports it.
 - **Three concurrent worktrees** is a soft ceiling. Beyond that, attention divides faster than parallelism saves time.
 
-If a discovery from this session is worth keeping, write it to a corpus file or `.charter/learning/inbox/` *before* clearing.
+If a discovery from this session is worth keeping, write it to a corpus file or `.keystone/learning/inbox/` *before* clearing.
 
-The specific context-clear / compaction primitives for your agent live in `.charter/adapters/<your-agent>/activation.md`.
+The specific context-clear / compaction primitives for your agent live in `.keystone/hosts/<your-agent>/activation.md`.
 
 ### 2. Orient
 

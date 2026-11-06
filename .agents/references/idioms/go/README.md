@@ -5,7 +5,7 @@ description: 'Go idiom set for the keystone project.'
 ---
 # Go idioms — reasoning
 
-Stack-specific patterns for Go code in this repo. Each idiom in this folder is paired with a rules file at [`../../../guides/idioms/go/`](../../../guides/idioms/go/).
+Stack-specific patterns for Go code in this repo. Each idiom in this folder is paired with a rules file at [`../../../guides/idioms/go/`](../../../rules/idioms/go/).
 
 ## Region
 
@@ -17,7 +17,7 @@ Go source lives in:
 ## Stack character
 
 - Single-binary CLI built around `spf13/cobra`.
-- Reads / writes filesystem (`.charter/`, project state). No DB, no HTTP server. (MCP server uses stdio.)
+- Reads / writes filesystem (`.agents/`, project state). No DB, no HTTP server. (MCP server uses stdio.)
 - Library deps kept small. Stdlib first, single-purpose third-party additions only.
 
 ## Layout

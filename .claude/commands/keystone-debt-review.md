@@ -3,7 +3,7 @@ description: Triage the code-debt ledger.
 ---
 # debt-review
 
-**Triage the code-debt ledger.** Read [`.charter/sensors/code-debt.md`](sensors/code-debt.md) and [`.charter/corpus/state/code-debt.md`](corpus/state/code-debt.md).
+**Triage the code-debt ledger.** Read [`.agents/hooks/code-debt.md`](../agents/code-debt.md) and [`.agents/references/state/code-debt.md`](../references/state/code-debt.md).
 
 For **charter debt** (stale rules, placeholder bootstrap, empty idiom dirs, uncited policies), use the [`audit`](audit.md) action — its Pruning flywheel writes to `corpus/state/charter-debt.md`.
 

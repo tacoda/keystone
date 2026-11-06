@@ -5,7 +5,7 @@ description: 'Selections captured by `keystone init`; read by the bootstrap acti
 ---
 # Install Profile
 
-Selections captured by `keystone init`. Read by the **bootstrap** action; safe to edit by hand. Machine state (keystone version, agents, policies) lives in [`.charter/lockfile.json`](.charter/lockfile.json) at the repo root.
+Selections captured by `keystone init`. Read by the **bootstrap** action; safe to edit by hand. Machine state (keystone version, agents, policies) lives in [`.keystone/lockfile.json`](../../../.keystone/lockfile.json) at the repo root.
 
 ## Selections
 

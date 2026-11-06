@@ -10,7 +10,7 @@ metadata:
 # keystone:new-corpus — scaffold a corpus entry
 
 A **corpus** entry is the long-form reasoning behind a rule. It lives
-at `.charter/corpus/<topic>/<name>.md` and is opened only when
+at `.agents/references/<topic>/<name>.md` and is opened only when
 a guide's `traces:` (or a prose forward-link) points at it.
 
 Most authors use `keystone:new-guide`, which scaffolds both the guide
@@ -28,7 +28,7 @@ Example:
 
 ```
 keystone new corpus idioms/rails/migrations
-# writes .charter/corpus/idioms/rails/migrations.md
+# writes .agents/references/idioms/rails/migrations.md
 ```
 
 ## After scaffolding
@@ -41,4 +41,4 @@ keystone new corpus idioms/rails/migrations
 3. Run `keystone index` to refresh the descriptor surface.
 
 Full port contract:
-[`docs/ports/corpus.md`](../../../../docs/ports/corpus.md).
+[`docs/ports/corpus.md`](../../../docs/ports/corpus.md).

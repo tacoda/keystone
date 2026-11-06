@@ -9,7 +9,7 @@ description: 'Active mode: paired'
 
 How the agent paces work. Orthogonal to the four phases — modes change *how* phases run, not *what* happens in them.
 
-Set by invoking the **mode** action with `<paired|solo|autopilot>`. The `**Active mode:**` line above is the source of truth and is updated in place. The binding for your agent lives in `charter/adapters/<your-agent>/lifecycle.md`. Agents that don't have a notion of autonomy levels may ignore modes entirely.
+Set by invoking the **mode** action with `<paired|solo|autopilot>`. The `**Active mode:**` line above is the source of truth and is updated in place. The binding for your agent lives in `.keystone/hosts/<your-agent>/lifecycle.md`. Agents that don't have a notion of autonomy levels may ignore modes entirely.
 
 ## paired
 

@@ -26,7 +26,7 @@ This directory ships **empty** in a fresh install. The **bootstrap** action popu
 
 Ambient, **lazy by region**. When the agent enters a code region matching a stack, the corresponding `idioms/<stack>/` folder activates. The agent does not load every idiom for every edit.
 
-How "lazy by region" is enforced is agent-specific — see `charter/adapters/<your-agent>/activation.md`.
+How "lazy by region" is enforced is agent-specific — see `.keystone/hosts/<your-agent>/activation.md`.
 
 ## Authorship
 

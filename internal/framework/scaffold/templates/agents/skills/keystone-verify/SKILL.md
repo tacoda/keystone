@@ -5,7 +5,7 @@ description: 'Check vendored policies for drift and the strict cascade for proje
 
 # keystone:verify — cascade + drift check
 
-Walks every vendored policy under `.charter/policies/`,
+Walks every vendored policy under `.keystone/policies/`,
 compares per-file hashes to the lockfile, and reports project files
 that shadow strict-locked policy items.
 

@@ -66,7 +66,7 @@ Phases reference lifecycle actions the agent invokes:
 | Verification | **verify** | (sensors gate the commit) |
 | Release | — | **learn** |
 
-How each action is actually invoked is agent-specific — slash command, rules-file trigger, CLI subcommand, etc. See `charter/adapters/<your-agent>/lifecycle.md` for the binding.
+How each action is actually invoked is agent-specific — slash command, rules-file trigger, CLI subcommand, etc. See `.keystone/hosts/<your-agent>/lifecycle.md` for the binding.
 
 ## Authorship
 

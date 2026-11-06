@@ -1,9 +1,7 @@
 ---
-kind: rule
-id: rules/keystone-charter-content-state-files
-description: Authoring rules for .charter/corpus/state/.
-globs:
-  - ".charter/corpus/state/**/*.md"
+description: Authoring rules for .agents/references/state/.
+paths:
+  - ".agents/references/state/**/*.md"
   - "internal/framework/scaffold/templates/**/corpus/state/**/*.md"
 source: .agents/rules/idioms/charter-content/state-files.md
 generated_by: keystone-project
@@ -11,7 +9,7 @@ generated_by: keystone-project
 
 # State files — rules
 
-Full guide: `.agents/rules/idioms/charter-content/state-files.md` (read on demand).
+Full rule: `.agents/rules/idioms/charter-content/state-files.md` (read on demand).
 
 ## IRON LAW
 

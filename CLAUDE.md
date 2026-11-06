@@ -26,8 +26,8 @@ internal/framework/   — agent-agnostic core
   adapters/           — per-host projection (claudecode, cursor, …)
   mcp/                — MCP server
   web/                — local dashboard
-.charter/    — this project's own charter (dogfood)
-.claude/              — projected from .charter/ — do not hand-edit
+.agents/    — this project's own charter (dogfood)
+.claude/              — projected from .agents/ — do not hand-edit
 ```
 
 ## Common commands
@@ -37,7 +37,7 @@ go build ./cmd/keystone        # build the CLI
 go install ./cmd/keystone      # install on PATH (refresh after every Frontmatter or CLI change — hooks call the installed binary)
 go test ./...                  # all tests
 go vet ./...                   # static check (must pass before commit)
-keystone index                 # regenerate .charter/INDEX*.json
+keystone index                 # regenerate .keystone/INDEX*.json
 keystone project               # regenerate .claude/* + merge hooks into settings
 keystone watch                 # long-running: re-project on every guide/sensor/agent save (300ms debounce)
 keystone verify                # policy + cascade check (auto-fires pre/post-verify hooks)
@@ -45,7 +45,7 @@ keystone signal fire <name>    # dispatch primitives subscribed (on:) to a signa
 ```
 
 > **Instant projection.** Run `keystone watch` in a side terminal while
-> editing primitives. Any save under `.charter/` regenerates
+> editing primitives. Any save under `.agents/` regenerates
 > `INDEX.json` + `INDEX.lite.json` + `.claude/*` + `AGENTS.md` +
 > `.cursor/rules/*` + `.aider.conf.yml` + `.continue/rules/*` within
 > the debounce window. The next agent invocation sees the updated
@@ -58,11 +58,11 @@ keystone signal fire <name>    # dispatch primitives subscribed (on:) to a signa
 
 ## Where things go
 
-- **New rule / convention** → `.charter/guides/idioms/<topic>.md` + paired corpus
-- **New computational check** → `.charter/sensors/<id>.md` (`mode: computational`, `on:` + `run:`)
-- **New review** → `.charter/sensors/<id>.md` (`mode: inferential`, `on:` + `returns:`) or a reviewer `.charter/agents/<id>.md`
-- **New side-effect** → `.charter/tools/<id>.md` (`transport:` + `on:`)
-- **New workflow** → `.charter/playbooks/<id>.md`
+- **New rule / convention** → `.agents/rules/idioms/<topic>.md` + paired corpus
+- **New computational check** → `.agents/hooks/<id>.md` (`mode: computational`, `on:` + `run:`)
+- **New review** → `.agents/hooks/<id>.md` (`mode: inferential`, `on:` + `returns:`) or a reviewer `.agents/agents/<id>.md`
+- **New side-effect** → `.agents/tools/<id>.md` (`transport:` + `on:`)
+- **New workflow** → `.agents/skills/<id>/SKILL.md`
 - **New keystone subcommand** → `cmd/keystone/<name>.go` + wire in `root.go`
 
 After any primitive add / move / delete: run `keystone index && keystone project`.
@@ -74,7 +74,7 @@ You **must** read [`CHARTER.md`](CHARTER.md) before doing anything in this repo 
 
 ## On this host — Claude Code
 
-- **Subagents** — spawn charter agents (`.charter/agents/`) as subagents via the Task tool for review/scout work.
+- **Subagents** — spawn charter agents (`.agents/agents/`) as subagents via the Task tool for review/scout work.
 - **Slash commands** — charter commands and playbooks surface as `/keystone-<id>`.
 - **Skills** — auto-activate by their `triggers:`.
 - **Hooks** — charter hooks fire automatically on Claude Code lifecycle events.

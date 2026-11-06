@@ -4,9 +4,9 @@ How each abstract lifecycle action is invoked in Block's Goose.
 
 ## Invocation
 
-Goose is a CLI / desktop agent. It reads `.goosehints` at the repo root (workspace scope) and `~/.config/goose/hints.md` (global). Every action is invoked via natural language: "run task on TICKET-123," "run verify," "do a review pass." The agent finds the action in the menu's bulleted list, follows the link to `charter/actions/<action>.md`, and executes the playbook.
+Goose is a CLI / desktop agent. It reads `.goosehints` at the repo root (workspace scope) and `~/.config/goose/hints.md` (global). Every action is invoked via natural language: "run task on TICKET-123," "run verify," "do a review pass." The agent finds the action in the menu's bulleted list, follows the link to `.agents/commands/<action>.md`, and executes the playbook.
 
-The canonical kickoff phrase is **"run task on `<ticket-id>`"** (or "run the task workflow") — `charter/actions/task.md` orchestrates `spec → orient → implementation → check-drift → verify → review`.
+The canonical kickoff phrase is **"run task on `<ticket-id>`"** (or "run the task workflow") — `.agents/commands/task.md` orchestrates `spec → orient → implementation → check-drift → verify → review`.
 
 ## Optional: recipes for one-shot invocation
 

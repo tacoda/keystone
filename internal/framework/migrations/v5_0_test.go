@@ -30,6 +30,8 @@ func seed40Install(t *testing.T) string {
 		".charter/lockfile.json":                    "{\"version\":1,\"migrations_applied\":[\"4.0\"]}\n",
 		".charter/INDEX.json":                       "{}\n",
 		".charter/README.md":                        "# Charter\n",
+		".claude/commands/keystone-verify.md":       "4.x projection\n",
+		".claude/commands/mine.md":                  "user file\n",
 		".gitignore":                                "/dist/\n.charter/policies/\n",
 	})
 	return tmp
@@ -97,6 +99,20 @@ func TestV5_Up_MovesLayout(t *testing.T) {
 		if !strings.Contains(string(idx), want) {
 			t.Errorf("rebuilt INDEX.json missing kind %s", want)
 		}
+	}
+}
+
+// TestV5_Up_RecordsLegacyProjections — 4.x keystone-* projections are
+// recorded as owned; user files beside them are not.
+func TestV5_Up_RecordsLegacyProjections(t *testing.T) {
+	tmp := seed40Install(t)
+	runV4(t, tmp, planUp_5_0)
+	lf, _ := os.ReadFile(filepath.Join(tmp, ".keystone/lockfile.json"))
+	if !strings.Contains(string(lf), ".claude/commands/keystone-verify.md") {
+		t.Errorf("4.x projection not recorded:\n%s", lf)
+	}
+	if strings.Contains(string(lf), "mine.md") {
+		t.Errorf("user file must not be claimed:\n%s", lf)
 	}
 }
 

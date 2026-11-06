@@ -5,6 +5,8 @@
 //   - native: the host reads the canonical file under .agents/ as-is.
 //   - symlink: the host reads the same format at another path; keystone
 //     links each entry (or copies it, in copy link mode).
+//   - copy: as symlink, but always a copy (hosts whose symlink support is
+//     unverified, or known to skip links).
 //   - shim: the host needs a different format; keystone renders it.
 //   - index: no host mechanism; AGENTS.md lists the primitive instead.
 //   - report: a constraint the host cannot enforce; surfaced, never dropped.
@@ -14,7 +16,6 @@
 package projection
 
 import (
-	"path"
 	"path/filepath"
 	"runtime"
 	"sort"
@@ -30,6 +31,7 @@ type Strategy string
 const (
 	Native  Strategy = "native"
 	Symlink Strategy = "symlink"
+	Copy    Strategy = "copy"
 	Shim    Strategy = "shim"
 	Index   Strategy = "index"
 	Report  Strategy = "report"
@@ -64,10 +66,16 @@ type Rule struct {
 	// projection on this host (e.g. a rule without paths:). Symlink and
 	// Shim rules need it.
 	Dest func(p primitive.Primitive) string
-	// Target returns what a Symlink links to (repo-relative); nil means
-	// the primitive's own file. A skill links its whole directory.
+	// Target returns what a Symlink or Copy mirrors (repo-relative); nil
+	// means the primitive's own file. A skill mirrors its whole directory.
 	Target func(p primitive.Primitive) string
+	// Render produces a Shim's bytes; nil means the Claude Code format
+	// (primitive.RenderForHost).
+	Render Renderer
 }
+
+// Renderer turns a primitive and its file contents into host bytes.
+type Renderer func(p primitive.Primitive, fileContents string) ([]byte, error)
 
 // Profile is one host's projection table.
 type Profile struct {
@@ -87,9 +95,10 @@ type Output struct {
 	ID       string
 	Src      string // canonical file, repo-relative
 	Dest     string // host path, repo-relative ("" for index/report)
-	Target   string // Symlink: canonical path the dest mirrors, repo-relative
+	Target   string // Symlink/Copy: canonical path the dest mirrors, repo-relative
 	Strategy Strategy
 	Prim     primitive.Primitive // the source primitive, for shim rendering
+	Render   Renderer            // Shim renderer; nil = Claude Code format
 }
 
 // Warning flags a plan-level concern, e.g. a host that will see the same
@@ -99,10 +108,17 @@ type Warning struct {
 	Message string
 }
 
+// PlanResult is a projection plan: the outputs, plus warnings about hosts
+// that will see one primitive twice.
+type PlanResult struct {
+	Outputs  []Output
+	Warnings []Warning
+}
+
 // Plan computes every output for the given hosts, in host order. Profiles
 // earlier in the slice are planned first, so a later host that reads an
 // earlier host's directory (Cursor and Copilot read .claude/) reuses it.
-func Plan(primitives []primitive.Primitive, hosts []Profile) ([]Output, []Warning) {
+func Plan(primitives []primitive.Primitive, hosts []Profile) PlanResult {
 	var outs []Output
 	located := map[string][]string{} // primitive key → repo-relative locations
 	for _, p := range primitives {
@@ -120,7 +136,7 @@ func Plan(primitives []primitive.Primitive, hosts []Profile) ([]Output, []Warnin
 			}
 		}
 	}
-	return outs, duplicateWarnings(primitives, hosts, located)
+	return PlanResult{Outputs: outs, Warnings: duplicateWarnings(primitives, hosts, located)}
 }
 
 // planOne plans p for host h. ok is false when nothing is needed: the
@@ -131,7 +147,7 @@ func planOne(h Profile, p primitive.Primitive, at []string) (Output, bool) {
 	if !ok || r.Strategy == Native {
 		return Output{}, false
 	}
-	o := Output{Host: h.Host, Kind: p.Kind, ID: p.ID, Src: p.Path, Strategy: r.Strategy, Prim: p}
+	o := Output{Host: h.Host, Kind: p.Kind, ID: p.ID, Src: p.Path, Strategy: r.Strategy, Prim: p, Render: r.Render}
 	if r.Strategy == Index || r.Strategy == Report {
 		return o, true
 	}
@@ -146,18 +162,34 @@ func planOne(h Profile, p primitive.Primitive, at []string) (Output, bool) {
 	return o, o.Dest != ""
 }
 
-// duplicateWarnings flags hosts that will load one primitive from two
-// directories they scan.
+// duplicateWarnings flags hosts that will load primitives from two
+// directories they scan, one warning per host and kind. Whether a host
+// dedupes by name is unverified (docs/hosts.md), so this is surfaced.
 func duplicateWarnings(primitives []primitive.Primitive, hosts []Profile, located map[string][]string) []Warning {
 	var ws []Warning
 	for _, h := range hosts {
+		counts := map[string]int{}
 		for _, p := range primitives {
-			if n := countRead(h.Reads[primitive.Kind(p.Kind)], located[key(p)]); n > 1 {
-				ws = append(ws, Warning{Host: h.Host, Message: p.Kind + "/" + p.ID + " is visible at " + strconv.Itoa(n) + " paths this host reads"})
+			if countRead(h.Reads[primitive.Kind(p.Kind)], located[key(p)]) > 1 {
+				counts[p.Kind]++
 			}
+		}
+		for _, k := range sortedKeys(counts) {
+			ws = append(ws, Warning{Host: h.Host, Message: strconv.Itoa(counts[k]) + " " + k +
+				"(s) visible at two paths this host reads (" + strings.Join(h.Reads[primitive.Kind(k)], ", ") +
+				") — unverified whether it dedupes by name"})
 		}
 	}
 	return ws
+}
+
+func sortedKeys(m map[string]int) []string {
+	keys := make([]string, 0, len(m))
+	for k := range m {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	return keys
 }
 
 func readsAny(dirs, at []string) bool { return countRead(dirs, at) > 0 }
@@ -181,10 +213,6 @@ func underDir(loc, dir string) bool {
 }
 
 func key(p primitive.Primitive) string { return p.Kind + "/" + p.ID }
-
-// skillDir returns the canonical directory of a skill (the parent of
-// SKILL.md), repo-relative.
-func skillDir(p primitive.Primitive) string { return path.Dir(filepath.ToSlash(p.Path)) }
 
 // Dests returns the sorted, de-duplicated host paths of outs.
 func Dests(outs []Output) []string {

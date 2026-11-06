@@ -8,7 +8,7 @@ globs:
 ---
 # Go idiom rules
 
-Rules for Go code in this repo. Paired with [`../../../corpus/idioms/go/`](../../../corpus/idioms/go/) (reasoning, examples).
+Rules for Go code in this repo. Paired with [`../../../corpus/idioms/go/`](../../../references/idioms/go/) (reasoning, examples).
 
 ## Activation
 

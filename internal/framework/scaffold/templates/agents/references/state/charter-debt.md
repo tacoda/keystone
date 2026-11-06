@@ -5,7 +5,7 @@ description: 'Paired ledger: [code-debt.'
 ---
 # Charter Debt Ledger
 
-> **Template.** The **audit** action's Pruning flywheel populates this from the [charter-debt sensor](sensors/charter-debt.md). Until then, leave as-is or fill in by hand.
+> **Template.** The **audit** action's Pruning flywheel populates this from the [charter-debt sensor](../../hooks/charter-debt.md). Until then, leave as-is or fill in by hand.
 
 Paired ledger: [`code-debt.md`](code-debt.md) — debt in the codebase. Tracked separately on purpose.
 
@@ -15,11 +15,11 @@ The debt the charter itself is carrying. When the charter gives stale or wrong g
 
 | ID | Location | Category | Severity | Notes |
 |---|---|---|---|---|
-| `<HDEBT-001>` | `<charter/path>` | `<stale-rule\|dead-idiom\|placeholder\|failing-sensor\|empty-shell\|uncited-policy\|unresolved-gap\|drifted-state>` | `<load-bearing\|noisy\|stale>` | `<one line>` |
+| `<HDEBT-001>` | `<.agents/path>` | `<stale-rule\|dead-idiom\|placeholder\|failing-sensor\|empty-shell\|uncited-policy\|unresolved-gap\|drifted-state>` | `<load-bearing\|noisy\|stale>` | `<one line>` |
 
 ## Categories
 
-See [`charter/sensors/charter-debt.md`](sensors/charter-debt.md) for category and severity definitions.
+See [`.agents/hooks/charter-debt.md`](../../hooks/charter-debt.md) for category and severity definitions.
 
 ## How to use it
 

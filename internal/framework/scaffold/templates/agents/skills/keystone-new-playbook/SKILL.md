@@ -10,7 +10,7 @@ end-to-end workflow. The shipped `task` playbook orchestrates
 `spec → orient → implementation → check-drift → verify → review`.
 Custom playbooks compose other workflows the same way.
 
-Playbooks live at `.charter/playbooks/<name>.md`.
+Playbooks live at `.agents/skills/<name>/SKILL.md`.
 
 ## Run
 
@@ -22,7 +22,7 @@ Example:
 
 ```
 keystone new playbook release
-# writes .charter/playbooks/release.md
+# writes .agents/skills/release/SKILL.md
 ```
 
 ## After scaffolding
@@ -34,4 +34,4 @@ keystone new playbook release
 3. Run `keystone index` to refresh the descriptor surface.
 
 Full port contract:
-[`docs/ports/playbook.md`](../../../../docs/ports/playbook.md).
+[`docs/ports/playbook.md`](../../../docs/ports/playbook.md).

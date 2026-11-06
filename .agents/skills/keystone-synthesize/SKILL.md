@@ -9,15 +9,15 @@ metadata:
 # keystone:synthesize — promote inbox candidates
 
 The Learning flywheel's promotion step. Walks
-`.charter/learning/inbox/`, promotes `status: accepted`
+`.keystone/learning/inbox/`, promotes `status: accepted`
 candidates to the right layer (guide / corpus / sensor), regenerates
 the globs index, and refreshes Cursor projections if present.
 
-Canonical playbook: `.charter/actions/synthesize.md`.
+Canonical playbook: `.agents/commands/synthesize.md`.
 
 ## Run
 
-Open `.charter/actions/synthesize.md` and execute every
+Open `.agents/commands/synthesize.md` and execute every
 activity in order. Every promotion is a proposed diff — never overwrite
 silently. After promotions land, run `keystone index` so
 `.keystone/INDEX.json` reflects the new shape.

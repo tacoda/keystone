@@ -6,7 +6,7 @@ last_reviewed: 2026-06-18
 ---
 # Charter Debt Ledger
 
-Populated by the **audit** action's Pruning flywheel from the [charter-debt sensor](../../sensors/charter-debt.md). Hand-edits during audit are OK.
+Populated by the **audit** action's Pruning flywheel from the [charter-debt sensor](../../agents/charter-debt.md). Hand-edits during audit are OK.
 
 Paired ledger: [`code-debt.md`](code-debt.md) — debt in the codebase. Tracked separately on purpose.
 
@@ -16,16 +16,16 @@ The debt the charter itself is carrying. When the charter gives stale or wrong g
 
 | ID | Location | Category | Severity | Notes |
 |---|---|---|---|---|
-| HDEBT-001 | `.charter/archive/`, `.charter/sources/`, `.charter/evals/` | empty-shell | noisy | README-only auxiliary dirs not in the twelve-kind taxonomy. Either drop or mark as auxiliary in each README. |
-| HDEBT-002 | `.charter/corpus/state/code-debt.md`, `charter-debt.md` | drifted-state | noisy | Internal links used `sensors/...` (pre-2.0 path); fixed to `../../sensors/...`. Watch for re-introduction in template copies. |
-| HDEBT-003 | `internal/framework/scaffold/templates/charter/corpus/state/INSTALL_PROFILE.md` | placeholder | load-bearing | Was missing from templates; fresh installs wouldn't ship the file. Added 2026-06-18. |
+| HDEBT-001 | `.keystone/archive/`, `.keystone/sources/`, `.agents/evals/` | empty-shell | noisy | README-only auxiliary dirs not in the twelve-kind taxonomy. Either drop or mark as auxiliary in each README. |
+| HDEBT-002 | `.agents/references/state/code-debt.md`, `charter-debt.md` | drifted-state | noisy | Internal links used `sensors/...` (pre-2.0 path); fixed to `../../sensors/...`. Watch for re-introduction in template copies. |
+| HDEBT-003 | `internal/framework/scaffold/templates/agents/references/state/INSTALL_PROFILE.md` | placeholder | load-bearing | Was missing from templates; fresh installs wouldn't ship the file. Added 2026-06-18. |
 | HDEBT-004 | `internal/framework/scaffold/templates/patches/1.0.3/`, `1.0.4/` | stale-rule | stale | 1.x patches removed 2026-06-18 (min supported = 2.0). Verify no upgrader still requests them. |
 | HDEBT-005 | `docs/ports/` | placeholder | noisy | Was missing `persona`, `skill`, `subagent`, `command`, `rule`, `computational`. Stubs added 2026-06-18; expand as semantics solidify. |
 | HDEBT-006 | `.github/workflows/` | unresolved-gap | load-bearing | Only `release.yml` wired. PR / push CI added 2026-06-18 (`ci.yml`). Verify on next PR. |
 
 ## Categories
 
-See [`../../sensors/charter-debt.md`](../../sensors/charter-debt.md) for category and severity definitions.
+See [`../../sensors/charter-debt.md`](../../agents/charter-debt.md) for category and severity definitions.
 
 ## How to use it
 

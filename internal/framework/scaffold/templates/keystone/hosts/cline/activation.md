@@ -39,9 +39,9 @@ Guides should land in the menu (custom-instructions field) so the model is alway
 
 Cline has no glob-based auto-attachment. Region-scoped idiom loading happens inside the **orient** action, which:
 
-1. Reads `charter/corpus/state/CODEBASE_STATE.md` to map the touched paths to a stack.
-2. Reads `charter/corpus/state/GLOBS_INDEX.md` and gates per-guide loading on declared `globs:` (guides without `globs:` keep stack-based loading).
-3. Reads `charter/guides/idioms/<stack>/*.md` and `charter/corpus/idioms/<stack>/*.md` for the resulting set as needed.
+1. Reads `.agents/references/state/CODEBASE_STATE.md` to map the touched paths to a stack.
+2. Reads `.agents/references/state/GLOBS_INDEX.md` and gates per-guide loading on declared `globs:` (guides without `globs:` keep stack-based loading).
+3. Reads `.agents/rules/idioms/<stack>/*.md` and `.agents/references/idioms/<stack>/*.md` for the resulting set as needed.
 4. Carries those rules forward in the task's context.
 
 The user can streamline this by attaching the relevant idiom files to the task via the "+ Add Files" button in the side panel, which forces them into context.
@@ -60,13 +60,13 @@ MCP servers are configured in the extension's MCP settings panel (the gear icon)
 - **New Task** — the "+" button in the side panel. Drops the entire task history; reloads the custom-instructions field. Equivalent to Claude Code's `/clear`.
 - **Subtask** — focuses a child task with a tight scope; on completion, control returns to the parent with a summary. Not a context reset for the parent.
 
-After a flywheel write that touched any `charter/guides/` file, start a new task so the next turn re-reads the updated guides via the custom-instructions field.
+After a flywheel write that touched any `.agents/rules/` file, start a new task so the next turn re-reads the updated guides via the custom-instructions field.
 
 ## Domain / state / process loading
 
 - **`corpus/domain/`** — relevant at task start; the orient action reads it after state.
 - **`corpus/state/CODEBASE_STATE.md`** — read by the **orient** action via `read_file`.
-- **`guides/process/<phase>.md`** — read when entering each phase. The Keystone workflows make this explicit ("read charter/guides/process/<phase>.md").
+- **`guides/process/<phase>.md`** — read when entering each phase. The Keystone workflows make this explicit ("read .agents/rules/process/<phase>.md").
 - **`guides/<layer>/<name>.md`** — should be reachable via the custom-instructions menu pointer. The menu file lists the five components and the iron laws; specific rule files are read on demand.
 
 ## Auto-approve and the verify cycle

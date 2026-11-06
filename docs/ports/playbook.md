@@ -6,8 +6,8 @@
 ## Path convention
 
 ```
-.charter/playbooks/<name>.md                                 # project-owned
-.charter/policies/<policy>/playbooks/<name>.md                # policy-owned (read-only)
+.agents/skills/<name>/SKILL.md                                 # project-owned
+.keystone/policies/<policy>/playbooks/<name>.md                # policy-owned (read-only)
 ```
 
 Flat — no topic directory. Playbooks are global by name across the cascade.

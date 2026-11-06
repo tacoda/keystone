@@ -6,8 +6,8 @@
 ## Path convention
 
 ```
-.charter/rules/<id>.md                                       # project-owned
-.charter/policies/<policy>/rules/<id>.md                      # policy-owned (read-only)
+.agents/rules/<id>.md                                       # project-owned
+.keystone/policies/<policy>/rules/<id>.md                      # policy-owned (read-only)
 ```
 
 Flat — rules are global by `id`.
@@ -35,7 +35,7 @@ globs:                # optional, narrow-only
 
 Project wins; deeper-nested policies refine. `strict.rules: [<id>]` locks absolutely.
 
-For pointer-style hosts (Claude Code, Codex, Aider, etc.), the cascade uses [`corpus/state/GLOBS_INDEX.md`](../../.charter/corpus/state/GLOBS_INDEX.md) to gate idiom loading. For Cursor, `keystone project` writes a `.cursor/rules/<id>.mdc` per rule with `globs:` mirrored verbatim.
+For pointer-style hosts (Claude Code, Codex, Aider, etc.), the cascade uses [`corpus/state/GLOBS_INDEX.md`](../../.agents/references/state/GLOBS_INDEX.md) to gate idiom loading. For Cursor, `keystone project` writes a `.cursor/rules/<id>.mdc` per rule with `globs:` mirrored verbatim.
 
 ## Authoring
 

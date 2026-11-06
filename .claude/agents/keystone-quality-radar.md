@@ -10,7 +10,7 @@ tools:
 Aggregates verification and review sensors into a five-dimension scorecard for the current diff (or the whole codebase, on **audit**).
 
 - **Trigger** — **audit** (codebase-wide) and **review** (diff-scoped).
-- **Inputs** — outputs of [lint](lint.md), [type-check](type-check.md), [test](test.md), [coverage](coverage.md), [review-security](review-security.md), [review-functional](review-functional.md), plus complexity metrics from [risk-fingerprint](risk-fingerprint.md).
+- **Inputs** — outputs of [lint](../hooks/lint.md), [type-check](../hooks/type-check.md), [test](../hooks/test.md), [coverage](../hooks/coverage.md), [review-security](review-security.md), [review-functional](review-functional.md), plus complexity metrics from [risk-fingerprint](../hooks/risk-fingerprint.md).
 - **Exit condition** — every dimension has a score and at least one cited finding (or an explicit "no findings").
 - **Output** — one score per dimension (`green | yellow | red`) with the citations that drove the score.
 - **State writes** — proposes a diff to `corpus/state/quality-radar.md`. User accepts or edits.

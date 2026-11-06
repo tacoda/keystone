@@ -1,8 +1,8 @@
 # Guides
 
-Rules — what the agent must *do* (and not do). Three tiers: regular **RULES** (the default), **GOLDEN RULE** (aspirational but explicit; stronger than regular), and **IRON LAWS** (non-negotiable; rare by design). Loaded ambient; enforced by the [drift sensor](sensors/drift.md). Per-agent adapters lift these into the agent's rules surface (`.cursor/rules/*.mdc`, the directive block of `CLAUDE.md`, etc.).
+Rules — what the agent must *do* (and not do). Three tiers: regular **RULES** (the default), **GOLDEN RULE** (aspirational but explicit; stronger than regular), and **IRON LAWS** (non-negotiable; rare by design). Loaded ambient; enforced by the [drift sensor](../hooks/drift.md). Per-agent adapters lift these into the agent's rules surface (`.cursor/rules/*.mdc`, the directive block of `CLAUDE.md`, etc.).
 
-For the full reasoning and references behind each rule, see the paired file in [`../corpus/`](corpus/README.md).
+For the full reasoning and references behind each rule, see the paired file in [`../corpus/`](../references/README.md).
 
 ## Kind
 
@@ -86,7 +86,7 @@ Process files are exceptions — they are entirely prescriptive (phase-by-phase 
 
 ## How adapters use guides
 
-A per-agent adapter at `.charter/adapters/<agent>/activation.md` describes how this directory is projected into the agent's rules surface. Examples:
+A per-agent adapter at `.keystone/hosts/<agent>/activation.md` describes how this directory is projected into the agent's rules surface. Examples:
 
 - **Cursor** — every `guides/principles/*.md` becomes a `.cursor/rules/<name>.mdc` file.
 - **Claude Code** — guides are referenced from `CLAUDE.md`'s directive block; the agent reads them on demand.
@@ -112,6 +112,6 @@ Sub-directory default first, then optional `globs:` narrows it (see **Globs** ab
 - `computational/` — driven by the underlying tool (LSP, formatter, hook).
 - Universal-policy principles — ambient.
 
-The agent operates under guide rules at all times within their activation window. Enforced by the [drift sensor](sensors/drift.md) inside the **check-drift**, **verify**, and **audit** actions.
+The agent operates under guide rules at all times within their activation window. Enforced by the [drift sensor](../hooks/drift.md) inside the **check-drift**, **verify**, and **audit** actions.
 
 When the agent needs the reasoning *behind* a rule, it follows the forward-link from the guide to the paired corpus file. Corpus is on-demand; guides are not.

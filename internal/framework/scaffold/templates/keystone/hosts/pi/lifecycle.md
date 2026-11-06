@@ -4,13 +4,13 @@ How pi.dev runs the charter's lifecycle actions.
 
 ## Invocation
 
-Every action is invoked via natural language: "run task on TICKET-123," "run verify," "do a review pass." The agent reads `AGENTS.md` at session start, finds the action in the bulleted list, follows the link to `charter/actions/<action>.md`, and executes the playbook. No prompt templates, no `/keystone-<action>` shortcuts — the playbooks are agent-agnostic.
+Every action is invoked via natural language: "run task on TICKET-123," "run verify," "do a review pass." The agent reads `AGENTS.md` at session start, finds the action in the bulleted list, follows the link to `.agents/commands/<action>.md`, and executes the playbook. No prompt templates, no `/keystone-<action>` shortcuts — the playbooks are agent-agnostic.
 
-The canonical kickoff phrase is **"run task on `<ticket-id>`"** (or "run the task workflow") — `charter/actions/task.md` orchestrates `spec → orient → implementation → check-drift → verify → review`.
+The canonical kickoff phrase is **"run task on `<ticket-id>`"** (or "run the task workflow") — `.agents/commands/task.md` orchestrates `spec → orient → implementation → check-drift → verify → review`.
 
 ## Sensor execution
 
-Pi runs shell commands directly. Sensors execute autonomously — see `charter/adapters/pi/sensors.md` for the per-sensor binding.
+Pi runs shell commands directly. Sensors execute autonomously — see `.keystone/hosts/pi/sensors.md` for the per-sensor binding.
 
 ## Sub-agent degradation
 
@@ -19,7 +19,7 @@ The **review** action would ideally spawn `review-functional`, `review-security`
 1. **Sequential** (default) — pi runs each reviewer pass in turn against the same diff and combines findings.
 2. **tmux fan-out** — power users can launch parallel pi instances in tmux panes, each running one reviewer pass, then merge results.
 
-`charter/actions/review.md` defaults to sequential.
+`.agents/commands/review.md` defaults to sequential.
 
 ## Session and branching
 

@@ -282,18 +282,14 @@ func writeRuleShim(srcAbs, destAbs string, p Primitive) error {
 	return atomicWriteFile(destAbs, content)
 }
 
-// ruleShimContent builds the rule-shim bytes for guide p (see writeRuleShim).
+// ruleShimContent builds the Claude Code rule-shim bytes for p (see
+// writeRuleShim): `paths:` frontmatter — the only key Claude Code reads
+// from .claude/rules/ — plus provenance, then RuleShimMarkdown.
 func ruleShimContent(srcAbs string, p Primitive) ([]byte, error) {
 	data, err := os.ReadFile(srcAbs)
 	if err != nil {
 		return nil, fmt.Errorf("read %s: %w", srcAbs, err)
 	}
-	body := stripFrontmatter(string(data))
-	title := extractH1(body)
-	if title == "" {
-		title = ruleShimDiskID(p.ID)
-	}
-	sections := extractGuideSections(body)
 
 	// Shim frontmatter mirrors the canonical primitive shape (kind /
 	// id / description / globs) rather than a host-specific convention.
@@ -304,30 +300,52 @@ func ruleShimContent(srcAbs string, p Primitive) ([]byte, error) {
 	// about where to edit.
 	var b strings.Builder
 	b.WriteString("---\n")
-	b.WriteString("kind: rule\n")
-	fmt.Fprintf(&b, "id: rules/%s\n", ruleShimDiskID(p.ID))
 	b.WriteString("description: ")
 	b.WriteString(yamlSafe(p.Description))
 	b.WriteString("\n")
-	b.WriteString("globs:\n")
+	b.WriteString("paths:\n")
 	for _, g := range p.Paths {
 		fmt.Fprintf(&b, "  - %q\n", g)
 	}
 	fmt.Fprintf(&b, "source: %s\n", p.Path)
 	b.WriteString("generated_by: keystone-project\n")
 	b.WriteString("---\n\n")
-	fmt.Fprintf(&b, "# %s\n\n", title)
-	fmt.Fprintf(&b, "Full guide: `%s` (read on demand).\n\n", p.Path)
-	if sections == "" {
-		b.WriteString("_No structured rule sections found in the source guide._\n")
-	} else {
-		b.WriteString(sections)
-		if !strings.HasSuffix(sections, "\n") {
-			b.WriteString("\n")
-		}
-	}
+	b.WriteString(RuleShimMarkdown(string(data), p))
 	return []byte(b.String()), nil
 }
+
+// RuleShimMarkdown is the host-neutral body of a rule shim, built from the
+// rule file's contents: its title, a pointer to the full rule, and the
+// high-signal sections (iron law / golden rule / rules / anti-patterns).
+// Every host's rule shim shares it; only the frontmatter differs.
+func RuleShimMarkdown(fileContents string, p Primitive) string {
+	body := stripFrontmatter(fileContents)
+	title := extractH1(body)
+	if title == "" {
+		title = ruleShimDiskID(p.ID)
+	}
+	var b strings.Builder
+	fmt.Fprintf(&b, "# %s\n\n", title)
+	fmt.Fprintf(&b, "Full rule: `%s` (read on demand).\n\n", p.Path)
+	sections := extractGuideSections(body)
+	if strings.TrimSpace(sections) == "" {
+		b.WriteString("_No structured rule sections found in the source rule._\n")
+		return b.String()
+	}
+	b.WriteString(sections)
+	return b.String()
+}
+
+// Body returns a primitive file's markdown body, frontmatter removed.
+func Body(fileContents string) string { return stripFrontmatter(fileContents) }
+
+// ProjectedName is the keystone-prefixed, kebab-case name a primitive
+// projects under on a host (`keystone-<name>`), shared across hosts so
+// one concept keeps one name everywhere.
+func ProjectedName(id string) string { return projectedDiskName(id) }
+
+// RuleSlug is the flattened, keystone-prefixed file name for a rule shim.
+func RuleSlug(id string) string { return ruleShimDiskID(id) }
 
 // stripFrontmatter returns the body of a markdown document with the
 // leading YAML frontmatter block removed. If the body has no

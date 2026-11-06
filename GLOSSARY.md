@@ -19,7 +19,7 @@ sometimes code. **You write it.**
 - policy
 
 Keystone **manages the charter.** In a Keystone repo the charter lives at
-`.charter/` and is indexed at `.charter/INDEX.json`.
+`.agents/` and is indexed at `.keystone/INDEX.json`.
 
 ### Harness
 
@@ -59,7 +59,7 @@ it manages the charter that constrains whatever harness you run.
 A typed unit of the charter — one of 13 kinds (`guide`, `sensor`,
 `agent`, `command`, `skill`, `playbook`, `pattern`, `corpus`, `document`,
 `concern`, `posture`, `tool`, `eval`). Each carries canonical frontmatter and a
-canonical path under `.charter/`.
+canonical path under `.agents/`.
 
 ## Signal
 
@@ -80,5 +80,5 @@ primitive kind is retired — reactions self-subscribe.
 
 Rendering the charter into a host agent's native paths (`.claude/rules/`,
 `.claude/skills/`, `.cursor/rules/`, `AGENTS.md`, …) via `keystone project`.
-Canonical source is `.charter/`; projected files are generated — don't
+Canonical source is `.agents/`; projected files are generated — don't
 hand-edit them.

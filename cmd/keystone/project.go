@@ -10,9 +10,6 @@ import (
 	"github.com/tacoda/keystone/internal/framework/adapters/agnostic"
 	"github.com/tacoda/keystone/internal/framework/adapters/aider"
 	"github.com/tacoda/keystone/internal/framework/adapters/claudecode"
-	"github.com/tacoda/keystone/internal/framework/adapters/continueide"
-	"github.com/tacoda/keystone/internal/framework/adapters/cursor"
-	"github.com/tacoda/keystone/internal/framework/adapters/opencode"
 	"github.com/tacoda/keystone/internal/framework/config"
 	"github.com/tacoda/keystone/internal/framework/primitive"
 )
@@ -25,6 +22,7 @@ import (
 // them as findings.
 func runProject(args []string) error {
 	dir := "."
+	overwrite := false
 	for i := 0; i < len(args); i++ {
 		a := args[i]
 		switch {
@@ -39,6 +37,8 @@ func runProject(args []string) error {
 			i++
 		case strings.HasPrefix(a, "--dir="):
 			dir = strings.TrimPrefix(a, "--dir=")
+		case a == "--overwrite":
+			overwrite = true
 		case strings.HasPrefix(a, "-"):
 			return fmt.Errorf("unknown flag %s", a)
 		default:
@@ -66,7 +66,7 @@ func runProject(args []string) error {
 	}
 	primitives = composed
 
-	res, err := projectHosts(absDir, primitives, os.Stdout)
+	res, err := projectHosts(absDir, primitives, os.Stdout, overwrite)
 	if err != nil {
 		return err
 	}
@@ -76,7 +76,7 @@ func runProject(args []string) error {
 	// Run host adapters. Each adapter projects the host-specific
 	// surface (hooks → .claude/settings.json, .cursor/rules/, etc.).
 	// Source of truth for hooks lives in sensor frontmatter under
-	// `.agents/sensors/` — the adapter reads the already-walked
+	// `.agents/hooks/` — the adapter reads the already-walked
 	// primitive slice rather than walking again.
 	cfg, cfgErr := config.ReadProjectConfig(absDir)
 	if cfgErr != nil && !errors.Is(cfgErr, os.ErrNotExist) {
@@ -98,14 +98,6 @@ func runProject(args []string) error {
 	// `adapters:` list. Each adapter writes its host's surface and
 	// reports the count of files emitted.
 	if cfg != nil {
-		if cfg.HasAdapter(config.AdapterCursor) {
-			cres, err := cursor.ProjectRules(absDir, primitives)
-			if err != nil {
-				return fmt.Errorf("cursor rules: %w", err)
-			}
-			fmt.Fprintf(os.Stdout, "  cursor: %d rule(s) written, %d unchanged\n",
-				cres.Wrote, cres.Unchanged)
-		}
 		if cfg.HasAdapter(config.AdapterAider) {
 			ares, err := aider.ProjectAider(absDir, agnostic.RenderPointer(agnostic.AiderProfile()))
 			if err != nil {
@@ -116,22 +108,6 @@ func runProject(args []string) error {
 			} else {
 				fmt.Fprintf(os.Stdout, "  aider: unchanged\n")
 			}
-		}
-		if cfg.HasAdapter(config.AdapterContinue) {
-			cnres, err := continueide.ProjectRules(absDir, primitives)
-			if err != nil {
-				return fmt.Errorf("continue rules: %w", err)
-			}
-			fmt.Fprintf(os.Stdout, "  continue: %d rule(s) written, %d unchanged\n",
-				cnres.Wrote, cnres.Unchanged)
-		}
-		if cfg.HasAdapter(config.AdapterOpenCode) {
-			ores, err := opencode.ProjectAgents(absDir, primitives)
-			if err != nil {
-				return fmt.Errorf("opencode: %w", err)
-			}
-			fmt.Fprintf(os.Stdout, "  opencode: %d file(s) written, %d unchanged (%d rule(s))\n",
-				ores.Wrote, ores.Unchanged, ores.Rules)
 		}
 	}
 	return nil

@@ -306,7 +306,7 @@ type Frontmatter struct {
 
 	// HostTriggers is the per-host activation surface for computational
 	// sensors. Same pattern as other primitive frontmatter — declared
-	// inline in the sensor's `.agents/sensors/<id>.md` rather
+	// inline in the sensor's `.agents/hooks/<id>.md` rather
 	// than in a separate config file. Each entry projects to one host
 	// hook entry (Claude Code: .claude/settings.json; Cursor: equivalent
 	// hook config; etc.) via per-host adapters. Empty for LLM-judgment

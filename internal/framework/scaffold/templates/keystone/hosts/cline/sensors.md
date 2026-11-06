@@ -10,22 +10,22 @@ Cline has a built-in **execute_command** tool that runs shell commands in the wo
 
 ## Per-sensor binding
 
-Sensor commands come from `charter/corpus/state/CODEBASE_STATE.md`, populated by the **bootstrap** action.
+Sensor commands come from `.agents/references/state/CODEBASE_STATE.md`, populated by the **bootstrap** action.
 
 | Sensor | Fires inside | Implementation |
 |---|---|---|
-| [lint](sensors/lint.md) | **verify** action | `execute_command` running `<lint command>` |
-| [type-check](sensors/type-check.md) | **verify** action | `execute_command` running `<type-check command>`. Skipped when no type checker. |
-| [test](sensors/test.md) | **verify** action | `execute_command` running `<test command>`. Fresh run per turn. |
-| [build](sensors/build.md) | **verify** action | `execute_command` running `<build command>` |
-| [drift](sensors/drift.md) | **check-drift** + **verify** + **audit** | `execute_command` for `git diff`; agent reads loaded guides and compares. No state writes. |
-| [coverage](sensors/coverage.md) | **verify** + **audit** | `execute_command` running `<coverage command>`; agent proposes a diff to `corpus/state/CODEBASE_STATE.md` via the file-edit tool. |
-| [risk-fingerprint](sensors/risk-fingerprint.md) | **audit** | `execute_command` for complexity metrics + `git log --stat`; agent writes table to `corpus/state/risk-fingerprints.md`. |
-| [traffic-topology](sensors/traffic-topology.md) | **audit** | `git log` + criticality from `corpus/state/CODEBASE_STATE.md` → `corpus/state/traffic-topology.md`. |
-| [state-region](sensors/state-region.md) | **orient** action | Agent reads `corpus/state/CODEBASE_STATE.md` and active migrations via `read_file`. No shell needed. |
-| [commit-message](sensors/commit-message.md) | **release** phase, pre-commit | Agent inspects the proposed message; runs `git commit` via `execute_command` only after the message passes. |
-| [tracker-card-fetcher](sensors/tracker-card-fetcher.md) | **spec** action | MCP tracker server (if configured) — Atlassian, Linear, GitHub — or `execute_command` with `gh issue view`. Fallback: user pastes. |
-| [spec-adherence](sensors/spec-adherence.md) | **review** action | Agent reads spec + diff and walks AC. No shell needed. |
+| [lint](../../../.agents/hooks/lint.md) | **verify** action | `execute_command` running `<lint command>` |
+| [type-check](../../../.agents/hooks/type-check.md) | **verify** action | `execute_command` running `<type-check command>`. Skipped when no type checker. |
+| [test](../../../.agents/hooks/test.md) | **verify** action | `execute_command` running `<test command>`. Fresh run per turn. |
+| [build](../../../.agents/hooks/build.md) | **verify** action | `execute_command` running `<build command>` |
+| [drift](../../../.agents/hooks/drift.md) | **check-drift** + **verify** + **audit** | `execute_command` for `git diff`; agent reads loaded guides and compares. No state writes. |
+| [coverage](../../../.agents/hooks/coverage.md) | **verify** + **audit** | `execute_command` running `<coverage command>`; agent proposes a diff to `corpus/state/CODEBASE_STATE.md` via the file-edit tool. |
+| [risk-fingerprint](../../../.agents/hooks/risk-fingerprint.md) | **audit** | `execute_command` for complexity metrics + `git log --stat`; agent writes table to `corpus/state/risk-fingerprints.md`. |
+| [traffic-topology](../../../.agents/hooks/traffic-topology.md) | **audit** | `git log` + criticality from `corpus/state/CODEBASE_STATE.md` → `corpus/state/traffic-topology.md`. |
+| [state-region](../../../.agents/hooks/state-region.md) | **orient** action | Agent reads `corpus/state/CODEBASE_STATE.md` and active migrations via `read_file`. No shell needed. |
+| [commit-message](../../../.agents/hooks/commit-message.md) | **release** phase, pre-commit | Agent inspects the proposed message; runs `git commit` via `execute_command` only after the message passes. |
+| [tracker-card-fetcher](../../../.agents/hooks/tracker-card-fetcher.md) | **spec** action | MCP tracker server (if configured) — Atlassian, Linear, GitHub — or `execute_command` with `gh issue view`. Fallback: user pastes. |
+| [spec-adherence](../../../.agents/hooks/spec-adherence.md) | **review** action | Agent reads spec + diff and walks AC. No shell needed. |
 
 ## State writes
 

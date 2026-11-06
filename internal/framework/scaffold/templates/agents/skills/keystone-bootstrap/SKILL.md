@@ -7,16 +7,16 @@ description: 'One-time initial charter scaffold — detect stack, seed state, sc
 
 The first thing to run after `keystone init`. Walks the repo, detects
 the real stack, and replaces every template placeholder under
-`.charter/corpus/state/` with code-grounded values.
+`.agents/references/state/` with code-grounded values.
 
 The canonical playbook is the **bootstrap action** at
-`.charter/actions/bootstrap.md`. This skill is a thin
+`.agents/commands/bootstrap.md`. This skill is a thin
 trigger that points the agent at it — open the action and execute its
 activities in order.
 
 ## Run
 
-Open `.charter/actions/bootstrap.md` and execute every activity
+Open `.agents/commands/bootstrap.md` and execute every activity
 listed under `## Activities`. Every activity must land a real file
 change before moving on; narration does not count.
 
@@ -38,7 +38,7 @@ A short summary of the work, copied from the action:
    adapters).
 
 After every state-file write or new primitive, run `keystone index` so
-`.charter/INDEX.json` reflects the new shape. If skills, subagents,
+`.keystone/INDEX.json` reflects the new shape. If skills, subagents,
 or commands changed, run `keystone project` to regenerate `.claude/`.
 
 ## When to trigger
@@ -52,7 +52,7 @@ or commands changed, run `keystone project` to regenerate `.claude/`.
 
 Bootstrap is **not** done until:
 
-- `grep -E '<[^>]+>' .charter/corpus/state/CODEBASE_STATE.md`
+- `grep -E '<[^>]+>' .agents/references/state/CODEBASE_STATE.md`
   returns no template placeholders.
 - `last_reconciled` in `CODEBASE_STATE.md` is today's date.
 - `corpus/idioms/<stack>/` and `guides/idioms/<stack>/` exist for

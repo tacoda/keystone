@@ -1,9 +1,9 @@
 ---
 kind: rule
 id: guides/idioms/charter-content/state-files
-description: 'Authoring rules for .charter/corpus/state/.'
+description: 'Authoring rules for .agents/references/state/.'
 paths:
-  - ".charter/corpus/state/**/*.md"
+  - ".agents/references/state/**/*.md"
   - "internal/framework/scaffold/templates/**/corpus/state/**/*.md"
 tags:
   - charter
@@ -11,7 +11,7 @@ tags:
 ---
 # State files — rules
 
-The rules from [`corpus/idioms/charter-content/state-files.md`](../../../corpus/idioms/charter-content/state-files.md).
+The rules from [`corpus/idioms/charter-content/state-files.md`](../../../references/idioms/charter-content/state-files.md).
 
 ## IRON LAW
 

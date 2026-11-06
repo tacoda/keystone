@@ -19,12 +19,12 @@ sensors against the in-progress diff:
 Each sensor returns a structured finding list. Semantic check — runs
 after computational sensors (lint / type / test / build) pass.
 
-Canonical playbook: `.charter/actions/review.md`. Full
-discipline at `.charter/guides/process/review.md`.
+Canonical playbook: `.agents/commands/review.md`. Full
+discipline at `.agents/rules/process/review.md`.
 
 ## Run
 
-Open `.charter/actions/review.md` and execute every activity.
+Open `.agents/commands/review.md` and execute every activity.
 
 ## When to trigger
 

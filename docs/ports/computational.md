@@ -6,8 +6,8 @@
 ## Path convention
 
 ```
-.charter/guides/computational/<tool>.md                      # project-owned
-.charter/policies/<policy>/guides/computational/<tool>.md     # policy-owned (read-only)
+.agents/rules/computational/<tool>.md                      # project-owned
+.keystone/policies/<policy>/guides/computational/<tool>.md     # policy-owned (read-only)
 ```
 
 One file per tool. Flat under `computational/` — no further sub-directories.
@@ -40,7 +40,7 @@ Project wins. Pruning flywheel removes entries when the tool stops running local
 
 ## Example
 
-See `.charter/guides/computational/gofmt.md`.
+See `.agents/rules/computational/gofmt.md`.
 
 ## Authoring
 

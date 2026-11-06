@@ -1,3 +1,6 @@
+// FROZEN: used only by the v2.x migrations. Live projection (5.0+) is
+// internal/framework/projection (Cursor profile).
+//
 // Package cursor projects keystone primitives into Cursor's
 // host-native rule layout. Cursor reads `.cursor/rules/<id>.mdc` (MDC
 // = Markdown + frontmatter) and auto-applies rules whose `globs:`

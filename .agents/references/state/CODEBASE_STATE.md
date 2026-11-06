@@ -62,7 +62,7 @@ Inventory of sensors wired up for this project. A sensor's row is omitted when i
 
 ## Guides
 
-Inferential guides (markdown rules) are activated by directory — see `.charter/guides/`. The table below tracks **computational guides** the bootstrap action detected.
+Inferential guides (markdown rules) are activated by directory — see `.agents/rules/`. The table below tracks **computational guides** the bootstrap action detected.
 
 | Tool | Kind | What it covers | Activation |
 |---|---|---|---|
@@ -78,8 +78,8 @@ This repo is the keystone framework dogfooding itself. Two stacks coexist: the G
 
 | Stack | Idiom folder | Region(s) |
 |---|---|---|
-| charter-content | `.charter/corpus/idioms/charter-content/` (+ paired `.charter/guides/idioms/charter-content/`) | `.charter/`, `internal/framework/scaffold/templates/` (if present) |
-| go | `.charter/corpus/idioms/go/` (+ paired `.charter/guides/idioms/go/`) | `cmd/`, `internal/` |
+| charter-content | `.agents/references/idioms/charter-content/` (+ paired `.agents/rules/idioms/charter-content/`) | `.agents/`, `internal/framework/scaffold/templates/` (if present) |
+| go | `.agents/references/idioms/go/` (+ paired `.agents/rules/idioms/go/`) | `cmd/`, `internal/` |
 
 **Primary stack:** `charter-content`. The Go code exists to read, write, and validate charter content; the content's shape is the load-bearing surface. Go idioms matter, but document-structure rules matter more.
 
@@ -100,13 +100,13 @@ Notable dependencies shaping how code is written.
 A "region" is a directory or set of directories with shared conventions.
 
 ### `cmd/keystone/`
-- **Idioms:** `.charter/corpus/idioms/go/`
+- **Idioms:** `.agents/references/idioms/go/`
 - **Coverage:** n/a (CLI wiring; behavior covered by `internal/` tests)
 - **Last reconciled:** 2026-06-18
 - **Active migrations:** Keystone 2.0 cleanup
 
 ### `internal/framework/`
-- **Idioms:** `.charter/corpus/idioms/go/`
+- **Idioms:** `.agents/references/idioms/go/`
 - **Coverage:** n/a (no coverage tooling wired; `go test -cover ./...` available)
 - **Last reconciled:** 2026-06-18
 - **Active migrations:** Keystone 2.0 cleanup
@@ -117,8 +117,8 @@ A "region" is a directory or set of directories with shared conventions.
 - **Last reconciled:** 2026-06-18
 - **Active migrations:** none
 
-### `.charter/`
-- **Idioms:** `.charter/corpus/idioms/charter-content/` (primary)
+### `.agents/`
+- **Idioms:** `.agents/references/idioms/charter-content/` (primary)
 - **Coverage:** n/a (validated structurally by `keystone verify` + the drift / charter-debt sensors)
 - **Last reconciled:** 2026-06-18
 - **Active migrations:** Keystone 2.0 cleanup
@@ -129,7 +129,7 @@ GitHub Actions. Single workflow `.github/workflows/release.yml` — release-only
 
 ## Methodology
 
-- **Pacing mode:** paired (active — see `.charter/guides/process/modes.md`).
+- **Pacing mode:** paired (active — see `.agents/rules/process/modes.md`).
 - **Testing posture:** TDD — write failing test, get review, smallest impl that turns at least one new test green.
 - **Code review:** sensor-driven on diff (`review` action runs the four review sensors).
 - **Compliance scope:** none. No SOX/HIPAA/SOC 2 starter rules apply.
@@ -142,6 +142,6 @@ Match current Go idioms: stdlib first, small interfaces, cobra commands, table-d
 
 Active areas:
 - `internal/framework/` — primary implementation surface; high churn during 2.0 cleanup.
-- `.charter/` — the charter primitives this project both ships and consumes (dogfooded).
+- `.agents/` — the charter primitives this project both ships and consumes (dogfooded).
 
 Do-not-touch: none flagged. Deprecated subsystems: none flagged.

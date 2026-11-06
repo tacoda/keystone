@@ -4,7 +4,7 @@ How ambient corpus content gets loaded into Codex, where the menu lives, and how
 
 ## The menu
 
-Codex reads `AGENTS.md` at the repo root on session start. Keystone drops one there pointing at `charter/README.md`.
+Codex reads `AGENTS.md` at the repo root on session start. Keystone drops one there pointing at `.agents/README.md`.
 
 Codex actually walks a cascade — `~/.codex/AGENTS.md` (global) first, then every `AGENTS.md` from the git root down to the current working directory, concatenated in that order (closer to cwd = higher precedence, because it appears later in the prompt). At each level, `AGENTS.override.md` is checked before `AGENTS.md` and wins when present. The combined load is capped at `project_doc_max_bytes` (32 KiB default); accumulation stops once the cap is hit. The charter only ships the repo-root file; the cascade is bonus capability the user can layer their own content into without us prescribing.
 
@@ -33,8 +33,8 @@ Codex has no in-session `/clear`. To reset context after a flywheel write (**syn
 
 ## Lazy-by-region — manual
 
-Codex has no glob-based rules system. The **orient** action implements lazy-by-region manually: the agent reads the touched paths, walks `charter/corpus/state/CODEBASE_STATE.md` to map paths to stacks, consults `charter/corpus/state/GLOBS_INDEX.md` to gate per-guide loading on declared `globs:`, and reads the resulting guides on demand.
+Codex has no glob-based rules system. The **orient** action implements lazy-by-region manually: the agent reads the touched paths, walks `.agents/references/state/CODEBASE_STATE.md` to map paths to stacks, consults `.agents/references/state/GLOBS_INDEX.md` to gate per-guide loading on declared `globs:`, and reads the resulting guides on demand.
 
 ## Approval modes ↔ pacing modes
 
-Codex's approval flags (`--ask-for-approval`, `--auto-edit`, `--full-auto`) are the closest analog to the charter's pacing modes. The flag is chosen at session start, not switched mid-session — so to change pacing mid-task, the user updates `charter/guides/process/modes.md` and starts a new Codex session with the matching flag.
+Codex's approval flags (`--ask-for-approval`, `--auto-edit`, `--full-auto`) are the closest analog to the charter's pacing modes. The flag is chosen at session start, not switched mid-session — so to change pacing mid-task, the user updates `.agents/rules/process/modes.md` and starts a new Codex session with the matching flag.

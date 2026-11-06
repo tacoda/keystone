@@ -8,7 +8,7 @@ expect.
 ## Shape
 
 ```
-.charter/evals/<id>/
+.agents/evals/<id>/
 ├── EVAL.md          # canonical primitive frontmatter + scenario prose
 ├── fixture/         # snapshot of code the eval runs against (optional)
 └── expected.json    # assertions
@@ -60,7 +60,7 @@ or regenerable artifacts, you can gitignore it:
 
 ```gitignore
 # in your project's .gitignore
-.charter/evals/*/fixture/
+.agents/evals/*/fixture/
 ```
 
 Tradeoff: baseline diffs against a ref where the fixture is missing
@@ -76,5 +76,5 @@ fragments) can ship them. Org policies often bundle evals alongside
 their guides so consumers can verify the policy's contract is met
 locally.
 
-See [`docs/ports/primitive.md`](../../../docs/ports/primitive.md) for
+See [`docs/ports/primitive.md`](../../docs/ports/primitive.md) for
 the canonical descriptor shape.

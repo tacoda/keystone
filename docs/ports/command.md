@@ -6,8 +6,8 @@
 ## Path convention
 
 ```
-.charter/commands/<id>.md                                    # project-owned
-.charter/policies/<policy>/commands/<id>.md                   # policy-owned (read-only)
+.agents/commands/<id>.md                                    # project-owned
+.keystone/policies/<policy>/commands/<id>.md                   # policy-owned (read-only)
 ```
 
 Flat — commands are global by `id`.
@@ -37,7 +37,7 @@ Project wins; deeper-nested policies refine. `strict.commands: [<id>]` locks abs
 
 ## Example
 
-See `.charter/commands/audit.md` — the slash-command wrapper for the audit action.
+See `.agents/commands/audit.md` — the slash-command wrapper for the audit action.
 
 ## Authoring
 

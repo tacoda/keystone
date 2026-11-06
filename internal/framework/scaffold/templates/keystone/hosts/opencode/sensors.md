@@ -5,7 +5,7 @@ How sensors fire inside opencode.
 ## Execution model
 
 opencode runs shell commands directly. **All sensors run autonomously** —
-the agent reads tool commands from `.charter/corpus/state/CODEBASE_STATE.md`,
+the agent reads tool commands from `.agents/references/state/CODEBASE_STATE.md`,
 invokes them via shell, and consumes the output. No human paste-and-report
 loop. How aggressively shell runs without approval depends on the
 permissions configured in `opencode.json`.

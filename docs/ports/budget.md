@@ -60,13 +60,13 @@ port, and renders a per-port breakdown:
 ```
 budget: per-port token estimate (whitespace-approximate)
   • actions    2955 / no cap
-        505  .charter/actions/policy-audit.md
-        441  .charter/actions/README.md
+        505  .agents/commands/policy-audit.md
+        441  .agents/commands/README.md
         ...
   • corpus     30715 / 50000  (61% used)
         ...
   ! guides     18893 / 10000
-        867  .charter/guides/process/release.md
+        867  .agents/rules/process/release.md
         ...
   ⚠ 1 port(s) over their declared budget — top contributors above
 ```

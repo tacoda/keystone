@@ -6,21 +6,21 @@ How an unknown agent picks up the corpus.
 
 For agents without a specific entry-file convention, the installer drops an `AGENTS.md` at the repo root. This is the de facto cross-agent convention; most modern coding agents will read it on session start.
 
-`AGENTS.md` content is short — a few paragraphs pointing at `.charter/README.md` and naming the five layers. The full corpus is read from `.charter/` on demand, not autoloaded.
+`AGENTS.md` content is short — a few paragraphs pointing at `.agents/README.md` and naming the five layers. The full corpus is read from `.agents/` on demand, not autoloaded.
 
 ## Where the agent reads from
 
 Every agent that uses the generic adapter is expected to:
 
 1. Read `AGENTS.md` (or whatever the user told it to read) at session start.
-2. From there, follow links to `.charter/README.md`.
-3. Read additional `.charter/` files on demand as work progresses.
+2. From there, follow links to `.agents/README.md`.
+3. Read additional `.agents/` files on demand as work progresses.
 
 This is the floor — markdown read on demand. Anything beyond that is an adapter upgrade.
 
 ## Lazy-by-region — manual
 
-The generic adapter does not have a mechanism to automatically load `.charter/corpus/idioms/<stack>/` when editing a particular path. The agent must read the **orient** phase explicitly at task start and load the relevant idioms by hand.
+The generic adapter does not have a mechanism to automatically load `.agents/references/idioms/<stack>/` when editing a particular path. The agent must read the **orient** phase explicitly at task start and load the relevant idioms by hand.
 
 ## Context-reset primitive
 

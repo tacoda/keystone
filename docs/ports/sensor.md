@@ -6,8 +6,8 @@
 ## Path convention
 
 ```
-.charter/sensors/<name>.md                                   # project-owned
-.charter/policies/<policy>/sensors/<name>.md                  # policy-owned (read-only)
+.agents/hooks/<name>.md                                   # project-owned
+.keystone/policies/<policy>/sensors/<name>.md                  # policy-owned (read-only)
 ```
 
 Flat — no topic directory. Sensors are global by name across the cascade.

@@ -120,8 +120,8 @@ func checkProjectionDrift(absDir string) error {
 		return err
 	}
 	composed, _ := primitive.Compose(prims)
-	outs, _, mode := planHosts(absDir, composed)
-	drifts := projection.Check(absDir, outs, mode)
+	pr, mode := planHosts(absDir, composed)
+	drifts := projection.Check(absDir, pr.Outputs, mode)
 	if len(drifts) == 0 {
 		return nil
 	}

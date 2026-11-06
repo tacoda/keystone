@@ -19,11 +19,11 @@ If the project also needs a custom system prompt (replacing pi's default), use `
 - `.pi/settings.json` — project-scoped JSON settings (model selection, telemetry, compaction, etc.). User-owned.
 - `.pi/SYSTEM.md` or `.pi/APPEND_SYSTEM.md` — optional system-prompt overrides. User-owned.
 
-The installer does **not** create `.pi/`. Lifecycle actions are agent-agnostic playbooks at `.charter/actions/<action>.md`; the agent reads them on demand when the user asks to run an action by name.
+The installer does **not** create `.pi/`. Lifecycle actions are agent-agnostic playbooks at `.agents/commands/<action>.md`; the agent reads them on demand when the user asks to run an action by name.
 
 ## Ambient loading
 
-Pi's `AGENTS.md` precedence chain means the corpus pointer is always available regardless of where in the repo the user runs pi. The full corpus (`.charter/`) is read on demand via pi's file-read capability — not autoloaded.
+Pi's `AGENTS.md` precedence chain means the corpus pointer is always available regardless of where in the repo the user runs pi. The full corpus (`.agents/`) is read on demand via pi's file-read capability — not autoloaded.
 
 This is intentional: loading the entire corpus at every session start would burn context.
 
@@ -45,4 +45,4 @@ For pi, `/compact` is the right reset after corpus mutation, unless you want to 
 
 ## Lazy-by-region — manual
 
-Pi has no glob-based rules system (unlike Cursor's `.cursor/rules/*.mdc`). The **orient** action playbook implements lazy-by-region manually: the agent reads the touched paths, walks `.charter/corpus/state/CODEBASE_STATE.md` to map paths to stacks, consults `.charter/corpus/state/GLOBS_INDEX.md` to gate per-guide loading on declared `globs:`, and reads the resulting guides with pi's file-read tool.
+Pi has no glob-based rules system (unlike Cursor's `.cursor/rules/*.mdc`). The **orient** action playbook implements lazy-by-region manually: the agent reads the touched paths, walks `.agents/references/state/CODEBASE_STATE.md` to map paths to stacks, consults `.agents/references/state/GLOBS_INDEX.md` to gate per-guide loading on declared `globs:`, and reads the resulting guides with pi's file-read tool.

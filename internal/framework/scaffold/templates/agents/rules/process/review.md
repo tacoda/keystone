@@ -21,7 +21,7 @@ Find the spec file — most recent under `docs/specs/` matching the task. If the
 
 Spawn every available review agent (named `review-*`) in parallel on the current diff. The default set is `review-functional`, `review-security`, `review-risk`, and `review-deployment`; teams may add more (`review-performance`, `review-accessibility`, project-specific reviewers).
 
-Where review agents live, and how they are spawned, is agent-specific — see `charter/adapters/<your-agent>/lifecycle.md`. Agents that do not support sub-agent parallelism collapse this into sequential review passes.
+Where review agents live, and how they are spawned, is agent-specific — see `.keystone/hosts/<your-agent>/lifecycle.md`. Agents that do not support sub-agent parallelism collapse this into sequential review passes.
 
 Each agent returns a numbered list of findings, graded:
 - **blocker** — must be fixed before release.

@@ -6,7 +6,7 @@ last_reviewed: 2026-06-18
 ---
 # Code Debt Ledger
 
-Populated by the **audit** and **debt-review** actions from the [code-debt sensor](../../sensors/code-debt.md). Hand-edits during those actions are OK.
+Populated by the **audit** and **debt-review** actions from the [code-debt sensor](../../agents/code-debt.md). Hand-edits during those actions are OK.
 
 Paired ledger: [`charter-debt.md`](charter-debt.md) — debt in the charter itself. Tracked separately on purpose.
 
@@ -22,7 +22,7 @@ The known debt this codebase carries. One row per item. The point of the ledger 
 
 ## Categories
 
-See [`../../sensors/code-debt.md`](../../sensors/code-debt.md) for category and severity definitions. Keep them consistent — the planning phase reads this table verbatim.
+See [`../../sensors/code-debt.md`](../../agents/code-debt.md) for category and severity definitions. Keep them consistent — the planning phase reads this table verbatim.
 
 ## How to use it
 

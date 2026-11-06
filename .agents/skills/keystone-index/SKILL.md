@@ -28,7 +28,7 @@ count. Idempotent — safe to run repeatedly.
 
 ## When to trigger
 
-- After authoring or editing any file under `.charter/`.
+- After authoring or editing any file under `.agents/`.
 - After running `keystone migrate` (the migrator regenerates the index
   automatically, but a re-run is cheap if drift is suspected).
 - Before reading `.keystone/INDEX.json` later in the same session if

@@ -3,7 +3,7 @@ kind: rule
 id: guides/idioms/charter-content/primitive-shape
 description: 'Frontmatter, canonical paths, corpus/guide pairing, narrow-only globs.'
 paths:
-  - ".charter/**/*.md"
+  - ".agents/**/*.md"
   - "internal/framework/scaffold/templates/**/*.md"
 tags:
   - charter
@@ -11,7 +11,7 @@ tags:
 ---
 # Primitive shape — rules
 
-The rules from [`corpus/idioms/charter-content/primitive-shape.md`](../../../corpus/idioms/charter-content/primitive-shape.md).
+The rules from [`corpus/idioms/charter-content/primitive-shape.md`](../../../references/idioms/charter-content/primitive-shape.md).
 
 ## IRON LAW
 

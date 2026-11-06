@@ -1,11 +1,11 @@
 ---
 name: keystone-index
-description: 'Regenerate .charter/INDEX.json — the primitive descriptor index every agent reads at session start. Triggers: keystone index; keystone:index; /keystone:index; refresh the keystone index; regenerate INDEX.json; reindex primitives.'
+description: 'Regenerate .keystone/INDEX.json — the primitive descriptor index every agent reads at session start. Triggers: keystone index; keystone:index; /keystone:index; refresh the keystone index; regenerate INDEX.json; reindex primitives.'
 ---
 
 # keystone:index — refresh the primitive descriptor index
 
-The agent's session-start path is "read `.charter/INDEX.json`, then
+The agent's session-start path is "read `.keystone/INDEX.json`, then
 open primitive bodies on demand." When canonical charter files change,
 the index goes stale and the agent's view of what is available diverges
 from what is on disk.
@@ -20,15 +20,15 @@ From the project root:
 keystone index
 ```
 
-The command writes `.charter/INDEX.json` and prints the primitive
+The command writes `.keystone/INDEX.json` and prints the primitive
 count. Idempotent — safe to run repeatedly.
 
 ## When to trigger
 
-- After authoring or editing any file under `.charter/`.
+- After authoring or editing any file under `.agents/`.
 - After running `keystone migrate` (the migrator regenerates the index
   automatically, but a re-run is cheap if drift is suspected).
-- Before reading `.charter/INDEX.json` later in the same session if
+- Before reading `.keystone/INDEX.json` later in the same session if
   any primitive file has changed since session start.
 
 ## Failure modes

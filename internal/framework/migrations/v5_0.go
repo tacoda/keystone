@@ -7,6 +7,8 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+
+	"github.com/tacoda/keystone/internal/framework/lockfile"
 )
 
 // Version 5.0 — standard vocabulary (ADR 0010). Primitives move from
@@ -92,10 +94,53 @@ func planUp_5_0(absDir string) (*Plan, error) {
 	p.Add("ignore "+stateRoot_5_0+"/policies/ in .gitignore where "+charterRoot_5_0+"/policies/ was ignored", func(absDir string) error {
 		return carryGitignore_5_0(filepath.Join(absDir, ".gitignore"))
 	})
+	p.Add("record 4.x keystone-* host projections as keystone-owned (so `keystone project` may replace and prune them)", recordLegacyProjections_5_0)
 	p.Add("rebuild INDEX.json + INDEX.lite.json under "+stateRoot_5_0+"/", func(absDir string) error {
 		return rebuildIndex(absDir, agentsRoot_5_0, stateRoot_5_0)
 	})
 	return p, nil
+}
+
+// legacyProjectionDirs_5_0 are the host directories 4.x projected into,
+// always under a `keystone-` name.
+var legacyProjectionDirs_5_0 = []string{
+	".claude/skills", ".claude/agents", ".claude/commands", ".claude/rules",
+	".cursor/rules", ".continue/rules",
+	".opencode/skills", ".opencode/agents", ".opencode/commands", ".opencode/rules",
+}
+
+// recordLegacyProjections_5_0 adds every `keystone-*` entry in the 4.x
+// projection dirs to the lockfile's `projections` list. 4.x kept no
+// ownership record, and 5.0 refuses to overwrite unowned paths, so without
+// this an upgraded repo would need `keystone project --overwrite`. Only
+// keystone-named entries are recorded; user files are never claimed.
+func recordLegacyProjections_5_0(absDir string) error {
+	path := filepath.Join(absDir, stateRoot_5_0, "lockfile.json")
+	lf, err := lockfile.ReadFromPath(path)
+	if err != nil {
+		return err
+	}
+	owned := map[string]bool{}
+	for _, p := range lf.Projections {
+		owned[p] = true
+	}
+	for _, dir := range legacyProjectionDirs_5_0 {
+		entries, _ := os.ReadDir(filepath.Join(absDir, dir))
+		for _, e := range entries {
+			if strings.HasPrefix(e.Name(), "keystone-") {
+				owned[dir+"/"+e.Name()] = true
+			}
+		}
+	}
+	if len(owned) == len(lf.Projections) {
+		return nil // nothing new; idempotent
+	}
+	lf.Projections = lf.Projections[:0]
+	for p := range owned {
+		lf.Projections = append(lf.Projections, p)
+	}
+	sort.Strings(lf.Projections)
+	return lockfile.WriteToPath(path, lf)
 }
 
 // planDown_5_0 moves every 5.0 location back under .charter/. Best-effort,

@@ -254,28 +254,46 @@ Work on `feat/5.0-standard-vocabulary`, one PR per phase or pair of phases.
   categories. Dashboard nav splits into Constraints and Capabilities.
 - Verify: `mcp_test.go`, CLI tests, dashboard route tests; no 404 on any nav link.
 
-### Phase 6b: `keystone allocate` (context de-bloat)
+### Phase 6b: `keystone allocate` (convert existing setups; context de-bloat)
 
-User-requested. Reads a root instruction file (`CLAUDE.md`, `AGENTS.md`, or
-a path) and proposes moving sections out of it into the right primitive, so
-the always-loaded file shrinks.
+User-requested. One command for every "what's already here" case. Two
+entry points into a charter, and nothing overwritten without `--overwrite`:
 
-- Split the file into sections (H2/H3 blocks) and classify each one:
-  - mentions file paths or globs → **rule** with `paths:`;
-  - "always run X before commit/after edit" → **hook**;
-  - allow/deny tool or command lists → **permission**;
-  - a numbered procedure the user triggers → **command**; one the agent
-    should pick up on its own → **skill**;
-  - long rationale behind another section → **reference**;
-  - iron laws and short always-on rules → stay in the root file.
-- Report per section: target kind, proposed path, and token count moved out
-  of the always-loaded file. Total saving at the end.
-- `--apply` writes the new primitives and removes the moved sections, showing
-  the diff first (no silent overwrites). Default is report-only.
-- Heuristics are computational and deterministic. A `keystone-allocate`
-  skill wraps the report for an agent to refine the borderline cases.
-- Verify: golden tests on a fixture `CLAUDE.md` with one section per target
-  kind; `--apply` round-trip leaves `keystone lint` clean.
+- **Seed a clean project:** `keystone init` (skips existing files by
+  default). Its destructive `--reset` is replaced by `--overwrite`, which
+  replaces conflicting template files and never deletes anything else.
+- **Convert an existing setup:** `keystone allocate`.
+
+`keystone allocate` reads, by default, every known host-specific setup and
+root file:
+
+- `CLAUDE.md` / `AGENTS.md` / `GEMINI.md` / `.goosehints` sections;
+- `.claude/skills|agents|commands|rules/`, `.claude/settings.json` hooks and
+  permissions;
+- `.cursorrules`, `.cursor/rules/*.mdc`, `.cursor/skills|agents|commands/`;
+- `.github/copilot-instructions.md`, `.github/instructions|prompts|agents/`;
+- `.clinerules/`, `.windsurfrules`, `.continue/rules|prompts/`, `.opencode/`.
+
+Each item is classified into a 5.0 kind (root-file sections by heuristic:
+paths/globs → rule; "always run X before commit" → hook; allow/deny lists
+→ permission; numbered user procedure → command, agent-triggered → skill;
+long rationale → reference; iron laws stay in the root file) and mapped to
+its `.agents/` path, converting frontmatter (`globs:`/`applyTo:` → `paths:`,
+Cursor `alwaysApply` → no paths, Claude `name:` → spec skill, …).
+
+- Default is a report: per item, source → target kind and path, and the
+  always-loaded tokens it would save (pairs with Phase 6c budgets).
+- `--apply` writes into `.agents/` only. It never overwrites an existing
+  `.agents/` file (conflicts are reported) and leaves every original in place.
+- `--overwrite` additionally records the originals as keystone-owned, so the
+  next `keystone project` replaces them with links and shims. This is the
+  only path that replaces user files.
+- A `keystone-allocate` skill wraps the report so an agent can refine the
+  borderline classifications.
+- Verify: fixture repos per source (Claude-only, Cursor-only, Copilot-only,
+  mixed) → report golden files; `--apply` round-trip leaves `keystone lint`
+  clean and every original byte-identical; `--overwrite` then `project`
+  leaves no unowned conflicts.
 
 ### Phase 6c: Context budget, reportable and enforced
 
@@ -460,3 +478,33 @@ agent loads. 5.0 measures the load.
   (path code, as in Phase 2); `verify`/`lint`/`project` CLI got simpler via
   a shared `parseFlags`. Claude Code picked up the linked skills live in the
   session that built this (symlinked skill dirs confirmed working).
+- Phase 4a: done (dogfooded with `project --overwrite`, user-approved). Host profiles for all 10 hosts
+  in `internal/framework/projection/hosts.go`, selected by keystone.json
+  `adapters` (claude-code always). Per-host shim renderers (yaml.v3
+  frontmatter; Codex TOML). New `copy` strategy for Continue and Cline
+  skills. Old cursor/continue/opencode adapters retired from live projection
+  (cursor/continueide kept FROZEN for the v2.x migrations; opencode
+  deleted). Fixed: Claude Code rule shims emitted `globs:`, which Claude
+  Code ignores, so path-scoped rules loaded every turn — now `paths:`.
+  User rule (2026-11-05): never overwrite without `--overwrite`. So Apply no
+  longer auto-adopts 4.x files; `keystone project --overwrite` is the only
+  way to replace an unowned path, and the `v5_0` migration records 4.x
+  `keystone-*` projections as owned (explicit `keystone migrate`).
+- Path sweep (user-requested, 2026-11-05): every live reference to the 4.x
+  `.charter/` layout and the 1.x `charter/` prefix now points at `.agents/`
+  or `.keystone/` (old dir names mapped: actions→commands, personas→agents,
+  guides→rules, corpus→references, sensors→hooks, playbooks→skills,
+  adapters→hosts). 234 files: charter content, scaffold templates, host
+  docs, MCP prompts, README/CLAUDE/CONTRIBUTING/GLOSSARY/GOVERNANCE,
+  docs/conventions, docs/ports. 278 relative links repaired in installed
+  coordinates. Left on purpose: CHANGELOG, ADRs, old plans (history), frozen
+  migrations. Still broken (pre-existing, not folder moves — Phase 8):
+  links to missing `principles/`, `policies/universal`, `policy-audit.md`,
+  `rules/process/sensors.md`, and keystone's own `docs/ports` from templates.
+  Also fixed: `Apply` preflight (a refused plan writes nothing), duplicate
+  warnings aggregated per host + kind, empty per-skill dirs pruned,
+  INSTALL_PROFILE writes `kind: reference` + a working lockfile link.
+  Open: Cursor sees each skill at `.agents/skills` and `.claude/skills`
+  (dedupe unverified, Phase 9 smoke); command `audit` and skill
+  `keystone:audit` share the projected name `keystone-audit` (pre-existing
+  in 4.x; Claude Code lets the skill win) — Phase 6 renaming.

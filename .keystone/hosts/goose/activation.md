@@ -4,7 +4,7 @@ How the charter's ambient content (guides and process docs) loads into Goose, an
 
 ## The menu
 
-Goose reads `.goosehints` at the repo root on every session — the file is treated as project-specific hints prepended to the system prompt. The installer drops a short `.goosehints` that points at `.charter/`, lists the five components, and states the iron laws.
+Goose reads `.goosehints` at the repo root on every session — the file is treated as project-specific hints prepended to the system prompt. The installer drops a short `.goosehints` that points at `.agents/`, lists the five components, and states the iron laws.
 
 Goose also reads a **global** hints file at `~/.config/goose/hints.md`. The charter uses only the workspace `.goosehints`; the global file is the user's territory.
 
@@ -52,12 +52,12 @@ Guides should live in (or be reachable from) `.goosehints` so the model is alway
 
 Goose has no glob-based auto-attach. Region-scoped idiom loading happens inside the **orient** action, which:
 
-1. Reads `.charter/corpus/state/CODEBASE_STATE.md` to map touched paths to a stack.
-2. Reads `.charter/corpus/state/GLOBS_INDEX.md` and gates per-guide loading on declared `globs:` (guides without `globs:` keep stack-based loading).
-3. Reads `.charter/guides/idioms/<stack>/*.md` (rules) for the resulting set and, on demand, `.charter/corpus/idioms/<stack>/*.md` (reasoning).
+1. Reads `.agents/references/state/CODEBASE_STATE.md` to map touched paths to a stack.
+2. Reads `.agents/references/state/GLOBS_INDEX.md` and gates per-guide loading on declared `globs:` (guides without `globs:` keep stack-based loading).
+3. Reads `.agents/rules/idioms/<stack>/*.md` (rules) for the resulting set and, on demand, `.agents/references/idioms/<stack>/*.md` (reasoning).
 4. Carries those rules forward in the session.
 
-For sessions that touch one stack heavily, the user can add `.charter/guides/idioms/<stack>/` to `.goosehints` so the rules load automatically.
+For sessions that touch one stack heavily, the user can add `.agents/rules/idioms/<stack>/` to `.goosehints` so the rules load automatically.
 
 ## Recipes vs. interactive sessions
 
@@ -84,7 +84,7 @@ goose configure --add-extension
 - **New session** — every `goose run` invocation is a fresh session by default; recipes implicitly reset.
 - **`/clear`** — clears the current session's history without exiting (some Goose versions).
 
-After a flywheel write that touched any `.charter/guides/` file, start a new session so the next turn re-reads the updated guides via `.goosehints` and any recipe instructions.
+After a flywheel write that touched any `.agents/rules/` file, start a new session so the next turn re-reads the updated guides via `.goosehints` and any recipe instructions.
 
 ## Domain / state / process loading
 

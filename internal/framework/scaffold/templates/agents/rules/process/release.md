@@ -69,7 +69,7 @@ Title under 70 characters. Body links to the tracker ticket and explains the **w
 
 ### 5. Capture learnings
 
-Invoke the **learn** action. If during the work the agent encountered a situation not covered by the corpus and made a judgment call, the reasoning gets captured to `charter/learning/inbox/` for the next **synthesize** cycle.
+Invoke the **learn** action. If during the work the agent encountered a situation not covered by the corpus and made a judgment call, the reasoning gets captured to `.keystone/learning/inbox/` for the next **synthesize** cycle.
 
 This is the **Learning flywheel** kicking. Skipping it means the corpus never grows from this commit's lessons.
 
@@ -130,7 +130,7 @@ To exit release:
 | Tag (release) | git tag |
 | Changelog entry (release) | `CHANGELOG.md` |
 | Postmortem (incident) | `docs/postmortems/YYYY-MM-DD-<slug>.md` |
-| Learning capture | `charter/learning/inbox/<timestamp>-<slug>.md` |
+| Learning capture | `.keystone/learning/inbox/<timestamp>-<slug>.md` |
 
 ## Anti-patterns
 

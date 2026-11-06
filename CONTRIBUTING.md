@@ -6,12 +6,12 @@ once, then file issues / open PRs.
 ## What keystone is
 
 Keystone is the **charter framework**. The charter — a tree
-of typed primitives at `.charter/` — is the product. A **harness** is
+of typed primitives at `.agents/` — is the product. A **harness** is
 the engine that runs the model (Claude Code, the orchestrator, the
 runner); Keystone is not a harness, it manages the charter that
 constrains one. The CLI and the MCP server are tooling that helps you
 author and serve that charter, but neither is required at runtime. Once
-a project has a charter, any agent that reads `.charter/INDEX.json` and
+a project has a charter, any agent that reads `.keystone/INDEX.json` and
 the primitive bodies it points at can operate on it. (See
 [`GLOSSARY.md`](GLOSSARY.md) for the charter/harness distinction.)
 
@@ -57,7 +57,7 @@ go run ./cmd/keystone web serve --dir "$WORK" --port 4773
 cmd/keystone/                  # Cobra CLI entry points; one verb per file
 internal/framework/
   config/                      # keystone.json schema + paths
-  lockfile/                    # .charter/lockfile.json
+  lockfile/                    # .keystone/lockfile.json
   loader/                      # cascade verifier + dependency graph
   manifest/                    # keystone-policy.json (per-policy)
   patch/                       # patch op model + apply
@@ -86,8 +86,8 @@ docs/
   canonical primitive frontmatter (`kind`, `id`, `description`, plus
   per-kind required fields). `keystone lint` is the gate.
 - **No YAML files** keystone owns. Standalone config is JSON
-  (`keystone.json`, `.charter/lockfile.json`, `.charter/context.json`,
-  `.charter/INDEX.json`, patches/*.json). YAML inside markdown
+  (`keystone.json`, `.keystone/lockfile.json`,
+  `.keystone/INDEX.json`, patches/*.json). YAML inside markdown
   frontmatter is fine (markdown convention; the parser accepts JSON
   there too).
 

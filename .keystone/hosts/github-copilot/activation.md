@@ -4,7 +4,7 @@ How the corpus's ambient content (principles, idioms, process docs) gets loaded 
 
 ## The menu
 
-Copilot reads `.github/copilot-instructions.md` on every session (both VS Code and CLI). The installer drops this file with a short body pointing at `.charter/` and listing the five layers, the lifecycle actions, and the iron laws.
+Copilot reads `.github/copilot-instructions.md` on every session (both VS Code and CLI). The installer drops this file with a short body pointing at `.agents/` and listing the five layers, the lifecycle actions, and the iron laws.
 
 A single `.github/copilot-instructions.md` covers both Copilot in VS Code and the Copilot CLI — Microsoft / GitHub designed them to share the same convention.
 
@@ -25,11 +25,11 @@ Copilot loads:
 - **Currently-open editor buffers** (VS Code only) — visible context for inline suggestions.
 - **Files referenced in the chat** — read on demand when the agent or user names them.
 
-The charter places the short menu in `.github/copilot-instructions.md` and lets the lifecycle actions pull in `.charter/corpus/principles/<file>.md`, `.charter/corpus/idioms/<stack>/*.md`, and `.charter/guides/process/<phase>.md` as needed. Loading the entire corpus into the always-loaded menu would dilute every chat.
+The charter places the short menu in `.github/copilot-instructions.md` and lets the lifecycle actions pull in `.agents/references/principles/<file>.md`, `.agents/references/idioms/<stack>/*.md`, and `.agents/rules/process/<phase>.md` as needed. Loading the entire corpus into the always-loaded menu would dilute every chat.
 
 ## Lazy-by-region — not native
 
-Copilot has no glob-based file auto-attachment (unlike Cursor's `.mdc` rules). The **orient** action implements lazy-by-region inside the chat: the agent reads `.charter/corpus/state/CODEBASE_STATE.md` to find the stack for the touched paths, consults `.charter/corpus/state/GLOBS_INDEX.md` to keep only the guides whose `globs:` match at least one touched file (guides without `globs:` are still loaded by stack), then reads `.charter/corpus/idioms/<stack>/*.md` for the resulting set.
+Copilot has no glob-based file auto-attachment (unlike Cursor's `.mdc` rules). The **orient** action implements lazy-by-region inside the chat: the agent reads `.agents/references/state/CODEBASE_STATE.md` to find the stack for the touched paths, consults `.agents/references/state/GLOBS_INDEX.md` to keep only the guides whose `globs:` match at least one touched file (guides without `globs:` are still loaded by stack), then reads `.agents/references/idioms/<stack>/*.md` for the resulting set.
 
 For VS Code specifically, the open-file context partially compensates — if the user has the relevant idiom files open in the editor, Copilot uses them as context. But this is incidental, not architectural.
 
@@ -42,11 +42,11 @@ After any **synthesize** or **audit** writes changed the corpus, reset the conte
 
 ## Domain / state / process loading
 
-- `domain/` — read at the start of any task via "read .charter/corpus/domain/" or similar in the chat.
+- `domain/` — read at the start of any task via "read .agents/references/domain/" or similar in the chat.
 - `state/CODEBASE_STATE.md` — read by the **orient** action.
 - `process/<phase>.md` — read by the matching lifecycle action.
 
-The user can pre-warm a session by asking Copilot to "read .charter/README.md, .charter/corpus/domain/, and .charter/corpus/state/CODEBASE_STATE.md" at the start. This brings the always-relevant context into the chat without ceremony.
+The user can pre-warm a session by asking Copilot to "read .agents/README.md, .agents/references/domain/, and .agents/references/state/CODEBASE_STATE.md" at the start. This brings the always-relevant context into the chat without ceremony.
 
 ## VS Code extension considerations
 

@@ -73,6 +73,11 @@ const (
 	AdapterAider      = "aider"
 	AdapterContinue   = "continue"
 	AdapterOpenCode   = "opencode"
+	AdapterCodex      = "codex"
+	AdapterCopilot    = "github-copilot"
+	AdapterCline      = "cline"
+	AdapterGoose      = "goose"
+	AdapterPi         = "pi"
 )
 
 // HasAdapter returns true when name appears in c.Adapters. The empty

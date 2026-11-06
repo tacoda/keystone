@@ -27,7 +27,7 @@ The **verify** action runs every verification sensor (see Sensors). It also read
 
 The agent invokes the action, then reads its full output — not the summary. Stale evidence is not evidence.
 
-The binding for your agent lives in `charter/adapters/<your-agent>/lifecycle.md`. Agents that cannot autonomously run shell sensors degrade this action into a checklist + commands surfaced to the human; see the adapter for the exact contract.
+The binding for your agent lives in `.keystone/hosts/<your-agent>/lifecycle.md`. Agents that cannot autonomously run shell sensors degrade this action into a checklist + commands surfaced to the human; see the adapter for the exact contract.
 
 ### 2. Confirm or fix
 
@@ -83,7 +83,7 @@ Only then: proceed to the **review** action.
 
 | Kind | Location |
 |---|---|
-| State updates | `charter/corpus/state/CODEBASE_STATE.md`, `charter/corpus/state/migrations/active/...` |
+| State updates | `.agents/references/state/CODEBASE_STATE.md`, `.agents/references/state/migrations/active/...` |
 | PR review responses | Comments on the PR |
 
 ## Anti-patterns

@@ -61,7 +61,7 @@ Never. The archive is read only by humans during audit cadence, and by the **aud
 
 ## Reload after archive
 
-When the **audit** action archives a **guide**, the active session still has the rule loaded — guides are ambient. The action ends with a **reload prompt**: reset the agent's context (see `charter/adapters/<your-agent>/activation.md`) and re-prompt to drop the archived rule.
+When the **audit** action archives a **guide**, the active session still has the rule loaded — guides are ambient. The action ends with a **reload prompt**: reset the agent's context (see `.keystone/hosts/<your-agent>/activation.md`) and re-prompt to drop the archived rule.
 
 Archiving a **corpus** file does not require a reload — corpus is on-demand.
 

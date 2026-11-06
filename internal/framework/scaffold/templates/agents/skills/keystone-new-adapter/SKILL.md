@@ -14,7 +14,7 @@ Shipped adapters: `claude-code`, `codex`, `cursor`, `aider`, `cline`,
 `continue`, `goose`, `github-copilot`, `pi`. Add a new one when
 supporting a host not on that list.
 
-Adapters live at `.charter/adapters/<agent>/`.
+Adapters live at `.keystone/hosts/<agent>/`.
 
 ## Run
 
@@ -26,7 +26,7 @@ Example:
 
 ```
 keystone new adapter mistral
-# writes .charter/adapters/mistral/{activation,lifecycle,sensors}.md
+# writes .keystone/hosts/mistral/{activation,lifecycle,sensors}.md
 ```
 
 ## After scaffolding
@@ -39,4 +39,4 @@ keystone new adapter mistral
 4. Run `keystone index` to refresh the descriptor surface.
 
 Full port contract:
-[`docs/ports/adapter.md`](../../../../docs/ports/adapter.md).
+[`docs/ports/adapter.md`](../../../docs/ports/adapter.md).

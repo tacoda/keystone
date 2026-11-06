@@ -63,7 +63,7 @@ Patches at 1.0 cover **config-schema bumps** and **framework-scaffolded scaffold
 - ✅ Add/rename a field in `keystone.json`.
 - ✅ Update the lockfile schema (with a corresponding `Version` bump in `internal/framework/lockfile/`).
 - ✅ Move a generated file (`INSTALL_PROFILE.md`) to a new location.
-- ✅ Update framework-scaffolded scaffold prose — the READMEs under `.charter/`, sensor playbooks (`.charter/sensors/*.md`), and action playbooks (`.charter/actions/*.md`) that ship from `keystone init`. These describe how the charter works; they are framework prose that happens to live in the user's tree.
+- ✅ Update framework-scaffolded scaffold prose — the READMEs under `.agents/`, sensor playbooks (`.agents/hooks/*.md`), and action playbooks (`.agents/commands/*.md`) that ship from `keystone init`. These describe how the charter works; they are framework prose that happens to live in the user's tree.
 - ❌ Edit the rules content the user authored — anything they wrote into a guide body, a corpus entry, a domain invariant, or a custom adapter override. That's in their git; they own it.
 
 The bright line is **scaffold prose vs. user rules**: the framework owns the prose it scaffolded; the user owns the rules they wrote. `replace_block` failures (exact-match mismatch) surface user customizations as conflicts so they never get clobbered silently.

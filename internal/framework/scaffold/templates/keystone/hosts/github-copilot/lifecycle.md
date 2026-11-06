@@ -6,9 +6,9 @@ This adapter covers both **Copilot in VS Code** (chat + edit + agent modes) and 
 
 ## Invocation
 
-Every action is invoked via natural language: "run task on TICKET-123," "run verify," "do a review pass." The agent reads `.github/copilot-instructions.md` at session start, finds the action in the bulleted list, follows the link to `charter/actions/<action>.md`, and executes the playbook. Copilot has no slash-command primitive for project actions — natural-language invocation is the only path, which is why the playbooks live agent-agnostic in `charter/actions/`.
+Every action is invoked via natural language: "run task on TICKET-123," "run verify," "do a review pass." The agent reads `.github/copilot-instructions.md` at session start, finds the action in the bulleted list, follows the link to `.agents/commands/<action>.md`, and executes the playbook. Copilot has no slash-command primitive for project actions — natural-language invocation is the only path, which is why the playbooks live agent-agnostic in `.agents/commands/`.
 
-The canonical kickoff phrase is **"run task on `<ticket-id>`"** (or "run the task workflow") — `charter/actions/task.md` orchestrates `spec → orient → implementation → check-drift → verify → review`.
+The canonical kickoff phrase is **"run task on `<ticket-id>`"** (or "run the task workflow") — `.agents/commands/task.md` orchestrates `spec → orient → implementation → check-drift → verify → review`.
 
 ## GitHub-native integrations
 

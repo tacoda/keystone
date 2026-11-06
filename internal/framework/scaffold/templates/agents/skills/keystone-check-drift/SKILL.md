@@ -10,13 +10,13 @@ before the full computational sensor suite — catches the obvious case
 where the agent is implementing something the rules explicitly
 disallow.
 
-Canonical playbook: `.charter/actions/check-drift.md`. Sensor
-contract at `.charter/sensors/drift.md`. Full discipline at
-`.charter/guides/process/implementation.md`.
+Canonical playbook: `.agents/commands/check-drift.md`. Sensor
+contract at `.agents/hooks/drift.md`. Full discipline at
+`.agents/rules/process/implementation.md`.
 
 ## Run
 
-Open `.charter/actions/check-drift.md` and execute every
+Open `.agents/commands/check-drift.md` and execute every
 activity.
 
 ## When to trigger

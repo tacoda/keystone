@@ -1,6 +1,6 @@
 {
   "version": "5.0",
-  "generated": "2026-11-06T05:37:00Z",
+  "generated": "2026-11-06T05:58:25Z",
   "primitives": [
     {
       "kind": "command",
@@ -412,7 +412,7 @@
       "id": "guides/idioms/charter-content/primitive-shape",
       "description": "Frontmatter, canonical paths, corpus/guide pairing, narrow-only globs.",
       "paths": [
-        ".charter/**/*.md",
+        ".agents/**/*.md",
         "internal/framework/scaffold/templates/**/*.md"
       ],
       "tags": [
@@ -425,9 +425,9 @@
     {
       "kind": "rule",
       "id": "guides/idioms/charter-content/state-files",
-      "description": "Authoring rules for .charter/corpus/state/.",
+      "description": "Authoring rules for .agents/references/state/.",
       "paths": [
-        ".charter/corpus/state/**/*.md",
+        ".agents/references/state/**/*.md",
         "internal/framework/scaffold/templates/**/corpus/state/**/*.md"
       ],
       "tags": [
@@ -705,7 +705,7 @@
     {
       "kind": "skill",
       "id": "keystone-learn",
-      "description": "Capture a learning candidate (surprise, incident, review finding) into .charter/learning/inbox/ for later synthesis. Triggers: keystone learn; keystone:learn; /keystone:learn; run the learn action; capture a learning candidate; log a surprise.",
+      "description": "Capture a learning candidate (surprise, incident, review finding) into .keystone/learning/inbox/ for later synthesis. Triggers: keystone learn; keystone:learn; /keystone:learn; run the learn action; capture a learning candidate; log a surprise.",
       "metadata": {
         "model": "opus"
       },
@@ -1116,7 +1116,7 @@
     {
       "kind": "subagent",
       "id": "learning-curator",
-      "description": "Captures a learning candidate from a surprise, incident, or review finding into .charter/learning/inbox/.",
+      "description": "Captures a learning candidate from a surprise, incident, or review finding into .keystone/learning/inbox/.",
       "tools": [
         "Read",
         "Grep"
@@ -1544,10 +1544,10 @@
     ]
   },
   "by_path": {
-    ".charter/**/*.md": [
+    ".agents/**/*.md": [
       "rule/guides/idioms/charter-content/primitive-shape"
     ],
-    ".charter/corpus/state/**/*.md": [
+    ".agents/references/state/**/*.md": [
       "rule/guides/idioms/charter-content/state-files"
     ],
     "cmd/**/*.go": [

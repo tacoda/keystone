@@ -16,7 +16,7 @@ Each `adapters/<agent>/` directory contains three files:
 
 ## Supported agents
 
-Every adapter uses the same invocation model: the agent reads its menu file at session start, finds an action in the bulleted list, follows the link to `charter/actions/<action>.md`, and executes the playbook. The "menu file" differs per agent — that's what this table records.
+Every adapter uses the same invocation model: the agent reads its menu file at session start, finds an action in the bulleted list, follows the link to `.agents/commands/<action>.md`, and executes the playbook. The "menu file" differs per agent — that's what this table records.
 
 | Agent | Adapter | Menu file |
 |---|---|---|
@@ -45,12 +45,12 @@ Each adapter calls out which of these apply.
 ## Adding a new adapter
 
 1. Create `adapters/<agent>/` with the three files above.
-2. Fill in the **lifecycle table** — every action in `charter/guides/process/` must have a row, even if the row says "not supported on this agent."
-3. Fill in the **sensors table** — every sensor in `charter/sensors/` gets a binding (autonomous / surfaced / no-op).
+2. Fill in the **lifecycle table** — every action in `.agents/rules/process/` must have a row, even if the row says "not supported on this agent."
+3. Fill in the **sensors table** — every sensor in `.agents/hooks/` gets a binding (autonomous / surfaced / no-op).
 4. Fill in **activation** — where ambient **guide** content projects to, how the agent reaches **corpus** files on demand, glob/region matching for `guides/idioms/`, context-reset primitive.
 5. Add a row to the table above.
 6. Add the matching installable artifacts to `targets/<agent>/` at repo root (separate from the charter — this is what gets dropped into a consumer project).
 
 ## The policy/charter separation invariant still applies
 
-`charter/adapters/<agent>/` is documentation about how the agent binds to the charter. The actual artifacts that get installed into a consumer's project live in `targets/<agent>/` at repo root. Do not duplicate content between the two; the adapter doc *describes*, the target *ships*.
+`.keystone/hosts/<agent>/` is documentation about how the agent binds to the charter. The actual artifacts that get installed into a consumer's project live in `targets/<agent>/` at repo root. Do not duplicate content between the two; the adapter doc *describes*, the target *ships*.

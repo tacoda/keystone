@@ -5,11 +5,11 @@ description: 'Capture a learning candidate from a surprise, an incident, or a re
 ---
 # learn
 
-**Capture a learning candidate** from a surprise, an incident, or a review finding. Writes to `.charter/learning/inbox/` for later synthesis. Read [`.charter/learning/README.md`](learning/README.md).
+**Capture a learning candidate** from a surprise, an incident, or a review finding. Writes to `.keystone/learning/inbox/` for later synthesis. Read [`.keystone/learning/README.md`](../../.keystone/learning/README.md).
 
 ## Activities
 
-Write a candidate to `.charter/learning/inbox/<timestamp>-<slug>.md` where:
+Write a candidate to `.keystone/learning/inbox/<timestamp>-<slug>.md` where:
 
 - `<timestamp>` is `YYYY-MM-DD-HHMM` in UTC
 - `<slug>` is a short kebab-case description of the insight

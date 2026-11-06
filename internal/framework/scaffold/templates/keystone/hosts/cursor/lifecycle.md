@@ -4,17 +4,17 @@ How Cursor runs the charter's lifecycle actions.
 
 ## Invocation
 
-Every action is invoked via natural language in the chat: "run task on TICKET-123," "run verify," "do a review pass." Cursor's always-applied rule (`.cursor/rules/keystone.mdc`) lists every action with a pointer to its playbook in `charter/actions/<action>.md`. The agent reads the playbook and executes it. No per-action `.mdc` rule files, no `@`-references — the playbooks are agent-agnostic.
+Every action is invoked via natural language in the chat: "run task on TICKET-123," "run verify," "do a review pass." Cursor's always-applied rule (`.cursor/rules/keystone.mdc`) lists every action with a pointer to its playbook in `.agents/commands/<action>.md`. The agent reads the playbook and executes it. No per-action `.mdc` rule files, no `@`-references — the playbooks are agent-agnostic.
 
-The canonical kickoff phrase is **"run task on `<ticket-id>`"** (or "run the task workflow") — `charter/actions/task.md` orchestrates `spec → orient → implementation → check-drift → verify → review`.
+The canonical kickoff phrase is **"run task on `<ticket-id>`"** (or "run the task workflow") — `.agents/commands/task.md` orchestrates `spec → orient → implementation → check-drift → verify → review`.
 
 ## Why one rule, not many
 
-Cursor's rule system supports three kinds of `.mdc` files: always-applied, auto-attached (by glob), and manual (`@<name>`). The charter uses **one always-applied rule** (`keystone.mdc`) as the menu file; idiom guides loaded by region still use auto-attach via `globs:` frontmatter inside `charter/guides/idioms/<stack>/`. Manual `@`-references are no longer used — every action lives in `charter/actions/` and the menu rule lists them.
+Cursor's rule system supports three kinds of `.mdc` files: always-applied, auto-attached (by glob), and manual (`@<name>`). The charter uses **one always-applied rule** (`keystone.mdc`) as the menu file; idiom guides loaded by region still use auto-attach via `globs:` frontmatter inside `.agents/rules/idioms/<stack>/`. Manual `@`-references are no longer used — every action lives in `.agents/commands/` and the menu rule lists them.
 
 ## Sensor execution
 
-Cursor's agent mode can invoke shell commands with per-call approval. Sensors run there. In chat-only mode the user pastes sensor output back into the chat. See `charter/adapters/cursor/sensors.md` for the per-sensor binding.
+Cursor's agent mode can invoke shell commands with per-call approval. Sensors run there. In chat-only mode the user pastes sensor output back into the chat. See `.keystone/hosts/cursor/sensors.md` for the per-sensor binding.
 
 ## Sub-agent parallelism
 

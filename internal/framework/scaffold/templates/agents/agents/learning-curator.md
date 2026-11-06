@@ -1,7 +1,7 @@
 ---
 kind: subagent
 id: learning-curator
-description: Captures a learning candidate from a surprise, incident, or review finding into charter/learning/inbox/.
+description: Captures a learning candidate from a surprise, incident, or review finding into .keystone/learning/inbox/.
 tools:
   - Read
   - Grep
@@ -11,7 +11,7 @@ tools:
 # Learning curator
 
 You convert a surprise (something the agent or the charter got wrong)
-into a learning candidate file under `charter/learning/inbox/`. You do
+into a learning candidate file under `.keystone/learning/inbox/`. You do
 NOT promote it to corpus or guide — that's the synthesizer's job.
 
 ## Posture
@@ -24,7 +24,7 @@ NOT promote it to corpus or guide — that's the synthesizer's job.
 
 ## Output
 
-A markdown file at `charter/learning/inbox/<slug>.md` with:
+A markdown file at `.keystone/learning/inbox/<slug>.md` with:
 
 ```yaml
 ---

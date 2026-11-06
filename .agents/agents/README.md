@@ -29,14 +29,14 @@ Sensors do not run on event hooks. They run inside lifecycle actions invoked at 
 | Action | Phase | Sensors that run |
 |---|---|---|
 | **spec** | spec | [tracker-card-fetcher](tracker-card-fetcher.md) (if a card ID was provided) |
-| **orient** | planning | [state-region](state-region.md) |
-| **check-drift** | implementation | [drift](drift.md) |
-| **verify** | verification | [lint](lint.md), [type-check](type-check.md), [test](test.md), [build](build.md), [drift](drift.md), [commit-message](commit-message.md), [secret-scan](secret-scan.md), [vuln-scan](vuln-scan.md), [sast](sast.md); proposes state updates from [coverage](coverage.md) |
-| **review** | review | [review-functional](review-functional.md), [review-security](review-security.md), [review-risk](review-risk.md), [review-deployment](review-deployment.md), [spec-adherence](spec-adherence.md), [quality-radar](quality-radar.md), [code-debt](code-debt.md) |
-| **audit** | discipline | [drift](drift.md), [coverage](coverage.md), [risk-fingerprint](risk-fingerprint.md), [traffic-topology](traffic-topology.md), [quality-radar](quality-radar.md), [code-debt](code-debt.md), [charter-debt](charter-debt.md), [stack-drift](stack-drift.md), [vuln-scan](vuln-scan.md), [sast](sast.md) |
+| **orient** | planning | [state-region](../hooks/state-region.md) |
+| **check-drift** | implementation | [drift](../hooks/drift.md) |
+| **verify** | verification | [lint](../hooks/lint.md), [type-check](../hooks/type-check.md), [test](../hooks/test.md), [build](../hooks/build.md), [drift](../hooks/drift.md), [commit-message](../hooks/commit-message.md), [secret-scan](../hooks/secret-scan.md), [vuln-scan](../hooks/vuln-scan.md), [sast](../hooks/sast.md); proposes state updates from [coverage](../hooks/coverage.md) |
+| **review** | review | [review-functional](review-functional.md), [review-security](review-security.md), [review-risk](review-risk.md), [review-deployment](review-deployment.md), [spec-adherence](../hooks/spec-adherence.md), [quality-radar](quality-radar.md), [code-debt](code-debt.md) |
+| **audit** | discipline | [drift](../hooks/drift.md), [coverage](../hooks/coverage.md), [risk-fingerprint](../hooks/risk-fingerprint.md), [traffic-topology](../hooks/traffic-topology.md), [quality-radar](quality-radar.md), [code-debt](code-debt.md), [charter-debt](charter-debt.md), [stack-drift](../hooks/stack-drift.md), [vuln-scan](../hooks/vuln-scan.md), [sast](../hooks/sast.md) |
 | **debt-review** | discipline | [code-debt](code-debt.md) |
 
-How an action is actually invoked, and whether sensors run autonomously or require human prompting, is agent-specific — see `.charter/adapters/<your-agent>/sensors.md`. The most common degradation: an agent that cannot run shell commands during a turn surfaces the sensor commands for the human to execute instead.
+How an action is actually invoked, and whether sensors run autonomously or require human prompting, is agent-specific — see `.keystone/hosts/<your-agent>/sensors.md`. The most common degradation: an agent that cannot run shell commands during a turn surfaces the sensor commands for the human to execute instead.
 
 ## Contract shape
 
@@ -63,25 +63,25 @@ Tool commands (lint, test, build, type-check, coverage) live in `corpus/state/CO
 
 | Sensor | Kind | Purpose |
 |---|---|---|
-| [lint](lint.md) | computational | Surface-level style and pattern checks |
-| [type-check](type-check.md) | computational | Signature and contract consistency |
-| [test](test.md) | computational | The project's test suite |
-| [build](build.md) | computational | Build / compile / package step |
-| [drift](drift.md) | computational | Diff vs. loaded corpus and guide rules |
-| [coverage](coverage.md) | computational | Test coverage; proposes state updates |
-| [risk-fingerprint](risk-fingerprint.md) | computational | Complexity + coupling + coverage per region |
-| [traffic-topology](traffic-topology.md) | computational | Git churn + recency + criticality map |
-| [state-region](state-region.md) | computational | Read-only: what State says about a touched region |
-| [commit-message](commit-message.md) | computational | Conventional-commit format + no AI attribution |
+| [lint](../hooks/lint.md) | computational | Surface-level style and pattern checks |
+| [type-check](../hooks/type-check.md) | computational | Signature and contract consistency |
+| [test](../hooks/test.md) | computational | The project's test suite |
+| [build](../hooks/build.md) | computational | Build / compile / package step |
+| [drift](../hooks/drift.md) | computational | Diff vs. loaded corpus and guide rules |
+| [coverage](../hooks/coverage.md) | computational | Test coverage; proposes state updates |
+| [risk-fingerprint](../hooks/risk-fingerprint.md) | computational | Complexity + coupling + coverage per region |
+| [traffic-topology](../hooks/traffic-topology.md) | computational | Git churn + recency + criticality map |
+| [state-region](../hooks/state-region.md) | computational | Read-only: what State says about a touched region |
+| [commit-message](../hooks/commit-message.md) | computational | Conventional-commit format + no AI attribution |
 | [tracker-card-fetcher](tracker-card-fetcher.md) | computational | Fetches tracker card from Jira / Linear / etc. |
 | [quality-radar](quality-radar.md) | computational | Five-dimension scorecard aggregating verify + review sensors |
 | [code-debt](code-debt.md) | computational | Surfaces and categorizes debt in the codebase |
 | [charter-debt](charter-debt.md) | computational | Surfaces debt in the charter itself (stale rules, placeholders, failing sensors, etc.) |
-| [stack-drift](stack-drift.md) | computational | Divergence between `CODEBASE_STATE.md` and actual repo |
-| [secret-scan](secret-scan.md) | computational | Committed-secret detection (gate) |
-| [vuln-scan](vuln-scan.md) | computational | Known-vulnerability scan over declared dependencies |
-| [sast](sast.md) | computational | Static analysis for insecure code patterns |
-| [spec-adherence](spec-adherence.md) | inferential | Walks spec ACs against the diff |
+| [stack-drift](../hooks/stack-drift.md) | computational | Divergence between `CODEBASE_STATE.md` and actual repo |
+| [secret-scan](../hooks/secret-scan.md) | computational | Committed-secret detection (gate) |
+| [vuln-scan](../hooks/vuln-scan.md) | computational | Known-vulnerability scan over declared dependencies |
+| [sast](../hooks/sast.md) | computational | Static analysis for insecure code patterns |
+| [spec-adherence](../hooks/spec-adherence.md) | inferential | Walks spec ACs against the diff |
 | [review-functional](review-functional.md) | inferential | Agent reviews the diff for logic / behavior bugs |
 | [review-security](review-security.md) | inferential | Agent reviews the diff for security concerns |
 | [review-risk](review-risk.md) | inferential | Agent reviews the diff for blast radius, reversibility, and coupling risk |
@@ -93,7 +93,7 @@ The bootstrap action confirms which sensors are wired up for this project (e.g.,
 
 Sensors are documented here; they are implemented inside the lifecycle action that invokes them. The **verify** action knows how to run lint and test sensors; the **audit** action knows how to run risk-fingerprint and traffic-topology. Each action reads tool commands from `corpus/state/CODEBASE_STATE.md` (populated by the **bootstrap** action).
 
-The actual wiring — what command, file, or rule trigger embodies each action for a given agent — lives in `.charter/adapters/<your-agent>/sensors.md`.
+The actual wiring — what command, file, or rule trigger embodies each action for a given agent — lives in `.keystone/hosts/<your-agent>/sensors.md`.
 
 ## Adding a sensor
 

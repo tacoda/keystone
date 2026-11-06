@@ -15,11 +15,11 @@ Guides without `globs:` are not listed here — they activate ambient per their 
 
 | Glob pattern | Guides claiming it |
 |---|---|
-| `<pattern>` | `<charter/guides/<topic>/<name>.md>` |
+| `<pattern>` | `<.agents/rules/<topic>/<name>.md>` |
 
 ## How it's regenerated
 
-1. Walk every guide under `charter/guides/` and `charter/policies/*/guides/`.
+1. Walk every guide under `.agents/rules/` and `.keystone/policies/*/guides/`.
 2. For each guide, read its frontmatter and collect each entry in `globs:` (if present).
 3. Invert: for each glob pattern, list the guides that claim it.
 4. Sort patterns by path-prefix for stable diffs.
@@ -30,7 +30,7 @@ Guides without `globs:` are not listed here — they activate ambient per their 
 | Adapter | How it uses the index |
 |---|---|
 | Claude Code | `orient` reads the index to load only the idiom guides whose globs match touched files. |
-| Codex | Same as Claude Code, via `charter/adapters/codex/activation.md`. |
+| Codex | Same as Claude Code, via `.keystone/hosts/codex/activation.md`. |
 | Aider / Cline / Continue / Goose / Pi | Same pointer-style pattern; per-adapter `activation.md` describes the lookup. |
 | Cursor | Does not read this file — it uses native `globs:` on `.cursor/rules/*.mdc`. |
 | `_generic` | Does not read this file — falls back to topic defaults. |

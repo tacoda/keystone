@@ -35,7 +35,7 @@ globs:
 
 The above fires inside the TypeScript region only when files under `apps/admin/**` are touched. Globs can never make an idiom fire outside its stack region — see [`../README.md`](../README.md) for the narrow-only contract.
 
-How "lazy by region" is enforced is agent-specific — see `.charter/adapters/<your-agent>/activation.md`.
+How "lazy by region" is enforced is agent-specific — see `.keystone/hosts/<your-agent>/activation.md`.
 
 ## Format
 

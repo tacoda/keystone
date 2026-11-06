@@ -15,11 +15,11 @@ Two surfaces, pick whichever fits:
   (e.g. `/keystone-verify`).
 - **Natural language** — "run task on TICKET-123," "run verify," "do a
   review pass." The agent reads `AGENTS.md` at session start, finds the
-  command, follows the link to its `.charter/commands/<id>.md` body, and
+  command, follows the link to its `.agents/commands/<id>.md` body, and
   executes.
 
 The canonical kickoff phrase is **"run task on `<ticket-id>`"** (or the
-`/keystone-task` command) — `.charter/playbooks/task.md` orchestrates
+`/keystone-task` command) — `.agents/skills/task/SKILL.md` orchestrates
 `spec → orient → implementation → check-drift → verify → review`.
 
 ## Capability matrix

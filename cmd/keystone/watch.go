@@ -18,9 +18,6 @@ import (
 	"github.com/tacoda/keystone/internal/framework/adapters/agnostic"
 	"github.com/tacoda/keystone/internal/framework/adapters/aider"
 	"github.com/tacoda/keystone/internal/framework/adapters/claudecode"
-	"github.com/tacoda/keystone/internal/framework/adapters/continueide"
-	"github.com/tacoda/keystone/internal/framework/adapters/cursor"
-	"github.com/tacoda/keystone/internal/framework/adapters/opencode"
 	"github.com/tacoda/keystone/internal/framework/config"
 	"github.com/tacoda/keystone/internal/framework/primitive"
 )
@@ -193,7 +190,7 @@ func runPipeline(ctx context.Context, projectDir string, doLint, doProject bool)
 	fmt.Fprintf(os.Stdout, "✓ %s (%d primitives", rel, len(idx.Primitives))
 
 	if doProject {
-		if _, err := projectHosts(projectDir, primitives, nil); err != nil {
+		if _, err := projectHosts(projectDir, primitives, nil, false); err != nil {
 			fmt.Fprintf(os.Stderr, "; ✗ project: %v", err)
 		} else {
 			fmt.Fprint(os.Stdout, ", projections refreshed")
@@ -238,24 +235,9 @@ func runWatchAdapters(projectDir string, primitives []primitive.Primitive) {
 	if cfg == nil {
 		return
 	}
-	if cfg.HasAdapter(config.AdapterCursor) {
-		if _, err := cursor.ProjectRules(projectDir, primitives); err != nil {
-			fmt.Fprintf(os.Stderr, "; ✗ cursor: %v", err)
-		}
-	}
 	if cfg.HasAdapter(config.AdapterAider) {
 		if _, err := aider.ProjectAider(projectDir, agnostic.RenderPointer(agnostic.AiderProfile())); err != nil {
 			fmt.Fprintf(os.Stderr, "; ✗ aider: %v", err)
-		}
-	}
-	if cfg.HasAdapter(config.AdapterContinue) {
-		if _, err := continueide.ProjectRules(projectDir, primitives); err != nil {
-			fmt.Fprintf(os.Stderr, "; ✗ continue: %v", err)
-		}
-	}
-	if cfg.HasAdapter(config.AdapterOpenCode) {
-		if _, err := opencode.ProjectAgents(projectDir, primitives); err != nil {
-			fmt.Fprintf(os.Stderr, "; ✗ opencode: %v", err)
 		}
 	}
 }

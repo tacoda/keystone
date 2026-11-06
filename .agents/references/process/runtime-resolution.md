@@ -54,4 +54,4 @@ the previous stage suffice?" answer.
   (information hiding) and chapter 10 (defining errors out of
   existence) inform why staged retrieval beats firehose retrieval.
 
-Back to the rules: [`guides/process/runtime-resolution.md`](../../guides/process/runtime-resolution.md).
+Back to the rules: [`guides/process/runtime-resolution.md`](../../rules/process/runtime-resolution.md).

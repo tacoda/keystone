@@ -23,5 +23,5 @@ Scaffolds `commands/<id>.md` with canonical frontmatter. `args:` lists
 each parameter the command accepts — name, type, required, description.
 Fill in the body to describe what the command does when invoked.
 
-See [`docs/ports/primitive.md`](../../../docs/ports/primitive.md) for the
+See [`docs/ports/primitive.md`](../../docs/ports/primitive.md) for the
 full descriptor shape.

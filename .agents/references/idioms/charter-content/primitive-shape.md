@@ -7,24 +7,24 @@ description: 'Frontmatter, paths, and corpus/guide pairing for charter primitive
 
 Every charter primitive is one markdown file (or a SKILL.md inside a slug folder for skills). The agent reads the frontmatter to decide *what kind* of primitive it is and *when* to activate it; the body holds the content. Shape mistakes silently downgrade a primitive to "noise the agent skips."
 
-> **Rules extracted:** [`guides/idioms/charter-content/primitive-shape.md`](../../../guides/idioms/charter-content/primitive-shape.md).
+> **Rules extracted:** [`guides/idioms/charter-content/primitive-shape.md`](../../../rules/idioms/charter-content/primitive-shape.md).
 
 ## Canonical paths
 
 | Kind | Path |
 |---|---|
-| action | `.charter/actions/<id>.md` |
-| playbook | `.charter/playbooks/<id>.md` |
-| guide | `.charter/guides/<topic>/<id>.md` |
-| corpus | `.charter/corpus/<topic>/<id>.md` |
-| sensor | `.charter/sensors/<id>.md` |
-| persona | `.charter/personas/<id>.md` |
-| skill | `.charter/skills/<slug>/SKILL.md` |
-| subagent | `.charter/agents/<id>.md` |
-| command | `.charter/commands/<id>.md` |
-| rule | `.charter/rules/<id>.md` |
-| computational | `.charter/guides/computational/<tool>.md` |
-| adapter | `.charter/adapters/<agent>/{lifecycle,sensors,activation}.md` |
+| action | `.agents/commands/<id>.md` |
+| playbook | `.agents/skills/<id>/SKILL.md` |
+| guide | `.agents/rules/<topic>/<id>.md` |
+| corpus | `.agents/references/<topic>/<id>.md` |
+| sensor | `.agents/hooks/<id>.md` |
+| persona | `.agents/agents/<id>.md` |
+| skill | `.agents/skills/<slug>/SKILL.md` |
+| subagent | `.agents/agents/<id>.md` |
+| command | `.agents/commands/<id>.md` |
+| rule | `.agents/rules/<id>.md` |
+| computational | `.agents/rules/computational/<tool>.md` |
+| adapter | `.keystone/hosts/<agent>/{lifecycle,sensors,activation}.md` |
 
 Off-path content is invisible to `keystone index` and never lands in `INDEX.json`.
 
@@ -68,7 +68,7 @@ A guide without `globs:` activates per its topic default (ambient). Globs can ne
 
 ## Anti-patterns
 
-- A primitive at an off-canonical path (e.g., `.charter/notes/foo.md`). `keystone index` skips it.
+- A primitive at an off-canonical path (e.g., `.agents/notes/foo.md`). `keystone index` skips it.
 - A guide with `globs:` it copy-pasted from another guide and never narrowed.
 - A corpus entry without a guide partner (or vice versa) — orphan reasoning / orphan rules.
 - Hand-edits to `INDEX.json` or `GLOBS_INDEX.md` — both are regenerated; the edit is lost on next `keystone index` / `synthesize`.
@@ -82,4 +82,4 @@ A guide without `globs:` activates per its topic default (ambient). Globs can ne
 - Paired corpus / guide both present?
 - `keystone index` re-run after the change?
 
-**Traces to:** the keystone framework's primitive-resolution contract (see `corpus/process/runtime-resolution.md` and `.charter/README.md`).
+**Traces to:** the keystone framework's primitive-resolution contract (see `corpus/process/runtime-resolution.md` and `.agents/README.md`).

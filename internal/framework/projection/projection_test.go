@@ -48,14 +48,13 @@ func walk(t *testing.T, root string) []primitive.Primitive {
 
 func plan(t *testing.T, root string, hosts ...Profile) []Output {
 	t.Helper()
-	outs, _ := Plan(walk(t, root), hosts)
-	return outs
+	return Plan(walk(t, root), hosts).Outputs
 }
 
 // apply runs Apply in symlink mode and fails the test on error.
 func apply(t *testing.T, root string, outs []Output, owned []string) ApplyResult {
 	t.Helper()
-	res, err := Apply(root, outs, owned, LinkSymlink)
+	res, err := Apply(root, outs, owned, Options{Mode: LinkSymlink})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -93,7 +92,8 @@ func TestPlan_ReusesLocationsHostsAlreadyRead(t *testing.T) {
 	readsClaude := Profile{Host: "reads-claude", Rules: map[primitive.Kind]Rule{primitive.KindSkill: skillRule},
 		Reads: map[primitive.Kind][]string{primitive.KindSkill: {".claude/skills", ".agents/skills"}}}
 
-	outs, warns := Plan(walk(t, seedCharter(t)), []Profile{ClaudeCode(), readsAgents, readsClaude})
+	pr := Plan(walk(t, seedCharter(t)), []Profile{ClaudeCode(), readsAgents, readsClaude})
+	outs, warns := pr.Outputs, pr.Warnings
 	for _, o := range outs {
 		if o.Host != "claude-code" {
 			t.Errorf("unexpected output for %s: %s", o.Host, o.Dest)
@@ -130,8 +130,12 @@ func TestApply_SymlinkShimIdempotentAndClean(t *testing.T) {
 func TestApply_RefusesUnownedPath(t *testing.T) {
 	root := seedCharter(t)
 	write(t, root, map[string]string{".claude/skills/deploy/SKILL.md": "mine\n"})
-	if _, err := Apply(root, plan(t, root, ClaudeCode()), nil, LinkSymlink); err == nil || !strings.Contains(err.Error(), "did not create") {
+	if _, err := Apply(root, plan(t, root, ClaudeCode()), nil, Options{Mode: LinkSymlink}); err == nil || !strings.Contains(err.Error(), "did not create") {
 		t.Fatalf("expected refusal, got %v", err)
+	}
+	// Preflight: a refused plan writes nothing at all.
+	if _, err := os.Stat(filepath.Join(root, ".claude/commands/keystone-verify.md")); !os.IsNotExist(err) {
+		t.Errorf("refused apply must not write other outputs (err=%v)", err)
 	}
 	if got, _ := os.ReadFile(filepath.Join(root, ".claude/skills/deploy/SKILL.md")); string(got) != "mine\n" {
 		t.Error("the user's file must survive")
@@ -155,28 +159,28 @@ func TestApply_PrunesOnlyOwned(t *testing.T) {
 	}
 }
 
-// TestApply_AdoptsLegacyPrefixed — 4.x projections (keystone-* names, no
-// ownership record) are adopted on the first 5.0 run: stale ones pruned,
-// planned ones overwritten.
-func TestApply_AdoptsLegacyPrefixed(t *testing.T) {
+// TestApply_OverwriteOnlyWhenAsked — an unowned file at a planned path
+// (e.g. a 4.x projection never recorded) is refused by default and replaced
+// only with --overwrite.
+func TestApply_OverwriteOnlyWhenAsked(t *testing.T) {
 	root := seedCharter(t)
-	write(t, root, map[string]string{
-		".claude/skills/keystone-old/SKILL.md": "stale\n",
-		".claude/commands/keystone-verify.md":  "stale\n",
-	})
-	res := apply(t, root, plan(t, root, ClaudeCode()), nil)
-	if strings.Join(res.Pruned, ",") != ".claude/skills/keystone-old" {
-		t.Errorf("pruned %v, want the stale 4.x skill", res.Pruned)
+	write(t, root, map[string]string{".claude/commands/keystone-verify.md": "stale\n"})
+	outs := plan(t, root, ClaudeCode())
+	if _, err := Apply(root, outs, nil, Options{Mode: LinkSymlink}); err == nil || !strings.Contains(err.Error(), "--overwrite") {
+		t.Fatalf("expected refusal naming --overwrite, got %v", err)
+	}
+	if _, err := Apply(root, outs, nil, Options{Mode: LinkSymlink, Overwrite: true}); err != nil {
+		t.Fatal(err)
 	}
 	if got, _ := os.ReadFile(filepath.Join(root, ".claude/commands/keystone-verify.md")); string(got) == "stale\n" {
-		t.Error("adopted shim should be rewritten")
+		t.Error("--overwrite should replace the unowned file")
 	}
 }
 
 func TestApply_CopyModeAndDrift(t *testing.T) {
 	root := seedCharter(t)
 	outs := plan(t, root, ClaudeCode())
-	if _, err := Apply(root, outs, nil, LinkCopy); err != nil {
+	if _, err := Apply(root, outs, nil, Options{Mode: LinkCopy}); err != nil {
 		t.Fatal(err)
 	}
 	info, err := os.Lstat(filepath.Join(root, ".claude/skills/deploy"))

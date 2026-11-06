@@ -9,16 +9,16 @@ metadata:
 # keystone:debt-review — triage the code-debt ledger
 
 Reads the code-debt sensor's latest findings and reconciles them against
-`.charter/corpus/state/code-debt.md`. Each finding gets one of:
+`.agents/references/state/code-debt.md`. Each finding gets one of:
 keep (still real), close (resolved), defer (not now), or escalate
 (promote to charter-debt or a guide).
 
-Canonical playbook: `.charter/actions/debt-review.md`. Sensor
-contract at `.charter/sensors/code-debt.md`.
+Canonical playbook: `.agents/commands/debt-review.md`. Sensor
+contract at `.agents/hooks/code-debt.md`.
 
 ## Run
 
-Open `.charter/actions/debt-review.md` and execute every
+Open `.agents/commands/debt-review.md` and execute every
 activity.
 
 ## When to trigger

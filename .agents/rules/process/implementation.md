@@ -69,7 +69,7 @@ Implementation runs sensors continuously, not just at exit:
 - **Test runner** — runs after each green to confirm the TDD loop is still on the rails.
 - **Drift sensor** — invoked by the **check-drift** action.
 
-These sensors do not gate the phase by themselves; the verification phase is where the gate hardens. They run during implementation as a fast feedback loop, *when the agent can drive them autonomously*. Agents that can only suggest commands fall back to surfacing the command for the human to run — see `.charter/adapters/<your-agent>/sensors.md`.
+These sensors do not gate the phase by themselves; the verification phase is where the gate hardens. They run during implementation as a fast feedback loop, *when the agent can drive them autonomously*. Agents that can only suggest commands fall back to surfacing the command for the human to run — see `.keystone/hosts/<your-agent>/sensors.md`.
 
 ## Gate condition
 

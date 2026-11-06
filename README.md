@@ -6,7 +6,7 @@ standards that constrain your coding agents, per repo. A small Go toolchain — 
 dashboard — that drops a structured, primitive-typed markdown **charter** into
 your repo and keeps it healthy. Once installed, neither tool is required at
 runtime. The charter is plain files; any agent that reads
-`.charter/INDEX.json` and the bodies it points at can operate the project.
+`.keystone/INDEX.json` and the bodies it points at can operate the project.
 
 A **harness** is the engine that runs the model — the coding agent (Claude
 Code, Cursor, Codex, opencode, …), the orchestrator, the runner. Keystone is
@@ -23,15 +23,15 @@ All three are convenience. The charter alone is enough.
 
 ```
 brew install tacoda/tap/keystone    # or grab a release binary
-keystone init                       # writes .charter/ + agent menu
-keystone index                      # emits .charter/INDEX.json
+keystone init                       # writes .agents/ + agent menu
+keystone index                      # emits .keystone/INDEX.json
 keystone mcp install --agent claude-code   # one-line agent wiring
 keystone web serve                  # optional: open the dashboard
 ```
 
 ## What's in the charter
 
-`.charter/` holds **13 primitive kinds**:
+`.agents/` holds **13 primitive kinds**:
 
 | Kind         | What it is                                                            |
 | ------------ | --------------------------------------------------------------------- |
@@ -57,7 +57,7 @@ lacks. It projects to native paths (`.claude/skills/`, `.claude/agents/`,
 Every primitive carries canonical frontmatter — `kind`, `id`,
 `description`, plus per-kind fields (`globs`, `phase`, `triggers`,
 `tier`, `mode`, `event`, `run`, `agent`, `returns`, `tools`, `corpus`,
-`includes`, …). The walker emits a single `.charter/INDEX.json` listing
+`includes`, …). The walker emits a single `.keystone/INDEX.json` listing
 every primitive's descriptor; agents read the index first and open
 bodies only when their activation conditions match.
 
@@ -92,7 +92,7 @@ block and in `guides/process/runtime-resolution.md`.
 | Verb                     | What it does                                                                  |
 | ------------------------ | ----------------------------------------------------------------------------- |
 | `keystone init`          | Minimum-friction scaffold. One question (agent target) or zero with `--agent`. |
-| `keystone index`         | Walk `.charter/`, emit `INDEX.json`.                                  |
+| `keystone index`         | Walk `.agents/`, emit `INDEX.json`.                                  |
 | `keystone lint`          | Validate primitive frontmatter; required fields per kind, deps integrity.      |
 | `keystone project`       | Regenerate `.claude/` / `.cursor/` host projections from canonical sources.    |
 | `keystone verify`        | Cascade + policy-drift check.                                                  |
@@ -106,7 +106,7 @@ block and in `guides/process/runtime-resolution.md`.
 | `keystone search <q>`    | Full-text search across every primitive.                                       |
 | `keystone graph`         | Render the primitive-relationship graph (Mermaid or DOT).                      |
 | `keystone watch`         | fsnotify loop: index + project + lint on change.                               |
-| `keystone snapshot`      | Save / list / restore tarballs of `.charter/` for safe experiments.           |
+| `keystone snapshot`      | Save / list / restore tarballs of `.agents/` for safe experiments.           |
 | `keystone eval run`      | Run static + sensor evals. `--baseline <ref>` for regression diffs.            |
 | `keystone policy`        | Add / update / remove vendored policies.                                       |
 | `keystone mcp serve`     | Launch the MCP server over stdio (host-launched).                              |
@@ -168,7 +168,7 @@ Pages:
 - **search** — HTMX-live full-text across the charter
 - **graph** — Mermaid-rendered dependency graph
 
-SSE push at `/events` swaps fragments when files in `.charter/` change.
+SSE push at `/events` swaps fragments when files in `.agents/` change.
 REST API under `/api/` is read-only.
 
 ## Policies
@@ -186,7 +186,7 @@ keystone policy add tacoda/tacoda-org@v2.0.0
 ## After install, the tools are optional
 
 The charter is markdown on disk. An agent that reads
-`.charter/INDEX.json` plus the primitive bodies it points at can
+`.keystone/INDEX.json` plus the primitive bodies it points at can
 operate the charter without keystone installed. The CLI helps you
 author + maintain; the MCP server gives the agent structured access;
 the dashboard gives you a local operator view. None are runtime
@@ -202,7 +202,7 @@ governance is in [`GOVERNANCE.md`](GOVERNANCE.md).
 
 **Migration to 4.0:** run `keystone migrate` once. It brings any prior
 layout up to current — most notably 4.0 renames `.harness/` to
-`.charter/` (and `HARNESS.md` → `CHARTER.md`), rewrites `keystone.json`
+`.agents/` (and `HARNESS.md` → `CHARTER.md`), rewrites `keystone.json`
 references, and regenerates `INDEX.json` and host projections.
 Idempotent — safe to re-run. Backup first via
 `keystone snapshot save --label pre-4.0`.

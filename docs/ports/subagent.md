@@ -6,8 +6,8 @@
 ## Path convention
 
 ```
-.charter/agents/<id>.md                                      # project-owned
-.charter/policies/<policy>/agents/<id>.md                     # policy-owned (read-only)
+.agents/agents/<id>.md                                      # project-owned
+.keystone/policies/<policy>/agents/<id>.md                     # policy-owned (read-only)
 ```
 
 Flat — subagents are global by `id` across the cascade.
@@ -35,7 +35,7 @@ tools:
 
 Project wins; deeper-nested policies refine. `strict.subagents: [<id>]` locks absolutely.
 
-`keystone project` does not re-author subagents — they ARE the host-native form. A `persona` (wrapper) authored in `.charter/personas/` *is* projected to `.claude/agents/<id>.md`; authoring a subagent directly bypasses the wrapper layer.
+`keystone project` does not re-author subagents — they ARE the host-native form. A `persona` (wrapper) authored in `.agents/agents/` *is* projected to `.claude/agents/<id>.md`; authoring a subagent directly bypasses the wrapper layer.
 
 ## Example
 
@@ -52,7 +52,7 @@ tools:
 
 # Subagent: drift-reviewer
 
-You compare the diff against guides under `.charter/guides/`. Report only
+You compare the diff against guides under `.agents/rules/`. Report only
 deviations; do not propose unrelated improvements.
 ```
 

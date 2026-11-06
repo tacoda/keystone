@@ -17,7 +17,7 @@ Two kinds exist:
 - **inferential** — produced by agent reasoning. Examples: functional
   review, security review, spec-acceptance walk.
 
-Sensors live at `.charter/sensors/<name>.md` and declare
+Sensors live at `.agents/hooks/<name>.md` and declare
 `kind:` (`computational` or `inferential`) in frontmatter.
 
 ## Run
@@ -44,4 +44,4 @@ keystone new sensor security --kind inferential   # explicit inferential
 5. Run `keystone index` to refresh the descriptor surface.
 
 Full port contract:
-[`docs/ports/sensor.md`](../../../../docs/ports/sensor.md).
+[`docs/ports/sensor.md`](../../../docs/ports/sensor.md).

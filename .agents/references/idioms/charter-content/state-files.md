@@ -5,9 +5,9 @@ description: 'How state files are written and what must not be hand-edited.'
 ---
 # State files
 
-State files under `.charter/corpus/state/` are the empirical record of the project: what stacks exist, what tools run, what guides claim which globs, what debt is outstanding. Some are agent-authored only; some are hand-edited freely; some are regenerated on every `keystone index` and must not be touched.
+State files under `.agents/references/state/` are the empirical record of the project: what stacks exist, what tools run, what guides claim which globs, what debt is outstanding. Some are agent-authored only; some are hand-edited freely; some are regenerated on every `keystone index` and must not be touched.
 
-> **Rules extracted:** [`guides/idioms/charter-content/state-files.md`](../../../guides/idioms/charter-content/state-files.md).
+> **Rules extracted:** [`guides/idioms/charter-content/state-files.md`](../../../rules/idioms/charter-content/state-files.md).
 
 ## The state files
 
@@ -28,4 +28,4 @@ The **bootstrap** action propose-edits every state file through the agent's edit
 
 ## Index regeneration
 
-`keystone index` reads every file under `.charter/` (project layer) and `.charter/policies/*/` (vendored policies), then writes `.keystone/INDEX.json`. Manual edits to INDEX.json are lost on the next run. The same rule applies to the `## Index` table in `GLOBS_INDEX.md`: it's a derived view, not a hand-authored doc.
+`keystone index` reads every file under `.agents/` (project layer) and `.keystone/policies/*/` (vendored policies), then writes `.keystone/INDEX.json`. Manual edits to INDEX.json are lost on the next run. The same rule applies to the `## Index` table in `GLOBS_INDEX.md`: it's a derived view, not a hand-authored doc.

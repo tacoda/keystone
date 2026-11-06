@@ -15,7 +15,7 @@ actions ship with every install: `spec`, `orient`, `verify`, `review`,
 `learn`, `audit`, `bootstrap`, `mode`, `synthesize`, `check-drift`.
 Custom actions for project-specific lifecycle phases live alongside.
 
-Actions live at `.charter/actions/<name>.md` (flat, no topic
+Actions live at `.agents/commands/<name>.md` (flat, no topic
 directory — actions are global by name across the cascade).
 
 ## Run
@@ -28,7 +28,7 @@ Example:
 
 ```
 keystone new action release-notes
-# writes .charter/actions/release-notes.md
+# writes .agents/commands/release-notes.md
 ```
 
 ## After scaffolding
@@ -43,4 +43,4 @@ keystone new action release-notes
 5. Run `keystone index` to refresh the descriptor surface.
 
 Full port contract:
-[`docs/ports/action.md`](../../../../docs/ports/action.md).
+[`docs/ports/action.md`](../../../docs/ports/action.md).

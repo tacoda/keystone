@@ -203,7 +203,7 @@ func indexAndProject(projectDir, charterRoot string) error {
 		fmt.Fprintf(os.Stdout, "  wrote: %s (%d primitive(s))\n", rel, len(primitives))
 	}
 
-	if _, err := projectHosts(projectDir, primitives, os.Stdout); err != nil {
+	if _, err := projectHosts(projectDir, primitives, os.Stdout, false); err != nil {
 		return fmt.Errorf("project primitives: %w", err)
 	}
 

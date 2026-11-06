@@ -1,8 +1,6 @@
 ---
-kind: rule
-id: rules/keystone-go-stdlib-first
 description: Prefer Go stdlib over new third-party deps.
-globs:
+paths:
   - "cmd/**/*.go"
   - "internal/**/*.go"
   - "go.mod"
@@ -13,7 +11,7 @@ generated_by: keystone-project
 
 # Stdlib first — rules
 
-Full guide: `.agents/rules/idioms/go/stdlib-first.md` (read on demand).
+Full rule: `.agents/rules/idioms/go/stdlib-first.md` (read on demand).
 
 ## IRON LAW
 

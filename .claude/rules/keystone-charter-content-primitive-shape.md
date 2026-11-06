@@ -1,9 +1,7 @@
 ---
-kind: rule
-id: rules/keystone-charter-content-primitive-shape
 description: Frontmatter, canonical paths, corpus/guide pairing, narrow-only globs.
-globs:
-  - ".charter/**/*.md"
+paths:
+  - ".agents/**/*.md"
   - "internal/framework/scaffold/templates/**/*.md"
 source: .agents/rules/idioms/charter-content/primitive-shape.md
 generated_by: keystone-project
@@ -11,7 +9,7 @@ generated_by: keystone-project
 
 # Primitive shape — rules
 
-Full guide: `.agents/rules/idioms/charter-content/primitive-shape.md` (read on demand).
+Full rule: `.agents/rules/idioms/charter-content/primitive-shape.md` (read on demand).
 
 ## IRON LAW
 

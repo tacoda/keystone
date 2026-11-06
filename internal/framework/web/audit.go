@@ -25,7 +25,7 @@ type auditEntry struct {
 }
 
 // auditLog persists charter change events to a per-session
-// append-only JSONL file under `.agents/state/audit/`. One file
+// append-only JSONL file under `.keystone/state/audit/`. One file
 // per `keystone web serve` process; never overwritten. The
 // dashboard reads the tail to render the audit widget; older
 // sessions sit on disk until startup prune.

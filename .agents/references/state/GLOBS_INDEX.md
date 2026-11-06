@@ -15,18 +15,18 @@ Guides without `globs:` are not listed here — they activate ambient per their 
 
 | Glob pattern | Guides claiming it |
 |---|---|
-| `.charter/**/*.md` | `.charter/guides/idioms/charter-content/README.md`, `.charter/guides/idioms/charter-content/primitive-shape.md` |
-| `.charter/corpus/state/**/*.md` | `.charter/guides/idioms/charter-content/state-files.md` |
-| `cmd/**/*.go` | `.charter/guides/computational/gofmt.md`, `.charter/guides/computational/go-vet.md`, `.charter/guides/computational/gopls.md`, `.charter/guides/idioms/go/README.md`, `.charter/guides/idioms/go/stdlib-first.md` |
-| `go.mod` | `.charter/guides/idioms/go/stdlib-first.md` |
-| `go.sum` | `.charter/guides/idioms/go/stdlib-first.md` |
-| `internal/**/*.go` | `.charter/guides/computational/gofmt.md`, `.charter/guides/computational/go-vet.md`, `.charter/guides/computational/gopls.md`, `.charter/guides/idioms/go/README.md`, `.charter/guides/idioms/go/stdlib-first.md` |
-| `internal/framework/scaffold/templates/**/*.md` | `.charter/guides/idioms/charter-content/README.md`, `.charter/guides/idioms/charter-content/primitive-shape.md` |
-| `internal/framework/scaffold/templates/**/corpus/state/**/*.md` | `.charter/guides/idioms/charter-content/state-files.md` |
+| `.agents/**/*.md` | `.agents/rules/idioms/charter-content/README.md`, `.agents/rules/idioms/charter-content/primitive-shape.md` |
+| `.agents/references/state/**/*.md` | `.agents/rules/idioms/charter-content/state-files.md` |
+| `cmd/**/*.go` | `.agents/rules/computational/gofmt.md`, `.agents/rules/computational/go-vet.md`, `.agents/rules/computational/gopls.md`, `.agents/rules/idioms/go/README.md`, `.agents/rules/idioms/go/stdlib-first.md` |
+| `go.mod` | `.agents/rules/idioms/go/stdlib-first.md` |
+| `go.sum` | `.agents/rules/idioms/go/stdlib-first.md` |
+| `internal/**/*.go` | `.agents/rules/computational/gofmt.md`, `.agents/rules/computational/go-vet.md`, `.agents/rules/computational/gopls.md`, `.agents/rules/idioms/go/README.md`, `.agents/rules/idioms/go/stdlib-first.md` |
+| `internal/framework/scaffold/templates/**/*.md` | `.agents/rules/idioms/charter-content/README.md`, `.agents/rules/idioms/charter-content/primitive-shape.md` |
+| `internal/framework/scaffold/templates/**/corpus/state/**/*.md` | `.agents/rules/idioms/charter-content/state-files.md` |
 
 ## How it's regenerated
 
-1. Walk every guide under `.charter/guides/` and `.charter/policies/*/guides/`.
+1. Walk every guide under `.agents/rules/` and `.keystone/policies/*/guides/`.
 2. For each guide, read its frontmatter and collect each entry in `globs:` (if present).
 3. Invert: for each glob pattern, list the guides that claim it.
 4. Sort patterns by path-prefix for stable diffs.
@@ -37,7 +37,7 @@ Guides without `globs:` are not listed here — they activate ambient per their 
 | Adapter | How it uses the index |
 |---|---|
 | Claude Code | `orient` reads the index to load only the idiom guides whose globs match touched files. |
-| Codex | Same as Claude Code, via `.charter/adapters/codex/activation.md`. |
+| Codex | Same as Claude Code, via `.keystone/hosts/codex/activation.md`. |
 | Aider / Cline / Continue / Goose / Pi | Same pointer-style pattern; per-adapter `activation.md` describes the lookup. |
 | Cursor | Does not read this file — it uses native `globs:` on `.cursor/rules/*.mdc`. |
 | `_generic` | Does not read this file — falls back to topic defaults. |

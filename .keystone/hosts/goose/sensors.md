@@ -10,22 +10,22 @@ Goose runs shell commands through the **developer extension's `bash` tool**. In 
 
 ## Per-sensor binding
 
-Sensor commands come from `.charter/corpus/state/CODEBASE_STATE.md`, populated by the **bootstrap** action.
+Sensor commands come from `.agents/references/state/CODEBASE_STATE.md`, populated by the **bootstrap** action.
 
 | Sensor | Fires inside | Implementation |
 |---|---|---|
-| [lint](sensors/lint.md) | **verify** action | `bash` tool running `<lint command>` |
-| [type-check](sensors/type-check.md) | **verify** action | `bash` tool running `<type-check command>`. Skipped when no type checker. |
-| [test](sensors/test.md) | **verify** action | `bash` tool running `<test command>`. Fresh run per turn. |
-| [build](sensors/build.md) | **verify** action | `bash` tool running `<build command>` |
-| [drift](sensors/drift.md) | **check-drift** + **verify** + **audit** | `bash` for `git diff`; agent reads loaded guides and compares. No state writes. |
-| [coverage](sensors/coverage.md) | **verify** + **audit** | `bash` running `<coverage command>`; agent proposes a diff to `corpus/state/CODEBASE_STATE.md` via the `text_editor` tool. |
-| [risk-fingerprint](sensors/risk-fingerprint.md) | **audit** | `bash` for complexity metrics + `git log --stat`; agent writes table to `corpus/state/risk-fingerprints.md`. |
-| [traffic-topology](sensors/traffic-topology.md) | **audit** | `git log` + criticality from `corpus/state/CODEBASE_STATE.md` → `corpus/state/traffic-topology.md`. |
-| [state-region](sensors/state-region.md) | **orient** action | Agent reads `corpus/state/CODEBASE_STATE.md` and active migrations via `text_editor`. No shell needed. |
-| [commit-message](sensors/commit-message.md) | **release** phase, pre-commit | Agent inspects the proposed message; runs `git commit` via `bash` only after the message passes. |
-| [tracker-card-fetcher](sensors/tracker-card-fetcher.md) | **spec** action | MCP extension (GitHub / Atlassian / Linear) if installed; otherwise `bash` running `gh issue view`. Fallback: user pastes. |
-| [spec-adherence](sensors/spec-adherence.md) | **review** action | Agent reads spec + diff and walks AC. No shell needed. |
+| [lint](../../../.agents/hooks/lint.md) | **verify** action | `bash` tool running `<lint command>` |
+| [type-check](../../../.agents/hooks/type-check.md) | **verify** action | `bash` tool running `<type-check command>`. Skipped when no type checker. |
+| [test](../../../.agents/hooks/test.md) | **verify** action | `bash` tool running `<test command>`. Fresh run per turn. |
+| [build](../../../.agents/hooks/build.md) | **verify** action | `bash` tool running `<build command>` |
+| [drift](../../../.agents/hooks/drift.md) | **check-drift** + **verify** + **audit** | `bash` for `git diff`; agent reads loaded guides and compares. No state writes. |
+| [coverage](../../../.agents/hooks/coverage.md) | **verify** + **audit** | `bash` running `<coverage command>`; agent proposes a diff to `corpus/state/CODEBASE_STATE.md` via the `text_editor` tool. |
+| [risk-fingerprint](../../../.agents/hooks/risk-fingerprint.md) | **audit** | `bash` for complexity metrics + `git log --stat`; agent writes table to `corpus/state/risk-fingerprints.md`. |
+| [traffic-topology](../../../.agents/hooks/traffic-topology.md) | **audit** | `git log` + criticality from `corpus/state/CODEBASE_STATE.md` → `corpus/state/traffic-topology.md`. |
+| [state-region](../../../.agents/hooks/state-region.md) | **orient** action | Agent reads `corpus/state/CODEBASE_STATE.md` and active migrations via `text_editor`. No shell needed. |
+| [commit-message](../../../.agents/hooks/commit-message.md) | **release** phase, pre-commit | Agent inspects the proposed message; runs `git commit` via `bash` only after the message passes. |
+| [tracker-card-fetcher](../../../.agents/agents/tracker-card-fetcher.md) | **spec** action | MCP extension (GitHub / Atlassian / Linear) if installed; otherwise `bash` running `gh issue view`. Fallback: user pastes. |
+| [spec-adherence](../../../.agents/hooks/spec-adherence.md) | **review** action | Agent reads spec + diff and walks AC. No shell needed. |
 
 ## State writes
 
@@ -53,8 +53,8 @@ version: 1.0.0
 title: Keystone — verify
 description: Run every sensor against the current change
 instructions: |
-  You are running the verify action. Read .charter/guides/process/verification.md
-  for the contract. Sensor commands live in .charter/corpus/state/CODEBASE_STATE.md.
+  You are running the verify action. Read .agents/rules/process/verification.md
+  for the contract. Sensor commands live in .agents/references/state/CODEBASE_STATE.md.
 
   Run each sensor in order. Stop and report immediately on the first failure;
   do not continue to subsequent sensors.

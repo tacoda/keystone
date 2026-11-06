@@ -4,13 +4,13 @@ How each abstract lifecycle action is invoked in Aider.
 
 ## Invocation
 
-Every action is invoked via natural language in the chat: "run task on TICKET-123," "run verify," "do a review pass." The agent reads `CONVENTIONS.md` (loaded via the `.aider.conf.yml` `read:` list) at session start, finds the action in the bulleted list, follows the link to `.charter/actions/<action>.md`, and executes the playbook. Aider has no slash-command primitive for project actions (its `/<command>` set is for shell, git, and chat control), so natural-language invocation is the only path — and that's exactly what `.charter/actions/` is designed for.
+Every action is invoked via natural language in the chat: "run task on TICKET-123," "run verify," "do a review pass." The agent reads `CONVENTIONS.md` (loaded via the `.aider.conf.yml` `read:` list) at session start, finds the action in the bulleted list, follows the link to `.agents/commands/<action>.md`, and executes the playbook. Aider has no slash-command primitive for project actions (its `/<command>` set is for shell, git, and chat control), so natural-language invocation is the only path — and that's exactly what `.agents/commands/` is designed for.
 
-The canonical kickoff phrase is **"run task on `<ticket-id>`"** (or "run the task workflow") — `.charter/actions/task.md` orchestrates `spec → orient → implementation → check-drift → verify → review`.
+The canonical kickoff phrase is **"run task on `<ticket-id>`"** (or "run the task workflow") — `.agents/commands/task.md` orchestrates `spec → orient → implementation → check-drift → verify → review`.
 
 ## Markdown is the native shape
 
-Aider's value is that it works straightforwardly with markdown — reading a playbook and following its activities is its native pattern. The action playbooks in `.charter/actions/` are exactly that. The corollary: keep them clear and executable. Aider has no slash-command layer to paper over a vague playbook.
+Aider's value is that it works straightforwardly with markdown — reading a playbook and following its activities is its native pattern. The action playbooks in `.agents/commands/` are exactly that. The corollary: keep them clear and executable. Aider has no slash-command layer to paper over a vague playbook.
 
 ## Sub-agent support
 

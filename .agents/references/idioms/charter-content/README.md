@@ -5,24 +5,24 @@ description: 'Charter content idioms — markdown primitive shape, paths, pairin
 ---
 # Charter content idioms — reasoning
 
-This repo authors and dogfoods the keystone charter. The primary stack is **markdown primitives** under `.charter/`. Same content also ships as the install-time template inside `internal/framework/scaffold/templates/` (when present), so changes to one must be reflected in the other.
+This repo authors and dogfoods the keystone charter. The primary stack is **markdown primitives** under `.agents/`. Same content also ships as the install-time template inside `internal/framework/scaffold/templates/` (when present), so changes to one must be reflected in the other.
 
 ## Primitive kinds
 
 The twelve-kind taxonomy enforced by the keystone charter:
 
-- **action** — atomic unit of work (`.charter/actions/<id>.md`).
-- **playbook** — ordered sequence of actions (`.charter/playbooks/<id>.md`).
-- **guide** — prescriptive rule file with optional `globs:` (`.charter/guides/<topic>/<id>.md`).
-- **corpus** — informational *why* paired to a guide or to state (`.charter/corpus/<topic>/<id>.md`).
-- **sensor** — automated check, computational or inferential (`.charter/sensors/<id>.md`).
-- **persona** — subagent system-prompt body (`.charter/personas/<id>.md`).
-- **skill** — host-native auto-activation manifest (`.charter/skills/<slug>/SKILL.md`).
-- **subagent** — host-native agent definition (`.charter/agents/<id>.md`).
-- **command** — host slash command (`.charter/commands/<id>.md`).
-- **rule** — host-native rule directive (`.charter/rules/<id>.md`).
-- **computational** — deterministic ambient enforcement (`.charter/guides/computational/<tool>.md`).
-- **adapter** — per-agent host wiring (`.charter/adapters/<agent>/`).
+- **action** — atomic unit of work (`.agents/commands/<id>.md`).
+- **playbook** — ordered sequence of actions (`.agents/skills/<id>/SKILL.md`).
+- **guide** — prescriptive rule file with optional `globs:` (`.agents/rules/<topic>/<id>.md`).
+- **corpus** — informational *why* paired to a guide or to state (`.agents/references/<topic>/<id>.md`).
+- **sensor** — automated check, computational or inferential (`.agents/hooks/<id>.md`).
+- **persona** — subagent system-prompt body (`.agents/agents/<id>.md`).
+- **skill** — host-native auto-activation manifest (`.agents/skills/<slug>/SKILL.md`).
+- **subagent** — host-native agent definition (`.agents/agents/<id>.md`).
+- **command** — host slash command (`.agents/commands/<id>.md`).
+- **rule** — host-native rule directive (`.agents/rules/<id>.md`).
+- **computational** — deterministic ambient enforcement (`.agents/rules/computational/<tool>.md`).
+- **adapter** — per-agent host wiring (`.keystone/hosts/<agent>/`).
 
 ## Layout
 

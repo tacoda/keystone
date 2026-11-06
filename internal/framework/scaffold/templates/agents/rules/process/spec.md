@@ -104,7 +104,7 @@ Spec runs:
 
 - **Tracker-card fetcher** — if a card ID is provided, fetches via the agent's tracker integration. Read-only.
 
-The binding (how to invoke the **spec** action and which sensors run) lives in `charter/adapters/<your-agent>/lifecycle.md`.
+The binding (how to invoke the **spec** action and which sensors run) lives in `.keystone/hosts/<your-agent>/lifecycle.md`.
 
 ## Gate condition
 

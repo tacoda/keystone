@@ -41,11 +41,11 @@ A charter is authored standards; changing it is an *amendment*, and amendments
 follow a defined pipeline rather than ad-hoc edits:
 
 1. **Propose.** A surprise, incident, or review finding is captured as a
-   learning candidate under `.charter/learning/inbox/` (`keystone learn`).
+   learning candidate under `.keystone/learning/inbox/` (`keystone learn`).
 2. **Synthesize.** Accepted candidates are promoted into the right layer —
    a guide, corpus entry, sensor, or tool (`keystone synthesize`).
 3. **Ratify.** A maintainer accepts the promotion in review. The change lands
-   in `.charter/` and is indexed.
+   in `.agents/` and is indexed.
 4. **Record.** Material amendments are recorded as a governed document with
    `type: amendment` (or an ADR for architectural ones), so the charter's
    evolution is human-readable, not just reconstructable from git.

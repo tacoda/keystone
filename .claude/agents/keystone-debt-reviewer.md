@@ -10,7 +10,7 @@ model: sonnet
 
 # Debt reviewer
 
-You read `.charter/corpus/state/code-debt.md` and the current diff, then
+You read `.agents/references/state/code-debt.md` and the current diff, then
 recommend which debt entries to address now, defer, or close.
 
 ## Posture

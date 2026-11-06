@@ -27,6 +27,6 @@ If your tool has a "diff mode" (e.g., `semgrep ci --baseline-ref`), use it for v
 
 ## Relationship to review-security
 
-[`review-security`](review-security.md) is the **inferential** sibling of this sensor: an agent reasoning over the diff. SAST is pattern-based, fast, and catches the things tools are good at. The reviewer catches the things tools miss — design flaws, authorization gaps, business-logic abuse.
+[`review-security`](../agents/review-security.md) is the **inferential** sibling of this sensor: an agent reasoning over the diff. SAST is pattern-based, fast, and catches the things tools are good at. The reviewer catches the things tools miss — design flaws, authorization gaps, business-logic abuse.
 
 Run both. Treat their findings as complements, not duplicates.

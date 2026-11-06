@@ -13,22 +13,22 @@ Continue runs shell commands two ways:
 
 ## Per-sensor binding
 
-Sensor commands come from `charter/corpus/state/CODEBASE_STATE.md`, populated by the **bootstrap** action.
+Sensor commands come from `.agents/references/state/CODEBASE_STATE.md`, populated by the **bootstrap** action.
 
 | Sensor | Fires inside | Implementation |
 |---|---|---|
-| [lint](sensors/lint.md) | **verify** action | Terminal tool / `cmd` step running `<lint command>` |
-| [type-check](sensors/type-check.md) | **verify** action | Terminal tool running `<type-check command>`. Skipped when no type checker. |
-| [test](sensors/test.md) | **verify** action | Terminal tool running `<test command>`. Fresh run per turn. |
-| [build](sensors/build.md) | **verify** action | Terminal tool running `<build command>` |
-| [drift](sensors/drift.md) | **check-drift** + **verify** + **audit** | Agent reads loaded guides + `git diff` (terminal tool or `diff` context provider); compares; reports findings. No state writes. |
-| [coverage](sensors/coverage.md) | **verify** + **audit** | Terminal tool running `<coverage command>`; agent proposes a diff to `corpus/state/CODEBASE_STATE.md` via Continue's edit flow. |
-| [risk-fingerprint](sensors/risk-fingerprint.md) | **audit** | Terminal tool for complexity metrics + `git log --stat`; agent writes table to `corpus/state/risk-fingerprints.md`. |
-| [traffic-topology](sensors/traffic-topology.md) | **audit** | `git log` + `corpus/state/CODEBASE_STATE.md` criticality → `corpus/state/traffic-topology.md`. |
-| [state-region](sensors/state-region.md) | **orient** action | Agent reads `corpus/state/CODEBASE_STATE.md` and active migrations directly. No shell needed. |
-| [commit-message](sensors/commit-message.md) | **release** phase, pre-commit | Agent inspects the proposed message before the commit. Continue does not auto-commit; the agent runs `git commit` via terminal tool. |
-| [tracker-card-fetcher](sensors/tracker-card-fetcher.md) | **spec** action | MCP tracker server (Atlassian / Linear) if configured; otherwise `cmd` step (`gh issue view`) or user pastes. |
-| [spec-adherence](sensors/spec-adherence.md) | **review** action | Agent reads spec + diff (via `diff` context provider) and walks AC. No shell needed. |
+| [lint](../../../.agents/hooks/lint.md) | **verify** action | Terminal tool / `cmd` step running `<lint command>` |
+| [type-check](../../../.agents/hooks/type-check.md) | **verify** action | Terminal tool running `<type-check command>`. Skipped when no type checker. |
+| [test](../../../.agents/hooks/test.md) | **verify** action | Terminal tool running `<test command>`. Fresh run per turn. |
+| [build](../../../.agents/hooks/build.md) | **verify** action | Terminal tool running `<build command>` |
+| [drift](../../../.agents/hooks/drift.md) | **check-drift** + **verify** + **audit** | Agent reads loaded guides + `git diff` (terminal tool or `diff` context provider); compares; reports findings. No state writes. |
+| [coverage](../../../.agents/hooks/coverage.md) | **verify** + **audit** | Terminal tool running `<coverage command>`; agent proposes a diff to `corpus/state/CODEBASE_STATE.md` via Continue's edit flow. |
+| [risk-fingerprint](../../../.agents/hooks/risk-fingerprint.md) | **audit** | Terminal tool for complexity metrics + `git log --stat`; agent writes table to `corpus/state/risk-fingerprints.md`. |
+| [traffic-topology](../../../.agents/hooks/traffic-topology.md) | **audit** | `git log` + `corpus/state/CODEBASE_STATE.md` criticality → `corpus/state/traffic-topology.md`. |
+| [state-region](../../../.agents/hooks/state-region.md) | **orient** action | Agent reads `corpus/state/CODEBASE_STATE.md` and active migrations directly. No shell needed. |
+| [commit-message](../../../.agents/hooks/commit-message.md) | **release** phase, pre-commit | Agent inspects the proposed message before the commit. Continue does not auto-commit; the agent runs `git commit` via terminal tool. |
+| [tracker-card-fetcher](../../../.agents/hooks/tracker-card-fetcher.md) | **spec** action | MCP tracker server (Atlassian / Linear) if configured; otherwise `cmd` step (`gh issue view`) or user pastes. |
+| [spec-adherence](../../../.agents/hooks/spec-adherence.md) | **review** action | Agent reads spec + diff (via `diff` context provider) and walks AC. No shell needed. |
 
 ## State writes
 

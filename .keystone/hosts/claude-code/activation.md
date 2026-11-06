@@ -4,14 +4,14 @@ How ambient corpus content gets loaded into Claude Code, where the menu lives, a
 
 ## The menu
 
-Claude Code reads `CLAUDE.md` at the project root on every session start. That file is the menu — it points the agent at `.charter/` and tells it the corpus is the source of truth.
+Claude Code reads `CLAUDE.md` at the project root on every session start. That file is the menu — it points the agent at `.agents/` and tells it the corpus is the source of truth.
 
 The installer drops a `CLAUDE.md` at root with this minimal content:
 
 ```markdown
 # CLAUDE.md
 
-This project uses a project charter. Read [.charter/README.md](.charter/README.md) before starting work.
+This project uses a project charter. Read [.agents/README.md](../../../.agents/README.md) before starting work.
 
 The corpus there defines:
 - Principles (universal engineering rules)
@@ -20,7 +20,7 @@ The corpus there defines:
 - State (the empirical map of the codebase)
 - Process (six phases: spec → planning → implementation → verification → review → release)
 
-Adapter bindings for Claude Code live at `.charter/adapters/claude-code/`.
+Adapter bindings for Claude Code live at `.keystone/hosts/claude-code/`.
 ```
 
 If the project already had a `CLAUDE.md`, the installer asks before overwriting. The user can also choose to merge — the shipped `CLAUDE.md` content is short and copy-paste-friendly.
@@ -28,9 +28,9 @@ If the project already had a `CLAUDE.md`, the installer asks before overwriting.
 ## Where runtime config lives
 
 - `.claude/settings.json` — permissions, MCP servers, hooks (optional, user-owned).
-- `.claude/agents/*.md` — project-local sub-agents (review-functional, review-security, etc.). Optional; only needed if the user wants to customize review sub-agents beyond what `.charter/actions/review.md` describes.
+- `.claude/agents/*.md` — project-local sub-agents (review-functional, review-security, etc.). Optional; only needed if the user wants to customize review sub-agents beyond what `.agents/commands/review.md` describes.
 
-The installer does **not** create or populate `.claude/`. Lifecycle actions live in `.charter/actions/<action>.md` and are invoked via natural language — no slash commands, no skills, no policy install required.
+The installer does **not** create or populate `.claude/`. Lifecycle actions live in `.agents/commands/<action>.md` and are invoked via natural language — no slash commands, no skills, no policy install required.
 
 ## Ambient loading
 
@@ -56,4 +56,4 @@ The corpus references these as "the agent's context-clear primitive." For Claude
 
 ## Lazy-by-region
 
-Claude Code does not have a built-in "load this file when editing this path" mechanism (unlike Cursor's `.cursor/rules/*.mdc` globs). The charter implements lazy-by-region inside the **orient** action playbook: the playbook tells the agent to read the touched paths, walk `.charter/corpus/state/CODEBASE_STATE.md` to map paths to stacks, consult `.charter/corpus/state/GLOBS_INDEX.md` to gate per-guide loading on declared `globs:`, and load the resulting guides via Read.
+Claude Code does not have a built-in "load this file when editing this path" mechanism (unlike Cursor's `.cursor/rules/*.mdc` globs). The charter implements lazy-by-region inside the **orient** action playbook: the playbook tells the agent to read the touched paths, walk `.agents/references/state/CODEBASE_STATE.md` to map paths to stacks, consult `.agents/references/state/GLOBS_INDEX.md` to gate per-guide loading on declared `globs:`, and load the resulting guides via Read.

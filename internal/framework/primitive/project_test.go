@@ -129,10 +129,8 @@ This prose section must be excluded from the shim.
 	}
 	s := string(out)
 	assertContainsAll(t, s, []string{
-		`kind: rule`,
-		`id: rules/keystone-go-stdlib-first`,
 		`description: Prefer Go stdlib over new deps.`,
-		`globs:`,
+		`paths:`, // the only key Claude Code reads from .claude/rules/
 		`  - "cmd/**/*.go"`,
 		`  - "go.mod"`,
 		`source: .agents/guides/idioms/go/stdlib-first.md`,
@@ -144,6 +142,7 @@ This prose section must be excluded from the shim.
 		`No new direct dep`,
 	})
 	assertContainsNone(t, s, []string{
+		"globs:", // Claude Code ignores it, so the rule would load every turn
 		"Intro prose",
 		"Why this is agent-specific",
 		"See also",

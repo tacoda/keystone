@@ -9,7 +9,7 @@ The Pruning flywheel's main entry point, paired with one Learning
 sweep. Walks the corpus + guides looking for stale, dead, or unused
 content; proposes archive moves with a one-line reason per item.
 
-Canonical playbook: `.charter/actions/audit.md`. Read it for
+Canonical playbook: `.agents/commands/audit.md`. Read it for
 the 12-category Pruning checklist (stale rules, dead idioms,
 placeholders, failing sensors, empty shells, uncited policies,
 unresolved gaps, drifted state, strict-cascade violations, required-item
@@ -17,10 +17,10 @@ gaps, risk fingerprint, traffic topology).
 
 ## Run
 
-Open `.charter/actions/audit.md` and execute every section.
+Open `.agents/commands/audit.md` and execute every section.
 Output is one report with Learn / Prune sections, each listing concrete
 proposed charter edits. Pruning diffs land in
-`.charter/corpus/state/charter-debt.md`.
+`.agents/references/state/charter-debt.md`.
 
 ## When to trigger
 

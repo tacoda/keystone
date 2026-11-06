@@ -1,6 +1,6 @@
 {
   "version": "5.0",
-  "generated": "2026-11-06T05:37:00Z",
+  "generated": "2026-11-06T05:58:25Z",
   "primitives": [
     {
       "category": "constraint",
@@ -198,7 +198,7 @@
       "category": "constraint",
       "kind": "rule",
       "id": "guides/idioms/charter-content/state-files",
-      "description": "Authoring rules for .charter/corpus/state/."
+      "description": "Authoring rules for .agents/references/state/."
     },
     {
       "category": "constraint",
@@ -420,7 +420,7 @@
       "category": "capability",
       "kind": "skill",
       "id": "keystone-learn",
-      "description": "Capture a learning candidate (surprise, incident, review finding) into .charter/learning/inbox/ for later synthesis. Triggers: keystone learn; keystone:learn; /keystone:learn; run the learn action; capture a learning candidate; log a surprise."
+      "description": "Capture a learning candidate (surprise, incident, review finding) into .keystone/learning/inbox/ for later synthesis. Triggers: keystone learn; keystone:learn; /keystone:learn; run the learn action; capture a learning candidate; log a surprise."
     },
     {
       "category": "capability",
@@ -552,7 +552,7 @@
       "category": "capability",
       "kind": "subagent",
       "id": "learning-curator",
-      "description": "Captures a learning candidate from a surprise, incident, or review finding into .charter/learning/inbox/."
+      "description": "Captures a learning candidate from a surprise, incident, or review finding into .keystone/learning/inbox/."
     },
     {
       "category": "capability",

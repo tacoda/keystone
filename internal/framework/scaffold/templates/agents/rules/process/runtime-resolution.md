@@ -15,7 +15,7 @@ enough information.
 
 - **Stage 1 — rules.** Open the index first. Find applicable guides
   and sensors via `keystone_list_primitives` (or by reading
-  `.charter/INDEX.json` directly). Filter by globs against touched
+  `.keystone/INDEX.json` directly). Filter by globs against touched
   files and by phase against current work. Cascade order: the project
   wins by default; policies refine via nesting in `keystone.json`; a
   policy's `strict` items lock absolutely.
@@ -41,10 +41,10 @@ enough information.
 ## GOLDEN RULE
 
 - **Read the index before reading bodies.** Open
-  `.charter/INDEX.json` first; load primitive bodies only on
+  `.keystone/INDEX.json` first; load primitive bodies only on
   activation. Reading every guide preemptively defeats the index.
 - **Stay at the lowest stage that suffices.** Don't escalate
   speculatively. Stage 1 covers most work; corpus is a refinement;
   external sources are an escape hatch.
 
-For reasoning, see [`corpus/process/runtime-resolution.md`](corpus/process/runtime-resolution.md).
+For reasoning, see [`corpus/process/runtime-resolution.md`](../../references/process/runtime-resolution.md).

@@ -14,8 +14,8 @@ alwaysApply: true
 
 This project uses a project charter. The corpus at charter/ defines
 principles, idioms, domain rules, codebase state, and the six-phase
-workflow. Read charter/README.md before starting work. Cursor
-bindings live in charter/adapters/cursor/.
+workflow. Read .agents/README.md before starting work. Cursor
+bindings live in .keystone/hosts/cursor/.
 ```
 
 That single always-applied rule is the menu. The full corpus is read on demand via the chat, not auto-loaded.
@@ -31,7 +31,7 @@ Legacy `.cursorrules` (single-file format) is **not** used — the modern `.curs
     └── keystone-<topic>-<name>.mdc             # one per guide with `globs:` (written by bootstrap)
 ```
 
-Lifecycle actions live in `charter/actions/<action>.md` and are invoked via natural language — no per-action `.mdc` files. The single always-applied rule lists every action with a pointer to its playbook, and the agent follows that pointer when the user asks to run an action.
+Lifecycle actions live in `.agents/commands/<action>.md` and are invoked via natural language — no per-action `.mdc` files. The single always-applied rule lists every action with a pointer to its playbook, and the agent follows that pointer when the user asks to run an action.
 
 ## Ambient loading
 

@@ -11,7 +11,7 @@ import (
 )
 
 // InboxItem is one learning-candidate file under
-// .agents/learning/inbox/. The body is the raw markdown
+// .keystone/learning/inbox/. The body is the raw markdown
 // the agent wrote when it captured the candidate.
 type InboxItem struct {
 	Name   string `json:"name"` // filename only

@@ -5,7 +5,7 @@ description: 'Paired ledger: [charter-debt.'
 ---
 # Code Debt Ledger
 
-> **Template.** The **audit** action and **debt-review** action will populate this from the [code-debt sensor](sensors/code-debt.md). Until then, leave as-is or fill in by hand.
+> **Template.** The **audit** action and **debt-review** action will populate this from the [code-debt sensor](../../hooks/code-debt.md). Until then, leave as-is or fill in by hand.
 
 Paired ledger: [`charter-debt.md`](charter-debt.md) — debt in the charter itself. Tracked separately on purpose.
 
@@ -19,7 +19,7 @@ The known debt this codebase carries. One row per item. The point of the ledger 
 
 ## Categories
 
-See [`charter/sensors/code-debt.md`](sensors/code-debt.md) for category and severity definitions. Keep them consistent — the planning phase reads this table verbatim.
+See [`.agents/hooks/code-debt.md`](../../hooks/code-debt.md) for category and severity definitions. Keep them consistent — the planning phase reads this table verbatim.
 
 ## How to use it
 

@@ -36,7 +36,7 @@ Sensors do not run on event hooks. They run inside lifecycle actions invoked at 
 | **audit** | discipline | [drift](drift.md), [coverage](coverage.md), [risk-fingerprint](risk-fingerprint.md), [traffic-topology](traffic-topology.md), [quality-radar](quality-radar.md), [code-debt](code-debt.md), [charter-debt](charter-debt.md), [stack-drift](stack-drift.md), [vuln-scan](vuln-scan.md), [sast](sast.md) |
 | **debt-review** | discipline | [code-debt](code-debt.md) |
 
-How an action is actually invoked, and whether sensors run autonomously or require human prompting, is agent-specific — see `charter/adapters/<your-agent>/sensors.md`. The most common degradation: an agent that cannot run shell commands during a turn surfaces the sensor commands for the human to execute instead.
+How an action is actually invoked, and whether sensors run autonomously or require human prompting, is agent-specific — see `.keystone/hosts/<your-agent>/sensors.md`. The most common degradation: an agent that cannot run shell commands during a turn surfaces the sensor commands for the human to execute instead.
 
 ## Contract shape
 
@@ -93,7 +93,7 @@ The bootstrap action confirms which sensors are wired up for this project (e.g.,
 
 Sensors are documented here; they are implemented inside the lifecycle action that invokes them. The **verify** action knows how to run lint and test sensors; the **audit** action knows how to run risk-fingerprint and traffic-topology. Each action reads tool commands from `corpus/state/CODEBASE_STATE.md` (populated by the **bootstrap** action).
 
-The actual wiring — what command, file, or rule trigger embodies each action for a given agent — lives in `charter/adapters/<your-agent>/sensors.md`.
+The actual wiring — what command, file, or rule trigger embodies each action for a given agent — lives in `.keystone/hosts/<your-agent>/sensors.md`.
 
 ## Adding a sensor
 

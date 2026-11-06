@@ -25,14 +25,14 @@ func writeInstallProfile(destDir, charterRoot string, sel Selections) error {
 
 	var b strings.Builder
 	fmt.Fprintf(&b, "---\n")
-	fmt.Fprintf(&b, "kind: corpus\n")
+	fmt.Fprintf(&b, "kind: reference\n")
 	fmt.Fprintf(&b, "id: corpus/state/INSTALL_PROFILE\n")
 	fmt.Fprintf(&b, "description: 'Selections captured by `keystone init`; read by the bootstrap action.'\n")
 	fmt.Fprintf(&b, "created: %s\n", time.Now().UTC().Format("2006-01-02"))
 	fmt.Fprintf(&b, "---\n\n")
 	fmt.Fprintf(&b, "# Install Profile\n\n")
 	lockPath := filepath.ToSlash(filepath.Join(config.StateRoot, config.LockfileName))
-	fmt.Fprintf(&b, "Selections captured by `keystone init`. Read by the **bootstrap** action; safe to edit by hand. Machine state (keystone version, agents, policies) lives in [`%s`](%s) at the repo root.\n\n", lockPath, lockPath)
+	fmt.Fprintf(&b, "Selections captured by `keystone init`. Read by the **bootstrap** action; safe to edit by hand. Machine state (keystone version, agents, policies) lives in [`%s`](../../../%s) at the repo root.\n\n", lockPath, lockPath)
 	fmt.Fprintf(&b, "## Selections\n\n")
 	fmt.Fprintf(&b, "| Category | Value(s) |\n")
 	fmt.Fprintf(&b, "|---|---|\n")

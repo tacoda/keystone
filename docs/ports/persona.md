@@ -6,8 +6,8 @@
 ## Path convention
 
 ```
-.charter/personas/<id>.md                                    # project-owned
-.charter/policies/<policy>/personas/<id>.md                   # policy-owned (read-only)
+.agents/agents/<id>.md                                    # project-owned
+.keystone/policies/<policy>/personas/<id>.md                   # policy-owned (read-only)
 ```
 
 Flat — personas are global by `id` across the cascade.

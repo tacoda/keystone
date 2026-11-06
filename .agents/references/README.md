@@ -2,7 +2,7 @@
 
 Informational reference — what the agent should *know* when the rules aren't enough. The reasoning, the literature, the anti-patterns, the lived state of the codebase.
 
-**Loaded on demand, not ambient.** The agent reaches a corpus file when it follows the forward-link from a guide, or when process explicitly references one. Rules live in [`../guides/`](guides/README.md) and are always loaded; corpus is read only when the agent needs the *why* behind a rule, the history behind an ideal, or the anti-patterns the team has chosen to call out.
+**Loaded on demand, not ambient.** The agent reaches a corpus file when it follows the forward-link from a guide, or when process explicitly references one. Rules live in [`../guides/`](../rules/README.md) and are always loaded; corpus is read only when the agent needs the *why* behind a rule, the history behind an ideal, or the anti-patterns the team has chosen to call out.
 
 ## Layers
 
@@ -14,7 +14,7 @@ Informational reference — what the agent should *know* when the rules aren't e
 
 **Engineering principles** (the universal reasoning that used to live under `corpus/principles/`) now ship inside the default policy at [`../policies/universal/corpus/principles/`](policies/universal) — they're a Level-3 policy, not project-authored content.
 
-Process is not represented here — the workflow phases are entirely prescriptive, so they live under [`../guides/process/`](guides/process/README.md).
+Process is not represented here — the workflow phases are entirely prescriptive, so they live under [`../guides/process/`](../rules/process/README.md).
 
 ## Pairing with guides
 

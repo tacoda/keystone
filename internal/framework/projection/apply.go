@@ -6,7 +6,6 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
-	"sort"
 	"strings"
 
 	"github.com/tacoda/keystone/internal/framework/primitive"
@@ -19,26 +18,30 @@ type ApplyResult struct {
 	Owned []string
 }
 
+// Options controls Apply.
+type Options struct {
+	Mode LinkMode
+	// Overwrite lets Apply replace a path keystone does not own. Off by
+	// default: keystone never overwrites what it did not create unless the
+	// user passes --overwrite.
+	Overwrite bool
+}
+
 // Apply materializes outs under projectDir. owned lists the host paths
-// keystone created on earlier runs (lockfile `projections`). Apply never
-// overwrites a path it does not own, and prunes owned paths the plan no
-// longer produces.
-//
-// First run under 5.0 (owned is empty): 4.x projections carried a
-// `keystone-` name prefix and no ownership record, so entries with that
-// prefix in the directories the plan writes to are adopted as owned. That
-// lets stale 4.x projections be pruned instead of left as duplicates.
-func Apply(projectDir string, outs []Output, owned []string, mode LinkMode) (ApplyResult, error) {
-	if len(owned) == 0 {
-		owned = adoptLegacy(projectDir, outs)
-	}
+// keystone created on earlier runs (lockfile `projections`). Apply refuses
+// to overwrite a path it does not own (unless opts.Overwrite), and prunes
+// owned paths the plan no longer produces.
+func Apply(projectDir string, outs []Output, owned []string, opts Options) (ApplyResult, error) {
 	isOwned := toSet(owned)
 	var res ApplyResult
+	if err := preflight(projectDir, outs, isOwned, opts); err != nil {
+		return res, err
+	}
 	for _, o := range outs {
 		if o.Dest == "" {
 			continue
 		}
-		changed, err := materialize(projectDir, o, mode, isOwned[o.Dest])
+		changed, err := materialize(projectDir, o, opts)
 		if err != nil {
 			return res, fmt.Errorf("%s %s: %w", o.Host, o.Dest, err)
 		}
@@ -54,20 +57,43 @@ func Apply(projectDir string, outs []Output, owned []string, mode LinkMode) (App
 	return res, err
 }
 
-// materialize writes one output; changed is false when disk already matches.
-func materialize(projectDir string, o Output, mode LinkMode, owned bool) (bool, error) {
-	dest := filepath.Join(projectDir, o.Dest)
-	if !owned && exists(dest) {
-		return false, fmt.Errorf("refusing to overwrite a path keystone did not create — move or remove it to let keystone project there")
+// preflight refuses the whole plan, before anything is written, when any
+// output would replace a path keystone does not own — so a refused run
+// never leaves a half-applied projection behind. It names every conflict.
+func preflight(projectDir string, outs []Output, owned map[string]bool, opts Options) error {
+	var conflicts []string
+	for _, o := range outs {
+		if o.Dest != "" && blocked(filepath.Join(projectDir, o.Dest), owned[o.Dest], opts) {
+			conflicts = append(conflicts, o.Dest)
+		}
 	}
+	if len(conflicts) == 0 {
+		return nil
+	}
+	return fmt.Errorf("refusing to overwrite %d path(s) keystone did not create — move them, or re-run with --overwrite:\n  %s",
+		len(conflicts), strings.Join(conflicts, "\n  "))
+}
+
+// materialize writes one output; changed is false when disk already matches.
+func materialize(projectDir string, o Output, opts Options) (bool, error) {
+	dest := filepath.Join(projectDir, o.Dest)
 	switch {
 	case o.Strategy == Shim:
 		return writeShim(projectDir, o, dest)
-	case mode == LinkCopy:
+	case o.Strategy == Copy || opts.Mode == LinkCopy:
 		return copyTarget(filepath.Join(projectDir, o.Target), dest)
 	default:
 		return linkTarget(projectDir, o, dest)
 	}
+}
+
+// blocked reports whether dest holds something keystone may not replace:
+// an existing path it does not own, without --overwrite.
+func blocked(dest string, owned bool, opts Options) bool {
+	if owned || opts.Overwrite {
+		return false
+	}
+	return exists(dest)
 }
 
 func writeShim(projectDir string, o Output, dest string) (bool, error) {
@@ -75,10 +101,20 @@ func writeShim(projectDir string, o Output, dest string) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	if prev, err := os.ReadFile(dest); err == nil && bytes.Equal(prev, content) {
+	same := func() bool {
+		prev, err := os.ReadFile(dest)
+		return err == nil && bytes.Equal(prev, content)
+	}
+	return ensure(dest, same, func() error { return os.WriteFile(dest, content, 0o644) })
+}
+
+// ensure leaves dest alone when same() holds; otherwise it replaces dest
+// via write. changed reports whether it wrote.
+func ensure(dest string, same func() bool, write func() error) (changed bool, err error) {
+	if same() {
 		return false, nil
 	}
-	return true, replaceAt(dest, func() error { return os.WriteFile(dest, content, 0o644) })
+	return true, replaceAt(dest, write)
 }
 
 // replaceAt clears whatever sits at dest (a file, dir, or link left by an
@@ -94,11 +130,18 @@ func replaceAt(dest string, write func() error) error {
 }
 
 func expectedShim(projectDir string, o Output) ([]byte, error) {
-	content, ok, err := primitive.RenderForHost(projectDir, o.Prim)
-	if err == nil && !ok {
-		err = fmt.Errorf("no shim renderer for %s/%s", o.Kind, o.ID)
+	if o.Render == nil {
+		content, ok, err := primitive.RenderForHost(projectDir, o.Prim)
+		if err == nil && !ok {
+			err = fmt.Errorf("no shim renderer for %s/%s", o.Kind, o.ID)
+		}
+		return content, err
 	}
-	return content, err
+	data, err := os.ReadFile(filepath.Join(projectDir, o.Src))
+	if err != nil {
+		return nil, err
+	}
+	return o.Render(o.Prim, string(data))
 }
 
 // linkTarget points dest at the canonical target with a relative symlink.
@@ -107,10 +150,11 @@ func linkTarget(projectDir string, o Output, dest string) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	if cur, err := os.Readlink(dest); err == nil && cur == rel {
-		return false, nil
+	same := func() bool {
+		cur, err := os.Readlink(dest)
+		return err == nil && cur == rel
 	}
-	return true, replaceAt(dest, func() error { return os.Symlink(rel, dest) })
+	return ensure(dest, same, func() error { return os.Symlink(rel, dest) })
 }
 
 func relLink(projectDir string, o Output) (string, error) {
@@ -119,10 +163,7 @@ func relLink(projectDir string, o Output) (string, error) {
 
 // copyTarget mirrors the canonical file or directory at src into dest.
 func copyTarget(src, dest string) (bool, error) {
-	if sameTree(src, dest) {
-		return false, nil
-	}
-	return true, replaceAt(dest, func() error { return copyTree(src, dest) })
+	return ensure(dest, func() bool { return sameTree(src, dest) }, func() error { return copyTree(src, dest) })
 }
 
 func copyTree(src, dest string) error {
@@ -183,6 +224,9 @@ func prune(projectDir string, owned []string, keep map[string]bool) ([]string, e
 		if err := os.RemoveAll(abs); err != nil {
 			return pruned, err
 		}
+		if filepath.Base(abs) == "SKILL.md" { // a per-skill dir keystone made
+			_ = os.Remove(filepath.Dir(abs)) // only succeeds when empty
+		}
 		pruned = append(pruned, rel)
 	}
 	return pruned, nil
@@ -193,34 +237,6 @@ func prune(projectDir string, owned []string, keep map[string]bool) ([]string, e
 func prunable(rel string) bool {
 	slash := filepath.ToSlash(rel)
 	return filepath.IsLocal(rel) && !strings.HasPrefix(slash, ".agents/") && !strings.HasPrefix(slash, ".keystone/")
-}
-
-// adoptLegacy returns the `keystone-*` entries in every directory the plan
-// writes into — 4.x projections, which predate ownership records.
-func adoptLegacy(projectDir string, outs []Output) []string {
-	var adopted []string
-	seen := map[string]bool{"": true, ".": true}
-	for _, o := range outs {
-		dir := filepath.Dir(o.Dest)
-		if !seen[dir] {
-			seen[dir] = true
-			adopted = append(adopted, legacyEntries(projectDir, dir)...)
-		}
-	}
-	sort.Strings(adopted)
-	return adopted
-}
-
-// legacyEntries lists repo-relative `keystone-*` entries directly under dir.
-func legacyEntries(projectDir, dir string) []string {
-	var out []string
-	entries, _ := os.ReadDir(filepath.Join(projectDir, dir))
-	for _, e := range entries {
-		if strings.HasPrefix(e.Name(), "keystone-") {
-			out = append(out, filepath.ToSlash(filepath.Join(dir, e.Name())))
-		}
-	}
-	return out
 }
 
 // Drift is one host path that no longer matches the plan.
@@ -251,7 +267,7 @@ func checkOne(projectDir string, o Output, mode LinkMode) string {
 		return "missing — run `keystone project`"
 	case o.Strategy == Shim:
 		return shimDrift(projectDir, o, dest)
-	case mode == LinkCopy:
+	case o.Strategy == Copy || mode == LinkCopy:
 		if !sameTree(filepath.Join(projectDir, o.Target), dest) {
 			return "copy differs from " + o.Target
 		}

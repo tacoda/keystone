@@ -2,7 +2,7 @@
 
 Each file here is one **action** — a single unit of lifecycle work. Actions are agent-agnostic: read by Claude Code, Cursor, Codex, Aider, GitHub Copilot, Continue, Cline, Goose, pi, or any other coding agent the project's menu file points here.
 
-For ordered sets of actions, see [`.charter/playbooks/`](playbooks/README.md). For example, the end-to-end task workflow lives at [`.charter/playbooks/task.md`](playbooks/task.md).
+For ordered sets of actions, see [`.agents/skills/`](../skills/README.md). For example, the end-to-end task workflow lives at [`.agents/skills/task/SKILL.md`](../skills/task/SKILL.md).
 
 ## How invocation works
 
@@ -27,8 +27,8 @@ No agent-specific slash commands, rule files, or prompts. One source of truth pe
 | **synthesize** | [`synthesize.md`](synthesize.md) | After inbox has accumulated — promote into corpus / guides. |
 | **mode** | [`mode.md`](mode.md) | When pacing needs to change — paired / solo / autopilot. |
 
-Each action is short (~20–40 lines): the agent reads it, executes the listed activities, and reports back. Deeper context lives in `.charter/guides/process/`, `.charter/sensors/`, and `.charter/learning/`; actions forward-link to those when they apply.
+Each action is short (~20–40 lines): the agent reads it, executes the listed activities, and reports back. Deeper context lives in `.agents/rules/process/`, `.agents/hooks/`, and `.keystone/learning/`; actions forward-link to those when they apply.
 
 ## Override cascade
 
-For any `<name>.md`, the project's `.charter/actions/<name>.md` always wins by default. Among policies, policies nested deeper in `keystone.json` refine the outer policies they're nested in. A policy can mark an item `strict` to make it absolute — nothing else can override a strict item, not the project, not any other policy. `keystone verify` reports a violation if any layer attempts to shadow a strict item.
+For any `<name>.md`, the project's `.agents/commands/<name>.md` always wins by default. Among policies, policies nested deeper in `keystone.json` refine the outer policies they're nested in. A policy can mark an item `strict` to make it absolute — nothing else can override a strict item, not the project, not any other policy. `keystone verify` reports a violation if any layer attempts to shadow a strict item.

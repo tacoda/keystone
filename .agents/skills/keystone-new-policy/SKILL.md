@@ -31,16 +31,16 @@ Example:
 
 ```
 keystone new policy acme-policies
-# writes ./acme-policies/{keystone-policy.json, .charter/, README.md, ...}
+# writes ./acme-policies/{keystone-policy.json, .agents/, README.md, ...}
 ```
 
 ## After scaffolding
 
 1. Fill in `keystone-policy.json` — name, version, required port
    declarations, strict locks.
-2. Author the policy's `.charter/` content — guides, sensors, etc.
+2. Author the policy's `.agents/` content — guides, sensors, etc.
 3. Initialize git and push to a host so consumers can pin the source.
 4. Consumers add the policy via `keystone policy add <owner>/<repo>@<version>`.
 
-See the [policy authoring guide](../../../../docs/adr/) for the full
+See the [policy authoring guide](../../../docs/adr/) for the full
 policy lifecycle.
