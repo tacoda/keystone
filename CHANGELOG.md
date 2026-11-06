@@ -4,6 +4,12 @@ All notable changes to keystone are documented here. The format is based on [Kee
 
 ## [5.0.1] — 2026-11-06
 
+### Fixed
+
+- `keystone init`'s closing message named the 4.x components (corpus,
+  guides, sensors); it now names the two categories and their kinds.
+- `docs/kinds/hook.md` lists the Codex hook bridge.
+
 ### Security
 
 - `golang.org/x/net` 0.56.0 → 0.60.0 and `github.com/quic-go/quic-go`

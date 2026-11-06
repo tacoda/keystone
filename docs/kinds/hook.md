@@ -76,6 +76,7 @@ On Claude Code, `keystone project` also writes the hook as a subagent in `.claud
 - **Claude Code**: bridges merged into `.claude/settings.json`, next to your own hooks.
 - **Cursor**: bridges merged into `.cursor/hooks.json`, with `failClosed: true`.
 - **GitHub Copilot**: bridges in `.github/hooks/keystone.json`.
+- **Codex**: bridges merged into `.codex/hooks.json`. Codex runs them once you trust them in `/hooks`.
 - **opencode**: a keystone-owned plugin.
 - **Every other host**: no bridge. `keystone project` reports it, and `AGENTS.md` tells the agent to run the checks in `.agents/hooks/` itself.
 

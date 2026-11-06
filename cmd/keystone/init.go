@@ -419,13 +419,14 @@ func printNextSteps(agents []string, charterRoot string) {
   ▶ Next: run the /keystone:bootstrap skill %s.
 
      Bootstrap reads your codebase and seeds %s/references/state/CODEBASE_STATE.md,
-     %s/corpus/idioms/<your-stack>/, and the paired %s/guides/idioms/<your-stack>/
-     so the charter reflects your project. It also confirms the sensor commands.
+     %s/rules/idioms/<your-stack>/, and the paired %s/references/idioms/<your-stack>/
+     so the charter reflects your project. It also confirms the hook commands.
 %s
 Also:
 
-  • Read %s/README.md for an overview of the five components
-    (corpus, guides, sensors, policies, flywheels).
+  • Read %s/README.md for an overview: constraints (rules, references,
+    hooks, permissions, evals) and capabilities (skills, commands,
+    subagents, tools, documents).
   • Review %s/references/state/INSTALL_PROFILE.md and adjust if needed.
   • Commit %s/ and any agent-specific files this installer created.
 `, list, bootstrapIn, charterRoot, charterRoot, charterRoot, lifecycle, charterRoot, charterRoot, charterRoot)
