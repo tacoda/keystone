@@ -7,44 +7,111 @@ import (
 	"path/filepath"
 
 	"github.com/tacoda/keystone/internal/framework/allocate"
+	"github.com/tacoda/keystone/internal/framework/config"
 	"github.com/tacoda/keystone/internal/framework/lockfile"
+	"github.com/tacoda/keystone/internal/framework/projection"
 )
 
 // runAllocate handles `keystone allocate [--apply] [--dir D]`: report, and
 // with --apply write, where each piece of an existing host-specific setup
 // goes in .agents/. Originals are never changed.
 func runAllocate(args []string) error {
-	dir, apply := ".", false
-	help, err := parseFlags(args, map[string]*string{"--dir": &dir}, map[string]*bool{"--apply": &apply},
+	dir, apply, overwrite := ".", false, false
+	help, err := parseFlags(args, map[string]*string{"--dir": &dir},
+		map[string]*bool{"--apply": &apply, "--overwrite": &overwrite},
 		func() { printAllocateUsage(os.Stdout) })
 	if help || err != nil {
 		return err
 	}
-	absDir, err := filepath.Abs(dir)
-	if err != nil {
-		return fmt.Errorf("resolve dir: %w", err)
-	}
-	lf, err := lockfile.Read(absDir)
+	absDir, lf, items, err := planAllocation(dir)
 	if err != nil {
 		return err
 	}
-	items, err := allocate.Plan(absDir, lf.Projections, lf.ManagedEntries)
-	if err != nil {
-		return err
-	}
-	printRootTotals(os.Stdout, allocate.RootTotals(absDir, items))
-	if len(items) == 0 {
-		fmt.Fprintln(os.Stdout, "✓ keystone allocate — nothing to move: no host-specific setup outside keystone's projections, and no root-file section that loads better on demand")
-		return nil
-	}
-	printAllocation(os.Stdout, items)
-	if !apply {
-		fmt.Fprintln(os.Stdout, "\nRun `keystone allocate --apply` to write these into .agents/ (originals stay in place).")
+	if !reportAllocation(absDir, items, apply || overwrite) {
 		return nil
 	}
 	res, err := allocate.Apply(absDir, items)
-	printApplied(os.Stdout, res)
-	return err
+	if err != nil || !overwrite {
+		printApplied(os.Stdout, res)
+		return err
+	}
+	return takeOver(absDir, lf, items, res)
+}
+
+// reportAllocation prints the plan and reports whether there is anything
+// to write (and writing was asked for).
+func reportAllocation(absDir string, items []allocate.Item, write bool) bool {
+	printRootTotals(os.Stdout, allocate.RootTotals(absDir, items))
+	if len(items) == 0 {
+		fmt.Fprintln(os.Stdout, "✓ keystone allocate — nothing to move: no host-specific setup outside keystone's projections, and no root-file section that loads better on demand")
+		return false
+	}
+	printAllocation(os.Stdout, items)
+	if !write {
+		fmt.Fprintln(os.Stdout, "\nRun `keystone allocate --apply` to write these into .agents/ (originals stay in place).")
+	}
+	return write
+}
+
+// planAllocation resolves dir, reads the lockfile (keystone's own output
+// is skipped), and plans every item.
+func planAllocation(dir string) (string, *lockfile.Lockfile, []allocate.Item, error) {
+	absDir, err := filepath.Abs(dir)
+	if err != nil {
+		return "", nil, nil, fmt.Errorf("resolve dir: %w", err)
+	}
+	lf, err := lockfile.Read(absDir)
+	if err != nil {
+		return "", nil, nil, err
+	}
+	items, err := allocate.Plan(absDir, lf.Projections, lf.ManagedEntries)
+	return absDir, lf, items, err
+}
+
+// takeOver is --overwrite: keystone takes ownership of the originals whose
+// converted files were written, then re-indexes and re-projects so each
+// host reads the charter instead.
+func takeOver(absDir string, lf *lockfile.Lockfile, items []allocate.Item, res allocate.Result) error {
+	own, err := allocate.Overwrite(absDir, items, res.Wrote, enabledHosts(absDir))
+	if err != nil {
+		return err
+	}
+	lf.Projections = append(lf.Projections, own.Owned...)
+	recordManaged(lf, mergeManaged(lf.ManagedEntries, own.Managed))
+	if err := lockfile.Write(absDir, lf); err != nil {
+		return err
+	}
+	for _, p := range res.Exists {
+		fmt.Fprintf(os.Stdout, "  exists, original kept: %s\n", p)
+	}
+	for _, k := range own.Kept {
+		fmt.Fprintf(os.Stdout, "  original kept: %s\n", k)
+	}
+	fmt.Fprintf(os.Stdout, "✓ keystone allocate --overwrite — %d written; %d original(s) now keystone's\n", len(res.Wrote), len(own.Owned))
+	return indexAndProject(absDir, config.DefaultAgentsRoot, false)
+}
+
+// enabledHosts is the hosts keystone projects to (keystone.json adapters,
+// plus claude-code, which is always on).
+func enabledHosts(absDir string) []string {
+	var adapters []string
+	if cfg, err := config.ReadProjectConfig(absDir); err == nil && cfg != nil {
+		adapters = cfg.Adapters
+	}
+	var hosts []string
+	for _, p := range projection.Enabled(adapters) {
+		hosts = append(hosts, p.Host)
+	}
+	return hosts
+}
+
+// mergeManaged appends add's entries to the lockfile's, per file.
+func mergeManaged(have, add map[string][]string) map[string][]string {
+	out := map[string][]string{}
+	for dest, entries := range add {
+		out[dest] = append(append([]string(nil), have[dest]...), entries...)
+	}
+	return out
 }
 
 func printAllocation(w io.Writer, items []allocate.Item) {
@@ -122,5 +189,11 @@ Copilot instructions, prompts, and agents; .clinerules, .windsurfrules;
   (default)   report only; nothing is written
   --apply     write the converted files into .agents/. An existing .agents/
               file is never overwritten, and no original is changed.
+  --overwrite --apply, then hand the originals to keystone: moved sections
+              leave their root file, moved hooks leave settings.json, and
+              each converted host file becomes keystone's, so the next
+              projection replaces it with a link or shim (or removes it
+              when no host reads that path any more). An original whose
+              .agents/ target already existed is left alone.
 `)
 }

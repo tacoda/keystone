@@ -132,7 +132,7 @@ func classify(file string, sec Section) (Item, bool) {
 	tokens := budget.Estimate([]byte(sec.Text()))
 	for _, rule := range classifiers {
 		if it, ok := rule(sec, slug); ok {
-			it.Source, it.Tokens = src, tokens
+			it.Source, it.Tokens, it.section = src, tokens, sec.Text()
 			return it, true
 		}
 	}

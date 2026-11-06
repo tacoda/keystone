@@ -22,6 +22,13 @@ type Item struct {
 	Content []byte         // the converted file
 	Note    string         // what changed in conversion, or why it stays
 	Tokens  int            // always-loaded tokens the move saves (root-file sections)
+
+	// What --overwrite hands to keystone once the target is written; see
+	// Overwrite. At most one is set.
+	own     string     // a host path keystone takes ownership of
+	section string     // root-file text to remove (root file is Source's file)
+	entries []string   // settings.json entries ("bucket:rule") keystone manages
+	hook    *movedHook // a settings.json hook to remove
 }
 
 // Moves reports whether the item has a target in .agents/.

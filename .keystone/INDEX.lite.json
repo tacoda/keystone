@@ -1,6 +1,6 @@
 {
   "version": "5.0",
-  "generated": "2026-11-06T14:44:37Z",
+  "generated": "2026-11-06T15:03:11Z",
   "primitives": [
     {
       "category": "constraint",
@@ -385,6 +385,12 @@
       "kind": "command",
       "id": "verify",
       "description": "Run the verification sensors — lint, type-check, test, build, drift, commit-message."
+    },
+    {
+      "category": "capability",
+      "kind": "skill",
+      "id": "keystone-allocate",
+      "description": "Move an existing agent setup into the charter and cut always-loaded context: run keystone allocate, review its classifications, then apply. Triggers: keystone allocate; keystone:allocate; /keystone:allocate; convert my .claude setup; migrate .cursorrules; trim CLAUDE.md; reduce context bloat."
     },
     {
       "category": "capability",

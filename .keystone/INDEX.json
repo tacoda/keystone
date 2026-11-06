@@ -1,6 +1,6 @@
 {
   "version": "5.0",
-  "generated": "2026-11-06T14:44:37Z",
+  "generated": "2026-11-06T15:03:11Z",
   "primitives": [
     {
       "kind": "command",
@@ -612,6 +612,29 @@
       "id": "process/verification",
       "description": "The phase where claims are paired with evidence before commit.",
       "path": ".agents/rules/process/verification.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "skill",
+      "id": "keystone-allocate",
+      "description": "Move an existing agent setup into the charter and cut always-loaded context: run keystone allocate, review its classifications, then apply. Triggers: keystone allocate; keystone:allocate; /keystone:allocate; convert my .claude setup; migrate .cursorrules; trim CLAUDE.md; reduce context bloat.",
+      "metadata": {
+        "model": "sonnet",
+        "tags": "scaffold,composition"
+      },
+      "tools": [
+        "Read",
+        "Write",
+        "Edit",
+        "Glob",
+        "Bash"
+      ],
+      "model": "sonnet",
+      "tags": [
+        "scaffold",
+        "composition"
+      ],
+      "path": ".agents/skills/keystone-allocate/SKILL.md",
       "provenance": "project"
     },
     {
@@ -1297,6 +1320,7 @@
       "process/verification"
     ],
     "skill": [
+      "keystone-allocate",
       "keystone-audit",
       "keystone-bootstrap",
       "keystone-check-drift",
@@ -1350,6 +1374,7 @@
       "command/spec",
       "command/synthesize",
       "command/verify",
+      "skill/keystone-allocate",
       "skill/keystone-audit",
       "skill/keystone-bootstrap",
       "skill/keystone-check-drift",

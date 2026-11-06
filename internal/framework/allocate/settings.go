@@ -48,6 +48,7 @@ type hookGroup struct {
 func (s *scan) permissions(perm map[string][]string) {
 	mine := toSet(s.managed[claudeSettingsPath])
 	var b strings.Builder
+	var entries []string
 	n := 0
 	for _, bucket := range []string{"allow", "ask", "deny"} {
 		var kept []string
@@ -62,6 +63,7 @@ func (s *scan) permissions(perm map[string][]string) {
 		b.WriteString(bucket + ":\n")
 		for _, rule := range kept {
 			fmt.Fprintf(&b, "  - %q\n", rule)
+			entries = append(entries, bucket+":"+rule)
 		}
 		n += len(kept)
 	}
@@ -71,7 +73,7 @@ func (s *scan) permissions(perm map[string][]string) {
 	content := "---\nid: claude-settings\ndescription: Permission rules moved from .claude/settings.json.\n" + b.String() +
 		"---\n\n# Claude Code settings permissions\n\nMoved by `keystone allocate`. Keystone translates these to every host that can enforce them.\n"
 	s.add(Item{Source: claudeSettingsPath + " permissions", Kind: primitive.KindPermission,
-		Target: ".agents/permissions/claude-settings.md", Content: []byte(content), Note: fmt.Sprintf("%d rule(s)", n)})
+		Target: ".agents/permissions/claude-settings.md", Content: []byte(content), Note: fmt.Sprintf("%d rule(s)", n), entries: entries})
 }
 
 // hooks turns each user command hook on event into a hook primitive. A
@@ -92,7 +94,7 @@ func (s *scan) hooks(event string, groups []hookGroup) {
 			id := fmt.Sprintf("claude-%s-%d", slugify(event), i)
 			content := fmt.Sprintf("---\nid: %s\ndescription: %s hook moved from .claude/settings.json.\nmode: computational\nevent: %s\nrun: %q\n---\n", id, event, event, h.Command)
 			s.add(Item{Source: src, Kind: primitive.KindHook, Target: ".agents/hooks/" + id + ".md", Content: []byte(content),
-				Note: "any non-zero exit now blocks (Claude Code blocked only on 2)"})
+				Note: "any non-zero exit now blocks (Claude Code blocked only on 2)", hook: &movedHook{event, h.Command}})
 		}
 	}
 }

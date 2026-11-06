@@ -666,3 +666,21 @@ agent loads. 5.0 measures the load.
   move saves. Two false positives from this repo's CLAUDE.md shaped the
   heuristics: the cue and command must share a line, and folder patterns
   (`.claude/*`) do not scope a rule.
+- Phase 6b.3: done. `keystone allocate --overwrite` applies, then hands
+  over the originals whose converted file was written: host files become
+  keystone-owned (lockfile `projections`; for a skill, its whole folder),
+  moved sections leave `CLAUDE.md` / `AGENTS.md`, moved hooks leave
+  `settings.json`, and moved permission rules become keystone-managed
+  entries. It then re-indexes and re-projects. Guards: an original whose
+  `.agents/` target already existed is never handed over (its content
+  would be lost), and neither is one whose host is not in `adapters`
+  (an owned path no projection covers is pruned); both are reported with
+  the fix. `GEMINI.md` and `.goosehints` sections are never removed (no
+  host projection replaces them). A `keystone-allocate` skill has an agent
+  review the classifications and run `--overwrite` only on the user's
+  explicit request. Tests assert mappings per source rather than golden
+  report files (the report wording is not a contract).
+  Open decision: Claude Code projections carry a `keystone-` file and name
+  prefix, so a converted `reviewer` subagent becomes `keystone-reviewer`
+  and `/release` becomes `/keystone-release`. Ownership now lives in the
+  lockfile, so the prefix is no longer needed to mark keystone's files.

@@ -53,6 +53,7 @@
     ".claude/rules/keystone-charter-content-primitive-shape.md",
     ".claude/rules/keystone-charter-content-state-files.md",
     ".claude/rules/keystone-go-stdlib-first.md",
+    ".claude/skills/keystone-allocate",
     ".claude/skills/keystone-audit",
     ".claude/skills/keystone-bootstrap",
     ".claude/skills/keystone-check-drift",

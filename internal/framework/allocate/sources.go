@@ -35,7 +35,7 @@ func cursorRules(s *scan) error {
 			slug := slugify(strings.TrimSuffix(path.Base(rel), ".mdc"))
 			body := frontmatter([2]string{"name", slug}, [2]string{"description", desc}) + primitive.Body(string(src))
 			s.add(Item{Source: rel, Kind: primitive.KindSkill, Target: ".agents/skills/" + slug + "/SKILL.md",
-				Content: []byte(body), Note: "agent-requested rule → skill"})
+				Content: []byte(body), Note: "agent-requested rule → skill", own: rel})
 			continue
 		}
 		s.convertTo(rel, primitive.KindRule, ".agents/rules/"+strings.TrimSuffix(strings.TrimPrefix(rel, ".cursor/rules/"), ".mdc")+".md")
@@ -98,7 +98,7 @@ func (s *scan) convertTo(rel string, kind primitive.Kind, target string) {
 	if kind == primitive.KindSubagent && !strings.Contains(string(content), "\ntools:") {
 		note = joinNote(note, "add `tools:` — the host gave this subagent every tool")
 	}
-	s.add(Item{Source: rel, Kind: kind, Target: target, Content: content, Note: note})
+	s.add(Item{Source: rel, Kind: kind, Target: target, Content: content, Note: note, own: rel})
 }
 
 func joinNote(a, b string) string {
@@ -113,7 +113,8 @@ func joinNote(a, b string) string {
 func (s *scan) skills(dir string) {
 	for _, rel := range s.files(dir, "") {
 		target := ".agents/skills/" + strings.TrimPrefix(rel, dir+"/")
-		s.add(Item{Source: rel, Kind: primitive.KindSkill, Target: target, Content: s.read(rel)})
+		name, _, _ := strings.Cut(strings.TrimPrefix(rel, dir+"/"), "/")
+		s.add(Item{Source: rel, Kind: primitive.KindSkill, Target: target, Content: s.read(rel), own: dir + "/" + name})
 	}
 }
 

@@ -246,3 +246,26 @@ func TestPlan_RootFileSections(t *testing.T) {
 	assertFile(t, root, ".agents/hooks/checks.md", "run: make lint", "event: Stop")
 	assertLintClean(t, root)
 }
+
+// TestOverwrite_OnlyWhatWasWritten — an original whose target already
+// existed, or whose host keystone does not project to, stays the user's.
+func TestOverwrite_OnlyWhatWasWritten(t *testing.T) {
+	root := seed(t, map[string]string{
+		".claude/agents/a.md":         "---\nname: a\ndescription: A.\n---\n",
+		".claude/agents/b.md":         "---\nname: b\ndescription: B.\n---\n",
+		".agents/agents/b.md":         "already here\n",
+		".github/prompts/x.prompt.md": "---\ndescription: X\n---\n",
+	})
+	items, _ := Plan(root, nil, nil)
+	res, _ := Apply(root, items)
+	own, err := Overwrite(root, items, res.Wrote, []string{"claude-code"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if strings.Join(own.Owned, ",") != ".claude/agents/a.md" {
+		t.Errorf("owned = %v; b's target existed and copilot is not enabled", own.Owned)
+	}
+	if len(own.Kept) != 1 || !strings.Contains(own.Kept[0], "keystone target add github-copilot") {
+		t.Errorf("kept = %v", own.Kept)
+	}
+}
