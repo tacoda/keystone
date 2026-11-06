@@ -1,85 +1,44 @@
-# Idioms
+# Idiom references
 
-Stack-specific patterns that express the principles in this stack's vocabulary. Each idiom file traces back to the principle it instantiates.
+Stack-specific patterns: how this stack expresses good practice. Each file explains one idiom. Its paired rule in `.agents/rules/idioms/<stack>/` carries the directives.
 
 ## Layout
 
-One folder per stack:
+One folder per stack, mirrored under `rules/idioms/`:
 
 ```
-idioms/
-├── README.md
-├── <stack-1>/
-│   ├── <pattern>.md
-│   └── anti-patterns.md
-└── <stack-2>/
-    └── ...
+references/idioms/
+├── <stack>/
+│   └── <idiom>.md     # the reasoning
+rules/idioms/
+├── <stack>/
+│   └── <idiom>.md     # the directives; corpus: names the reference
 ```
 
-Stacks are added by the **bootstrap** action (detects the project's stack and scaffolds the matching folder) or by hand. Common stack names: `php-laravel`, `typescript-react`, `python-django`, `ruby-rails`, `go`, `rust`, `elixir-phoenix`, `claude-code-policy` (for projects authoring a Claude Code policy).
-
-## Empty by default
-
-This directory ships **empty** in a fresh install. The **bootstrap** action populates it on first use. Until then, only the principles layer drives the agent.
-
-## Activation
-
-Ambient, **lazy by region**. When the agent enters a code region matching a stack, the corresponding `idioms/<stack>/` folder activates. The agent does not load every idiom for every edit.
-
-How "lazy by region" is enforced is agent-specific — see `.keystone/hosts/<your-agent>/activation.md`.
-
-## Authorship
-
-Lead engineer drafts; agent refines through Learning flywheel cycles. Idioms accumulate over the project's lifetime.
+This folder ships empty. The `bootstrap` command detects the stack and seeds it, or you add a stack by hand with `keystone new rule idioms/<stack>/<idiom>`.
 
 ## Format
 
-An idiom is split across two files — informational in `corpus/`, prescriptive in `guides/`:
-
-**`corpus/idioms/<stack>/<idiom>.md`** — the explanation:
-
 ```markdown
-# <Idiom Name>
+---
+id: idioms/<stack>/<idiom>
+description: One line on the reasoning this file holds.
+---
 
-One-paragraph statement of the pattern in this stack.
+# <Idiom name>
 
-> **Rules extracted:** [`guides/idioms/<stack>/<idiom>.md`](guides/idioms/<stack>/<idiom>.md).
+One paragraph that states the pattern in this stack.
 
 ## How to apply
 
-Concrete steps, code shape, anti-patterns to avoid.
+Concrete steps and code shape.
 
-## Review checklist
+## Anti-patterns
 
-Bullet list a reviewer can run through.
-
-**Traces to:** [Principle Name](principles/<file>.md)
+What to avoid.
 ```
 
-**`guides/idioms/<stack>/<idiom>.md`** — the rules:
+## Anti-patterns for this folder
 
-```markdown
-# <Idiom Name> — rules
-
-The rules from [`corpus/idioms/<stack>/<idiom>.md`](corpus/idioms/<stack>/<idiom>.md).
-
-## IRON LAW
-
-Non-negotiable for this stack. (Optional — only when there is a true must.)
-
-## GOLDEN RULE
-
-Ideals. Deviation requires reasoning.
-```
-
-Idiom files ship with real content. Stack-specific facts are inferred by the **bootstrap** action from the project's manifest, build files, and code — not parked behind placeholders.
-
-## Changes when
-
-The stack does. Adding a new framework, upgrading a major version, adopting a new pattern → an idiom file changes or appears.
-
-## Anti-patterns for this layer
-
-- An idiom that does not cite a principle.
-- A "principle" pretending to be an idiom because the team likes a particular way of doing things.
-- An idiom that names a specific function or file from the codebase — that is state, not knowledge.
+- An idiom that names a specific function or file in the codebase. That is state, not an idiom.
+- A team preference written up as if it were a universal principle.

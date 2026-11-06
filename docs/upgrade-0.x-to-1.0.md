@@ -120,7 +120,7 @@ Then file an issue describing what failed — the upgrade narrative is the surfa
 
 ## See also
 
-- [`PLAN-1.0.md`](../PLAN-1.0.md) — the full 0.x → 1.0 plan, with per-phase deliverables.
+- `PLAN-1.0.md` — the full 0.x → 1.0 plan, with per-phase deliverables.
 - [`docs/compatibility.md`](compatibility.md) — what 1.0 promises going forward.
 - [`docs/conventions.md`](conventions.md) — the canonical Rails-style convention table.
-- [`docs/ports/`](ports/) — per-port contracts.
+- [`docs/kinds/`](kinds/README.md) — per-port contracts.

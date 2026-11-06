@@ -1,80 +1,41 @@
 # Evals
 
-Framework primitive. Each eval measures how the charter behaves
-against a known scenario — useful when adding, pruning, or
-re-severing rules to confirm the change actually does what you
-expect.
+Each folder here is an eval: a test that the charter behaves the way you expect. Use one when you add, scope, or prune a rule. An eval doesn't run on its own, so run it yourself or add `keystone eval run` to CI.
 
 ## Shape
 
 ```
 .agents/evals/<id>/
-├── EVAL.md          # canonical primitive frontmatter + scenario prose
-├── fixture/         # snapshot of code the eval runs against (optional)
-└── expected.json    # assertions
+├── EVAL.md          # frontmatter + the scenario in prose
+├── expected.json    # the assertions
+└── fixture/         # optional; the runner doesn't read it today
 ```
-
-Each EVAL.md declares canonical primitive frontmatter:
 
 ```yaml
 ---
-kind: eval
-id: rule-fires-on-billing-touch
-description: When a touched file matches src/billing/**, the billing guide must activate.
-level: static                # static | sensor | agent
-deps:
-  - guide/idioms/billing/billing-rules
+id: billing-scope
+description: The billing rule applies to billing code and stays out of the web code.
+level: static          # static | sensor | agent; default static
 ---
 ```
 
 ## Levels
 
-| Level   | What it checks                                                            | Cost     | Deterministic |
-| ------- | -------------------------------------------------------------------------- | -------- | ------------- |
-| static  | INDEX.json + cascade + glob match given a fixture file set.               | seconds  | yes           |
-| sensor  | Computational sensors against the fixture diff; exit codes + output.      | seconds  | yes           |
-| agent   | LLM-driven scenario w/ charter loaded; judge-graded outputs. (Phase 2.1.) | $ per run | no            |
+| Level | What it checks | Status |
+|---|---|---|
+| `static` | Each rule's `paths:` against `touched_files` in `expected.json`. | Runs |
+| `sensor` | A hook's command: its exit code and output. | Runs |
+| `agent` | An agent's behavior with the charter loaded. | Skipped: not built yet |
 
-## Running
+A rule without `paths:` never counts as fired in a static eval, so assert only scoped rules.
+
+## Run
 
 ```
-keystone eval run                  # all evals at static + sensor levels
-keystone eval run --filter <pat>   # subset
-keystone eval run --report md      # human report (default: json)
-keystone new eval <id>             # scaffold a new eval dir
+keystone eval run                    # every eval, Markdown report
+keystone eval run --filter billing   # ids that contain "billing"
+keystone eval run --baseline main    # compare against a git ref
+keystone new eval <id>               # scaffold a new eval folder
 ```
 
-The dashboard at `/evals` provides one-click runs + SSE-live result
-streams.
-
-## Committing evals + the baseline contract
-
-`EVAL.md` and `expected.json` are the spec — small, version-controlled,
-always committed. `keystone eval run --baseline <git-ref>` checks out
-the ref into a worktree; if EVAL.md / expected.json aren't in that
-ref's tree, the baseline diff reports those evals as `removed` (not a
-regression).
-
-`fixture/` is the negotiable part. If it carries heavy code snapshots
-or regenerable artifacts, you can gitignore it:
-
-```gitignore
-# in your project's .gitignore
-.agents/evals/*/fixture/
-```
-
-Tradeoff: baseline diffs against a ref where the fixture is missing
-will skip sensor-level assertions that read fixture files. Static
-assertions still run because they only need `touched_files` from
-`expected.json`. If fidelity matters for sensor evals, leave the
-fixture committed.
-
-## Packaging in policies
-
-Evals are a framework abstraction; policies (vendored charter
-fragments) can ship them. Org policies often bundle evals alongside
-their guides so consumers can verify the policy's contract is met
-locally.
-
-See [`docs/kinds/README.md`](../../docs/kinds/README.md) for
-the canonical descriptor shape.
+With `--baseline`, an eval missing from the ref shows as new, not as a regression. Commit `EVAL.md` and `expected.json`.

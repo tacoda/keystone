@@ -1,30 +1,19 @@
-# Domain
+# Domain references
 
-What the project *is* — its product shape, its business rules, the invariants the codebase exists to enforce. Distinct from idioms (how to write code) and state (what the code looks like right now).
+What the project is: its product shape, its business rules, and the invariants the code exists to enforce. Idioms say how to write code. State says what the code looks like now. Domain says what the code is for.
 
 ## What lives here
 
-- `product-shape.md` — what the project ships, what it doesn't, and what survives a release. Add it on first use.
+- `product-shape.md` ships as a template. The `bootstrap` command fills it in.
 
 Teams often add more:
 
-- `glossary.md` — domain vocabulary that the agent should use consistently.
-- `invariants.md` — business rules that must always hold (e.g., "an order cannot be both shipped and refunded").
-- `personas.md` — user types the system serves.
-- `<feature>.md` — domain notes for a feature area.
+- `glossary.md`: the domain words the agent should use.
+- `invariants.md`: business rules that must always hold, such as "an order can't be both shipped and refunded."
+- `<feature>.md`: notes for one feature area.
 
-## Activation
+When a domain fact must constrain code, write the directive as a rule in `.agents/rules/domain/` and point its `corpus:` here.
 
-Ambient, always loaded. Domain rules constrain agent behavior across every action.
+## Who writes it
 
-## Empty by default
-
-This directory ships with a `product-shape.md` template populated by the **bootstrap** action. Until then, the agent has only principles and process — no project-specific business context.
-
-## Authorship
-
-Domain expert + lead engineer. Agents may propose additions through the Learning flywheel, but domain claims must be confirmed by a human who owns the business knowledge.
-
-## Changes when
-
-The product changes. New invariant accepted. Business rule shifts. Vocabulary settles.
+A domain expert and the lead engineer. The agent can propose additions through `learn`, but a person who owns the business knowledge confirms each claim.

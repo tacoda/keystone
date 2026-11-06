@@ -1,26 +1,26 @@
 ---
-kind: corpus
-id: corpus/idioms/go/README
+kind: reference
+id: idioms/go/README
 description: 'Go idiom set for the keystone project.'
 ---
-# Go idioms — reasoning
+# Go idioms, reasoning
 
-Stack-specific patterns for Go code in this repo. Each idiom in this folder is paired with a rules file at [`../../../guides/idioms/go/`](../../../rules/idioms/go/).
+Stack-specific patterns for Go code in this repo. Each idiom here pairs with a rule file in [`rules/idioms/go/`](../../../rules/idioms/go/).
 
 ## Region
 
 Go source lives in:
 
-- `cmd/keystone/` — CLI entrypoint, cobra wiring.
-- `internal/framework/` — the framework implementation. Everything that isn't the CLI shell.
+- `cmd/keystone/`: the CLI entrypoint and cobra wiring.
+- `internal/framework/`: the framework implementation, everything outside the CLI shell.
 
 ## Stack character
 
-- Single-binary CLI built around `spf13/cobra`.
-- Reads / writes filesystem (`.agents/`, project state). No DB, no HTTP server. (MCP server uses stdio.)
-- Library deps kept small. Stdlib first, single-purpose third-party additions only.
+- A single-binary CLI built on `spf13/cobra`.
+- It reads and writes the filesystem (`.agents/`, `.keystone/`). No DB and no HTTP server. The MCP server uses stdio.
+- Library deps stay small. Stdlib first, then single-purpose third-party additions only.
 
 ## Layout
 
-- `stdlib-first.md` — prefer stdlib over third-party for primitives that exist there.
-- (more idioms accumulate via the **learn** → **synthesize** flywheel.)
+- `stdlib-first.md`: prefer the stdlib over third-party packages for anything it covers.
+- More idioms accumulate through the **learn** and **synthesize** flywheel.

@@ -1,34 +1,47 @@
-# Actions
+# Commands
 
-Each file here is one **action** — a single unit of lifecycle work. Actions are agent-agnostic: read by Claude Code, Cursor, Codex, Aider, GitHub Copilot, Continue, Cline, Goose, pi, or any other coding agent the project's menu file points here.
+Each file here is a command: a unit of work the user asks for by name, such as `/spec` or "run verify". A command does nothing until someone calls it. If the work should start from the task itself, write a skill instead.
 
-For ordered sets of actions, see [`.agents/skills/`](../skills/README.md). For example, the end-to-end task workflow lives at [`.agents/skills/task/SKILL.md`](../skills/task/SKILL.md).
+## Shape
 
-## How invocation works
+```markdown
+---
+id: spec
+description: Capture intent and acceptance criteria for a unit of work.
+args:
+  - name: card
+    type: string
+    required: false
+    description: The tracker card id.
+---
 
-The agent reads its menu file (`CLAUDE.md`, `AGENTS.md`, `CONVENTIONS.md`, `.continuerules`, `.cursor/rules/keystone.mdc`, etc.) on session start. The menu file lists every action with a one-line description and a link. When the user asks to "run bootstrap" (or "run the bootstrap action," or "do a verify pass"), the agent follows the link and executes the action.
+# spec
 
-No agent-specific slash commands, rule files, or prompts. One source of truth per action.
+The prompt the host gives the agent when the user calls the command.
+```
 
-## The actions
+- `id` is the name the user calls.
+- `args` lists each parameter: `name`, `type`, `required`, and `description`.
+- Commands are flat: one file per command, no topic folders.
 
-| Action | File | When |
+## Add one
+
+Run `keystone new command <id>`, fill in the body, then run `keystone index && keystone project`. Where the host has slash commands, the project step writes one, such as `.claude/commands/<id>.md`. Elsewhere, the command is listed in `AGENTS.md`. Edit this file, never the copy.
+
+## The commands
+
+| Command | File | When |
 |---|---|---|
-| **bootstrap** | [`bootstrap.md`](bootstrap.md) | Once per project — detect stack, seed state, classify sensors. |
-| **spec** | [`spec.md`](spec.md) | First action on any task — capture intent + acceptance criteria. |
-| **orient** | [`orient.md`](orient.md) | After spec — load `CODEBASE_STATE.md` and idioms for the touched region; sketch a plan. |
-| **check-drift** | [`check-drift.md`](check-drift.md) | Between implementation and verify — fast drift check on the diff. |
-| **verify** | [`verify.md`](verify.md) | Pre-commit — lint / type-check / test / build / drift / commit-message sensors. |
-| **review** | [`review.md`](review.md) | Post-verify — functional / security / risk / deployment review + spec-adherence. |
-| **learn** | [`learn.md`](learn.md) | Any time something surprising happens — capture to `learning/inbox/`. |
-| **audit** | [`audit.md`](audit.md) | Periodic — dual flywheel (Learning + Pruning); Pruning writes to `corpus/state/charter-debt.md`. |
-| **debt-review** | [`debt-review.md`](debt-review.md) | Periodic — triage `corpus/state/code-debt.md`. |
-| **policy-audit** | [`policy-audit.md`](policy-audit.md) | Before release or per audit cycle — check codebase against installed policy guides; verify org `strict` items aren't being overridden. |
-| **synthesize** | [`synthesize.md`](synthesize.md) | After inbox has accumulated — promote into corpus / guides. |
-| **mode** | [`mode.md`](mode.md) | When pacing needs to change — paired / solo / autopilot. |
+| **bootstrap** | [`bootstrap.md`](bootstrap.md) | Once per project: detect the stack, seed state, classify hooks. |
+| **spec** | [`spec.md`](spec.md) | First on any task: capture intent and acceptance criteria. |
+| **orient** | [`orient.md`](orient.md) | After spec: read `CODEBASE_STATE.md` and the idioms for the touched region, then sketch a plan. |
+| **check-drift** | [`check-drift.md`](check-drift.md) | Between implementation and verify: a fast drift check on the diff. |
+| **verify** | [`verify.md`](verify.md) | Before commit: lint, type-check, test, build, drift, and commit-message. |
+| **review** | [`review.md`](review.md) | After verify: functional, security, risk, and deployment review, plus spec adherence. |
+| **learn** | [`learn.md`](learn.md) | When something surprising happens: capture it to `.keystone/learning/inbox/`. |
+| **audit** | [`audit.md`](audit.md) | Periodically: the learning and pruning flywheels together. Pruning writes to `.agents/references/state/charter-debt.md`. |
+| **debt-review** | [`debt-review.md`](debt-review.md) | Periodically: triage `.agents/references/state/code-debt.md`. |
+| **synthesize** | [`synthesize.md`](synthesize.md) | When the inbox has filled: promote candidates into rules and references. |
+| **mode** | [`mode.md`](mode.md) | When pacing needs to change: paired, solo, or autopilot. |
 
-Each action is short (~20–40 lines): the agent reads it, executes the listed activities, and reports back. Deeper context lives in `.agents/rules/process/`, `.agents/hooks/`, and `.keystone/learning/`; actions forward-link to those when they apply.
-
-## Override cascade
-
-For any `<name>.md`, the project's `.agents/commands/<name>.md` always wins by default. Among policies, policies nested deeper in `keystone.json` refine the outer policies they're nested in. A policy can mark an item `strict` to make it absolute — nothing else can override a strict item, not the project, not any other policy. `keystone verify` reports a violation if any layer attempts to shadow a strict item.
+The [`task`](../skills/task/SKILL.md) skill chains spec through review for one unit of work.

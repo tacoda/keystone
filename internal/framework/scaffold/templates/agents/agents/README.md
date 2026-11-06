@@ -1,28 +1,26 @@
 # Subagents
 
-Canonical home for project-authored subagent definitions. Each subagent
-lives at `agents/<id>.md` and declares the canonical primitive
-frontmatter — `kind: subagent`, `id`, `description`, `tools:` — plus a
-system-prompt body.
+Each file here is a subagent: a role the main agent delegates to, such as a reviewer or a planner. The main agent hands it a narrow job and gets a short report back. Treat that report as a claim to verify, not as evidence.
 
-This is the **source of truth**. `keystone project` regenerates the host
-projection at `.claude/agents/<id>.md` by copying the file verbatim.
-Hand-edits to the projection are erased on the next run; the drift
-sensor reports them.
+## Shape
 
-The same file is served by `keystone-mcp` so MCP-aware hosts can
-discover subagents alongside rules and skills. One source, many
-consumers.
+```markdown
+---
+id: drift-reviewer
+description: Flags places the current diff drifts from loaded charter rules.
+tools: [Read, Grep, Bash]
+model: sonnet          # optional
+---
 
-## Authoring
+# drift-reviewer
 
-```
-keystone new subagent <id>
+The system prompt. Write it as instructions to the subagent.
 ```
 
-Scaffolds `agents/<id>.md` with canonical frontmatter. Fill in the
-system prompt body — `tools:` declares the allow-list the host enforces
-when this subagent runs.
+- `id` is the name the agent spawns it by.
+- `tools` is the allow-list. `keystone lint` reports an error when it is missing or empty. Only some hosts enforce it.
+- The body is the system prompt.
 
-See [`docs/kinds/README.md`](../../docs/kinds/README.md) for the
-full descriptor shape.
+## Add one
+
+Run `keystone new subagent <id>`, fill in the body, then run `keystone index && keystone project`. The project step writes each host's copy, such as `.claude/agents/<id>.md`. Edit this file, never the copy.

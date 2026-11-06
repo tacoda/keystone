@@ -1,37 +1,40 @@
 ---
-kind: corpus
-id: corpus/idioms/charter-content/README
-description: 'Charter content idioms — markdown primitive shape, paths, pairing.'
+kind: reference
+id: idioms/charter-content/README
+description: 'Charter content idioms: markdown primitive shape, paths, pairing.'
 ---
-# Charter content idioms — reasoning
+# Charter content idioms, reasoning
 
-This repo authors and dogfoods the keystone charter. The primary stack is **markdown primitives** under `.agents/`. Same content also ships as the install-time template inside `internal/framework/scaffold/templates/` (when present), so changes to one must be reflected in the other.
+This repo authors and dogfoods the keystone charter. The primary stack is **markdown primitives** under `.agents/`. The same content ships as the install-time template under `internal/framework/scaffold/templates/`, so a change to one must reach the other.
 
 ## Primitive kinds
 
-The twelve-kind taxonomy enforced by the keystone charter:
+Keystone knows ten kinds in two categories. It reads the kind from the first folder under `.agents/`.
 
-- **action** — atomic unit of work (`.agents/commands/<id>.md`).
-- **playbook** — ordered sequence of actions (`.agents/skills/<id>/SKILL.md`).
-- **guide** — prescriptive rule file with optional `globs:` (`.agents/rules/<topic>/<id>.md`).
-- **corpus** — informational *why* paired to a guide or to state (`.agents/references/<topic>/<id>.md`).
-- **sensor** — automated check, computational or inferential (`.agents/hooks/<id>.md`).
-- **persona** — subagent system-prompt body (`.agents/agents/<id>.md`).
-- **skill** — host-native auto-activation manifest (`.agents/skills/<slug>/SKILL.md`).
-- **subagent** — host-native agent definition (`.agents/agents/<id>.md`).
-- **command** — host slash command (`.agents/commands/<id>.md`).
-- **rule** — host-native rule directive (`.agents/rules/<id>.md`).
-- **computational** — deterministic ambient enforcement (`.agents/rules/computational/<tool>.md`).
-- **adapter** — per-agent host wiring (`.keystone/hosts/<agent>/`).
+Constraints limit, gate, or check what the agent does:
+
+- **rule**: a directive, scoped by `paths:` (`.agents/rules/<topic>/<id>.md`).
+- **reference**: the reasoning behind a rule (`.agents/references/<topic>/<id>.md`).
+- **hook**: a check that runs on an event and can block (`.agents/hooks/<id>.md`).
+- **permission**: allow, ask, and deny rules for tools (`.agents/permissions/<id>.md`).
+- **eval**: a test that the charter changes behavior (`.agents/evals/<id>/EVAL.md`).
+
+Capabilities add something the agent can do:
+
+- **skill**: an Agent Skills workflow (`.agents/skills/<name>/SKILL.md`).
+- **command**: a unit of work the user asks for by name (`.agents/commands/<id>.md`).
+- **subagent**: a role the agent delegates to (`.agents/agents/<id>.md`).
+- **tool**: a callable over MCP, as a command, or as a host plugin (`.agents/tools/<id>.md`).
+- **document**: a template for governed output (`.agents/documents/<id>.md`).
 
 ## Layout
 
-- `primitive-shape.md` — frontmatter, canonical paths, the corpus/guide pair convention, the narrow-only `globs:` contract.
-- `state-files.md` — how state files (CODEBASE_STATE, GLOBS_INDEX, INSTALL_PROFILE, code-debt, charter-debt) are written, by whom, and what must not be hand-edited.
-- (more idioms accumulate via the **learn** → **synthesize** flywheel.)
+- `primitive-shape.md`: frontmatter, canonical paths, the rule and reference pair, and the narrow-only `paths:` contract.
+- `state-files.md`: how the state files (CODEBASE_STATE, GLOBS_INDEX, INSTALL_PROFILE, code-debt, charter-debt) are written, by whom, and what must not be hand-edited.
+- More idioms accumulate through the **learn** and **synthesize** flywheel.
 
 ## What makes this stack different
 
-- Files are **read by an agent at runtime**, not compiled. Naming, frontmatter, and paths *are* the API.
-- Edits propagate through `keystone index` → `.keystone/INDEX.json`. Manual edits to INDEX.json drift instantly.
-- Project-layer files always win over installed-policy files unless a policy is marked `strict`. This is the cascade contract — guides must not assume they are absolute.
+- An agent reads these files at runtime. Nothing compiles them. Naming, frontmatter, and paths *are* the API.
+- Edits propagate through `keystone index` to `.keystone/INDEX.json`. A manual edit to INDEX.json is lost on the next run.
+- Project files override installed policy files, unless the policy marks the item `strict`. So a rule must not assume it is absolute.

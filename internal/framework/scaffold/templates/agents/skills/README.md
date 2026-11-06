@@ -1,27 +1,27 @@
 # Skills
 
-Canonical home for project-authored Claude Code skills. Each skill lives
-at `skills/<id>/SKILL.md` and declares the canonical primitive
-frontmatter — `kind: skill`, `id`, `description`, `triggers:` — plus a
-body the host loads when a trigger phrase matches.
+Each folder here is a skill: a workflow the agent loads when the task matches its description. A skill is a `SKILL.md` file written to the Agent Skills spec, so most hosts read it with no translation. The host decides when a skill fires.
 
-This is the **source of truth**. `keystone project` regenerates the host
-projection at `.claude/skills/<id>/SKILL.md` by copying the file
-verbatim. Hand-edits to the projection are erased on the next run; the
-drift sensor reports them.
+## Shape
 
-The same file is read by `keystone-mcp` as a skill resource — the
-canonical frontmatter satisfies both interfaces. One source, many
-consumers.
+```markdown
+---
+name: release-notes
+description: Draft release notes from merged PRs since the last tag. Use when the user asks for release notes.
+allowed-tools: Read Bash Grep   # optional
+---
 
-## Authoring
+# release-notes
 
-```
-keystone new skill <id>
+The steps the agent follows.
 ```
 
-Scaffolds `skills/<id>/SKILL.md` with canonical frontmatter. Fill in the
-body to teach the agent how to do the thing.
+- `name` must match the folder name. Keystone uses it as the id.
+- `description` says what the skill does and when to use it. The host matches the task against this text.
+- Scripts or templates can sit next to `SKILL.md`. They travel with the folder.
 
-See [`docs/kinds/README.md`](../../docs/kinds/README.md) for the
-full descriptor shape.
+The shipped [`task`](task/SKILL.md) skill runs the lifecycle end to end.
+
+## Add one
+
+Run `keystone new skill <name>`, fill in the body, then run `keystone index && keystone project`. `keystone lint` checks the name and field lengths, and `keystone lint --fix` moves 4.x keys such as `triggers:` into spec form.

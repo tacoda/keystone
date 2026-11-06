@@ -1,40 +1,33 @@
----
-kind: computational
----
+# Computational rules
 
-# Computational guides
+A computational rule records a deterministic tool the stack already runs, such as a formatter, a linter, or a language server. It runs a command on an event instead of being read.
 
-Deterministic ambient enforcement. Anything that shapes the agent's behavior in real time without requiring the agent to reason over natural-language rules — language servers, formatters-on-save, editor lint-as-you-type, pre-commit hooks scoped to formatting, type-checked autocomplete.
-
-This directory ships empty. The **bootstrap** action populates it by inventorying what the project's stack actually supports (an LSP for the primary language, a formatter wired into the editor, the lint configuration the editor reads). The inventory lands here as one file per tool, plus a row in `corpus/state/CODEBASE_STATE.md`.
-
-## File shape
-
-Each file declares what the tool is, how it activates, and how the agent should treat its signal.
+## Shape
 
 ```markdown
 ---
-kind: computational
+id: computational/gofmt
+description: gofmt, canonical Go formatting.
+mode: computational
+event: PostToolUse
+run: 'test -z "$(gofmt -l cmd internal)"'
 ---
 
-# <tool name>
+# gofmt
 
-**What it covers** — <e.g. types, formatting, lint, unused imports>.
-**Activation** — <e.g. LSP in editor, on-save formatter, pre-commit hook>.
-**Authority** — <treat findings as: blocking | advisory | informational>.
-**Configured by** — <path to config file in the repo>.
+What the tool covers, where its config lives, and how to treat a failure.
 ```
+
+`keystone hook fire` runs any primitive with both `event:` and `run:`, so a computational rule fires the same way a hook does. A non-zero exit blocks. Without `event:`, the rule never runs.
+
+A computational rule gets no host shim and no `AGENTS.md` line. Its `paths:` are documentation only, because the hook layer doesn't filter on them.
+
+## Ships empty
+
+The `bootstrap` command inventories the tools the stack supports and proposes one file per tool. A tool may need a config file, a binary, or an agent setting at install time. Offer that as a `keystone init` option, not as a file here.
 
 ## Anti-patterns
 
-- A computational guide whose result the agent ignores. If a deterministic check is wired up, its signal must be honored (or its authority downgraded explicitly).
-- A computational guide that overlaps an existing sensor (e.g., an editor lint and a CI lint that disagree). One source of truth per concern; reference the same config.
-- Adding entries by hand that the toolchain does not actually run. Bootstrap inventories what exists; if a tool isn't running locally, it doesn't belong here.
-
-## Install-time options
-
-If a computational guide requires shipping a config file, a binary, or an agent setting, the project surfaces it as a flag on `keystone init` rather than scaffolding it unconditionally.
-
-## Globs
-
-`globs:` on a computational guide is **documentation, not enforcement**. The actual tool (LSP, formatter, hook) reads its own config file, not this frontmatter. Recording `globs:` here lets the **stack-drift** sensor compare the documented paths against the tool's effective configuration and flag divergence. The contract — including the narrow-only invariant — is the same as other guides; see [`../README.md`](../README.md).
+- A file for a tool the project doesn't run. List only what runs.
+- A rule that duplicates a hook, such as an editor lint and a CI lint with different configs. Point both at one config.
+- A tool signal the agent ignores. Honor it, or lower its authority on purpose.

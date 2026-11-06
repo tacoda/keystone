@@ -54,7 +54,7 @@ Verification sensors gate the commit:
 | State proposal | Sensors that update state produced their diff for human review. |
 | Commit-message | The proposed commit message is conventional and free of AI attribution. |
 
-Full contracts (triggers, inputs, exit conditions, outputs, state writes) live in [sensors.md](sensors.md).
+Full contracts (triggers, inputs, exit conditions, outputs, state writes) live in each hook file under `.agents/hooks/`.
 
 A sensor that *runs* and *exits successfully* is evidence. A sensor that was run before any edit since is **stale evidence** and does not count.
 

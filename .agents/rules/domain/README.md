@@ -1,60 +1,41 @@
 # Domain rules
 
-Business-rule constraints extracted from `corpus/domain/`. Where corpus describes what the project *is*, this directory holds the rules the agent must obey when writing code that touches the domain.
+Business-rule constraints. The domain references in `.agents/references/domain/` describe what the project is. The rules here say what the agent must obey when its code touches that domain.
 
 ## What lives here
 
 Teams typically add files such as:
 
-- `invariants.md` — non-negotiable business rules ("an order cannot be both shipped and refunded").
-- `vocabulary.md` — terminology rules ("never call a `Customer` a `User` in surfaced text").
-- `<feature>.md` — feature-specific rules.
+- `invariants.md`: rules that must always hold, such as "an order can't be both shipped and refunded."
+- `vocabulary.md`: terminology rules, such as "never call a `Customer` a `User` in surfaced text."
+- `<feature>.md`: rules for one feature area.
 
-Each file traces to a corpus counterpart that explains *why* the rule exists.
+This folder ships empty. Rules arrive through `learn` and `synthesize` as the agent meets domain constraints in the code.
 
-## Empty by default
+## Scope with paths
 
-This directory ships **empty** in a fresh install. The **bootstrap** action seeds `corpus/domain/product-shape.md`; rules emerge through the Learning flywheel as the agent encounters domain constraints in the codebase.
-
-## Activation
-
-**Default** — ambient, every action. Domain rules constrain agent behavior across every action.
-
-**With `globs:`** — narrows that default to a subset of paths. A domain rule with a clear regional boundary (billing, auth, search) keeps context lean by firing only where it applies:
+A domain rule with a clear boundary should declare `paths:`, so it applies only there:
 
 ```markdown
 ---
-globs:
+id: domain/billing
+description: Billing invariants.
+paths:
   - "src/billing/**"
   - "tests/billing/**"
+corpus:
+  - domain/billing
 ---
-# Billing invariants — rules
+
+# Billing invariants
+
+## Iron law
+
+- An invoice total never changes after it is issued.
 ```
 
-The above is silent on files outside `src/billing/**` and `tests/billing/**`. Domain rules without `globs:` keep today's behavior (always loaded). See [`../README.md`](../README.md) for the full narrow-only contract.
+A domain rule without `paths:` applies everywhere.
 
-## Format
+## Who writes it
 
-Each rule file:
-
-```markdown
-# <Rule Set> — rules
-
-The rules from [`corpus/domain/<file>.md`](corpus/domain/<file>.md).
-
-## IRON LAWS
-
-- **<RULE NAME IN CAPS.>** One-sentence rule. (When applicable.)
-
-## GOLDEN RULE
-
-- **<Rule name.>** Strongly-preferred behavior, deviation requires reasoning.
-```
-
-## Authorship
-
-Domain expert + lead engineer. Agents propose additions via the Learning flywheel; humans gate every domain rule before it lands here — domain claims must be confirmed by someone who owns the business knowledge.
-
-## Changes when
-
-The product does. New invariant accepted, business rule shifts, vocabulary settles.
+A domain expert and the lead engineer. The agent can propose a rule, but a person who owns the business knowledge confirms it before it lands.

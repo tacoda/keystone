@@ -1,21 +1,21 @@
 ---
-kind: guide
-id: guides/idioms/go/README
-description: 'Go idiom rules — entry point.'
-globs:
+kind: rule
+id: idioms/go/README
+description: 'Go idiom rules, entry point.'
+paths:
   - "cmd/**/*.go"
   - "internal/**/*.go"
 ---
 # Go idiom rules
 
-Rules for Go code in this repo. Paired with [`../../../corpus/idioms/go/`](../../../references/idioms/go/) (reasoning, examples).
+Rules for Go code in this repo. Each pairs with a reference in [`references/idioms/go/`](../../../references/idioms/go/), which holds the reasoning and examples.
 
 ## Activation
 
-`globs:` above narrows ambient stack activation. These rules fire when a touched file matches `cmd/**/*.go` or `internal/**/*.go`.
+`paths:` above scopes these rules. They apply when a touched file matches `cmd/**/*.go` or `internal/**/*.go`.
 
 ## Rule files
 
-- [`stdlib-first.md`](stdlib-first.md) — prefer stdlib over new deps.
+- [`stdlib-first.md`](stdlib-first.md): prefer the stdlib over new deps.
 
-(More files accumulate via the **learn** → **synthesize** flywheel.)
+More files accumulate through the **learn** and **synthesize** flywheel.
