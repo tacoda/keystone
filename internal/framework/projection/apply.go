@@ -294,16 +294,20 @@ func prune(projectDir string, owned []string, keep map[string]bool) ([]string, e
 	return pruned, nil
 }
 
-// insideProject: abs's parent, with symlinks resolved, is still under
-// projectDir, so a symlinked host folder cannot aim RemoveAll outside it.
+// insideProject: abs, with its parent's symlinks resolved, is still a
+// prunable path under projectDir, so a symlinked host folder cannot aim
+// RemoveAll outside the project or into .agents/ or .keystone/.
 func insideProject(projectDir, abs string) bool {
 	root, err1 := filepath.EvalSymlinks(projectDir)
 	parent, err2 := filepath.EvalSymlinks(filepath.Dir(abs))
 	if err1 != nil || err2 != nil {
 		return false
 	}
-	rel, err := filepath.Rel(root, parent)
-	return err == nil && filepath.IsLocal(rel)
+	// The resolved target, not just the lockfile's spelling of it, must be
+	// a prunable host path: a symlinked host folder must never let prune
+	// reach a charter source in .agents/ or keystone state in .keystone/.
+	rel, err := filepath.Rel(root, filepath.Join(parent, filepath.Base(abs)))
+	return err == nil && prunable(rel)
 }
 
 // prunable guards prune against a tampered or corrupt lockfile: only a

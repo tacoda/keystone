@@ -239,3 +239,23 @@ func TestPrune_SymlinkEscape(t *testing.T) {
 		t.Error("file outside the project was removed")
 	}
 }
+
+// TestPrune_NeverThroughSymlinkIntoSources — an owned path that reaches a
+// charter source through a symlinked host folder (a corrupt or tampered
+// lockfile) is never removed.
+func TestPrune_NeverThroughSymlinkIntoSources(t *testing.T) {
+	root := t.TempDir()
+	write(t, root, map[string]string{".agents/skills/deploy/SKILL.md": "keep"})
+	if err := os.MkdirAll(filepath.Join(root, ".claude/skills"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Symlink("../../.agents/skills/deploy", filepath.Join(root, ".claude/skills/deploy")); err != nil {
+		t.Fatal(err)
+	}
+	if pruned, _ := prune(root, []string{".claude/skills/deploy/SKILL.md"}, nil); len(pruned) != 0 {
+		t.Errorf("pruned through a symlink into .agents/: %v", pruned)
+	}
+	if _, err := os.Stat(filepath.Join(root, ".agents/skills/deploy/SKILL.md")); err != nil {
+		t.Error("the charter source was deleted")
+	}
+}
