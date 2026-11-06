@@ -136,7 +136,7 @@ func validityCriterion(prims []primitive.Primitive) Criterion {
 // guides are self-contained directives, and computational guides (LSP)
 // and README index files are exempt.
 func pairingCriterion(prims []primitive.Primitive) Criterion {
-	c := Criterion{Name: "Guide↔corpus pairing", Rule: "idiom guides paired with corpus (PASS ≥90% · PARTIAL ≥60%)"}
+	c := Criterion{Name: "Rule↔reference pairing", Rule: "idiom rules paired with a reference (PASS ≥90% · PARTIAL ≥60%)"}
 	corpusTopics := corpusTopicSet(prims)
 	total, paired := 0, 0
 	for _, p := range prims {

@@ -99,6 +99,7 @@ func runShow(args []string) error {
 // for what `show` knows.
 type showView struct {
 	Kind         string                  `json:"kind"`
+	Category     string                  `json:"category,omitempty"`
 	ID           string                  `json:"id"`
 	Description  string                  `json:"description"`
 	Path         string                  `json:"path"`
@@ -108,7 +109,7 @@ type showView struct {
 	Phase        string                  `json:"phase,omitempty"`
 	Tags         []string                `json:"tags,omitempty"`
 	Tools        []string                `json:"tools,omitempty"`
-	Paths        []string                `json:"globs,omitempty"`
+	Paths        []string                `json:"paths,omitempty"`
 	Triggers     []string                `json:"triggers,omitempty"`
 	Includes     []string                `json:"includes,omitempty"`
 	IncludedBy   []string                `json:"included_by,omitempty"`
@@ -120,6 +121,7 @@ type showView struct {
 func buildShowView(target primitive.Primitive, all []primitive.Primitive) showView {
 	v := showView{
 		Kind:         target.Kind,
+		Category:     string(primitive.CategoryOf(primitive.Kind(target.Kind))),
 		ID:           target.ID,
 		Description:  target.Description,
 		Path:         target.Path,
@@ -183,77 +185,52 @@ func printShowText(w *os.File, v showView) {
 	}
 	fmt.Fprintln(w)
 
-	if v.Path != "" {
-		fmt.Fprintf(w, "  path:       %s\n", v.Path)
-	}
-	if v.Provenance != "" {
-		fmt.Fprintf(w, "  provenance: %s\n", v.Provenance)
-	}
-	if v.Severity != "" {
-		fmt.Fprintf(w, "  severity:   %s\n", v.Severity)
-	}
-	if v.Model != "" {
-		fmt.Fprintf(w, "  model:      %s\n", v.Model)
-	}
-	if v.Phase != "" {
-		fmt.Fprintf(w, "  phase:      %s\n", v.Phase)
-	}
-	if len(v.Tags) > 0 {
-		fmt.Fprintf(w, "  tags:       %s\n", strings.Join(v.Tags, ", "))
-	}
+	showField(w, "category", v.Category)
+	showField(w, "path", v.Path)
+	showField(w, "provenance", v.Provenance)
+	showField(w, "severity", v.Severity)
+	showField(w, "model", v.Model)
+	showField(w, "phase", v.Phase)
+	showField(w, "tags", strings.Join(v.Tags, ", "))
 
-	if len(v.Tools) > 0 {
-		fmt.Fprintln(w, "\n  tools:")
-		for _, t := range v.Tools {
-			fmt.Fprintf(w, "    - %s\n", t)
-		}
+	showList(w, "tools", v.Tools)
+	showList(w, "paths", v.Paths)
+	showList(w, "triggers", v.Triggers)
+	showList(w, "host_triggers", hostTriggerLines(v.HostTriggers))
+	showList(w, "includes (composed in)", v.Includes)
+	showList(w, "included by", v.IncludedBy)
+	showList(w, "traces (forward)", v.Traces)
+	showList(w, "traced by", v.TracedBy)
+}
+
+// showField prints one "label: value" line; an empty value prints nothing.
+func showField(w *os.File, label, value string) {
+	if value != "" {
+		fmt.Fprintf(w, "  %-12s%s\n", label+":", value)
 	}
-	if len(v.Paths) > 0 {
-		fmt.Fprintln(w, "\n  globs:")
-		for _, g := range v.Paths {
-			fmt.Fprintf(w, "    - %s\n", g)
-		}
+}
+
+// showList prints a titled bullet list; an empty list prints nothing.
+func showList(w *os.File, title string, items []string) {
+	if len(items) == 0 {
+		return
 	}
-	if len(v.Triggers) > 0 {
-		fmt.Fprintln(w, "\n  triggers:")
-		for _, t := range v.Triggers {
-			fmt.Fprintf(w, "    - %s\n", t)
-		}
+	fmt.Fprintf(w, "\n  %s:\n", title)
+	for _, it := range items {
+		fmt.Fprintf(w, "    - %s\n", it)
 	}
-	if len(v.HostTriggers) > 0 {
-		fmt.Fprintln(w, "\n  host_triggers:")
-		for _, h := range v.HostTriggers {
-			matcher := h.Matcher
-			if matcher == "" {
-				matcher = "(any)"
-			}
-			fmt.Fprintf(w, "    - %s / %s → %s\n", h.Phase, matcher, h.Command)
+}
+
+func hostTriggerLines(hs []primitive.HostTrigger) []string {
+	var out []string
+	for _, h := range hs {
+		matcher := h.Matcher
+		if matcher == "" {
+			matcher = "(any)"
 		}
+		out = append(out, fmt.Sprintf("%s / %s → %s", h.Phase, matcher, h.Command))
 	}
-	if len(v.Includes) > 0 {
-		fmt.Fprintln(w, "\n  includes (composed in):")
-		for _, id := range v.Includes {
-			fmt.Fprintf(w, "    - %s\n", id)
-		}
-	}
-	if len(v.IncludedBy) > 0 {
-		fmt.Fprintln(w, "\n  included by:")
-		for _, ref := range v.IncludedBy {
-			fmt.Fprintf(w, "    - %s\n", ref)
-		}
-	}
-	if len(v.Traces) > 0 {
-		fmt.Fprintln(w, "\n  traces (forward):")
-		for _, t := range v.Traces {
-			fmt.Fprintf(w, "    - %s\n", t)
-		}
-	}
-	if len(v.TracedBy) > 0 {
-		fmt.Fprintln(w, "\n  traced by:")
-		for _, ref := range v.TracedBy {
-			fmt.Fprintf(w, "    - %s\n", ref)
-		}
-	}
+	return out
 }
 
 func printShowUsage(w *os.File) {

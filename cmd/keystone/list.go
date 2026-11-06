@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"sort"
 	"strings"
 
 	"github.com/tacoda/keystone/internal/framework/config"
@@ -18,13 +17,13 @@ import (
 // `[tag1, tag2]` suffix when tags are declared.
 //
 // Filtering:
-//   - Optional positional argument <kind> narrows to that kind only.
+//   - Optional positional argument <kind> narrows to that kind, or to a
+//     category (constraints / capabilities).
 //   - Multiple `--tag X` flags filter AND — a primitive must declare
 //     every requested tag to appear.
 //   - No filter ⇒ every primitive.
 //
-// Output is sorted (kind, then id) for deterministic eyeballing and
-// diff-friendliness.
+// Output is grouped by category (constraints first), then kind, then id.
 func runList(args []string) error {
 	dir := "."
 	var kindFilter string
@@ -76,31 +75,29 @@ func runList(args []string) error {
 	composed, _ := primitive.Compose(primitives)
 
 	matched := filterPrimitives(composed, kindFilter, tags)
-	sort.SliceStable(matched, func(i, j int) bool {
-		if matched[i].Kind != matched[j].Kind {
-			return matched[i].Kind < matched[j].Kind
-		}
-		return matched[i].ID < matched[j].ID
-	})
+	primitive.SortByCategory(matched)
 
+	printListed(matched)
+	return nil
+}
+
+// printListed prints the matches as a table under a heading per category.
+func printListed(matched []primitive.Primitive) {
 	if len(matched) == 0 {
 		fmt.Fprintln(os.Stdout, "(no matching primitives)")
-		return nil
+		return
 	}
 
-	// Column widths sized to the longest match — keeps the table
-	// readable without word-wrapping.
-	kindW, idW := 0, 0
+	kindW, idW := listColumnWidths(matched)
+	heading := ""
 	for _, p := range matched {
-		if l := len(p.Kind); l > kindW {
-			kindW = l
+		if h := primitive.CategoryTitle(p.Kind); h != heading {
+			if heading != "" {
+				fmt.Fprintln(os.Stdout)
+			}
+			fmt.Fprintf(os.Stdout, "# %s\n", h)
+			heading = h
 		}
-		if l := len(p.ID); l > idW {
-			idW = l
-		}
-	}
-
-	for _, p := range matched {
 		desc := p.Description
 		if desc == "" {
 			desc = "—"
@@ -111,7 +108,16 @@ func runList(args []string) error {
 		}
 		fmt.Fprintln(os.Stdout, line)
 	}
-	return nil
+}
+
+// listColumnWidths sizes the columns to the longest match, keeping the
+// table readable without word-wrapping.
+func listColumnWidths(matched []primitive.Primitive) (kindW, idW int) {
+	for _, p := range matched {
+		kindW = max(kindW, len(p.Kind))
+		idW = max(idW, len(p.ID))
+	}
+	return kindW, idW
 }
 
 // filterPrimitives returns the subset matching the kind filter (if
@@ -120,7 +126,7 @@ func runList(args []string) error {
 func filterPrimitives(primitives []primitive.Primitive, kind string, tags []string) []primitive.Primitive {
 	var out []primitive.Primitive
 	for _, p := range primitives {
-		if kind != "" && !primitive.IsKind(p.Kind, kind) {
+		if kind != "" && !matchesKindOrCategory(p.Kind, kind) {
 			continue
 		}
 		if !hasAllTags(p.Tags, tags) {
@@ -129,6 +135,21 @@ func filterPrimitives(primitives []primitive.Primitive, kind string, tags []stri
 		out = append(out, p)
 	}
 	return out
+}
+
+// categoryFilters lets `keystone list` take a category in place of a kind.
+var categoryFilters = map[string]primitive.Category{
+	"constraint": primitive.CategoryConstraint, "constraints": primitive.CategoryConstraint,
+	"capability": primitive.CategoryCapability, "capabilities": primitive.CategoryCapability,
+}
+
+// matchesKindOrCategory: the filter is a kind (or its 4.x spelling) or a
+// category.
+func matchesKindOrCategory(kind, filter string) bool {
+	if c, ok := categoryFilters[filter]; ok {
+		return primitive.CategoryOf(primitive.Kind(kind)) == c
+	}
+	return primitive.IsKind(kind, filter)
 }
 
 func hasAllTags(have, want []string) bool {
@@ -151,25 +172,25 @@ func printListUsage(w *os.File) {
 	fmt.Fprint(w, `keystone list — list primitives by kind and / or tag
 
 Usage:
-  keystone list [<kind>] [--tag <tag>]... [--dir <path>]
+  keystone list [<kind> | constraints | capabilities] [--tag <tag>]... [--dir <path>]
 
 Walks the charter, applies composition, and prints one line per
 matching primitive (kind / id / description, with declared tags in
-brackets).
+brackets), constraints first, under a heading per category.
 
 Filters:
-  <kind>            Optional positional. One of guide, sensor, action,
-                    playbook, persona, corpus, eval, source, concern,
-                    rule, skill, subagent, command.
+  <kind>            Optional positional. A constraint kind (rule, reference,
+                    hook, permission, eval), a capability kind (skill,
+                    command, subagent, tool, document), or a category.
   --tag <tag>       Repeatable. Multiple --tag arguments AND together —
                     a primitive must declare every requested tag.
   --dir <path>      Project root (defaults to cwd).
 
 Examples:
   keystone list                          # all primitives
-  keystone list sensor                   # all sensors
+  keystone list constraints              # rules, references, hooks, permissions, evals
+  keystone list hook                     # all hooks
   keystone list --tag security           # any primitive tagged 'security'
-  keystone list persona --tag review     # personas tagged 'review'
-  keystone list guide --tag onboarding --tag security
+  keystone list rule --tag onboarding --tag security
 `)
 }

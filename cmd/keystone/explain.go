@@ -105,7 +105,7 @@ func printExplanation(e charter.Explanation, dirty bool) {
 	if e.Provenance != "" && e.Provenance != "project" {
 		src = "  [" + e.Provenance + "]"
 	}
-	fmt.Fprintf(os.Stdout, "%s  %s%s\n", e.Kind, e.ID, src)
+	fmt.Fprintf(os.Stdout, "%s (%s)  %s%s\n", e.Kind, primitive.CategoryOf(primitive.Kind(e.Kind)), e.ID, src)
 	fmt.Fprintf(os.Stdout, "  %s\n\n", e.Description)
 	fmt.Fprintf(os.Stdout, "  Activation:  %s\n", e.Activation)
 	if len(e.Links) > 0 {

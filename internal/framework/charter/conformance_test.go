@@ -40,7 +40,7 @@ func TestConformance_UnpairedGuideDrifts(t *testing.T) {
 	}
 	var pairing *Criterion
 	for i := range rub.Criteria {
-		if rub.Criteria[i].Name == "Guide↔corpus pairing" {
+		if rub.Criteria[i].Name == "Rule↔reference pairing" {
 			pairing = &rub.Criteria[i]
 		}
 	}

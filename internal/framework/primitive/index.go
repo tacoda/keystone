@@ -102,6 +102,40 @@ func BuildLite(idx Index) LiteIndex {
 	return out
 }
 
+// SortByCategory orders primitives constraints first, then capabilities,
+// each kind in KnownKinds order, then by id. A retired kind sorts last.
+func SortByCategory(ps []Primitive) {
+	sort.SliceStable(ps, func(i, j int) bool {
+		if a, b := KindRank(ps[i].Kind), KindRank(ps[j].Kind); a != b {
+			return a < b
+		}
+		return ps[i].ID < ps[j].ID
+	})
+}
+
+// KindRank is kind's position in KnownKinds (constraints first); a retired
+// kind ranks last.
+func KindRank(kind string) int {
+	for i, k := range KnownKinds {
+		if string(k) == kind {
+			return i
+		}
+	}
+	return len(KnownKinds)
+}
+
+// CategoryTitle is a category's heading: "Constraints", "Capabilities", or
+// "Other" for a retired kind.
+func CategoryTitle(kind string) string {
+	switch CategoryOf(Kind(kind)) {
+	case CategoryConstraint:
+		return "Constraints"
+	case CategoryCapability:
+		return "Capabilities"
+	}
+	return "Other"
+}
+
 // categoryRank orders constraints before capabilities, and anything
 // uncategorized (a retired kind) last.
 func categoryRank(c string) int {

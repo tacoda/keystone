@@ -71,11 +71,11 @@ func printCoverage(r charter.CoverageResult) {
 	fmt.Fprintf(os.Stdout, "Charter coverage — %d files, %d governed, %d uncharted (%d%% governed)\n",
 		r.Total, r.Governed, len(r.Uncharted), pct)
 	if len(r.Uncharted) == 0 {
-		fmt.Fprintln(os.Stdout, "\nEvery scanned file is governed by a guide.")
+		fmt.Fprintln(os.Stdout, "\nEvery scanned file is governed by a rule.")
 		return
 	}
 	counts := r.UnchartedByRegion()
-	fmt.Fprintln(os.Stdout, "\nUncharted regions (no guide globs match):")
+	fmt.Fprintln(os.Stdout, "\nUncharted regions (no rule paths: match):")
 	for _, region := range sortByCountDesc(counts) {
 		fmt.Fprintf(os.Stdout, "  %-28s %d\n", region, counts[region])
 	}
@@ -169,20 +169,20 @@ func printRoster(entries []charter.Entry, effective bool) {
 		label = "effective charter (post-cascade)"
 	}
 	fmt.Fprintf(os.Stdout, "%s — %d primitive(s)\n", label, len(entries))
-	byKind := map[string][]charter.Entry{}
+	sort.SliceStable(entries, func(i, j int) bool {
+		return primitive.KindRank(entries[i].Primitive.Kind) < primitive.KindRank(entries[j].Primitive.Kind)
+	})
+	heading, kind := "", ""
 	for _, e := range entries {
-		byKind[e.Primitive.Kind] = append(byKind[e.Primitive.Kind], e)
-	}
-	kinds := make([]string, 0, len(byKind))
-	for k := range byKind {
-		kinds = append(kinds, k)
-	}
-	sort.Strings(kinds)
-	for _, k := range kinds {
-		fmt.Fprintf(os.Stdout, "\n%s\n", k)
-		for _, e := range byKind[k] {
-			printRosterLine(e)
+		if h := primitive.CategoryTitle(e.Primitive.Kind); h != heading {
+			fmt.Fprintf(os.Stdout, "\n# %s\n", h)
+			heading = h
 		}
+		if e.Primitive.Kind != kind {
+			kind = e.Primitive.Kind
+			fmt.Fprintf(os.Stdout, "\n%s\n", kind)
+		}
+		printRosterLine(e)
 	}
 }
 

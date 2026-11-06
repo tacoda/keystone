@@ -618,3 +618,9 @@ agent loads. 5.0 measures the load.
   folders (the migration should remove them when unmodified). Wire the
   `cli` and `plugin` tool transports (today only `mcp` is served).
   For Phase 8: `docs/conventions.md` still names `new guide|sensor|playbook`.
+- Phase 6.2: done. `keystone list` and `keystone charter show` print
+  constraints first, under a heading per category, kinds in canonical
+  order; `keystone list constraints|capabilities` filters by category.
+  `show` and `explain` print the category; `show --json` gains `category`
+  and renames `globs` to `paths`. Coverage and conformance say rule,
+  reference, and `paths:` instead of guide, corpus, and globs.
