@@ -809,3 +809,12 @@ agent loads. 5.0 measures the load.
   Smoke test (fresh project, all 10 hosts plus a custom host): init,
   target add, new for every kind, project (idempotent), lint, verify,
   doctor, budget, allocate, hook fire per host, tool list: all pass.
+- Phase 10: done. Released v5.0.0 (tag push, GoReleaser). CI then failed
+  on govulncheck (five advisories in golang.org/x/net and quic-go, both
+  indirect); bumped them, pinned toolchain go1.26.10, and released v5.0.1
+  after CI passed on main. The feature branch is merged (fast-forward) and
+  deleted.
+- Phase 11: done. gh-pages updated for v5.0.1: the landing page says what
+  Keystone is, the problem, and four quick use cases; guide.html is the
+  essential walkthrough; docs.html is the full reference. Styling is
+  byte-identical (style and script blocks unchanged).
