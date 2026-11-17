@@ -67,6 +67,20 @@ keystone signal fire <name>    # dispatch primitives subscribed (on:) to a signa
 
 After any primitive add / move / delete: run `keystone index && keystone project`.
 
+## Agent skills
+
+### Issue tracker
+
+Issues are tracked in GitHub Issues (`tacoda/keystone`) via the `gh` CLI. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Default five-label vocabulary: needs-triage, needs-info, ready-for-agent, ready-for-human, wontfix. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context: root `GLOSSARY.md` + `docs/adr/`. See `docs/agents/domain.md`.
+
 <!-- keystone:start -->
 @AGENTS.md
 
