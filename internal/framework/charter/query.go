@@ -19,12 +19,12 @@ import (
 //     cost one descriptor line each. Hooks, skills, commands, and agents
 //     are invocable, not ambient: they enter through their event,
 //     description match (task), or paths — never by flooding every query.
-//  2. Path-scoped primitives — any primitive whose `paths:` matches a
+//  3. Path-scoped primitives — any primitive whose `paths:` matches a
 //     queried file. MatchPath (doublestar) decides.
-//  3. Cited references — the `corpus:` entries of matched rules and
+//  4. Cited references — the `corpus:` entries of matched rules and
 //     corpus, resolved by id.
-//  4. Task match — for the free-text part, a token overlap score over
-//     id, description, and tags. Descriptors sort by score, best first.
+//  2. Task match — when a task is given, token-overlap-scored entries
+//     lead; they are the most specific reason anything matched.
 //
 // The result carries descriptors only; callers print bodies on demand
 // (`--full`), whose paths come back with the entry.
@@ -75,7 +75,8 @@ func Query(prims []primitive.Primitive, files []string, task string) QueryResult
 	}
 
 	// 1. Task-scored entries lead when a task is given — they are the
-	// most specific reason anything matched.
+	// most specific reason anything matched; everywhere rules follow
+	// (they always apply, but they are the least specific).
 	if task != "" {
 		type scored struct {
 			p     primitive.Primitive
