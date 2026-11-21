@@ -5,15 +5,18 @@ once, then file issues / open PRs.
 
 ## What keystone is
 
-Keystone is the **agent charter framework**. The charter, a tree
-of typed primitives at `.agents/`, is the product. A **harness** is
-the engine that runs the model (Claude Code, the orchestrator, the
-runner); Keystone is not a harness, it manages the charter that
-constrains one. The CLI and the MCP server are tooling that helps you
-author and serve that charter, but neither is required at runtime. Once
-a project has a charter, any agent that reads `.keystone/INDEX.json` and
-the primitive bodies it points at can operate on it. (See
-[`GLOSSARY.md`](GLOSSARY.md) for the charter/harness distinction.)
+Keystone is the **agent context framework**. The charter — the codified
+context of the repository, a tree of typed primitives at `.agents/` — is
+the product. Keystone is **not a harness**: it manages the context; it
+never runs the model, serves author-defined callables, or acts as an
+engine, and the charter carries no `tool` kind. What must execute
+deterministically belongs to hosts and CI, which the charter can name but
+never replace. Codified context is in scope; ambient context (MCP servers,
+CLIs, APIs, external services) is out. The CLI and the MCP server are
+tooling that helps you author and serve that charter, but neither is
+required at runtime. Once a project has a charter, any agent that reads
+`.keystone/INDEX.json` and the primitive bodies it points at can operate
+on it. (See [`GLOSSARY.md`](GLOSSARY.md).)
 
 That framing affects the work:
 

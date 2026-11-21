@@ -24,23 +24,28 @@ orchestrator, the runner. Keystone manages the charter that constrains
 whatever harness you run. After install, the tools are optional, because the
 charter is plain files that any agent can read.
 
-## Two halves: constraints and capabilities
+## The kinds
 
-Every primitive in `.agents/` is one of ten kinds. **Constraints** limit, gate,
-or check what the agent does. **Capabilities** add things it can do.
+The charter is the codified context of the repository — everything a coding
+agent should be able to look up about how this codebase works and how to
+work in it. Every primitive is one of nine kinds, with frontmatter that the
+index holds and the agent opens on demand.
 
-| Category   | Kind         | Folder                 | What it is                                                        |
-| ---------- | ------------ | ---------------------- | ----------------------------------------------------------------- |
-| constraint | `rule`       | `.agents/rules/`       | A directive. It applies when a touched file matches its `paths:`, or everywhere without them. |
-| constraint | `reference`  | `.agents/references/`  | The reasoning behind a rule, opened on demand.                    |
-| constraint | `hook`       | `.agents/hooks/`       | A check that runs on an event. A non-zero exit blocks the agent.  |
-| constraint | `permission` | `.agents/permissions/` | Allow, ask, and deny rules for tools.                             |
-| constraint | `eval`       | `.agents/evals/`       | A test that the charter changes agent behavior.                   |
-| capability | `skill`      | `.agents/skills/`      | An Agent Skills `SKILL.md`. It activates when its description matches the task. |
-| capability | `command`    | `.agents/commands/`    | A unit of work the user asks for by name.                         |
-| capability | `subagent`   | `.agents/agents/`      | A role the agent delegates to.                                    |
-| capability | `tool`       | `.agents/tools/`       | A callable you write: over MCP, as a command, or as a host plugin. |
-| capability | `document`   | `.agents/documents/`   | A template for governed output, such as a plan or an ADR.         |
+| Kind         | Folder                 | What it is                                                        |
+| ------------ | ---------------------- | ----------------------------------------------------------------- |
+| `rule`       | `.agents/rules/`       | A directive. It applies when a touched file matches its `paths:`, or everywhere without them. |
+| `reference`  | `.agents/references/`  | The reasoning behind a rule, opened on demand.                    |
+| `hook`       | `.agents/hooks/`       | A check that runs on an event. A non-zero exit blocks the agent.  |
+| `permission` | `.agents/permissions/` | Allow, ask, and deny rules for tools.                             |
+| `eval`       | `.agents/evals/`       | A test that the charter changes agent behavior.                   |
+| `skill`      | `.agents/skills/`      | An Agent Skills `SKILL.md`. It activates when its description matches the task. |
+| `command`    | `.agents/commands/`    | A unit of work the user asks for by name.                         |
+| `agent`      | `.agents/agents/`      | A role the agent delegates to (a subagent).                       |
+| `document`   | `.agents/documents/`   | A template for governed output, such as a plan or an ADR.         |
+
+Keystone manages context, not callables: it is not a harness, and the charter
+carries no `tool` kind — what must execute deterministically belongs to hosts
+and CI, which the charter can name but never replace.
 
 Keystone's own state lives in `.keystone/`: the index, the lockfile, the
 learning inbox, work in progress, and vendored policies. You edit `.agents/`.
@@ -155,18 +160,17 @@ same order:
 | `keystone init`                | Seed `.agents/` and `.keystone/`, then project every host. `--overwrite` replaces keystone's files. |
 | `keystone allocate`            | Report where an existing setup belongs. `--apply` writes, `--overwrite` hands originals over. |
 | `keystone budget`              | The context each host loads, against your caps. `--json` for CI.     |
-| `keystone new <kind> <id>`     | Scaffold any of the ten kinds, a `policy`, or an `adapter` (a host keystone has no profile for). |
+| `keystone new <kind> <id>`     | Scaffold any of the nine kinds, a `policy`, or an `adapter` (a host keystone has no profile for). |
 | `keystone index`               | Rebuild `.keystone/INDEX.json` and `INDEX.lite.json`.                |
 | `keystone project`             | Deliver `.agents/` to every host in `adapters`.                      |
-| `keystone lint`                | Check frontmatter. `--fix` applies the 5.0 spelling.                 |
+| `keystone lint`                | Check frontmatter. `--fix` applies the 6.0 spelling.                 |
 | `keystone verify`              | Check policy drift, strict items, budget caps, and projection drift. |
-| `keystone list`                | List primitives, constraints first. Filter by kind or category.     |
+| `keystone list`                | List primitives, grouped by kind. Filter by kind or tag.            |
 | `keystone show`, `explain`     | One primitive: its fields, its links, how it activates.              |
 | `keystone charter coverage`    | Project files that no rule's `paths:` covers.                        |
 | `keystone charter conformance` | Does the repo conform to its charter?                                |
 | `keystone hook fire <event>`   | Run the hooks on an event. Host bridges call it.                     |
 | `keystone signal fire <name>`  | Fire a keystone signal (an event no host sees).                      |
-| `keystone tool run <id>`       | Run a tool the way the MCP server does.                              |
 | `keystone migrate up`          | Upgrade an older install. See the upgrade guide.                     |
 | `keystone watch`               | Re-index and re-project on every save under `.agents/`.              |
 | `keystone mcp serve`           | Run the MCP server over stdio.                                       |
@@ -180,12 +184,10 @@ Every command takes `--help`.
 `keystone mcp install --agent <host>` writes the host's MCP config, and the
 host starts the server. The server reads the same files as the CLI. It offers
 read tools (`keystone_list_primitives`, `keystone_get_reference`,
-`keystone_budget`, …), write tools (`keystone_new_<kind>`), and each
-`transport: mcp` tool as `keystone_tool_<id>`.
+`keystone_budget`, …) and write tools (`keystone_new_<kind>`).
 
-`keystone web serve` opens a local dashboard. Its nav splits the charter into
-constraints and capabilities, and it has pages for coverage, the budget,
-signals, evals, and the learning flywheels.
+`keystone web serve` opens a local dashboard over the same files: primitives,
+coverage, the budget, signals, evals, and the learning flywheels.
 
 ## Policies
 

@@ -5,24 +5,21 @@
 
 A primitive is one typed unit of the charter: one Markdown file under `.agents/`, or one folder for a skill. Each primitive has YAML frontmatter and a body. The frontmatter is the descriptor that keystone indexes. The agent reads the descriptors first and opens a body only when that primitive applies. This page covers what every kind shares. Each kind has its own page for the fields and behavior that only it has.
 
-## The two categories
+## The kinds
 
-Every kind belongs to one of two categories. A **constraint** limits, gates, or checks what the agent does. A **capability** adds something the agent can do. `keystone list`, `INDEX.lite.json`, and `AGENTS.md` show constraints first.
+| Kind | Folder | Page |
+|---|---|---|
+| `rule` | `.agents/rules/` | [rule.md](rule.md) |
+| `reference` | `.agents/references/` | [reference.md](reference.md) |
+| `hook` | `.agents/hooks/` | [hook.md](hook.md) |
+| `permission` | `.agents/permissions/` | [permission.md](permission.md) |
+| `eval` | `.agents/evals/<id>/EVAL.md` | [eval.md](eval.md) |
+| `skill` | `.agents/skills/<id>/SKILL.md` | [skill.md](skill.md) |
+| `command` | `.agents/commands/` | [command.md](command.md) |
+| `agent` | `.agents/agents/` | [agent.md](agent.md) |
+| `document` | `.agents/documents/` | [document.md](document.md) |
 
-| Kind | Category | Folder | Page |
-|---|---|---|---|
-| `rule` | constraint | `.agents/rules/` | [rule.md](rule.md) |
-| `reference` | constraint | `.agents/references/` | [reference.md](reference.md) |
-| `hook` | constraint | `.agents/hooks/` | [hook.md](hook.md) |
-| `permission` | constraint | `.agents/permissions/` | [permission.md](permission.md) |
-| `eval` | constraint | `.agents/evals/<id>/EVAL.md` | [eval.md](eval.md) |
-| `skill` | capability | `.agents/skills/<id>/SKILL.md` | [skill.md](skill.md) |
-| `command` | capability | `.agents/commands/` | [command.md](command.md) |
-| `subagent` | capability | `.agents/agents/` | [subagent.md](subagent.md) |
-| `tool` | capability | `.agents/tools/` | [tool.md](tool.md) |
-| `document` | capability | `.agents/documents/` | [document.md](document.md) |
-
-Keystone knows only these ten kinds. `keystone lint` reports any other kind as an error, except the retired `concern`, which gets a warning until you inline it with `keystone lint --fix`.
+Keystone knows only these nine kinds. `keystone lint` reports any other kind as an error, except the retired `concern`, which gets a warning until you inline it with `keystone lint --fix`.
 
 ## Kind comes from the folder
 
@@ -59,8 +56,7 @@ Other fields belong to one kind, and each kind page describes its own fields:
 | `permission` | `allow:`, `ask:`, `deny:` |
 | `skill` | `name:`, `license:`, `compatibility:`, `allowed-tools:`, `metadata:` |
 | `command` | `phase:`, `args:`, `tools:`, `model:`, `produces:`, `consumes:`, `stop:` |
-| `subagent` | `tools:`, `model:` |
-| `tool` | `transport:`, `run:`, `event:` |
+| `agent` | `tools:`, `model:` |
 | `document` | `type:`, `gates:`, `gate:`, `produced_by:` |
 
 ## The index

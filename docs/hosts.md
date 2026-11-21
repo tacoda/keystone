@@ -18,18 +18,18 @@ or index/report instead of shim).
 
 ## Matrix
 
-| Host | Root | Rules | Skills | Commands | Subagents | Hooks | Permissions | Tools (MCP) |
+| Host | Root | Rules | Skills | Commands | Agents | Hooks | Permissions |
 |---|---|---|---|---|---|---|---|---|
-| claude-code | shim `CLAUDE.md` (`@AGENTS.md`) | shim `.claude/rules/` | symlink `.claude/skills/` | shim `.claude/commands/` | shim `.claude/agents/` | shim `.claude/settings.json` | shim `.claude/settings.json` | shim `.mcp.json` |
-| codex | native | index | native | index | shim `.codex/agents/*.toml` | merge `.codex/hooks.json` (trust it in `/hooks`) | shim `.codex/rules/*.rules` + report | shim `.codex/config.toml` |
-| cursor | native | shim `.cursor/rules/*.mdc` | native | shim `.cursor/skills/` (user-invoked) | shim `.cursor/agents/` | shim `.cursor/hooks.json` | shim `.cursor/cli.json` + report | shim `.cursor/mcp.json` |
-| github-copilot | native | shim `.github/instructions/` | native | shim `.github/prompts/` | shim `.github/agents/` | shim `.github/hooks/` | report (no repo file) | shim `.mcp.json` |
-| opencode | native | index | native | shim `.opencode/commands/` | shim `.opencode/agents/` | shim `.opencode/plugins/` | report (pending an order-preserving merge) | shim `opencode.json` |
-| continue | native (IDE: root only) | shim `.continue/rules/` | shim (copy) `.continue/skills/` | shim `.continue/prompts/` | index | report | report (user-level only) | shim `.continue/mcpServers/` |
-| cline | native | shim (copy) `.clinerules/` | shim (copy) `.cline/skills/` | index (format unverified) | index (format unverified) | report (format unverified) | report | report (global only) |
-| goose | native | index | native | index | shim `.goose/agents/` | report (bridge format unverified) | report (global only) | report (global only) |
-| pi | native | index | native | shim `.pi/prompts/` | index (none) | report (bridge format unverified) | report (none) | shim `.pi/mcp.json` |
-| aider | shim `.aider.conf.yml` `read:` | index | index | index | index | report | report (none) | report (none) |
+| claude-code | shim `CLAUDE.md` (`@AGENTS.md`) | shim `.claude/rules/` | symlink `.claude/skills/` | shim `.claude/commands/` | shim `.claude/agents/` | shim `.claude/settings.json` | shim `.claude/settings.json` |
+| codex | native | index | native | index | shim `.codex/agents/*.toml` | merge `.codex/hooks.json` (trust it in `/hooks`) | shim `.codex/rules/*.rules` + report |
+| cursor | native | shim `.cursor/rules/*.mdc` | native | shim `.cursor/skills/` (user-invoked) | shim `.cursor/agents/` | shim `.cursor/hooks.json` | shim `.cursor/cli.json` + report |
+| github-copilot | native | shim `.github/instructions/` | native | shim `.github/prompts/` | shim `.github/agents/` | shim `.github/hooks/` | report (no repo file) |
+| opencode | native | index | native | shim `.opencode/commands/` | shim `.opencode/agents/` | shim `.opencode/plugins/` | report (pending an order-preserving merge) |
+| continue | native (IDE: root only) | shim `.continue/rules/` | shim (copy) `.continue/skills/` | shim `.continue/prompts/` | index | report | report (user-level only) |
+| cline | native | shim (copy) `.clinerules/` | shim (copy) `.cline/skills/` | index (format unverified) | index (format unverified) | report (format unverified) | report |
+| goose | native | index | native | index | shim `.goose/agents/` | report (bridge format unverified) | report (global only) |
+| pi | native | index | native | shim `.pi/prompts/` | index (none) | report (bridge format unverified) | report (none) |
+| aider | shim `.aider.conf.yml` `read:` | index | index | index | index | report | report (none) |
 
 ## Custom hosts
 
@@ -44,7 +44,7 @@ kind:
     "skill":    { "strategy": "link", "dir": ".zed/skills" },
     "rule":     { "strategy": "copy", "dir": ".zed/rules" },
     "command":  { "strategy": "index" },
-    "subagent": { "strategy": "native" }
+    "agent": { "strategy": "native" }
   }
 }
 ```

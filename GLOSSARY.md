@@ -53,44 +53,43 @@ between mechanism and policy that puts Claude Code in the harness and your
 
 ## Keystone
 
-The agent charter framework: a CLI, an MCP server, and a dashboard that
-author, check, project, and maintain the charter. Keystone is **not** a
-harness. It manages the charter that constrains whatever harness you run.
-
-## Constraint and capability
-
-The two halves of a charter.
-
-- A **constraint** limits, gates, or checks what the agent does: `rule`,
-  `reference`, `hook`, `permission`, `eval`.
-- A **capability** adds something the agent can do: `skill`, `command`,
-  `subagent`, `tool`, `document`.
+The agent context framework: a CLI, an MCP server, and a dashboard that
+author, check, project, and maintain the charter. The **charter is the
+codified context of the repository** — everything a coding agent should be
+able to look up about how the codebase works and how to work in it.
+Keystone is **not** a harness: it manages the context; it never runs the
+model, serves author-defined callables, or acts as an engine. What must
+execute deterministically belongs to hosts and CI, which the charter can
+name but never replace. Codified context is in scope; ambient context
+(MCP servers, CLIs, APIs, external services) is out.
 
 ## Primitive
 
 A typed unit of the charter: one file (or, for a skill, one folder) under
 `.agents/`, with frontmatter and a body. Its kind comes from its folder.
 
-| Kind         | Category   | What it is                                                        |
-| ------------ | ---------- | ----------------------------------------------------------------- |
-| `rule`       | constraint | A directive. `paths:` scopes it to matching files.                |
-| `reference`  | constraint | The reasoning behind a rule, opened on demand. Was `corpus`.      |
-| `hook`       | constraint | A check that runs on an event and can block. Was `sensor`.        |
-| `permission` | constraint | Allow, ask, and deny rules for tools. Was `posture`.              |
-| `eval`       | constraint | A test that the charter changes agent behavior.                   |
-| `skill`      | capability | An Agent Skills `SKILL.md`. Absorbed `playbook` and `pattern`.    |
-| `command`    | capability | A unit of work the user asks for by name.                         |
-| `subagent`   | capability | A role the agent delegates to. Was `agent`.                       |
-| `tool`       | capability | A callable you write, served over MCP, as a command, or as a host plugin. |
-| `document`   | capability | A template for governed output, such as a plan or an ADR.         |
+| Kind         | What it is                                                        |
+| ------------ | ----------------------------------------------------------------- |
+| `rule`       | A directive. `paths:` scopes it to matching files.                |
+| `reference`  | The reasoning behind a rule, opened on demand. Was `corpus`.      |
+| `hook`       | A check that runs on an event and can block. Was `sensor`.        |
+| `permission` | Allow, ask, and deny rules for tools. Was `posture`.              |
+| `eval`       | A test that the charter changes agent behavior.                   |
+| `skill`      | An Agent Skills `SKILL.md`. Absorbed `playbook` and `pattern`.    |
+| `command`    | A unit of work the user asks for by name.                         |
+| `agent`      | A role the agent delegates to — a subagent. 5.0 spelled the kind `subagent`; 6.0 restored `agent`. |
+| `document`   | A template for governed output, such as a plan or an ADR.         |
+
+The `tool` kind is retired in 6.0: keystone manages context, not callables.
 
 ## Agent and subagent
 
-The **agent** is the model you talk to, running in its host. A **subagent**
-is a role that agent delegates to, with its own instructions and tools.
-Keystone's kind is `subagent`. I kept `agents/` for its folder because every
-host with subagents names its folder that way: `.claude/agents/`,
-`.cursor/agents/`, `.github/agents/`, `.opencode/agents/`.
+The **agent** (the model) is what you talk to, running in its host. A
+**subagent** is a role that agent delegates to, with its own instructions
+and tools. Keystone's kind is `agent` (5.0 spelled it `subagent`). The
+folder stayed `agents/` throughout, because every host with subagents names
+its folder that way: `.claude/agents/`, `.cursor/agents/`,
+`.github/agents/`, `.opencode/agents/`.
 
 ## Host
 

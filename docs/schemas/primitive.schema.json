@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://keystone.tacoda.dev/schemas/primitive.json",
   "title": "Keystone primitive frontmatter (5.0)",
-  "description": "YAML frontmatter of a charter primitive under .agents/. The kind is inferred from the directory (rules/, references/, hooks/, permissions/, evals/, skills/, commands/, agents/, tools/, documents/), so `kind:` is optional. Constraints: rule, reference, hook, permission, eval. Capabilities: skill, command, subagent, tool, document. Validate a file against `#/$defs/<kind>`, picked by its directory (frontmatter alone cannot tell kinds apart). See ADR 0010. 4.x spellings stay readable: kinds guide/corpus/sensor/posture/agent/playbook/pattern, `globs:` for `paths:`, `on:` for `event:`.",
+  "description": "YAML frontmatter of a charter primitive under .agents/. The kind is inferred from the directory (rules/, references/, hooks/, permissions/, evals/, skills/, commands/, agents/, documents/), so `kind:` is optional. Kinds: rule, reference, hook, permission, eval, skill, command, agent, document. Validate a file against `#/$defs/<kind>`, picked by its directory (frontmatter alone cannot tell kinds apart). See ADR 0010. 4.x spellings stay readable: kinds guide/corpus/sensor/posture/agent/playbook/pattern, `globs:` for `paths:`, `on:` for `event:`.",
   "$defs": {
     "stringList": { "type": "array", "items": { "type": "string" } },
     "common": {
@@ -106,25 +106,15 @@
         "stop": { "type": "string", "description": "Explicit done-condition." }
       }
     },
-    "subagent": {
+    "agent": {
       "description": "Capability. A role the main agent delegates to. Lives at .agents/agents/<id>.md, the directory hosts read.",
       "allOf": [{ "$ref": "#/$defs/common" }],
       "properties": {
-        "kind": { "enum": ["subagent", "agent"] },
+        "kind": { "enum": ["agent", "subagent"] },
         "tools": { "$ref": "#/$defs/stringList", "description": "Tool allow-list; required." },
         "model": { "type": "string" }
       },
       "required": ["tools"]
-    },
-    "tool": {
-      "description": "Capability. An author-defined callable, served by the keystone MCP server. Lives at .agents/tools/<id>.md.",
-      "allOf": [{ "$ref": "#/$defs/common" }],
-      "properties": {
-        "kind": { "const": "tool" },
-        "transport": { "enum": ["cli", "http", "mcp", "plugin"], "default": "cli" },
-        "run": { "type": "string" },
-        "event": { "type": "string", "description": "Optional: fire as a side-effect on this event or signal." }
-      }
     },
     "document": {
       "description": "Capability (keystone extension). A governed output template (ADR, review, retro, …). Instances live under .keystone/work/. Lives at .agents/documents/<id>.md.",
