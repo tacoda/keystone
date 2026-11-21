@@ -46,17 +46,16 @@ func writeGenerators() []writeGen {
 	}
 	return []writeGen{
 		// constraints — limit, gate, or check what the agent does
-		gen("rule", "<topic>/<name>", "Scaffold a rule plus its paired reference (constraint). A rule applies when a touched file matches its `paths:`, or everywhere without them. id form: '<topic>/<name>' (e.g. 'process/release')."),
-		gen("reference", "<topic>/<name>", "Scaffold a reference (constraint): the reasoning behind a rule, opened on demand. id form: '<topic>/<name>'."),
-		gen("hook", "<id>", "Scaffold a hook (constraint): a check that runs on an event (`event:` + `run:`); a non-zero exit blocks the agent."),
-		gen("permission", "<id>", "Scaffold a permission (constraint): allow / ask / deny tool rules, translated to every host that can enforce them."),
-		gen("eval", "<id>", "Scaffold an eval (constraint): a test that the charter changes agent behavior."),
+		gen("rule", "<topic>/<name>", "Scaffold a rule plus its paired reference. A rule applies when a touched file matches its `paths:`, or everywhere without them. id form: '<topic>/<name>' (e.g. 'process/release')."),
+		gen("reference", "<topic>/<name>", "Scaffold a reference: the reasoning behind a rule, opened on demand. id form: '<topic>/<name>'."),
+		gen("hook", "<id>", "Scaffold a hook: a check that runs on an event (`event:` + `run:`); a non-zero exit blocks the agent."),
+		gen("permission", "<id>", "Scaffold a permission: allow / ask / deny tool rules, translated to every host that can enforce them."),
+		gen("eval", "<id>", "Scaffold an eval: a test that the charter changes agent behavior."),
 		// capabilities — add things the agent can do
-		gen("skill", "<id>", "Scaffold a skill (capability) in Agent Skills shape: .agents/skills/<id>/SKILL.md."),
-		gen("command", "<id>", "Scaffold a command (capability): a unit of work the user asks for by name."),
-		gen("subagent", "<id>", "Scaffold a subagent (capability): a role the agent delegates to."),
-		gen("tool", "<id>", "Scaffold a tool (capability): an author-defined callable (transport: mcp | cli | plugin). Not a host tool like Bash or Read."),
-		gen("document", "<id>", "Scaffold a document template (capability): governed output such as a plan, review, or ADR. Instances land in .keystone/work/."),
+		gen("skill", "<id>", "Scaffold a skill in Agent Skills shape: .agents/skills/<id>/SKILL.md."),
+		gen("command", "<id>", "Scaffold a command: a unit of work the user asks for by name."),
+		gen("agent", "<id>", "Scaffold an agent (a subagent role): a role the agent delegates to."),
+		gen("document", "<id>", "Scaffold a document template: governed output such as a plan, review, or ADR. Instances land in .keystone/work/."),
 		// keystone itself
 		gen("adapter", "<name>", "Define a host keystone has no built-in profile for: writes .agents/hosts/<name>.json (native, link, copy, or index per kind). Then keystone_target_add <name>."),
 		gen("policy", "<name>", "Scaffold a new policy repo skeleton (separate dir; publish to git afterward)."),
@@ -126,7 +125,7 @@ func registerCharterTools(s *server.MCPServer, projectDir string) {
 
 	s.AddTool(
 		mcp.NewTool("keystone_project_refresh",
-			mcp.WithDescription("Regenerate host-native projections (.claude/...) from canonical sources. Call after any keystone_new_* tool that touches skill/subagent/command."),
+			mcp.WithDescription("Regenerate host-native projections (.claude/...) from canonical sources. Call after any keystone_new_* tool that touches skill/agent/command."),
 		),
 		func(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 			out, err := execKeystone(ctx, "project", "--dir", projectDir)

@@ -18,7 +18,7 @@ var sources = []func(*scan) error{
 func claudeAndCursor(s *scan) error {
 	for _, host := range []string{".claude", ".cursor"} {
 		s.skills(host + "/skills")
-		s.each(host+"/agents", ".md", primitive.KindSubagent, ".agents/agents")
+		s.each(host+"/agents", ".md", primitive.KindAgent, ".agents/agents")
 		s.each(host+"/commands", ".md", primitive.KindCommand, ".agents/commands")
 	}
 	s.each(".claude/rules", ".md", primitive.KindRule, ".agents/rules")
@@ -48,7 +48,7 @@ func copilot(s *scan) error {
 	s.single(".github/copilot-instructions.md", primitive.KindRule, ".agents/rules/copilot-instructions.md")
 	s.each(".github/instructions", ".instructions.md", primitive.KindRule, ".agents/rules")
 	s.each(".github/prompts", ".prompt.md", primitive.KindCommand, ".agents/commands")
-	s.each(".github/agents", ".md", primitive.KindSubagent, ".agents/agents")
+	s.each(".github/agents", ".md", primitive.KindAgent, ".agents/agents")
 	return nil
 }
 
@@ -67,7 +67,7 @@ func continueFiles(s *scan) error {
 
 func opencodeFiles(s *scan) error {
 	for _, dir := range []string{"agent", "agents"} {
-		s.each(".opencode/"+dir, ".md", primitive.KindSubagent, ".agents/agents")
+		s.each(".opencode/"+dir, ".md", primitive.KindAgent, ".agents/agents")
 	}
 	for _, dir := range []string{"command", "commands"} {
 		s.each(".opencode/"+dir, ".md", primitive.KindCommand, ".agents/commands")
@@ -95,8 +95,8 @@ func (s *scan) single(rel string, kind primitive.Kind, target string) {
 
 func (s *scan) convertTo(rel string, kind primitive.Kind, target string) {
 	content, note := convert(s.read(rel), idFor(kind, target))
-	if kind == primitive.KindSubagent && !strings.Contains(string(content), "\ntools:") {
-		note = joinNote(note, "add `tools:` — the host gave this subagent every tool")
+	if kind == primitive.KindAgent && !strings.Contains(string(content), "\ntools:") {
+		note = joinNote(note, "add `tools:` — the host gave this agent every tool")
 	}
 	s.add(Item{Source: rel, Kind: kind, Target: target, Content: content, Note: note, own: rel})
 }

@@ -27,7 +27,7 @@ func TestCustomHost_ProjectsByItsFile(t *testing.T) {
 	assertContains(t, root, ".zed/rules/go-style.md", "# Style")
 	assertContains(t, root, ".zed/skills/deploy/SKILL.md", "deploy")
 	md := AgentsMD(prims, hosts)
-	if !strings.Contains(md, "- **zed** — loads rules, skills by itself; open commands, subagents from `.agents/` yourself; does **not** run hooks") {
+	if !strings.Contains(md, "- **zed** — loads rules, skills by itself; open commands, agents from `.agents/` yourself; does **not** run hooks") {
 		t.Errorf("AGENTS.md zed line:\n%s", md)
 	}
 	if off, _ := HostsFor(root, nil); off[len(off)-1].Host == "zed" {

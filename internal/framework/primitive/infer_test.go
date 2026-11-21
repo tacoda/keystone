@@ -16,8 +16,7 @@ func TestInferKind(t *testing.T) {
 		"evals/regression.md":        KindEval,
 		"skills/task/SKILL.md":       KindSkill,
 		"commands/verify.md":         KindCommand,
-		"agents/code-reviewer.md":    KindSubagent,
-		"tools/grep-symbols.md":      KindTool,
+		"agents/code-reviewer.md":    KindAgent,
 		"documents/adr.md":           KindDocument,
 		// 4.x directories normalize to their 5.0 kinds.
 		"guides/idioms/go/stdlib-first.md": KindRule,
@@ -49,7 +48,8 @@ func TestNormalizeKind(t *testing.T) {
 		{"corpus", KindReference, true},
 		{"sensor", KindHook, true},
 		{"posture", KindPermission, true},
-		{"agent", KindSubagent, true},
+		{"agent", KindAgent, false},
+		{"subagent", KindAgent, true},
 		{"playbook", KindSkill, true},
 		{"pattern", KindSkill, true},
 		{"rule", KindRule, false},
@@ -64,23 +64,17 @@ func TestNormalizeKind(t *testing.T) {
 	}
 }
 
-func TestCategoryOf(t *testing.T) {
-	want := map[Kind]Category{
-		KindRule: CategoryConstraint, KindReference: CategoryConstraint,
-		KindHook: CategoryConstraint, KindPermission: CategoryConstraint,
-		KindEval:  CategoryConstraint,
-		KindSkill: CategoryCapability, KindCommand: CategoryCapability,
-		KindSubagent: CategoryCapability, KindTool: CategoryCapability,
-		KindDocument: CategoryCapability,
-		KindConcern:  "", // retired: no category
+func TestKnownKinds_Closed(t *testing.T) {
+	if len(KnownKinds) != 9 {
+		t.Errorf("KnownKinds has %d kinds, want 9", len(KnownKinds))
 	}
-	for k, c := range want {
-		if got := CategoryOf(k); got != c {
-			t.Errorf("CategoryOf(%q) = %q, want %q", k, got, c)
+	for _, k := range KnownKinds {
+		if !IsKnownKind(string(k)) {
+			t.Errorf("IsKnownKind(%q) = false, want true", k)
 		}
 	}
-	if len(want)-1 != len(KnownKinds) {
-		t.Errorf("KnownKinds has %d kinds, table covers %d", len(KnownKinds), len(want)-1)
+	if IsKnownKind("concern") || IsKnownKind("guide") {
+		t.Error("retired and 4.x-only names are not known kinds")
 	}
 }
 

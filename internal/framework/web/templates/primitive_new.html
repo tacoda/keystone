@@ -9,12 +9,7 @@
     <div class="row">
       <label>kind
         <select name="kind" required>
-          <optgroup label="constraints — limit, gate, or check">
-            {{range .ConstraintKinds}}<option value="{{.}}">{{.}}</option>{{end}}
-          </optgroup>
-          <optgroup label="capabilities — add what the agent can do">
-            {{range .CapabilityKinds}}<option value="{{.}}">{{.}}</option>{{end}}
-          </optgroup>
+          {{range .Kinds}}<option value="{{.}}">{{.}}</option>{{end}}
         </select>
       </label>
       <label>id

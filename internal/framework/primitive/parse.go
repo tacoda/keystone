@@ -89,7 +89,6 @@ type fmShadow struct {
 	Event         string            `yaml:"event"`
 	On            string            `yaml:"on"` // 4.x alias for `event:`
 	Run           string            `yaml:"run"`
-	Transport     string            `yaml:"transport"`
 	Agent         string            `yaml:"agent"`
 	Returns       string            `yaml:"returns"`
 	Allow         []string          `yaml:"allow"`
@@ -141,7 +140,6 @@ func (f *Frontmatter) UnmarshalYAML(value *yaml.Node) error {
 	f.Mode = s.Mode
 	f.Event = firstNonEmpty(s.Event, s.On) // `event:` canonical; `on:` alias
 	f.Run = s.Run
-	f.Transport = s.Transport
 	f.Agent = s.Agent
 	f.Returns = s.Returns
 	f.Allow = s.Allow

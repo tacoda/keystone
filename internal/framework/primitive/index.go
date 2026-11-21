@@ -18,14 +18,10 @@ func Build(primitives []Primitive, generatedAt time.Time) Index {
 		Generated:  generatedAt.UTC().Format(time.RFC3339),
 		Primitives: primitives,
 		ByKind:     map[string][]string{},
-		ByCategory: map[string][]string{},
 		ByPath:     map[string][]string{},
 	}
 	for _, p := range primitives {
 		idx.ByKind[p.Kind] = append(idx.ByKind[p.Kind], p.ID)
-		if c := CategoryOf(Kind(p.Kind)); c != "" {
-			idx.ByCategory[string(c)] = append(idx.ByCategory[string(c)], p.Kind+"/"+p.ID)
-		}
 		for _, g := range p.Paths {
 			ref := p.Kind + "/" + p.ID
 			idx.ByPath[g] = append(idx.ByPath[g], ref)
@@ -33,9 +29,6 @@ func Build(primitives []Primitive, generatedAt time.Time) Index {
 	}
 	for k := range idx.ByKind {
 		sort.Strings(idx.ByKind[k])
-	}
-	for c := range idx.ByCategory {
-		sort.Strings(idx.ByCategory[c])
 	}
 	for g := range idx.ByPath {
 		sort.Strings(idx.ByPath[g])
@@ -56,19 +49,18 @@ func Write(outPath string, idx Index) error {
 }
 
 // LiteEntry is the minimal descriptor written to INDEX.lite.json. Cheap
-// discovery surface — category/kind/id/description per primitive.
+// discovery surface — kind/id/description per primitive.
 // The agent reads this on session start to pick which primitives to
 // open; the full INDEX.json (with paths, globs, triggers, traces) is
 // read only when the agent needs to activate a primitive.
 type LiteEntry struct {
-	Category    string `json:"category"`
 	Kind        string `json:"kind"`
 	ID          string `json:"id"`
 	Description string `json:"description"`
 }
 
-// LiteIndex is the serialized shape of INDEX.lite.json. Sorted by
-// category (constraints first), then kind, then id, so diffs stay readable.
+// LiteIndex is the serialized shape of INDEX.lite.json. Sorted by kind
+// then id, so diffs stay readable.
 type LiteIndex struct {
 	Version    string      `json:"version"`
 	Generated  string      `json:"generated"`
@@ -86,14 +78,10 @@ func BuildLite(idx Index) LiteIndex {
 	}
 	for _, p := range idx.Primitives {
 		out.Primitives = append(out.Primitives, LiteEntry{
-			Category: string(CategoryOf(Kind(p.Kind))),
-			Kind:     p.Kind, ID: p.ID, Description: p.Description,
+			Kind: p.Kind, ID: p.ID, Description: p.Description,
 		})
 	}
 	sort.SliceStable(out.Primitives, func(i, j int) bool {
-		if out.Primitives[i].Category != out.Primitives[j].Category {
-			return categoryRank(out.Primitives[i].Category) < categoryRank(out.Primitives[j].Category)
-		}
 		if out.Primitives[i].Kind != out.Primitives[j].Kind {
 			return out.Primitives[i].Kind < out.Primitives[j].Kind
 		}
@@ -102,9 +90,9 @@ func BuildLite(idx Index) LiteIndex {
 	return out
 }
 
-// SortByCategory orders primitives constraints first, then capabilities,
-// each kind in KnownKinds order, then by id. A retired kind sorts last.
-func SortByCategory(ps []Primitive) {
+// SortByKind orders primitives in KnownKinds order, then by id. A
+// retired kind sorts last.
+func SortByKind(ps []Primitive) {
 	sort.SliceStable(ps, func(i, j int) bool {
 		if a, b := KindRank(ps[i].Kind), KindRank(ps[j].Kind); a != b {
 			return a < b
@@ -113,8 +101,7 @@ func SortByCategory(ps []Primitive) {
 	})
 }
 
-// KindRank is kind's position in KnownKinds (constraints first); a retired
-// kind ranks last.
+// KindRank is kind's position in KnownKinds; a retired kind ranks last.
 func KindRank(kind string) int {
 	for i, k := range KnownKinds {
 		if string(k) == kind {
@@ -122,30 +109,6 @@ func KindRank(kind string) int {
 		}
 	}
 	return len(KnownKinds)
-}
-
-// CategoryTitle is a category's heading: "Constraints", "Capabilities", or
-// "Other" for a retired kind.
-func CategoryTitle(kind string) string {
-	switch CategoryOf(Kind(kind)) {
-	case CategoryConstraint:
-		return "Constraints"
-	case CategoryCapability:
-		return "Capabilities"
-	}
-	return "Other"
-}
-
-// categoryRank orders constraints before capabilities, and anything
-// uncategorized (a retired kind) last.
-func categoryRank(c string) int {
-	switch Category(c) {
-	case CategoryConstraint:
-		return 0
-	case CategoryCapability:
-		return 1
-	}
-	return 2
 }
 
 // WriteLite serializes the lite index to outPath, atomic-rename style.

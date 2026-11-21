@@ -14,7 +14,6 @@ import (
 // convention (charter-root-relative links, no ../) and the kind's contract
 // (frontmatter, required sections). The author fills in the body.
 var newDispatch = map[string]func([]string) error{
-	// constraints
 	"rule":       runNewRule,
 	"reference":  runNewReference,
 	"hook":       runNewHook,
@@ -23,8 +22,7 @@ var newDispatch = map[string]func([]string) error{
 	// capabilities
 	"skill":    runNewSkill,
 	"command":  runNewCommand,
-	"subagent": runNewSubagent,
-	"tool":     runNewTool,
+	"agent":    runNewAgent,
 	"document": runNewDocument,
 	// keystone itself
 	"adapter": runNewAdapter,
@@ -34,10 +32,10 @@ var newDispatch = map[string]func([]string) error{
 // newRenamed maps each 4.x `keystone new` kind to its 5.0 name.
 var newRenamed = map[string]string{
 	"guide": "rule", "corpus": "reference", "sensor": "hook", "posture": "permission",
-	"agent": "subagent", "playbook": "skill", "pattern": "skill",
+	"playbook": "skill", "pattern": "skill",
 }
 
-const newKinds = "rule, reference, hook, permission, eval, skill, command, subagent, tool, document, adapter, policy"
+const newKinds = "rule, reference, hook, permission, eval, skill, command, agent, document, adapter, policy"
 
 func runNew(args []string) error {
 	if len(args) == 0 {
@@ -64,19 +62,15 @@ func printNewUsage(w *os.File) {
 
 Usage:
 
-  Constraints — limit, gate, or check what the agent does:
-    keystone new rule <topic>/<name>      [--dir <path>]   # a rule (+ paired reference); paths: scopes it
-    keystone new reference <topic>/<name> [--dir <path>]   # the reasoning behind a rule
-    keystone new hook <id>                [--dir <path>]   # a check that runs on an event and can block
-    keystone new permission <id>          [--dir <path>]   # allow / ask / deny tool rules
-    keystone new eval <id>                [--dir <path>]   # a test that the charter changes behavior
-
-  Capabilities — add things the agent can do:
-    keystone new skill <id>               [--dir <path>]   # Agent Skills SKILL.md
-    keystone new command <id>             [--dir <path>]   # a unit of work the user asks for by name
-    keystone new subagent <id>            [--dir <path>]   # a role the agent delegates to
-    keystone new tool <id>                [--dir <path>]   # a callable (transport: mcp | cli | plugin)
-    keystone new document <id>            [--dir <path>]   # a governed output template
+  keystone new rule <topic>/<name>      [--dir <path>]   # a rule (+ paired reference); paths: scopes it
+  keystone new reference <topic>/<name> [--dir <path>]   # the reasoning behind a rule
+  keystone new hook <id>                [--dir <path>]   # a check that runs on an event and can block
+  keystone new permission <id>          [--dir <path>]   # allow / ask / deny tool rules
+  keystone new eval <id>                [--dir <path>]   # a test that the charter changes behavior
+  keystone new skill <id>               [--dir <path>]   # Agent Skills SKILL.md
+  keystone new command <id>             [--dir <path>]   # a unit of work the user asks for by name
+  keystone new agent <id>               [--dir <path>]   # a role the agent delegates to
+  keystone new document <id>            [--dir <path>]   # a governed output template
 
   Keystone itself:
     keystone new adapter <name>           [--dir <path>]   # a host keystone has no profile for (.agents/hosts/<name>.json)

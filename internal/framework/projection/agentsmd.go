@@ -87,8 +87,7 @@ var kindDirs = []struct {
 	{primitive.KindEval, "evals", "tests that the charter changes agent behavior"},
 	{primitive.KindSkill, "skills", "activates when its description matches the task"},
 	{primitive.KindCommand, "commands", "a unit of work the user asks for by name"},
-	{primitive.KindSubagent, "agents", "a role you delegate to"},
-	{primitive.KindTool, "tools", "a callable you run: through the keystone MCP server or `keystone tool run` (listed below)"},
+	{primitive.KindAgent, "agents", "a role you delegate to"},
 	{primitive.KindDocument, "documents", "a template for governed output; instances live in `.keystone/work/`"},
 }
 
@@ -103,21 +102,17 @@ var hostNames = map[string]string{
 func AgentsMD(primitives []primitive.Primitive, hosts []Profile) string {
 	var b strings.Builder
 	b.WriteString(agentsIntro)
-	writeKindSection(&b, "Constraints", primitive.CategoryConstraint)
-	writeKindSection(&b, "Capabilities", primitive.CategoryCapability)
+	writeKindSection(&b)
 	writeEverywhereRules(&b, primitives)
-	writeTools(&b, primitives)
 	b.WriteString(agentsLaws)
 	writeHosts(&b, primitives, hosts)
 	return b.String()
 }
 
-func writeKindSection(b *strings.Builder, title string, cat primitive.Category) {
-	fmt.Fprintf(b, "\n## %s\n\n", title)
+func writeKindSection(b *strings.Builder) {
+	fmt.Fprintf(b, "\n## Kinds\n\n")
 	for _, k := range kindDirs {
-		if primitive.CategoryOf(k.kind) == cat {
-			fmt.Fprintf(b, "- **%s** (`.agents/%s/`) — %s.\n", k.kind, k.dir, k.what)
-		}
+		fmt.Fprintf(b, "- **%s** (`.agents/%s/`) — %s.\n", k.kind, k.dir, k.what)
 	}
 }
 
@@ -136,36 +131,6 @@ func writeEverywhereRules(b *strings.Builder, primitives []primitive.Primitive) 
 	sort.Strings(lines)
 	b.WriteString("\n## Rules that apply everywhere\n\nOpen the one that fits the phase you are in.\n\n")
 	b.WriteString(strings.Join(lines, "\n") + "\n")
-}
-
-// writeTools lists each tool with how to call it: an mcp tool by its MCP
-// name, a cli or plugin tool by its `keystone tool run` command (a plugin
-// tool is also a native tool on hosts that have one).
-func writeTools(b *strings.Builder, primitives []primitive.Primitive) {
-	var lines []string
-	for _, p := range primitives {
-		if primitive.Kind(p.Kind) == primitive.KindTool {
-			lines = append(lines, fmt.Sprintf("- **%s** — %s Call: %s", p.ID, strings.TrimSpace(p.Description), toolCall(p)))
-		}
-	}
-	if len(lines) == 0 {
-		return
-	}
-	sort.Strings(lines)
-	b.WriteString("\n## Tools\n\nNot your host's built-in tools: these are the charter's own.\n\n")
-	b.WriteString(strings.Join(lines, "\n") + "\n")
-}
-
-func toolCall(p primitive.Primitive) string {
-	if p.Transport == "mcp" {
-		return "MCP tool `" + MCPToolName(p.ID) + "` (keystone MCP server)."
-	}
-	return "`" + primitive.ToolCommand(p) + "`."
-}
-
-// MCPToolName is the name the keystone MCP server serves tool id under.
-func MCPToolName(id string) string {
-	return "keystone_tool_" + strings.NewReplacer(":", "_", "/", "_", "-", "_").Replace(id)
 }
 
 // appliesEverywhere is an inferential rule with no paths: scope.
@@ -248,7 +213,7 @@ func hostKinds(h Profile) (auto, manual []string) {
 	for _, k := range kindDirs {
 		r, ok := h.Rules[k.kind]
 		switch {
-		case !ok, k.kind == primitive.KindTool: // the Tools section says how to call each
+		case !ok:
 		case r.Strategy == Index:
 			manual = append(manual, plural(k.kind))
 		default:
@@ -267,13 +232,13 @@ func plural(k primitive.Kind) string {
 
 const agentsIntro = `# Charter
 
-This repo is governed by a **keystone charter**: the standards that shape how any coding agent works here. The charter has two halves. **Constraints** limit, gate, or check what you do. **Capabilities** add things you can do.
+This repo is governed by a **keystone charter**: the codified context of the repository — everything a coding agent should be able to look up about how this codebase works and how to work in it.
 
 The sources live in ` + "`.agents/`" + `; keystone's index and state live in ` + "`.keystone/`" + `. Host files (` + "`.claude/`" + `, ` + "`.cursor/`" + `, the region of this file between the keystone markers) are generated from ` + "`.agents/`" + `: edit the sources, never the generated files.
 
 ## Read first
 
-` + "`.keystone/INDEX.lite.json`" + ` lists every primitive (category, kind, id, description). Browse it, then open a body only when it applies to the task.
+` + "`.keystone/INDEX.lite.json`" + ` lists every primitive (kind, id, description). Browse it, then open a body only when it applies to the task.
 `
 
 const agentsLaws = `

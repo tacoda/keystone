@@ -424,9 +424,8 @@ func printNextSteps(agents []string, charterRoot string) {
 %s
 Also:
 
-  • Read %s/README.md for an overview: constraints (rules, references,
-    hooks, permissions, evals) and capabilities (skills, commands,
-    subagents, tools, documents).
+  • Read %s/README.md for an overview: rules, references, hooks,
+    permissions, evals, skills, commands, agents, tools, documents.
   • Review %s/references/state/INSTALL_PROFILE.md and adjust if needed.
   • Commit %s/ and any agent-specific files this installer created.
 `, list, bootstrapIn, charterRoot, charterRoot, charterRoot, lifecycle, charterRoot, charterRoot, charterRoot)

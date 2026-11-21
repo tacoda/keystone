@@ -49,22 +49,18 @@ import "strings"
 // primitive's contract is, not how it's stored or served.
 type Kind string
 
-// 5.0 vocabulary (ADR 0010). Kinds use the names hosts already use, and
-// every kind belongs to one of two categories: a constraint limits, gates,
-// or verifies what the agent does; a capability adds something it can do.
+// 6.0 vocabulary: the charter is the codified context of the repository,
+// and kinds use the names coding agents already use.
 const (
-	// Constraints.
 	KindRule       Kind = "rule"       // ambient, path-scoped directive (was guide)
 	KindReference  Kind = "reference"  // the why behind a rule, loaded on demand (was corpus); keystone extension
 	KindHook       Kind = "hook"       // a check that reacts to an event → verdict; gates (was sensor)
 	KindPermission Kind = "permission" // allow/ask/deny tool rules (was posture)
 	KindEval       Kind = "eval"       // measures whether rules change behavior; keystone extension
 
-	// Capabilities.
 	KindSkill    Kind = "skill"    // Agent Skills spec skill (absorbs playbook, pattern)
 	KindCommand  Kind = "command"  // user-invoked unit of work
-	KindSubagent Kind = "subagent" // a role the main agent delegates to (was agent)
-	KindTool     Kind = "tool"     // author-defined callable → keystone MCP server
+	KindAgent    Kind = "agent"    // a role the main agent delegates to (5.0 spelled it subagent)
 	KindDocument Kind = "document" // governed output doc; `type:` carries the subtype; keystone extension
 
 	// KindConcern is retired in 5.0. It stays recognized only so 4.x trees
@@ -73,32 +69,23 @@ const (
 	KindConcern Kind = "concern"
 )
 
-// Category splits the charter into its two halves (ADR 0010).
-type Category string
-
-const (
-	CategoryConstraint Category = "constraint"
-	CategoryCapability Category = "capability"
-)
-
-// KnownKinds is the closed set the indexer and linter validate against,
-// constraints first.
+// KnownKinds is the closed set the indexer and linter validate against.
 var KnownKinds = []Kind{
 	KindRule, KindReference, KindHook, KindPermission, KindEval,
-	KindSkill, KindCommand, KindSubagent, KindTool, KindDocument,
+	KindSkill, KindCommand, KindAgent, KindDocument,
 }
 
-var kindCategory = map[Kind]Category{
-	KindRule: CategoryConstraint, KindReference: CategoryConstraint,
-	KindHook: CategoryConstraint, KindPermission: CategoryConstraint,
-	KindEval:  CategoryConstraint,
-	KindSkill: CategoryCapability, KindCommand: CategoryCapability,
-	KindSubagent: CategoryCapability, KindTool: CategoryCapability,
-	KindDocument: CategoryCapability,
+// IsKnownKind reports whether name is exactly one of KnownKinds. It
+// does not normalize 4.x spellings; call NormalizeKind first when the
+// input may be legacy. A retired kind is not known.
+func IsKnownKind(name string) bool {
+	for _, known := range KnownKinds {
+		if Kind(name) == known {
+			return true
+		}
+	}
+	return false
 }
-
-// CategoryOf returns the category of k, or "" for an unknown kind.
-func CategoryOf(k Kind) Category { return kindCategory[k] }
 
 // legacyKinds maps every 4.x kind name to its 5.0 kind. Walk normalizes
 // legacy names so a 4.x tree keeps working until it is migrated; lint
@@ -108,7 +95,7 @@ var legacyKinds = map[string]Kind{
 	"corpus":   KindReference,
 	"sensor":   KindHook,
 	"posture":  KindPermission,
-	"agent":    KindSubagent,
+	"subagent": KindAgent,
 	"playbook": KindSkill,
 	"pattern":  KindSkill,
 }
@@ -134,8 +121,7 @@ var canonicalDirKind = map[string]Kind{
 	"evals":       KindEval,
 	"skills":      KindSkill,
 	"commands":    KindCommand,
-	"agents":      KindSubagent,
-	"tools":       KindTool,
+	"agents":      KindAgent,
 	"documents":   KindDocument,
 
 	// 4.x directories.
@@ -239,14 +225,10 @@ type Frontmatter struct {
 	// accepted as an alias.
 	Event string `yaml:"event,omitempty" json:"event,omitempty"`
 
-	// Run is the shell command/script a computational hook/sensor/tool
+	// Run is the shell command/script a computational hook/sensor
 	// executes. NOT the `command` kind — that is an agent-driven unit of
 	// work; `run:` is a plain shell string.
 	Run string `yaml:"run,omitempty" json:"run,omitempty"`
-
-	// Transport is how a `tool` callable reaches the agent: cli | mcp |
-	// plugin. keystone's generic sense of "tool" — not MCP-only.
-	Transport string `yaml:"transport,omitempty" json:"transport,omitempty"`
 
 	// Agent is the agent an inferential hook/sensor dispatches; Returns is
 	// the structured-result schema that agent must emit (the dispatcher
@@ -362,28 +344,16 @@ type Index struct {
 	Generated  string              `json:"generated"`
 	Primitives []Primitive         `json:"primitives"`
 	ByKind     map[string][]string `json:"by_kind"`
-	ByCategory map[string][]string `json:"by_category"`
 	ByPath     map[string][]string `json:"by_path,omitempty"`
 }
 
 // IndexVersion is the schema version emitted into Index.Version. Bumped
 // when the descriptor shape changes in a way that consumers must notice.
-const IndexVersion = "5.0"
+const IndexVersion = "6.0"
 
 // IsKind reports whether a normalized kind matches a requested kind, which
 // may be a 4.x name typed by a user (`--kind sensor` finds hooks).
 func IsKind(have, want string) bool {
 	k, _ := NormalizeKind(want)
 	return have == string(k)
-}
-
-// ToolCommand is the shell command that runs tool p through keystone
-// (`keystone tool run <id> --<arg> <arg>`), the form AGENTS.md lists and
-// host plugins call.
-func ToolCommand(p Primitive) string {
-	cmd := "keystone tool run " + p.ID
-	for _, a := range p.Args {
-		cmd += " --" + a.Name + " <" + a.Name + ">"
-	}
-	return cmd
 }

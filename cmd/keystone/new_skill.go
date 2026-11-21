@@ -109,26 +109,26 @@ If the skill wraps a shell command, show the exact invocation:
 	return writeSkeleton(path, body)
 }
 
-// runNewSubagent handles `keystone new subagent <id>`. Scaffolds
+// runNewAgent handles `keystone new subagent <id>`. Scaffolds
 // <charter-root>/agents/<id>.md with canonical primitive frontmatter.
-func runNewSubagent(args []string) error {
+func runNewAgent(args []string) error {
 	projectDir, charterRoot, remaining, err := parseDirAndCharterRoot(args)
 	if err != nil {
 		return err
 	}
 	if len(remaining) != 1 {
-		return fmt.Errorf("`keystone new subagent` requires exactly one argument: <id>")
+		return fmt.Errorf("`keystone new agent` requires exactly one argument: <id>")
 	}
 	id := remaining[0]
 	if err := validatePrimitiveID(id); err != nil {
-		return fmt.Errorf("subagent id: %w", err)
+		return fmt.Errorf("agent id: %w", err)
 	}
 	diskName := strings.ReplaceAll(id, ":", "-")
 	path := filepath.Join(projectDir, charterRoot, "agents", diskName+".md")
 	body := fmt.Sprintf(`---
-kind: subagent
+kind: agent
 id: %s
-description: TODO — one-line description of what this subagent does.
+description: TODO — one-line description of what this agent does.
 tools:
   - Read
   - Grep
@@ -136,12 +136,12 @@ tools:
 
 # %s
 
-The system prompt the subagent runs under. Describe its job, its
-constraints, what it returns. Keep it focused — one job per subagent.
+The system prompt the agent runs under. Describe its job, its
+constraints, what it returns. Keep it focused — one job per agent.
 
 ## Output
 
-What the subagent returns to its caller. Be explicit about format
+What the agent returns to its caller. Be explicit about format
 (JSON, markdown table, plain text) and length expectations.
 `, id, id)
 	return writeSkeleton(path, body)

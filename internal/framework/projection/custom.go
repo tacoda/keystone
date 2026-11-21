@@ -33,7 +33,7 @@ type customKind struct {
 
 // customKinds are the kinds a custom host can receive; any it leaves out
 // are indexed in AGENTS.md.
-var customKinds = []primitive.Kind{skillK, ruleK, commandK, subagentK}
+var customKinds = []primitive.Kind{skillK, ruleK, commandK, agentK}
 
 var customStrategies = map[string]Strategy{"native": Native, "link": Symlink, "copy": Copy, "index": Index}
 

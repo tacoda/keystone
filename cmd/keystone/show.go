@@ -99,7 +99,6 @@ func runShow(args []string) error {
 // for what `show` knows.
 type showView struct {
 	Kind         string                  `json:"kind"`
-	Category     string                  `json:"category,omitempty"`
 	ID           string                  `json:"id"`
 	Description  string                  `json:"description"`
 	Path         string                  `json:"path"`
@@ -121,7 +120,6 @@ type showView struct {
 func buildShowView(target primitive.Primitive, all []primitive.Primitive) showView {
 	v := showView{
 		Kind:         target.Kind,
-		Category:     string(primitive.CategoryOf(primitive.Kind(target.Kind))),
 		ID:           target.ID,
 		Description:  target.Description,
 		Path:         target.Path,
@@ -185,7 +183,6 @@ func printShowText(w *os.File, v showView) {
 	}
 	fmt.Fprintln(w)
 
-	showField(w, "category", v.Category)
 	showField(w, "path", v.Path)
 	showField(w, "provenance", v.Provenance)
 	showField(w, "severity", v.Severity)
@@ -241,7 +238,7 @@ Usage:
 
 Walks the charter once, composes the target primitive, and prints:
 
-  - The target's own descriptor (category, kind, id, description, path,
+  - The target's own descriptor (kind, id, description, path,
     severity, model, tags, paths, host_triggers).
   - includes: primitives the target composes in.
   - included by: primitives that include this one.

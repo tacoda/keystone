@@ -55,11 +55,11 @@ func TestNewPermission_ScaffoldsCleanRules(t *testing.T) {
 	}
 }
 
-func TestNewHookAndSubagent_ScaffoldClean(t *testing.T) {
+func TestNewHookAndAgent_ScaffoldClean(t *testing.T) {
 	_, hook := runNewScaffold(t, "hook", "go-vet", "hooks/go-vet.md")
 	parsesAndLintsClean(t, hook, "hook")
-	_, sub := runNewScaffold(t, "subagent", "reviewer", "agents/reviewer.md")
-	parsesAndLintsClean(t, sub, "subagent")
+	_, sub := runNewScaffold(t, "agent", "reviewer", "agents/reviewer.md")
+	parsesAndLintsClean(t, sub, "agent")
 }
 
 // TestNewRule_PairsReference — the rule's corpus: entry resolves to the
@@ -86,16 +86,6 @@ func TestNew_LegacyKindsNameTheirReplacement(t *testing.T) {
 		if err == nil || !strings.Contains(err.Error(), "keystone new "+now) {
 			t.Errorf("new %s: want an error naming `keystone new %s`, got %v", old, now, err)
 		}
-	}
-}
-
-func TestNewTool_ScaffoldsCleanCallable(t *testing.T) {
-	_, path := runNewScaffold(t, "tool", "grep-symbols", "tools/grep-symbols.md")
-	parsesAndLintsClean(t, path, "tool")
-	data, _ := os.ReadFile(path)
-	fm, _, _ := primitive.Parse(string(data))
-	if fm.Transport == "" || fm.Run == "" {
-		t.Errorf("tool scaffold missing transport/run: %+v", fm)
 	}
 }
 

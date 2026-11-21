@@ -171,7 +171,7 @@ func lintKindFields(p Primitive, add func(FindingSeverity, string)) {
 		lintGuideKind(p, add)
 	case KindSkill:
 		lintSkillSpec(p, add)
-	case KindSubagent:
+	case KindAgent:
 		if len(p.Tools) == 0 {
 			add(FindingError, "subagent missing `tools:` — declare the tool allow-list explicitly")
 		}
@@ -180,14 +180,12 @@ func lintKindFields(p Primitive, add func(FindingSeverity, string)) {
 	}
 }
 
-// lintActionKinds validates the firing kinds (hook/sensor/tool); split from
+// lintActionKinds validates the firing kinds (hook/sensor); split from
 // the dispatch switch to keep lintKindFields a flat router.
 func lintActionKinds(p Primitive, add func(FindingSeverity, string)) {
 	switch Kind(p.Kind) {
 	case KindHook:
 		lintSensorContract(p, add)
-	case KindTool:
-		lintToolContract(p, add)
 	}
 }
 
@@ -236,23 +234,6 @@ func lintGuideTier(p Primitive, add func(FindingSeverity, string)) {
 	case "", string(TierIronLaw), string(TierGoldenRule), string(TierPreference):
 	default:
 		add(FindingError, fmt.Sprintf("rule tier %q invalid (iron-law | golden-rule | preference)", p.Tier))
-	}
-}
-
-// lintToolContract enforces a tool's handler + transport. A tool is an
-// author-defined external callable: it needs a `run:` handler and a
-// `transport:` of cli | mcp | plugin (empty defaults to cli; 4.x http warns). A
-// tool fires on-demand, or as a side-effect when it declares `on:`.
-func lintToolContract(p Primitive, add func(FindingSeverity, string)) {
-	switch p.Transport {
-	case "", "cli", "mcp", "plugin":
-	case "http": // 4.x; still readable (migrations iron law 6)
-		add(FindingWarning, "tool transport `http` runs like `cli` in 5.0 (its run: handler makes the call); set `transport: cli`")
-	default:
-		add(FindingError, fmt.Sprintf("tool transport %q invalid (cli | mcp | plugin)", p.Transport))
-	}
-	if strings.TrimSpace(p.Run) == "" {
-		add(FindingError, "tool missing `run:` — the handler the agent invokes")
 	}
 }
 

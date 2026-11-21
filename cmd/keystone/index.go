@@ -99,22 +99,19 @@ Usage:
   keystone index [--dir <path>]
 
 Walks .agents/ and writes .keystone/INDEX.json (every descriptor) and
-.keystone/INDEX.lite.json (category, kind, id, description). A
+.keystone/INDEX.lite.json (kind, id, description). A
 primitive's kind comes from its folder:
 
-  Constraints:
-    .agents/rules/**/*.md              → rule
-    .agents/references/**/*.md         → reference
-    .agents/hooks/*.md                 → hook
-    .agents/permissions/*.md           → permission
-    .agents/evals/<id>/EVAL.md         → eval
-
-  Capabilities:
-    .agents/skills/<id>/SKILL.md       → skill
-    .agents/commands/*.md              → command
-    .agents/agents/*.md                → subagent
-    .agents/tools/*.md                 → tool
-    .agents/documents/*.md             → document
+  .agents/rules/**/*.md              → rule
+  .agents/references/**/*.md         → reference
+  .agents/hooks/*.md                 → hook
+  .agents/permissions/*.md           → permission
+  .agents/evals/<id>/EVAL.md         → eval
+  .agents/skills/<id>/SKILL.md       → skill
+  .agents/commands/*.md              → command
+  .agents/agents/*.md                → agent
+  .agents/tools/*.md                 → tool
+  .agents/documents/*.md             → document
 
 Vendored policies under .keystone/policies/ are indexed the same way.
 The 4.x folders (guides/, corpus/, sensors/, playbooks/, …) still index

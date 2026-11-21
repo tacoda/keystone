@@ -10,9 +10,8 @@ import (
 // The form posts to /web/actions/primitives/new.
 func (s *server) handlePrimitivesNew(w http.ResponseWriter, r *http.Request) {
 	s.renderPage(w, r, "primitive_new.html", map[string]any{
-		"ProjectDir":      s.projectDir,
-		"ConstraintKinds": []string{"rule", "reference", "hook", "permission", "eval"},
-		"CapabilityKinds": []string{"skill", "command", "subagent", "tool", "document"},
+		"ProjectDir": s.projectDir,
+		"Kinds":      []string{"rule", "reference", "hook", "permission", "eval", "skill", "command", "agent", "document"},
 	})
 }
 

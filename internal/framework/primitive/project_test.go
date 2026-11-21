@@ -31,7 +31,7 @@ func TestProjectionRelPath(t *testing.T) {
 		// Projected names are kebab-case, unprefixed (5.0); an id already
 		// in the keystone namespace is not double-prefixed.
 		{"skill", "keystone:index", "", nil, filepath.Join(".claude", "skills", "keystone-index", "SKILL.md")},
-		{"subagent", "code-reviewer", "", nil, filepath.Join(".claude", "agents", "code-reviewer.md")},
+		{"agent", "code-reviewer", "", nil, filepath.Join(".claude", "agents", "code-reviewer.md")},
 		{"command", "review", "", nil, filepath.Join(".claude", "commands", "review.md")},
 		{"command", "verify", "", nil, filepath.Join(".claude", "commands", "verify.md")},
 		{"skill", "task", "", nil, filepath.Join(".claude", "skills", "task", "SKILL.md")},
@@ -50,7 +50,6 @@ func TestProjectionRelPath(t *testing.T) {
 		// Other no-projection kinds.
 		{"reference", "corpus/process/spec", "", nil, ""},
 		{"permission", "default", "", nil, ""},
-		{"tool", "grep-symbols", "", nil, ""},
 		{"document", "implementation-plan", "", nil, ""},
 		{"eval", "demo", "", nil, ""},
 	}

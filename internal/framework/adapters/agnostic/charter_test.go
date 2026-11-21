@@ -12,7 +12,7 @@ func TestRenderPointer_NonImportHosts(t *testing.T) {
 	if strings.Contains(cursor, "@CHARTER.md") {
 		t.Error("cursor has no import mechanism; pointer must not use @import")
 	}
-	for _, want := range []string{"**No subagents**", "You **must** read"} {
+	for _, want := range []string{"**No agents**", "You **must** read"} {
 		if !strings.Contains(cursor, want) {
 			t.Errorf("cursor pointer missing %q", want)
 		}

@@ -8,10 +8,10 @@ import (
 	"github.com/tacoda/keystone/internal/framework/primitive"
 )
 
-func TestListFilter_Category(t *testing.T) {
+func TestListFilter_Kind(t *testing.T) {
 	hook := primitive.Primitive{Frontmatter: primitive.Frontmatter{Kind: "hook", ID: "lint"}}
-	if !(listFilter{category: "constraint"}).match(hook) || (listFilter{category: "capability"}).match(hook) {
-		t.Error("category filter: a hook is a constraint")
+	if !(listFilter{kind: "hook"}).match(hook) || (listFilter{kind: "skill"}).match(hook) {
+		t.Error("kind filter: a hook matches hook, not skill")
 	}
 	if !(listFilter{kind: "sensor"}).match(hook) {
 		t.Error("a 4.x kind name still filters")
@@ -57,5 +57,5 @@ func is5Kind(verb string) bool {
 	if legacy || string(k) != verb {
 		return false
 	}
-	return primitive.CategoryOf(k) != ""
+	return primitive.IsKnownKind(verb)
 }

@@ -104,7 +104,6 @@ func init() {
 	rootCmd.AddCommand(lintCmd())
 	rootCmd.AddCommand(allocateCmd())
 	rootCmd.AddCommand(budgetCmd())
-	rootCmd.AddCommand(toolCmd())
 	rootCmd.AddCommand(listCmd())
 	rootCmd.AddCommand(showCmd())
 	rootCmd.AddCommand(documentCmd())
@@ -249,15 +248,6 @@ func indexCmd() *cobra.Command {
 		RunE:               runAndForward(runIndex),
 	}
 	return c
-}
-
-func toolCmd() *cobra.Command {
-	return &cobra.Command{
-		Use:                "tool",
-		Short:              "List the charter's tools, or run one (how cli and plugin tools reach a host)",
-		DisableFlagParsing: true,
-		RunE:               runAndForward(runTool),
-	}
 }
 
 func budgetCmd() *cobra.Command {

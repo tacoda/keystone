@@ -110,7 +110,7 @@ func (s *server) handlePrimitivesList(w http.ResponseWriter, r *http.Request) {
 		"ProjectDir": s.projectDir,
 		"Primitives": filtered,
 		"Total":      len(primitives),
-		"Filter":     map[string]any{"kind": f.kind, "category": f.category, "paths": f.path, "tags": f.tags},
+		"Filter":     map[string]any{"kind": f.kind, "paths": f.path, "tags": f.tags},
 		"Kinds":      uniqueKinds(primitives),
 		"AllTags":    uniqueTags(primitives),
 	})
@@ -168,11 +168,11 @@ func (s *server) handlePrimitivesFragment(w http.ResponseWriter, r *http.Request
 
 // primitiveFilter is the dashboard's list filter; an empty field matches all.
 type primitiveFilter struct {
-	kind, category, path string
-	tags                 []string
+	kind, path string
+	tags       []string
 }
 
-// filterFromQuery reads ?kind=&category=&paths=&tag= (`glob` is the 4.x
+// filterFromQuery reads ?kind=&paths=&tag= (`glob` is the 4.x
 // name for paths).
 func filterFromQuery(r *http.Request) primitiveFilter {
 	q := r.URL.Query()
@@ -180,14 +180,11 @@ func filterFromQuery(r *http.Request) primitiveFilter {
 	if path == "" {
 		path = q.Get("glob")
 	}
-	return primitiveFilter{kind: q.Get("kind"), category: q.Get("category"), path: path, tags: q["tag"]}
+	return primitiveFilter{kind: q.Get("kind"), path: path, tags: q["tag"]}
 }
 
 func (f primitiveFilter) match(p primitive.Primitive) bool {
 	if f.kind != "" && !primitive.IsKind(p.Kind, f.kind) {
-		return false
-	}
-	if f.category != "" && string(primitive.CategoryOf(primitive.Kind(p.Kind))) != f.category {
 		return false
 	}
 	if f.path != "" && !slices.Contains(p.Paths, f.path) {
@@ -196,7 +193,7 @@ func (f primitiveFilter) match(p primitive.Primitive) bool {
 	return len(f.tags) == 0 || hasAllTagsWeb(p.Tags, f.tags)
 }
 
-// filterPrimitives returns the matches, constraints first.
+// filterPrimitives returns the matches, sorted by kind.
 func filterPrimitives(in []primitive.Primitive, f primitiveFilter) []primitive.Primitive {
 	out := in[:0:0]
 	for _, p := range in {
@@ -204,7 +201,7 @@ func filterPrimitives(in []primitive.Primitive, f primitiveFilter) []primitive.P
 			out = append(out, p)
 		}
 	}
-	primitive.SortByCategory(out)
+	primitive.SortByKind(out)
 	return out
 }
 

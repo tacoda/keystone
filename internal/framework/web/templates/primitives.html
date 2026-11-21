@@ -17,13 +17,6 @@
         {{range .Kinds}}<option value="{{.}}" {{if eq . $.Filter.kind}}selected{{end}}>{{.}}</option>{{end}}
       </select>
     </label>
-    <label>category
-      <select name="category">
-        <option value="">(any)</option>
-        <option value="constraint" {{if eq "constraint" $.Filter.category}}selected{{end}}>constraints</option>
-        <option value="capability" {{if eq "capability" $.Filter.category}}selected{{end}}>capabilities</option>
-      </select>
-    </label>
     <label>paths
       <input type="text" name="paths" value="{{.Filter.paths}}" placeholder="src/billing/**">
     </label>

@@ -45,17 +45,17 @@ func TestAgentsMD_Content(t *testing.T) {
 	write(t, root, map[string]string{".agents/rules/process/spec.md": "---\nid: process/spec\ndescription: Capture intent first.\n---\n# Spec\n"})
 	md := AgentsMD(walk(t, root), Enabled([]string{"codex", "aider"}))
 	for _, want := range []string{
-		"## Constraints", "**rule** (`.agents/rules/`)", "## Capabilities", "**subagent** (`.agents/agents/`)",
+		"## Kinds", "**rule** (`.agents/rules/`)", "**agent** (`.agents/agents/`)",
 		"## Rules that apply everywhere", "`.agents/rules/process/spec.md` — Capture intent first.",
 		"## Iron laws", "## On each host",
-		"- **Codex** — loads skills, subagents by itself; open rules, commands from `.agents/` yourself",
-		"- **Aider** — open rules, skills, commands, subagents from `.agents/` yourself; does **not** run hooks",
+		"- **Codex** — loads skills, agents by itself; open rules, commands from `.agents/` yourself",
+		"- **Aider** — open rules, skills, commands, agents from `.agents/` yourself; does **not** run hooks",
 	} {
 		if !strings.Contains(md, want) {
 			t.Errorf("AGENTS.md missing %q", want)
 		}
 	}
-	if strings.Contains(md, "**Claude Code** — loads rules, hooks (inferential), skills, commands, subagents by itself; does") {
+	if strings.Contains(md, "**Claude Code** — loads rules, hooks (inferential), skills, commands, agents by itself; does") {
 		t.Error("Claude Code bridges hooks; it must not be told to run them by hand")
 	}
 	if strings.Contains(md, "go/style.md") {

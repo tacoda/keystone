@@ -83,23 +83,6 @@ func TestLint_GuideTier(t *testing.T) {
 	}
 }
 
-// TestLint_ToolContract — a tool needs a `run:` handler and a valid
-// `transport:` (cli | mcp | plugin | "").
-func TestLint_ToolContract(t *testing.T) {
-	missingRun := Lint([]Primitive{{Frontmatter: Frontmatter{Kind: "tool", ID: "grep", Description: "d", Transport: "cli"}}})
-	if !find(t, missingRun, FindingError, "run") {
-		t.Errorf("expected tool-missing-run error, got %v", missingRun)
-	}
-	badTransport := Lint([]Primitive{{Frontmatter: Frontmatter{Kind: "tool", ID: "grep", Description: "d", Run: "./x.sh", Transport: "carrier-pigeon"}}})
-	if !find(t, badTransport, FindingError, "transport") {
-		t.Errorf("expected invalid-transport error, got %v", badTransport)
-	}
-	clean := Lint([]Primitive{{Frontmatter: Frontmatter{Kind: "tool", ID: "grep", Description: "d", Run: "./x.sh", Transport: "mcp"}}})
-	if HasErrors(clean) {
-		t.Errorf("expected clean tool, got %v", clean)
-	}
-}
-
 // TestLint_ModeValue — `mode:` must be computational, inferential, or empty.
 func TestLint_ModeValue(t *testing.T) {
 	fs := Lint([]Primitive{{Frontmatter: Frontmatter{Kind: "rule", ID: "p/x", Description: "d", Mode: "bogus"}}})
@@ -177,7 +160,7 @@ func TestLint_SkillNeedsNoTriggers(t *testing.T) {
 
 func TestLint_AgentRequiresTools(t *testing.T) {
 	ps := []Primitive{
-		{Frontmatter: Frontmatter{Kind: "subagent", ID: "security-reviewer", Description: "d"}},
+		{Frontmatter: Frontmatter{Kind: "agent", ID: "security-reviewer", Description: "d"}},
 	}
 	fs := Lint(ps)
 	if !find(t, fs, FindingError, "agent missing `tools:`") {
@@ -239,7 +222,7 @@ func TestLint_Clean(t *testing.T) {
 		{Frontmatter: Frontmatter{Kind: "hook", ID: "review", Description: "Real description.", Mode: "inferential", Agent: "reviewer", Returns: "findings"}},
 		{Frontmatter: Frontmatter{Kind: "hook", ID: "on-gate", Description: "Real description.", Mode: "inferential", Event: "on-gate", Agent: "reviewer", Returns: "verdict"}},
 		{Frontmatter: Frontmatter{Kind: "skill", ID: "demo", Description: "Real description.", Triggers: []string{"demo"}}},
-		{Frontmatter: Frontmatter{Kind: "subagent", ID: "demo", Description: "Real description.", Tools: []string{"Read"}}},
+		{Frontmatter: Frontmatter{Kind: "agent", ID: "demo", Description: "Real description.", Tools: []string{"Read"}}},
 		{Frontmatter: Frontmatter{Kind: "document", ID: "implementation-plan", Description: "Real description."}},
 	}
 	fs := Lint(ps)

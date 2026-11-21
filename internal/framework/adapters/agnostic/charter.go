@@ -76,7 +76,7 @@ func renderCapabilities(p HostProfile) string {
 	if p.Subagents {
 		lines = append(lines, "- **Subagents** — spawn charter agents (`.agents/agents/`) as subagents for review/scout work.")
 	} else {
-		lines = append(lines, "- **No subagents** — run agent-defined reviews inline yourself; the `agents/` bodies are still the instructions.")
+		lines = append(lines, "- **No agents** — run delegated roles inline yourself; the `agents/` bodies are still the instructions.")
 	}
 	if p.SlashCommands {
 		lines = append(lines, "- **Slash commands** — charter commands and playbooks surface as `/keystone-<id>`.")

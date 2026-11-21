@@ -39,7 +39,7 @@ func capKey(key string) string {
 	if kind, ok := legacyPorts[key]; ok {
 		return kind
 	}
-	if k, _ := primitive.NormalizeKind(strings.TrimSuffix(key, "s")); primitive.CategoryOf(k) != "" {
+	if k, _ := primitive.NormalizeKind(strings.TrimSuffix(key, "s")); primitive.IsKnownKind(string(k)) {
 		return string(k)
 	}
 	return ""

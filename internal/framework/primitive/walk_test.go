@@ -118,7 +118,7 @@ func TestWalk_FindsAllKindsSkipsReadmesAndNonFM(t *testing.T) {
 		"hook/drift",
 		"hook/build",
 		"skill/review-code",
-		"subagent/cavecrew-reviewer",
+		"agent/cavecrew-reviewer",
 		"command/verify",
 	}
 	for _, id := range wantIDs {
@@ -141,8 +141,8 @@ func TestBuildAndWrite(t *testing.T) {
 	if idx.Version != IndexVersion {
 		t.Errorf("Version = %q, want %q", idx.Version, IndexVersion)
 	}
-	if IndexVersion != "5.0" {
-		t.Errorf("IndexVersion = %q, want 5.0", IndexVersion)
+	if IndexVersion != "6.0" {
+		t.Errorf("IndexVersion = %q, want 6.0", IndexVersion)
 	}
 	if idx.Generated != "2026-06-17T00:00:00Z" {
 		t.Errorf("Generated = %q", idx.Generated)
@@ -173,21 +173,21 @@ func TestBuildAndWrite(t *testing.T) {
 }
 
 // TestBuild_ByCategory — every indexed primitive lands in its category.
-func TestBuild_ByCategory(t *testing.T) {
+func TestBuild_ByKind(t *testing.T) {
 	primitives, _, err := Walk(fixtureTree(t), "charter")
 	if err != nil {
 		t.Fatal(err)
 	}
 	idx := Build(primitives, time.Unix(0, 0))
-	// rule + reference + 2 hooks; skill + subagent + command.
-	if c, k := len(idx.ByCategory["constraint"]), len(idx.ByCategory["capability"]); c != 4 || k != 3 {
-		t.Errorf("ByCategory = %v, want 4 constraints and 3 capabilities", idx.ByCategory)
+	// rule + reference + 2 hooks; skill + agent + command.
+	if c, s := len(idx.ByKind["hook"]), len(idx.ByKind["skill"]); c != 2 || s != 1 {
+		t.Errorf("ByKind = %v, want 2 hooks and 1 skill", idx.ByKind)
 	}
 }
 
-// TestBuildLite_CategoryOrder — the lite index lists constraints before
-// capabilities and stamps each entry with its category.
-func TestBuildLite_CategoryOrder(t *testing.T) {
+// TestBuildLite_KindOrder — the lite index lists entries sorted by kind
+// then id, with kind/id/description only.
+func TestBuildLite_KindOrder(t *testing.T) {
 	prims := []Primitive{
 		{Frontmatter: Frontmatter{Kind: "skill", ID: "a"}},
 		{Frontmatter: Frontmatter{Kind: "hook", ID: "b"}},
@@ -195,9 +195,9 @@ func TestBuildLite_CategoryOrder(t *testing.T) {
 		{Frontmatter: Frontmatter{Kind: "rule", ID: "d"}},
 	}
 	lite := BuildLite(Build(prims, time.Unix(0, 0)))
-	want := []string{"constraint/hook/b", "constraint/rule/d", "capability/command/c", "capability/skill/a"}
+	want := []string{"command/c", "hook/b", "rule/d", "skill/a"}
 	for i, e := range lite.Primitives {
-		if got := e.Category + "/" + e.Kind + "/" + e.ID; got != want[i] {
+		if got := e.Kind + "/" + e.ID; got != want[i] {
 			t.Errorf("lite[%d] = %s, want %s", i, got, want[i])
 		}
 	}

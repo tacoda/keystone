@@ -16,7 +16,7 @@ var portFolders = map[string]string{
 	"permissions": "permissions", "permission": "permissions", "posture": "permissions",
 	"skills": "skills", "skill": "skills", "playbooks": "skills", "playbook": "skills", "patterns": "skills",
 	"commands": "commands", "command": "commands", "actions": "commands", "action": "commands",
-	"agents": "agents", "subagent": "agents", "subagents": "agents",
+	"agents": "agents", "agent": "agents", "subagent": "agents", "subagents": "agents",
 }
 
 // legacyFolders are the 4.x folders a vendored policy tree may still use.

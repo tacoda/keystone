@@ -12,12 +12,11 @@ import (
 // with `keystone mcp install`.
 
 const (
-	skillK    = primitive.KindSkill
-	ruleK     = primitive.KindRule
-	commandK  = primitive.KindCommand
-	subagentK = primitive.KindSubagent
-	hookK     = primitive.KindHook
-	toolK     = primitive.KindTool
+	skillK   = primitive.KindSkill
+	ruleK    = primitive.KindRule
+	commandK = primitive.KindCommand
+	agentK   = primitive.KindAgent
+	hookK    = primitive.KindHook
 )
 
 var (
@@ -37,11 +36,11 @@ func ClaudeCode() Profile {
 		Hooks:       claudeHooks,
 		Permissions: claudePermissions,
 		Rules: map[primitive.Kind]Rule{
-			skillK:    {Strategy: Symlink, Dest: skillDirDest(".claude/skills"), Target: skillDir},
-			ruleK:     shim,
-			commandK:  shim,
-			subagentK: shim,
-			hookK:     shim, // inferential hooks only (Dest is "" otherwise)
+			skillK:   {Strategy: Symlink, Dest: skillDirDest(".claude/skills"), Target: skillDir},
+			ruleK:    shim,
+			commandK: shim,
+			agentK:   shim,
+			hookK:    shim, // inferential hooks only (Dest is "" otherwise)
 		},
 		Reads: map[primitive.Kind][]string{skillK: {".claude/skills"}},
 	}
@@ -81,13 +80,13 @@ func Cursor() Profile {
 			commandK: {Strategy: Shim, Dest: nameDest(".cursor/skills", "/SKILL.md"), Render: bodyRenderer(func(p primitive.Primitive) any {
 				return userSkill{Name: primitive.ProjectedName(p.ID), Description: p.Description, DisableModelInvocation: true}
 			})},
-			subagentK: {Strategy: Shim, Dest: nameDest(".cursor/agents", ".md"), Render: bodyRenderer(func(p primitive.Primitive) any {
+			agentK: {Strategy: Shim, Dest: nameDest(".cursor/agents", ".md"), Render: bodyRenderer(func(p primitive.Primitive) any {
 				return namedDoc{Name: primitive.ProjectedName(p.ID), Description: p.Description, Model: p.Model}
 			})},
 		},
 		Reads: map[primitive.Kind][]string{
-			skillK:    {".agents/skills", ".cursor/skills", ".claude/skills", ".codex/skills"},
-			subagentK: {".cursor/agents", ".claude/agents", ".codex/agents"},
+			skillK: {".agents/skills", ".cursor/skills", ".claude/skills", ".codex/skills"},
+			agentK: {".cursor/agents", ".claude/agents", ".codex/agents"},
 		},
 	}
 }
@@ -116,7 +115,7 @@ func GitHubCopilot() Profile {
 			commandK: {Strategy: Shim, Dest: nameDest(".github/prompts", ".prompt.md"), Render: bodyRenderer(func(p primitive.Primitive) any {
 				return promptFile{Description: p.Description, ArgumentHint: argumentHint(p.Args)}
 			})},
-			subagentK: {Strategy: Shim, Dest: nameDest(".github/agents", ".agent.md"), Render: bodyRenderer(func(p primitive.Primitive) any {
+			agentK: {Strategy: Shim, Dest: nameDest(".github/agents", ".agent.md"), Render: bodyRenderer(func(p primitive.Primitive) any {
 				return namedDoc{Name: primitive.ProjectedName(p.ID), Description: p.Description}
 			})},
 		},
@@ -151,7 +150,7 @@ func Continue() Profile {
 			commandK: {Strategy: Shim, Dest: nameDest(".continue/prompts", ".md"), Render: bodyRenderer(func(p primitive.Primitive) any {
 				return continuePrompt{Name: primitive.ProjectedName(p.ID), Description: p.Description, Invokable: true}
 			})},
-			subagentK: index,
+			agentK: index,
 		},
 		Reads: map[primitive.Kind][]string{skillK: {".claude/skills", ".continue/skills"}},
 	}
@@ -181,10 +180,9 @@ func OpenCode() Profile {
 			commandK: {Strategy: Shim, Dest: nameDest(".opencode/commands", ".md"), Render: bodyRenderer(func(p primitive.Primitive) any {
 				return opencodeCommand{Description: p.Description, Model: p.Model}
 			})},
-			subagentK: {Strategy: Shim, Dest: nameDest(".opencode/agents", ".md"), Render: bodyRenderer(func(p primitive.Primitive) any {
+			agentK: {Strategy: Shim, Dest: nameDest(".opencode/agents", ".md"), Render: bodyRenderer(func(p primitive.Primitive) any {
 				return opencodeAgent{Description: p.Description, Mode: "subagent", Model: p.Model}
 			})},
-			toolK: {Strategy: Shim, Dest: pluginToolDest(".opencode/tools", ".ts"), Render: opencodeTool},
 		},
 		Reads: map[primitive.Kind][]string{skillK: {".agents/skills", ".opencode/skills", ".claude/skills"}},
 	}
@@ -199,10 +197,10 @@ func Codex() Profile {
 		Hooks:       codexHooks,
 		Permissions: codexPermissions,
 		Rules: map[primitive.Kind]Rule{
-			skillK:    native,
-			ruleK:     index,
-			commandK:  index,
-			subagentK: {Strategy: Shim, Dest: nameDest(".codex/agents", ".toml"), Render: codexAgent},
+			skillK:   native,
+			ruleK:    index,
+			commandK: index,
+			agentK:   {Strategy: Shim, Dest: nameDest(".codex/agents", ".toml"), Render: codexAgent},
 		},
 		Reads: map[primitive.Kind][]string{skillK: {".agents/skills"}},
 	}
@@ -215,10 +213,10 @@ func Cline() Profile {
 	return Profile{
 		Host: "cline",
 		Rules: map[primitive.Kind]Rule{
-			skillK:    {Strategy: Copy, Dest: skillDirDest(".cline/skills"), Target: skillDir},
-			ruleK:     {Strategy: Shim, Dest: pathRuleDest(".clinerules", ".md")},
-			commandK:  index,
-			subagentK: index,
+			skillK:   {Strategy: Copy, Dest: skillDirDest(".cline/skills"), Target: skillDir},
+			ruleK:    {Strategy: Shim, Dest: pathRuleDest(".clinerules", ".md")},
+			commandK: index,
+			agentK:   index,
 		},
 		Reads: map[primitive.Kind][]string{skillK: {".cline/skills"}},
 	}
@@ -234,13 +232,13 @@ func Goose() Profile {
 			skillK:   native,
 			ruleK:    index,
 			commandK: index,
-			subagentK: {Strategy: Shim, Dest: nameDest(".goose/agents", ".md"), Render: bodyRenderer(func(p primitive.Primitive) any {
+			agentK: {Strategy: Shim, Dest: nameDest(".goose/agents", ".md"), Render: bodyRenderer(func(p primitive.Primitive) any {
 				return namedDoc{Name: primitive.ProjectedName(p.ID), Description: p.Description, Model: p.Model}
 			})},
 		},
 		Reads: map[primitive.Kind][]string{
-			skillK:    {".agents/skills"},
-			subagentK: {".claude/agents", ".goose/agents"},
+			skillK: {".agents/skills"},
+			agentK: {".claude/agents", ".goose/agents"},
 		},
 	}
 }
@@ -256,7 +254,7 @@ func Pi() Profile {
 			commandK: {Strategy: Shim, Dest: nameDest(".pi/prompts", ".md"), Render: bodyRenderer(func(p primitive.Primitive) any {
 				return promptFile{Description: p.Description, ArgumentHint: argumentHint(p.Args)}
 			})},
-			subagentK: index,
+			agentK: index,
 		},
 		Reads: map[primitive.Kind][]string{skillK: {".agents/skills"}},
 	}
@@ -267,7 +265,7 @@ func Pi() Profile {
 func Aider() Profile {
 	return Profile{
 		Host:  "aider",
-		Rules: map[primitive.Kind]Rule{skillK: index, ruleK: index, commandK: index, subagentK: index},
+		Rules: map[primitive.Kind]Rule{skillK: index, ruleK: index, commandK: index, agentK: index},
 	}
 }
 

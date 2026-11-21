@@ -58,39 +58,6 @@ What the check verifies, what a failure means, and how to fix one.
 	return writeSkeleton(path, body)
 }
 
-// runNewTool handles `keystone new tool <id>`. A tool is an author-defined
-// callable the agent invokes on demand (Claude's generic sense of "tool").
-// Its transport is one of: an MCP server keystone registers it on, a plugin,
-// or a plain CLI. The scaffold declares the `transport:`, a `run:` handler,
-// and the `args:` input schema.
-func runNewTool(args []string) error {
-	id, projectDir, charterRoot, err := newOneArg(args, "tool")
-	if err != nil {
-		return err
-	}
-	diskName := strings.ReplaceAll(id, ":", "-")
-	path := filepath.Join(projectDir, charterRoot, "tools", diskName+".md")
-	body := fmt.Sprintf(`---
-kind: tool
-id: %s
-description: TODO — what the agent invokes this for.
-transport: cli   # cli | mcp | plugin
-run: ./scripts/%s.sh
-args:
-  - name: target
-    type: string
-    required: true
-    description: TODO — the input this callable expects.
----
-
-# %s
-
-What this callable does, its inputs and outputs, and when the agent should
-reach for it instead of a built-in tool.
-`, id, diskName, id)
-	return writeSkeleton(path, body)
-}
-
 // newOneArg is the shared front-half for single-id scaffolds: parse flags,
 // require exactly one id, validate it. Returns (id, projectDir, charterRoot).
 func newOneArg(args []string, kind string) (id, projectDir, charterRoot string, err error) {

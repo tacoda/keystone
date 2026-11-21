@@ -39,7 +39,7 @@ var fixture = map[string]string{
 var wantTargets = map[string]string{
 	".claude/skills/deploy/SKILL.md":          "skill .agents/skills/deploy/SKILL.md",
 	".claude/skills/deploy/scripts/run.sh":    "skill .agents/skills/deploy/scripts/run.sh",
-	".claude/agents/reviewer.md":              "subagent .agents/agents/reviewer.md",
+	".claude/agents/reviewer.md":              "agent .agents/agents/reviewer.md",
 	".claude/commands/release.md":             "command .agents/commands/release.md",
 	".claude/rules/go/errors.md":              "rule .agents/rules/go/errors.md",
 	".cursor/rules/ts.mdc":                    "rule .agents/rules/ts.md",
@@ -49,11 +49,11 @@ var wantTargets = map[string]string{
 	".github/copilot-instructions.md":         "rule .agents/rules/copilot-instructions.md",
 	".github/instructions/py.instructions.md": "rule .agents/rules/py.md",
 	".github/prompts/triage.prompt.md":        "command .agents/commands/triage.md",
-	".github/agents/planner.agent.md":         "subagent .agents/agents/planner.md",
+	".github/agents/planner.agent.md":         "agent .agents/agents/planner.md",
 	".clinerules/testing.md":                  "rule .agents/rules/cline/testing.md",
 	".windsurfrules":                          "rule .agents/rules/windsurfrules.md",
 	".continue/rules/sql.md":                  "rule .agents/rules/sql.md",
-	".opencode/agent/docs.md":                 "subagent .agents/agents/docs.md",
+	".opencode/agent/docs.md":                 "agent .agents/agents/docs.md",
 	".claude/settings.json permissions":       "permission .agents/permissions/claude-settings.md",
 	".claude/settings.json hooks.Stop":        "hook .agents/hooks/claude-stop-1.md",
 }

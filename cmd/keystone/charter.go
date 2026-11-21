@@ -172,15 +172,11 @@ func printRoster(entries []charter.Entry, effective bool) {
 	sort.SliceStable(entries, func(i, j int) bool {
 		return primitive.KindRank(entries[i].Primitive.Kind) < primitive.KindRank(entries[j].Primitive.Kind)
 	})
-	heading, kind := "", ""
+	kind := ""
 	for _, e := range entries {
-		if h := primitive.CategoryTitle(e.Primitive.Kind); h != heading {
-			fmt.Fprintf(os.Stdout, "\n# %s\n", h)
-			heading = h
-		}
 		if e.Primitive.Kind != kind {
 			kind = e.Primitive.Kind
-			fmt.Fprintf(os.Stdout, "\n%s\n", kind)
+			fmt.Fprintf(os.Stdout, "\n# %s\n", kind)
 		}
 		printRosterLine(e)
 	}

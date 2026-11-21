@@ -106,7 +106,7 @@ func relPathWith(p Primitive, nameOf namer) string {
 	// 4.x playbooks and patterns normalize to skill and project the same way.
 	case KindSkill:
 		return filepath.Join(".claude", "skills", name, "SKILL.md")
-	case KindSubagent:
+	case KindAgent:
 		return filepath.Join(".claude", "agents", name+".md")
 	case KindCommand:
 		return filepath.Join(".claude", "commands", name+".md")
@@ -115,7 +115,7 @@ func relPathWith(p Primitive, nameOf namer) string {
 	case KindHook:
 		return sensorProjection(p, name)
 	}
-	// permission, tool, document, reference, concern, eval: no host file
+	// permission, document, reference, concern, eval: no host file
 	// projection here.
 	return ""
 }

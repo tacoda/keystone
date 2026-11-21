@@ -35,29 +35,27 @@ const Version = "3.0.0" // 5.0: constraint/capability kinds, keystone_get_refere
 // detailed contracts live in `docs/ports/primitive.md`.
 const instructions = `keystone MCP — the charter, served.
 
-The charter's sources live in .agents/ and are indexed at
+The charter is the codified context of the repository: everything a
+coding agent should be able to look up about how this codebase works
+and how to work in it. Its sources live in .agents/ and are indexed at
 .keystone/INDEX.json. This server and the keystone CLI read the same
 files; they never disagree.
 
-## Two categories
+## Kinds
 
-Constraints limit, gate, or check what the agent does:
   rule        applies when a touched file matches its paths: (or everywhere)
   reference   the reasoning behind a rule, opened on demand
   hook        a check that runs on an event; a non-zero exit blocks
   permission  allow / ask / deny tool rules
   eval        a test that the charter changes agent behavior
-
-Capabilities add things the agent can do:
   skill       Agent Skills SKILL.md; activates when its description matches
   command     a unit of work the user asks for by name
-  subagent    a role the agent delegates to
-  tool        an author-defined callable (transport: mcp is served here)
+  agent       a role the main agent delegates to (a subagent)
   document    a template for governed output
 
-## Runtime resolution flow
+## How to resolve a scenario
 
-When a scenario arises, work the charter in stages. Only escalate when
+Work the charter in stages. Only escalate when
 the previous stage does not carry enough information:
 
   1. RULES.      Call keystone_list_primitives kind=rule to find the rules
@@ -72,14 +70,14 @@ the previous stage does not carry enough information:
 
 ## Read tools
 
-  keystone_list_primitives [kind=<k>|category=<c>] [paths=<p>] [tags=…]
+  keystone_list_primitives [kind=<k>] [paths=<p>] [tags=…]
       Filter the index. Returns descriptors only.
   keystone_get_primitive kind=<k> id=<i>
       Returns one primitive's full body.
   keystone_get_reference id=<rule-id>
       Follow a rule's corpus: field; return the linked reference bodies.
   keystone_signal_list
-      List signals (events a hook, tool, or subagent subscribes to via
+      List signals (events a hook or agent subscribes to via
       event:) and their subscribers, plus the bridged host events.
   keystone_charter_coverage
       Files a rule governs vs. uncharted (matched by no rule's paths:).
@@ -98,14 +96,13 @@ the previous stage does not carry enough information:
 A signal or host event fires; the reacting primitive subscribes via
 event:, like a skill declares triggers:
   - hook      — a check → verdict (exit status); a failure blocks.
-  - tool      — an external callable; on demand, or a side effect on an event.
-  - subagent  — an inferential review → structured returns:.
+  - agent     — an inferential review → structured returns:.
 
 ## Write tools (each shells out to the keystone binary)
 
   keystone_new_<kind>          Scaffold a new primitive. <kind> is one of
                                rule, reference, hook, permission, eval,
-                               skill, command, subagent, tool, document,
+                               skill, command, agent, tool, document,
                                adapter, policy.
   keystone_charter_bootstrap   Scaffold the charter (init equivalent).
   keystone_target_add          Add another host.
@@ -165,7 +162,6 @@ func New(opts Options) (*server.MCPServer, error) {
 	registerEvalTools(s, abs)
 	registerSearchTool(s, abs)
 	registerCharterViews(s, abs)
-	registerToolPrimitives(s, abs)
 
 	return s, nil
 }
@@ -185,12 +181,9 @@ func Serve(ctx context.Context, opts Options) error {
 func registerTools(s *server.MCPServer, projectDir string) {
 	s.AddTool(
 		mcp.NewTool("keystone_list_primitives",
-			mcp.WithDescription("List charter primitives, optionally filtered by kind, category, path pattern, or tag(s). Returns descriptors only — open bodies via keystone_get_primitive. The returned descriptors reflect the COMPOSED view (`includes:` already merged into list fields)."),
+			mcp.WithDescription("List charter primitives, optionally filtered by kind, path pattern, or tag(s). Returns descriptors only — open bodies via keystone_get_primitive. The returned descriptors reflect the COMPOSED view (`includes:` already merged into list fields)."),
 			mcp.WithString("kind",
-				mcp.Description("Filter by kind: a constraint (rule, reference, hook, permission, eval) or a capability (skill, command, subagent, tool, document). Omit for all."),
-			),
-			mcp.WithString("category",
-				mcp.Description("Filter by category: constraint or capability. Omit for both."),
+				mcp.Description("Filter by kind: rule, reference, hook, permission, eval, skill, command, agent, or document. Omit for all."),
 			),
 			mcp.WithString("paths",
 				mcp.Description("Filter primitives that declare this pattern in their `paths:` frontmatter. Exact-string match on the pattern. (`glob` is the 4.x name.)"),
@@ -202,10 +195,9 @@ func registerTools(s *server.MCPServer, projectDir string) {
 		),
 		func(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 			f := listFilter{
-				kind:     req.GetString("kind", ""),
-				category: req.GetString("category", ""),
-				path:     req.GetString("paths", req.GetString("glob", "")),
-				tags:     req.GetStringSlice("tags", nil),
+				kind: req.GetString("kind", ""),
+				path: req.GetString("paths", req.GetString("glob", "")),
+				tags: req.GetStringSlice("tags", nil),
 			}
 
 			idx, err := loadIndex(projectDir)
@@ -298,7 +290,7 @@ func registerTools(s *server.MCPServer, projectDir string) {
 			mcp.WithDescription("Return the full body of a single primitive given its kind and id. The body includes the frontmatter and the markdown that follows."),
 			mcp.WithString("kind",
 				mcp.Required(),
-				mcp.Description("Primitive kind: rule, reference, hook, permission, eval, skill, command, subagent, tool, or document (4.x names are accepted)."),
+				mcp.Description("Primitive kind: rule, reference, hook, permission, eval, skill, command, agent, or document (4.x names are accepted)."),
 			),
 			mcp.WithString("id",
 				mcp.Required(),
@@ -334,7 +326,7 @@ func registerTools(s *server.MCPServer, projectDir string) {
 			mcp.WithDescription("Return one primitive's descriptor PLUS forward + reverse cross-references in a single call. Surfaces: the composed view of the target (tags / tools / paths / host_triggers after `includes:` resolution), `included_by` (when another primitive includes it), `traces` (forward) and `traced_by` (reverse) for rule↔reference pairs, severity / model / phase / provenance. Use this when you need to understand a primitive's neighborhood in one shot — saves N follow-up keystone_get_primitive calls."),
 			mcp.WithString("kind",
 				mcp.Required(),
-				mcp.Description("Primitive kind: rule, reference, hook, permission, eval, skill, command, subagent, tool, or document."),
+				mcp.Description("Primitive kind: rule, reference, hook, permission, eval, skill, command, agent, or document."),
 			),
 			mcp.WithString("id",
 				mcp.Required(),
@@ -580,15 +572,12 @@ func loadPrimitiveBody(projectDir, kind, id string) (primitive.Primitive, string
 
 // listFilter is keystone_list_primitives' filter; an empty field matches all.
 type listFilter struct {
-	kind, category, path string
-	tags                 []string
+	kind, path string
+	tags       []string
 }
 
 func (f listFilter) match(p primitive.Primitive) bool {
 	if f.kind != "" && !primitive.IsKind(p.Kind, f.kind) {
-		return false
-	}
-	if f.category != "" && string(primitive.CategoryOf(primitive.Kind(p.Kind))) != f.category {
 		return false
 	}
 	if f.path != "" && !contains(p.Paths, f.path) {

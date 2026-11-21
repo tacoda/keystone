@@ -64,14 +64,7 @@ var activators = map[primitive.Kind]func(primitive.Primitive) string{
 		}
 		return fmt.Sprintf("computational check — runs `%s` on %s; gates on its status.", orNone(p.Run), on)
 	},
-	primitive.KindTool: func(p primitive.Primitive) string {
-		t := orDefault(p.Transport, "cli")
-		if strings.TrimSpace(p.Event) != "" {
-			return fmt.Sprintf("external callable (transport: %s) — fires as a side-effect on %s.", t, p.Event)
-		}
-		return fmt.Sprintf("external callable (transport: %s) — invoked on demand.", t)
-	},
-	primitive.KindSubagent: func(p primitive.Primitive) string {
+	primitive.KindAgent: func(p primitive.Primitive) string {
 		return "spawned as a subagent by id; tools: " + orNone(strings.Join(p.Tools, ", "))
 	},
 	primitive.KindCommand: func(p primitive.Primitive) string {

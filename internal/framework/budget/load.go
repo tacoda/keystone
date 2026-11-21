@@ -51,11 +51,11 @@ func (v Violation) OverBy() int { return v.Tokens - v.Cap }
 // onDemandKinds are the kinds whose bodies an agent opens on demand.
 var onDemandKinds = map[string]bool{
 	"rule": true, "reference": true, "skill": true, "command": true,
-	"subagent": true, "tool": true, "document": true,
+	"agent": true, "document": true,
 }
 
 // listedKinds are the kinds a host lists up front, by name and description.
-var listedKinds = map[string]bool{"skill": true, "command": true, "subagent": true}
+var listedKinds = map[string]bool{"skill": true, "command": true, "agent": true}
 
 // MeasureProject walks the charter at projectDir and measures it for the
 // hosts and caps in keystone.json (claude-code only, no caps, without one).

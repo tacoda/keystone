@@ -171,7 +171,7 @@ func TestAgentsMD_ReportsUnenforcedPermissions(t *testing.T) {
 	write(t, root, map[string]string{".agents/permissions/p.md": "---\nid: p\ndescription: x\ndeny:\n  - Bash(rm:*)\n  - Read(./.env*)\n---\n"})
 	md := AgentsMD(walk(t, root), Enabled([]string{"codex", "github-copilot"}))
 	for _, want := range []string{
-		"**Codex** — loads skills, subagents by itself; open rules, commands from `.agents/` yourself",
+		"**Codex** — loads skills, agents by itself; open rules, commands from `.agents/` yourself",
 		"does **not** enforce 1 permission rule(s)", // Codex: Read(./.env*)
 		"does **not** enforce 2 permission rule(s)", // Copilot: both
 	} {
@@ -179,7 +179,7 @@ func TestAgentsMD_ReportsUnenforcedPermissions(t *testing.T) {
 			t.Errorf("AGENTS.md missing %q:\n%s", want, md)
 		}
 	}
-	if strings.Contains(md, "**Claude Code** — loads rules, hooks (inferential), skills, commands, subagents by itself; does **not** enforce") {
+	if strings.Contains(md, "**Claude Code** — loads rules, hooks (inferential), skills, commands, agents by itself; does **not** enforce") {
 		t.Error("Claude Code enforces every rule")
 	}
 }
