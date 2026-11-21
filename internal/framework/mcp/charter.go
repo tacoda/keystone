@@ -3,6 +3,7 @@ package mcp
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"strings"
 
 	"github.com/mark3labs/mcp-go/mcp"
@@ -19,7 +20,9 @@ import (
 // dashboard do.
 func registerCharterViews(s *server.MCPServer, projectDir string) {
 	registerSignalListTool(s, projectDir)
+	registerQueryTool(s, projectDir)
 	registerCoverageTool(s, projectDir)
+	registerCharterMover(s, projectDir)
 	registerExplainTool(s, projectDir)
 	registerConformanceTool(s, projectDir)
 	registerBudgetTool(s, projectDir)
@@ -124,6 +127,47 @@ func registerSignalListTool(s *server.MCPServer, projectDir string) {
 	)
 }
 
+// registerQueryTool answers "what context applies here?" through the
+// same charter.Query composition the CLI uses — everywhere rules,
+// path-matched rules and corpus, cited references, task-scored entries.
+// Descriptors only; the agent opens bodies via keystone_get_primitive.
+func registerQueryTool(s *server.MCPServer, projectDir string) {
+	s.AddTool(
+		mcp.NewTool("keystone_charter_query",
+			mcp.WithDescription("What context applies? Compose the relevant charter for a region (file paths) and/or a task (free text): rules without paths: match everywhere; rules and corpus match by paths:; cited references come along; other entries score by keyword overlap on id/description/tags. Returns descriptors with the reason each matched — open bodies with keystone_get_primitive."),
+			mcp.WithArray("files",
+				mcp.Description("Repo-relative file paths of the region (the files you are about to touch)."),
+				mcp.WithStringItems(),
+			),
+			mcp.WithString("task",
+				mcp.Description("What you are doing, free text. Scores id/description/tags by token overlap."),
+			),
+		),
+		func(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+			files := req.GetStringSlice("files", nil)
+			task := req.GetString("task", "")
+			if len(files) == 0 && task == "" {
+				return mcp.NewToolResultError("pass files, a task, or both"), nil
+			}
+			prims, _, err := primitive.Walk(projectDir, kconfig.DefaultAgentsRoot)
+			if err != nil {
+				return mcp.NewToolResultError(err.Error()), nil
+			}
+			composed, _ := primitive.Compose(prims)
+			res := charter.Query(composed, files, task)
+			type entry struct {
+				Kind, ID, Description, Path, Provenance, Why string
+			}
+			out := make([]entry, 0, len(res.Entries))
+			for _, e := range res.Entries {
+				out = append(out, entry{e.Kind, e.ID, e.Description, e.Path, e.Provenance, e.Why})
+			}
+			body, _ := json.MarshalIndent(out, "", "  ")
+			return mcp.NewToolResultText(string(body)), nil
+		},
+	)
+}
+
 // registerCoverageTool reports which project files a guide governs and
 // which are uncharted (matched by no guide's globs).
 func registerCoverageTool(s *server.MCPServer, projectDir string) {
@@ -145,4 +189,59 @@ func registerCoverageTool(s *server.MCPServer, projectDir string) {
 			return mcp.NewToolResultText(string(body)), nil
 		},
 	)
+}
+
+// registerCharterMover exposes move / promote / demote over MCP,
+// shelling out to the keystone binary (the write-tools pattern): the
+// mover edits files and rewrites citations, so it runs in-process with
+// the CLI, never against a stale index.
+func registerCharterMover(s *server.MCPServer, projectDir string) {
+	s.AddTool(
+		mcp.NewTool("keystone_charter_move",
+			mcp.WithDescription("Relocate a charter primitive: move it to another kind (optionally renaming inside that kind), or use keystone_charter_promote / keystone_charter_demote to step the corpus \u2192 reference \u2192 rule ladder. Rewrites citations that point at the moved id and re-indexes."),
+			mcp.WithString("kind_id",
+				mcp.Required(),
+				mcp.Description("The primitive, as kind/id (e.g. corpus/billing/props)."),
+			),
+			mcp.WithString("target",
+				mcp.Required(),
+				mcp.Description("Where it goes: new-kind, or new-kind/new-path (e.g. rule/billing/billing-gate)."),
+			),
+		),
+		func(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+			kindID, err := req.RequireString("kind_id")
+			if err != nil {
+				return mcp.NewToolResultError(err.Error()), nil
+			}
+			target, err := req.RequireString("target")
+			if err != nil {
+				return mcp.NewToolResultError(err.Error()), nil
+			}
+			out, err := execKeystone(ctx, "charter", "move", kindID, target, "--dir", projectDir)
+			if err != nil {
+				return mcp.NewToolResultError(fmt.Sprintf("move failed: %v\n%s", err, out)), nil
+			}
+			return mcp.NewToolResultText(out), nil
+		},
+	)
+	for verb, dir := range map[string]string{"promote": "+1", "demote": "-1"} {
+		verb, dir := verb, dir
+		s.AddTool(
+			mcp.NewTool("keystone_charter_"+verb,
+				mcp.WithDescription(verb+": one step "+map[string]string{"promote": "up", "demote": "down"}[dir]+" the corpus \u2192 reference \u2192 rule ladder; rewrites citations and re-indexes."),
+				mcp.WithString("kind_id", mcp.Required(), mcp.Description("The primitive, as kind/id.")),
+			),
+			func(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+				kindID, err := req.RequireString("kind_id")
+				if err != nil {
+					return mcp.NewToolResultError(err.Error()), nil
+				}
+				out, err := execKeystone(ctx, "charter", verb, kindID, "--dir", projectDir)
+				if err != nil {
+					return mcp.NewToolResultError(fmt.Sprintf("%s failed: %v\n%s", verb, err, out)), nil
+				}
+				return mcp.NewToolResultText(out), nil
+			},
+		)
+	}
 }

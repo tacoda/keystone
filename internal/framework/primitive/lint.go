@@ -141,7 +141,7 @@ func lintKindAndMode(p Primitive, known map[Kind]bool, add func(FindingSeverity,
 	} else if Kind(p.Kind) == KindConcern {
 		add(FindingWarning, "concern is retired in 5.0 — `keystone lint --fix` inlines it into its consumers; then delete it")
 	} else if !known[Kind(p.Kind)] {
-		add(FindingError, fmt.Sprintf("unknown kind %q (allowed: %s)", p.Kind, knownKindList()))
+		add(FindingError, fmt.Sprintf("unknown kind %q (allowed: %s)", p.Kind, KnownKindList()))
 	}
 	switch p.Mode {
 	case "", "computational", "inferential":
@@ -299,7 +299,8 @@ func refResolves(exists map[string]bool, ref string, prefixes []string) bool {
 	return false
 }
 
-func knownKindList() string {
+// KnownKindList renders the allowed kinds for error messages.
+func KnownKindList() string {
 	parts := make([]string, 0, len(KnownKinds))
 	for _, k := range KnownKinds {
 		parts = append(parts, string(k))

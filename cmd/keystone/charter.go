@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -12,17 +13,26 @@ import (
 	"github.com/tacoda/keystone/internal/framework/primitive"
 )
 
-// runCharter dispatches `keystone charter <sub>`: `coverage` (files no
-// guide governs) and `show` (the roster, optionally post-cascade).
+// runCharter dispatches `keystone charter <sub>`: `query` (what applies
+// here?), `coverage` (files no rule governs), `show` (the roster,
+// optionally post-cascade), and `conformance`.
 func runCharter(args []string) error {
 	if len(args) == 0 {
 		printCharterUsage(os.Stderr)
-		return fmt.Errorf("`keystone charter` requires a subcommand (coverage | show)")
+		return fmt.Errorf("`keystone charter` requires a subcommand (query | coverage | show | conformance)")
 	}
 	switch args[0] {
 	case "help", "--help", "-h":
 		printCharterUsage(os.Stdout)
 		return nil
+	case "query":
+		return runCharterQuery(args[1:])
+	case "move":
+		return runCharterMove(args[1:])
+	case "promote":
+		return runCharterPromote(args[1:])
+	case "demote":
+		return runCharterDemote(args[1:])
 	case "coverage":
 		return runCharterCoverage(args[1:])
 	case "show":
@@ -30,8 +40,86 @@ func runCharter(args []string) error {
 	case "conformance":
 		return runCharterConformance(args[1:])
 	default:
-		return fmt.Errorf("unknown charter subcommand %q (use: coverage | show | conformance)", args[0])
+		return fmt.Errorf("unknown charter subcommand %q (use: query | coverage | show | conformance)", args[0])
 	}
+}
+
+// runCharterQuery handles `keystone charter query [files…] [--task <text>]
+// [--full]`. Composes "what context applies here?" through
+// charter.Query — the same helper the MCP server's keystone_charter_query
+// calls, so CLI and MCP never disagree.
+func runCharterQuery(args []string) error {
+	var files []string
+	task, asJSON, full := "", false, false
+	for i := 0; i < len(args); i++ {
+		a := args[i]
+		switch {
+		case a == "--task":
+			i++
+			if i >= len(args) {
+				return fmt.Errorf("--task requires a value")
+			}
+			task = args[i]
+		case a == "--json":
+			asJSON = true
+		case a == "--full":
+			full = true
+		case a == "--dir":
+			i++ // value consumed here; dirArg re-reads it below
+		case strings.HasPrefix(a, "--dir="), strings.HasPrefix(a, "--task="):
+			// --dir handled by dirArg; --task by the --task sweep
+		default:
+			files = append(files, a)
+		}
+	}
+	if task == "" {
+		for i := 0; i+1 < len(args); i++ {
+			if args[i] == "--task" || strings.HasPrefix(args[i], "--task=") {
+				if strings.HasPrefix(args[i], "--task=") {
+					task = strings.TrimPrefix(args[i], "--task=")
+				} else {
+					task = args[i+1]
+				}
+			}
+		}
+	}
+	absDir, err := filepath.Abs(dirArg(args))
+	if err != nil {
+		return fmt.Errorf("resolve dir: %w", err)
+	}
+	prims, _, err := primitive.Walk(absDir, config.DefaultAgentsRoot)
+	if err != nil {
+		return err
+	}
+	composed, _ := primitive.Compose(prims)
+	res := charter.Query(composed, files, task)
+
+	if asJSON {
+		enc := json.NewEncoder(os.Stdout)
+		enc.SetIndent("", "  ")
+		enc.SetEscapeHTML(false)
+		return enc.Encode(res.Entries)
+	}
+	if len(res.Entries) == 0 {
+		fmt.Fprintln(os.Stdout, "(no context matches)")
+		return nil
+	}
+	for _, e := range res.Entries {
+		fmt.Fprintf(os.Stdout, "%s/%s  %s\n", e.Kind, e.ID, e.Description)
+		fmt.Fprintf(os.Stdout, "  %s  [%s]\n", e.Path, e.Provenance)
+		if e.Why != "everywhere" {
+			fmt.Fprintf(os.Stdout, "  matched: %s\n", e.Why)
+		}
+		if full {
+			body, rerr := os.ReadFile(filepath.Join(absDir, filepath.FromSlash(e.Path)))
+			if rerr != nil {
+				fmt.Fprintf(os.Stderr, "  ! read %s: %v\n", e.Path, rerr)
+				continue
+			}
+			fmt.Fprintf(os.Stdout, "\n%s\n\n", strings.TrimRight(string(body), "\n"))
+		}
+	}
+	return nil
 }
 
 func runCharterConformance(args []string) error {
@@ -195,17 +283,23 @@ func printRosterLine(e charter.Entry) {
 }
 
 func printCharterUsage(w *os.File) {
-	fmt.Fprint(w, `keystone charter — inspect the charter
+	fmt.Fprint(w, `keystone charter — query, move, inspect
 
 Usage:
 
-    keystone charter coverage [--dir D]                        # files no rule governs (uncharted territory)
-    keystone charter show [--effective] [--kind K] [--dir D]   # the charter roster
-    keystone charter conformance [--dir D]                     # rubric: does the repo conform to its charter?
+    keystone charter query [files…] [--task TEXT] [--full] [--json]  # what context applies here?
+    keystone charter move <kind>/<id> <new-kind>[/<new-path>]        # relocate or re-kind a primitive
+    keystone charter promote <kind>/<id>                             # corpus → reference → rule, one step up
+    keystone charter demote <kind>/<id>                              # rule → reference → corpus, one step down
+    keystone charter coverage [--dir D] [--full] [--dir D]           # files no rule governs (uncharted territory)
+    keystone charter show [--effective] [--kind K] [--dir D]         # the charter roster
+    keystone charter conformance [--dir D] [--full] [--dir D]        # rubric: does the repo conform to its charter?
 
-Coverage reports which project files a rule's paths: match and which are
-uncharted — where the agent runs with no ambient rule. Show lists the
-charter's primitives by kind; --effective resolves the cascade (project
-wins, then policies) and annotates what each winner overrides.
+Query composes "what applies here?": rules without paths: (everywhere),
+path-matched rules and corpus, cited references, then task-scored
+entries -- by keyword, descriptors only until --full. Move relocates a
+primitive and rewrites citations that point at it; promote/demote walk
+the information ladder (the what → the why → the how). Capability kinds
+move laterally -- there is no ladder between them.
 `)
 }

@@ -74,6 +74,11 @@ the previous stage does not carry enough information:
 
 ## Read tools
 
+  keystone_charter_query [files=…] [task=<text>]
+      What context applies here? Composes everywhere rules, path-matched
+      rules and corpus, cited references, and task-scored entries.
+      Descriptors only; open bodies with keystone_get_primitive. The
+      front door — prefer it over filtering the index by hand.
   keystone_list_primitives [kind=<k>] [paths=<p>] [tags=…]
       Filter the index. Returns descriptors only.
   keystone_get_primitive kind=<k> id=<i>
@@ -108,6 +113,9 @@ event:, like a skill declares triggers:
                                rule, reference, corpus, hook, permission, eval,
                                skill, command, agent, tool, document,
                                adapter, policy.
+  keystone_charter_move        Relocate a primitive; rewrite citations; re-index.
+  keystone_charter_promote     corpus → reference → rule, one step up.
+  keystone_charter_demote      rule → reference → corpus, one step down.
   keystone_charter_bootstrap   Scaffold the charter (init equivalent).
   keystone_target_add          Add another host.
   keystone_index_refresh       Rebuild .keystone/INDEX.json.

@@ -265,3 +265,84 @@ func setList(m *yaml.Node, key string, vals []string) {
 	}
 	m.Content = append(m.Content, &yaml.Node{Kind: yaml.ScalarNode, Value: key}, seq)
 }
+
+// MoveFrontmatter prepares a primitive's frontmatter for relocation to
+// the folder that declares wantKind: the `kind:` key drops (convention
+// over configuration — the destination folder is the declaration) and
+// `id:` takes newID when non-empty. Other keys keep their order and
+// values. Returns the rewritten frontmatter text.
+func MoveFrontmatter(fm, wantKind, newID string) (string, error) {
+	var doc yaml.Node
+	if err := yaml.Unmarshal([]byte(fm), &doc); err != nil {
+		return "", err
+	}
+	if len(doc.Content) == 0 || doc.Content[0].Kind != yaml.MappingNode {
+		return "", fmt.Errorf("frontmatter is not a mapping")
+	}
+	m := doc.Content[0]
+	if i := mapIndex(m, "kind"); i >= 0 {
+		m.Content = append(m.Content[:i], m.Content[i+2:]...)
+	}
+	if newID != "" {
+		if i := mapIndex(m, "id"); i >= 0 {
+			m.Content[i+1].Value = newID
+		}
+	}
+	out, err := encodeYAML(m)
+	if err != nil {
+		return "", err
+	}
+	return out, nil
+}
+
+// ReplaceCorpusRef rewrites any `corpus:` entry that cites oldID (as a
+// bare id, corpus/-prefixed, or kind-qualified) to cite newID, keeping
+// the entry's original shape: the corpus/ prefix survives, and the kind
+// prefix swaps to newKind. Unchanged input returns as-is.
+func ReplaceCorpusRef(fm, oldKind, oldID, newKind, newID string) (string, error) {
+	var doc yaml.Node
+	if err := yaml.Unmarshal([]byte(fm), &doc); err != nil {
+		return "", err
+	}
+	if len(doc.Content) == 0 || doc.Content[0].Kind != yaml.MappingNode {
+		return "", fmt.Errorf("frontmatter is not a mapping")
+	}
+	m := doc.Content[0]
+	i := mapIndex(m, "corpus")
+	if i < 0 {
+		return fm, nil
+	}
+	list := m.Content[i+1]
+	changed := false
+	for _, v := range list.Content {
+		orig := v.Value
+		bare := orig
+		shape := "" // "", "corpus/", or "<kind>/"
+		switch {
+		case strings.HasPrefix(orig, "corpus/"):
+			shape = "corpus/"
+			bare = strings.TrimPrefix(orig, shape)
+		default:
+			if j := strings.IndexByte(orig, '/'); j > 0 {
+				shape = orig[:j+1]
+				bare = orig[j+1:]
+			}
+		}
+		if bare != oldID {
+			continue
+		}
+		switch shape {
+		case "corpus/":
+			v.Value = "corpus/" + newID
+		case "":
+			v.Value = newID
+		default:
+			v.Value = newKind + "/" + newID
+		}
+		changed = true
+	}
+	if !changed {
+		return fm, nil
+	}
+	return encodeYAML(m)
+}
