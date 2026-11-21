@@ -104,6 +104,7 @@ primitive's kind comes from its folder:
 
   .agents/rules/**/*.md              → rule
   .agents/references/**/*.md         → reference
+  .agents/corpus/**/*.md             → corpus
   .agents/hooks/*.md                 → hook
   .agents/permissions/*.md           → permission
   .agents/evals/<id>/EVAL.md         → eval

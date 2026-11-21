@@ -47,7 +47,8 @@ func writeGenerators() []writeGen {
 	return []writeGen{
 		// constraints — limit, gate, or check what the agent does
 		gen("rule", "<topic>/<name>", "Scaffold a rule plus its paired reference. A rule applies when a touched file matches its `paths:`, or everywhere without them. id form: '<topic>/<name>' (e.g. 'process/release')."),
-		gen("reference", "<topic>/<name>", "Scaffold a reference: the reasoning behind a rule, opened on demand. id form: '<topic>/<name>'."),
+		gen("reference", "<topic>/<name>", "Scaffold a reference: the why behind the rules, opened on demand. id form: '<topic>/<name>'."),
+		gen("corpus", "<id>", "Scaffold a corpus entry: the what — facts, general patterns, product information; standalone. id may be bare or <topic>/<name>."),
 		gen("hook", "<id>", "Scaffold a hook: a check that runs on an event (`event:` + `run:`); a non-zero exit blocks the agent."),
 		gen("permission", "<id>", "Scaffold a permission: allow / ask / deny tool rules, translated to every host that can enforce them."),
 		gen("eval", "<id>", "Scaffold an eval: a test that the charter changes agent behavior."),

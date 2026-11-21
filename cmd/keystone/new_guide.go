@@ -111,6 +111,32 @@ func runNewReference(args []string) error {
 	return writeSkeleton(path, referenceBody(topic+"/"+name, titleize(name), ruleRel))
 }
 
+// runNewCorpus handles `keystone new corpus <id>`. Corpus is standalone
+// information — the what: facts, general patterns, product information.
+// An id may be a bare name or <topic>/<name>; both land under corpus/.
+func runNewCorpus(args []string) error {
+	projectDir, charterRoot, remaining, err := parseDirAndCharterRoot(args)
+	if err != nil {
+		return err
+	}
+	if len(remaining) != 1 {
+		return fmt.Errorf("`keystone new corpus` requires exactly one argument: <id> (bare or <topic>/<name>)")
+	}
+	path := filepath.Join(projectDir, charterRoot, "corpus", filepath.FromSlash(remaining[0]+".md"))
+	id := strings.ReplaceAll(remaining[0], "/", "-")
+	return writeSkeleton(path, fmt.Sprintf(`---
+id: %s
+description: TODO — one line; the agent reads this in the index and decides whether to open the body.
+tags: []
+---
+
+# %s
+
+The what: facts, general patterns, product information. Standalone —
+no rule needs to cite it. Keep it current; stale corpus misleads.
+`, id, remaining[0]))
+}
+
 func splitTopicName(s string) (string, string, error) {
 	i := strings.IndexByte(s, '/')
 	if i < 0 {

@@ -163,7 +163,7 @@ matching primitive (kind / id / description, with declared tags in
 brackets), grouped by kind.
 
 Filters:
-  <kind>            Optional positional. A kind: rule, reference, hook,
+  <kind>            Optional positional. A kind: rule, reference, corpus, hook,
                     permission, eval, skill, command, subagent, tool,
                     document.
   --tag <tag>       Repeatable. Multiple --tag arguments AND together —

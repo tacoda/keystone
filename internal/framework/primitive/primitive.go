@@ -53,7 +53,8 @@ type Kind string
 // and kinds use the names coding agents already use.
 const (
 	KindRule       Kind = "rule"       // ambient, path-scoped directive (was guide)
-	KindReference  Kind = "reference"  // the why behind a rule, loaded on demand (was corpus); keystone extension
+	KindReference  Kind = "reference"  // the why behind a rule, loaded on demand (4.0 called its folder corpus)
+	KindCorpus     Kind = "corpus"     // standalone information; no rule required; keystone extension
 	KindHook       Kind = "hook"       // a check that reacts to an event → verdict; gates (was sensor)
 	KindPermission Kind = "permission" // allow/ask/deny tool rules (was posture)
 	KindEval       Kind = "eval"       // measures whether rules change behavior; keystone extension
@@ -71,7 +72,7 @@ const (
 
 // KnownKinds is the closed set the indexer and linter validate against.
 var KnownKinds = []Kind{
-	KindRule, KindReference, KindHook, KindPermission, KindEval,
+	KindRule, KindReference, KindCorpus, KindHook, KindPermission, KindEval,
 	KindSkill, KindCommand, KindAgent, KindDocument,
 }
 
@@ -92,7 +93,7 @@ func IsKnownKind(name string) bool {
 // warns on each one.
 var legacyKinds = map[string]Kind{
 	"guide":    KindRule,
-	"corpus":   KindReference,
+	"corpus":   KindReference, // 4.x spelled the references kind corpus; 6.0 makes corpus its own kind
 	"sensor":   KindHook,
 	"posture":  KindPermission,
 	"subagent": KindAgent,
@@ -116,6 +117,7 @@ func NormalizeKind(name string) (k Kind, legacy bool) {
 var canonicalDirKind = map[string]Kind{
 	"rules":       KindRule,
 	"references":  KindReference,
+	"corpus":      KindCorpus,
 	"hooks":       KindHook,
 	"permissions": KindPermission,
 	"evals":       KindEval,
@@ -126,7 +128,6 @@ var canonicalDirKind = map[string]Kind{
 
 	// 4.x directories.
 	"guides":    KindRule,
-	"corpus":    KindReference,
 	"sensors":   KindHook,
 	"posture":   KindPermission,
 	"playbooks": KindSkill,
@@ -353,7 +354,15 @@ const IndexVersion = "6.0"
 
 // IsKind reports whether a normalized kind matches a requested kind, which
 // may be a 4.x name typed by a user (`--kind sensor` finds hooks).
+// IsKind reports whether have is the kind the filter word want names.
+// Current kind names match exactly — corpus is a kind in 6.0, so a
+// `list corpus` filter means the corpus kind, not 4.x's corpus-as-
+// reference alias. Only words that are not current kinds fall back to
+// the 4.x rename map (guide → rule, sensor → hook, subagent → agent).
 func IsKind(have, want string) bool {
+	if IsKnownKind(want) {
+		return have == want
+	}
 	k, _ := NormalizeKind(want)
 	return have == string(k)
 }

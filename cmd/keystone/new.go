@@ -16,6 +16,7 @@ import (
 var newDispatch = map[string]func([]string) error{
 	"rule":       runNewRule,
 	"reference":  runNewReference,
+	"corpus":     runNewCorpus,
 	"hook":       runNewHook,
 	"permission": runNewPermission,
 	"eval":       runNewEval,
@@ -31,11 +32,11 @@ var newDispatch = map[string]func([]string) error{
 
 // newRenamed maps each 4.x `keystone new` kind to its 5.0 name.
 var newRenamed = map[string]string{
-	"guide": "rule", "corpus": "reference", "sensor": "hook", "posture": "permission",
+	"guide": "rule", "sensor": "hook", "posture": "permission",
 	"playbook": "skill", "pattern": "skill",
 }
 
-const newKinds = "rule, reference, hook, permission, eval, skill, command, agent, document, adapter, policy"
+const newKinds = "rule, reference, corpus, hook, permission, eval, skill, command, agent, document, adapter, policy"
 
 func runNew(args []string) error {
 	if len(args) == 0 {
@@ -47,8 +48,13 @@ func runNew(args []string) error {
 		printNewUsage(os.Stdout)
 		return nil
 	}
+	if gen, ok := newDispatch[args[0]]; ok {
+		return gen(args[1:])
+	}
+	// Not a current verb. A 4.x name gets the rename pointer — except
+	// corpus, which 6.0 made a kind of its own (handled above).
 	if to, ok := newRenamed[args[0]]; ok {
-		return fmt.Errorf("`keystone new %s` is now `keystone new %s` (5.0 names)", args[0], to)
+		return fmt.Errorf("`keystone new %s` is now `keystone new %s` (current names)", args[0], to)
 	}
 	gen, ok := newDispatch[args[0]]
 	if !ok {

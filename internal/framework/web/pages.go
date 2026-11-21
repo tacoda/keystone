@@ -11,7 +11,7 @@ import (
 func (s *server) handlePrimitivesNew(w http.ResponseWriter, r *http.Request) {
 	s.renderPage(w, r, "primitive_new.html", map[string]any{
 		"ProjectDir": s.projectDir,
-		"Kinds":      []string{"rule", "reference", "hook", "permission", "eval", "skill", "command", "agent", "document"},
+		"Kinds":      []string{"rule", "reference", "corpus", "hook", "permission", "eval", "skill", "command", "agent", "document"},
 	})
 }
 

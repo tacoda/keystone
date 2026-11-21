@@ -54,9 +54,9 @@ func TestBuildShowView_TracedByReverseLookup(t *testing.T) {
 			Corpus: []string{"corpus/security/owasp-top-10"},
 		}},
 	}
-	view, found := buildShowView(primitives, "corpus", "corpus/security/owasp-top-10")
+	view, found := buildShowView(primitives, "reference", "corpus/security/owasp-top-10")
 	if !found {
-		t.Fatal("expected corpus to be found")
+		t.Fatal("expected reference (4.x corpus/ id) to be found")
 	}
 	if len(view.TracedBy) != 1 || view.TracedBy[0] != "rule/rules/process/security-review" {
 		t.Errorf("TracedBy = %v, want one rule reference", view.TracedBy)

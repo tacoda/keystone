@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://keystone.tacoda.dev/schemas/primitive.json",
   "title": "Keystone primitive frontmatter (5.0)",
-  "description": "YAML frontmatter of a charter primitive under .agents/. The kind is inferred from the directory (rules/, references/, hooks/, permissions/, evals/, skills/, commands/, agents/, documents/), so `kind:` is optional. Kinds: rule, reference, hook, permission, eval, skill, command, agent, document. Validate a file against `#/$defs/<kind>`, picked by its directory (frontmatter alone cannot tell kinds apart). See ADR 0010. 4.x spellings stay readable: kinds guide/corpus/sensor/posture/agent/playbook/pattern, `globs:` for `paths:`, `on:` for `event:`.",
+  "description": "YAML frontmatter of a charter primitive under .agents/. The kind is inferred from the directory (rules/, references/, hooks/, permissions/, evals/, skills/, commands/, agents/, documents/), so `kind:` is optional. Kinds: rule, reference, corpus, hook, permission, eval, skill, command, agent, document. Validate a file against `#/$defs/<kind>`, picked by its directory (frontmatter alone cannot tell kinds apart). See ADR 0010. 4.x spellings stay readable: kinds guide/corpus/sensor/posture/agent/playbook/pattern, `globs:` for `paths:`, `on:` for `event:`.",
   "$defs": {
     "stringList": { "type": "array", "items": { "type": "string" } },
     "common": {
@@ -30,9 +30,13 @@
       }
     },
     "reference": {
-      "description": "Constraint (keystone extension). The reasoning behind a rule, loaded on demand. Lives at .agents/references/<topic>/<name>.md.",
+      "description": "Constraint (keystone extension). The why behind the rules, loaded on demand. Lives at .agents/references/<topic>/<name>.md.",
       "allOf": [{ "$ref": "#/$defs/common" }],
       "properties": { "kind": { "enum": ["reference", "corpus"] } }
+    },
+    "corpus_entry": {
+      "description": "Standalone information — the what: facts, general patterns, product information. No rule needs to cite it. Lives at .agents/corpus/<id>.md.",
+      "allOf": [{ "$ref": "#/$defs/common" }]
     },
     "hook": {
       "description": "Constraint. A check that reacts to a host event or a signal and gates on its verdict. Lives at .agents/hooks/<id>.md.",

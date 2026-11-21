@@ -81,7 +81,8 @@ var kindDirs = []struct {
 	what string
 }{
 	{primitive.KindRule, "rules", "applies when a touched file matches its `paths:`; a rule without `paths:` applies everywhere"},
-	{primitive.KindReference, "references", "the reasoning behind a rule; open it when you need the why"},
+	{primitive.KindReference, "references", "the why behind the rules; open it when how isn't enough"},
+	{primitive.KindCorpus, "corpus", "the what — facts, general patterns, product information; standalone"},
 	{primitive.KindHook, "hooks", "a check that runs on an event and can block; where your host cannot run it, run it yourself before claiming done"},
 	{primitive.KindPermission, "permissions", "allow / ask / deny rules for tools"},
 	{primitive.KindEval, "evals", "tests that the charter changes agent behavior"},

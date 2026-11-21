@@ -43,8 +43,12 @@ files; they never disagree.
 
 ## Kinds
 
+The triad: rules are how and specifics; references are why; corpus is
+what — facts, general patterns, product information.
+
   rule        applies when a touched file matches its paths: (or everywhere)
-  reference   the reasoning behind a rule, opened on demand
+  reference   the why behind the rules, opened on demand
+  corpus      the what — facts, patterns, product info; standalone
   hook        a check that runs on an event; a non-zero exit blocks
   permission  allow / ask / deny tool rules
   eval        a test that the charter changes agent behavior
@@ -101,7 +105,7 @@ event:, like a skill declares triggers:
 ## Write tools (each shells out to the keystone binary)
 
   keystone_new_<kind>          Scaffold a new primitive. <kind> is one of
-                               rule, reference, hook, permission, eval,
+                               rule, reference, corpus, hook, permission, eval,
                                skill, command, agent, tool, document,
                                adapter, policy.
   keystone_charter_bootstrap   Scaffold the charter (init equivalent).
@@ -183,7 +187,7 @@ func registerTools(s *server.MCPServer, projectDir string) {
 		mcp.NewTool("keystone_list_primitives",
 			mcp.WithDescription("List charter primitives, optionally filtered by kind, path pattern, or tag(s). Returns descriptors only — open bodies via keystone_get_primitive. The returned descriptors reflect the COMPOSED view (`includes:` already merged into list fields)."),
 			mcp.WithString("kind",
-				mcp.Description("Filter by kind: rule, reference, hook, permission, eval, skill, command, agent, or document. Omit for all."),
+				mcp.Description("Filter by kind: rule, reference, corpus, hook, permission, eval, skill, command, agent, or document. Omit for all."),
 			),
 			mcp.WithString("paths",
 				mcp.Description("Filter primitives that declare this pattern in their `paths:` frontmatter. Exact-string match on the pattern. (`glob` is the 4.x name.)"),
@@ -290,7 +294,7 @@ func registerTools(s *server.MCPServer, projectDir string) {
 			mcp.WithDescription("Return the full body of a single primitive given its kind and id. The body includes the frontmatter and the markdown that follows."),
 			mcp.WithString("kind",
 				mcp.Required(),
-				mcp.Description("Primitive kind: rule, reference, hook, permission, eval, skill, command, agent, or document (4.x names are accepted)."),
+				mcp.Description("Primitive kind: rule, reference, corpus, hook, permission, eval, skill, command, agent, or document (4.x names are accepted)."),
 			),
 			mcp.WithString("id",
 				mcp.Required(),
@@ -326,7 +330,7 @@ func registerTools(s *server.MCPServer, projectDir string) {
 			mcp.WithDescription("Return one primitive's descriptor PLUS forward + reverse cross-references in a single call. Surfaces: the composed view of the target (tags / tools / paths / host_triggers after `includes:` resolution), `included_by` (when another primitive includes it), `traces` (forward) and `traced_by` (reverse) for rule↔reference pairs, severity / model / phase / provenance. Use this when you need to understand a primitive's neighborhood in one shot — saves N follow-up keystone_get_primitive calls."),
 			mcp.WithString("kind",
 				mcp.Required(),
-				mcp.Description("Primitive kind: rule, reference, hook, permission, eval, skill, command, agent, or document."),
+				mcp.Description("Primitive kind: rule, reference, corpus, hook, permission, eval, skill, command, agent, or document."),
 			),
 			mcp.WithString("id",
 				mcp.Required(),

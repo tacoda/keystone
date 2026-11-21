@@ -11,7 +11,7 @@ import (
 // written for 4.x keeps locking the same items after the 5.0 move.
 var portFolders = map[string]string{
 	"rules": "rules", "rule": "rules", "guides": "rules", "guide": "rules",
-	"references": "references", "reference": "references", "corpus": "references",
+	"references": "references", "reference": "references", "corpus": "corpus",
 	"hooks": "hooks", "hook": "hooks", "sensors": "hooks", "sensor": "hooks",
 	"permissions": "permissions", "permission": "permissions", "posture": "permissions",
 	"skills": "skills", "skill": "skills", "playbooks": "skills", "playbook": "skills", "patterns": "skills",
@@ -21,7 +21,7 @@ var portFolders = map[string]string{
 
 // legacyFolders are the 4.x folders a vendored policy tree may still use.
 var legacyFolders = map[string][]string{
-	"rules": {"guides"}, "references": {"corpus"}, "hooks": {"sensors"},
+	"rules": {"guides"}, "references": {}, "hooks": {"sensors"},
 	"permissions": {"posture"}, "skills": {"playbooks", "patterns"}, "commands": {"actions"},
 }
 

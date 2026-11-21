@@ -50,7 +50,7 @@ func (v Violation) OverBy() int { return v.Tokens - v.Cap }
 
 // onDemandKinds are the kinds whose bodies an agent opens on demand.
 var onDemandKinds = map[string]bool{
-	"rule": true, "reference": true, "skill": true, "command": true,
+	"rule": true, "reference": true, "corpus": true, "skill": true, "command": true,
 	"agent": true, "document": true,
 }
 

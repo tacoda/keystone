@@ -45,17 +45,16 @@ func TestWriteGenerators_Use5Kinds(t *testing.T) {
 		if g.verb == "adapter" || g.verb == "policy" {
 			continue
 		}
-		if !is5Kind(g.verb) {
-			t.Errorf("keystone_new_%s: not a 5.0 kind", g.verb)
+		if !isCurrentKind(g.verb) {
+			t.Errorf("keystone_new_%s: not a current kind", g.verb)
 		}
 	}
 }
 
-// is5Kind: verb is a 5.0 kind name itself, not a 4.x alias of one.
-func is5Kind(verb string) bool {
-	k, legacy := primitive.NormalizeKind(verb)
-	if legacy || string(k) != verb {
-		return false
-	}
+// isCurrentKind: verb is a current kind name. Corpus is deliberately
+// both a current kind (6.0) and a 4.x alias for reference in frontmatter,
+// so the check is KnownKinds membership; a 4.x-only name (guide, sensor,
+// subagent) is not in KnownKinds.
+func isCurrentKind(verb string) bool {
 	return primitive.IsKnownKind(verb)
 }

@@ -7,10 +7,14 @@ A primitive is one typed unit of the charter: one Markdown file under `.agents/`
 
 ## The kinds
 
+The triad: a rule is **how** and specifics; a reference is **why**; a corpus
+entry is **what** — facts, general patterns, product information.
+
 | Kind | Folder | Page |
 |---|---|---|
 | `rule` | `.agents/rules/` | [rule.md](rule.md) |
 | `reference` | `.agents/references/` | [reference.md](reference.md) |
+| `corpus` | `.agents/corpus/` | [corpus.md](corpus.md) |
 | `hook` | `.agents/hooks/` | [hook.md](hook.md) |
 | `permission` | `.agents/permissions/` | [permission.md](permission.md) |
 | `eval` | `.agents/evals/<id>/EVAL.md` | [eval.md](eval.md) |
@@ -19,7 +23,7 @@ A primitive is one typed unit of the charter: one Markdown file under `.agents/`
 | `agent` | `.agents/agents/` | [agent.md](agent.md) |
 | `document` | `.agents/documents/` | [document.md](document.md) |
 
-Keystone knows only these nine kinds. `keystone lint` reports any other kind as an error, except the retired `concern`, which gets a warning until you inline it with `keystone lint --fix`.
+Keystone knows only these ten kinds. `keystone lint` reports any other kind as an error, except the retired `concern`, which gets a warning until you inline it with `keystone lint --fix`.
 
 ## Kind comes from the folder
 

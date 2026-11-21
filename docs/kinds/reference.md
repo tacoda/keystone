@@ -3,7 +3,7 @@
 <!-- voice-register: informational -->
 <!-- voice-english: ste -->
 
-A reference holds the reasoning behind a rule: why it exists, what it guards against, and where it comes from. It's a constraint, and a keystone extension, because no host has a format for it. The agent opens a reference only when it needs the why, so a reference costs no context until then. The cost is that nothing loads it for you: a rule must link it, or the agent never finds it.
+A reference holds the reasoning behind the rules — **the why**: why it exists, what it guards against, and where it comes from. The triad: a [rule](rule.md) is **how** and specifics; a reference is why; a [corpus entry](corpus.md) is **what** — facts, general patterns, product information. It's a constraint, and a keystone extension, because no host has a format for it. The agent opens a reference only when it needs the why, so a reference costs no context until then. The cost is that nothing loads it for you: a rule must link it, or the agent never finds it.
 
 ## Example
 

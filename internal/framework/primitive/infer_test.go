@@ -24,7 +24,7 @@ func TestInferKind(t *testing.T) {
 		"playbooks/task.md":                KindSkill,
 		"patterns/retry-with-backoff.md":   KindSkill,
 		"posture/default.md":               KindPermission,
-		"corpus/process/spec.md":           KindReference,
+		"corpus/process/spec.md":           KindCorpus, // 6.0: the corpus folder is the corpus kind
 		"concerns/reads-diff.md":           KindConcern,
 		// Off-convention paths infer nothing.
 		"sources/jira.md": "",
@@ -65,8 +65,8 @@ func TestNormalizeKind(t *testing.T) {
 }
 
 func TestKnownKinds_Closed(t *testing.T) {
-	if len(KnownKinds) != 9 {
-		t.Errorf("KnownKinds has %d kinds, want 9", len(KnownKinds))
+	if len(KnownKinds) != 10 {
+		t.Errorf("KnownKinds has %d kinds, want 10", len(KnownKinds))
 	}
 	for _, k := range KnownKinds {
 		if !IsKnownKind(string(k)) {
