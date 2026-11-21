@@ -103,7 +103,10 @@ returns `GLOSSARY.md` and `show` prints it, file unmoved and unedited;
 INDEX entries carry `provenance: repo`; lint does not demand frontmatter in
 adopted files; `keystone index` is idempotent over adopted sets.
 
-## Phase 4 — Query surface (the front door)
+## Phase 4 — Invocation surfaces (the front door)
+
+Availability over adoption (decision 15): everything keystone can do is
+invocable by users, scripts, rules, skills, and hosts; nothing is imposed.
 
 1. CLI `keystone charter query [files…|<task>]`: composes rules matched by
    `paths:`, corpus entries matched by `paths:`, adopted docs matched by
@@ -111,13 +114,25 @@ adopted files; `keystone index` is idempotent over adopted sets.
    on `--full`.
 2. MCP `keystone_charter_query` with the same composition; results carry
    `path` so the agent opens bodies only when needed.
-3. Server instructions lead with the query flow; `keystone_explain`
-   stays for single-primitive why.
+3. Every capability gets an invocation on each surface — CLI verb and MCP
+   tool, not only a planted skill. The learning and pruning flywheels are
+   the templates: `keystone learn` / `keystone_learn`, `keystone
+   synthesize` / `keystone_synthesize`, `keystone audit`, `keystone
+   check-drift`, `keystone mode`. Skills remain wrappers for teams that
+   want them planted, never the only path.
+4. Server instructions lead with the query and invocation flow;
+   `keystone_explain` stays for single-primitive why.
+5. init stops planting the lifecycle skills and phase rules by default —
+   a fresh project gets the minimal charter and full invocability; the
+   lifecycle moves behind an opt-in `--starter workflow` pack.
 
 **Success criteria:** on this repo, querying `internal/framework/projection/`
 returns the path-scoped rules plus any scoped corpus, in descriptor form;
 an MCP-only client (existing `server_test.go` harness) completes a
-cold-start question/answer with no host files present.
+cold-start question/answer with no host files present; the flywheel
+capabilities run through CLI and MCP with no lifecycle skill planted
+(delete `task` + the keystone-* lifecycle skills from a scratch init and
+exercise the verbs).
 
 ## Phase 5 — Context drift management (pillar 2)
 
@@ -180,7 +195,11 @@ passes with a green lockfile.
 ## Phase 8 — Dogfood, docs, release
 
 1. Convert this repo's own tree: `agent` kind renames, corpus entries,
-   `context.roots` adopting `GLOSSARY.md` and `docs/**`.
+   `charter.roots` adopting `GLOSSARY.md` and `docs/**`. This repo's own
+   phased lifecycle (task, spec, orient, …) becomes the **worked example**
+   of an opted-in workflow — init no longer plants it by default; a
+   `--starter workflow` pack (alongside `universal-principles`) carries
+   the lifecycle skills for teams who want them.
 2. Rewrite README/GLOSSARY/CONTRIBUTING to the context framing; CHANGELOG.
 3. Release 6.0.0 per the release checklist; update the gh-pages site.
 
