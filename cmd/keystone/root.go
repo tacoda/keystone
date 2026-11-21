@@ -110,6 +110,10 @@ func init() {
 	rootCmd.AddCommand(hookCmd())
 	rootCmd.AddCommand(signalCmd())
 	rootCmd.AddCommand(charterCmd())
+	rootCmd.AddCommand(learnCmd())
+	rootCmd.AddCommand(learningCmd())
+	rootCmd.AddCommand(promoteCmd())
+	rootCmd.AddCommand(demoteCmd())
 	rootCmd.AddCommand(explainCmd())
 	rootCmd.AddCommand(projectCmd())
 	rootCmd.AddCommand(migrateCmd())
@@ -331,9 +335,74 @@ func signalCmd() *cobra.Command {
 func charterCmd() *cobra.Command {
 	c := &cobra.Command{
 		Use:                "charter",
-		Short:              "Inspect the charter (coverage: files no rule governs)",
+		Short:              "Query, move, inspect the charter (query: what applies here?)",
 		DisableFlagParsing: true,
 		RunE:               runAndForward(runCharter),
+	}
+	return c
+}
+
+func learnCmd() *cobra.Command {
+	c := &cobra.Command{
+		Use:                "learn <slug> [--source TEXT] [--layer L] [--globs G...] [--body TEXT|-]",
+		Short:              "Write a learning candidate to the inbox (the Learning flywheel's additive step)",
+		DisableFlagParsing: true,
+		RunE:               runAndForward(runLearn),
+	}
+	return c
+}
+
+func promoteCmd() *cobra.Command {
+	return promoteDemoteCmd("promote", "step up the corpus → reference → rule ladder")
+}
+
+func demoteCmd() *cobra.Command {
+	return promoteDemoteCmd("demote", "step down the rule → reference → corpus ladder")
+}
+
+func promoteDemoteCmd(verb, blurb string) *cobra.Command {
+	c := &cobra.Command{
+		Use:                verb + " <kind>/<id>",
+		Short:              "Walk the information ladder (" + blurb + "); rewrites citations and re-indexes",
+		DisableFlagParsing: true,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return runAndForward(func(a []string) error {
+				if verb == "promote" {
+					return runCharterPromote(a)
+				}
+				return runCharterDemote(a)
+			})(cmd, args)
+		},
+	}
+	return c
+}
+
+func learningListCmd() *cobra.Command {
+	c := &cobra.Command{
+		Use:                "list",
+		Short:              "List the learning inbox, newest first (promotion is synthesize's judgment)",
+		DisableFlagParsing: true,
+		RunE:               runAndForward(runLearningList),
+	}
+	return c
+}
+
+func promoteLadderGroupCmd() *cobra.Command {
+	c := &cobra.Command{
+		Use:                "ladder",
+		Short:              "Information-ladder moves: corpus, reference, rule (why, what, how)",
+		DisableFlagParsing: true,
+	}
+	c.AddCommand(moverGroupListCmd())
+	return c
+}
+
+func moverGroupListCmd() *cobra.Command {
+	c := &cobra.Command{
+		Use:                "list",
+		Short:              "List the learning inbox candidates with their proposed layers",
+		DisableFlagParsing: true,
+		RunE:               runAndForward(runLearningList),
 	}
 	return c
 }

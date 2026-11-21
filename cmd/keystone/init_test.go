@@ -39,7 +39,8 @@ func TestInit_FreshScaffoldGoldenFiles(t *testing.T) {
 	}
 
 	projectDir := t.TempDir()
-	cmd := exec.Command(bin, "init", projectDir, "--agent", "codex")
+	cmd := exec.Command(bin, "init", projectDir, "--agent", "codex", "--starter", "workflow")
+
 	// stdin is closed by default for exec.Cmd; non-TTY path will be taken,
 	// which is what we want for a non-interactive test.
 	if out, err := cmd.CombinedOutput(); err != nil {
@@ -58,25 +59,60 @@ func TestInit_FreshScaffoldGoldenFiles(t *testing.T) {
 	// Codex agent TOMLs, and the generated AGENTS.md / CLAUDE.md blocks.
 	assertFileContains(t, projectDir, "keystone.json", `"codex"`)
 	// A fresh install starts on the current layout: no migration is pending.
-	assertFileContains(t, projectDir, ".keystone/lockfile.json", `"migrations_applied"`, `"5.0"`)
+	assertFileContains(t, projectDir, ".keystone/lockfile.json", `"migrations_applied"`, `"6.0"`)
+	// The Codex subagent shim projects agents/verifier.md, which rides the
+	// opt-in workflow pack — a codex init carries --starter workflow so the
+	// TOML lands (decision 15: nothing prescriptive plants by default).
 	assertFileContains(t, projectDir, ".codex/agents/verifier.toml", "developer_instructions = ")
 	assertFileContains(t, projectDir, "AGENTS.md", "<!-- keystone:start -->", "## Kinds", "**Codex**")
 	assertFileContains(t, projectDir, "CLAUDE.md", "@AGENTS.md")
 
-	// Universal-principles must NOT scaffold by default — it's opt-in
-	// via --starter universal-principles.
+	// Universal-principles and the vendored-policies dir must NOT scaffold
+	// by default — both opt-in (`--starter universal-principles`; policies
+	// via `keystone new policy`).
 	if _, err := os.Stat(filepath.Join(projectDir, ".agents/rules/principles/tdd.md")); !os.IsNotExist(err) {
 		t.Errorf("guides/principles/tdd.md should not exist on a default init (got err = %v)", err)
 	}
-
-	// Vendored policies dir must not exist on a fresh install (no policies
-	// declared yet). The .gitignore entry is created regardless so future
-	// `keystone install` calls don't accidentally commit policy content.
 	if _, err := os.Stat(filepath.Join(projectDir, ".agents/policies")); !os.IsNotExist(err) {
 		t.Errorf("charter/policies should not exist on a fresh init with no policies declared (got err = %v)", err)
 	}
 }
 
+// TestInit_WorkflowPackOptIn — decision 15, asserted: a default init
+// plants no lifecycle (checked in the golden test); the workflow pack
+// does, and legacy implies workflow (the transition kit rides the
+// phased lifecycle's documents and rules).
+func TestInit_WorkflowPackOptIn(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping e2e init test in -short mode")
+	}
+	dir, run := initRunner(t)
+
+	workflowInit(t, dir, run, []string{"--agent", "codex", "--starter", "workflow"}, []string{
+		".agents/skills/task/SKILL.md", ".agents/skills/keystone-spec/SKILL.md", ".agents/rules/process/spec.md",
+	})
+	workflowInit(t, dir, run, []string{"--agent", "generic", "--starter", "legacy"}, []string{
+		".agents/skills/task/SKILL.md", ".agents/skills/keystone-spec/SKILL.md", ".agents/rules/process/spec.md",
+		".agents/rules/legacy/characterize-before-touch.md",
+		".agents/documents/characterization.md",
+		".agents/documents/test-expansion.md",
+	})
+}
+
+// workflowInit runs init with initArgs into dir and asserts every
+// planted file exists.
+func workflowInit(t *testing.T, dir string, run func(...string) (string, error), initArgs, planted []string) {
+	t.Helper()
+	out, err := run(initArgs...)
+	if err != nil {
+		t.Fatalf("init %v: %v\n%s", initArgs, err, out)
+	}
+	for _, rel := range planted {
+		if _, err := os.Stat(filepath.Join(dir, rel)); err != nil {
+			t.Errorf("%s: missing after %v: %v", rel, initArgs, err)
+		}
+	}
+}
 func assertFilesExist(t *testing.T, root string, rels []string) {
 	t.Helper()
 	for _, rel := range rels {
@@ -130,16 +166,19 @@ func TestInit_OverwriteReplacesInPlace(t *testing.T) {
 	}
 	dir, run := initRunner(t)
 	mustInit(t, run)
-	spec := filepath.Join(dir, ".agents/rules/process/spec.md")
-	mine := filepath.Join(dir, ".agents/rules/mine.md")
-	writeMine(t, spec, mine)
+	scaffold := filepath.Join(dir, ".agents/skills/keystone-new/SKILL.md")
+	mine := filepath.Join(dir, ".agents/skills/mine/SKILL.md")
+	writeMine(t, scaffold, mine)
+	t.Logf("DEBUG after write: mine exists=%v", existsAt(mine))
 
 	mustInit(t, run)
-	if !isMine(spec) {
+	t.Logf("DEBUG after plain: mine exists=%v scaffold exists=%v", existsAt(mine), existsAt(scaffold))
+	if !isMine(scaffold) {
 		t.Error("re-init without --overwrite replaced a user-edited file")
 	}
 	mustInit(t, run, "--overwrite")
-	if isMine(spec) {
+	t.Logf("DEBUG after overwrite: mine exists=%v", existsAt(mine))
+	if isMine(scaffold) {
 		t.Error("--overwrite left keystone's scaffold file unreplaced")
 	}
 	if !isMine(mine) {
@@ -175,6 +214,9 @@ func mustInit(t *testing.T, run func(...string) (string, error), args ...string)
 func writeMine(t *testing.T, paths ...string) {
 	t.Helper()
 	for _, p := range paths {
+		if err := os.MkdirAll(filepath.Dir(p), 0o755); err != nil {
+			t.Fatal(err)
+		}
 		if err := os.WriteFile(p, []byte("MINE\n"), 0o644); err != nil {
 			t.Fatal(err)
 		}
@@ -188,39 +230,28 @@ func isMine(path string) bool {
 
 // freshInitFiles is the contract for a fresh `init --agent codex`: anything
 // important to the install shows up here.
+// freshInitFiles is the contract for a fresh `init --agent codex`: the
+// PLANTED set only. The phased lifecycle (spec, orient, review, verify,
+// task, mode, learn, synthesize, audit, debt-review, check-drift,
+// allocate, bootstrap) and its rules and agents ride the opt-in
+// `--starter workflow` pack; keystone-new / -adapter / -policy and
+// keystone-index are scaffold ergonomics and stay planted (decision 15:
+// availability over adoption — nothing prescriptive plants by default).
 var freshInitFiles = []string{
 	"keystone.json",
 	".gitignore",
 	".keystone/lockfile.json",
 	".agents/README.md",
 	".agents/rules/README.md",
-	".agents/rules/process/spec.md",
-	".agents/rules/process/release.md",
-	".agents/rules/process/runtime-resolution.md",
-	".agents/references/process/runtime-resolution.md",
 	".agents/references/README.md",
 	".agents/hooks/build.md",
 	".agents/hooks/lint.md",
 	".agents/hooks/test.md",
-	".agents/hooks/review-functional.md",
-	".agents/skills/task/SKILL.md",
 	".keystone/learning/README.md",
 	".keystone/archive/README.md",
 	".agents/skills/README.md",
-	".agents/skills/keystone-bootstrap/SKILL.md",
-	".agents/skills/keystone-spec/SKILL.md",
-	".agents/skills/keystone-orient/SKILL.md",
-	".agents/skills/keystone-check-drift/SKILL.md",
-	".agents/skills/keystone-review/SKILL.md",
-	".agents/skills/keystone-debt-review/SKILL.md",
-	".agents/skills/keystone-mode/SKILL.md",
-	".agents/skills/keystone-learn/SKILL.md",
-	".agents/skills/keystone-synthesize/SKILL.md",
-	".agents/skills/keystone-audit/SKILL.md",
 	".agents/skills/keystone-index/SKILL.md",
-	".agents/skills/keystone-verify/SKILL.md",
 	".agents/skills/keystone-new/SKILL.md",
-	".agents/skills/keystone-allocate/SKILL.md",
 	".agents/skills/keystone-new-adapter/SKILL.md",
 	".agents/skills/keystone-new-policy/SKILL.md",
 	".agents/agents/README.md",
@@ -230,8 +261,11 @@ var freshInitFiles = []string{
 	// Generated by the post-install index + project step. Without
 	// these the agent has no way to find the keystone skills.
 	".keystone/INDEX.json",
-	".claude/skills/keystone-bootstrap/SKILL.md",
 	".claude/skills/keystone-index/SKILL.md",
-	".claude/skills/keystone-verify/SKILL.md",
 	".claude/skills/keystone-new/SKILL.md",
+}
+
+func existsAt(p string) bool {
+	_, err := os.Stat(p)
+	return err == nil
 }

@@ -28,6 +28,15 @@ func installConditional(assets fs.FS, destDir, charterRoot string, sel Selection
 		if catID == "agent" {
 			continue
 		}
+		// legacy implies workflow: the transition kit rides the phased
+		// lifecycle pack (its documents and rules extend it).
+		if catID == "starter" {
+			has, want := hasValue(values, "legacy"), hasValue(values, "workflow")
+			if has && !want {
+				values = append(values, "workflow")
+				sel[catID] = values // ranging copied the slice header; write it back
+			}
+		}
 		for _, label := range values {
 			srcRoot := fmt.Sprintf("optional/%s/%s/agents", catID, label)
 			if _, err := fs.Stat(assets, srcRoot); err != nil {
@@ -41,4 +50,14 @@ func installConditional(assets fs.FS, destDir, charterRoot string, sel Selection
 		}
 	}
 	return nil
+}
+
+// hasValue reports whether values names label.
+func hasValue(values []string, label string) bool {
+	for _, v := range values {
+		if v == label {
+			return true
+		}
+	}
+	return false
 }

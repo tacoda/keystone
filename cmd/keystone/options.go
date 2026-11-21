@@ -115,6 +115,8 @@ var categories = []Category{
 		MultiSelect: true,
 		Values: []OptionValue{
 			{"universal-principles", "Engineering principles: rules and references (SOLID, TDD, BDD, naming, error handling, ...)"},
+			{"workflow", "The phased lifecycle: task, spec, orient, review, verify, mode, plus the learning and pruning flywheels"},
+			{"legacy", "The transition kit: characterization and test-expansion documents, the legacy rules, and the migration subtype (implies workflow)"},
 		},
 	},
 }

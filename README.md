@@ -24,6 +24,24 @@ orchestrator, the runner. Keystone manages the charter that constrains
 whatever harness you run. After install, the tools are optional, because the
 charter is plain files that any agent can read.
 
+For legacy projects, keystone is the way in: drop it into a codebase no one
+has chartered yet, characterize what is true, and start tackling longstanding
+technical debt at scale — large-scale refactorings behind migration
+documents, test expansion per region, and the other code concerns the
+rule set names. The transition kit makes the codebase agent-ready: agents
+check the empirical map and the migration documents before they touch a
+region, instead of re-deriving the shape of the work from scratch.
+
+In a way this is an agent-readiness kit: it gives you an easy place to add
+and edit agent primitives, assess and adjust them, and a way to onboard a
+legacy project. The easy part is what keystone scaffolds — adding things is
+easy. The hard part is the code changes, and they must be able to happen
+while still delivering product work. And it does that without giving up on
+shipping new features: the kits constrain the regions they name —
+characterize-before-touch, tests-first-per-region, no-rewrite-without-migration —
+everything else keeps moving; new feature work and legacy stabilization run
+in parallel, one charter, no freeze.
+
 ## The kinds
 
 The charter is the codified context of the repository — everything a coding
