@@ -129,6 +129,12 @@ func Walk(projectDir, charterRoot string) (primitives []Primitive, warnings []Wa
 			return nil, nil, walkErr
 		}
 	}
+	adopted, adoptWarn, err := adoptRepositoryDocs(projectDir)
+	if err != nil {
+		return nil, nil, err
+	}
+	warnings = append(warnings, adoptWarn...)
+	primitives = append(primitives, adopted...)
 	sort.Slice(primitives, func(i, j int) bool {
 		if primitives[i].Kind != primitives[j].Kind {
 			return primitives[i].Kind < primitives[j].Kind

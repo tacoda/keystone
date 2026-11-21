@@ -25,6 +25,11 @@ const SchemaVersion = "2"
 // write the host explicitly (`gitlab.com/acme/policies`).
 const DefaultPolicyHost = "github.com"
 
+// CharterSpec is keystone.json's `charter` block.
+type CharterSpec struct {
+	Roots []string `json:"roots,omitempty"`
+}
+
 // ProjectConfig is the parsed shape of keystone.json. Records the
 // framework version this project is pinned to, the nested policy tree,
 // and optional per-port budgets.
@@ -40,6 +45,11 @@ type ProjectConfig struct {
 	Policies         []PolicyNode          `json:"policies"`
 	Budgets          map[string]BudgetSpec `json:"budgets,omitempty"`
 	Adapters         []string              `json:"adapters,omitempty"`
+	// Charter declares how the charter reaches beyond .agents/. Roots
+	// are repo-relative globs of repository documents adopted as corpus:
+	// indexed and queryable in place — never moved, never edited. Empty
+	// (the zero value) adopts nothing; keystone manages only .agents/.
+	Charter *CharterSpec `json:"charter,omitempty"`
 	// Signals are project-defined framework events beyond the built-ins.
 	// A hook may bind to any signal; declaring it here lets lint catch
 	// typos and `keystone signal list` surface it. Firing works without
@@ -157,6 +167,11 @@ func DefaultProjectConfig(_ string) *ProjectConfig {
 	return &ProjectConfig{
 		Version:  SchemaVersion,
 		Policies: []PolicyNode{},
+		// Fresh projects adopt their docs/ as corpus (decision 7, the
+		// boundary is the repository). Top-level files like GLOSSARY.md
+		// stay opt-in: README, CHANGELOG, and LICENSE are too noisy to
+		// take by default.
+		Charter: &CharterSpec{Roots: []string{"docs/**/*.md"}},
 	}
 }
 

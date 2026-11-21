@@ -103,6 +103,13 @@ returns `GLOSSARY.md` and `show` prints it, file unmoved and unedited;
 INDEX entries carry `provenance: repo`; lint does not demand frontmatter in
 adopted files; `keystone index` is idempotent over adopted sets.
 
+Inline update (2026-11-21, implementation): the default roots narrowed —
+fresh projects seed `docs/**/*.md` only, not root `*.md` (README,
+CHANGELOG, LICENSE are too noisy to auto-adopt); top-level files like
+`GLOSSARY.md` are opted into explicitly. Also recorded: decision 16 —
+extension points (moments, registry blocks, plugin APIs, read-side
+transforms) are declined; keystone is not a runtime.
+
 ## Phase 4 — Invocation surfaces (the front door)
 
 Availability over adoption (decision 15): everything keystone can do is
