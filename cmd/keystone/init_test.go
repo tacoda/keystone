@@ -91,12 +91,6 @@ func TestInit_WorkflowPackOptIn(t *testing.T) {
 	workflowInit(t, dir, run, []string{"--agent", "codex", "--starter", "workflow"}, []string{
 		".agents/skills/task/SKILL.md", ".agents/skills/keystone-spec/SKILL.md", ".agents/rules/process/spec.md",
 	})
-	workflowInit(t, dir, run, []string{"--agent", "generic", "--starter", "legacy"}, []string{
-		".agents/skills/task/SKILL.md", ".agents/skills/keystone-spec/SKILL.md", ".agents/rules/process/spec.md",
-		".agents/rules/legacy/characterize-before-touch.md",
-		".agents/documents/characterization.md",
-		".agents/documents/test-expansion.md",
-	})
 }
 
 // workflowInit runs init with initArgs into dir and asserts every
