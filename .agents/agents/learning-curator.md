@@ -1,5 +1,5 @@
 ---
-kind: subagent
+kind: agent
 id: learning-curator
 description: Captures a learning candidate from a surprise, incident, or review finding into .keystone/learning/inbox/.
 tools:

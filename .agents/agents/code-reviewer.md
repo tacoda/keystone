@@ -1,5 +1,5 @@
 ---
-kind: subagent
+kind: agent
 id: code-reviewer
 description: General code reviewer that runs the four review checks on the current diff and surfaces findings.
 tools:

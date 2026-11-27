@@ -1,5 +1,5 @@
 ---
-kind: subagent
+kind: agent
 id: quality-radar
 description: 'Aggregates verification hooks and review subagents into a five-dimension scorecard for the current diff (or the whole codebase, on audit).'
 tags:

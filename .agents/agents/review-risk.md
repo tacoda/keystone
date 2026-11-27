@@ -1,5 +1,5 @@
 ---
-kind: subagent
+kind: agent
 id: review-risk
 description: 'An agent reads the diff and reports risk concerns — blast radius, reversibility, hot-spot regions, fan-out and shared-state coupling, irr...'
 tags:

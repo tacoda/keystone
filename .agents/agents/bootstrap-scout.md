@@ -1,5 +1,5 @@
 ---
-kind: subagent
+kind: agent
 id: bootstrap-scout
 description: Stack detector that seeds the initial charter state from a fresh repo.
 tools:

@@ -9,5 +9,11 @@
     "opencode",
     "codex",
     "github-copilot"
-  ]
+  ],
+  "charter": {
+    "roots": [
+      "docs/**/*.md",
+      "GLOSSARY.md"
+    ]
+  }
 }

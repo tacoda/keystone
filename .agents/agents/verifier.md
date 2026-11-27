@@ -1,5 +1,5 @@
 ---
-kind: subagent
+kind: agent
 id: verifier
 description: 'Runs the verification hooks (lint, type-check, test, build, drift, commit-message) and reports the gate.'
 tools:
