@@ -96,8 +96,13 @@ func AlwaysCap(projectDir string) int {
 
 // Measure computes the budget from each host's projection profile, so a
 // host's always-loaded tier reflects what that host reads, and applies the
-// caps in budgets (keystone.json).
+// caps in budgets (keystone.json). With no adapters configured (a fresh
+// 6.0 install), the AGENTS.md root file is still measured — it is the one
+// always-loaded artifact every host reads.
 func Measure(projectDir string, prims []primitive.Primitive, hosts []projection.Profile, budgets map[string]config.BudgetSpec) Report {
+	if len(hosts) == 0 {
+		hosts = []projection.Profile{{Host: "agents-md"}}
+	}
 	r := Report{ByKind: map[string]int{}}
 	for _, h := range hosts {
 		r.Hosts = append(r.Hosts, hostLoad(projectDir, h, prims))

@@ -1,6 +1,11 @@
 # Host support matrix
 
-How Keystone 5.0 reaches each host, per primitive kind. Every cell was checked
+> **Compat notice (6.0):** projection is opt-in. `keystone init` writes no
+> host files; `keystone target add <host>` opts one in. The query layer
+> (CLI + MCP + the AGENTS.md block) is the front door — this matrix covers
+> only the compatibility projection.
+
+How Keystone 6.0 reaches each host, per primitive kind. Every cell was checked
 against the host's own docs (or source, where marked) on **2026-11-05**. Hosts
 change fast: re-verify a row before changing its adapter, and update the date.
 

@@ -42,7 +42,7 @@ func measureFixture(t *testing.T, budgets map[string]config.BudgetSpec, adapters
 // TestMeasure_TwoTiersPerHost — a host loads its root files and the
 // listing of each skill it projects; bodies and path-scoped rules wait.
 func TestMeasure_TwoTiersPerHost(t *testing.T) {
-	r := measureFixture(t, nil, "codex")
+	r := measureFixture(t, nil, "claude-code", "codex")
 	always := map[string]int{}
 	for _, h := range r.Hosts {
 		always[h.Host] = h.Always
@@ -72,7 +72,7 @@ func TestMeasure_Caps(t *testing.T) {
 		AlwaysLoaded: {MaxTokens: 8},
 		"corpus":     {MaxTokensPerLoad: 50}, // 4.x port key → reference
 		"skills":     {MaxTokens: 1000},
-	})
+	}, "claude-code")
 	var scopes []string
 	for _, v := range r.Violations {
 		scopes = append(scopes, v.Scope)

@@ -32,10 +32,14 @@ func rootDests(outs []Output) string {
 
 func TestRootOutputs(t *testing.T) {
 	prims := walk(t, seedCharter(t))
-	if got := rootDests(RootOutputs(prims, Enabled(nil))); got != "block AGENTS.md|block CLAUDE.md" {
-		t.Errorf("default hosts: %s", got)
+	// 6.0: no adapters → only the AGENTS.md block; claude-code is opt-in.
+	if got := rootDests(RootOutputs(prims, Enabled(nil))); got != "block AGENTS.md" {
+		t.Errorf("no adapters: %s", got)
 	}
-	if got := rootDests(RootOutputs(prims, Enabled([]string{"aider"}))); got != "block AGENTS.md|block CLAUDE.md|shim .aider.conf.yml" {
+	if got := rootDests(RootOutputs(prims, Enabled([]string{"claude-code"}))); got != "block AGENTS.md|block CLAUDE.md" {
+		t.Errorf("claude-code opted in: %s", got)
+	}
+	if got := rootDests(RootOutputs(prims, Enabled([]string{"aider"}))); got != "block AGENTS.md|shim .aider.conf.yml" {
 		t.Errorf("with aider: %s", got)
 	}
 }

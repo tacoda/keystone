@@ -274,9 +274,11 @@ func Aider() Profile {
 var profiles = []func() Profile{ClaudeCode, Cursor, GitHubCopilot, Continue, OpenCode, Codex, Cline, Goose, Pi, Aider}
 
 // Enabled returns the profiles to project for keystone.json `adapters`, in
-// plan order. Claude Code is always included (the 4.x default).
+// plan order. 6.0: no host is projected unless it is listed — projection
+// is opt-in via `keystone target add` (the AGENTS.md block is written
+// separately and always).
 func Enabled(adapters []string) []Profile {
-	want := map[string]bool{"claude-code": true}
+	want := map[string]bool{}
 	for _, a := range adapters {
 		want[a] = true
 	}

@@ -30,8 +30,8 @@ func TestCustomHost_ProjectsByItsFile(t *testing.T) {
 	if !strings.Contains(md, "- **zed** — loads rules, skills by itself; open commands, agents from `.agents/` yourself; does **not** run hooks") {
 		t.Errorf("AGENTS.md zed line:\n%s", md)
 	}
-	if off, _ := HostsFor(root, nil); off[len(off)-1].Host == "zed" {
-		t.Error("a custom host not in adapters must not be enabled")
+	if off, _ := HostsFor(root, nil); len(off) != 0 {
+		t.Errorf("a custom host not in adapters must not be enabled: %v", off)
 	}
 }
 

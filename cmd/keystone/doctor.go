@@ -128,10 +128,28 @@ func runDoctor(args []string) error {
 		// Budget over-runs are warnings, not errors — never sets hadErrors.
 	}
 
+	printAdaptersState(absDir)
+
 	if hadErrors {
 		return fmt.Errorf("doctor found issues — see above")
 	}
 	return nil
+}
+
+// printAdaptersState reports configured host adapters as opt-in state
+// (6.0): keystone projects only for listed adapters, added via
+// `keystone target add`; until then only the AGENTS.md block exists.
+func printAdaptersState(projectDir string) {
+	cfg, err := config.ReadProjectConfig(projectDir)
+	if err != nil || cfg == nil {
+		return
+	}
+	if len(cfg.Adapters) == 0 {
+		fmt.Fprintln(os.Stdout, "✓ hosts: no adapters — projection is opt-in (`keystone target add <agent>`); only the AGENTS.md block exists")
+		return
+	}
+	fmt.Fprintf(os.Stdout, "▸ hosts: %d adapter(s) opted in (%s) — projected by `keystone project`\n",
+		len(cfg.Adapters), strings.Join(cfg.Adapters, ", "))
 }
 
 // runBudgetReport prints the context budget summary. Always informational

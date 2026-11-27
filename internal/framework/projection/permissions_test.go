@@ -128,7 +128,7 @@ func TestPermissions_ReportedNotDropped(t *testing.T) {
 // the project allow; Claude Code evaluates deny first, so deny wins.
 func TestPermissions_CascadeDenyReachesClaude(t *testing.T) {
 	root, prims := seedCascade(t)
-	if _, err := Apply(root, Plan(prims, Enabled(nil)).Outputs, nil, Options{Mode: LinkSymlink}); err != nil {
+	if _, err := Apply(root, Plan(prims, Enabled([]string{"claude-code"})).Outputs, nil, Options{Mode: LinkSymlink}); err != nil {
 		t.Fatal(err)
 	}
 	assertContains(t, root, ".claude/settings.json", `"deny": [`, `"allow": [`, "Bash(git push:*)")

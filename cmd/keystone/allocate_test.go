@@ -12,6 +12,7 @@ import (
 // root-file sections and settings hooks leave their files; everything else
 // in them stays, and a disabled host's original is kept.
 var overwriteFixture = map[string]string{
+	"keystone.json":              `{"version":"2","policies":[],"adapters":["claude-code"]}`,
 	"CLAUDE.md":                  "# P\n\n## Iron laws\n\n- Never push to main.\n\n## Go style\n\nFor `**/*.go`: wrap errors.\n",
 	".claude/agents/reviewer.md": "---\nname: reviewer\ndescription: Reviews.\ntools: Read\n---\nReview.\n",
 	".cursor/rules/ts.mdc":       "---\nglobs: \"**/*.ts\"\ndescription: TS\n---\nStrict.\n",

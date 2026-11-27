@@ -110,9 +110,14 @@ func AgentsMD(primitives []primitive.Primitive, hosts []Profile) string {
 }
 
 // writeHosts states, per enabled host, what it loads by itself and what
-// the agent must open from .agents/ by hand.
+// the agent must open from .agents/ by hand. With no hosts projected
+// (6.0 opt-in), it says so and points at `keystone target add`.
 func writeHosts(b *strings.Builder, primitives []primitive.Primitive, hosts []Profile) {
 	b.WriteString("\n## On each host\n\n")
+	if len(hosts) == 0 {
+		b.WriteString("No hosts projected — projection is opt-in: `keystone target add <agent>` (e.g. claude-code). Until then, AGENTS.md plus the index is the whole always-loaded surface.\n")
+		return
+	}
 	hooksOnHostEvents := len(claudecode.HostPhases(primitives)) > 0
 	rules := CollectRules(primitives)
 	for _, h := range hosts {

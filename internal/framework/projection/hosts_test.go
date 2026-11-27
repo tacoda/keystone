@@ -8,7 +8,7 @@ import (
 	"testing"
 )
 
-var allHosts = []string{"cursor", "github-copilot", "continue", "opencode", "codex", "cline", "goose", "pi", "aider"}
+var allHosts = []string{"claude-code", "cursor", "github-copilot", "continue", "opencode", "codex", "cline", "goose", "pi", "aider"}
 
 // TestHosts_PlanPerHost pins every host's outputs for the fixture charter
 // (one skill, one path-scoped rule, one command, one subagent).

@@ -95,7 +95,7 @@ func runInit(args []string, assets fs.FS) error {
 		return fmt.Errorf("install optional content: %w", err)
 	}
 
-	if err := initializeLockfile(absDir, flags.charterRoot, agents); err != nil {
+	if err := initializeLockfile(absDir, flags.charterRoot); err != nil {
 		return fmt.Errorf("initialize lockfile: %w", err)
 	}
 
@@ -200,7 +200,11 @@ func markFreshInstallMigrated(destDir string, lf *lockfile.Lockfile) {
 	}
 }
 
-func initializeLockfile(destDir, charterRoot string, agents []string) error {
+// initializeLockfile creates the lockfile at install. 6.0: the init-chosen
+// agent is a selection (recorded in INSTALL_PROFILE.md), not an installed
+// host — the lockfile's agents list is populated only by `keystone target
+// add`, which is what projects host files and records them as managed.
+func initializeLockfile(destDir, charterRoot string) error {
 	lf, err := ensureLockfile(destDir, charterRoot)
 	if err != nil {
 		return err
@@ -209,16 +213,6 @@ func initializeLockfile(destDir, charterRoot string, agents []string) error {
 	if lf.Keystone.Installed == "" {
 		lf.Keystone.Installed = time.Now().UTC().Format("2006-01-02")
 		markFreshInstallMigrated(destDir, lf)
-	}
-	seen := map[string]bool{}
-	for _, a := range lf.Keystone.Agents {
-		seen[a] = true
-	}
-	for _, a := range agents {
-		if !seen[a] {
-			lf.Keystone.Agents = append(lf.Keystone.Agents, a)
-			seen[a] = true
-		}
 	}
 	if err := lockfile.Write(destDir, lf); err != nil {
 		return err
@@ -283,22 +277,24 @@ func preflight(dir string) {
 
 // writeProjectConfigIfMissing creates keystone.json at the project root if
 // it doesn't exist yet. Re-running init never overwrites a user-edited
-// keystone.json — the user's policy tree is preserved.
-// The chosen agents become `adapters`, which selects the hosts `keystone
-// project` writes for; on an existing keystone.json they are only added.
+// keystone.json — the user's policy tree and adapters are preserved.
+//
+// 6.0: a fresh init writes an EMPTY adapters list. Host projection is
+// opt-in (`keystone target add <agent>`); init only ever writes the
+// charter, the state dir, keystone.json, and the AGENTS.md block.
 func writeProjectConfigIfMissing(projectDir string, agents []string) error {
 	if _, err := config.ReadProjectConfig(projectDir); err == nil {
 		fmt.Fprintf(os.Stdout, "  exists: %s (kept)\n", filepath.Join(projectDir, config.ProjectConfigFile))
-		return addAdapters(projectDir, agents)
+		return nil
 	} else if !errors.Is(err, os.ErrNotExist) {
 		return err
 	}
 	cfg := config.DefaultProjectConfig("")
-	cfg.Adapters = hostAdapters(agents)
+	cfg.Adapters = nil
 	if err := config.WriteProjectConfig(projectDir, cfg); err != nil {
 		return err
 	}
-	fmt.Fprintf(os.Stdout, "  wrote: %s\n", filepath.Join(projectDir, config.ProjectConfigFile))
+	fmt.Fprintf(os.Stdout, "  wrote: %s (adapters empty — host projection is opt-in: `keystone target add <agent>`)\n", filepath.Join(projectDir, config.ProjectConfigFile))
 	return nil
 }
 
@@ -424,9 +420,11 @@ func printNextSteps(agents []string, charterRoot string) {
 %s
 Also:
 
-  • Read %s/README.md for an overview: rules, references, hooks,
-    permissions, evals, skills, commands, agents, tools, documents.
+  • Read %s/README.md for an overview: rules, references, corpus, hooks,
+    permissions, evals, skills, commands, agents, documents.
   • Review %s/references/state/INSTALL_PROFILE.md and adjust if needed.
-  • Commit %s/ and any agent-specific files this installer created.
-`, list, bootstrapIn, charterRoot, charterRoot, charterRoot, lifecycle, charterRoot, charterRoot, charterRoot)
+  • Host projection is opt-in: "keystone target add <agent>" projects a
+    host's files (e.g. .claude/); until then only the AGENTS.md block exists.
+  • Commit %s/ and %s.
+`, list, bootstrapIn, charterRoot, charterRoot, charterRoot, lifecycle, charterRoot, charterRoot, charterRoot, config.StateRoot)
 }

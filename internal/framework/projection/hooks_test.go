@@ -58,7 +58,7 @@ func TestHookBridges_Warnings(t *testing.T) {
 	root := seedCharter(t)
 	write(t, root, map[string]string{".agents/hooks/notify.md": "---\nid: notify\ndescription: x\nmode: computational\nevent: Notification\nrun: \"true\"\n---\n"})
 	var msgs []string
-	for _, w := range Plan(walk(t, root), Enabled([]string{"cursor", "github-copilot"})).Warnings {
+	for _, w := range Plan(walk(t, root), Enabled([]string{"claude-code", "cursor", "github-copilot"})).Warnings {
 		msgs = append(msgs, w.Host+": "+w.Message)
 	}
 	all := strings.Join(msgs, "\n")
