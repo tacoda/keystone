@@ -24,11 +24,17 @@ const learningInbox = ".keystone/learning/inbox"
 // defines — one shape, every writer.
 func runLearn(args []string) error {
 	slug := ""
-	var source, layer, body string
+	var source, layer, body, dir string
 	var globs []string
 	for i := 0; i < len(args); i++ {
 		a := args[i]
 		switch {
+		case a == "--dir":
+			i++
+			if i >= len(args) {
+				return fmt.Errorf("--dir requires a value")
+			}
+			dir = args[i]
 		case a == "--source":
 			i++
 			if i >= len(args) {
@@ -62,6 +68,8 @@ func runLearn(args []string) error {
 			} else {
 				body = args[i]
 			}
+		case strings.HasPrefix(a, "--dir="):
+			dir = strings.TrimPrefix(a, "--dir=")
 		case strings.HasPrefix(a, "--source="):
 			source = strings.TrimPrefix(a, "--source=")
 		case strings.HasPrefix(a, "--layer="):
@@ -91,7 +99,10 @@ func runLearn(args []string) error {
 		return fmt.Errorf("--layer %q %s", layer, inv)
 	}
 
-	absDir, err := filepath.Abs(".")
+	if dir == "" {
+		dir = "."
+	}
+	absDir, err := filepath.Abs(dir)
 	if err != nil {
 		return err
 	}
@@ -130,7 +141,7 @@ func runLearn(args []string) error {
 // first, one line per candidate. Promotion is synthesize's judgment, not
 // a command.
 func runLearningList(args []string) error {
-	absDir, err := filepath.Abs(".")
+	absDir, err := filepath.Abs(dirArg(args))
 	if err != nil {
 		return err
 	}

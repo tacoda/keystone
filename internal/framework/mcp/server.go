@@ -111,7 +111,7 @@ event:, like a skill declares triggers:
 
   keystone_new_<kind>          Scaffold a new primitive. <kind> is one of
                                rule, reference, corpus, hook, permission, eval,
-                               skill, command, agent, tool, document,
+                               skill, command, agent, document,
                                adapter, policy.
   keystone_charter_move        Relocate a primitive; rewrite citations; re-index.
   keystone_charter_promote     corpus → reference → rule, one step up.
@@ -120,6 +120,16 @@ event:, like a skill declares triggers:
   keystone_target_add          Add another host.
   keystone_index_refresh       Rebuild .keystone/INDEX.json.
   keystone_project_refresh     Regenerate every host's projection.
+
+## Charter hygiene (flywheels — each shells out to the keystone binary)
+
+  keystone_learn               Capture a learning candidate to the inbox.
+  keystone_synthesize          Promote accepted inbox candidates to their
+                               proposed layer; re-indexes (dry_run to preview).
+  keystone_audit               Dual-flywheel report as JSON: inbox candidates
+                               + pruning candidates (uncited/unscoped/untriggered).
+  keystone_mode [mode]         Read or set the pacing mode
+                               (paired / solo / autopilot).
 
 ## Resources
 
@@ -168,6 +178,7 @@ func New(opts Options) (*server.MCPServer, error) {
 
 	registerTools(s, abs)
 	registerWriteTools(s, abs)
+	registerFlywheelTools(s, abs)
 	registerResources(s, abs)
 	registerSkillResources(s, abs)
 	registerPrompts(s, abs)
