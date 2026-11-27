@@ -1,7 +1,617 @@
 {
-  "version": "5.0",
-  "generated": "2026-11-06T16:22:30Z",
+  "version": "6.0",
+  "generated": "2026-11-27T18:40:13Z",
   "primitives": [
+    {
+      "kind": "agent",
+      "id": "auditor",
+      "description": "Dual-flywheel auditor — captures learning candidates and prunes dead rules from the charter.",
+      "tools": [
+        "Read",
+        "Grep",
+        "Glob",
+        "Bash"
+      ],
+      "model": "opus",
+      "tags": [
+        "audit",
+        "flywheel"
+      ],
+      "path": ".agents/agents/auditor.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "agent",
+      "id": "bootstrap-scout",
+      "description": "Stack detector that seeds the initial charter state from a fresh repo.",
+      "tools": [
+        "Read",
+        "Grep",
+        "Glob",
+        "Bash"
+      ],
+      "model": "sonnet",
+      "tags": [
+        "scaffold",
+        "bootstrap"
+      ],
+      "path": ".agents/agents/bootstrap-scout.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "agent",
+      "id": "charter-debt",
+      "description": "Surfaces debt in the charter itself — content that exists but isn't earning its keep.",
+      "tools": [
+        "Read",
+        "Grep"
+      ],
+      "tags": [
+        "llm-judgment"
+      ],
+      "path": ".agents/agents/charter-debt.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "agent",
+      "id": "code-debt",
+      "description": "Surfaces and categorizes debt in the codebase — the known-suboptimal code the team has chosen to live with, plus the shape of any new deb...",
+      "tools": [
+        "Read",
+        "Grep"
+      ],
+      "tags": [
+        "llm-judgment"
+      ],
+      "path": ".agents/agents/code-debt.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "agent",
+      "id": "code-reviewer",
+      "description": "General code reviewer that runs the four review checks on the current diff and surfaces findings.",
+      "tools": [
+        "Read",
+        "Grep",
+        "Bash"
+      ],
+      "model": "opus",
+      "tags": [
+        "review",
+        "composition"
+      ],
+      "path": ".agents/agents/code-reviewer.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "agent",
+      "id": "debt-reviewer",
+      "description": "Triages the code-debt ledger and recommends which entries to action this cycle.",
+      "tools": [
+        "Read",
+        "Grep",
+        "Bash"
+      ],
+      "model": "sonnet",
+      "tags": [
+        "review",
+        "composition"
+      ],
+      "path": ".agents/agents/debt-reviewer.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "agent",
+      "id": "drift-reviewer",
+      "description": "Drift reviewer — flags places the current diff drifts from loaded charter rules.",
+      "tools": [
+        "Read",
+        "Grep",
+        "Bash"
+      ],
+      "model": "sonnet",
+      "tags": [
+        "review",
+        "composition"
+      ],
+      "path": ".agents/agents/drift-reviewer.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "agent",
+      "id": "learning-curator",
+      "description": "Captures a learning candidate from a surprise, incident, or review finding into .keystone/learning/inbox/.",
+      "tools": [
+        "Read",
+        "Grep"
+      ],
+      "model": "opus",
+      "tags": [
+        "audit",
+        "flywheel",
+        "learning"
+      ],
+      "path": ".agents/agents/learning-curator.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "agent",
+      "id": "mode-switcher",
+      "description": "Pacing-mode coordinator — switches the charter between paired, solo, and autopilot.",
+      "tools": [
+        "Read",
+        "Write"
+      ],
+      "model": "sonnet",
+      "tags": [
+        "mode"
+      ],
+      "path": ".agents/agents/mode-switcher.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "agent",
+      "id": "planner",
+      "description": "Planning scout — loads codebase state and matching idioms for the touched region, then sketches a plan.",
+      "tools": [
+        "Read",
+        "Grep",
+        "Glob"
+      ],
+      "model": "opus",
+      "tags": [
+        "planning"
+      ],
+      "path": ".agents/agents/planner.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "agent",
+      "id": "quality-radar",
+      "description": "Aggregates verification hooks and review subagents into a five-dimension scorecard for the current diff (or the whole codebase, on audit).",
+      "tools": [
+        "Read",
+        "Grep"
+      ],
+      "tags": [
+        "llm-judgment"
+      ],
+      "path": ".agents/agents/quality-radar.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "agent",
+      "id": "review-deployment",
+      "description": "An agent reads the diff and reports deployment considerations — schema migration safety (expand-contract), feature-flag gating, environme...",
+      "tools": [
+        "Read",
+        "Grep"
+      ],
+      "tags": [
+        "llm-judgment"
+      ],
+      "path": ".agents/agents/review-deployment.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "agent",
+      "id": "review-functional",
+      "description": "An agent reads the diff and reports logic, correctness, and behavior issues.",
+      "tools": [
+        "Read",
+        "Grep"
+      ],
+      "tags": [
+        "llm-judgment"
+      ],
+      "path": ".agents/agents/review-functional.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "agent",
+      "id": "review-risk",
+      "description": "An agent reads the diff and reports risk concerns — blast radius, reversibility, hot-spot regions, fan-out and shared-state coupling, irr...",
+      "tools": [
+        "Read",
+        "Grep"
+      ],
+      "tags": [
+        "llm-judgment"
+      ],
+      "path": ".agents/agents/review-risk.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "agent",
+      "id": "review-security",
+      "description": "An agent reads the diff and reports security concerns — injection, auth, secrets, unsafe deserialization, weak crypto, missing authorizat...",
+      "tools": [
+        "Read",
+        "Grep"
+      ],
+      "tags": [
+        "llm-judgment"
+      ],
+      "path": ".agents/agents/review-security.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "agent",
+      "id": "security-reviewer",
+      "description": "Security-focused PR reviewer that hunts OWASP-top-10 patterns and unsafe defaults.",
+      "tools": [
+        "Read",
+        "Grep",
+        "Bash",
+        "Glob"
+      ],
+      "model": "opus",
+      "tags": [
+        "review",
+        "composition"
+      ],
+      "path": ".agents/agents/security-reviewer.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "agent",
+      "id": "spec-author",
+      "description": "Captures intent and acceptance criteria for a unit of work — first step on any task.",
+      "tools": [
+        "Read",
+        "Grep",
+        "Write"
+      ],
+      "model": "opus",
+      "tags": [
+        "planning",
+        "spec"
+      ],
+      "path": ".agents/agents/spec-author.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "agent",
+      "id": "synthesizer",
+      "description": "Promotes learning-inbox candidates into the right reference or rule layer.",
+      "tools": [
+        "Read",
+        "Grep",
+        "Write"
+      ],
+      "model": "opus",
+      "tags": [
+        "audit",
+        "flywheel",
+        "synthesis"
+      ],
+      "path": ".agents/agents/synthesizer.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "agent",
+      "id": "tracker-card-fetcher",
+      "description": "Fetches a tracker card from Jira / Linear / GitHub Issues / Asana via whatever tracker integration the agent has (MCP server, CLI, policy...",
+      "tools": [
+        "Read",
+        "Grep"
+      ],
+      "tags": [
+        "llm-judgment"
+      ],
+      "path": ".agents/agents/tracker-card-fetcher.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "agent",
+      "id": "verifier",
+      "description": "Runs the verification hooks (lint, type-check, test, build, drift, commit-message) and reports the gate.",
+      "tools": [
+        "Read",
+        "Grep",
+        "Bash"
+      ],
+      "model": "sonnet",
+      "tags": [
+        "verification"
+      ],
+      "path": ".agents/agents/verifier.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "corpus",
+      "id": "docs/adr/0001-naming",
+      "description": "0001 — Naming",
+      "path": "docs/adr/0001-naming.md",
+      "provenance": "repo"
+    },
+    {
+      "kind": "corpus",
+      "id": "docs/adr/0002-framework-client-boundary",
+      "description": "0002 — Framework / client boundary",
+      "path": "docs/adr/0002-framework-client-boundary.md",
+      "provenance": "repo"
+    },
+    {
+      "kind": "corpus",
+      "id": "docs/adr/0003-ports-and-adapters",
+      "description": "0003 — Ports and adapters",
+      "path": "docs/adr/0003-ports-and-adapters.md",
+      "provenance": "repo"
+    },
+    {
+      "kind": "corpus",
+      "id": "docs/adr/0004-cascade-and-json-config",
+      "description": "0004 — Cascade and JSON config",
+      "path": "docs/adr/0004-cascade-and-json-config.md",
+      "provenance": "repo"
+    },
+    {
+      "kind": "corpus",
+      "id": "docs/adr/0005-conventions-not-plugins",
+      "description": "0005 — Conventions, not plugins",
+      "path": "docs/adr/0005-conventions-not-plugins.md",
+      "provenance": "repo"
+    },
+    {
+      "kind": "corpus",
+      "id": "docs/adr/0006-vendored-readonly-plugins",
+      "description": "0006 — Vendored read-only plugins",
+      "path": "docs/adr/0006-vendored-readonly-plugins.md",
+      "provenance": "repo"
+    },
+    {
+      "kind": "corpus",
+      "id": "docs/adr/0007-no-backward-compat-at-1.0",
+      "description": "0007 — No backward compatibility at 1.0",
+      "path": "docs/adr/0007-no-backward-compat-at-1.0.md",
+      "provenance": "repo"
+    },
+    {
+      "kind": "corpus",
+      "id": "docs/adr/0008-versioning-policy",
+      "description": "0008 — Versioning policy",
+      "path": "docs/adr/0008-versioning-policy.md",
+      "provenance": "repo"
+    },
+    {
+      "kind": "corpus",
+      "id": "docs/adr/0009-charter-rebrand-and-signals",
+      "description": "0009 — Charter rebrand + signals (4.0)",
+      "path": "docs/adr/0009-charter-rebrand-and-signals.md",
+      "provenance": "repo"
+    },
+    {
+      "kind": "corpus",
+      "id": "docs/adr/0010-constraints-and-capabilities",
+      "description": "0010: Constraints and capabilities, standard vocabulary (5.0)",
+      "path": "docs/adr/0010-constraints-and-capabilities.md",
+      "provenance": "repo"
+    },
+    {
+      "kind": "corpus",
+      "id": "docs/agents/domain",
+      "description": "Domain Docs",
+      "path": "docs/agents/domain.md",
+      "provenance": "repo"
+    },
+    {
+      "kind": "corpus",
+      "id": "docs/agents/issue-tracker",
+      "description": "Issue tracker: GitHub",
+      "path": "docs/agents/issue-tracker.md",
+      "provenance": "repo"
+    },
+    {
+      "kind": "corpus",
+      "id": "docs/agents/triage-labels",
+      "description": "Triage Labels",
+      "path": "docs/agents/triage-labels.md",
+      "provenance": "repo"
+    },
+    {
+      "kind": "corpus",
+      "id": "docs/compatibility",
+      "description": "Keystone compatibility",
+      "path": "docs/compatibility.md",
+      "provenance": "repo"
+    },
+    {
+      "kind": "corpus",
+      "id": "docs/conventions",
+      "description": "Keystone conventions",
+      "path": "docs/conventions.md",
+      "provenance": "repo"
+    },
+    {
+      "kind": "corpus",
+      "id": "docs/hosts",
+      "description": "Host support matrix",
+      "path": "docs/hosts.md",
+      "provenance": "repo"
+    },
+    {
+      "kind": "corpus",
+      "id": "docs/internals/budget",
+      "description": "Context budget",
+      "path": "docs/internals/budget.md",
+      "provenance": "repo"
+    },
+    {
+      "kind": "corpus",
+      "id": "docs/internals/flywheel-sink",
+      "description": "Flywheel sinks",
+      "path": "docs/internals/flywheel-sink.md",
+      "provenance": "repo"
+    },
+    {
+      "kind": "corpus",
+      "id": "docs/internals/host-docs",
+      "description": "Host docs",
+      "path": "docs/internals/host-docs.md",
+      "provenance": "repo"
+    },
+    {
+      "kind": "corpus",
+      "id": "docs/internals/patch",
+      "description": "Patch (retired)",
+      "path": "docs/internals/patch.md",
+      "provenance": "repo"
+    },
+    {
+      "kind": "corpus",
+      "id": "docs/internals/state-ledger",
+      "description": "State ledgers",
+      "path": "docs/internals/state-ledger.md",
+      "provenance": "repo"
+    },
+    {
+      "kind": "corpus",
+      "id": "docs/kinds/agent",
+      "description": "Agent",
+      "path": "docs/kinds/agent.md",
+      "provenance": "repo"
+    },
+    {
+      "kind": "corpus",
+      "id": "docs/kinds/command",
+      "description": "Command",
+      "path": "docs/kinds/command.md",
+      "provenance": "repo"
+    },
+    {
+      "kind": "corpus",
+      "id": "docs/kinds/corpus",
+      "description": "Corpus",
+      "path": "docs/kinds/corpus.md",
+      "provenance": "repo"
+    },
+    {
+      "kind": "corpus",
+      "id": "docs/kinds/document",
+      "description": "Document",
+      "path": "docs/kinds/document.md",
+      "provenance": "repo"
+    },
+    {
+      "kind": "corpus",
+      "id": "docs/kinds/eval",
+      "description": "Eval",
+      "path": "docs/kinds/eval.md",
+      "provenance": "repo"
+    },
+    {
+      "kind": "corpus",
+      "id": "docs/kinds/hook",
+      "description": "Hook",
+      "path": "docs/kinds/hook.md",
+      "provenance": "repo"
+    },
+    {
+      "kind": "corpus",
+      "id": "docs/kinds/permission",
+      "description": "Permission",
+      "path": "docs/kinds/permission.md",
+      "provenance": "repo"
+    },
+    {
+      "kind": "corpus",
+      "id": "docs/kinds/readme",
+      "description": "Primitives",
+      "path": "docs/kinds/README.md",
+      "provenance": "repo"
+    },
+    {
+      "kind": "corpus",
+      "id": "docs/kinds/reference",
+      "description": "Reference",
+      "path": "docs/kinds/reference.md",
+      "provenance": "repo"
+    },
+    {
+      "kind": "corpus",
+      "id": "docs/kinds/rule",
+      "description": "Rule",
+      "path": "docs/kinds/rule.md",
+      "provenance": "repo"
+    },
+    {
+      "kind": "corpus",
+      "id": "docs/kinds/skill",
+      "description": "Skill",
+      "path": "docs/kinds/skill.md",
+      "provenance": "repo"
+    },
+    {
+      "kind": "corpus",
+      "id": "docs/plans/2026-06-09-guide-scoping",
+      "description": "Plan — Guide scoping (path-narrowed activation)",
+      "path": "docs/plans/2026-06-09-guide-scoping.md",
+      "provenance": "repo"
+    },
+    {
+      "kind": "corpus",
+      "id": "docs/plans/2026-11-21-context-drift",
+      "description": "Plan — context drift (`keystone drift`)",
+      "path": "docs/plans/2026-11-21-context-drift.md",
+      "provenance": "repo"
+    },
+    {
+      "kind": "corpus",
+      "id": "docs/plans/2026-11-21-context-framework",
+      "description": "Plan — Keystone 6.0: the context framework",
+      "path": "docs/plans/2026-11-21-context-framework.md",
+      "provenance": "repo"
+    },
+    {
+      "kind": "corpus",
+      "id": "docs/plans/2026-11-27-6.0-wrap-up",
+      "description": "Plan — Keystone 6.0 wrap-up (path to publishing 6.0.0)",
+      "path": "docs/plans/2026-11-27-6.0-wrap-up.md",
+      "provenance": "repo"
+    },
+    {
+      "kind": "corpus",
+      "id": "docs/specs/2026-06-18-gin-and-async-investigate",
+      "description": "Adopt gin for the web dashboard + stop expensive handlers from hanging the server",
+      "path": "docs/specs/2026-06-18-gin-and-async-investigate.md",
+      "provenance": "repo"
+    },
+    {
+      "kind": "corpus",
+      "id": "docs/specs/2026-06-18-web-dashboard-spa",
+      "description": "Web dashboard — HTMX SPA, consolidated, observability-first",
+      "path": "docs/specs/2026-06-18-web-dashboard-spa.md",
+      "provenance": "repo"
+    },
+    {
+      "kind": "corpus",
+      "id": "docs/specs/2026-11-21-context-framework",
+      "description": "Keystone 6.0 — the context framework",
+      "path": "docs/specs/2026-11-21-context-framework.md",
+      "provenance": "repo"
+    },
+    {
+      "kind": "corpus",
+      "id": "docs/upgrade-0.x-to-1.0",
+      "description": "Upgrading from 0.x to 1.0",
+      "path": "docs/upgrade-0.x-to-1.0.md",
+      "provenance": "repo"
+    },
+    {
+      "kind": "corpus",
+      "id": "docs/upgrade-4.x-to-5.0",
+      "description": "Upgrading from 4.x to 5.0",
+      "path": "docs/upgrade-4.x-to-5.0.md",
+      "provenance": "repo"
+    },
+    {
+      "kind": "corpus",
+      "id": "glossary",
+      "description": "Glossary",
+      "path": "GLOSSARY.md",
+      "provenance": "repo"
+    },
     {
       "kind": "hook",
       "id": "build",
@@ -26,6 +636,48 @@
         "computational"
       ],
       "path": ".agents/hooks/commit-message.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "hook",
+      "id": "computational/go-vet",
+      "description": "go vet — suspicious-construct check.",
+      "paths": [
+        "cmd/**/*.go",
+        "internal/**/*.go"
+      ],
+      "mode": "computational",
+      "event": "PostToolUse",
+      "run": "command -v go \u003e/dev/null 2\u003e\u00261 \u0026\u0026 go vet ./... || true",
+      "path": ".agents/hooks/computational/go-vet.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "hook",
+      "id": "computational/gofmt",
+      "description": "gofmt — canonical Go formatting.",
+      "paths": [
+        "cmd/**/*.go",
+        "internal/**/*.go"
+      ],
+      "mode": "computational",
+      "event": "PostToolUse",
+      "run": "command -v gofmt \u003e/dev/null 2\u003e\u00261 \u0026\u0026 test -z \"$(gofmt -l cmd internal)\" || true",
+      "path": ".agents/hooks/computational/gofmt.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "hook",
+      "id": "computational/gopls",
+      "description": "gopls — Go LSP for in-editor signal.",
+      "paths": [
+        "cmd/**/*.go",
+        "internal/**/*.go"
+      ],
+      "mode": "computational",
+      "event": "PostToolUse",
+      "run": "command -v gopls \u003e/dev/null 2\u003e\u00261 \u0026\u0026 gopls version \u003e/dev/null 2\u003e\u00261 || true",
+      "path": ".agents/hooks/computational/gopls.md",
       "provenance": "project"
     },
     {
@@ -290,48 +942,6 @@
     },
     {
       "kind": "rule",
-      "id": "guides/computational/go-vet",
-      "description": "go vet — suspicious-construct check.",
-      "paths": [
-        "cmd/**/*.go",
-        "internal/**/*.go"
-      ],
-      "mode": "computational",
-      "event": "PostToolUse",
-      "run": "command -v go \u003e/dev/null 2\u003e\u00261 \u0026\u0026 go vet ./... || true",
-      "path": ".agents/rules/computational/go-vet.md",
-      "provenance": "project"
-    },
-    {
-      "kind": "rule",
-      "id": "guides/computational/gofmt",
-      "description": "gofmt — canonical Go formatting.",
-      "paths": [
-        "cmd/**/*.go",
-        "internal/**/*.go"
-      ],
-      "mode": "computational",
-      "event": "PostToolUse",
-      "run": "command -v gofmt \u003e/dev/null 2\u003e\u00261 \u0026\u0026 test -z \"$(gofmt -l cmd internal)\" || true",
-      "path": ".agents/rules/computational/gofmt.md",
-      "provenance": "project"
-    },
-    {
-      "kind": "rule",
-      "id": "guides/computational/gopls",
-      "description": "gopls — Go LSP for in-editor signal.",
-      "paths": [
-        "cmd/**/*.go",
-        "internal/**/*.go"
-      ],
-      "mode": "computational",
-      "event": "PostToolUse",
-      "run": "command -v gopls \u003e/dev/null 2\u003e\u00261 \u0026\u0026 gopls version \u003e/dev/null 2\u003e\u00261 || true",
-      "path": ".agents/rules/computational/gopls.md",
-      "provenance": "project"
-    },
-    {
-      "kind": "rule",
       "id": "guides/idioms/charter-content/primitive-shape",
       "description": "Frontmatter, canonical paths, rule/reference pairing, paths: scoping.",
       "paths": [
@@ -424,6 +1034,13 @@
       "id": "process/implementation",
       "description": "The phase where code gets written, test-first.",
       "path": ".agents/rules/process/implementation.md",
+      "provenance": "project"
+    },
+    {
+      "kind": "rule",
+      "id": "process/iron-laws",
+      "description": "Iron laws (every phase) + the cascade override rule — moved here from the generated AGENTS.md block at 6.0",
+      "path": ".agents/rules/process/iron-laws.md",
       "provenance": "project"
     },
     {
@@ -851,328 +1468,81 @@
       "model": "opus",
       "path": ".agents/skills/task/SKILL.md",
       "provenance": "project"
-    },
-    {
-      "kind": "subagent",
-      "id": "auditor",
-      "description": "Dual-flywheel auditor — captures learning candidates and prunes dead rules from the charter.",
-      "tools": [
-        "Read",
-        "Grep",
-        "Glob",
-        "Bash"
-      ],
-      "model": "opus",
-      "tags": [
-        "audit",
-        "flywheel"
-      ],
-      "path": ".agents/agents/auditor.md",
-      "provenance": "project"
-    },
-    {
-      "kind": "subagent",
-      "id": "bootstrap-scout",
-      "description": "Stack detector that seeds the initial charter state from a fresh repo.",
-      "tools": [
-        "Read",
-        "Grep",
-        "Glob",
-        "Bash"
-      ],
-      "model": "sonnet",
-      "tags": [
-        "scaffold",
-        "bootstrap"
-      ],
-      "path": ".agents/agents/bootstrap-scout.md",
-      "provenance": "project"
-    },
-    {
-      "kind": "subagent",
-      "id": "charter-debt",
-      "description": "Surfaces debt in the charter itself — content that exists but isn't earning its keep.",
-      "tools": [
-        "Read",
-        "Grep"
-      ],
-      "tags": [
-        "llm-judgment"
-      ],
-      "path": ".agents/agents/charter-debt.md",
-      "provenance": "project"
-    },
-    {
-      "kind": "subagent",
-      "id": "code-debt",
-      "description": "Surfaces and categorizes debt in the codebase — the known-suboptimal code the team has chosen to live with, plus the shape of any new deb...",
-      "tools": [
-        "Read",
-        "Grep"
-      ],
-      "tags": [
-        "llm-judgment"
-      ],
-      "path": ".agents/agents/code-debt.md",
-      "provenance": "project"
-    },
-    {
-      "kind": "subagent",
-      "id": "code-reviewer",
-      "description": "General code reviewer that runs the four review checks on the current diff and surfaces findings.",
-      "tools": [
-        "Read",
-        "Grep",
-        "Bash"
-      ],
-      "model": "opus",
-      "tags": [
-        "review",
-        "composition"
-      ],
-      "path": ".agents/agents/code-reviewer.md",
-      "provenance": "project"
-    },
-    {
-      "kind": "subagent",
-      "id": "debt-reviewer",
-      "description": "Triages the code-debt ledger and recommends which entries to action this cycle.",
-      "tools": [
-        "Read",
-        "Grep",
-        "Bash"
-      ],
-      "model": "sonnet",
-      "tags": [
-        "review",
-        "composition"
-      ],
-      "path": ".agents/agents/debt-reviewer.md",
-      "provenance": "project"
-    },
-    {
-      "kind": "subagent",
-      "id": "drift-reviewer",
-      "description": "Drift reviewer — flags places the current diff drifts from loaded charter rules.",
-      "tools": [
-        "Read",
-        "Grep",
-        "Bash"
-      ],
-      "model": "sonnet",
-      "tags": [
-        "review",
-        "composition"
-      ],
-      "path": ".agents/agents/drift-reviewer.md",
-      "provenance": "project"
-    },
-    {
-      "kind": "subagent",
-      "id": "learning-curator",
-      "description": "Captures a learning candidate from a surprise, incident, or review finding into .keystone/learning/inbox/.",
-      "tools": [
-        "Read",
-        "Grep"
-      ],
-      "model": "opus",
-      "tags": [
-        "audit",
-        "flywheel",
-        "learning"
-      ],
-      "path": ".agents/agents/learning-curator.md",
-      "provenance": "project"
-    },
-    {
-      "kind": "subagent",
-      "id": "mode-switcher",
-      "description": "Pacing-mode coordinator — switches the charter between paired, solo, and autopilot.",
-      "tools": [
-        "Read",
-        "Write"
-      ],
-      "model": "sonnet",
-      "tags": [
-        "mode"
-      ],
-      "path": ".agents/agents/mode-switcher.md",
-      "provenance": "project"
-    },
-    {
-      "kind": "subagent",
-      "id": "planner",
-      "description": "Planning scout — loads codebase state and matching idioms for the touched region, then sketches a plan.",
-      "tools": [
-        "Read",
-        "Grep",
-        "Glob"
-      ],
-      "model": "opus",
-      "tags": [
-        "planning"
-      ],
-      "path": ".agents/agents/planner.md",
-      "provenance": "project"
-    },
-    {
-      "kind": "subagent",
-      "id": "quality-radar",
-      "description": "Aggregates verification hooks and review subagents into a five-dimension scorecard for the current diff (or the whole codebase, on audit).",
-      "tools": [
-        "Read",
-        "Grep"
-      ],
-      "tags": [
-        "llm-judgment"
-      ],
-      "path": ".agents/agents/quality-radar.md",
-      "provenance": "project"
-    },
-    {
-      "kind": "subagent",
-      "id": "review-deployment",
-      "description": "An agent reads the diff and reports deployment considerations — schema migration safety (expand-contract), feature-flag gating, environme...",
-      "tools": [
-        "Read",
-        "Grep"
-      ],
-      "tags": [
-        "llm-judgment"
-      ],
-      "path": ".agents/agents/review-deployment.md",
-      "provenance": "project"
-    },
-    {
-      "kind": "subagent",
-      "id": "review-functional",
-      "description": "An agent reads the diff and reports logic, correctness, and behavior issues.",
-      "tools": [
-        "Read",
-        "Grep"
-      ],
-      "tags": [
-        "llm-judgment"
-      ],
-      "path": ".agents/agents/review-functional.md",
-      "provenance": "project"
-    },
-    {
-      "kind": "subagent",
-      "id": "review-risk",
-      "description": "An agent reads the diff and reports risk concerns — blast radius, reversibility, hot-spot regions, fan-out and shared-state coupling, irr...",
-      "tools": [
-        "Read",
-        "Grep"
-      ],
-      "tags": [
-        "llm-judgment"
-      ],
-      "path": ".agents/agents/review-risk.md",
-      "provenance": "project"
-    },
-    {
-      "kind": "subagent",
-      "id": "review-security",
-      "description": "An agent reads the diff and reports security concerns — injection, auth, secrets, unsafe deserialization, weak crypto, missing authorizat...",
-      "tools": [
-        "Read",
-        "Grep"
-      ],
-      "tags": [
-        "llm-judgment"
-      ],
-      "path": ".agents/agents/review-security.md",
-      "provenance": "project"
-    },
-    {
-      "kind": "subagent",
-      "id": "security-reviewer",
-      "description": "Security-focused PR reviewer that hunts OWASP-top-10 patterns and unsafe defaults.",
-      "tools": [
-        "Read",
-        "Grep",
-        "Bash",
-        "Glob"
-      ],
-      "model": "opus",
-      "tags": [
-        "review",
-        "composition"
-      ],
-      "path": ".agents/agents/security-reviewer.md",
-      "provenance": "project"
-    },
-    {
-      "kind": "subagent",
-      "id": "spec-author",
-      "description": "Captures intent and acceptance criteria for a unit of work — first step on any task.",
-      "tools": [
-        "Read",
-        "Grep",
-        "Write"
-      ],
-      "model": "opus",
-      "tags": [
-        "planning",
-        "spec"
-      ],
-      "path": ".agents/agents/spec-author.md",
-      "provenance": "project"
-    },
-    {
-      "kind": "subagent",
-      "id": "synthesizer",
-      "description": "Promotes learning-inbox candidates into the right reference or rule layer.",
-      "tools": [
-        "Read",
-        "Grep",
-        "Write"
-      ],
-      "model": "opus",
-      "tags": [
-        "audit",
-        "flywheel",
-        "synthesis"
-      ],
-      "path": ".agents/agents/synthesizer.md",
-      "provenance": "project"
-    },
-    {
-      "kind": "subagent",
-      "id": "tracker-card-fetcher",
-      "description": "Fetches a tracker card from Jira / Linear / GitHub Issues / Asana via whatever tracker integration the agent has (MCP server, CLI, policy...",
-      "tools": [
-        "Read",
-        "Grep"
-      ],
-      "tags": [
-        "llm-judgment"
-      ],
-      "path": ".agents/agents/tracker-card-fetcher.md",
-      "provenance": "project"
-    },
-    {
-      "kind": "subagent",
-      "id": "verifier",
-      "description": "Runs the verification hooks (lint, type-check, test, build, drift, commit-message) and reports the gate.",
-      "tools": [
-        "Read",
-        "Grep",
-        "Bash"
-      ],
-      "model": "sonnet",
-      "tags": [
-        "verification"
-      ],
-      "path": ".agents/agents/verifier.md",
-      "provenance": "project"
     }
   ],
   "by_kind": {
+    "agent": [
+      "auditor",
+      "bootstrap-scout",
+      "charter-debt",
+      "code-debt",
+      "code-reviewer",
+      "debt-reviewer",
+      "drift-reviewer",
+      "learning-curator",
+      "mode-switcher",
+      "planner",
+      "quality-radar",
+      "review-deployment",
+      "review-functional",
+      "review-risk",
+      "review-security",
+      "security-reviewer",
+      "spec-author",
+      "synthesizer",
+      "tracker-card-fetcher",
+      "verifier"
+    ],
+    "corpus": [
+      "docs/adr/0001-naming",
+      "docs/adr/0002-framework-client-boundary",
+      "docs/adr/0003-ports-and-adapters",
+      "docs/adr/0004-cascade-and-json-config",
+      "docs/adr/0005-conventions-not-plugins",
+      "docs/adr/0006-vendored-readonly-plugins",
+      "docs/adr/0007-no-backward-compat-at-1.0",
+      "docs/adr/0008-versioning-policy",
+      "docs/adr/0009-charter-rebrand-and-signals",
+      "docs/adr/0010-constraints-and-capabilities",
+      "docs/agents/domain",
+      "docs/agents/issue-tracker",
+      "docs/agents/triage-labels",
+      "docs/compatibility",
+      "docs/conventions",
+      "docs/hosts",
+      "docs/internals/budget",
+      "docs/internals/flywheel-sink",
+      "docs/internals/host-docs",
+      "docs/internals/patch",
+      "docs/internals/state-ledger",
+      "docs/kinds/agent",
+      "docs/kinds/command",
+      "docs/kinds/corpus",
+      "docs/kinds/document",
+      "docs/kinds/eval",
+      "docs/kinds/hook",
+      "docs/kinds/permission",
+      "docs/kinds/readme",
+      "docs/kinds/reference",
+      "docs/kinds/rule",
+      "docs/kinds/skill",
+      "docs/plans/2026-06-09-guide-scoping",
+      "docs/plans/2026-11-21-context-drift",
+      "docs/plans/2026-11-21-context-framework",
+      "docs/plans/2026-11-27-6.0-wrap-up",
+      "docs/specs/2026-06-18-gin-and-async-investigate",
+      "docs/specs/2026-06-18-web-dashboard-spa",
+      "docs/specs/2026-11-21-context-framework",
+      "docs/upgrade-0.x-to-1.0",
+      "docs/upgrade-4.x-to-5.0",
+      "glossary"
+    ],
     "hook": [
       "build",
       "commit-message",
+      "computational/go-vet",
+      "computational/gofmt",
+      "computational/gopls",
       "coverage",
       "drift",
       "lint",
@@ -1203,9 +1573,6 @@
       "corpus/state/traffic-topology"
     ],
     "rule": [
-      "guides/computational/go-vet",
-      "guides/computational/gofmt",
-      "guides/computational/gopls",
       "guides/idioms/charter-content/primitive-shape",
       "guides/idioms/charter-content/state-files",
       "guides/idioms/go/stdlib-first",
@@ -1215,6 +1582,7 @@
       "process/escalation",
       "process/grounding",
       "process/implementation",
+      "process/iron-laws",
       "process/modes",
       "process/planning",
       "process/pushback",
@@ -1247,124 +1615,6 @@
       "keystone-synthesize",
       "keystone-verify",
       "task"
-    ],
-    "subagent": [
-      "auditor",
-      "bootstrap-scout",
-      "charter-debt",
-      "code-debt",
-      "code-reviewer",
-      "debt-reviewer",
-      "drift-reviewer",
-      "learning-curator",
-      "mode-switcher",
-      "planner",
-      "quality-radar",
-      "review-deployment",
-      "review-functional",
-      "review-risk",
-      "review-security",
-      "security-reviewer",
-      "spec-author",
-      "synthesizer",
-      "tracker-card-fetcher",
-      "verifier"
-    ]
-  },
-  "by_category": {
-    "capability": [
-      "skill/keystone-allocate",
-      "skill/keystone-audit",
-      "skill/keystone-bootstrap",
-      "skill/keystone-check-drift",
-      "skill/keystone-debt-review",
-      "skill/keystone-index",
-      "skill/keystone-learn",
-      "skill/keystone-mode",
-      "skill/keystone-new",
-      "skill/keystone-new-adapter",
-      "skill/keystone-new-policy",
-      "skill/keystone-orient",
-      "skill/keystone-review",
-      "skill/keystone-spec",
-      "skill/keystone-synthesize",
-      "skill/keystone-verify",
-      "skill/task",
-      "subagent/auditor",
-      "subagent/bootstrap-scout",
-      "subagent/charter-debt",
-      "subagent/code-debt",
-      "subagent/code-reviewer",
-      "subagent/debt-reviewer",
-      "subagent/drift-reviewer",
-      "subagent/learning-curator",
-      "subagent/mode-switcher",
-      "subagent/planner",
-      "subagent/quality-radar",
-      "subagent/review-deployment",
-      "subagent/review-functional",
-      "subagent/review-risk",
-      "subagent/review-security",
-      "subagent/security-reviewer",
-      "subagent/spec-author",
-      "subagent/synthesizer",
-      "subagent/tracker-card-fetcher",
-      "subagent/verifier"
-    ],
-    "constraint": [
-      "hook/build",
-      "hook/commit-message",
-      "hook/coverage",
-      "hook/drift",
-      "hook/lint",
-      "hook/risk-fingerprint",
-      "hook/sast",
-      "hook/secret-scan",
-      "hook/spec-adherence",
-      "hook/stack-drift",
-      "hook/state-region",
-      "hook/test",
-      "hook/traffic-topology",
-      "hook/type-check",
-      "hook/vuln-scan",
-      "reference/corpus/domain/product-shape",
-      "reference/corpus/idioms/charter-content/primitive-shape",
-      "reference/corpus/idioms/charter-content/state-files",
-      "reference/corpus/idioms/go/stdlib-first",
-      "reference/corpus/process/runtime-resolution",
-      "reference/corpus/state/CODEBASE_STATE",
-      "reference/corpus/state/GLOBS_INDEX",
-      "reference/corpus/state/INSTALL_PROFILE",
-      "reference/corpus/state/charter-debt",
-      "reference/corpus/state/code-debt",
-      "reference/corpus/state/quality-radar",
-      "reference/corpus/state/risk-fingerprints",
-      "reference/corpus/state/traffic-topology",
-      "rule/guides/computational/go-vet",
-      "rule/guides/computational/gofmt",
-      "rule/guides/computational/gopls",
-      "rule/guides/idioms/charter-content/primitive-shape",
-      "rule/guides/idioms/charter-content/state-files",
-      "rule/guides/idioms/go/stdlib-first",
-      "rule/process/ci-failure",
-      "rule/process/context-budget",
-      "rule/process/dangerous-actions",
-      "rule/process/escalation",
-      "rule/process/grounding",
-      "rule/process/implementation",
-      "rule/process/modes",
-      "rule/process/planning",
-      "rule/process/pushback",
-      "rule/process/release",
-      "rule/process/review",
-      "rule/process/runtime-resolution",
-      "rule/process/scoping",
-      "rule/process/self-validation",
-      "rule/process/sensitive-files",
-      "rule/process/spec",
-      "rule/process/subagent-trust",
-      "rule/process/surgical-edits",
-      "rule/process/verification"
     ]
   },
   "by_path": {
@@ -1375,9 +1625,9 @@
       "rule/guides/idioms/charter-content/state-files"
     ],
     "cmd/**/*.go": [
-      "rule/guides/computational/go-vet",
-      "rule/guides/computational/gofmt",
-      "rule/guides/computational/gopls",
+      "hook/computational/go-vet",
+      "hook/computational/gofmt",
+      "hook/computational/gopls",
       "rule/guides/idioms/go/stdlib-first"
     ],
     "go.mod": [
@@ -1387,9 +1637,9 @@
       "rule/guides/idioms/go/stdlib-first"
     ],
     "internal/**/*.go": [
-      "rule/guides/computational/go-vet",
-      "rule/guides/computational/gofmt",
-      "rule/guides/computational/gopls",
+      "hook/computational/go-vet",
+      "hook/computational/gofmt",
+      "hook/computational/gopls",
       "rule/guides/idioms/go/stdlib-first"
     ],
     "internal/framework/scaffold/templates/**/*.md": [
