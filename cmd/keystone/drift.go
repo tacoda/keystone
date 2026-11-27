@@ -30,27 +30,15 @@ func driftCmd() *cobra.Command {
 // `--diff` takes the scope from `git diff --name-only HEAD`. Warnings
 // only — keystone names stale context, it never judges the diff.
 func runDrift(args []string) error {
-	var files []string
-	asJSON, diffMode := false, false
-	for i := 0; i < len(args); i++ {
-		switch a := args[i]; {
-		case a == "--json":
-			asJSON = true
-		case a == "--diff":
-			diffMode = true
-		case a == "--dir":
-			i++
-			if i >= len(args) {
-				return fmt.Errorf("--dir requires a value")
-			}
-		case strings.HasPrefix(a, "--dir="):
-		case strings.HasPrefix(a, "-"):
-			return fmt.Errorf("unknown flag %q", a)
-		default:
-			files = append(files, a)
-		}
+	dir, asJSON, diffMode := ".", false, false
+	files, help, err := parseFlagsArgs(args,
+		map[string]*string{"--dir": &dir},
+		map[string]*bool{"--json": &asJSON, "--diff": &diffMode},
+		func() { printDriftUsage(os.Stdout) })
+	if help || err != nil {
+		return err
 	}
-	absDir, err := filepath.Abs(dirArg(args))
+	absDir, err := filepath.Abs(dir)
 	if err != nil {
 		return err
 	}
@@ -82,6 +70,15 @@ func runDrift(args []string) error {
 		fmt.Fprintf(os.Stdout, "  • %s — %s (%s/%s %s)\n", w.Path, w.Reason, w.Kind, w.PrimID, w.Detail)
 	}
 	return nil
+}
+
+func printDriftUsage(w *os.File) {
+	fmt.Fprint(w, `keystone drift [files…|--diff] [--json] [--dir D]
+
+Context-drift report: dead relative links, paths: globs matching zero
+files, and verified: dates older than the drift.days window (default 90).
+Warnings only. files… scopes the scan; --diff scopes it to the HEAD diff.
+`)
 }
 
 // gitDiffFiles lists the repo-relative files changed vs HEAD (staged and

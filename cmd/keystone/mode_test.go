@@ -36,7 +36,7 @@ func TestMode_ReadCurrent(t *testing.T) {
 	if err != nil {
 		t.Fatalf("modesRulePath: %v", err)
 	}
-	got, err := currentMode(path)
+	got, err := currentMode(root, path)
 	if err != nil {
 		t.Fatalf("currentMode: %v", err)
 	}
@@ -67,7 +67,7 @@ func TestMode_SetRewritesLineDescriptionAndIndex(t *testing.T) {
 	}
 	// Reading again reports the new mode.
 	path, _ := modesRulePath(root)
-	got, err := currentMode(path)
+	got, err := currentMode(root, path)
 	if err != nil || got != "solo" {
 		t.Errorf("currentMode after set = %q, %v; want solo", got, err)
 	}
@@ -84,15 +84,33 @@ func TestMode_RejectsUnknownMode(t *testing.T) {
 	}
 }
 
-func TestMode_NoModesRuleErrors(t *testing.T) {
+// TestMode_WorksWithoutWorkflowPack — decision 15: the mode verb is
+// invocable on a plain init with no lifecycle rules planted; the state
+// falls back to .keystone/mode.
+func TestMode_WorksWithoutWorkflowPack(t *testing.T) {
 	root := t.TempDir()
 	writeFiles(t, root, map[string]string{
 		".agents/rules/process/other.md": "---\nkind: rule\nid: process/other\ndescription: x\n---\n",
 	})
-	if err := runMode([]string{"--dir", root}); err == nil {
-		t.Fatal("expected an error when no process/modes rule exists")
+	// Read with nothing set: the default.
+	got, err := currentMode(root, "")
+	if err != nil || got != "paired" {
+		t.Fatalf("default mode = %q, %v; want paired", got, err)
 	}
-	if _, err := os.Stat(filepath.Join(root, ".keystone")); !os.IsNotExist(err) {
-		t.Error("no state dir should be created on the error path")
+	// Set: writes the state file, no modes rule needed.
+	if err := runMode([]string{"autopilot", "--dir", root}); err != nil {
+		t.Fatalf("runMode on a packless charter: %v", err)
+	}
+	data, err := os.ReadFile(filepath.Join(root, ".keystone/mode"))
+	if err != nil {
+		t.Fatalf("state file: %v", err)
+	}
+	if strings.TrimSpace(string(data)) != "autopilot" {
+		t.Errorf("state file = %q", data)
+	}
+	// Read back through the verb's helper.
+	got, err = currentMode(root, "")
+	if err != nil || got != "autopilot" {
+		t.Errorf("read back = %q, %v; want autopilot", got, err)
 	}
 }

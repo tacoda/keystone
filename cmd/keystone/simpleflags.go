@@ -9,16 +9,34 @@ import (
 // flags into the given targets. `--help`/`-h` calls usage and returns
 // help=true. Positional arguments and unknown flags are errors.
 func parseFlags(args []string, values map[string]*string, bools map[string]*bool, usage func()) (help bool, err error) {
+	pos, help, err := parseFlagsArgs(args, values, bools, usage)
+	if err != nil || help {
+		return help, err
+	}
+	if len(pos) > 0 {
+		return false, fmt.Errorf("unexpected positional argument %q", pos[0])
+	}
+	return false, nil
+}
+
+// parseFlagsArgs is parseFlags for commands that also take positional
+// arguments (e.g. `keystone drift <files…>`, `keystone mode solo`):
+// non-flag arguments are collected into the returned slice in order.
+func parseFlagsArgs(args []string, values map[string]*string, bools map[string]*bool, usage func()) (positionals []string, help bool, err error) {
 	for i := 0; i < len(args); i++ {
 		if args[i] == "--help" || args[i] == "-h" {
 			usage()
-			return true, nil
+			return nil, true, nil
+		}
+		if !strings.HasPrefix(args[i], "-") {
+			positionals = append(positionals, args[i])
+			continue
 		}
 		if i, err = parseOneFlag(args, i, values, bools); err != nil {
-			return false, err
+			return nil, false, err
 		}
 	}
-	return false, nil
+	return positionals, false, nil
 }
 
 // parseOneFlag consumes the flag at args[i] (and its value, if separate)

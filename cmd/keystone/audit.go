@@ -50,30 +50,33 @@ type auditReport struct {
 	} `json:"pruning"`
 }
 
+func printAuditUsage(w *os.File) {
+	fmt.Fprint(w, `keystone audit [--json] [--dir D]
+
+Dual-flywheel report: the learning inbox (pending/accepted) and pruning
+candidates (project primitives that are uncited, unscoped, and untriggered).
+Data only — acting on a candidate is charter move/demote or an edit.
+`)
+}
+
 // runAudit handles `keystone audit [--json] [--dir D]`. The report is
 // data, not verdicts (decision 16): the Learning flywheel side lists the
 // inbox, the Pruning side lists primitives no citation, path scope, or
 // event reaches. Acting on a candidate is `charter move` / `demote` /
 // an edit — never automatic.
 func runAudit(args []string) error {
-	asJSON := false
-	for i := 0; i < len(args); i++ {
-		switch a := args[i]; {
-		case a == "--json":
-			asJSON = true
-		case a == "--dir":
-			i++
-			if i >= len(args) {
-				return fmt.Errorf("--dir requires a value")
-			}
-		case strings.HasPrefix(a, "--dir="):
-		case strings.HasPrefix(a, "-"):
-			return fmt.Errorf("unknown flag %q", a)
-		default:
-			return fmt.Errorf("audit takes no positional args; got %q", a)
-		}
+	dir, asJSON := ".", false
+	pos, help, err := parseFlagsArgs(args,
+		map[string]*string{"--dir": &dir},
+		map[string]*bool{"--json": &asJSON},
+		func() { printAuditUsage(os.Stdout) })
+	if help || err != nil {
+		return err
 	}
-	absDir, err := filepath.Abs(dirArg(args))
+	if len(pos) > 0 {
+		return fmt.Errorf("audit takes no positional args; got %q", pos[0])
+	}
+	absDir, err := filepath.Abs(dir)
 	if err != nil {
 		return err
 	}

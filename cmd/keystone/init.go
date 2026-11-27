@@ -400,19 +400,13 @@ func alreadyHas(body, line string) bool {
 func printNextSteps(agents []string, charterRoot string) {
 	list := strings.Join(agents, ", ")
 
-	var bootstrapIn, lifecycle string
-	if len(agents) == 1 {
-		bootstrapIn = fmt.Sprintf("in %s", agents[0])
-		lifecycle = "     AGENTS.md says what that host loads by itself and what to run by hand.\n"
-	} else {
-		bootstrapIn = "in any one of the agents above (the charter edits are agent-agnostic)"
-		lifecycle = "     AGENTS.md says, per host, what it loads by itself and what to run by hand.\n"
-	}
+	lifecycle := "     AGENTS.md says, per host, what it loads by itself and what to run by hand.\n"
 
 	fmt.Fprintf(os.Stdout, `
 ✓ charter installed for %s.
 
-  ▶ Next: run the /keystone:bootstrap skill %s.
+  ▶ Next: characterize the codebase — the /keystone:bootstrap skill does it
+     (planted by the opt-in workflow pack: keystone init --starter workflow).
 
      Bootstrap reads your codebase and seeds %s/references/state/CODEBASE_STATE.md,
      %s/rules/idioms/<your-stack>/, and the paired %s/references/idioms/<your-stack>/
@@ -426,5 +420,5 @@ Also:
   • Host projection is opt-in: "keystone target add <agent>" projects a
     host's files (e.g. .claude/); until then only the AGENTS.md block exists.
   • Commit %s/ and %s.
-`, list, bootstrapIn, charterRoot, charterRoot, charterRoot, lifecycle, charterRoot, charterRoot, charterRoot, config.StateRoot)
+`, list, charterRoot, charterRoot, charterRoot, lifecycle, charterRoot, charterRoot, charterRoot, config.StateRoot)
 }

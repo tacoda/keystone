@@ -43,28 +43,22 @@ func modeCmd() *cobra.Command {
 // `**Active mode:**` line of rules/process/modes.md in place (plus the
 // frontmatter description, which feeds the index), then re-indexes.
 func runMode(args []string) error {
-	mode, asJSON := "", false
-	for i := 0; i < len(args); i++ {
-		a := args[i]
-		switch {
-		case a == "--json":
-			asJSON = true
-		case a == "--dir":
-			i++
-			if i >= len(args) {
-				return fmt.Errorf("--dir requires a value")
-			}
-		case strings.HasPrefix(a, "--dir="):
-		case strings.HasPrefix(a, "-"):
-			return fmt.Errorf("unknown flag %q", a)
-		default:
-			if mode != "" {
-				return fmt.Errorf("mode takes one value; also got %q", a)
-			}
-			mode = a
-		}
+	dir, asJSON := ".", false
+	pos, help, err := parseFlagsArgs(args,
+		map[string]*string{"--dir": &dir},
+		map[string]*bool{"--json": &asJSON},
+		func() { printModeUsage(os.Stdout) })
+	if help || err != nil {
+		return err
 	}
-	absDir, err := filepath.Abs(dirArg(args))
+	if len(pos) > 1 {
+		return fmt.Errorf("mode takes one value; also got %q", pos[1])
+	}
+	mode := ""
+	if len(pos) == 1 {
+		mode = pos[0]
+	}
+	absDir, err := filepath.Abs(dir)
 	if err != nil {
 		return err
 	}
@@ -73,7 +67,7 @@ func runMode(args []string) error {
 		return err
 	}
 	if mode == "" {
-		cur, err := currentMode(path)
+		cur, err := currentMode(absDir, path)
 		if err != nil {
 			return err
 		}
@@ -89,18 +83,47 @@ func runMode(args []string) error {
 	if !validMode(mode) {
 		return fmt.Errorf("unknown mode %q (allowed: %s)", mode, strings.Join(modeChoices, ", "))
 	}
-	prev, err := currentMode(path)
+	prev, err := currentMode(absDir, path)
 	if err != nil {
 		return err
 	}
-	if err := setActiveMode(absDir, path, mode); err != nil {
+	store, err := setActiveMode(absDir, path, mode)
+	if err != nil {
 		return err
 	}
 	if asJSON {
 		return json.NewEncoder(os.Stdout).Encode(map[string]string{"mode": mode, "previous": prev})
 	}
-	fmt.Fprintf(os.Stdout, "✓ active mode: %s → %s (%s)\n", prev, mode, relTo(absDir, path))
+	fmt.Fprintf(os.Stdout, "✓ active mode: %s → %s (%s)\n", prev, mode, store)
 	return nil
+}
+
+func printModeUsage(w *os.File) {
+	fmt.Fprint(w, `keystone mode [paired|solo|autopilot] [--dir D] [--json]
+
+Read the active pacing mode, or set it. The source of truth is the
+**Active mode:** line of .agents/rules/process/modes.md when that rule
+exists (workflow pack); otherwise .keystone/mode.
+`)
+}
+
+// currentMode reads the active mode: the modes rule's line when the rule
+// exists, else the .keystone/mode state file, else the default (paired).
+func currentMode(absDir, path string) (string, error) {
+	if path != "" {
+		return currentModeFromFile(path)
+	}
+	data, err := os.ReadFile(filepath.Join(absDir, filepath.FromSlash(modeStateFile)))
+	if os.IsNotExist(err) {
+		return "paired", nil
+	}
+	if err != nil {
+		return "", err
+	}
+	if m := strings.TrimSpace(string(data)); validMode(m) {
+		return m, nil
+	}
+	return "paired", nil
 }
 
 func validMode(m string) bool {
@@ -112,7 +135,13 @@ func validMode(m string) bool {
 	return false
 }
 
-// modesRulePath resolves the process/modes rule's file under absDir.
+// modeStateFile is the fallback store when the charter has no
+// process/modes rule (a plain init without the workflow pack). The rule's
+// `**Active mode:**` line stays the source of truth when it exists.
+const modeStateFile = config.StateRoot + "/mode"
+
+// modesRulePath resolves the process/modes rule's file under absDir, or
+// "" when the charter has no such rule.
 func modesRulePath(absDir string) (string, error) {
 	prims, _, err := primitive.Walk(absDir, config.DefaultAgentsRoot)
 	if err != nil {
@@ -123,13 +152,13 @@ func modesRulePath(absDir string) (string, error) {
 			return filepath.Join(absDir, filepath.FromSlash(prims[i].Path)), nil
 		}
 	}
-	return "", fmt.Errorf("no %s rule under %s — the pacing mode lives at .agents/rules/%s.md (planted by the workflow starter pack)", modesRuleID, config.DefaultAgentsRoot, modesRuleID)
+	return "", nil
 }
 
 var activeModeLine = regexp.MustCompile(`(?m)^\*\*Active mode:\s*([^*]+?)\*\*\s*$`)
 
-// currentMode reads the `**Active mode:**` line of the modes rule.
-func currentMode(path string) (string, error) {
+// currentModeFromFile reads the `**Active mode:**` line of the modes rule.
+func currentModeFromFile(path string) (string, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
 		return "", err
@@ -141,13 +170,25 @@ func currentMode(path string) (string, error) {
 	return string(m[1]), nil
 }
 
-// setActiveMode rewrites the `**Active mode:**` line in the body and the
-// `description:` line in the frontmatter (the index carries the
-// description), leaving the rest of the file untouched, then re-indexes.
-func setActiveMode(absDir, path, mode string) error {
+// setActiveMode stores the mode: always in the .keystone/mode state file,
+// and — when the process/modes rule exists — also in its `**Active mode:**`
+// line and frontmatter description (the index carries the description),
+// leaving the rest of the file untouched, then re-indexes. Returns the
+// repo-relative store that changed.
+func setActiveMode(absDir, path, mode string) (string, error) {
+	state := filepath.Join(absDir, filepath.FromSlash(modeStateFile))
+	if err := os.MkdirAll(filepath.Dir(state), 0o755); err != nil {
+		return "", err
+	}
+	if err := os.WriteFile(state, []byte(mode+"\n"), 0o644); err != nil {
+		return "", err
+	}
+	if path == "" {
+		return modeStateFile, nil
+	}
 	data, err := os.ReadFile(path)
 	if err != nil {
-		return err
+		return "", err
 	}
 	out := activeModeLine.ReplaceAll(data, []byte("**Active mode: "+mode+"**"))
 	fm, body, ok := primitive.SplitFrontmatter(string(out))
@@ -161,7 +202,10 @@ func setActiveMode(absDir, path, mode string) error {
 		out = []byte("---\n" + strings.Join(lines, "\n") + "---\n" + body)
 	}
 	if err := os.WriteFile(path, out, 0o644); err != nil {
-		return err
+		return "", err
 	}
-	return reindex(absDir)
+	if err := reindex(absDir); err != nil {
+		return "", err
+	}
+	return relTo(absDir, path), nil
 }

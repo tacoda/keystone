@@ -69,6 +69,15 @@ type synthReport struct {
 
 var inboxName = regexp.MustCompile(`^\d{4}-\d{2}-\d{2}T\d{2}-\d{2}-\d{2}-(.*)\.md$`)
 
+func printSynthesizeUsage(w *os.File) {
+	fmt.Fprint(w, `keystone synthesize [--dry-run] [--json] [--dir D]
+
+Promote learning-inbox candidates marked status: accepted to their
+proposed layer, file them under learning/promoted/, and re-index.
+--dry-run previews without writing.
+`)
+}
+
 // runSynthesize handles `keystone synthesize [--dry-run] [--json] [--dir D]`.
 // The deterministic half of the promotion step: every inbox candidate
 // marked `status: accepted` with a mappable `proposed-layer` is written
@@ -76,26 +85,18 @@ var inboxName = regexp.MustCompile(`^\d{4}-\d{2}-\d{2}T\d{2}-\d{2}-\d{2}-(.*)\.m
 // choice and acceptance stay with the human/agent curating the
 // candidate — synthesize only executes what was accepted.
 func runSynthesize(args []string) error {
-	dryRun, asJSON := false, false
-	for i := 0; i < len(args); i++ {
-		switch a := args[i]; {
-		case a == "--dry-run":
-			dryRun = true
-		case a == "--json":
-			asJSON = true
-		case a == "--dir":
-			i++
-			if i >= len(args) {
-				return fmt.Errorf("--dir requires a value")
-			}
-		case strings.HasPrefix(a, "--dir="):
-		case strings.HasPrefix(a, "-"):
-			return fmt.Errorf("unknown flag %q", a)
-		default:
-			return fmt.Errorf("synthesize takes no positional args; got %q", a)
-		}
+	dir, dryRun, asJSON := ".", false, false
+	pos, help, err := parseFlagsArgs(args,
+		map[string]*string{"--dir": &dir},
+		map[string]*bool{"--dry-run": &dryRun, "--json": &asJSON},
+		func() { printSynthesizeUsage(os.Stdout) })
+	if help || err != nil {
+		return err
 	}
-	absDir, err := filepath.Abs(dirArg(args))
+	if len(pos) > 0 {
+		return fmt.Errorf("synthesize takes no positional args; got %q", pos[0])
+	}
+	absDir, err := filepath.Abs(dir)
 	if err != nil {
 		return err
 	}
