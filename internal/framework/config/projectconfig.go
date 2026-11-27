@@ -30,6 +30,25 @@ type CharterSpec struct {
 	Roots []string `json:"roots,omitempty"`
 }
 
+// DriftSpec is keystone.json's `drift` block.
+type DriftSpec struct {
+	// Days is the staleness window for `verified:` dates. Zero or
+	// absent means the default (90).
+	Days int `json:"days,omitempty"`
+}
+
+// DefaultDriftDays is the staleness window used when keystone.json does
+// not configure drift.days.
+const DefaultDriftDays = 90
+
+// DriftWindow returns the configured staleness window in days.
+func (c *ProjectConfig) DriftWindow() int {
+	if c.Drift == nil || c.Drift.Days <= 0 {
+		return DefaultDriftDays
+	}
+	return c.Drift.Days
+}
+
 // ProjectConfig is the parsed shape of keystone.json. Records the
 // framework version this project is pinned to, the nested policy tree,
 // and optional per-port budgets.
@@ -50,6 +69,9 @@ type ProjectConfig struct {
 	// indexed and queryable in place — never moved, never edited. Empty
 	// (the zero value) adopts nothing; keystone manages only .agents/.
 	Charter *CharterSpec `json:"charter,omitempty"`
+	// Drift configures context-drift reporting (`keystone drift`): the
+	// staleness window for `verified:` dates. Absent means defaults.
+	Drift *DriftSpec `json:"drift,omitempty"`
 	// Signals are project-defined framework events beyond the built-ins.
 	// A hook may bind to any signal; declaring it here lets lint catch
 	// typos and `keystone signal list` surface it. Firing works without

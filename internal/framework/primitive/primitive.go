@@ -204,8 +204,13 @@ type Frontmatter struct {
 	// Paths scopes a rule to the files it governs (glob list). The YAML
 	// key is `paths:`, the key Claude Code and Cline read; the 4.x key
 	// `globs:` is accepted as an alias.
-	Paths    []string `yaml:"paths,omitempty"    json:"paths,omitempty"`
-	Phase    string   `yaml:"phase,omitempty"    json:"phase,omitempty"`
+	Paths []string `yaml:"paths,omitempty"    json:"paths,omitempty"`
+	Phase string   `yaml:"phase,omitempty"    json:"phase,omitempty"`
+	// Verified is an author-set date (YYYY-MM-DD) recording when the
+	// primitive was last re-checked against the code. Drift never stamps
+	// it; `keystone drift` warns when it is older than the staleness
+	// window (keystone.json drift.days, default 90).
+	Verified string   `yaml:"verified,omitempty" json:"verified,omitempty"`
 	Triggers []string `yaml:"triggers,omitempty" json:"triggers,omitempty"`
 	Tools    []string `yaml:"tools,omitempty"    json:"tools,omitempty"`
 	Model    string   `yaml:"model,omitempty"    json:"model,omitempty"`

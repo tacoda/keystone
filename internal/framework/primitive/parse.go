@@ -66,6 +66,7 @@ type fmShadow struct {
 	Paths         []string          `yaml:"paths"`
 	Globs         []string          `yaml:"globs"` // 4.x alias for `paths:`
 	Phase         string            `yaml:"phase"`
+	Verified      string            `yaml:"verified"`
 	Triggers      []string          `yaml:"triggers"`
 	Tools         []string          `yaml:"tools"`
 	Model         string            `yaml:"model"`
@@ -119,6 +120,7 @@ func (f *Frontmatter) UnmarshalYAML(value *yaml.Node) error {
 		f.Paths = s.Globs
 	}
 	f.Phase = s.Phase
+	f.Verified = s.Verified
 	f.Triggers = s.Triggers
 	f.Tools = s.Tools
 	f.Model = s.Model

@@ -44,6 +44,42 @@ func IsRelativeLink(target string) bool {
 	return !urlScheme.MatchString(target)
 }
 
+// RelativeLinkTargets returns each relative Markdown link target in body
+// (written for a file at repo-relative src), resolved to a repo-relative
+// path. Code fences are skipped; URLs, anchors, absolute paths, and links
+// that leave the repo are not returned.
+func RelativeLinkTargets(body []byte, src string) []string {
+	var out []string
+	seen := map[string]bool{}
+	lines := strings.SplitAfter(string(body), "\n")
+	inFence := false
+	for _, line := range lines {
+		if strings.HasPrefix(strings.TrimSpace(line), "```") {
+			inFence = !inFence
+			continue
+		}
+		if inFence {
+			continue
+		}
+		for _, m := range mdLink.FindAllStringSubmatch(line, -1) {
+			target := m[1]
+			if !IsRelativeLink(target) {
+				continue
+			}
+			file, _, _ := strings.Cut(target, "#")
+			abs := path.Clean(path.Join(path.Dir(src), file))
+			if abs == ".." || strings.HasPrefix(abs, "../") {
+				continue // leaves the repo
+			}
+			if !seen[abs] {
+				seen[abs] = true
+				out = append(out, filepath.ToSlash(abs))
+			}
+		}
+	}
+	return out
+}
+
 // rebase moves one link target from src's folder to dest's.
 func rebase(target, src, dest string) string {
 	if !IsRelativeLink(target) {
