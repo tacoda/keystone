@@ -9,23 +9,20 @@ This repo authors and dogfoods the keystone charter. The primary stack is **mark
 
 ## Primitive kinds
 
-Keystone knows ten kinds in two categories. It reads the kind from the first folder under `.agents/`.
-
-Constraints limit, gate, or check what the agent does:
+Keystone knows ten kinds, no categories. It reads the kind from the first folder under `.agents/`. The triad: **rule** = how, **reference** = why, **corpus** = what.
 
 - **rule**: a directive, scoped by `paths:` (`.agents/rules/<topic>/<id>.md`).
 - **reference**: the reasoning behind a rule (`.agents/references/<topic>/<id>.md`).
+- **corpus**: standalone information — facts, patterns, product info (`.agents/corpus/<id>.md`), plus repo docs adopted via `charter.roots`.
 - **hook**: a check that runs on an event and can block (`.agents/hooks/<id>.md`).
 - **permission**: allow, ask, and deny rules for tools (`.agents/permissions/<id>.md`).
 - **eval**: a test that the charter changes behavior (`.agents/evals/<id>/EVAL.md`).
-
-Capabilities add something the agent can do:
-
 - **skill**: an Agent Skills workflow (`.agents/skills/<name>/SKILL.md`).
 - **command**: a unit of work the user asks for by name (`.agents/commands/<id>.md`).
-- **subagent**: a role the agent delegates to (`.agents/agents/<id>.md`).
-- **tool**: a callable over MCP, as a command, or as a host plugin (`.agents/tools/<id>.md`).
+- **agent**: a role the agent delegates to (`.agents/agents/<id>.md`).
 - **document**: a template for governed output (`.agents/documents/<id>.md`).
+
+The `tool` kind is retired in 6.0: keystone manages context, not callables.
 
 ## Layout
 

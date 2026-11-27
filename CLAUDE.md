@@ -1,4 +1,4 @@
-# Keystone — the agent charter framework
+# Keystone — the charter framework (context management)
 
 ## Stack
 

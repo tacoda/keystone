@@ -12,17 +12,19 @@ to specify behavior, or is it the _engine_ that applies what's specified?**
 
 ### Charter
 
-Everything you author to specify how the agent should behave. Mostly prose,
-sometimes code. **You write it.**
+The **codified context in the repository** — everything a coding agent
+should be able to look up about how this codebase works and how to work in
+it. Authored, versioned files. **You write it.**
 
-- `CLAUDE.md`, `AGENTS.md`, and equivalent instruction files
-- rules and the references behind them
-- hooks, permissions, and evals you author
-- skills, commands, subagents, and tools
-- policy
+- the primitives under `.agents/`: rules, references, corpus entries, hooks,
+  permissions, evals, skills, commands, agents, documents
+- repository documents adopted as corpus via `charter.roots` (in place,
+  provenance-marked)
+- the index and state under `.keystone/`
+- policy bundles vendored from other repos
 
 Keystone **manages the charter.** In a Keystone repo the charter lives at
-`.agents/` and is indexed at `.keystone/INDEX.json`.
+`.agents/` (plus adopted repo docs) and is indexed at `.keystone/INDEX.json`.
 
 ### Harness
 
@@ -53,10 +55,12 @@ between mechanism and policy that puts Claude Code in the harness and your
 
 ## Keystone
 
-The agent context framework: a CLI, an MCP server, and a dashboard that
-author, check, project, and maintain the charter. The **charter is the
-codified context of the repository** — everything a coding agent should be
-able to look up about how the codebase works and how to work in it.
+The **charter framework** — the framework for managing context: a CLI, an
+MCP server, and a dashboard that author, check, project, and maintain the
+charter. The **charter is the codified context of the repository** —
+everything a coding agent should be able to look up about how the codebase
+works and how to work in it. It is the first level of the **habitat** the
+agent works in.
 Keystone is **not** a harness: it manages the context; it never runs the
 model, serves author-defined callables, or acts as an engine. What must
 execute deterministically belongs to hosts and CI, which the charter can
@@ -70,8 +74,9 @@ A typed unit of the charter: one file (or, for a skill, one folder) under
 
 | Kind         | What it is                                                        |
 | ------------ | ----------------------------------------------------------------- |
-| `rule`       | A directive. `paths:` scopes it to matching files.                |
-| `reference`  | The reasoning behind a rule, opened on demand. Was `corpus`.      |
+| `rule`       | How and specifics — a directive. `paths:` scopes it to matching files. |
+| `reference`  | Why — the reasoning behind a rule, opened on demand. Was `corpus` (folder). |
+| `corpus`     | What — standalone facts, patterns, product information; no rule attached. |
 | `hook`       | A check that runs on an event and can block. Was `sensor`.        |
 | `permission` | Allow, ask, and deny rules for tools. Was `posture`.              |
 | `eval`       | A test that the charter changes agent behavior.                   |

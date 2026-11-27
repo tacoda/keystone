@@ -15,13 +15,13 @@ Every charter primitive is one markdown file (or a SKILL.md inside a slug folder
 |---|---|
 | rule | `.agents/rules/<topic>/<name>.md` |
 | reference | `.agents/references/<topic>/<name>.md` |
+| corpus | `.agents/corpus/<id>.md` |
 | hook | `.agents/hooks/<id>.md` |
 | permission | `.agents/permissions/<id>.md` |
 | eval | `.agents/evals/<id>/` |
 | skill | `.agents/skills/<name>/SKILL.md` |
 | command | `.agents/commands/<id>.md` |
-| subagent | `.agents/agents/<id>.md` |
-| tool | `.agents/tools/<id>.md` |
+| agent | `.agents/agents/<id>.md` |
 | document | `.agents/documents/<id>.md` |
 
 Off-path content is invisible to `keystone index` and never lands in `INDEX.json`.

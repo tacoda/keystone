@@ -1,34 +1,35 @@
 # Charter
 
-This folder holds the project's charter: the standards that shape how a coding agent works in this repo. You own every file here. Version it with the code and edit it freely.
+This folder holds the project's charter: the codified context of the
+repository — everything a coding agent should be able to look up about how
+this codebase works and how to work in it. You own every file here. Version
+it with the code and edit it freely.
 
-Keystone keeps its own state in `.keystone/`. Hosts get generated copies (`.claude/`, `.cursor/`, the managed block in `AGENTS.md`). Edit the source here, never a generated file.
+Keystone keeps its own state in `.keystone/`. Hosts get generated copies
+(`.claude/`, `.cursor/`, the managed block in `AGENTS.md`) — opt-in via
+`keystone target add <host>`. Edit the source here, never a generated file.
 
-## Two categories, ten kinds
+## Ten kinds, no categories
 
-Each file is a primitive. Keystone reads its kind from the first folder under `.agents/`, so `kind:` is optional.
-
-A **constraint** limits, gates, or checks what the agent does:
+Each file is a primitive. Keystone reads its kind from the first folder under `.agents/`, so `kind:` is optional. The triad: **rule** = how, **reference** = why, **corpus** = what.
 
 | Kind | Folder | What it is |
 |---|---|---|
 | `rule` | [`rules/`](rules/README.md) | A directive. It applies when a touched file matches its `paths:`, or everywhere without them. |
 | `reference` | [`references/`](references/README.md) | The reasoning behind a rule. The agent opens it on demand. |
+| `corpus` | `corpus/` | Standalone information: facts, patterns, product info. No rule attached. |
 | `hook` | [`hooks/`](hooks/README.md) | A check that runs on an event. A non-zero exit blocks. |
 | `permission` | `permissions/` | Allow, ask, and deny rules for tools. |
 | `eval` | [`evals/`](evals/README.md) | A test that the charter changes agent behavior. |
-
-A **capability** adds something the agent can do:
-
-| Kind | Folder | What it is |
-|---|---|---|
 | `skill` | [`skills/`](skills/README.md) | A `SKILL.md` folder. It activates when its description matches the task. |
 | `command` | [`commands/`](commands/README.md) | A unit of work the user asks for by name. |
-| `subagent` | [`agents/`](agents/README.md) | A role the agent delegates to. |
-| `tool` | `tools/` | A callable you write, over MCP, as a command, or as a host plugin. |
+| `agent` | [`agents/`](agents/README.md) | A role the agent delegates to. |
 | `document` | `documents/` | A template for governed output, such as a plan or an ADR. |
 
-A fresh install has no `permissions/`, `tools/`, or `documents/` folder. Run `keystone new <kind> <name>` to add the first one.
+The `tool` kind is retired in 6.0: keystone manages context, not callables —
+what must execute deterministically belongs to hosts and CI.
+
+A fresh install has no `permissions/`, `corpus/`, or `documents/` folder. Run `keystone new <kind> <name>` to add the first one.
 
 ## Every primitive shares
 

@@ -1,6 +1,6 @@
 {
   "version": "6.0",
-  "generated": "2026-11-27T18:40:13Z",
+  "generated": "2026-11-27T20:53:22Z",
   "primitives": [
     {
       "kind": "agent",
@@ -1302,7 +1302,7 @@
     {
       "kind": "skill",
       "id": "keystone-new",
-      "description": "Scaffold a new primitive (rule, reference, hook, permission, eval, skill, command, subagent, tool, document) at the canonical path. Triggers: keystone new; keystone:new; /keystone:new; add a rule; add a hook; add a skill; scaffold a primitive.",
+      "description": "Scaffold a new primitive (rule, reference, corpus, hook, permission, eval, skill, command, agent, document) at the canonical path. Triggers: keystone new; keystone:new; /keystone:new; add a rule; add a hook; add a skill; scaffold a primitive.",
       "metadata": {
         "model": "sonnet",
         "tags": "scaffold,composition"

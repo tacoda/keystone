@@ -111,11 +111,11 @@ PR:
 6. Add the kind to the dashboard's kind lists in
    `internal/framework/web/`.
 
-There are 10 kinds in two categories. Constraints are `rule`, `reference`,
-`hook`, `permission`, and `eval`. Capabilities are `skill`, `command`,
-`subagent`, `tool`, and `document`. A hook, tool, or subagent names what
-fires it with `event:`. Pick the kind by what the primitive *is*, not
-how it fires.
+There are 10 kinds, no categories. The triad is `rule` (how), `reference`
+(why), `corpus` (what); the rest are `hook`, `permission`, `eval`, `skill`,
+`command`, `agent`, and `document` (the `tool` kind is retired in 6.0 —
+keystone manages context, not callables). A hook names what fires it with
+`event:`. Pick the kind by what the primitive *is*, not how it fires.
 
 ## Filing issues
 
