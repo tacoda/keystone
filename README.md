@@ -245,9 +245,11 @@ flywheels.
 
 ## Policies
 
-A policy is a charter fragment you vendor from another repo. Keystone pins it
-by version, checks its hash, and resets drift on `keystone verify`. The
-project layer wins by default, and a policy's `strict` items lock.
+A policy is a charter fragment you vendor from another repo — the team-level
+plugin: vendor a versioned bundle once, and every adopting repo gets its
+rules, references, corpus, skills, and hooks through the cascade. Keystone
+pins it by version, checks its hash, and resets drift on `keystone verify`.
+The project layer wins by default, and a policy's `strict` items lock.
 
 ```bash
 keystone policy add tacoda/tacoda-org@v2.0.0
