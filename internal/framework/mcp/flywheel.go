@@ -67,6 +67,19 @@ func registerFlywheelTools(s *server.MCPServer, projectDir string) {
 		},
 	)
 	s.AddTool(
+		mcp.NewTool("keystone_drift_report",
+			mcp.WithDescription("Context-drift report as JSON: dead relative links, rules whose paths: match zero files, and primitives whose verified: date is older than the drift.days window (default 90). Warnings only — keystone names stale context, it does not judge the diff. `files` optionally scopes the report to comma-separated repo-relative files."),
+			mcp.WithString("files", mcp.Description("Comma-separated repo-relative files to scope the scan to. Omit for the whole charter.")),
+		),
+		func(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+			out, err := execKeystone(ctx, driftArgs(projectDir, req.GetString("files", ""))...)
+			if err != nil {
+				return mcp.NewToolResultError(fmt.Sprintf("keystone_drift_report failed: %v\n%s", err, out)), nil
+			}
+			return mcp.NewToolResultText(out), nil
+		},
+	)
+	s.AddTool(
 		mcp.NewTool("keystone_mode",
 			mcp.WithDescription("Read or set the charter pacing mode. Omit `mode` to read the active mode; pass paired, solo, or autopilot to switch it (rewrites the **Active mode:** line of rules/process/modes.md and re-indexes). Returns JSON."),
 			mcp.WithString("mode", mcp.Description("paired | solo | autopilot. Omit to read the current mode.")),
@@ -121,4 +134,16 @@ func modeArgs(projectDir, mode string) []string {
 		args = append(args, mode)
 	}
 	return append(args, "--dir", projectDir, "--json")
+}
+
+func driftArgs(projectDir, files string) []string {
+	args := []string{"drift", "--dir", projectDir, "--json"}
+	if files != "" {
+		for _, f := range strings.Split(files, ",") {
+			if f = strings.TrimSpace(f); f != "" {
+				args = append(args, f)
+			}
+		}
+	}
+	return args
 }

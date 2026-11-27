@@ -1,0 +1,35 @@
+{{define "drift.html"}}{{template "layout" .}}{{end}}
+{{define "title"}}drift{{end}}
+{{define "main"}}
+<section class="card">
+  <h1>drift</h1>
+  <p class="muted">The charter is living context. This pane reports where it no longer matches the code — dead links, <code>paths:</code> globs matching zero files, and <code>verified:</code> dates older than the staleness window. Warnings only: keystone names stale context, the team re-verifies it. Same data as <code>keystone drift --json</code>, <code>/api/drift</code>, and MCP <code>keystone_drift_report</code>.</p>
+
+  <div class="stats">
+    <div class="stat"><div class="label">checked</div><div class="value amber">{{.Checked}}</div></div>
+    <div class="stat"><div class="label">warnings</div><div class="value bad">{{len .Warnings}}</div></div>
+    <div class="stat"><div class="label">dead links</div><div class="value">{{index .Counts "dead-link"}}</div></div>
+    <div class="stat"><div class="label">paths gone</div><div class="value">{{index .Counts "paths-gone"}}</div></div>
+    <div class="stat"><div class="label">stale</div><div class="value">{{index .Counts "stale"}}</div></div>
+  </div>
+
+  {{if .Warnings}}
+  <table>
+    <thead><tr><th>kind</th><th>primitive</th><th>file</th><th>detail</th><th>reason</th></tr></thead>
+    <tbody>
+      {{range .Warnings}}
+      <tr>
+        <td><span class="pill warn">{{.Kind}}</span></td>
+        <td>{{.PrimID}}</td>
+        <td><code>{{.Path}}</code></td>
+        <td class="muted"><code>{{.Detail}}</code></td>
+        <td class="muted">{{.Reason}}</td>
+      </tr>
+      {{end}}
+    </tbody>
+  </table>
+  {{else}}
+  <p class="muted">No drift — the charter matches the code it scopes.</p>
+  {{end}}
+</section>
+{{end}}

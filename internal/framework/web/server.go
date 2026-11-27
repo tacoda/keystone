@@ -241,6 +241,7 @@ func (s *server) routes() {
 		{"/flywheels", s.handleFlywheels},
 		{"/flywheels/inbox", s.handleInbox},
 		{"/flywheels/prune", s.handlePrune},
+		{"/flywheels/drift", s.handleDrift},
 
 		// Quality.
 		{"/quality", s.handleVerifyPage},
@@ -267,6 +268,7 @@ func (s *server) routes() {
 		{"/api/evals", s.apiEvals},
 		{"/api/evals/run", s.apiEvalRun},
 		{"/api/insights", s.apiInsights},
+		{"/api/drift", s.apiDrift},
 
 		// HTMX fragments + write actions.
 		{"/web/fragments/search", s.handleSearchFragment},

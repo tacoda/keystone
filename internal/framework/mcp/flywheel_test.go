@@ -44,6 +44,19 @@ func TestAuditArgs(t *testing.T) {
 	}
 }
 
+func TestDriftArgs(t *testing.T) {
+	got := driftArgs("/p", "cmd/main.go, docs/x.md")
+	want := []string{"drift", "--dir", "/p", "--json", "cmd/main.go", "docs/x.md"}
+	if !reflect.DeepEqual(got, want) {
+		t.Errorf("driftArgs scoped = %v, want %v", got, want)
+	}
+	got = driftArgs("/p", "")
+	want = []string{"drift", "--dir", "/p", "--json"}
+	if !reflect.DeepEqual(got, want) {
+		t.Errorf("driftArgs = %v, want %v", got, want)
+	}
+}
+
 func TestModeArgs(t *testing.T) {
 	got := modeArgs("/p", "solo")
 	want := []string{"mode", "solo", "--dir", "/p", "--json"}

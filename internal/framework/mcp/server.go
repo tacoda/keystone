@@ -99,6 +99,9 @@ the previous stage does not carry enough information:
   keystone_charter_conformance
       Rubric verdict (CONFORMANT|DRIFTING|NON-CONFORMANT) from objective
       checks: cascade, frontmatter validity, pairing, coverage.
+  keystone_drift_report [files=…]
+      Context-drift warnings as JSON: dead links, paths: matching zero
+      files, stale verified: dates. Warnings only.
 
 ## Reactions (what fires when)
 
