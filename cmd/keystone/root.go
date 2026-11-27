@@ -112,6 +112,7 @@ func init() {
 	rootCmd.AddCommand(charterCmd())
 	rootCmd.AddCommand(learnCmd())
 	rootCmd.AddCommand(learningCmd())
+	rootCmd.AddCommand(modeCmd())
 	rootCmd.AddCommand(promoteCmd())
 	rootCmd.AddCommand(demoteCmd())
 	rootCmd.AddCommand(explainCmd())
