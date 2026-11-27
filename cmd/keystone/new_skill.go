@@ -109,7 +109,7 @@ If the skill wraps a shell command, show the exact invocation:
 	return writeSkeleton(path, body)
 }
 
-// runNewAgent handles `keystone new subagent <id>`. Scaffolds
+// runNewAgent handles `keystone new agent <id>`. Scaffolds
 // <charter-root>/agents/<id>.md with canonical primitive frontmatter.
 func runNewAgent(args []string) error {
 	projectDir, charterRoot, remaining, err := parseDirAndCharterRoot(args)

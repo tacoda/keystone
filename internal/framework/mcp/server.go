@@ -28,7 +28,7 @@ import (
 
 // Version is stamped into the MCP `serverInfo` block. Bumped on every
 // notable surface change.
-const Version = "3.0.0" // 5.0: constraint/capability kinds, keystone_get_reference
+const Version = "6.0.0" // 6.0: kind triad (rule/reference/corpus), agent kind, query front door, flywheel + drift tools
 
 // instructions is the short, top-of-server description host agents
 // receive when they `initialize` the server. Intentionally terse —

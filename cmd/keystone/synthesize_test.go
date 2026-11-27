@@ -41,7 +41,7 @@ func synthesizeFixture(t *testing.T) string {
 	root := t.TempDir()
 	writeFiles(t, root, map[string]string{
 		".keystone/learning/inbox/2026-11-27T10-00-00-no-silent-overwrites.md": acceptedCandidate,
-		".keystone/learning/inbox/2026-11-27T11-00-00-surprise.md":              pendingCandidate,
+		".keystone/learning/inbox/2026-11-27T11-00-00-surprise.md":             pendingCandidate,
 	})
 	return root
 }

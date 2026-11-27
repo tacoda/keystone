@@ -21,9 +21,9 @@ import (
 //     description match (task), or paths — never by flooding every query.
 //  3. Path-scoped primitives — any primitive whose `paths:` matches a
 //     queried file. MatchPath (doublestar) decides.
-//  4. Cited references — the `corpus:` entries of matched rules and
+//  2. Cited references — the `corpus:` entries of matched rules and
 //     corpus, resolved by id.
-//  2. Task match — when a task is given, token-overlap-scored entries
+//  1. Task match — when a task is given, token-overlap-scored entries
 //     lead; they are the most specific reason anything matched.
 //
 // The result carries descriptors only; callers print bodies on demand

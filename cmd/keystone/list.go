@@ -164,7 +164,7 @@ brackets), grouped by kind.
 
 Filters:
   <kind>            Optional positional. A kind: rule, reference, corpus, hook,
-                    permission, eval, skill, command, subagent, tool,
+                    permission, eval, skill, command, agent,
                     document.
   --tag <tag>       Repeatable. Multiple --tag arguments AND together —
                     a primitive must declare every requested tag.

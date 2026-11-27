@@ -66,21 +66,12 @@ func runCharterQuery(args []string) error {
 			full = true
 		case a == "--dir":
 			i++ // value consumed here; dirArg re-reads it below
-		case strings.HasPrefix(a, "--dir="), strings.HasPrefix(a, "--task="):
-			// --dir handled by dirArg; --task by the --task sweep
+		case strings.HasPrefix(a, "--dir="):
+			// consumed by dirArg below
+		case strings.HasPrefix(a, "--task="):
+			task = strings.TrimPrefix(a, "--task=")
 		default:
 			files = append(files, a)
-		}
-	}
-	if task == "" {
-		for i := 0; i+1 < len(args); i++ {
-			if args[i] == "--task" || strings.HasPrefix(args[i], "--task=") {
-				if strings.HasPrefix(args[i], "--task=") {
-					task = strings.TrimPrefix(args[i], "--task=")
-				} else {
-					task = args[i+1]
-				}
-			}
 		}
 	}
 	absDir, err := filepath.Abs(dirArg(args))
@@ -291,9 +282,9 @@ Usage:
     keystone charter move <kind>/<id> <new-kind>[/<new-path>]        # relocate or re-kind a primitive
     keystone charter promote <kind>/<id>                             # corpus → reference → rule, one step up
     keystone charter demote <kind>/<id>                              # rule → reference → corpus, one step down
-    keystone charter coverage [--dir D] [--full] [--dir D]           # files no rule governs (uncharted territory)
+    keystone charter coverage [--dir D] [--full]           # files no rule governs (uncharted territory)
     keystone charter show [--effective] [--kind K] [--dir D]         # the charter roster
-    keystone charter conformance [--dir D] [--full] [--dir D]        # rubric: does the repo conform to its charter?
+    keystone charter conformance [--dir D] [--full]        # rubric: does the repo conform to its charter?
 
 Query composes "what applies here?": rules without paths: (everywhere),
 path-matched rules and corpus, cited references, then task-scored

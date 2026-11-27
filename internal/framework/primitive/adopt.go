@@ -63,10 +63,7 @@ func adoptRepositoryDocs(projectDir string) ([]Primitive, []Warning, error) {
 // returning sorted slash paths of regular files. The guard dirs (.git,
 // node_modules, .agents, .keystone) never match — adopted docs come from
 // the repository around the charter, not from inside it.
-// GlobRepo expands one repo-relative glob against the working tree,
-// returning sorted slash paths of regular files. Exported for the drift
-// scanner's paths-gone check; the guard dirs (.git, node_modules,
-// .agents, .keystone) never match.
+// GlobRepo is globRepo, exported for the drift scanner's paths-gone check.
 func GlobRepo(projectDir, pattern string) ([]string, error) {
 	return globRepo(projectDir, pattern)
 }

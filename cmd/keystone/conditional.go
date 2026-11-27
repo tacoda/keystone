@@ -43,13 +43,3 @@ func installConditional(assets fs.FS, destDir, charterRoot string, sel Selection
 	}
 	return nil
 }
-
-// hasValue reports whether values names label.
-func hasValue(values []string, label string) bool {
-	for _, v := range values {
-		if v == label {
-			return true
-		}
-	}
-	return false
-}

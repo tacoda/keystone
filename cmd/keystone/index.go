@@ -111,7 +111,6 @@ primitive's kind comes from its folder:
   .agents/skills/<id>/SKILL.md       → skill
   .agents/commands/*.md              → command
   .agents/agents/*.md                → agent
-  .agents/tools/*.md                 → tool
   .agents/documents/*.md             → document
 
 Vendored policies under .keystone/policies/ are indexed the same way.
