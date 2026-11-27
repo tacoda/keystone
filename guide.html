@@ -5,21 +5,21 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="voice-register" content="informational">
 <meta name="voice-english" content="ste">
-<title>Keystone Guide: get started with the agent charter framework</title>
-<meta name="description" content="A hands-on walkthrough for Keystone 5.0, the agent charter framework. Install, run keystone init, write your first rule and hook, and project them to every host.">
+<title>Keystone Guide: get started with the charter framework — context management</title>
+<meta name="description" content="A hands-on walkthrough for Keystone 6.0, the charter framework. Install, run keystone init, write your first rule and hook, and project them to every host.">
 <link rel="canonical" href="https://www.tacoda.dev/keystone/guide.html">
 
 <!-- Open Graph -->
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://www.tacoda.dev/keystone/guide.html">
-<meta property="og:title" content="Keystone Guide: get started with the agent charter framework">
-<meta property="og:description" content="A hands-on walkthrough for Keystone 5.0, the agent charter framework. Install, run keystone init, write your first rule and hook, and project them to every host.">
+<meta property="og:title" content="Keystone Guide: get started with the charter framework — context management">
+<meta property="og:description" content="A hands-on walkthrough for Keystone 6.0, the charter framework. Install, run keystone init, write your first rule and hook, and project them to every host.">
 <meta property="og:image" content="https://www.tacoda.dev/keystone/keystone_logo.png">
 
 <!-- Twitter Card -->
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Keystone Guide: get started with the agent charter framework">
-<meta name="twitter:description" content="A hands-on walkthrough for Keystone 5.0, the agent charter framework. Install, run keystone init, write your first rule and hook, and project them to every host.">
+<meta name="twitter:title" content="Keystone Guide: get started with the charter framework — context management">
+<meta name="twitter:description" content="A hands-on walkthrough for Keystone 6.0, the charter framework. Install, run keystone init, write your first rule and hook, and project them to every host.">
 <meta name="twitter:image" content="https://www.tacoda.dev/keystone/keystone_logo.png">
 
 <link rel="icon" type="image/png" href="keystone_logo.png">
@@ -1174,8 +1174,8 @@
         <span class="brand-logo-wrap"><img src="keystone_logo.png" alt="Keystone" class="brand-logo" width="512" height="512"></span>
         <h1>Keystone</h1>
       </div>
-      <p>the agent charter framework</p>
-      <p>guide · v5.0.2</p>
+      <p>the charter framework — context management</p>
+      <p>guide · v6.0.0</p>
     </div>
 
     <nav>
@@ -1221,7 +1221,7 @@
   <!-- ===================== 1 · INTRODUCTION ===================== -->
   <section id="introduction" class="page" data-title="Introduction">
     <div class="page-head">
-      <div class="crumb">Guide · Keystone v5.0.2</div>
+      <div class="crumb">Guide · Keystone v6.0.0</div>
       <h1>Get started with <em class="hero-any">Keystone</em>.</h1>
       <p class="tagline">
         Keystone keeps the standards for your coding agents in one folder, <code>.agents/</code>,
@@ -1286,7 +1286,7 @@
     </div>
 
     <div class="callout">
-      <strong>Coming from 4.x?</strong> Run <code>keystone migrate up</code>, then install the 5.0
+      <strong>Coming from 4.x?</strong> Run <code>keystone migrate up</code>, then install the 6.0
       binary before your hooks run again. The 4.x names still parse, and
       <code>keystone lint --fix</code> rewrites them. See the <a href="docs.html">reference</a> for
       the map from each old name to its new one.
@@ -1418,7 +1418,7 @@ continue  cline  goose  pi  aider  generic</pre>
       <div class="tree-line"><span class="tree-structure">├─</span> <span class="tree-dir">references/</span><span class="tree-annotation ann-2">the reasoning behind each rule</span></div>
       <div class="tree-line"><span class="tree-structure">├─</span> <span class="tree-dir">hooks/</span><span class="tree-annotation ann-3">checks that run on an event</span></div>
       <div class="tree-line"><span class="tree-structure">├─</span> <span class="tree-dir">skills/</span><span class="tree-annotation ann-4">Agent Skills, including the keystone-* lifecycle skills</span></div>
-      <div class="tree-line"><span class="tree-structure">└─</span> <span class="tree-dir">agents/</span> <span class="tree-file">commands/</span> <span class="tree-file">evals/</span><span class="tree-annotation ann-5">subagents, commands, and evals</span></div>
+      <div class="tree-line"><span class="tree-structure">└─</span> <span class="tree-dir">agents/</span> <span class="tree-file">commands/</span> <span class="tree-file">evals/</span><span class="tree-annotation ann-5">agents, commands, and evals</span></div>
       <div class="tree-line"><span class="tree-dir">.keystone/</span></div>
       <div class="tree-line"><span class="tree-structure">├─</span> <span class="tree-file">INDEX.json</span> <span class="tree-file">INDEX.lite.json</span><span class="tree-annotation ann-1">the descriptor index, read first</span></div>
       <div class="tree-line"><span class="tree-structure">├─</span> <span class="tree-file">lockfile.json</span><span class="tree-annotation ann-2">every file Keystone wrote</span></div>
@@ -1455,16 +1455,16 @@ continue  cline  goose  pi  aider  generic</pre>
       <span>Kind</span><span>What it is</span><span>Category</span><span>Folder</span>
     </div>
     <div class="layers">
-      <div class="layer l1"><div class="layer-cell layer-name">rule</div><div class="layer-cell layer-desc">a directive; applies when a touched file matches its paths:, or everywhere without them</div><div class="layer-cell layer-act">constraint</div><div class="layer-cell layer-act">.agents/rules/</div></div>
-      <div class="layer l2"><div class="layer-cell layer-name">reference</div><div class="layer-cell layer-desc">the reasoning behind a rule, opened on demand</div><div class="layer-cell layer-act">constraint</div><div class="layer-cell layer-act">.agents/references/</div></div>
-      <div class="layer l3"><div class="layer-cell layer-name">hook</div><div class="layer-cell layer-desc">a check that runs on an event; a non-zero exit blocks</div><div class="layer-cell layer-act">constraint</div><div class="layer-cell layer-act">.agents/hooks/</div></div>
-      <div class="layer l4"><div class="layer-cell layer-name">permission</div><div class="layer-cell layer-desc">allow, ask, and deny rules for tools</div><div class="layer-cell layer-act">constraint</div><div class="layer-cell layer-act">.agents/permissions/</div></div>
-      <div class="layer l5"><div class="layer-cell layer-name">eval</div><div class="layer-cell layer-desc">a test that the charter changes agent behavior</div><div class="layer-cell layer-act">constraint</div><div class="layer-cell layer-act">.agents/evals/</div></div>
-      <div class="layer l1"><div class="layer-cell layer-name">skill</div><div class="layer-cell layer-desc">an Agent Skills SKILL.md; activates when its description matches the task</div><div class="layer-cell layer-act">capability</div><div class="layer-cell layer-act">.agents/skills/</div></div>
-      <div class="layer l2"><div class="layer-cell layer-name">command</div><div class="layer-cell layer-desc">a unit of work the user asks for by name</div><div class="layer-cell layer-act">capability</div><div class="layer-cell layer-act">.agents/commands/</div></div>
-      <div class="layer l3"><div class="layer-cell layer-name">subagent</div><div class="layer-cell layer-desc">a role the agent delegates to</div><div class="layer-cell layer-act">capability</div><div class="layer-cell layer-act">.agents/agents/</div></div>
-      <div class="layer l4"><div class="layer-cell layer-name">tool</div><div class="layer-cell layer-desc">a callable you write: over MCP, as a command, or as a host plugin</div><div class="layer-cell layer-act">capability</div><div class="layer-cell layer-act">.agents/tools/</div></div>
-      <div class="layer l5"><div class="layer-cell layer-name">document</div><div class="layer-cell layer-desc">a template for governed output, such as a plan or an ADR</div><div class="layer-cell layer-act">capability</div><div class="layer-cell layer-act">.agents/documents/</div></div>
+      <div class="layer l1"><div class="layer-cell layer-name">rule</div><div class="layer-cell layer-desc">a directive; applies when a touched file matches its paths:, or everywhere without them</div><div class="layer-cell layer-act">governs</div><div class="layer-cell layer-act">.agents/rules/</div></div>
+      <div class="layer l2"><div class="layer-cell layer-name">reference</div><div class="layer-cell layer-desc">the reasoning behind a rule, opened on demand</div><div class="layer-cell layer-act">governs</div><div class="layer-cell layer-act">.agents/references/</div></div>
+      <div class="layer l3"><div class="layer-cell layer-name">hook</div><div class="layer-cell layer-desc">a check that runs on an event; a non-zero exit blocks</div><div class="layer-cell layer-act">governs</div><div class="layer-cell layer-act">.agents/hooks/</div></div>
+      <div class="layer l4"><div class="layer-cell layer-name">permission</div><div class="layer-cell layer-desc">allow, ask, and deny rules for tools</div><div class="layer-cell layer-act">governs</div><div class="layer-cell layer-act">.agents/permissions/</div></div>
+      <div class="layer l5"><div class="layer-cell layer-name">eval</div><div class="layer-cell layer-desc">a test that the charter changes agent behavior</div><div class="layer-cell layer-act">governs</div><div class="layer-cell layer-act">.agents/evals/</div></div>
+      <div class="layer l1"><div class="layer-cell layer-name">skill</div><div class="layer-cell layer-desc">an Agent Skills SKILL.md; activates when its description matches the task</div><div class="layer-cell layer-act">extends</div><div class="layer-cell layer-act">.agents/skills/</div></div>
+      <div class="layer l2"><div class="layer-cell layer-name">command</div><div class="layer-cell layer-desc">a unit of work the user asks for by name</div><div class="layer-cell layer-act">extends</div><div class="layer-cell layer-act">.agents/commands/</div></div>
+      <div class="layer l3"><div class="layer-cell layer-name">agent</div><div class="layer-cell layer-desc">a role the agent delegates to</div><div class="layer-cell layer-act">extends</div><div class="layer-cell layer-act">.agents/agents/</div></div>
+      <div class="layer l4"><div class="layer-cell layer-name">tool</div><div class="layer-cell layer-desc">a callable you write: over MCP, as a command, or as a host plugin</div><div class="layer-cell layer-act">extends</div><div class="layer-cell layer-act">.agents/tools/</div></div>
+      <div class="layer l5"><div class="layer-cell layer-name">document</div><div class="layer-cell layer-desc">a template for governed output, such as a plan or an ADR</div><div class="layer-cell layer-act">extends</div><div class="layer-cell layer-act">.agents/documents/</div></div>
     </div>
 
     <div class="prose">
@@ -1896,14 +1896,14 @@ On demand (opened when they apply): 21031
   rule             10371
   reference         2810
   skill             6278
-  subagent          1572
+  agent          1572
   <span class="comment">…</span></pre>
 
     <div class="prose">
       <p>
         The <strong>always loaded</strong> tier is what the host reads at the start of every
         session. That tier holds root files, rules without <code>paths:</code>, and the name and
-        description of every skill, command, and subagent. The <strong>on demand</strong> tier is
+        description of every skill, command, and agent. The <strong>on demand</strong> tier is
         every body the agent opens when it applies.
       </p>
       <p>
@@ -1950,12 +1950,12 @@ On demand (opened when they apply): 21031
         modes, and how each host gets it.
       </p>
       <ul class="cta-list">
-        <li><span class="il-tag">other kinds</span> Permissions, evals, skills, commands, subagents, tools, and documents.</li>
+        <li><span class="il-tag">other kinds</span> Permissions, evals, skills, commands, agents, tools, and documents.</li>
         <li><span class="il-tag">policies</span> Vendor a charter fragment from another repo with <code>keystone policy add</code>. The project wins by default, and a <code>strict</code> item locks.</li>
         <li><span class="il-tag">lifecycle</span> The <code>keystone-*</code> skills. Say "run task on &lt;ticket-id&gt;" to start a unit of work.</li>
         <li><span class="il-tag">hosts</span> The full host matrix, inferential hooks, and custom adapters.</li>
         <li><span class="il-tag">health</span> <code>keystone verify</code>, <code>keystone charter coverage</code>, and <code>keystone charter conformance</code>.</li>
-        <li><span class="il-tag">upgrade</span> <code>keystone migrate up</code> and the map from each 4.x name to its 5.0 name.</li>
+        <li><span class="il-tag">upgrade</span> <code>keystone migrate up</code> and the map from each 4.x name to its 6.0 name.</li>
       </ul>
       <div class="cta-buttons">
         <a class="cta-btn cta-primary" href="docs.html">Open the reference →</a>
@@ -1965,7 +1965,7 @@ On demand (opened when they apply): 21031
     <div class="cta-card">
       <div class="cta-headline">Source, changelog &amp; contributing</div>
       <p class="cta-body">
-        Keystone is open source under the MIT license. The 5.0.0 changelog lists every change in
+        Keystone is open source under the MIT license. The 6.0.0 changelog lists every change in
         this release. To contribute, read <code>CONTRIBUTING.md</code> for the local dev loop.
       </p>
       <div class="cta-buttons">
@@ -1999,7 +1999,7 @@ On demand (opened when they apply): 21031
     </div>
 
     <div class="page-foot">
-      <span class="built">Built with <a href="index.html">Keystone</a> · the agent charter framework</span>
+      <span class="built">Built with <a href="index.html">Keystone</a> · the charter framework — context management</span>
       <span><a href="index.html">Home</a> · <a href="docs.html">Reference</a> · <a href="https://github.com/tacoda/keystone" target="_blank" rel="noopener">GitHub ↗</a></span>
     </div>
   </section>

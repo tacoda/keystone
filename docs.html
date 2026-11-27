@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Keystone reference: the agent charter framework, v5.0.2</title>
-<meta name="description" content="Keystone v5.0.2 reference: constraints and capabilities, the ten kinds, projection to ten hosts, hooks and permissions, the cascade, events, the CLI, the MCP server, the dashboard, and the upgrade from 4.x.">
+<title>Keystone reference: the charter framework — context management, v6.0.0</title>
+<meta name="description" content="Keystone v6.0.0 reference: the ten kinds and the query layer, projection to ten hosts, hooks and permissions, the cascade, events, the CLI, the MCP server, the dashboard, and the upgrade from 4.x.">
 <meta name="voice-register" content="informational">
 <meta name="voice-english" content="ste">
 <link rel="canonical" href="https://www.tacoda.dev/keystone/docs.html">
@@ -12,14 +12,14 @@
 <!-- Open Graph -->
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://www.tacoda.dev/keystone/docs.html">
-<meta property="og:title" content="Keystone reference: the agent charter framework, v5.0.2">
-<meta property="og:description" content="Keystone v5.0.2 reference: constraints and capabilities, the ten kinds, projection to ten hosts, hooks and permissions, the cascade, events, the CLI, the MCP server, the dashboard, and the upgrade from 4.x.">
+<meta property="og:title" content="Keystone reference: the charter framework — context management, v6.0.0">
+<meta property="og:description" content="Keystone v6.0.0 reference: the ten kinds and the query layer, projection to ten hosts, hooks and permissions, the cascade, events, the CLI, the MCP server, the dashboard, and the upgrade from 4.x.">
 <meta property="og:image" content="https://www.tacoda.dev/keystone/keystone_logo.png">
 
 <!-- Twitter Card -->
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Keystone reference: the agent charter framework, v5.0.2">
-<meta name="twitter:description" content="Keystone v5.0.2 reference: constraints and capabilities, the ten kinds, projection to ten hosts, hooks and permissions, the cascade, events, the CLI, the MCP server, the dashboard, and the upgrade from 4.x.">
+<meta name="twitter:title" content="Keystone reference: the charter framework — context management, v6.0.0">
+<meta name="twitter:description" content="Keystone v6.0.0 reference: the ten kinds and the query layer, projection to ten hosts, hooks and permissions, the cascade, events, the CLI, the MCP server, the dashboard, and the upgrade from 4.x.">
 <meta name="twitter:image" content="https://www.tacoda.dev/keystone/keystone_logo.png">
 
 <link rel="icon" type="image/png" href="keystone_logo.png">
@@ -1148,8 +1148,8 @@
         <span class="brand-logo-wrap"><img src="keystone_logo.png" alt="Keystone" class="brand-logo" width="512" height="512"></span>
         <h1>Keystone</h1>
       </div>
-      <p>the agent charter framework</p>
-      <p>reference · v5.0.2</p>
+      <p>the charter framework — context management</p>
+      <p>reference · v6.0.0</p>
     </div>
 
     <nav>
@@ -1157,7 +1157,7 @@
         <span class="nav-label">Concepts</span>
         <a class="nav-link" href="#overview">Overview</a>
         <a class="nav-link" href="#charter-vs-harness">Charter vs. harness</a>
-        <a class="nav-link" href="#categories">Constraints and capabilities</a>
+        <a class="nav-link" href="#categories">The ten kinds</a>
         <a class="nav-link" href="#projection">Projection</a>
         <a class="nav-link" href="#enforcement">Hooks and permissions</a>
         <a class="nav-link" href="#resolution">Resolution order</a>
@@ -1178,7 +1178,7 @@
         <span class="nav-label">Capabilities</span>
         <a class="nav-link" href="#skill">skill</a>
         <a class="nav-link" href="#command">command</a>
-        <a class="nav-link" href="#subagent">subagent</a>
+        <a class="nav-link" href="#agent">agent</a>
         <a class="nav-link" href="#tool">tool</a>
         <a class="nav-link" href="#document">document</a>
       </div>
@@ -1219,17 +1219,17 @@
   <!-- ===================== OVERVIEW ===================== -->
   <section id="overview" class="page" data-title="Overview">
     <div class="page-head">
-      <div class="crumb">Concepts · Keystone v5.0.2</div>
+      <div class="crumb">Concepts · Keystone v6.0.0</div>
       <h1>The <em class="hero-any">Keystone</em> reference.</h1>
       <p class="tagline">
-        Keystone is the agent charter framework. You write the standards your coding agents follow once, in <code>.agents/</code>. Keystone delivers them to ten hosts and tells you where a host can't enforce one. This page is the full reference for v5.0.2. For a first look, read the <a href="index.html">home page</a>. For a task walkthrough, read the <a href="guide.html">guide</a>.
+        Keystone is the charter framework — context management. You write the standards your coding agents follow once, in <code>.agents/</code>. Keystone delivers them to ten hosts and tells you where a host can't enforce one. This page is the full reference for v6.0.0. For a first look, read the <a href="index.html">home page</a>. For a task walkthrough, read the <a href="guide.html">guide</a>.
       </p>
     </div>
 
     <div class="section-label">How this page is organized</div>
     <div class="layers">
       <div class="layer-header"><span>Group</span><span>What it covers</span><span>Read it when</span><span>Start at</span></div>
-      <div class="layer l1"><div class="layer-cell layer-name">Concepts</div><div class="layer-cell layer-desc">The two categories, projection, per-host enforcement, resolution, the cascade, and events.</div><div class="layer-cell layer-author">you're new</div><div class="layer-cell layer-act"><a href="#categories">Constraints and capabilities</a></div></div>
+      <div class="layer l1"><div class="layer-cell layer-name">Concepts</div><div class="layer-cell layer-desc">The two categories, projection, per-host enforcement, resolution, the cascade, and events.</div><div class="layer-cell layer-author">you're new</div><div class="layer-cell layer-act"><a href="#categories">The ten kinds</a></div></div>
       <div class="layer l2"><div class="layer-cell layer-name">Constraints</div><div class="layer-cell layer-desc">One page per kind that limits, gates, or checks the agent.</div><div class="layer-cell layer-author">you write a rule or a hook</div><div class="layer-cell layer-act"><a href="#rule">rule</a></div></div>
       <div class="layer l3"><div class="layer-cell layer-name">Capabilities</div><div class="layer-cell layer-desc">One page per kind that adds something the agent can do.</div><div class="layer-cell layer-author">you write a skill or a tool</div><div class="layer-cell layer-act"><a href="#skill">skill</a></div></div>
       <div class="layer l4"><div class="layer-cell layer-name">Surfaces</div><div class="layer-cell layer-desc">The CLI, the MCP server, and the dashboard.</div><div class="layer-cell layer-author">you need a command or flag</div><div class="layer-cell layer-act"><a href="#cli">CLI</a></div></div>
@@ -1251,8 +1251,8 @@
       <div class="tree-line"><span class="tree-structure">├─</span> <span class="tree-file">AGENTS.md</span><span class="tree-annotation ann-1">keystone writes a managed block</span></div>
       <div class="tree-line"><span class="tree-structure">├─</span> <span class="tree-file">CLAUDE.md</span><span class="tree-annotation ann-1">managed block that imports AGENTS.md</span></div>
       <div class="tree-line"><span class="tree-structure">├─</span> <span class="tree-dir">.agents/</span><span class="tree-annotation ann-1">the charter you write: one folder per kind</span></div>
-      <div class="tree-line"><span class="tree-structure">│  ├─</span> <span class="tree-dir">rules/ references/ hooks/ permissions/ evals/</span><span class="tree-annotation ann-2">constraints</span></div>
-      <div class="tree-line"><span class="tree-structure">│  ├─</span> <span class="tree-dir">skills/ commands/ agents/ tools/ documents/</span><span class="tree-annotation ann-4">capabilities</span></div>
+      <div class="tree-line"><span class="tree-structure">│  ├─</span> <span class="tree-dir">rules/ references/ hooks/ permissions/ evals/</span><span class="tree-annotation ann-2">how / why / checks</span></div>
+      <div class="tree-line"><span class="tree-structure">│  ├─</span> <span class="tree-dir">skills/ commands/ agents/ documents/ corpus/</span><span class="tree-annotation ann-4">skills / commands / agents</span></div>
       <div class="tree-line"><span class="tree-structure">│  └─</span> <span class="tree-dir">hosts/</span><span class="tree-annotation ann-default">custom host profiles (optional)</span></div>
       <div class="tree-line"><span class="tree-structure">├─</span> <span class="tree-dir">.keystone/</span><span class="tree-annotation ann-3">keystone's state; don't edit it by hand</span></div>
       <div class="tree-line"><span class="tree-structure">│  ├─</span> <span class="tree-file">INDEX.json INDEX.lite.json lockfile.json</span><span class="tree-annotation ann-3">generated</span></div>
@@ -1261,7 +1261,7 @@
     </div>
 
     <div class="page-foot">
-      <span>Keystone v5.0.2 reference</span>
+      <span>Keystone v6.0.0 reference</span>
       <span><a href="index.html">Home</a> · <a href="guide.html">Guide</a></span>
     </div>
   </section>
@@ -1278,7 +1278,7 @@
       <div class="action">
         <span class="action-tag">Charter</span>
         <h3>What you author</h3>
-        <p>Rules and their references, hooks, permissions, evals, skills, commands, subagents, tools, and policy. Your <code>CLAUDE.md</code> and <code>AGENTS.md</code> are charter too. It lives in <code>.agents/</code>.</p>
+        <p>Rules and their references, hooks, permissions, evals, skills, commands, agents, tools, and policy. Your <code>CLAUDE.md</code> and <code>AGENTS.md</code> are charter too. It lives in <code>.agents/</code>.</p>
       </div>
       <div class="action">
         <span class="action-tag">Harness</span>
@@ -1294,29 +1294,29 @@
       <p>The orchestrator splits the same way. It runs, so it's harness. The process it enforces is authored, so that's charter.</p>
     </div>
 
-    <div class="page-foot"><span>Concepts</span><span><a href="#categories">Constraints and capabilities →</a></span></div>
+    <div class="page-foot"><span>Concepts</span><span><a href="#categories">The ten kinds →</a></span></div>
   </section>
 
   <!-- ===================== CATEGORIES ===================== -->
-  <section id="categories" class="page" data-title="Constraints and capabilities">
+  <section id="categories" class="page" data-title="The ten kinds">
     <div class="page-head">
       <div class="crumb">Concepts</div>
-      <h1>Constraints and capabilities</h1>
-      <p class="tagline">Every primitive is one of ten kinds, and every kind sits in one of two categories. A <strong>constraint</strong> limits, gates, or checks what the agent does. A <strong>capability</strong> adds something the agent can do. <code>keystone list</code>, <code>INDEX.lite.json</code>, and <code>AGENTS.md</code> show constraints first.</p>
+      <h1>The ten kinds</h1>
+      <p class="tagline">Every primitive is one of ten kinds, and no categories — ten kinds. The triad: <strong>rule</strong> = how, <strong>reference</strong> = why, <strong>corpus</strong> = what. <code>keystone list</code>, <code>INDEX.lite.json</code>, and <code>AGENTS.md</code> show descriptors first; bodies open on demand.</p>
     </div>
 
     <div class="layers">
       <div class="layer-header"><span>Kind</span><span>What it is</span><span>Folder</span><span>Category</span></div>
-      <div class="layer l1"><div class="layer-cell layer-name"><a href="#rule" style="color:inherit;border:none;">rule</a></div><div class="layer-cell layer-desc">A directive. <code>paths:</code> scopes it; without them it applies everywhere.</div><div class="layer-cell layer-author">rules/&lt;topic&gt;/&lt;name&gt;.md</div><div class="layer-cell layer-act">constraint</div></div>
-      <div class="layer l1"><div class="layer-cell layer-name"><a href="#reference" style="color:inherit;border:none;">reference</a></div><div class="layer-cell layer-desc">The reasoning behind a rule, opened on demand.</div><div class="layer-cell layer-author">references/&lt;topic&gt;/&lt;name&gt;.md</div><div class="layer-cell layer-act">constraint</div></div>
-      <div class="layer l1"><div class="layer-cell layer-name"><a href="#hook" style="color:inherit;border:none;">hook</a></div><div class="layer-cell layer-desc">A check that runs on an event. A non-zero exit blocks the agent.</div><div class="layer-cell layer-author">hooks/&lt;id&gt;.md</div><div class="layer-cell layer-act">constraint</div></div>
-      <div class="layer l1"><div class="layer-cell layer-name"><a href="#permission" style="color:inherit;border:none;">permission</a></div><div class="layer-cell layer-desc">Allow, ask, and deny rules for tool calls.</div><div class="layer-cell layer-author">permissions/&lt;id&gt;.md</div><div class="layer-cell layer-act">constraint</div></div>
-      <div class="layer l1"><div class="layer-cell layer-name"><a href="#eval" style="color:inherit;border:none;">eval</a></div><div class="layer-cell layer-desc">A test that the charter behaves the way you expect.</div><div class="layer-cell layer-author">evals/&lt;id&gt;/EVAL.md</div><div class="layer-cell layer-act">constraint</div></div>
-      <div class="layer l4"><div class="layer-cell layer-name"><a href="#skill" style="color:inherit;border:none;">skill</a></div><div class="layer-cell layer-desc">An Agent Skills <code>SKILL.md</code>. It loads when its description matches the task.</div><div class="layer-cell layer-author">skills/&lt;id&gt;/SKILL.md</div><div class="layer-cell layer-act">capability</div></div>
-      <div class="layer l4"><div class="layer-cell layer-name"><a href="#command" style="color:inherit;border:none;">command</a></div><div class="layer-cell layer-desc">A unit of work the user asks for by name.</div><div class="layer-cell layer-author">commands/&lt;id&gt;.md</div><div class="layer-cell layer-act">capability</div></div>
-      <div class="layer l4"><div class="layer-cell layer-name"><a href="#subagent" style="color:inherit;border:none;">subagent</a></div><div class="layer-cell layer-desc">A role the agent delegates to.</div><div class="layer-cell layer-author">agents/&lt;id&gt;.md</div><div class="layer-cell layer-act">capability</div></div>
-      <div class="layer l4"><div class="layer-cell layer-name"><a href="#tool" style="color:inherit;border:none;">tool</a></div><div class="layer-cell layer-desc">A callable you write: over MCP, as a command, or as a host plugin.</div><div class="layer-cell layer-author">tools/&lt;id&gt;.md</div><div class="layer-cell layer-act">capability</div></div>
-      <div class="layer l4"><div class="layer-cell layer-name"><a href="#document" style="color:inherit;border:none;">document</a></div><div class="layer-cell layer-desc">A template for governed output, such as a plan or an ADR.</div><div class="layer-cell layer-author">documents/&lt;id&gt;.md</div><div class="layer-cell layer-act">capability</div></div>
+      <div class="layer l1"><div class="layer-cell layer-name"><a href="#rule" style="color:inherit;border:none;">rule</a></div><div class="layer-cell layer-desc">A directive. <code>paths:</code> scopes it; without them it applies everywhere.</div><div class="layer-cell layer-author">rules/&lt;topic&gt;/&lt;name&gt;.md</div><div class="layer-cell layer-act">governs</div></div>
+      <div class="layer l1"><div class="layer-cell layer-name"><a href="#reference" style="color:inherit;border:none;">reference</a></div><div class="layer-cell layer-desc">The reasoning behind a rule, opened on demand.</div><div class="layer-cell layer-author">references/&lt;topic&gt;/&lt;name&gt;.md</div><div class="layer-cell layer-act">governs</div></div>
+      <div class="layer l1"><div class="layer-cell layer-name"><a href="#hook" style="color:inherit;border:none;">hook</a></div><div class="layer-cell layer-desc">A check that runs on an event. A non-zero exit blocks the agent.</div><div class="layer-cell layer-author">hooks/&lt;id&gt;.md</div><div class="layer-cell layer-act">governs</div></div>
+      <div class="layer l1"><div class="layer-cell layer-name"><a href="#permission" style="color:inherit;border:none;">permission</a></div><div class="layer-cell layer-desc">Allow, ask, and deny rules for tool calls.</div><div class="layer-cell layer-author">permissions/&lt;id&gt;.md</div><div class="layer-cell layer-act">governs</div></div>
+      <div class="layer l1"><div class="layer-cell layer-name"><a href="#eval" style="color:inherit;border:none;">eval</a></div><div class="layer-cell layer-desc">A test that the charter behaves the way you expect.</div><div class="layer-cell layer-author">evals/&lt;id&gt;/EVAL.md</div><div class="layer-cell layer-act">governs</div></div>
+      <div class="layer l4"><div class="layer-cell layer-name"><a href="#skill" style="color:inherit;border:none;">skill</a></div><div class="layer-cell layer-desc">An Agent Skills <code>SKILL.md</code>. It loads when its description matches the task.</div><div class="layer-cell layer-author">skills/&lt;id&gt;/SKILL.md</div><div class="layer-cell layer-act">extends</div></div>
+      <div class="layer l4"><div class="layer-cell layer-name"><a href="#command" style="color:inherit;border:none;">command</a></div><div class="layer-cell layer-desc">A unit of work the user asks for by name.</div><div class="layer-cell layer-author">commands/&lt;id&gt;.md</div><div class="layer-cell layer-act">extends</div></div>
+      <div class="layer l4"><div class="layer-cell layer-name"><a href="#agent" style="color:inherit;border:none;">agent</a></div><div class="layer-cell layer-desc">A role the agent delegates to.</div><div class="layer-cell layer-author">agents/&lt;id&gt;.md</div><div class="layer-cell layer-act">extends</div></div>
+      <div class="layer l4"><div class="layer-cell layer-name"><a href="#tool" style="color:inherit;border:none;">tool</a></div><div class="layer-cell layer-desc">A callable you write: over MCP, as a command, or as a host plugin.</div><div class="layer-cell layer-author">tools/&lt;id&gt;.md</div><div class="layer-cell layer-act">extends</div></div>
+      <div class="layer l4"><div class="layer-cell layer-name"><a href="#document" style="color:inherit;border:none;">document</a></div><div class="layer-cell layer-desc">A template for governed output, such as a plan or an ADR.</div><div class="layer-cell layer-author">documents/&lt;id&gt;.md</div><div class="layer-cell layer-act">extends</div></div>
     </div>
 
     <div class="section-label">The kind comes from the folder</div>
@@ -1358,9 +1358,9 @@
       <div class="layer-header"><span>Strategy</span><span>What keystone writes</span><span>Example</span><span></span></div>
       <div class="layer l1"><div class="layer-cell layer-name">native</div><div class="layer-cell layer-desc">Nothing. The host reads <code>AGENTS.md</code> or <code>.agents/</code> as written.</div><div class="layer-cell layer-author" style="grid-column: span 2;">Codex and opencode read <code>.agents/skills/</code></div></div>
       <div class="layer l2"><div class="layer-cell layer-name">link</div><div class="layer-cell layer-desc">A symlink per entry at the host's path. With <code>"link_mode": "copy"</code>, a copy instead.</div><div class="layer-cell layer-author" style="grid-column: span 2;">Claude Code skills in <code>.claude/skills/</code></div></div>
-      <div class="layer l3"><div class="layer-cell layer-name">shim</div><div class="layer-cell layer-desc">A generated file in the host's own format.</div><div class="layer-cell layer-author" style="grid-column: span 2;">Cursor <code>.mdc</code> rules, Codex TOML subagents</div></div>
+      <div class="layer l3"><div class="layer-cell layer-name">shim</div><div class="layer-cell layer-desc">A generated file in the host's own format.</div><div class="layer-cell layer-author" style="grid-column: span 2;">Cursor <code>.mdc</code> rules, Codex TOML agents</div></div>
       <div class="layer l4"><div class="layer-cell layer-name">index</div><div class="layer-cell layer-desc">A line in <code>AGENTS.md</code>. The agent opens the source when it applies.</div><div class="layer-cell layer-author" style="grid-column: span 2;">rules on Codex, opencode, Goose, Pi, Aider</div></div>
-      <div class="layer l5"><div class="layer-cell layer-name">report</div><div class="layer-cell layer-desc">A constraint the host can't enforce. <code>keystone project</code> prints it, and <code>AGENTS.md</code> lists it.</div><div class="layer-cell layer-author" style="grid-column: span 2;">hooks on Continue, Cline, Goose, Pi, Aider</div></div>
+      <div class="layer l5"><div class="layer-cell layer-name">report</div><div class="layer-cell layer-desc">A check the host can't enforce. <code>keystone project</code> prints it, and <code>AGENTS.md</code> lists it.</div><div class="layer-cell layer-author" style="grid-column: span 2;">hooks on Continue, Cline, Goose, Pi, Aider</div></div>
     </div>
 
     <div class="section-label">The ten hosts</div>
@@ -1372,7 +1372,7 @@
     <div class="definition">
       <p><strong>The <code>AGENTS.md</code> block.</strong> Keystone writes only between <code>&lt;!-- keystone:start --&gt;</code> and <code>&lt;!-- keystone:end --&gt;</code>. The block holds the orientation, the iron laws, the pathless rules, the tools, and one line per host. Your text around it stays. <code>CLAUDE.md</code> gets a block that imports <code>AGENTS.md</code>.</p>
       <p><strong>The lockfile.</strong> Keystone records every file it writes in <code>.keystone/lockfile.json</code>. <code>keystone project</code> replaces only those files. A file it didn't write stops the run, unless you pass <code>--overwrite</code>.</p>
-      <p><strong>Names.</strong> A primitive projects under its own id in kebab case. The subagent <code>reviewer</code> becomes <code>.claude/agents/reviewer.md</code>, and the command <code>release</code> becomes <code>/release</code>.</p>
+      <p><strong>Names.</strong> A primitive projects under its own id in kebab case. The agent <code>reviewer</code> becomes <code>.claude/agents/reviewer.md</code>, and the command <code>release</code> becomes <code>/release</code>.</p>
       <p><strong>Edit the source, never the projection.</strong> The next <code>keystone project</code> overwrites a projected file.</p>
     </div>
 
@@ -1383,7 +1383,7 @@
     "skill":    { "strategy": "link", "dir": ".zed/skills" },
     "rule":     { "strategy": "copy", "dir": ".zed/rules" },
     "command":  { "strategy": "index" },
-    "subagent": { "strategy": "native" }
+    "agent": { "strategy": "native" }
   }
 }</code></pre>
     <div class="definition">
@@ -1500,7 +1500,7 @@ flowchart LR
     </div>
     <div class="definition">
       <p><strong><code>strict</code></strong> items ship with the policy and lock. <code>keystone verify</code> reads them from each policy entry in <code>keystone.json</code>. <strong><code>required</code></strong> items don't ship with the policy. The policy's <code>keystone-policy.json</code> names them, and an outer layer must supply them. An outer layer is an ancestor policy or the project. A missing one is an advisory gap.</p>
-      <p>A 4.x key keeps locking the same items in the 5.0 folders, and inside a policy keystone also searches the 4.x folder. References aren't in the cascade, because they load on demand.</p>
+      <p>A 4.x key keeps locking the same items in the 6.0 folders, and inside a policy keystone also searches the 4.x folder. References aren't in the cascade, because they load on demand.</p>
     </div>
 
     <div class="section-label">Hook depth limit</div>
@@ -1550,7 +1550,7 @@ on-synthesize               on-audit      on-mode-change</code></pre>
     <ol class="steps">
       <li><strong>Select.</strong><p>It finds <code>.agents/</code> from any subfolder and takes every primitive with this <code>event:</code> and a <code>run:</code>. There's no per-hook matcher, so a <code>PreToolUse</code> hook reads its stdin payload to pick the calls it checks.</p></li>
       <li><strong>Run.</strong><p>It runs each command in parallel, with <code>KEYSTONE_EVENT</code>, <code>KEYSTONE_PHASE</code>, <code>KEYSTONE_COMMAND</code>, <code>KEYSTONE_TYPE</code>, and <code>KEYSTONE_HOST</code> set. On a host event, it also passes the host's event JSON on stdin.</p></li>
-      <li><strong>Dispatch.</strong><p>For inferential hooks, it prints a dispatch list: each subagent to spawn and the <code>returns:</code> schema to fill. The host's agent spawns them.</p></li>
+      <li><strong>Dispatch.</strong><p>For inferential hooks, it prints a dispatch list: each agent to spawn and the <code>returns:</code> schema to fill. The host's agent spawns them.</p></li>
     </ol>
 
     <pre class="code"><span class="prompt">$</span> keystone signal list              <span class="comment"># built-in and declared signals, plus host events</span>
@@ -1667,7 +1667,7 @@ Every direct dependency is code the team must audit and upgrade.
     <div class="page-head">
       <div class="crumb">Constraints</div>
       <h1><code>hook</code></h1>
-      <p class="tagline">A check that runs on an event and can block the agent. On a host that runs hooks, it's the strongest constraint keystone has. The cost is the binary: every machine that runs agents needs the 5.0 <code>keystone</code> on its <code>PATH</code>.</p>
+      <p class="tagline">A check that runs on an event and can block the agent. On a host that runs hooks, it's the strongest gate keystone has. The cost is the binary: every machine that runs agents needs the 6.0 <code>keystone</code> on its <code>PATH</code>.</p>
     </div>
 
     <div class="action-grid">
@@ -1703,13 +1703,13 @@ A non-zero exit means the build is broken. Fix it before you claim done.</code><
       <div class="agent-row"><span class="agent-name">event</span><span class="agent-status real">to fire</span><span>A host event or a signal. Without it, the hook never runs. See <a href="#events">Events</a>.</span></div>
       <div class="agent-row"><span class="agent-name">run</span><span class="agent-status real">computational</span><span>The shell command.</span></div>
       <div class="agent-row"><span class="agent-name">returns</span><span class="agent-status real">inferential</span><span>The verdict schema the review must fill.</span></div>
-      <div class="agent-row"><span class="agent-name">agent</span><span class="agent-status fallback">no</span><span>The subagent to dispatch. The default is the hook's own id.</span></div>
+      <div class="agent-row"><span class="agent-name">agent</span><span class="agent-status fallback">no</span><span>The agent to dispatch. The default is the hook's own id.</span></div>
     </div>
 
     <div class="section-label">How each host gets it</div>
     <div class="definition">
-      <p>Claude Code, Cursor, Copilot, Codex, and opencode get a bridge per host event. Every other host gets a report, and <code>AGENTS.md</code> tells the agent to run the checks in <code>.agents/hooks/</code> itself. On Claude Code, an inferential hook is also written as a subagent. See <a href="#enforcement">Hooks and permissions</a>.</p>
-      <p>If checks stop after an upgrade, a 4.x binary is still on <code>PATH</code>. Install 5.0 on that machine.</p>
+      <p>Claude Code, Cursor, Copilot, Codex, and opencode get a bridge per host event. Every other host gets a report, and <code>AGENTS.md</code> tells the agent to run the checks in <code>.agents/hooks/</code> itself. On Claude Code, an inferential hook is also written as a agent. See <a href="#enforcement">Hooks and permissions</a>.</p>
+      <p>If checks stop after an upgrade, a 4.x binary is still on <code>PATH</code>. Install 6.0 on that machine.</p>
     </div>
 
     <div class="section-label">Author it</div>
@@ -1890,14 +1890,14 @@ Tests run freely. A push leaves the machine, so it needs a person.</code></pre>
     <div class="section-label">Author it</div>
     <pre class="code"><span class="prompt">$</span> keystone new command &lt;id&gt;</pre>
 
-    <div class="page-foot"><span>Capabilities</span><span><a href="#subagent">subagent →</a></span></div>
+    <div class="page-foot"><span>Capabilities</span><span><a href="#agent">agent →</a></span></div>
   </section>
 
   <!-- ===================== SUBAGENT ===================== -->
-  <section id="subagent" class="page" data-title="subagent">
+  <section id="agent" class="page" data-title="agent">
     <div class="page-head">
       <div class="crumb">Capabilities</div>
-      <h1><code>subagent</code></h1>
+      <h1><code>agent</code></h1>
       <p class="tagline">A role the agent delegates to, such as a reviewer or a planner, with its own system prompt and tool list. The cost: its report is a claim, not evidence. Also, only Claude Code gets the tool list.</p>
     </div>
 
@@ -1911,7 +1911,7 @@ Tests run freely. A push leaves the machine, so it needs a person.</code></pre>
 
 Compare the diff against the rules under `.agents/rules/`. Report only
 deviations, one per line, with the rule path.</code></pre>
-    <div class="definition"><p>Save it as <code>.agents/agents/drift-reviewer.md</code>. The folder is <code>agents/</code>, because every host with subagents uses that name. The body is the system prompt, and lint fails when <code>tools</code> is missing or empty.</p></div>
+    <div class="definition"><p>Save it as <code>.agents/agents/drift-reviewer.md</code>. The folder is <code>agents/</code>, because every host with agents uses that name. The body is the system prompt, and lint fails when <code>tools</code> is missing or empty.</p></div>
 
     <div class="section-label">How each host gets it</div>
     <div class="agents-table">
@@ -1919,15 +1919,15 @@ deviations, one per line, with the rule path.</code></pre>
       <div class="agent-row"><span class="agent-name">claude-code</span><span class="agent-status real">shim</span><span><code>.claude/agents/&lt;id&gt;.md</code> with <code>tools</code> and <code>model</code></span></div>
       <div class="agent-row"><span class="agent-name">cursor</span><span class="agent-status real">shim</span><span><code>.cursor/agents/&lt;id&gt;.md</code></span></div>
       <div class="agent-row"><span class="agent-name">github-copilot</span><span class="agent-status real">shim</span><span><code>.github/agents/&lt;id&gt;.agent.md</code></span></div>
-      <div class="agent-row"><span class="agent-name">opencode</span><span class="agent-status real">shim</span><span><code>.opencode/agents/&lt;id&gt;.md</code> with <code>mode: subagent</code></span></div>
+      <div class="agent-row"><span class="agent-name">opencode</span><span class="agent-status real">shim</span><span><code>.opencode/agents/&lt;id&gt;.md</code> with <code>mode: agent</code></span></div>
       <div class="agent-row"><span class="agent-name">codex</span><span class="agent-status real">shim</span><span><code>.codex/agents/&lt;id&gt;.toml</code>, body as <code>developer_instructions</code></span></div>
       <div class="agent-row"><span class="agent-name">goose</span><span class="agent-status real">shim</span><span><code>.goose/agents/&lt;id&gt;.md</code></span></div>
       <div class="agent-row"><span class="agent-name">continue, cline, pi, aider</span><span class="agent-status fallback">index</span><span>A line in <code>AGENTS.md</code>.</span></div>
     </div>
-    <div class="definition"><p>To dispatch a subagent on an event, name it in an inferential hook's <code>agent:</code> field. On hosts without a tool list, restrict tools with a <a href="#permission">permission</a> where the host supports one.</p></div>
+    <div class="definition"><p>To dispatch a agent on an event, name it in an inferential hook's <code>agent:</code> field. On hosts without a tool list, restrict tools with a <a href="#permission">permission</a> where the host supports one.</p></div>
 
     <div class="section-label">Author it</div>
-    <pre class="code"><span class="prompt">$</span> keystone new subagent &lt;id&gt;   <span class="comment"># tools: [Read, Grep]; widen only as far as the job needs</span></pre>
+    <pre class="code"><span class="prompt">$</span> keystone new agent &lt;id&gt;   <span class="comment"># tools: [Read, Grep]; widen only as far as the job needs</span></pre>
 
     <div class="page-foot"><span>Capabilities</span><span><a href="#tool">tool →</a></span></div>
   </section>
@@ -2028,13 +2028,13 @@ deviations, one per line, with the rule path.</code></pre>
       <div class="agent-row"><span class="agent-name">index</span><span class="agent-status real">build</span><span>Write <code>.keystone/INDEX.json</code> and <code>INDEX.lite.json</code>.</span></div>
       <div class="agent-row"><span class="agent-name">project</span><span class="agent-status real">build</span><span>Deliver <code>.agents/</code> to every host. <code>--overwrite</code> replaces files keystone doesn't own.</span></div>
       <div class="agent-row"><span class="agent-name">watch</span><span class="agent-status real">build</span><span>Index, project, and lint on every save under <code>.agents/</code>.</span></div>
-      <div class="agent-row"><span class="agent-name">lint</span><span class="agent-status gaps">check</span><span>Check frontmatter. <code>--fix</code> applies the 5.0 spelling; <code>--verbose</code> shows warnings.</span></div>
+      <div class="agent-row"><span class="agent-name">lint</span><span class="agent-status gaps">check</span><span>Check frontmatter. <code>--fix</code> applies the 6.0 spelling; <code>--verbose</code> shows warnings.</span></div>
       <div class="agent-row"><span class="agent-name">verify</span><span class="agent-status gaps">check</span><span>Check policy drift, strict items, budget caps, and projection drift. <code>--hook &lt;id&gt;</code> runs one hook.</span></div>
       <div class="agent-row"><span class="agent-name">doctor</span><span class="agent-status gaps">check</span><span>Check links under <code>.agents/</code>, policy integrity, and template drift.</span></div>
       <div class="agent-row"><span class="agent-name">budget</span><span class="agent-status gaps">check</span><span>Context each host loads, against your caps. <code>--json</code> for CI.</span></div>
       <div class="agent-row"><span class="agent-name">charter coverage</span><span class="agent-status gaps">check</span><span>Project files that no rule's <code>paths:</code> covers.</span></div>
       <div class="agent-row"><span class="agent-name">charter conformance</span><span class="agent-status gaps">check</span><span>Does the repo conform to its charter?</span></div>
-      <div class="agent-row"><span class="agent-name">list</span><span class="agent-status real">discover</span><span>List primitives, constraints first. Filter by kind, <code>constraints</code>, <code>capabilities</code>, or <code>--tag</code>.</span></div>
+      <div class="agent-row"><span class="agent-name">list</span><span class="agent-status real">discover</span><span>List primitives, grouped by kind. Filter by kind or <code>--tag</code>.</span></div>
       <div class="agent-row"><span class="agent-name">show &lt;kind&gt; &lt;id&gt;</span><span class="agent-status real">discover</span><span>One primitive's descriptor and links. <code>--json</code>.</span></div>
       <div class="agent-row"><span class="agent-name">explain &lt;id&gt;</span><span class="agent-status real">discover</span><span>How a primitive activates, what it links to, where it projects, and any uncommitted change.</span></div>
       <div class="agent-row"><span class="agent-name">charter show</span><span class="agent-status real">discover</span><span>The roster by kind. <code>--effective</code> resolves the cascade.</span></div>
@@ -2096,8 +2096,8 @@ skill://list · skill://{name}/SKILL.md <span class="comment"># skill discovery<
 
     <div class="section-label">Navigation</div>
     <div class="action-grid three">
-      <div class="action"><span class="action-tag">Charter</span><h3>constraints</h3><p>Rules, references, hooks, permissions, and evals, with a kind and path filter.</p></div>
-      <div class="action"><span class="action-tag">Charter</span><h3>capabilities</h3><p>Skills, commands, subagents, tools, and documents. Each detail page shows cross-references.</p></div>
+      <div class="action"><span class="action-tag">Charter</span><h3>primitives</h3><p>Rules, references, corpus, hooks, permissions, and evals, with a kind and path filter.</p></div>
+      <div class="action"><span class="action-tag">Charter</span><h3>kinds</h3><p>Skills, commands, agents, and documents — the full ten-kind index. Each detail page shows cross-references.</p></div>
       <div class="action"><span class="action-tag">Charter</span><h3>coverage</h3><p>Files that no rule's <code>paths:</code> covers.</p></div>
       <div class="action"><span class="action-tag">Charter</span><h3>budget</h3><p>Exceeded caps, the always-loaded tier per host, the on-demand tier per kind, and the largest files.</p></div>
       <div class="action"><span class="action-tag">Charter</span><h3>signals</h3><p>Declared signals and the primitives that subscribe.</p></div>
@@ -2122,12 +2122,12 @@ skill://list · skill://{name}/SKILL.md <span class="comment"># skill discovery<
       <div class="action">
         <span class="action-tag">Always loaded</span>
         <h3>Per host</h3>
-        <p>Root files (<code>AGENTS.md</code>, plus <code>CLAUDE.md</code> on Claude Code). The id and description of each skill, command, and subagent the host lists. The full body of each pathless rule the host loads.</p>
+        <p>Root files (<code>AGENTS.md</code>, plus <code>CLAUDE.md</code> on Claude Code). The id and description of each skill, command, and agent the host lists. The full body of each pathless rule the host loads.</p>
       </div>
       <div class="action">
         <span class="action-tag">On demand</span>
         <h3>The same for every host</h3>
-        <p>The full body of each rule, reference, skill, command, subagent, tool, and document, totaled per kind.</p>
+        <p>The full body of each rule, reference, skill, command, agent, tool, and document, totaled per kind.</p>
       </div>
     </div>
 
@@ -2141,7 +2141,7 @@ skill://list · skill://{name}/SKILL.md <span class="comment"># skill discovery<
       <div class="agent-row"><span class="agent-name">always_loaded</span><span class="agent-status real">max_tokens</span><span>Each host's always-loaded tier.</span></div>
       <div class="agent-row"><span class="agent-name">a kind (rule, …)</span><span class="agent-status real">max_tokens</span><span>That kind's on-demand total.</span></div>
       <div class="agent-row"><span class="agent-name">a kind (rule, …)</span><span class="agent-status real">max_tokens_per_load</span><span>Any one file of that kind.</span></div>
-      <div class="agent-row"><span class="agent-name">a 4.x key</span><span class="agent-status fallback">both</span><span><code>guides</code>, <code>corpus</code>, <code>sensors</code>, <code>actions</code>, <code>playbooks</code> map to their 5.0 kind.</span></div>
+      <div class="agent-row"><span class="agent-name">a 4.x key</span><span class="agent-status fallback">both</span><span><code>guides</code>, <code>corpus</code>, <code>sensors</code>, <code>actions</code>, <code>playbooks</code> map to their 6.0 kind.</span></div>
     </div>
     <div class="definition"><p>If two keys map to one kind, the stricter value wins. Set a field to 0, or leave it out, to leave it uncapped. Real tokenizers count about 1.35 times more than the estimate.</p></div>
 
@@ -2207,7 +2207,7 @@ skill://list · skill://{name}/SKILL.md <span class="comment"># skill discovery<
       <li><strong>Ratify.</strong><p>A maintainer accepts the promotion in review. The change lands in <code>.agents/</code> and gets indexed.</p></li>
       <li><strong>Record.</strong><p>Record a material amendment as a document with <code>type: amendment</code>, or as an ADR when it's architectural.</p></li>
     </ol>
-    <div class="definition"><p>Pruning runs the other way. The <code>keystone-audit</code> skill moves stale rules and references to <code>.keystone/archive/</code>, with a one-line reason. ADR 0010 records the 5.0 split into constraints and capabilities.</p></div>
+    <div class="definition"><p>Pruning runs the other way. The <code>keystone-audit</code> skill moves stale rules and references to <code>.keystone/archive/</code>, with a one-line reason. ADR 0010 records the 6.0 kind triad (rule / reference / corpus).</p></div>
 
     <div class="section-label">Roles and decisions</div>
     <div class="definition">
@@ -2241,7 +2241,7 @@ skill://list · skill://{name}/SKILL.md <span class="comment"># skill discovery<
       <div class="layer l4"><div class="layer-cell layer-name">.charter/sensors/</div><div class="layer-cell layer-desc">.agents/hooks/</div><div class="layer-cell layer-author" style="grid-column: span 2;">sensor becomes hook</div></div>
       <div class="layer l4"><div class="layer-cell layer-name">.charter/posture/</div><div class="layer-cell layer-desc">.agents/permissions/</div><div class="layer-cell layer-author" style="grid-column: span 2;">posture becomes permission</div></div>
       <div class="layer l4"><div class="layer-cell layer-name">playbooks/, patterns/</div><div class="layer-cell layer-desc">.agents/skills/&lt;id&gt;/SKILL.md</div><div class="layer-cell layer-author" style="grid-column: span 2;">both become skill</div></div>
-      <div class="layer l4"><div class="layer-cell layer-name">.charter/agents/</div><div class="layer-cell layer-desc">.agents/agents/</div><div class="layer-cell layer-author" style="grid-column: span 2;">agent becomes subagent</div></div>
+      <div class="layer l4"><div class="layer-cell layer-name">.charter/agents/</div><div class="layer-cell layer-desc">.agents/agents/</div><div class="layer-cell layer-author" style="grid-column: span 2;">agent becomes agent</div></div>
       <div class="layer l4"><div class="layer-cell layer-name">INDEX, lockfile, learning/, work/, policies/, …</div><div class="layer-cell layer-desc">.keystone/</div><div class="layer-cell layer-author" style="grid-column: span 2;">keystone's state</div></div>
       <div class="layer l4"><div class="layer-cell layer-name">CHARTER.md</div><div class="layer-cell layer-desc">removed</div><div class="layer-cell layer-author" style="grid-column: span 2;">the <code>AGENTS.md</code> block replaces it</div></div>
     </div>
@@ -2258,7 +2258,7 @@ skill://list · skill://{name}/SKILL.md <span class="comment"># skill discovery<
       <p>If an old binary meets the new hooks, every tool call fails closed, including the install that would fix it. In Claude Code, type <code>! go install github.com/tacoda/keystone/cmd/keystone@latest</code> yourself.</p>
     </div>
 
-    <div class="page-foot"><span>Keystone v5.0.2 reference</span><span><a href="index.html">Home</a> · <a href="guide.html">Guide</a> · <a href="https://github.com/tacoda/keystone/blob/main/docs/upgrade-4.x-to-5.0.md" target="_blank" rel="noopener">Full upgrade guide ↗</a></span></div>
+    <div class="page-foot"><span>Keystone v6.0.0 reference</span><span><a href="index.html">Home</a> · <a href="guide.html">Guide</a> · <a href="https://github.com/tacoda/keystone/blob/main/docs/upgrade-4.x-to-5.0.md" target="_blank" rel="noopener">Full upgrade guide ↗</a></span></div>
   </section>
 
   </main>

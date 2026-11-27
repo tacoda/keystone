@@ -3,21 +3,21 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Keystone — the agent charter framework. The discipline your AI agents won't drift from.</title>
-<meta name="description" content="Keystone is the agent charter framework. Write the standards your coding agents follow once, in .agents/, and keystone delivers them to Claude Code, Cursor, Copilot, Codex, and six more agents.">
+<title>Keystone — the charter framework. Manage your coding agents' context in one place.</title>
+<meta name="description" content="Keystone is the charter framework — the framework for managing context. The charter (the codified context of your repo) lives in one place, .agents/, and every agent queries it via CLI, MCP, or dashboard. Agent-agnostic, team-friendly, and dynamic: it learns, prunes, and relocates context so agent output improves.">
 <link rel="canonical" href="https://www.tacoda.dev/keystone/">
 
 <!-- Open Graph -->
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://www.tacoda.dev/keystone/">
-<meta property="og:title" content="Keystone — the agent charter framework. The discipline your AI agents won't drift from.">
-<meta property="og:description" content="Write the standards your coding agents follow once, in .agents/. Keystone delivers them to ten agents, from Claude Code to Aider, and tells you where a host can't enforce them.">
+<meta property="og:title" content="Keystone — the charter framework. One charter, every agent, a context that keeps improving.">
+<meta property="og:description" content="The charter lives in .agents/ and is indexed at .keystone/INDEX.json. Any agent queries it via CLI or MCP; the dashboard shows drift and the learning flywheels. Teams share it via policies.">
 <meta property="og:image" content="https://www.tacoda.dev/keystone/keystone_logo.png">
 
 <!-- Twitter Card -->
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Keystone — the agent charter framework. The discipline your AI agents won't drift from.">
-<meta name="twitter:description" content="Write the standards your coding agents follow once, in .agents/. Keystone delivers them to ten agents, from Claude Code to Aider, and tells you where a host can't enforce them.">
+<meta name="twitter:title" content="Keystone — the charter framework. One charter, every agent, a context that keeps improving.">
+<meta name="twitter:description" content="The charter lives in .agents/ and is indexed at .keystone/INDEX.json. Any agent queries it via CLI or MCP; the dashboard shows drift and the learning flywheels. Teams share it via policies.">
 <meta name="twitter:image" content="https://www.tacoda.dev/keystone/keystone_logo.png">
 
 <link rel="icon" type="image/png" href="keystone_logo.png">
@@ -1213,15 +1213,15 @@
         <span class="brand-logo-wrap"><img src="keystone_logo.png" alt="Keystone" class="brand-logo" width="512" height="512"></span>
         <h1>Keystone</h1>
       </div>
-      <p>the agent charter framework</p>
-      <p>v5.0.2</p>
+      <p>the charter framework</p>
+      <p>v6.0.0</p>
     </div>
 
     <nav>
       <div class="nav-group">
         <span class="nav-label">Overview</span>
         <a class="nav-link" href="#problem">The problem</a>
-        <a class="nav-link" href="#use-cases">Use cases</a>
+        <a class="nav-link" href="#what">What it does</a>
         <a class="nav-link" href="#install">Get started</a>
       </div>
 
@@ -1246,12 +1246,13 @@
   <!-- ============ HERO ============ -->
   <section class="hero">
     <div class="hero-copy">
-      <div class="eyebrow">The agent charter framework</div>
-      <h1>The discipline your AI agents <span class="hero-any">won't</span> drift from.</h1>
+      <div class="eyebrow">The charter framework — context management for coding agents</div>
+      <h1>One charter. Every agent. A context that <span class="hero-any">keeps improving</span>.</h1>
       <p class="lede">
-        Keystone keeps the standards your coding agents follow in one folder,
-        <code>.agents/</code>, and delivers them to every agent you use:
-        Claude Code, Cursor, Copilot, Codex, and six more.
+        The <strong>charter</strong> — the codified context of your repository — lives in one
+        place, <code>.agents/</code>, indexed at <code>.keystone/INDEX.json</code>. It is the
+        first level of the <strong>habitat</strong> your agent works in: keystone manages the
+        context; it never runs the agent.
       </p>
       <div class="hero-cta">
         <a class="cta-btn cta-primary" href="#install" style="background:var(--accent);color:var(--bg);border:1px solid var(--accent);">Install Keystone</a>
@@ -1260,7 +1261,7 @@
       <div class="hero-meta">
         <span>Open source · MIT</span>
         <span>Go CLI + MCP + dashboard</span>
-        <span>v5.0.2</span>
+        <span>v6.0.0</span>
       </div>
     </div>
 
@@ -1272,11 +1273,12 @@
         </div>
         <div class="term-body">
           <div><span class="pr">$</span> brew install tacoda/tap/keystone</div>
-          <div><span class="pr">$</span> keystone init --agent claude-code</div>
-          <div><span class="ok">✓</span> <span class="dim">wrote</span> .agents/ <span class="dim">+</span> .keystone/</div>
-          <div><span class="pr">$</span> keystone target add cursor,github-copilot</div>
-          <div><span class="ok">✓</span> <span class="ar">.claude/</span> <span class="dim">·</span> <span class="ar">.cursor/</span> <span class="dim">·</span> <span class="ar">.github/</span> <span class="dim">·</span> <span class="ar">AGENTS.md</span> <span class="dim">projected</span></div>
-          <div class="dim"># one source, every agent reads it</div>
+          <div><span class="pr">$</span> keystone init</div>
+          <div><span class="ok">✓</span> <span class="dim">wrote</span> .agents/ <span class="dim">+</span> .keystone/ <span class="dim">+</span> AGENTS.md</div>
+          <div><span class="pr">$</span> keystone charter query "add a migration"</div>
+          <div><span class="pr">$</span> keystone mcp install --agent claude-code</div>
+          <div><span class="pr">$</span> keystone web serve</div>
+          <div class="dim"># one charter — CLI, MCP, dashboard, every agent</div>
           <div><span class="pr">$</span> <span id="elapsed">3</span>s <span class="dim">·</span> <span id="spark">✦</span> on-rails<span class="cursor"></span></div>
         </div>
       </div>
@@ -1288,66 +1290,73 @@
   <div class="definition">
     <p>
       Your standards for coding agents live in <code>CLAUDE.md</code>,
-      <code>.cursorrules</code>, Copilot instructions, and whatever the next
-      agent reads. Those copies <strong>drift</strong> apart. Everything in a
-      root file loads into every session, so each one starts with all of it,
-      relevant or not. And a check you wrote as a hook blocks the agent on one
-      host and does nothing on the next.
+      <code>.cursorrules</code>, Copilot instructions, and whatever the next agent reads.
+      Those copies <strong>drift apart</strong>. Everything in a root file loads into every
+      session, relevant or not. And a check you wrote as a hook blocks the agent on one host
+      and does nothing on the next.
     </p>
     <p>
-      You write each standard once, in <code>.agents/</code>. Keystone writes
-      the file each host reads, and where a host can't enforce something,
-      keystone tells you and the agent.
+      Keystone keeps the charter in one indexed place under <code>.agents/</code> (plus the
+      repo docs you adopt with <code>charter.roots</code>). Agents query it on demand through
+      the CLI or MCP; people browse it in the dashboard. Nothing loads eagerly but the index.
     </p>
   </div>
 
-  <!-- ============ USE CASES ============ -->
-  <div class="section-label" id="use-cases">Use cases</div>
+  <!-- ============ WHAT IT DOES ============ -->
+  <div class="section-label" id="what">What it does</div>
 
   <div class="install-method">
-    <h3>One charter for Claude Code, Cursor, and Copilot</h3>
-    <p>Pick the first agent at install, then add the rest. Each host gets its own files from the same source.</p>
+    <h3>Agent-agnostic</h3>
+    <p>Claude Code, Cursor, Copilot, Codex, opencode, Continue, Cline, Goose, Pi, and Aider all
+    read the same charter — through the CLI (<code>keystone charter query</code>), the MCP
+    server (<code>keystone_charter_query</code>), or the dashboard (<code>keystone web
+    serve</code>). Host-native files are an opt-in compat layer via
+    <code>keystone target add</code>.</p>
   </div>
-  <pre class="code"><span class="prompt">$ </span>keystone init --agent claude-code          <span class="comment"># writes .agents/ and .keystone/</span>
-<span class="prompt">$ </span>keystone target add cursor,github-copilot  <span class="comment"># adds two hosts and projects</span>
-<span class="prompt">$ </span>keystone project                           <span class="comment"># after each edit under .agents/</span></pre>
 
   <div class="install-method">
-    <h3>Bring an existing setup over</h3>
-    <p>Allocate reads <code>.claude/</code>, <code>.cursorrules</code>, Copilot instructions, and the setups for Cline, Windsurf, Continue, and opencode. It reports where each item belongs in <code>.agents/</code>. With <code>--apply</code> it writes only new files, and the originals stay as they are.</p>
+    <h3>Easy to manage — especially for teams</h3>
+    <p>The context stays in one manageable place regardless of which host each developer
+    prefers. At the team level, a <strong>policy</strong> is the plugin: vendor a versioned
+    bundle once (<code>keystone policy add org/charter@v2</code>) and every adopting repo gets
+    its rules, references, corpus, skills, and hooks through the cascade.</p>
   </div>
-  <pre class="code"><span class="prompt">$ </span>keystone allocate          <span class="comment"># report only, writes nothing</span>
-<span class="prompt">$ </span>keystone allocate --apply  <span class="comment"># write the new files under .agents/</span></pre>
 
   <div class="install-method">
-    <h3>Trim a bloated CLAUDE.md</h3>
-    <p>Allocate also proposes which sections of <code>CLAUDE.md</code> or <code>AGENTS.md</code> can load on demand. Budget shows what each host loads every session, so run it before and after. <code>--overwrite</code> moves the sections out and hands the converted host files to keystone. To hold the line, set a cap under <code>budgets</code> in <code>keystone.json</code>, and <code>keystone verify</code> fails when a host goes over.</p>
+    <h3>The charter is dynamic</h3>
+    <p>Keystone keeps the context honest and improving: <code>keystone drift</code> names stale
+    primitives; <code>keystone learn</code> → <code>synthesize</code> promotes accepted findings
+    into rules; <code>keystone audit</code> reports pruning candidates; and
+    <code>keystone charter move / promote / demote</code> relocates context to the layer where it
+    belongs (a rule that is really a check becomes a hook). All of it is on the CLI and MCP, so
+    scripts and agents drive it too.</p>
   </div>
-  <pre class="code"><span class="prompt">$ </span>keystone budget                <span class="comment"># tokens each host loads every session</span>
-<span class="prompt">$ </span>keystone allocate --overwrite  <span class="comment"># move the sections out of CLAUDE.md</span>
-<span class="prompt">$ </span>keystone budget                <span class="comment"># compare</span></pre>
 
   <div class="install-method">
-    <h3>Make a check block the agent</h3>
-    <p>Set <code>event:</code> and <code>run:</code> in the new hook. On Claude Code, Cursor, Copilot, Codex, and opencode, a failing check blocks the agent. I've run that on Claude Code; for the other four it's what each host's hook docs specify. On the other hosts, <code>AGENTS.md</code> tells the agent to run the check itself.</p>
+    <h3>Your agent's habitat, level one</h3>
+    <p>Keystone is not a harness — it never runs the model or acts as an engine. It manages the
+    codified context (rules, references, corpus, hooks, permissions, evals, skills, commands,
+    agents, documents) that whatever harness you run reads. What must execute deterministically
+    belongs to hosts and CI, which the charter can name but never replace.</p>
   </div>
-  <pre class="code"><span class="prompt">$ </span>keystone new hook go-test  <span class="comment"># event: Stop, run: go test ./...</span>
-<span class="prompt">$ </span>keystone project</pre>
 
   <!-- ============ INSTALL ============ -->
   <div class="section-label" id="install">Get started</div>
   <div class="install-method">
-    <h3>Install</h3>
-    <p>One Homebrew tap, one init. Pass <code>--agent</code> to skip the question about which agent you use.</p>
+    <h3>Install, init, query</h3>
+    <p>One Homebrew tap, one init, then ask the charter what applies to the task at hand.</p>
   </div>
-  <pre class="code"><span class="prompt">$ </span>brew install tacoda/tap/keystone    <span class="comment"># or grab a release binary</span>
-<span class="prompt">$ </span>keystone init                       <span class="comment"># writes .agents/ and .keystone/</span></pre>
+  <pre class="code"><span class="prompt">$ </span>brew install tacoda/tap/keystone     <span class="comment"># or grab a release binary</span>
+<span class="prompt">$ </span>keystone init                        <span class="comment"># writes .agents/, .keystone/, keystone.json, AGENTS.md</span>
+<span class="prompt">$ </span>keystone charter query cmd/...       <span class="comment"># what context applies here?</span>
+<span class="prompt">$ </span>keystone mcp install --agent claude-code   <span class="comment"># same reads over MCP</span>
+<span class="prompt">$ </span>keystone web serve                   <span class="comment"># dashboard: primitives, drift, flywheels</span></pre>
 
   <div class="cta-card alt">
     <div class="cta-headline">Start here</div>
     <div class="cta-body">
-      The guide takes you from install to a working charter. The reference
-      covers the ten kinds, every command, and what each host supports.
+      The guide takes you from install to a working charter. The reference covers the ten
+      kinds, every command, and what each host supports.
     </div>
     <div class="cta-buttons">
       <a class="cta-btn cta-primary" href="guide.html">The guide →</a>
@@ -1357,8 +1366,8 @@
   </div>
 
   <footer class="page-foot">
-    <span>Keystone, the agent charter framework · MIT License</span>
-    <span class="built">You write the charter; the <a href="guide.html">harness</a> you run applies it.</span>
+    <span>Keystone, the charter framework · MIT License</span>
+    <span class="built">You write the charter; the harness you run applies it.</span>
   </footer>
 
 </main>
