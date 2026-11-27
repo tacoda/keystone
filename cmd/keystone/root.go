@@ -381,36 +381,6 @@ func promoteDemoteCmd(verb, blurb string) *cobra.Command {
 	return c
 }
 
-func learningListCmd() *cobra.Command {
-	c := &cobra.Command{
-		Use:                "list",
-		Short:              "List the learning inbox, newest first (promotion is synthesize's judgment)",
-		DisableFlagParsing: true,
-		RunE:               runAndForward(runLearningList),
-	}
-	return c
-}
-
-func promoteLadderGroupCmd() *cobra.Command {
-	c := &cobra.Command{
-		Use:                "ladder",
-		Short:              "Information-ladder moves: corpus, reference, rule (why, what, how)",
-		DisableFlagParsing: true,
-	}
-	c.AddCommand(moverGroupListCmd())
-	return c
-}
-
-func moverGroupListCmd() *cobra.Command {
-	c := &cobra.Command{
-		Use:                "list",
-		Short:              "List the learning inbox candidates with their proposed layers",
-		DisableFlagParsing: true,
-		RunE:               runAndForward(runLearningList),
-	}
-	return c
-}
-
 func explainCmd() *cobra.Command {
 	c := &cobra.Command{
 		Use:                "explain",

@@ -77,18 +77,17 @@ read:
 var kindDirs = []struct {
 	kind primitive.Kind
 	dir  string
-	what string
 }{
-	{primitive.KindRule, "rules", "applies when a touched file matches its `paths:`; a rule without `paths:` applies everywhere"},
-	{primitive.KindReference, "references", "the why behind the rules; open it when how isn't enough"},
-	{primitive.KindCorpus, "corpus", "the what — facts, general patterns, product information; standalone"},
-	{primitive.KindHook, "hooks", "a check that runs on an event and can block; where your host cannot run it, run it yourself before claiming done"},
-	{primitive.KindPermission, "permissions", "allow / ask / deny rules for tools"},
-	{primitive.KindEval, "evals", "tests that the charter changes agent behavior"},
-	{primitive.KindSkill, "skills", "activates when its description matches the task"},
-	{primitive.KindCommand, "commands", "a unit of work the user asks for by name"},
-	{primitive.KindAgent, "agents", "a role you delegate to"},
-	{primitive.KindDocument, "documents", "a template for governed output; instances live in `.keystone/work/`"},
+	{primitive.KindRule, "rules"},
+	{primitive.KindReference, "references"},
+	{primitive.KindCorpus, "corpus"},
+	{primitive.KindHook, "hooks"},
+	{primitive.KindPermission, "permissions"},
+	{primitive.KindEval, "evals"},
+	{primitive.KindSkill, "skills"},
+	{primitive.KindCommand, "commands"},
+	{primitive.KindAgent, "agents"},
+	{primitive.KindDocument, "documents"},
 }
 
 var hostNames = map[string]string{
