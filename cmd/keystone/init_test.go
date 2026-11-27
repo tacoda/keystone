@@ -64,7 +64,7 @@ func TestInit_FreshScaffoldGoldenFiles(t *testing.T) {
 	// opt-in workflow pack — a codex init carries --starter workflow so the
 	// TOML lands (decision 15: nothing prescriptive plants by default).
 	assertFileContains(t, projectDir, ".codex/agents/verifier.toml", "developer_instructions = ")
-	assertFileContains(t, projectDir, "AGENTS.md", "<!-- keystone:start -->", "## Kinds", "**Codex**")
+	assertFileContains(t, projectDir, "AGENTS.md", "<!-- keystone:start -->", "# Charter", "## Query the charter", "keystone_charter_query", "**Codex**")
 	assertFileContains(t, projectDir, "CLAUDE.md", "@AGENTS.md")
 
 	// Universal-principles and the vendored-policies dir must NOT scaffold

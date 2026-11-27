@@ -81,3 +81,68 @@ func TestMeasure_Caps(t *testing.T) {
 		t.Errorf("violations = %s", got)
 	}
 }
+
+// TestMeasure_DefaultAlwaysCap — with no budgets configured, the 6.0
+// default always_loaded cap applies and names the over-cap files; an
+// explicit cap overrides it; max_tokens: 0 disables it.
+func TestMeasure_DefaultAlwaysCap(t *testing.T) {
+	// No budgets: a fat AGENTS.md blows the default cap.
+	root := t.TempDir()
+	for rel, body := range charterFixture {
+		p := filepath.Join(root, rel)
+		if err := os.MkdirAll(filepath.Dir(p), 0o755); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(p, []byte(body), 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	fat := strings.Repeat("word ", DefaultAlwaysLoadedCap+100) + "\n"
+	if err := os.WriteFile(filepath.Join(root, "AGENTS.md"), []byte(fat), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	prims, _, err := primitive.Walk(root, config.DefaultAgentsRoot)
+	if err != nil {
+		t.Fatal(err)
+	}
+	r := Measure(root, prims, projection.Enabled([]string{"codex"}), nil)
+	var vs []Violation
+	for _, v := range r.Violations {
+		if v.Scope == AlwaysLoaded+" (codex)" {
+			vs = append(vs, v)
+		}
+	}
+	if len(vs) != 1 {
+		t.Fatalf("default cap: want 1 always_loaded violation, got %+v", r.Violations)
+	}
+	if vs[0].Cap != DefaultAlwaysLoadedCap || vs[0].OverBy() <= 0 {
+		t.Errorf("violation = %+v", vs[0])
+	}
+	if !strings.Contains(vs[0].Path, "AGENTS.md") {
+		t.Errorf("violation must name the over-cap file, got path %q", vs[0].Path)
+	}
+
+	// Explicit smaller cap wins over the default.
+	r = Measure(root, prims, projection.Enabled([]string{"codex"}), map[string]config.BudgetSpec{
+		AlwaysLoaded: {MaxTokens: 10},
+	})
+	found := false
+	for _, v := range r.Violations {
+		if v.Scope == AlwaysLoaded+" (codex)" && v.Cap == 10 {
+			found = true
+		}
+	}
+	if !found {
+		t.Errorf("explicit cap not applied: %+v", r.Violations)
+	}
+
+	// Explicit zero disables the cap.
+	r = Measure(root, prims, projection.Enabled([]string{"codex"}), map[string]config.BudgetSpec{
+		AlwaysLoaded: {MaxTokens: 0},
+	})
+	for _, v := range r.Violations {
+		if v.Scope == AlwaysLoaded+" (codex)" {
+			t.Errorf("max_tokens: 0 must disable the cap, got %+v", v)
+		}
+	}
+}

@@ -2,7 +2,6 @@ package projection
 
 import (
 	"fmt"
-	"sort"
 	"strings"
 
 	"github.com/tacoda/keystone/internal/framework/adapters/claudecode"
@@ -98,48 +97,16 @@ var hostNames = map[string]string{
 	"goose": "Goose", "pi": "Pi", "aider": "Aider",
 }
 
-// AgentsMD renders the AGENTS.md managed block: the whole orientation, in
-// one place, for every host that reads AGENTS.md.
+// AgentsMD renders the AGENTS.md managed block: the slim always-loaded
+// orientation for every host that reads AGENTS.md. Nothing loads eagerly
+// except this block and the index — every primitive body opens on demand
+// through the query surface (spec pillar 1).
 func AgentsMD(primitives []primitive.Primitive, hosts []Profile) string {
 	var b strings.Builder
 	b.WriteString(agentsIntro)
-	writeKindSection(&b)
-	writeEverywhereRules(&b, primitives)
-	b.WriteString(agentsLaws)
+	b.WriteString(agentsQuery)
 	writeHosts(&b, primitives, hosts)
 	return b.String()
-}
-
-func writeKindSection(b *strings.Builder) {
-	fmt.Fprintf(b, "\n## Kinds\n\n")
-	for _, k := range kindDirs {
-		fmt.Fprintf(b, "- **%s** (`.agents/%s/`) — %s.\n", k.kind, k.dir, k.what)
-	}
-}
-
-// writeEverywhereRules lists rules without paths: — they apply to every
-// task, but stay one line each here; the body is opened on demand.
-func writeEverywhereRules(b *strings.Builder, primitives []primitive.Primitive) {
-	var lines []string
-	for _, p := range primitives {
-		if appliesEverywhere(p) {
-			lines = append(lines, fmt.Sprintf("- `%s` — %s", p.Path, strings.TrimSpace(p.Description)))
-		}
-	}
-	if len(lines) == 0 {
-		return
-	}
-	sort.Strings(lines)
-	b.WriteString("\n## Rules that apply everywhere\n\nOpen the one that fits the phase you are in.\n\n")
-	b.WriteString(strings.Join(lines, "\n") + "\n")
-}
-
-// appliesEverywhere is an inferential rule with no paths: scope.
-func appliesEverywhere(p primitive.Primitive) bool {
-	if primitive.Kind(p.Kind) != primitive.KindRule || p.Mode == "computational" {
-		return false
-	}
-	return len(p.Paths) == 0
 }
 
 // writeHosts states, per enabled host, what it loads by itself and what
@@ -242,25 +209,17 @@ The sources live in ` + "`.agents/`" + `; keystone's index and state live in ` +
 ` + "`.keystone/INDEX.lite.json`" + ` lists every primitive (kind, id, description). Browse it, then open a body only when it applies to the task.
 `
 
-const agentsLaws = `
-## Iron laws (every phase)
+// agentsQuery is the block's query section: how to reach every body on
+// demand, on both surfaces (CLI and MCP), plus the hygiene verbs and the
+// dashboard. The kind table, everywhere-rules list, and iron laws that
+// used to be inlined here live in .agents/ primitives now — this block
+// only orients.
+const agentsQuery = `
+## Query the charter
 
-- No proceeding without explicit acceptance criteria.
-- No completion claims without fresh verification: checks run this turn, against post-edit state, with cited output.
-- No commits with failing checks. Never ` + "`--no-verify`" + `.
-- No AI attribution in commits, PRs, or tracker comments.
-- No silent overwrites of state files.
-- No reading or writing sensitive files (` + "`.env*`" + `, ` + "`*.pem`" + `, ` + "`*.key`" + `, ` + "`credentials.json`" + `, secrets dirs); ask out-of-band.
-- No dangerous action without explicit in-turn confirmation (` + "`rm -rf`" + `, force-push, ` + "`reset --hard`" + `, prod DB writes, external comms, installs).
-- No invented imports, methods, config keys, or CLI flags: grep, read the manifest, or check ` + "`--help`" + ` first.
-- No "while I'm here" cleanups: every changed line traces to the request.
-- No accepting a subagent's "done" report as evidence: read the diff and re-run checks yourself.
+Nothing loads eagerly except this block and the index; open bodies on demand.
 
-## Lifecycle
-
-To start a unit of work, say **"run task on ` + "`<ticket-id>`" + `"**; it runs the ` + "`task`" + ` skill. For one step, ask in plain words ("run verify"): the matching ` + "`keystone-*`" + ` skill activates.
-
-## Override
-
-Project files in ` + "`.agents/`" + ` win over installed policies (` + "`.keystone/policies/`" + `). Deeper policies refine outer ones; a ` + "`strict:`" + ` item is absolute.
+- CLI — ` + "`keystone charter query <files…> [--task \"…\"]`" + ` (add ` + "`--full`" + ` for bodies); also ` + "`list` / `show <kind> <id>` / `search <query>`" + `
+- MCP (` + "`keystone mcp serve`" + `) — ` + "`keystone_charter_query` / `keystone_list_primitives` / `keystone_get_primitive` / `keystone_search`" + `
+- Charter hygiene — ` + "`keystone learn | synthesize | audit | drift | mode`" + ` (the same verbs as ` + "`keystone_*`" + ` MCP tools); dashboard: ` + "`keystone web serve`" + `
 `

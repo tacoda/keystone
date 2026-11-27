@@ -45,9 +45,12 @@ func TestAgentsMD_Content(t *testing.T) {
 	write(t, root, map[string]string{".agents/rules/process/spec.md": "---\nid: process/spec\ndescription: Capture intent first.\n---\n# Spec\n"})
 	md := AgentsMD(walk(t, root), Enabled([]string{"codex", "aider"}))
 	for _, want := range []string{
-		"## Kinds", "**rule** (`.agents/rules/`)", "**agent** (`.agents/agents/`)",
-		"## Rules that apply everywhere", "`.agents/rules/process/spec.md` — Capture intent first.",
-		"## Iron laws", "## On each host",
+		"# Charter", "codified context",
+		"## Read first", ".keystone/INDEX.lite.json",
+		"## Query the charter",
+		"keystone charter query", "keystone_charter_query",
+		"keystone learn | synthesize | audit | drift | mode", "keystone web serve",
+		"## On each host",
 		"- **Codex** — loads skills, agents by itself; open rules, commands from `.agents/` yourself",
 		"- **Aider** — open rules, skills, commands, agents from `.agents/` yourself; does **not** run hooks",
 	} {
@@ -55,11 +58,21 @@ func TestAgentsMD_Content(t *testing.T) {
 			t.Errorf("AGENTS.md missing %q", want)
 		}
 	}
+	// The 6.0 block is slim: no inlined kind table, rule list, or laws —
+	// those live in .agents/ primitives and open on demand.
+	for _, banned := range []string{
+		"## Kinds", "## Rules that apply everywhere", "## Iron laws",
+		"`.agents/rules/process/spec.md` — Capture intent first.",
+	} {
+		if strings.Contains(md, banned) {
+			t.Errorf("AGENTS.md must not inline %q — slim block only", banned)
+		}
+	}
 	if strings.Contains(md, "**Claude Code** — loads rules, hooks (inferential), skills, commands, agents by itself; does") {
 		t.Error("Claude Code bridges hooks; it must not be told to run them by hand")
 	}
 	if strings.Contains(md, "go/style.md") {
-		t.Error("path-scoped rules belong to host rule files, not the always-loaded list")
+		t.Error("path-scoped rules belong to host rule files, not the always-loaded block")
 	}
 }
 
@@ -77,7 +90,7 @@ func TestApply_BlockKeepsUserContent(t *testing.T) {
 	if again := apply(t, root, outs, first.Owned); len(again.Wrote) != 0 {
 		t.Errorf("second apply wrote %v", again.Wrote)
 	}
-	write(t, root, map[string]string{"AGENTS.md": strings.Replace(string(got), "## Iron laws", "## Edited", 1)})
+	write(t, root, map[string]string{"AGENTS.md": strings.Replace(string(got), "## Query the charter", "## Edited", 1)})
 	if d := Check(root, outs, LinkSymlink); len(d) != 1 || d[0].Dest != "AGENTS.md" {
 		t.Errorf("want AGENTS.md block drift, got %v", d)
 	}

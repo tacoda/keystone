@@ -81,13 +81,17 @@ func MeasureProject(projectDir string) (Report, error) {
 	return Measure(projectDir, composed, hosts, budgets), nil
 }
 
-// AlwaysCap is the always_loaded cap in keystone.json, 0 when none.
+// AlwaysCap is the effective always_loaded cap: keystone.json's
+// budgets.always_loaded.max_tokens when configured, else the 6.0 default.
 func AlwaysCap(projectDir string) int {
 	cfg, err := config.ReadProjectConfig(projectDir)
 	if err != nil || cfg == nil {
-		return 0
+		return DefaultAlwaysLoadedCap
 	}
-	return caps(cfg.Budgets)[AlwaysLoaded].MaxTokens
+	if c, ok := caps(cfg.Budgets)[AlwaysLoaded]; ok {
+		return c.MaxTokens
+	}
+	return DefaultAlwaysLoadedCap
 }
 
 // Measure computes the budget from each host's projection profile, so a

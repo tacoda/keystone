@@ -11,6 +11,22 @@ import (
 // always-loaded tier.
 const AlwaysLoaded = "always_loaded"
 
+// DefaultAlwaysLoadedCap is the always-loaded cap applied when
+// keystone.json has no `budgets.always_loaded` entry (6.0 pillar 1:
+// nothing loads eagerly but the block and the index, and verify enforces
+// the cap). Units are Estimate words. An explicit `always_loaded` entry
+// overrides it; `max_tokens: 0` on that entry disables the cap.
+const DefaultAlwaysLoadedCap = 8000
+
+// withDefaultCap returns the normalized caps with the default
+// always_loaded cap filled in when the project did not configure one.
+func withDefaultCap(cs map[string]config.BudgetSpec) map[string]config.BudgetSpec {
+	if _, ok := cs[AlwaysLoaded]; !ok {
+		cs[AlwaysLoaded] = config.BudgetSpec{MaxTokens: DefaultAlwaysLoadedCap}
+	}
+	return cs
+}
+
 // legacyPorts maps the 4.x `budgets` keys (charter directories) to kinds.
 // `adapters` has no 5.0 counterpart and is ignored.
 var legacyPorts = map[string]string{
@@ -62,8 +78,10 @@ func minCap(a, b int) int {
 
 // checkCaps lists every cap the report exceeds: each host's always-loaded
 // tier, each kind's on-demand total, and each file against its kind's
-// per-load cap.
+// per-load cap. The default always_loaded cap applies when the project
+// configured none.
 func checkCaps(r Report, cs map[string]config.BudgetSpec) []Violation {
+	cs = withDefaultCap(cs)
 	vs := alwaysViolations(r.Hosts, cs[AlwaysLoaded].MaxTokens)
 	vs = append(vs, kindViolations(r.ByKind, cs)...)
 	return append(vs, perLoadViolations(r.OnDemand, cs)...)
@@ -73,7 +91,16 @@ func alwaysViolations(hosts []HostLoad, limit int) []Violation {
 	var vs []Violation
 	for _, h := range hosts {
 		if limit > 0 && h.Always > limit {
-			vs = append(vs, Violation{Scope: AlwaysLoaded + " (" + h.Host + ")", Tokens: h.Always, Cap: limit})
+			// Name the files that make up the over-cap tier.
+			var files []string
+			for _, e := range h.Entries {
+				files = append(files, e.Path)
+			}
+			vs = append(vs, Violation{
+				Scope:  AlwaysLoaded + " (" + h.Host + ")",
+				Path:   strings.Join(files, ", "),
+				Tokens: h.Always, Cap: limit,
+			})
 		}
 	}
 	return vs
