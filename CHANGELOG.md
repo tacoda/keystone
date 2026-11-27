@@ -2,6 +2,39 @@
 
 All notable changes to keystone are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); the project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [6.0.0] — 2026-11-27
+
+Keystone 6.0 is the charter framework — the framework for managing context. The **charter** keeps its name and gains its definition: the codified context in the repository, all of it, managed as one standardized, lazy-loaded, agent-agnostic layer under `.agents/` plus the repo documents you adopt — queried through the CLI and the MCP server by any coding agent, and browsable in the web dashboard.
+
+### Added
+
+- **The query front door.** `keystone charter query [files…|--task "…"]` on the CLI and `keystone_charter_query` over MCP compose the context that applies to a region or task — descriptors first, bodies on `--full`.
+- **The relocation ladder.** `keystone charter move <kind>/<id> <new-kind>[/<path>]`, `promote`, and `demote` relocate a primitive between kinds (corpus → reference → rule), rewriting `corpus:` citations and re-indexing — the tool for moving a constraint to the layer where it belongs (a rule that is really an executable check becomes a hook).
+- **The corpus kind.** `.agents/corpus/` holds standalone information — the what — alongside `rule` (how) and `reference` (why).
+- **`charter.roots`.** keystone.json adopts repository documents (e.g. `docs/**/*.md`, `GLOSSARY.md`) as corpus in place — indexed and queryable, never moved or edited, marked `provenance: repo`.
+- **Charter hygiene on every surface.** `keystone learn`, `keystone synthesize`, `keystone audit`, `keystone mode`, and `keystone drift` on the CLI, with `keystone_learn` / `keystone_synthesize` / `keystone_audit` / `keystone_mode` / `keystone_drift_report` over MCP — so users, scripts, rules, and hosts all drive the flywheels with no planted skills required (availability over adoption).
+- **Context drift.** `keystone drift [files…|--diff]` reports dead relative links, `paths:` globs matching zero files, and `verified:` dates older than `drift.days` (default 90). `keystone verify` surfaces the same warnings (never fatal); `keystone show` prints `verified:`; the dashboard gains a `/flywheels/drift` pane and `/api/drift`.
+- **Default `always_loaded` budget cap** (8000 estimate-words) enforced by `keystone verify` with the over-cap files named; explicit `budgets.always_loaded` overrides, `max_tokens: 0` disables.
+- **Web dashboard** (`keystone web serve`) with the drift pane and the learning flywheel views.
+
+### Changed
+
+- **The charter is redefined** as the codified context in the repository. The constraint/capability category split is gone from the index, CLI, MCP, and generated AGENTS.md; consumers sort by kind.
+- **The AGENTS.md managed block is slim**: what the charter is, the index pointer, the query surface (CLI + MCP + hygiene verbs + dashboard), and one line per projected host. No inlined rule bodies.
+- **Host projection is opt-in.** Fresh `keystone init` writes only `.agents/`, `.keystone/`, `keystone.json`, the AGENTS.md block, and `.gitignore`; `keystone target add <host>` projects a host. `keystone doctor` reports adapters as opt-in state.
+- **`keystone init` no longer plants the lifecycle skills and phase rules**; the workflow rides the opt-in `--starter workflow` pack.
+
+### Removed
+
+- **The `tool` kind** (and `keystone tool run`, its MCP serving, and per-host projections): keystone manages context, not callables — it is not a harness. The kind set is ten: rule, reference, corpus, hook, permission, eval, skill, command, agent, document.
+- **The 4.x legacy aliases** (`guide`, `sensor`, `posture`, `playbook`, `pattern`) are retired; `keystone migrate up` + `keystone lint --fix` rewrite them.
+
+### Breaking
+
+- `subagent` is `agent` (folder `.agents/agents/` unchanged).
+- `INDEX.json` / `INDEX.lite.json` drop the `category` fields.
+- Fresh installs record no `adapters`; host projection requires `keystone target add`.
+
 ## [5.0.2] — 2026-11-06
 
 ### Fixed
