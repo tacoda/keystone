@@ -1,6 +1,7 @@
 ---
-status: draft
+status: approved
 captured: 2026-11-21
+approved: 2026-11-27
 topic: context drift (plan phase 5)
 ---
 
