@@ -115,6 +115,7 @@ func init() {
 	rootCmd.AddCommand(modeCmd())
 	rootCmd.AddCommand(synthesizeCmd())
 	rootCmd.AddCommand(auditCmd())
+	rootCmd.AddCommand(driftCmd())
 	rootCmd.AddCommand(promoteCmd())
 	rootCmd.AddCommand(demoteCmd())
 	rootCmd.AddCommand(explainCmd())

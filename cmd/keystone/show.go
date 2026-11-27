@@ -110,6 +110,7 @@ type showView struct {
 	Tools        []string                `json:"tools,omitempty"`
 	Paths        []string                `json:"paths,omitempty"`
 	Triggers     []string                `json:"triggers,omitempty"`
+	Verified     string                  `json:"verified,omitempty"`
 	Includes     []string                `json:"includes,omitempty"`
 	IncludedBy   []string                `json:"included_by,omitempty"`
 	Traces       []string                `json:"traces,omitempty"`
@@ -131,6 +132,7 @@ func buildShowView(target primitive.Primitive, all []primitive.Primitive) showVi
 		Tools:        target.Tools,
 		Paths:        target.Paths,
 		Triggers:     target.Triggers,
+		Verified:     target.Verified,
 		Includes:     target.Includes,
 		Traces:       target.Corpus,
 		HostTriggers: target.HostTriggers,
@@ -189,6 +191,7 @@ func printShowText(w *os.File, v showView) {
 	showField(w, "model", v.Model)
 	showField(w, "phase", v.Phase)
 	showField(w, "tags", strings.Join(v.Tags, ", "))
+	showField(w, "verified", v.Verified)
 
 	showList(w, "tools", v.Tools)
 	showList(w, "paths", v.Paths)

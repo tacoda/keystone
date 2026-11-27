@@ -12,6 +12,7 @@ import (
 	"strings"
 
 	"github.com/tacoda/keystone/internal/framework/config"
+	"github.com/tacoda/keystone/internal/framework/drift"
 	"github.com/tacoda/keystone/internal/framework/loader"
 	"github.com/tacoda/keystone/internal/framework/lockfile"
 	"github.com/tacoda/keystone/internal/framework/policies"
@@ -113,12 +114,32 @@ func parseVerifyArgs(args []string) (dir, sensorID string, help bool, err error)
 }
 
 // checkCharter runs verify's charter checks: budget caps, then host
-// projection drift.
+// projection drift, then context-drift warnings (never fatal).
 func checkCharter(absDir string) error {
 	if err := checkBudgetCaps(absDir); err != nil {
 		return err
 	}
-	return checkProjectionDrift(absDir)
+	projErr := checkProjectionDrift(absDir)
+	warnContextDrift(absDir)
+	return projErr
+}
+
+// warnContextDrift prints context-drift warnings — stale verified:
+// dates, dead links, vanished paths: — surfaced but never failing the
+// gate. Keystone names stale context; the team re-verifies by hand.
+func warnContextDrift(absDir string) {
+	days := config.DefaultDriftDays
+	if cfg, err := config.ReadProjectConfig(absDir); err == nil {
+		days = cfg.DriftWindow()
+	}
+	rep, err := drift.Scan(absDir, drift.Options{Days: days})
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "! keystone drift: %v\n", err)
+		return
+	}
+	for _, w := range rep.Warnings {
+		fmt.Fprintf(os.Stdout, "⚠ drift: %s — %s (%s)\n", w.Path, w.Reason, w.PrimID)
+	}
 }
 
 // checkBudgetCaps fails when the charter exceeds a keystone.json budget

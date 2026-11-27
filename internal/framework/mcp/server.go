@@ -417,6 +417,7 @@ type showView struct {
 	Tools        []string                `json:"tools,omitempty"`
 	Paths        []string                `json:"paths,omitempty"`
 	Triggers     []string                `json:"triggers,omitempty"`
+	Verified     string                  `json:"verified,omitempty"`
 	Includes     []string                `json:"includes,omitempty"`
 	IncludedBy   []string                `json:"included_by,omitempty"`
 	Traces       []string                `json:"traces,omitempty"`
@@ -454,6 +455,7 @@ func buildShowView(primitives []primitive.Primitive, kind, id string) (showView,
 		Tools:        target.Tools,
 		Paths:        target.Paths,
 		Triggers:     target.Triggers,
+		Verified:     target.Verified,
 		Includes:     target.Includes,
 		Traces:       target.Corpus,
 		HostTriggers: target.HostTriggers,
